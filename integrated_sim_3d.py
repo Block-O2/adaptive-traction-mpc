@@ -1,15 +1,11 @@
 """
-Integrated 3D Simulation — 大纲四层架构 v4
+Integrated 3D Simulation — 大纲四层架构 v5
 
-场景：机械臂引导患者手臂沿弧线运动，手臂刚度极大，过临界点后力急剧上升。
-
-改动（相对 v3）：
-1. ks_true=50，f_max_safe=3N，模拟大刚度患者手臂
-2. 力模型：L0 之前纯噪声，L0 之后线性大刚度，去掉非线性项
-3. noise_std=0.1，始终存在
-4. 整定阶段退出条件：步数超过20步，不看力
-5. 整定和弧线阶段：力超 f_max_safe 立刻回缩
-6. MPC 目标：维持力在安全范围内，尽快完成角度任务
+改动（相对 v4）：
+1. 删除整定阶段，BOCD触发后直接进MPC弧线控制
+2. MPC早期速度保守，随弧线步数线性增大到V_MAX
+3. RLS初始ks猜测从10降到5，早期更保守
+4. 两阶段：阶段0探索，阶段1弧线
 """
 import matplotlib
 matplotlib.use('Agg')
@@ -27,39 +23,38 @@ warnings.filterwarnings('ignore')
 # ══════════════════════════════════════════════════════
 np.random.seed(42)
 dt         = 0.05
-ks_true    = 50.0       # 大刚度：模拟患者手臂
+ks_true    = 50.0
 b_true     = 0.5
 m_true     = 0.05
-L0_true    = 0.5        # 自然长度（控制器未知）
+L0_true    = 0.5
 anchor     = np.array([0.0, 0.0, 0.0])
-f_max_safe = 3.0        # 患者安全上限（超过会痛）
-noise_std  = 0.1        # 传感器噪声，始终存在
+f_max_safe = 3.0
+noise_std  = 0.1
 
 def true_force_mag(stretch, vel, acc):
     if stretch <= 0:
-        return 0.0      # L0 之前无弹力
-    return ks_true * stretch + b_true * vel + m_true * acc
+        return 0.0
+    return ks_true*stretch + b_true*vel + m_true*acc
 
 def true_force_3d(p, vel=0.0, acc=0.0):
     d = p - anchor; dist = np.linalg.norm(d)
-    if dist < 1e-6:
-        return np.random.normal(0, noise_std, 3)
+    noise = np.random.normal(0, noise_std, 3)
+    if dist < 1e-6: return noise
     stretch = max(0.0, dist - L0_true)
     f = max(0.0, true_force_mag(stretch, vel, acc))
-    # 噪声始终存在
-    noise = np.random.normal(0, noise_std, 3)
-    if f < 1e-6:
-        return noise    # L0 之前：纯噪声
+    if f < 1e-6: return noise
     return f * d/dist + noise
 
 # ══════════════════════════════════════════════════════
-# MPC 权重超参数
+# MPC 权重
 # ══════════════════════════════════════════════════════
 W_FORCE  = 20.0
 W_TIME   = 0.5
 W_INPUT  = 0.05
 W_ANGLE  = 10.0
-V_MAX    = 0.3
+V_MAX    = 0.3    # 最终速度上限
+V_MIN    = 0.05   # 早期速度上限
+V_RAMP   = 60     # 经过多少弧线步数线性爬升到V_MAX
 MPC_N    = 8
 
 # ══════════════════════════════════════════════════════
@@ -97,7 +92,7 @@ class BOCD:
 class RLS:
     def __init__(self, lam=0.97):
         self.lam=lam
-        self.theta=np.array([10.0, 0.3, 0.05])  # 初始猜测，ks偏小
+        self.theta=np.array([5.0, 0.3, 0.05])  # 保守初始猜测
         self.P=np.diag([50., 3., 1.])
 
     def update(self, phi, y):
@@ -138,8 +133,7 @@ class GPRModel:
         return float(mu[0]), float(sig[0])
 
     def local_ks(self, stretch, vel, ks_fallback, delta=0.001, sigma_threshold=0.3):
-        if not self.fitted:
-            return ks_fallback
+        if not self.fitted: return ks_fallback
         _, sigma_cur = self.predict(stretch, vel)
         if sigma_cur is None or sigma_cur > sigma_threshold:
             return ks_fallback
@@ -149,26 +143,27 @@ class GPRModel:
         mu_minus, _ = self.predict(s_minus, vel)
         if mu_plus is None or mu_minus is None:
             return ks_fallback
-        ks_eff = (mu_plus - mu_minus) / (2 * delta)
+        ks_eff = (mu_plus - mu_minus) / (2*delta)
         return max(0.05, ks_eff)
 
 # ══════════════════════════════════════════════════════
-# 安全回缩：力超限时往锚点方向退
+# 安全回缩
 # ══════════════════════════════════════════════════════
 def retract_velocity(p_cur, anchor_est, speed=0.1):
     d = anchor_est - p_cur
     norm = np.linalg.norm(d)
     if norm < 1e-6: return np.zeros(3)
-    return d / norm * speed
+    return d/norm * speed
 
 # ══════════════════════════════════════════════════════
-# Tube-MPC
+# Tube-MPC（动态速度上限）
 # ══════════════════════════════════════════════════════
 def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
                anchor_est, L0_est,
                theta_cur, theta_target,
                f_taut, f_lower, f_upper,
-               sigma_gpr=0.):
+               sigma_gpr=0., v_max_cur=0.1):
+
     f_max_eff = f_upper - 2.0*np.clip(sigma_gpr, 0., 0.5)
     f_max_eff = max(f_max_eff, f_taut*1.1)
 
@@ -209,13 +204,13 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
         cons.append({'type':'ineq','fun':make_lower(k)})
 
     tang=np.array([-np.sin(theta_cur), np.cos(theta_cur), 0.])
-    u0=np.tile(tang*0.1, MPC_N)
+    u0=np.tile(tang*0.05, MPC_N)
     res=minimize(cost, u0, method='SLSQP',
-                 bounds=[(-V_MAX,V_MAX)]*(MPC_N*3),
+                 bounds=[(-v_max_cur, v_max_cur)]*(MPC_N*3),
                  constraints=cons,
                  options={'maxiter':60,'ftol':1e-3})
     u_out=res.x.reshape(MPC_N,3)[0]
-    return u_out if (res.success or res.fun<1e8) else tang*0.05
+    return u_out if (res.success or res.fun<1e8) else tang*0.02
 
 # ══════════════════════════════════════════════════════
 # Taubin 圆拟合
@@ -236,31 +231,33 @@ def taubin_fit(pts):
 # ══════════════════════════════════════════════════════
 # 主仿真
 # ══════════════════════════════════════════════════════
-T_sim        = 700
+T_sim        = 800
 theta_start  = np.radians(-20)
 theta_target = theta_start + np.pi/2
 
-R_init     = L0_true * 0.35
-p_cur      = anchor + R_init*np.array([np.cos(theta_start),np.sin(theta_start),0.])
-v_cur      = np.zeros(3); v_prev=np.zeros(3)
-L0_est     = R_init*0.8; anchor_est=anchor.copy()
+R_init   = L0_true*0.35
+p_cur    = anchor + R_init*np.array([np.cos(theta_start),np.sin(theta_start),0.])
+v_cur    = np.zeros(3); v_prev=np.zeros(3)
+L0_est   = R_init*0.8; anchor_est=anchor.copy()
 
 bocd=BOCD(); rls=RLS(); gpr=GPRModel()
 
-phase=0
-taut_step=None; arc_step=None; settle_count=0
+# 两阶段
+phase=0       # 0:探索  1:弧线
+taut_step=None; arc_steps=0
 f_taut=0.2; f_lower=0.1; f_upper=1.0
 sigma_s=0.
 
 hp=[p_cur.copy()]; hf=[]; hsig=[]; hks=[]
 hgmu=[]; hgsig=[]; hL0=[L0_est]; hphase=[]
-h_flower=[]; h_fupper=[]
+h_flower=[]; h_fupper=[]; h_vmax=[]
 f_cur=true_force_3d(p_cur)
 
 print("="*62)
-print("Integrated 3D Simulation  —  大纲四层架构 v4")
+print("Integrated 3D Simulation  —  大纲四层架构 v5")
 print(f"ks_true={ks_true}  L0_true={L0_true}m  f_max_safe={f_max_safe}N")
 print(f"起始θ={np.degrees(theta_start):.0f}°  目标θ={np.degrees(theta_target):.0f}°")
+print(f"速度: {V_MIN}→{V_MAX} m/s (线性爬升 {V_RAMP} 步)")
 print("="*62)
 
 for t in range(T_sim):
@@ -269,29 +266,24 @@ for t in range(T_sim):
 
     theta_cur=np.arctan2(p_cur[1]-anchor_est[1], p_cur[0]-anchor_est[0])
 
-    # ── 阶段转换 ─────────────────────────────────────
+    # 阶段转换
     if phase==0 and sig>0.35:
         phase=1; taut_step=t
         f_taut  = max(fm, 0.1)
         f_lower, f_upper = rls.force_bounds(f_taut)
         L0_est  = max(0.05, np.linalg.norm(p_cur-anchor_est) - fm/10.0)
-        print(f"  [BOCD]  t={t:3d}: 检测到绷直 → 进入整定阶段")
+        print(f"  [BOCD]  t={t:3d}: 检测到绷直 → 直接进入弧线阶段")
         print(f"          sig={sig:.3f}  f_taut={f_taut:.3f}N  L0_est={L0_est:.3f}m")
 
-    if phase==1 and settle_count>=20:
-        phase=2; arc_step=t
-        print(f"  [整定]  t={t:3d}: 整定完成 → 进入弧线阶段")
-        print(f"          ks_rls={rls.theta[0]:.2f} (真值{ks_true})  dist={np.linalg.norm(p_cur-anchor_est):.3f}m")
-
-    if phase==2 and theta_cur>=theta_target-0.03:
+    if phase==1 and theta_cur>=theta_target-0.03:
         print(f"  [Done]  t={t:3d}: θ={np.degrees(theta_cur):.1f}° 到达目标!")
         break
 
-    # ── 安全检查：任何阶段力超限立刻回缩 ────────────
-    if fm >= f_max_safe and phase>=1:
-        u = retract_velocity(p_cur, anchor_est, speed=0.15)
+    # 安全回缩
+    if fm>=f_max_safe and phase==1:
+        u=retract_velocity(p_cur, anchor_est, speed=0.1)
         hks.append(rls.theta[0]); hgmu.append(0.); hgsig.append(sigma_s)
-        h_flower.append(f_lower); h_fupper.append(f_upper)
+        h_flower.append(f_lower); h_fupper.append(f_upper); h_vmax.append(0.)
         hL0.append(L0_est); hphase.append(phase)
         v_prev=v_cur.copy(); v_cur=u.copy()
         pn=p_cur+dt*u
@@ -299,67 +291,49 @@ for t in range(T_sim):
         p_cur=pn; hp.append(p_cur.copy())
         continue
 
-    # ── 阶段0：探索 ──────────────────────────────────
+    # 阶段0：探索
     if phase==0:
         dist=np.linalg.norm(p_cur-anchor_est); dn=(p_cur-anchor_est)/(dist+1e-6)
         sp=0.15*max(0.3, 1.4-dist/(L0_true*1.3)); u=dn*sp
         if fm<noise_std*2: L0_est=dist*0.9
         hks.append(rls.theta[0]); hgmu.append(0.); hgsig.append(0.)
-        h_flower.append(f_lower); h_fupper.append(f_upper)
+        h_flower.append(f_lower); h_fupper.append(f_upper); h_vmax.append(0.)
 
-    # ── 阶段1：整定（20步后转弧线）──────────────────
-    elif phase==1:
-        d=p_cur-anchor_est; dist=np.linalg.norm(d)
-        st=max(0., dist-L0_est); vs=np.linalg.norm(v_cur)
-        ac=np.linalg.norm((v_cur-v_prev)/dt)
-        phi=np.array([st,vs,ac]); trls=rls.update(phi,fm)
-        gpr.add_data(st,vs,fm)
-        if t%8==0: gpr.fit()
-
-        f_lower, f_upper = rls.force_bounds(f_taut)
-        f_upper = min(f_upper, f_max_safe)
-
-        # 缓速外伸，RLS 预热
-        R_target = L0_est + f_taut*2.0/max(trls[0], 0.1)
-        d_norm=d/(dist+1e-6)
-        u=d_norm*0.08 if dist<R_target else np.zeros(3)
-        settle_count+=1
-
-        mu,sr=gpr.predict(st,vs)
-        if sr is None: sr=0.
-        mu_val=trls[0]*st if mu is None else mu
-        sigma_s=0.2*sr+0.8*sigma_s
-        hks.append(trls[0]); hgmu.append(float(mu_val)); hgsig.append(sigma_s)
-        h_flower.append(f_lower); h_fupper.append(f_upper)
-
-    # ── 阶段2：弧线（Tube-MPC）──────────────────────
+    # 阶段1：弧线（MPC，动态速度上限）
     else:
         d=p_cur-anchor_est; dist=np.linalg.norm(d)
         st=max(0., dist-L0_est); vs=np.linalg.norm(v_cur)
         ac=np.linalg.norm((v_cur-v_prev)/dt)
-        phi=np.array([st,vs,ac]); trls=rls.update(phi,fm)
-        gpr.add_data(st,vs,fm)
-        if t%10==0: gpr.fit()
 
+        # RLS 更新，动态调整力边界
+        phi=np.array([st,vs,ac]); trls=rls.update(phi,fm)
         f_lower, f_upper = rls.force_bounds(f_taut)
         f_upper = min(f_upper, f_max_safe)
 
+        # GPR 更新
+        gpr.add_data(st,vs,fm)
+        if t%10==0: gpr.fit()
         mu,sr=gpr.predict(st,vs)
         if sr is None: sr=0.
         mu_val=trls[0]*st if mu is None else mu
         sigma_s=0.2*sr+0.8*sigma_s
 
+        # GPR 局部线性化，σ 大时退化到 RLS
         ks_eff=gpr.local_ks(st, vs, ks_fallback=trls[0])
         b_rls, m_rls = trls[1], trls[2]
 
+        # 动态速度上限：线性从 V_MIN 爬升到 V_MAX
+        v_max_cur = min(V_MIN + (V_MAX-V_MIN)*(arc_steps/V_RAMP), V_MAX)
+        arc_steps += 1
+
         hks.append(trls[0]); hgmu.append(float(mu_val)); hgsig.append(sigma_s)
-        h_flower.append(f_lower); h_fupper.append(f_upper)
+        h_flower.append(f_lower); h_fupper.append(f_upper); h_vmax.append(v_max_cur)
 
         u=run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
                      anchor_est, L0_est,
                      theta_cur, theta_target,
                      f_taut, f_lower, f_upper,
-                     sigma_gpr=sigma_s)
+                     sigma_gpr=sigma_s, v_max_cur=v_max_cur)
 
     hL0.append(L0_est); hphase.append(phase)
     v_prev=v_cur.copy(); v_cur=u.copy()
@@ -374,13 +348,13 @@ for t in range(T_sim):
 hp=np.array(hp); hf_a=np.array(hf)
 R_fit=xc=yc=None
 
-if arc_step is not None:
-    fc=hf_a[arc_step:]
+if taut_step is not None:
+    fc=hf_a[taut_step:]
     rms=float(np.sqrt(np.mean((fc-f_taut)**2)))
     viol=float(np.mean(fc>f_max_safe))*100
     print(f"\n[指标] 弧线阶段 RMS力误差={rms:.3f}N  超限={viol:.1f}%")
-    print(f"[指标] 总步={len(hf_a)}  整定步={arc_step-taut_step}  弧线步={len(fc)}")
-    pts2d=hp[arc_step:,:2]
+    print(f"[指标] 总步={len(hf_a)}  弧线步={len(fc)}")
+    pts2d=hp[taut_step:,:2]
     xc,yc,R_fit=taubin_fit(pts2d)
     if R_fit is not None:
         print(f"[Taubin] 圆心({xc:.3f},{yc:.3f}) R={R_fit:.3f}m")
@@ -391,8 +365,8 @@ if arc_step is not None:
 # 绘图
 # ══════════════════════════════════════════════════════
 fig=plt.figure(figsize=(16,10))
-fig.suptitle("Integrated 3D Simulation  —  大纲四层架构 v4\n"
-             "大刚度手臂模型  ks=50  f_max_safe=3N",
+fig.suptitle("Integrated 3D Simulation  —  大纲四层架构 v5\n"
+             "两阶段: 探索→弧线(MPC)  ks=50  动态速度上限",
              fontsize=11, y=0.99)
 
 n=len(hf_a)
@@ -400,12 +374,12 @@ phase_arr=np.array(hphase+[hphase[-1] if hphase else 0])
 
 # 1. 轨迹
 ax1=fig.add_subplot(2,3,1)
-p0=np.where(phase_arr==0)[0]; p1=np.where(phase_arr==1)[0]; p2=np.where(phase_arr==2)[0]
+p0=np.where(phase_arr==0)[0]; p1=np.where(phase_arr==1)[0]
 if len(p0)>0: ax1.plot(hp[p0,0],hp[p0,1],'gray',lw=1.2,label='Phase0: explore',alpha=0.7)
-if len(p1)>0: ax1.plot(hp[p1,0],hp[p1,1],'orange',lw=1.5,label='Phase1: settle')
-if len(p2)>0: ax1.plot(hp[p2,0],hp[p2,1],'b-',lw=2,label='Phase2: arc (MPC)')
+if len(p1)>0: ax1.plot(hp[p1,0],hp[p1,1],'b-',lw=2,label='Phase1: arc (MPC)')
 ax1.plot(*anchor[:2],'k+',ms=12,mew=2,label='Anchor')
-if arc_step is not None: ax1.plot(*hp[arc_step,:2],'go',ms=8,zorder=5,label=f'Arc t={arc_step}')
+if taut_step is not None:
+    ax1.plot(*hp[taut_step,:2],'go',ms=8,zorder=5,label=f'BOCD t={taut_step}')
 if R_fit is not None:
     tha=np.linspace(theta_start,theta_target,300)
     ax1.plot(xc+R_fit*np.cos(tha),yc+R_fit*np.sin(tha),'m:',lw=1.5,label=f'Taubin R={R_fit:.2f}m')
@@ -417,10 +391,8 @@ ax2=fig.add_subplot(2,3,2)
 ax2.plot(np.arange(n),hf_a,'b-',lw=1.2,label='Force magnitude',alpha=0.85)
 ax2.axhline(f_max_safe,color='red',ls='-',lw=1.5,label=f'f_max_safe={f_max_safe}N')
 if taut_step is not None:
-    ax2.axvline(taut_step,color='green',ls='--',alpha=0.7,label=f'Taut t={taut_step}')
+    ax2.axvline(taut_step,color='green',ls='--',alpha=0.7,label=f'BOCD t={taut_step}')
     ax2.axhline(f_taut,color='purple',ls='--',lw=1.2,label=f'f_taut={f_taut:.2f}N')
-if arc_step is not None:
-    ax2.axvline(arc_step,color='blue',ls='--',alpha=0.7,label=f'Arc t={arc_step}')
 if len(h_flower)>0:
     fl=np.array(h_flower); fu=np.array(h_fupper)
     ax2.fill_between(np.arange(len(fl)),fl,fu,alpha=0.1,color='green',label='RLS force bounds')
@@ -429,11 +401,11 @@ ax2.legend(fontsize=7); ax2.set_title('Force magnitude + dynamic bounds'); ax2.g
 
 # 3. GPR 预测 vs 真实
 ax3=fig.add_subplot(2,3,3)
-if arc_step is not None:
-    arc_gmu=np.array(hgmu[arc_step:]); arc_gsig=np.array(hgsig[arc_step:])
-    tc3=np.arange(arc_step,arc_step+len(arc_gmu))
+if taut_step is not None:
+    arc_gmu=np.array(hgmu[taut_step:]); arc_gsig=np.array(hgsig[taut_step:])
+    tc3=np.arange(taut_step,taut_step+len(arc_gmu))
     if len(arc_gmu)>2:
-        ftc=hf_a[arc_step:arc_step+len(arc_gmu)]
+        ftc=hf_a[taut_step:taut_step+len(arc_gmu)]
         ax3.plot(tc3,ftc,'k-',alpha=0.6,lw=1,label='True force')
         ax3.plot(tc3,arc_gmu,'b-',lw=1.5,label='GPR mean μ')
         ax3.fill_between(tc3,arc_gmu-2*arc_gsig,arc_gmu+2*arc_gsig,
@@ -443,23 +415,29 @@ if arc_step is not None:
 ax3.set_ylabel('Force (N)'); ax3.set_xlabel('Time step')
 ax3.legend(fontsize=7); ax3.set_title('GPR prediction vs true force'); ax3.grid(True,alpha=0.3)
 
-# 4. GPR 不确定度
+# 4. GPR 不确定度 + 动态速度上限
 ax4=fig.add_subplot(2,3,4)
-if arc_step is not None and len(arc_gsig)>2:
-    ax4.plot(tc3,arc_gsig,color='purple',lw=1.5,label='GPR σ (smoothed)')
+if taut_step is not None and len(arc_gsig)>2:
+    ax4.plot(tc3,arc_gsig,color='purple',lw=1.5,label='GPR σ')
     ax4.fill_between(tc3,0,arc_gsig,alpha=0.2,color='purple')
     ax4.axhline(0.3,color='red',ls='--',lw=1,label='σ threshold=0.3')
-    ax4.set_xlabel('Time step')
-ax4.set_ylabel('σ (N)'); ax4.legend(fontsize=7)
-ax4.set_title('GPR uncertainty → Tube margin'); ax4.grid(True,alpha=0.3)
+ax4_r=ax4.twinx()
+if len(h_vmax)>0:
+    vm=np.array(h_vmax)
+    ax4_r.plot(np.arange(len(vm)),vm,'orange',lw=1.5,label='v_max_cur')
+    ax4_r.set_ylabel('v_max (m/s)',color='orange')
+ax4.set_ylabel('σ (N)'); ax4.set_xlabel('Time step')
+ax4.legend(fontsize=7,loc='upper left')
+ax4_r.legend(fontsize=7,loc='upper right')
+ax4.set_title('GPR σ + dynamic v_max'); ax4.grid(True,alpha=0.3)
 
 # 5. RLS 刚度收敛
 ax5=fig.add_subplot(2,3,5)
 ks_all=np.array(hks)
 ax5.plot(ks_all,'b-',lw=1.5,label='RLS ks estimate')
 ax5.axhline(ks_true,color='r',ls='--',label=f'True ks={ks_true}')
-if taut_step is not None: ax5.axvline(taut_step,color='green',ls='--',alpha=0.6,label='Taut')
-if arc_step  is not None: ax5.axvline(arc_step, color='blue', ls='--',alpha=0.6,label='Arc start')
+if taut_step is not None:
+    ax5.axvline(taut_step,color='green',ls='--',alpha=0.6,label='BOCD')
 ax5.set_ylabel('ks (N/m)'); ax5.set_xlabel('Time step')
 ax5.legend(fontsize=7); ax5.set_title('Stiffness estimation (RLS)'); ax5.grid(True,alpha=0.3)
 
@@ -470,8 +448,8 @@ ax6.plot(L0_arr,'g-',lw=1.5,label='L0 estimate')
 ax6.axhline(L0_true,color='r',ls='--',label=f'True L0={L0_true}m')
 dist_arr=np.linalg.norm(hp[:-1]-anchor,axis=1)[:n]
 ax6.plot(dist_arr,'b-',lw=1,alpha=0.6,label='dist(t) from anchor')
-if taut_step is not None: ax6.axvline(taut_step,color='green',ls='--',alpha=0.6)
-if arc_step  is not None: ax6.axvline(arc_step, color='blue', ls='--',alpha=0.6)
+if taut_step is not None:
+    ax6.axvline(taut_step,color='green',ls='--',alpha=0.6,label='BOCD')
 ax6.set_ylabel('Distance (m)'); ax6.set_xlabel('Time step')
 ax6.legend(fontsize=7); ax6.set_title('L0 estimate & radius evolution'); ax6.grid(True,alpha=0.3)
 
