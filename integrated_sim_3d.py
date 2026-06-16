@@ -1,11 +1,14 @@
 """
-Integrated 3D Simulation — 大纲四层架构 v5
+Integrated 3D Simulation — 大纲四层架构 v8
 
-改动（相对 v4）：
-1. 删除整定阶段，BOCD触发后直接进MPC弧线控制
-2. MPC早期速度保守，随弧线步数线性增大到V_MAX
-3. RLS初始ks猜测从10降到5，早期更保守
-4. 两阶段：阶段0探索，阶段1弧线
+修改（相对 v7）：
+1. arc 早期安全预热：前 ARC_WARMUP_STEPS 步 v_max 锁在极低值
+   临床意义：治疗师刚开始牵引时先轻推确认方向和阻力，再正式发力
+2. GPR 输入加入角度特征 theta（RBF kernel，各维独立 length_scale）
+   让 GPR 感知弧线不同位置的力变化；Matérn 计算太慢暂不使用
+3. 代价函数加轻微区间中点吸引项，给优化器在可行域内提供梯度方向
+4. settle 阶段 GPR fit 改为数据量 ≥ 15 才开始，避免早期过拟合噪声
+5. 安全回缩时正确更新 v_prev，消除回缩后第一步 ac 的尖峰噪声
 """
 import matplotlib
 matplotlib.use('Agg')
@@ -48,14 +51,31 @@ def true_force_3d(p, vel=0.0, acc=0.0):
 # ══════════════════════════════════════════════════════
 # MPC 权重
 # ══════════════════════════════════════════════════════
-W_FORCE  = 20.0
+W_FORCE  = 30.0
 W_TIME   = 0.5
 W_INPUT  = 0.05
 W_ANGLE  = 10.0
-V_MAX    = 0.3    # 最终速度上限
-V_MIN    = 0.05   # 早期速度上限
-V_RAMP   = 60     # 经过多少弧线步数线性爬升到V_MAX
-MPC_N    = 8
+V_MAX    = 0.3
+V_MIN    = 0.05
+V_RAMP   = 60
+MPC_N    = 6
+
+# ── 径向约束参数 ─────────────────────────────────────────
+R_TOL        = 0.04   # 允许径向偏差 ±4cm
+R_REF_UPDATE = 20     # 每隔多少步更新一次 R_ref
+
+# ── Arc 早期安全预热 ─────────────────────────────────────
+# 临床意义：刚开始牵引时先轻推，确认方向和阻力正常再正式发力
+ARC_WARMUP_STEPS = 15   # 预热步数
+V_WARMUP         = 0.02  # 预热阶段速度上限 (m/s)
+
+# ── Settle 阶段参数 ──────────────────────────────────────
+# 临床含义：评估性触诊，小幅径向往返激励 RLS 收敛
+SETTLE_STEPS      = 180   # settle 阶段最大步数（临床可接受：5秒@20Hz）
+SETTLE_AMP        = 0.06  # 径向往返幅度 (m)，临床场景可压缩到 0.01
+SETTLE_SPEED      = 0.08  # settle 阶段速度 (m/s)
+KS_MIN_FOR_GPR    = 25.0  # RLS ks 估计超过此值才允许 GPR 接管（真值的 50%）
+GPR_MIN_DATA      = 20    # GPR 接管所需最小数据点数
 
 # ══════════════════════════════════════════════════════
 # BOCD
@@ -90,15 +110,23 @@ class BOCD:
 # RLS（感知层：估计刚度，动态维护力边界）
 # ══════════════════════════════════════════════════════
 class RLS:
-    def __init__(self, lam=0.97):
+    def __init__(self, lam=0.97, lam_settle=0.88):
         self.lam=lam
-        self.theta=np.array([5.0, 0.3, 0.05])  # 保守初始猜测
-        self.P=np.diag([50., 3., 1.])
+        self.lam_settle=lam_settle   # settle 阶段用更低的遗忘因子，收敛更快
+        self.lam_cur=lam_settle      # 初始用 settle 模式
+        self.theta=np.array([10.0, 0.3, 0.05])
+        self.P=np.diag([100., 3., 1.])
 
-    def update(self, phi, y):
-        e=y-phi@self.theta; d=self.lam+phi@self.P@phi
+    def set_lam(self, lam):
+        self.lam_cur = lam
+
+    def update(self, phi, y, stretch_delta=None):
+        # stretch 变化量极小时跳过更新，避免无激励状态下 ks 漂移
+        if stretch_delta is not None and abs(stretch_delta) < 1e-3:
+            return self.theta.copy()
+        e=y-phi@self.theta; d=self.lam_cur+phi@self.P@phi
         K=self.P@phi/d; self.theta+=K*e
-        self.P=(1./self.lam)*(np.eye(3)-np.outer(K,phi))@self.P
+        self.P=(1./self.lam_cur)*(np.eye(3)-np.outer(K,phi))@self.P
         self.theta=np.clip(self.theta,[0.05,0.,0.],[200.,5.,2.])
         return self.theta.copy()
 
@@ -111,39 +139,48 @@ class RLS:
 # GPR（建模层）
 # ══════════════════════════════════════════════════════
 class GPRModel:
-    def __init__(self, max_data=60):
-        k=(ConstantKernel(1.,(0.1,10.))*RBF(0.05,(0.005,1.))+WhiteKernel(0.1,(1e-3,1.)))
-        self.gpr=GaussianProcessRegressor(kernel=k,n_restarts_optimizer=1,normalize_y=True)
+    def __init__(self, max_data=80):
+        # RBF kernel，3维输入 [stretch, vel, theta]
+        # theta 特征让 GPR 感知弧线不同角度位置的力变化
+        k = (ConstantKernel(1., (0.1, 10.))
+             * RBF(length_scale=[0.05, 0.05, 0.5],
+                   length_scale_bounds=[(0.005, 1.), (0.005, 1.), (0.05, 5.)])
+             + WhiteKernel(0.1, (1e-3, 1.)))
+        self.gpr = GaussianProcessRegressor(
+            kernel=k, n_restarts_optimizer=0, normalize_y=True)
         self.X=[]; self.y=[]; self.fitted=False
-        self.xm=np.zeros(2); self.xs=np.ones(2); self.max_data=max_data
+        self.xm=np.zeros(3); self.xs=np.ones(3); self.max_data=max_data
 
-    def add_data(self, s, v, f):
-        self.X.append([s,v]); self.y.append(f)
-        if len(self.X)>self.max_data: self.X.pop(0); self.y.pop(0)
+    def add_data(self, s, v, theta, f):
+        # 输入：[stretch, vel, theta]，theta 让 GPR 感知弧线位置
+        self.X.append([s, v, theta]); self.y.append(f)
+        if len(self.X) > self.max_data: self.X.pop(0); self.y.pop(0)
 
     def fit(self):
-        if len(self.X)<8: return
-        X=np.array(self.X); self.xm=X.mean(0); self.xs=X.std(0)+1e-6
-        self.gpr.fit((X-self.xm)/self.xs, np.array(self.y)); self.fitted=True
+        if len(self.X) < 15: return   # 数据量 ≥ 15 才 fit，避免早期过拟合
+        X = np.array(self.X)
+        self.xm = X.mean(0); self.xs = X.std(0) + 1e-6
+        self.gpr.fit((X - self.xm) / self.xs, np.array(self.y))
+        self.fitted = True
 
-    def predict(self, s, v):
+    def predict(self, s, v, theta):
         if not self.fitted: return None, None
-        xn=(np.array([[s,v]])-self.xm)/self.xs
-        mu,sig=self.gpr.predict(xn,return_std=True)
+        xn = (np.array([[s, v, theta]]) - self.xm) / self.xs
+        mu, sig = self.gpr.predict(xn, return_std=True)
         return float(mu[0]), float(sig[0])
 
-    def local_ks(self, stretch, vel, ks_fallback, delta=0.001, sigma_threshold=0.3):
+    def local_ks(self, stretch, vel, theta, ks_fallback, delta=0.001, sigma_threshold=0.3):
         if not self.fitted: return ks_fallback
-        _, sigma_cur = self.predict(stretch, vel)
+        _, sigma_cur = self.predict(stretch, vel, theta)
         if sigma_cur is None or sigma_cur > sigma_threshold:
             return ks_fallback
         s_plus  = max(0., stretch + delta)
         s_minus = max(0., stretch - delta)
-        mu_plus,  _ = self.predict(s_plus,  vel)
-        mu_minus, _ = self.predict(s_minus, vel)
+        mu_plus,  _ = self.predict(s_plus,  vel, theta)
+        mu_minus, _ = self.predict(s_minus, vel, theta)
         if mu_plus is None or mu_minus is None:
             return ks_fallback
-        ks_eff = (mu_plus - mu_minus) / (2*delta)
+        ks_eff = (mu_plus - mu_minus) / (2 * delta)
         return max(0.05, ks_eff)
 
 # ══════════════════════════════════════════════════════
@@ -162,10 +199,14 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
                anchor_est, L0_est,
                theta_cur, theta_target,
                f_taut, f_lower, f_upper,
-               sigma_gpr=0., v_max_cur=0.1):
+               sigma_gpr=0., v_max_cur=0.1, R_ref=None):
 
     f_max_eff = f_upper - 2.0*np.clip(sigma_gpr, 0., 0.5)
     f_max_eff = max(f_max_eff, f_taut*1.1)
+
+    # 径向参考：没传入就用当前 dist
+    if R_ref is None:
+        R_ref = np.linalg.norm(p_cur - anchor_est)
 
     def pf(p_, v_, a_):
         stretch = max(0., np.linalg.norm(p_-anchor_est) - L0_est)
@@ -173,17 +214,27 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
 
     def cost(u_flat):
         u_seq=u_flat.reshape(MPC_N,3); p=p_cur.copy(); v=v_cur.copy(); c=0.
+        f_mid = (f_lower + f_max_eff) / 2.0   # 区间中点
+        W_MID = 2.0                             # 轻微吸引，远小于边界惩罚
         for k in range(MPC_N):
             vk=u_seq[k]; ak=(vk-v)/dt; pn=p+dt*vk
-            c += W_FORCE*(pf(pn,vk,ak)-f_taut)**2
+            f_pred = pf(pn, vk, ak)
+            # 单边硬惩罚：越界才强惩罚
+            c += W_FORCE * max(0, f_lower - f_pred) ** 2
+            c += W_FORCE * max(0, f_pred - f_max_eff) ** 2
+            # 轻微中点吸引：在可行域内给优化器方向感
+            c += W_MID * (f_pred - f_mid) ** 2
             c += W_TIME
-            c += W_INPUT*float(np.dot(vk,vk))
+            c += W_INPUT * float(np.dot(vk, vk))
             tn=np.arctan2(pn[1]-anchor_est[1], pn[0]-anchor_est[0])
             pg=tn-theta_cur
             if pg<-np.pi: pg+=2*np.pi
             c -= W_ANGLE*np.clip(pg, 0., 0.15)
             p=pn; v=vk
-        c += W_FORCE*(pf(p,v,np.zeros(3))-f_taut)**2
+        f_terminal = pf(p, v, np.zeros(3))
+        c += W_FORCE * max(0, f_lower - f_terminal) ** 2
+        c += W_FORCE * max(0, f_terminal - f_max_eff) ** 2
+        c += W_MID * (f_terminal - f_mid) ** 2
         return c
 
     cons=[]
@@ -200,15 +251,30 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
                 for i in range(k_+1): v=u.reshape(MPC_N,3)[i]; p=p+dt*v
                 return pf(p,v,np.zeros(3)) - f_lower
             return fn
+        # 径向约束：预测位置的 dist 不偏离 R_ref 超过 R_TOL
+        def make_radial_upper(k_=k):
+            def fn(u):
+                p=p_cur.copy(); v=v_cur.copy()
+                for i in range(k_+1): v=u.reshape(MPC_N,3)[i]; p=p+dt*v
+                return R_ref + R_TOL - np.linalg.norm(p - anchor_est)
+            return fn
+        def make_radial_lower(k_=k):
+            def fn(u):
+                p=p_cur.copy(); v=v_cur.copy()
+                for i in range(k_+1): v=u.reshape(MPC_N,3)[i]; p=p+dt*v
+                return np.linalg.norm(p - anchor_est) - (R_ref - R_TOL)
+            return fn
         cons.append({'type':'ineq','fun':make_upper(k)})
         cons.append({'type':'ineq','fun':make_lower(k)})
+        cons.append({'type':'ineq','fun':make_radial_upper(k)})
+        cons.append({'type':'ineq','fun':make_radial_lower(k)})
 
     tang=np.array([-np.sin(theta_cur), np.cos(theta_cur), 0.])
     u0=np.tile(tang*0.05, MPC_N)
     res=minimize(cost, u0, method='SLSQP',
                  bounds=[(-v_max_cur, v_max_cur)]*(MPC_N*3),
                  constraints=cons,
-                 options={'maxiter':60,'ftol':1e-3})
+                 options={'maxiter':40,'ftol':2e-3})
     u_out=res.x.reshape(MPC_N,3)[0]
     return u_out if (res.success or res.fun<1e8) else tang*0.02
 
@@ -242,11 +308,12 @@ L0_est   = R_init*0.8; anchor_est=anchor.copy()
 
 bocd=BOCD(); rls=RLS(); gpr=GPRModel()
 
-# 两阶段
-phase=0       # 0:探索  1:弧线
-taut_step=None; arc_steps=0
+# 三阶段状态机
+phase=0          # 0:探索  1:settle  2:弧线
+taut_step=None; arc_step=None
+arc_steps=0; settle_steps_done=0; settle_base_dist=0.
 f_taut=0.2; f_lower=0.1; f_upper=1.0
-sigma_s=0.
+sigma_s=0.; R_ref=None
 
 hp=[p_cur.copy()]; hf=[]; hsig=[]; hks=[]
 hgmu=[]; hgsig=[]; hL0=[L0_est]; hphase=[]
@@ -254,10 +321,11 @@ h_flower=[]; h_fupper=[]; h_vmax=[]
 f_cur=true_force_3d(p_cur)
 
 print("="*62)
-print("Integrated 3D Simulation  —  大纲四层架构 v5")
+print("Integrated 3D Simulation  —  大纲四层架构 v6")
 print(f"ks_true={ks_true}  L0_true={L0_true}m  f_max_safe={f_max_safe}N")
 print(f"起始θ={np.degrees(theta_start):.0f}°  目标θ={np.degrees(theta_target):.0f}°")
 print(f"速度: {V_MIN}→{V_MAX} m/s (线性爬升 {V_RAMP} 步)")
+print(f"Settle幅度: ±{SETTLE_AMP}m  最大步数: {SETTLE_STEPS}")
 print("="*62)
 
 for t in range(T_sim):
@@ -266,64 +334,132 @@ for t in range(T_sim):
 
     theta_cur=np.arctan2(p_cur[1]-anchor_est[1], p_cur[0]-anchor_est[0])
 
-    # 阶段转换
+    # ── 阶段转换 ─────────────────────────────────────────
+    # 0→1：BOCD 检测到绷直，进入 settle
     if phase==0 and sig>0.35:
-        phase=1; taut_step=t
-        f_taut  = max(fm, 0.1)
+        phase=1; taut_step=t; settle_steps_done=0
+        f_taut = max(fm, 0.1)
         f_lower, f_upper = rls.force_bounds(f_taut)
-        L0_est  = max(0.05, np.linalg.norm(p_cur-anchor_est) - fm/10.0)
-        print(f"  [BOCD]  t={t:3d}: 检测到绷直 → 直接进入弧线阶段")
-        print(f"          sig={sig:.3f}  f_taut={f_taut:.3f}N  L0_est={L0_est:.3f}m")
+        # 修复：L0_est 用物理公式，除以 RLS 当前 ks 估计
+        ks_guess = max(rls.theta[0], 1.0)
+        L0_est = max(0.05, np.linalg.norm(p_cur-anchor_est) - fm/ks_guess)
+        settle_base_dist = np.linalg.norm(p_cur-anchor_est)  # settle 的基准距离
+        print(f"  [BOCD]  t={t:3d}: 检测到绷直 → 进入 settle 阶段")
+        print(f"          sig={sig:.3f}  f_taut={f_taut:.3f}N  "
+              f"L0_est={L0_est:.3f}m  ks_guess={ks_guess:.1f}")
 
-    if phase==1 and theta_cur>=theta_target-0.03:
+    # 1→2：settle 完成（步数到了或 RLS 已收敛），进入弧线
+    if phase==1:
+        ks_converged = rls.theta[0] > KS_MIN_FOR_GPR
+        settle_done  = settle_steps_done >= SETTLE_STEPS
+        if ks_converged or settle_done:
+            phase=2; arc_step=t
+            # 只有 RLS 真正收敛（过门槛）时才用更新后的 ks 重估 L0
+            if ks_converged:
+                ks_now = rls.theta[0]
+                dist_now = np.linalg.norm(p_cur - anchor_est)
+                L0_est = max(0.05, dist_now - fm / ks_now)
+                print(f"  [Settle→Arc] t={t:3d}: ks_est={ks_now:.1f} (收敛)  "
+                      f"L0_est更新→{L0_est:.3f}m")
+            else:
+                print(f"  [Settle→Arc] t={t:3d}: ks_est={rls.theta[0]:.1f} (超时，保留L0_est={L0_est:.3f}m)")
+            rls.set_lam(rls.lam)  # 切换回正常遗忘因子
+            R_ref = np.linalg.norm(p_cur - anchor_est)  # 初始化径向参考
+            st_prev = max(0., np.linalg.norm(p_cur - anchor_est) - L0_est)
+
+    if phase==2 and theta_cur>=theta_target-0.03:
         print(f"  [Done]  t={t:3d}: θ={np.degrees(theta_cur):.1f}° 到达目标!")
         break
 
-    # 安全回缩
-    if fm>=f_max_safe and phase==1:
+    # ── 安全回缩（仅弧线阶段） ───────────────────────────
+    if fm>=f_max_safe and phase==2:
         u=retract_velocity(p_cur, anchor_est, speed=0.1)
         hks.append(rls.theta[0]); hgmu.append(0.); hgsig.append(sigma_s)
         h_flower.append(f_lower); h_fupper.append(f_upper); h_vmax.append(0.)
         hL0.append(L0_est); hphase.append(phase)
-        v_prev=v_cur.copy(); v_cur=u.copy()
+        v_prev=v_cur.copy()   # 回缩前正确保存 v_prev，消除下一步 ac 尖峰
+        v_cur=u.copy()
         pn=p_cur+dt*u
         f_cur=true_force_3d(pn, np.linalg.norm(u), np.linalg.norm((u-v_prev)/dt))
         p_cur=pn; hp.append(p_cur.copy())
         continue
 
-    # 阶段0：探索
+    # ── 阶段 0：径向外探索 ───────────────────────────────
     if phase==0:
         dist=np.linalg.norm(p_cur-anchor_est); dn=(p_cur-anchor_est)/(dist+1e-6)
         sp=0.15*max(0.3, 1.4-dist/(L0_true*1.3)); u=dn*sp
-        if fm<noise_std*2: L0_est=dist*0.9
         hks.append(rls.theta[0]); hgmu.append(0.); hgsig.append(0.)
         h_flower.append(f_lower); h_fupper.append(f_upper); h_vmax.append(0.)
 
-    # 阶段1：弧线（MPC，动态速度上限）
+    # ── 阶段 1：Settle（小幅径向往返，激励 RLS） ────────
+    elif phase==1:
+        dist = np.linalg.norm(p_cur-anchor_est)
+        dn   = (p_cur-anchor_est)/(dist+1e-6)
+        # 以 settle_base_dist 为中心，正弦往返（2个完整周期）
+        phase_osc = 2 * np.pi * settle_steps_done / max(SETTLE_STEPS/2, 1)
+        target_dist = settle_base_dist + SETTLE_AMP * np.sin(phase_osc)
+        err = target_dist - dist
+        u = dn * np.clip(err / dt, -SETTLE_SPEED, SETTLE_SPEED)
+        settle_steps_done += 1
+
+        # RLS 更新（settle 阶段是主要激励窗口）
+        st  = max(0., dist - L0_est)
+        vs  = np.linalg.norm(v_cur)
+        ac  = np.linalg.norm((v_cur-v_prev)/dt)
+        phi = np.array([st, vs, ac])
+        trls = rls.update(phi, fm)
+        f_lower, f_upper = rls.force_bounds(f_taut)
+        f_upper = min(f_upper, f_max_safe)
+
+        # GPR 也开始积累数据（但还不接管控制）
+        gpr.add_data(st, vs, theta_cur, fm)
+        if len(gpr.X) >= 15 and t%5==0: gpr.fit()
+
+        hks.append(trls[0]); hgmu.append(0.); hgsig.append(0.)
+        h_flower.append(f_lower); h_fupper.append(f_upper); h_vmax.append(0.)
+
+    # ── 阶段 2：弧线（MPC，动态速度上限） ───────────────
     else:
         d=p_cur-anchor_est; dist=np.linalg.norm(d)
         st=max(0., dist-L0_est); vs=np.linalg.norm(v_cur)
         ac=np.linalg.norm((v_cur-v_prev)/dt)
 
-        # RLS 更新，动态调整力边界
-        phi=np.array([st,vs,ac]); trls=rls.update(phi,fm)
+        # RLS 持续更新
+        phi=np.array([st,vs,ac])
+        stretch_delta = st - st_prev
+        trls=rls.update(phi, fm, stretch_delta=stretch_delta)
+        st_prev = st
         f_lower, f_upper = rls.force_bounds(f_taut)
         f_upper = min(f_upper, f_max_safe)
 
+        # L0_est 滚动更新：用 RLS 最新 ks 持续修正
+        # 临床意义：机器人在牵引中持续修正对肢体弹性的估计
+        if trls[0] > KS_MIN_FOR_GPR and fm > f_taut * 0.5:
+            L0_est_new = max(0.05, dist - fm / trls[0])
+            L0_est = 0.9 * L0_est + 0.1 * L0_est_new  # 低通滤波，防止跳变
+
+        # R_ref 缓慢追踪真实 dist（防止径向约束中心和实际位置越来越偏）
+        if arc_steps % R_REF_UPDATE == 0:
+            R_ref = 0.8 * R_ref + 0.2 * dist
+
         # GPR 更新
-        gpr.add_data(st,vs,fm)
-        if t%10==0: gpr.fit()
-        mu,sr=gpr.predict(st,vs)
+        gpr.add_data(st, vs, theta_cur, fm)
+        if t%15==0: gpr.fit()
+        mu,sr=gpr.predict(st, vs, theta_cur)
         if sr is None: sr=0.
         mu_val=trls[0]*st if mu is None else mu
         sigma_s=0.2*sr+0.8*sigma_s
 
-        # GPR 局部线性化，σ 大时退化到 RLS
-        ks_eff=gpr.local_ks(st, vs, ks_fallback=trls[0])
+        # GPR 延迟接管：RLS 收敛 + 数据量足够才用 GPR local_ks
+        gpr_ready = (trls[0] > KS_MIN_FOR_GPR) and (len(gpr.X) >= GPR_MIN_DATA)
+        ks_eff = gpr.local_ks(st, vs, theta_cur, ks_fallback=trls[0]) if gpr_ready else trls[0]
         b_rls, m_rls = trls[1], trls[2]
 
-        # 动态速度上限：线性从 V_MIN 爬升到 V_MAX
-        v_max_cur = min(V_MIN + (V_MAX-V_MIN)*(arc_steps/V_RAMP), V_MAX)
+        # 动态速度上限：预热阶段极低速，之后线性爬升
+        if arc_steps < ARC_WARMUP_STEPS:
+            v_max_cur = V_WARMUP
+        else:
+            v_max_cur = min(V_MIN + (V_MAX-V_MIN)*((arc_steps-ARC_WARMUP_STEPS)/V_RAMP), V_MAX)
         arc_steps += 1
 
         hks.append(trls[0]); hgmu.append(float(mu_val)); hgsig.append(sigma_s)
@@ -333,7 +469,8 @@ for t in range(T_sim):
                      anchor_est, L0_est,
                      theta_cur, theta_target,
                      f_taut, f_lower, f_upper,
-                     sigma_gpr=sigma_s, v_max_cur=v_max_cur)
+                     sigma_gpr=sigma_s, v_max_cur=v_max_cur,
+                     R_ref=R_ref)
 
     hL0.append(L0_est); hphase.append(phase)
     v_prev=v_cur.copy(); v_cur=u.copy()
@@ -348,13 +485,13 @@ for t in range(T_sim):
 hp=np.array(hp); hf_a=np.array(hf)
 R_fit=xc=yc=None
 
-if taut_step is not None:
-    fc=hf_a[taut_step:]
+if arc_step is not None:
+    fc=hf_a[arc_step:]
     rms=float(np.sqrt(np.mean((fc-f_taut)**2)))
     viol=float(np.mean(fc>f_max_safe))*100
     print(f"\n[指标] 弧线阶段 RMS力误差={rms:.3f}N  超限={viol:.1f}%")
     print(f"[指标] 总步={len(hf_a)}  弧线步={len(fc)}")
-    pts2d=hp[taut_step:,:2]
+    pts2d=hp[arc_step:,:2]
     xc,yc,R_fit=taubin_fit(pts2d)
     if R_fit is not None:
         print(f"[Taubin] 圆心({xc:.3f},{yc:.3f}) R={R_fit:.3f}m")
@@ -365,8 +502,8 @@ if taut_step is not None:
 # 绘图
 # ══════════════════════════════════════════════════════
 fig=plt.figure(figsize=(16,10))
-fig.suptitle("Integrated 3D Simulation  —  大纲四层架构 v5\n"
-             "两阶段: 探索→弧线(MPC)  ks=50  动态速度上限",
+fig.suptitle("Integrated 3D Simulation  —  大纲四层架构 v8\n"
+             "三阶段: 探索→settle→弧线(MPC)  径向约束+预热+Matérn GPR  ks=50",
              fontsize=11, y=0.99)
 
 n=len(hf_a)
@@ -374,12 +511,17 @@ phase_arr=np.array(hphase+[hphase[-1] if hphase else 0])
 
 # 1. 轨迹
 ax1=fig.add_subplot(2,3,1)
-p0=np.where(phase_arr==0)[0]; p1=np.where(phase_arr==1)[0]
+p0=np.where(phase_arr==0)[0]
+p1=np.where(phase_arr==1)[0]
+p2=np.where(phase_arr==2)[0]
 if len(p0)>0: ax1.plot(hp[p0,0],hp[p0,1],'gray',lw=1.2,label='Phase0: explore',alpha=0.7)
-if len(p1)>0: ax1.plot(hp[p1,0],hp[p1,1],'b-',lw=2,label='Phase1: arc (MPC)')
+if len(p1)>0: ax1.plot(hp[p1,0],hp[p1,1],'orange',lw=1.5,label='Phase1: settle',alpha=0.8)
+if len(p2)>0: ax1.plot(hp[p2,0],hp[p2,1],'b-',lw=2,label='Phase2: arc (MPC)')
 ax1.plot(*anchor[:2],'k+',ms=12,mew=2,label='Anchor')
 if taut_step is not None:
     ax1.plot(*hp[taut_step,:2],'go',ms=8,zorder=5,label=f'BOCD t={taut_step}')
+if arc_step is not None:
+    ax1.plot(*hp[arc_step,:2],'b^',ms=8,zorder=5,label=f'Arc start t={arc_step}')
 if R_fit is not None:
     tha=np.linspace(theta_start,theta_target,300)
     ax1.plot(xc+R_fit*np.cos(tha),yc+R_fit*np.sin(tha),'m:',lw=1.5,label=f'Taubin R={R_fit:.2f}m')
@@ -393,6 +535,8 @@ ax2.axhline(f_max_safe,color='red',ls='-',lw=1.5,label=f'f_max_safe={f_max_safe}
 if taut_step is not None:
     ax2.axvline(taut_step,color='green',ls='--',alpha=0.7,label=f'BOCD t={taut_step}')
     ax2.axhline(f_taut,color='purple',ls='--',lw=1.2,label=f'f_taut={f_taut:.2f}N')
+if arc_step is not None:
+    ax2.axvline(arc_step,color='blue',ls=':',alpha=0.7,label=f'Arc start t={arc_step}')
 if len(h_flower)>0:
     fl=np.array(h_flower); fu=np.array(h_fupper)
     ax2.fill_between(np.arange(len(fl)),fl,fu,alpha=0.1,color='green',label='RLS force bounds')
@@ -401,11 +545,11 @@ ax2.legend(fontsize=7); ax2.set_title('Force magnitude + dynamic bounds'); ax2.g
 
 # 3. GPR 预测 vs 真实
 ax3=fig.add_subplot(2,3,3)
-if taut_step is not None:
-    arc_gmu=np.array(hgmu[taut_step:]); arc_gsig=np.array(hgsig[taut_step:])
-    tc3=np.arange(taut_step,taut_step+len(arc_gmu))
+if arc_step is not None:
+    arc_gmu=np.array(hgmu[arc_step:]); arc_gsig=np.array(hgsig[arc_step:])
+    tc3=np.arange(arc_step,arc_step+len(arc_gmu))
     if len(arc_gmu)>2:
-        ftc=hf_a[taut_step:taut_step+len(arc_gmu)]
+        ftc=hf_a[arc_step:arc_step+len(arc_gmu)]
         ax3.plot(tc3,ftc,'k-',alpha=0.6,lw=1,label='True force')
         ax3.plot(tc3,arc_gmu,'b-',lw=1.5,label='GPR mean μ')
         ax3.fill_between(tc3,arc_gmu-2*arc_gsig,arc_gmu+2*arc_gsig,
@@ -417,7 +561,7 @@ ax3.legend(fontsize=7); ax3.set_title('GPR prediction vs true force'); ax3.grid(
 
 # 4. GPR 不确定度 + 动态速度上限
 ax4=fig.add_subplot(2,3,4)
-if taut_step is not None and len(arc_gsig)>2:
+if arc_step is not None and len(arc_gsig)>2:
     ax4.plot(tc3,arc_gsig,color='purple',lw=1.5,label='GPR σ')
     ax4.fill_between(tc3,0,arc_gsig,alpha=0.2,color='purple')
     ax4.axhline(0.3,color='red',ls='--',lw=1,label='σ threshold=0.3')
@@ -436,8 +580,11 @@ ax5=fig.add_subplot(2,3,5)
 ks_all=np.array(hks)
 ax5.plot(ks_all,'b-',lw=1.5,label='RLS ks estimate')
 ax5.axhline(ks_true,color='r',ls='--',label=f'True ks={ks_true}')
+ax5.axhline(KS_MIN_FOR_GPR,color='orange',ls=':',lw=1.2,label=f'GPR handoff={KS_MIN_FOR_GPR}')
 if taut_step is not None:
     ax5.axvline(taut_step,color='green',ls='--',alpha=0.6,label='BOCD')
+if arc_step is not None:
+    ax5.axvline(arc_step,color='blue',ls=':',alpha=0.6,label='Arc start')
 ax5.set_ylabel('ks (N/m)'); ax5.set_xlabel('Time step')
 ax5.legend(fontsize=7); ax5.set_title('Stiffness estimation (RLS)'); ax5.grid(True,alpha=0.3)
 
@@ -450,6 +597,8 @@ dist_arr=np.linalg.norm(hp[:-1]-anchor,axis=1)[:n]
 ax6.plot(dist_arr,'b-',lw=1,alpha=0.6,label='dist(t) from anchor')
 if taut_step is not None:
     ax6.axvline(taut_step,color='green',ls='--',alpha=0.6,label='BOCD')
+if arc_step is not None:
+    ax6.axvline(arc_step,color='blue',ls=':',alpha=0.6,label='Arc start')
 ax6.set_ylabel('Distance (m)'); ax6.set_xlabel('Time step')
 ax6.legend(fontsize=7); ax6.set_title('L0 estimate & radius evolution'); ax6.grid(True,alpha=0.3)
 
