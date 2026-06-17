@@ -1,14 +1,13 @@
 """
-Integrated 3D Simulation — 大纲四层架构 v8
+Integrated 3D Simulation — 大纲四层架构 v9
 
-修改（相对 v7）：
-1. arc 早期安全预热：前 ARC_WARMUP_STEPS 步 v_max 锁在极低值
-   临床意义：治疗师刚开始牵引时先轻推确认方向和阻力，再正式发力
-2. GPR 输入加入角度特征 theta（RBF kernel，各维独立 length_scale）
-   让 GPR 感知弧线不同位置的力变化；Matérn 计算太慢暂不使用
-3. 代价函数加轻微区间中点吸引项，给优化器在可行域内提供梯度方向
-4. settle 阶段 GPR fit 改为数据量 ≥ 15 才开始，避免早期过拟合噪声
-5. 安全回缩时正确更新 v_prev，消除回缩后第一步 ac 的尖峰噪声
+修改（相对 v8）：
+1. GPR 真正作为 MPC 主预测模型
+   - MPC 的 pf() 直接调用 gpr.predict()，不再经过 ks*stretch 弹簧公式
+   - GPR ready 前用 RLS 弹簧模型作为 fallback
+   - σ 直接作为 Tube-MPC 约束收紧依据，无需 local_ks 数值微分
+2. RLS 退出主预测流程，arc 阶段加 stretch 门控防止无激励漂移
+3. v8 的其他改动保留：径向约束、arc 预热、区间中点吸引、v_prev 修复
 """
 import matplotlib
 matplotlib.use('Agg')
@@ -199,18 +198,31 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
                anchor_est, L0_est,
                theta_cur, theta_target,
                f_taut, f_lower, f_upper,
-               sigma_gpr=0., v_max_cur=0.1, R_ref=None):
+               sigma_gpr=0., v_max_cur=0.1, R_ref=None,
+               gpr_model=None, gpr_ready=False):
 
     f_max_eff = f_upper - 2.0*np.clip(sigma_gpr, 0., 0.5)
     f_max_eff = max(f_max_eff, f_taut*1.1)
 
-    # 径向参考：没传入就用当前 dist
     if R_ref is None:
         R_ref = np.linalg.norm(p_cur - anchor_est)
 
     def pf(p_, v_, a_):
-        stretch = max(0., np.linalg.norm(p_-anchor_est) - L0_est)
-        return max(0., ks_eff*stretch + b_rls*np.linalg.norm(v_) + m_rls*np.linalg.norm(a_))
+        """GPR ready 时直接用 GPR 预测力，否则用 RLS 弹簧模型（用于代价函数）"""
+        dist_ = np.linalg.norm(p_ - anchor_est)
+        stretch_ = max(0., dist_ - L0_est)
+        vs_ = np.linalg.norm(v_)
+        theta_ = np.arctan2(p_[1]-anchor_est[1], p_[0]-anchor_est[0])
+        if gpr_ready and gpr_model is not None:
+            mu, _ = gpr_model.predict(stretch_, vs_, theta_)
+            if mu is not None:
+                return max(0., mu)
+        return max(0., ks_eff*stretch_ + b_rls*vs_ + m_rls*np.linalg.norm(a_))
+
+    def pf_fast(p_, v_, a_):
+        """轻量弹簧模型，用于约束函数（避免约束评估时反复调用 GPR）"""
+        stretch_ = max(0., np.linalg.norm(p_-anchor_est) - L0_est)
+        return max(0., ks_eff*stretch_ + b_rls*np.linalg.norm(v_) + m_rls*np.linalg.norm(a_))
 
     def cost(u_flat):
         u_seq=u_flat.reshape(MPC_N,3); p=p_cur.copy(); v=v_cur.copy(); c=0.
@@ -243,13 +255,13 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
             def fn(u):
                 p=p_cur.copy(); v=v_cur.copy()
                 for i in range(k_+1): v=u.reshape(MPC_N,3)[i]; p=p+dt*v
-                return f_max_eff - pf(p,v,np.zeros(3))
+                return f_max_eff - pf_fast(p,v,np.zeros(3))
             return fn
         def make_lower(k_=k):
             def fn(u):
                 p=p_cur.copy(); v=v_cur.copy()
                 for i in range(k_+1): v=u.reshape(MPC_N,3)[i]; p=p+dt*v
-                return pf(p,v,np.zeros(3)) - f_lower
+                return pf_fast(p,v,np.zeros(3)) - f_lower
             return fn
         # 径向约束：预测位置的 dist 不偏离 R_ref 超过 R_TOL
         def make_radial_upper(k_=k):
@@ -313,7 +325,7 @@ phase=0          # 0:探索  1:settle  2:弧线
 taut_step=None; arc_step=None
 arc_steps=0; settle_steps_done=0; settle_base_dist=0.
 f_taut=0.2; f_lower=0.1; f_upper=1.0
-sigma_s=0.; R_ref=None
+sigma_s=0.; R_ref=None; st_prev=0.
 
 hp=[p_cur.copy()]; hf=[]; hsig=[]; hks=[]
 hgmu=[]; hgsig=[]; hL0=[L0_est]; hphase=[]
@@ -363,8 +375,8 @@ for t in range(T_sim):
                       f"L0_est更新→{L0_est:.3f}m")
             else:
                 print(f"  [Settle→Arc] t={t:3d}: ks_est={rls.theta[0]:.1f} (超时，保留L0_est={L0_est:.3f}m)")
-            rls.set_lam(rls.lam)  # 切换回正常遗忘因子
-            R_ref = np.linalg.norm(p_cur - anchor_est)  # 初始化径向参考
+            rls.set_lam(rls.lam)
+            R_ref = np.linalg.norm(p_cur - anchor_est)
             st_prev = max(0., np.linalg.norm(p_cur - anchor_est) - L0_est)
 
     if phase==2 and theta_cur>=theta_target-0.03:
@@ -424,7 +436,7 @@ for t in range(T_sim):
         st=max(0., dist-L0_est); vs=np.linalg.norm(v_cur)
         ac=np.linalg.norm((v_cur-v_prev)/dt)
 
-        # RLS 持续更新
+        # RLS 更新：stretch 无激励时跳过，防止无信号漂移
         phi=np.array([st,vs,ac])
         stretch_delta = st - st_prev
         trls=rls.update(phi, fm, stretch_delta=stretch_delta)
@@ -432,27 +444,25 @@ for t in range(T_sim):
         f_lower, f_upper = rls.force_bounds(f_taut)
         f_upper = min(f_upper, f_max_safe)
 
-        # L0_est 滚动更新：用 RLS 最新 ks 持续修正
-        # 临床意义：机器人在牵引中持续修正对肢体弹性的估计
+        # L0_est 滚动更新（低通，防跳变）
         if trls[0] > KS_MIN_FOR_GPR and fm > f_taut * 0.5:
             L0_est_new = max(0.05, dist - fm / trls[0])
-            L0_est = 0.9 * L0_est + 0.1 * L0_est_new  # 低通滤波，防止跳变
+            L0_est = 0.9 * L0_est + 0.1 * L0_est_new
 
-        # R_ref 缓慢追踪真实 dist（防止径向约束中心和实际位置越来越偏）
+        # R_ref 缓慢追踪
         if arc_steps % R_REF_UPDATE == 0:
             R_ref = 0.8 * R_ref + 0.2 * dist
 
         # GPR 更新
         gpr.add_data(st, vs, theta_cur, fm)
         if t%15==0: gpr.fit()
-        mu,sr=gpr.predict(st, vs, theta_cur)
+        mu, sr = gpr.predict(st, vs, theta_cur)
         if sr is None: sr=0.
-        mu_val=trls[0]*st if mu is None else mu
-        sigma_s=0.2*sr+0.8*sigma_s
+        mu_val = trls[0]*st if mu is None else mu
+        sigma_s = 0.2*sr + 0.8*sigma_s
 
-        # GPR 延迟接管：RLS 收敛 + 数据量足够才用 GPR local_ks
-        gpr_ready = (trls[0] > KS_MIN_FOR_GPR) and (len(gpr.X) >= GPR_MIN_DATA)
-        ks_eff = gpr.local_ks(st, vs, theta_cur, ks_fallback=trls[0]) if gpr_ready else trls[0]
+        # GPR ready 条件：数据足够且已 fit
+        gpr_ready = gpr.fitted and (len(gpr.X) >= GPR_MIN_DATA)
         b_rls, m_rls = trls[1], trls[2]
 
         # 动态速度上限：预热阶段极低速，之后线性爬升
@@ -465,12 +475,13 @@ for t in range(T_sim):
         hks.append(trls[0]); hgmu.append(float(mu_val)); hgsig.append(sigma_s)
         h_flower.append(f_lower); h_fupper.append(f_upper); h_vmax.append(v_max_cur)
 
-        u=run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
+        u=run_mpc_3d(p_cur, v_cur, trls[0], b_rls, m_rls,
                      anchor_est, L0_est,
                      theta_cur, theta_target,
                      f_taut, f_lower, f_upper,
                      sigma_gpr=sigma_s, v_max_cur=v_max_cur,
-                     R_ref=R_ref)
+                     R_ref=R_ref,
+                     gpr_model=gpr, gpr_ready=gpr_ready)
 
     hL0.append(L0_est); hphase.append(phase)
     v_prev=v_cur.copy(); v_cur=u.copy()
@@ -502,8 +513,8 @@ if arc_step is not None:
 # 绘图
 # ══════════════════════════════════════════════════════
 fig=plt.figure(figsize=(16,10))
-fig.suptitle("Integrated 3D Simulation  —  大纲四层架构 v8\n"
-             "三阶段: 探索→settle→弧线(MPC)  径向约束+预热+Matérn GPR  ks=50",
+fig.suptitle("Integrated 3D Simulation  —  大纲四层架构 v9\n"
+             "三阶段: 探索→settle→弧线(MPC)  GPR主预测模型  ks=50",
              fontsize=11, y=0.99)
 
 n=len(hf_a)
