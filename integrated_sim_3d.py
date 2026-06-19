@@ -1,13 +1,14 @@
 """
-Integrated 3D Simulation — 大纲四层架构 v11
+Integrated 3D Simulation — 大纲四层架构 v13
 
-修改（相对 v9）：
-1. RLS 直接驱动 MPC：pf 和 pf_fast 合并为同一个弹簧模型，消除约束不一致
-2. GPR 退回 Tube-MPC 角色：只提供 σ 收紧 f_max_eff，不参与力点预测
-3. settle 阶段改为径向拉伸扫描：从 L0_est 开始推到 stretch≈0.1m 再收回
-   临床意义：治疗师接触后做完整阻力评估，给 RLS 宽范围激励
-4. f_lower 提高到 f_taut：绷直作为硬约束
-5. 去掉速度惩罚项 W_INPUT
+修改（相对 v12）：
+1. stretch 硬约束加入 MPC constraints，直接约束形变量
+   - 不依赖 ks_est 精度，与力约束完全解耦
+   - 临床意义：形变量是直接可观测的安全指标，治疗师评估时确定 STRETCH_MAX
+2. force_bounds 恢复干净版本（不再从 stretch_max 导出 f_upper）
+   - 力约束作为独立安全网，stretch 约束通过 MPC 直接保证
+3. settle 阶段安全检查用位移增量直接判断，不依赖 L0_est 或 ks
+   临床意义：形变约束全程有效，不存在 L0 误差带来的逻辑漏洞
 """
 import matplotlib
 matplotlib.use('Agg')
@@ -32,6 +33,11 @@ L0_true    = 0.5
 anchor     = np.array([0.0, 0.0, 0.0])
 f_max_safe = 3.0
 noise_std  = 0.1
+
+# ── 形变约束（主约束来源）────────────────────────────────
+# 临床意义：允许的最大形变量，由治疗师在评估阶段确定
+# 等价于当前力约束：stretch_max = f_max_safe / ks_true = 3/50 = 0.06m
+STRETCH_MAX = 0.06  # 最大允许形变量 (m)
 
 def true_force_mag(stretch, vel, acc):
     if stretch <= 0:
@@ -130,7 +136,7 @@ class RLS:
         return self.theta.copy()
 
     def force_bounds(self, f_taut):
-        f_lower = 0.95 * f_taut                 # 接近绷直，留小余量防止约束不可行
+        f_lower = 0.95 * f_taut
         f_upper = min(2.5 * f_taut, f_max_safe)
         return f_lower, f_upper
 
@@ -268,6 +274,16 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
         cons.append({'type':'ineq','fun':make_lower(k)})
         cons.append({'type':'ineq','fun':make_radial_upper(k)})
         cons.append({'type':'ineq','fun':make_radial_lower(k)})
+        # stretch 硬约束：预测位置的形变量不超过 STRETCH_MAX
+        # 直接约束形变，不依赖 ks_est 精度
+        def make_stretch_upper(k_=k):
+            def fn(u):
+                p=p_cur.copy(); v=v_cur.copy()
+                for i in range(k_+1): v=u.reshape(MPC_N,3)[i]; p=p+dt*v
+                stretch_pred=max(0., np.linalg.norm(p-anchor_est)-L0_est)
+                return STRETCH_MAX - stretch_pred
+            return fn
+        cons.append({'type':'ineq','fun':make_stretch_upper(k)})
 
     tang=np.array([-np.sin(theta_cur), np.cos(theta_cur), 0.])
     u0=np.tile(tang*0.05, MPC_N)
@@ -321,7 +337,7 @@ h_flower=[]; h_fupper=[]; h_vmax=[]
 f_cur=true_force_3d(p_cur)
 
 print("="*62)
-print("Integrated 3D Simulation  —  大纲四层架构 v6")
+print("Integrated 3D Simulation  —  大纲四层架构 v13")
 print(f"ks_true={ks_true}  L0_true={L0_true}m  f_max_safe={f_max_safe}N")
 print(f"起始θ={np.degrees(theta_start):.0f}°  目标θ={np.degrees(theta_target):.0f}°")
 print(f"速度: {V_MIN}→{V_MAX} m/s (线性爬升 {V_RAMP} 步)")
@@ -396,10 +412,12 @@ for t in range(T_sim):
         dist = np.linalg.norm(p_cur-anchor_est)
         dn   = (p_cur-anchor_est)/(dist+1e-6)
 
-        # 力安全检查：settle 阶段力接近上限时立即收回
-        # 临床意义：评估阻力时不能对患者施加危险力度
-        if fm > f_max_safe * 0.8:
-            target_dist = settle_base_dist  # 强制收回到基准距离
+        # 安全检查：直接用位移增量判断，不依赖 L0_est 或 ks
+        # 临床意义：从绷直点推出的距离不超过 STRETCH_MAX，形变约束全程有效
+        dist_settle = np.linalg.norm(p_cur - anchor_est)
+        disp_from_base = dist_settle - settle_base_dist  # 相对绷直点的位移增量
+        if disp_from_base > STRETCH_MAX * 0.9 or fm > f_max_safe * 0.8:
+            target_dist = settle_base_dist
         else:
             half = SETTLE_STEPS / 2
             if settle_steps_done < half:
@@ -508,8 +526,8 @@ if arc_step is not None:
 # 绘图
 # ══════════════════════════════════════════════════════
 fig=plt.figure(figsize=(16,10))
-fig.suptitle("Integrated 3D Simulation  —  大纲四层架构 v11\n"
-             "三阶段: 探索→settle(拉伸扫描)→弧线  RLS驱动MPC  GPR仅提供σ  ks=50",
+fig.suptitle("Integrated 3D Simulation  —  大纲四层架构 v13\n"
+             "三阶段: 探索→settle→弧线  stretch硬约束+力约束  STRETCH_MAX=0.06m  ks=50",
              fontsize=11, y=0.99)
 
 n=len(hf_a)
