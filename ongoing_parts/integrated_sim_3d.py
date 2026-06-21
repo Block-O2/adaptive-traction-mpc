@@ -276,19 +276,51 @@ class GPRModel:
              + WhiteKernel(0.1, (1e-3, 1.)))
         self.gpr = GaussianProcessRegressor(
             kernel=k, n_restarts_optimizer=0, normalize_y=True)
-        self.X=[]; self.y=[]; self.fitted=False
+        self.fitted=False
         self.xm=np.zeros(3); self.xs=np.ones(3); self.max_data=max_data
+
+        # 数据分两个池子管理：
+        # - base_X/base_y：settle 阶段的完整扫描数据，在 settle→arc
+        #   转换时通过 freeze_base() 一次性锁存，之后不再变动。这是
+        #   GPR 训练数据里"覆盖了完整 stretch 扫描范围"的部分。
+        # - X/y：滑动窗口，settle 和 arc 阶段都会持续 add_data 进来，
+        #   按 max_data 正常淘汰最旧数据。
+        # fit() 时两个池子合并训练。
+        #
+        # 这个分离修复了一个真实 bug：之前只有一个共享滑动窗口，arc
+        # 阶段(尤其是"回归子阶段"，机器人被拉回接近 dist_taut 的位置)
+        # 持续产生 stretch≈0 附近的新数据，把 settle 阶段好不容易扫出
+        # 的大范围 stretch 数据全部挤出窗口——等机器人真正沿弧线推进、
+        # stretch 重新变化时，GPR 训练集已经被"局部化"在很窄的范围，
+        # 对实际遇到的更大 stretch 是在做严重外推，而不是真正的预测。
+        self.base_X=[]; self.base_y=[]
+        self.X=[]; self.y=[]
+
+        # local_ratio 输出的平滑状态：相邻两次调用之间结果可能跳动，
+        # 这个状态变量让 local_ratio 内部对自己上一次的输出做指数
+        # 滑动平均，None 表示还没有过历史值（第一次调用不做平滑）。
+        self._ks_smooth_prev = None
 
     def add_data(self, s, v, theta, f):
         # 输入：[stretch, vel, theta]，theta 让 GPR 感知弧线位置
         self.X.append([s, v, theta]); self.y.append(f)
         if len(self.X) > self.max_data: self.X.pop(0); self.y.pop(0)
 
+    def freeze_base(self):
+        """settle→arc 转换时调用一次：把当前滑动窗口里的数据(此时应
+        该正好是 settle 阶段积累的完整扫描数据)复制进 base 池永久锁存。
+        之后 arc 阶段的新数据只会进入滑动窗口、淘汰滑动窗口里的旧数据，
+        不会再触碰 base 池，settle 的激励范围因此不会被冲掉。"""
+        self.base_X = list(self.X)
+        self.base_y = list(self.y)
+
     def fit(self):
-        if len(self.X) < 15: return   # 数据量 ≥ 15 才 fit，避免早期过拟合
-        X = np.array(self.X)
+        all_X = self.base_X + self.X
+        all_y = self.base_y + self.y
+        if len(all_X) < 15: return   # 数据量 ≥ 15 才 fit，避免早期过拟合
+        X = np.array(all_X)
         self.xm = X.mean(0); self.xs = X.std(0) + 1e-6
-        self.gpr.fit((X - self.xm) / self.xs, np.array(self.y))
+        self.gpr.fit((X - self.xm) / self.xs, np.array(all_y))
         self.fitted = True
 
     def predict(self, s, v, theta):
@@ -297,19 +329,65 @@ class GPRModel:
         mu, sig = self.gpr.predict(xn, return_std=True)
         return float(mu[0]), float(sig[0])
 
-    def local_ks(self, stretch, vel, theta, ks_fallback, delta=0.001, sigma_threshold=0.3):
-        if not self.fitted: return ks_fallback
-        _, sigma_cur = self.predict(stretch, vel, theta)
-        if sigma_cur is None or sigma_cur > sigma_threshold:
+    def local_ratio(self, stretch, vel, theta, ks_fallback,
+                     sigma_threshold=0.3, smooth_alpha=0.3,
+                     min_stretch_for_ratio=0.03):
+        """
+        用 GPR 在当前点直接预测一次力，除以当前 stretch 得到一个等效
+        比例，代替之前用数值微分反推局部刚度的 local_ks。
+
+        为什么放弃数值微分：实测发现 local_ks 在线性材料(真实ks≈11.5)
+        下输出系统性偏小(0.5~6之间，远低于真实值)，而且这不是噪声
+        问题——固定同一个点反复测试，不同 delta 给出的结果其实相当
+        一致(0.57~0.90)，但全都偏离真实值。根因是 GPR 的 RBF 核函数
+        本身有平滑特性，拟合出的 mu(stretch) 曲线斜率天然比真实斜率
+        更平缓，两点数值微分会把这个核函数自带的平滑偏差直接放大成
+        刚度估计的系统性偏差，调 delta 或加平滑都只能压噪声、压不住
+        这种系统性偏差。
+
+        改为只查询一次 GPR，直接用预测力本身（GPR 学到的非线性信息
+        没有被中间的微分步骤压缩、丢失），除以 stretch 得到等效比例：
+            ratio = f_gpr(stretch, vel, theta) / stretch
+        候选点预测时用 ratio*stretch_候选点 做线性外推——这仍然是"用
+        GPR这一次查询的结果，外推到 MPC 内部的所有候选点"，满足"每
+        步只查一次GPR"的性能约束，但不再经过数值微分这一步有损变换。
+
+        min_stretch_for_ratio 是除了 σ 阈值之外的第二道独立防线：
+        实测发现 ks=30 线性材料下，GPR 被采用的全部 11 次都发生在
+        stretch 极小(0.0004~0.02)的时刻——σ 在这些点上确实够低(GPR
+        "认为"自己有把握)，mu 本身也合理(0.7~1.5N，量级正常)，但
+        ratio=mu/stretch 这个除法在分母接近零时，mu 的微小误差会被
+        放大到离谱(真实ks=30，实测ratio最高到709)。σ衡量的是"对 mu
+        这个值有多大把握"，不衡量"用 mu 做除法是否数值安全"——这是
+        两件不同的事，σ阈值这道防线管不到这个问题，必须单独加一道
+        基于 stretch 量级本身的保护：stretch 小于此值时，不论 σ 多
+        低，一律退回 ks_fallback，因为这时候"等效比例"概念本身是
+        病态的(材料几乎没有被拉伸，用一个微弱的力推算"刚度"，物理
+        上就是噪声主导)。0.03m 是 STRETCH_MAX(0.25m 典型值)的约
+        12%，覆盖了 settle 刚结束、arc 刚开始的"回归子阶段"附近
+        stretch 还很小的过渡期。
+
+        smooth_alpha 的指数滑动平均同样保留，抑制相邻步之间的残余
+        跳变。
+        """
+        if not self.fitted:
+            self._ks_smooth_prev = None
             return ks_fallback
-        s_plus  = max(0., stretch + delta)
-        s_minus = max(0., stretch - delta)
-        mu_plus,  _ = self.predict(s_plus,  vel, theta)
-        mu_minus, _ = self.predict(s_minus, vel, theta)
-        if mu_plus is None or mu_minus is None:
+        if stretch < min_stretch_for_ratio:
+            self._ks_smooth_prev = None
             return ks_fallback
-        ks_eff = (mu_plus - mu_minus) / (2 * delta)
-        return max(0.05, ks_eff)
+        mu, sigma_cur = self.predict(stretch, vel, theta)
+        if mu is None or sigma_cur is None or sigma_cur > sigma_threshold:
+            self._ks_smooth_prev = None
+            return ks_fallback
+        ratio_raw = max(0.05, mu / stretch)
+
+        if self._ks_smooth_prev is None:
+            ratio = ratio_raw
+        else:
+            ratio = smooth_alpha * ratio_raw + (1 - smooth_alpha) * self._ks_smooth_prev
+        self._ks_smooth_prev = ratio
+        return ratio
 
 # ══════════════════════════════════════════════════════
 # 安全回缩
@@ -327,6 +405,7 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
                anchor_est, dist_taut, f_taut,
                theta_cur, theta_target,
                STRETCH_MAX, f_max_safe,
+               gpr_model=None, gpr_sigma_thresh=0.3,
                sigma_gpr=0., v_max_cur=0.1, R_ref=None, w_time=None):
     """
     主约束是距离约束，力作为"任务引导"代价项（非安全判据）
@@ -341,6 +420,36 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
       - f_taut 引导让 MPC 主动维持"刚好绷紧"的状态去传导运动，
         同时距离硬约束依然兜底，引导不会突破安全边界
     径向约束：保持弧线轨迹半径稳定
+
+    力预测(pf)的有效刚度优先用 GPR 给出的局部估计，GPR 没有把握
+    (σ过高/数据不足)时退回 RLS 的 ks_eff——这是大纲原始设计"GPR 为
+    主、RLS 为降级后备"，之前实现里被颠倒成了"RLS 全程主导，GPR 只管
+    σ"，已用多种子对比实验验证修正方向：σ 和 GPR 实际预测误差强相关
+    (相关系数0.83，迟滞材料测试)，证明 GPR 在犯大错时确实"知道自己
+    不确定"，σ阈值切换并非凭空假设。
+
+    GPR 只在每次 MPC 求解开始前查询一次（不是在 pf 内部对每个候选点
+    查询）——这是吃过亏才确认下来的关键点：大纲原文是"每次滚动优化
+    前利用新数据更新GPR后验分布"，即粒度是"每一步求解一次"，不是
+    "每个候选点一次"。第一版实现把 gpr.predict 直接放进了 pf 内部，
+    而 pf 在一次 SLSQP 求解里会被调用上千次(SLSQP迭代数×MPC_N候选
+    点)，实测单步求解时间从几秒暴涨到100+秒。
+
+    第二版改为求解前调用一次 gpr_model.local_ks(...)，对 GPR 当前
+    点附近做数值微分反推等效局部刚度。但实测发现这个数值微分系统性
+    低估刚度（线性ks=10材料下，local_ks 输出在 0.5~6 之间，真实值
+    11.5）——根因不是噪声，是 RBF 核函数本身的平滑特性让拟合曲线
+    的斜率天然比真实斜率更平缓，两点数值微分把这个平滑偏差直接放大
+    成系统性的刚度低估，加大 delta 或加平滑都只能压随机噪声、压不住
+    这种系统性偏差。
+
+    现在改用 gpr_model.local_ratio(...)：只查询一次 GPR 得到当前点
+    的预测力，直接用 力/stretch 算等效比例，不经过数值微分这一步
+    有损变换，GPR 学到的非线性信息没有被压缩丢失。把这个比例当成一
+    个和 RLS 的 ks_eff 等价的标量传给 pf，pf 内部恢复成原来的纯线性
+    公式做候选点外推，不再含任何 GPR 调用。gpr_sigma_thresh=0.3 复用
+    local_ratio 同样在用的σ阈值。gpr_model=None 时完全退化为原来的
+    纯 RLS 行为。
 
     STRETCH_MAX、f_max_safe 显式作为参数传入（而非闭包读取模块级
     全局变量），使函数在不同实验配置（不同材料/临床设定）下可安全
@@ -359,10 +468,25 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
     dist_upper_eff = dist_upper - np.clip(sigma_gpr * 0.5, 0., STRETCH_MAX * 0.3)
     dist_upper_eff = max(dist_upper_eff, dist_lower + 0.01)  # 保证可行域非空
 
-    # 力预测（用于代价函数，不作硬约束）
+    # GPR 局部刚度：只在这里查询一次(对应当前实际位置)，不在 pf 内部
+    # 逐候选点查询。返回值和 RLS 的 ks_eff 是同一个量纲、同一种用法，
+    # GPR 没把握时函数内部自己退回 ks_eff，调用方不需要再判断。
+    if gpr_model is not None:
+        cur_stretch = max(0., np.linalg.norm(p_cur - anchor_est) - dist_taut)
+        cur_vel = np.linalg.norm(v_cur)
+        ks_eff_for_pf = gpr_model.local_ratio(
+            cur_stretch, cur_vel, theta_cur, ks_fallback=ks_eff,
+            sigma_threshold=gpr_sigma_thresh)
+    else:
+        ks_eff_for_pf = ks_eff
+
+    # 力预测（用于代价函数，不作硬约束）。轻量纯算术，不含任何 GPR
+    # 调用——GPR 的影响已经通过上面算好的 ks_eff_for_pf 这一个标量
+    # 体现，pf 在 SLSQP 内部被反复调用时不会再触发任何 GPR 推断。
     def pf(p_, v_, a_):
         stretch_ = max(0., np.linalg.norm(p_ - anchor_est) - dist_taut)
-        return max(0., ks_eff * stretch_ + b_rls * np.linalg.norm(v_) + m_rls * np.linalg.norm(a_))
+        return max(0., ks_eff_for_pf * stretch_ + b_rls * np.linalg.norm(v_)
+                   + m_rls * np.linalg.norm(a_))
 
     # 距离辅助函数
     def dist_from_anchor(p_):
@@ -657,6 +781,12 @@ def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
                 theta_frozen = rls.theta.copy()
                 ks_frozen = max(theta_frozen[0], 0.5)  # 防止除零/极小值
 
+                # 锁存 GPR 训练数据：此刻滑动窗口里正好是 settle 阶段
+                # 积累的完整 stretch 扫描数据，把它复制进 base 池永久
+                # 保护起来，不会被 arc 阶段(尤其是回归子阶段，机器人在
+                # dist_taut 附近停留)产生的新数据挤出窗口。
+                gpr.freeze_base()
+
                 # R_ref 不再用固定的 STRETCH_MAX 比例，改为从 f_taut 反推。
                 # 之前 R_ref = dist_taut + 0.2*STRETCH_MAX 是一个和材料
                 # 刚度无关的固定拉伸比例，但力引导代价项的目标是把力拉向
@@ -831,12 +961,19 @@ def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
                                 dist_taut + 0.05 * STRETCH_MAX,
                                 dist_taut + 0.6 * STRETCH_MAX)
 
-            # GPR 更新（提供 σ 收紧距离约束上界）
+            # GPR 更新：现在不只提供 σ 收紧距离约束上界，均值预测 mu
+            # 也会在 run_mpc_3d 的 pf 函数里被实际用于力预测(σ 足够小
+            # 时优先于 RLS)。这里同步记录真正参与决策的预测值，不再
+            # 像之前那样把 RLS 的值伪装成"GPR显示值"。
             gpr.add_data(st, vs, theta_cur, fm)
             if t % 15 == 0: gpr.fit()
-            _, sr = gpr.predict(st, vs, theta_cur)
+            mu_gpr, sr = gpr.predict(st, vs, theta_cur)
             if sr is None: sr = 0.
-            mu_val  = trls[0] * st   # 显示用
+            GPR_SIGMA_THRESH = 0.3
+            if mu_gpr is not None and sr < GPR_SIGMA_THRESH:
+                mu_val = mu_gpr
+            else:
+                mu_val = trls[0] * st
             sigma_s = 0.2 * sr + 0.8 * sigma_s
 
             b_rls, m_rls = trls[1], trls[2]
@@ -855,6 +992,7 @@ def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
                            anchor_est, dist_taut, f_taut,
                            theta_cur, theta_target,
                            STRETCH_MAX, f_max_safe,
+                           gpr_model=gpr, gpr_sigma_thresh=0.3,
                            sigma_gpr=sigma_s, v_max_cur=v_max_cur,
                            R_ref=R_ref, w_time=w_time)
 
@@ -941,6 +1079,7 @@ def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
             'rms': None, 'viol': None,
             'dist_viol_upper': None, 'dist_viol_lower': None,
             'total_steps': len(hf_a), 'arc_steps_count': None,
+            'gpr_model': gpr, 'theta_frozen': None,
         }
 
     ks_final = float(theta_frozen[0])
@@ -957,6 +1096,7 @@ def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
         'rms': rms, 'viol': viol,
         'dist_viol_upper': dist_viol_upper, 'dist_viol_lower': dist_viol_lower,
         'total_steps': len(hf_a), 'arc_steps_count': len(fc),
+        'gpr_model': gpr, 'theta_frozen': theta_frozen.copy(),
     }
 
 
@@ -981,7 +1121,7 @@ if __name__ == "__main__":
                                  aniso_amp=0.2, b=0.5, m=0.05),
         5: LinearSpring(ks=10, b=0.5, m=0.05),
     }
-    MATERIAL_CHOICE = 4   # 改这个数字切换材料，对照 MATERIAL_PRESETS 表
+    MATERIAL_CHOICE = 1   # 改这个数字切换材料，对照 MATERIAL_PRESETS 表
     # 注：4号(PiecewiseAnisoSpring)是已知未完全收敛的材料模型——分段
     # 转折点附近刚度突变较大，RLS 单一局部线性假设难以跨越，settle
     # 阶段常常超时退出而非真正收敛。这是当前架构的一个真实边界，不是
