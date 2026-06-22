@@ -339,11 +339,6 @@ class GPRModel:
         self.base_X=[]; self.base_y=[]
         self.X=[]; self.y=[]
 
-        # local_ratio 输出的平滑状态：相邻两次调用之间结果可能跳动，
-        # 这个状态变量让 local_ratio 内部对自己上一次的输出做指数
-        # 滑动平均，None 表示还没有过历史值（第一次调用不做平滑）。
-        self._ks_smooth_prev = None
-
     def add_data(self, s, v, theta, f):
         # 输入：[stretch, vel, theta]，theta 让 GPR 感知弧线位置
         self.X.append([s, v, theta]); self.y.append(f)
@@ -372,65 +367,34 @@ class GPRModel:
         mu, sig = self.gpr.predict(xn, return_std=True)
         return float(mu[0]), float(sig[0])
 
-    def local_ratio(self, stretch, vel, theta, ks_fallback,
-                     sigma_threshold=0.3, smooth_alpha=0.3,
-                     min_stretch_for_ratio=0.03):
+    def gpr_force_anchor(self, stretch, vel, theta, sigma_threshold=0.3):
         """
-        用 GPR 在当前点直接预测一次力，除以当前 stretch 得到一个等效
-        比例，代替之前用数值微分反推局部刚度的 local_ks。
+        当前运行点的 GPR 力预测，直接返回 (mu, stretch)，不做任何除法。
 
-        为什么放弃数值微分：实测发现 local_ks 在线性材料(真实ks≈11.5)
-        下输出系统性偏小(0.5~6之间，远低于真实值)，而且这不是噪声
-        问题——固定同一个点反复测试，不同 delta 给出的结果其实相当
-        一致(0.57~0.90)，但全都偏离真实值。根因是 GPR 的 RBF 核函数
-        本身有平滑特性，拟合出的 mu(stretch) 曲线斜率天然比真实斜率
-        更平缓，两点数值微分会把这个核函数自带的平滑偏差直接放大成
-        刚度估计的系统性偏差，调 delta 或加平滑都只能压噪声、压不住
-        这种系统性偏差。
+        替代 local_ratio 的动机：
+        local_ratio 用 mu/stretch 把 GPR 的力预测转换成一个"等效刚度比例"，
+        再让 pf 用 ratio*stretch_candidate 做外推——这一步除法引入了一道
+        min_stretch_for_ratio=0.03 的几何防线（分母太小时除法不稳定），而
+        这道防线碰巧和系统正常稳态时的 stretch_target 量级相当，导致大多数
+        材料在 arc 阶段正常运行时，stretch 系统性地落在防线之下，GPR 完全
+        没有出场机会——实测 24 组非线性矩阵全部 GPR 采用率 0%。
 
-        改为只查询一次 GPR，直接用预测力本身（GPR 学到的非线性信息
-        没有被中间的微分步骤压缩、丢失），除以 stretch 得到等效比例：
-            ratio = f_gpr(stretch, vel, theta) / stretch
-        候选点预测时用 ratio*stretch_候选点 做线性外推——这仍然是"用
-        GPR这一次查询的结果，外推到 MPC 内部的所有候选点"，满足"每
-        步只查一次GPR"的性能约束，但不再经过数值微分这一步有损变换。
+        改为直接返回 (mu, stretch_cur)，让调用方用"锚点偏移"形式做外推：
+            f_pred = mu + ks_fallback * (stretch_candidate - stretch_cur)
+        这里 mu 和 stretch_cur 都是求解前算好的常数，pf 在 SLSQP 内部
+        被反复调用时不含任何 GPR 查询（性能约束依然满足）。ks_fallback 只
+        用于候选点之间的线性插值，GPR 的贡献以"当前点力锚定"的形式体现，
+        不需要除法，不需要 min_stretch_for_ratio 防线。
 
-        min_stretch_for_ratio 是除了 σ 阈值之外的第二道独立防线：
-        实测发现 ks=30 线性材料下，GPR 被采用的全部 11 次都发生在
-        stretch 极小(0.0004~0.02)的时刻——σ 在这些点上确实够低(GPR
-        "认为"自己有把握)，mu 本身也合理(0.7~1.5N，量级正常)，但
-        ratio=mu/stretch 这个除法在分母接近零时，mu 的微小误差会被
-        放大到离谱(真实ks=30，实测ratio最高到709)。σ衡量的是"对 mu
-        这个值有多大把握"，不衡量"用 mu 做除法是否数值安全"——这是
-        两件不同的事，σ阈值这道防线管不到这个问题，必须单独加一道
-        基于 stretch 量级本身的保护：stretch 小于此值时，不论 σ 多
-        低，一律退回 ks_fallback，因为这时候"等效比例"概念本身是
-        病态的(材料几乎没有被拉伸，用一个微弱的力推算"刚度"，物理
-        上就是噪声主导)。0.03m 是 STRETCH_MAX(0.25m 典型值)的约
-        12%，覆盖了 settle 刚结束、arc 刚开始的"回归子阶段"附近
-        stretch 还很小的过渡期。
-
-        smooth_alpha 的指数滑动平均同样保留，抑制相邻步之间的残余
-        跳变。
+        GPR 没把握时(σ过高/未fit)返回 (None, None)，调用方检测到后退回
+        纯 RLS 的 pf，行为和之前完全一致。
         """
         if not self.fitted:
-            self._ks_smooth_prev = None
-            return ks_fallback
-        if stretch < min_stretch_for_ratio:
-            self._ks_smooth_prev = None
-            return ks_fallback
+            return None, None
         mu, sigma_cur = self.predict(stretch, vel, theta)
         if mu is None or sigma_cur is None or sigma_cur > sigma_threshold:
-            self._ks_smooth_prev = None
-            return ks_fallback
-        ratio_raw = max(0.05, mu / stretch)
-
-        if self._ks_smooth_prev is None:
-            ratio = ratio_raw
-        else:
-            ratio = smooth_alpha * ratio_raw + (1 - smooth_alpha) * self._ks_smooth_prev
-        self._ks_smooth_prev = ratio
-        return ratio
+            return None, None
+        return mu, stretch
 
 # ══════════════════════════════════════════════════════
 # 安全回缩
@@ -486,13 +450,15 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
     成系统性的刚度低估，加大 delta 或加平滑都只能压随机噪声、压不住
     这种系统性偏差。
 
-    现在改用 gpr_model.local_ratio(...)：只查询一次 GPR 得到当前点
-    的预测力，直接用 力/stretch 算等效比例，不经过数值微分这一步
-    有损变换，GPR 学到的非线性信息没有被压缩丢失。把这个比例当成一
-    个和 RLS 的 ks_eff 等价的标量传给 pf，pf 内部恢复成原来的纯线性
-    公式做候选点外推，不再含任何 GPR 调用。gpr_sigma_thresh=0.3 复用
-    local_ratio 同样在用的σ阈值。gpr_model=None 时完全退化为原来的
-    纯 RLS 行为。
+    现在改用 gpr_model.gpr_force_anchor(...)：只查询一次 GPR 得到当前点
+    的预测力 mu_anchor，pf 用锚点偏移形式
+        f_pred = mu_anchor + ks_eff*(stretch_candidate - stretch_cur)
+    把这个结果外推到 MPC 内部所有候选点——GPR 的贡献以"当前点力锚定"
+    的形式体现，不需要除法，彻底消除了 local_ratio 里 mu/stretch 除法
+    引入的 min_stretch_for_ratio=0.03 防线。这道防线和系统正常稳态时的
+    stretch_target 量级相当，导致 24 组非线性矩阵全部 GPR 采用率 0%，
+    换用锚点偏移后 GPR 可以在任意 stretch 水平下参与。
+    gpr_model=None 时完全退化为原来的纯 RLS 行为。
 
     STRETCH_MAX、f_max_safe 显式作为参数传入（而非闭包读取模块级
     全局变量），使函数在不同实验配置（不同材料/临床设定）下可安全
@@ -511,25 +477,34 @@ def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
     dist_upper_eff = dist_upper - np.clip(sigma_gpr * 0.5, 0., STRETCH_MAX * 0.3)
     dist_upper_eff = max(dist_upper_eff, dist_lower + 0.01)  # 保证可行域非空
 
-    # GPR 局部刚度：只在这里查询一次(对应当前实际位置)，不在 pf 内部
-    # 逐候选点查询。返回值和 RLS 的 ks_eff 是同一个量纲、同一种用法，
-    # GPR 没把握时函数内部自己退回 ks_eff，调用方不需要再判断。
+    # GPR 力锚点：只在这里查询一次(对应当前实际位置)，不在 pf 内部
+    # 逐候选点查询。返回 (mu_anchor, stretch_anchor) 或 (None,None)。
+    # pf 用锚点偏移形式：f = mu_anchor + ks_eff*(stretch - stretch_anchor)
+    # 这样不需要除法，彻底消除了 local_ratio 里 min_stretch_for_ratio
+    # 防线的存在理由——GPR 可以在任意 stretch 水平下参与，不被几何量挡住。
+    mu_anchor, stretch_anchor = None, None
     if gpr_model is not None:
         cur_stretch = max(0., np.linalg.norm(p_cur - anchor_est) - dist_taut)
         cur_vel = np.linalg.norm(v_cur)
-        ks_eff_for_pf = gpr_model.local_ratio(
-            cur_stretch, cur_vel, theta_cur, ks_fallback=ks_eff,
+        mu_anchor, stretch_anchor = gpr_model.gpr_force_anchor(
+            cur_stretch, cur_vel, theta_cur,
             sigma_threshold=gpr_sigma_thresh)
-    else:
-        ks_eff_for_pf = ks_eff
 
     # 力预测（用于代价函数，不作硬约束）。轻量纯算术，不含任何 GPR
-    # 调用——GPR 的影响已经通过上面算好的 ks_eff_for_pf 这一个标量
-    # 体现，pf 在 SLSQP 内部被反复调用时不会再触发任何 GPR 推断。
+    # 调用——GPR 的影响已经通过上面算好的 mu_anchor/stretch_anchor 体现，
+    # pf 在 SLSQP 内部被反复调用时不会再触发任何 GPR 推断。
+    # 锚点偏移形式：以 GPR 在当前点的预测力为锚，用 RLS 的 ks_eff
+    # 做候选点之间的线性外推。GPR 没把握时退化为纯 RLS 形式。
     def pf(p_, v_, a_):
         stretch_ = max(0., np.linalg.norm(p_ - anchor_est) - dist_taut)
-        return max(0., ks_eff_for_pf * stretch_ + b_rls * np.linalg.norm(v_)
-                   + m_rls * np.linalg.norm(a_))
+        f_rls = ks_eff * stretch_ + b_rls * np.linalg.norm(v_) + m_rls * np.linalg.norm(a_)
+        if mu_anchor is not None:
+            # 锚点偏移：GPR 给出当前点的力，RLS 给出离开当前点后力的变化率
+            f_pred = mu_anchor + ks_eff * (stretch_ - stretch_anchor) \
+                     + b_rls * np.linalg.norm(v_) + m_rls * np.linalg.norm(a_)
+            return max(0., f_pred)
+        return max(0., f_rls)
+
 
     # 距离辅助函数
     def dist_from_anchor(p_):
@@ -737,6 +712,8 @@ def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
     hgmu = []; hgsig = []; hL0 = []; hphase = []
     h_dist_taut = []   # 记录 dist_taut 的演化（调试用）
     h_vmax = []
+    h_rls_pred   = []  # arc phase: RLS predicted force (ks_frozen*stretch), always recorded
+    h_gpr_anchor = []  # arc phase: GPR anchor force (mu_anchor), nan when GPR not confident
     f_cur = true_force_3d(p_cur)
 
     if verbose:
@@ -1131,6 +1108,10 @@ def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
 
             hks.append(trls[0]); hgmu.append(float(mu_val)); hgsig.append(sigma_s)
             h_dist_taut.append(dist_taut); h_vmax.append(v_max_cur)
+            # 三线对比记录：RLS预测力始终记录；GPR锚点力在有把握时记录，否则 nan
+            h_rls_pred.append(float(trls[0] * st))
+            mu_anc, _ = gpr.gpr_force_anchor(st, vs, theta_cur)
+            h_gpr_anchor.append(float(mu_anc) if mu_anc is not None else float('nan'))
 
             u = run_mpc_3d(p_cur, v_cur, trls[0], b_rls, m_rls,
                            anchor_est, dist_taut, f_taut,
@@ -1215,6 +1196,7 @@ def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
             'hp': hp, 'hf': hf_a, 'hsig': hsig, 'hks': hks,
             'hgmu': hgmu, 'hgsig': hgsig, 'hphase': hphase,
             'h_dist_taut': h_dist_taut, 'h_vmax': h_vmax,
+            'h_rls_pred': h_rls_pred, 'h_gpr_anchor': h_gpr_anchor,
             'dist_taut': dist_taut, 'f_taut': f_taut,
             'anchor_est': anchor_est, 'theta_start': theta_start,
             'theta_target': theta_target, 'noise_std_est': noise_std_est,
@@ -1232,6 +1214,7 @@ def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
         'hp': hp, 'hf': hf_a, 'hsig': hsig, 'hks': hks,
         'hgmu': hgmu, 'hgsig': hgsig, 'hphase': hphase,
         'h_dist_taut': h_dist_taut, 'h_vmax': h_vmax,
+        'h_rls_pred': h_rls_pred, 'h_gpr_anchor': h_gpr_anchor,
         'dist_taut': dist_taut, 'f_taut': f_taut,
         'anchor_est': anchor_est, 'theta_start': theta_start,
         'theta_target': theta_target, 'noise_std_est': noise_std_est,
@@ -1311,6 +1294,8 @@ if __name__ == "__main__":
     hks           = result['hks']
     noise_std_est = result['noise_std_est']
     hgmu          = result['hgmu']
+    h_rls_pred    = result['h_rls_pred']
+    h_gpr_anchor  = result['h_gpr_anchor']
 
     if result['status'] == 'FAILED':
         print("\n[警告] 仿真未能在 T_sim 步内完成绷直，跳过画图。")
@@ -1384,24 +1369,23 @@ if __name__ == "__main__":
         ax3.set_ylabel('Distance (m)'); ax3.set_xlabel('Time step')
         ax3.legend(fontsize=7); ax3.set_title('Distance + 约束带 (核心安全图)'); ax3.grid(True, alpha=0.3)
 
-        # 4. GPR σ + 动态速度上限
+        # 4. 三线对比：真实力 vs GPR锚点力 vs RLS预测力（arc阶段）
         ax4 = fig.add_subplot(2, 3, 4)
-        if arc_step is not None:
-            arc_gsig = np.array(hgsig[arc_step:])
-            tc3 = np.arange(arc_step, arc_step + len(arc_gsig))
-            if len(arc_gsig) > 2:
-                ax4.plot(tc3, arc_gsig, color='purple', lw=1.5, label='GPR σ')
-                ax4.fill_between(tc3, 0, arc_gsig, alpha=0.2, color='purple')
-                ax4.axhline(0.3, color='red', ls='--', lw=1, label='σ threshold=0.3')
-        ax4_r = ax4.twinx()
-        if len(h_vmax) > 0:
-            vm = np.array(h_vmax)
-            ax4_r.plot(np.arange(len(vm)), vm, 'orange', lw=1.5, label='v_max_cur')
-            ax4_r.set_ylabel('v_max (m/s)', color='orange')
-        ax4.set_ylabel('σ (N)'); ax4.set_xlabel('Time step')
-        ax4.legend(fontsize=7, loc='upper left')
-        ax4_r.legend(fontsize=7, loc='upper right')
-        ax4.set_title('GPR σ + dynamic v_max'); ax4.grid(True, alpha=0.3)
+        if arc_step is not None and len(h_rls_pred) > 0:
+            tc4 = np.arange(arc_step, arc_step + len(h_rls_pred))
+            true_arc = hf_a[arc_step: arc_step + len(h_rls_pred)]
+            rls_arr  = np.array(h_rls_pred)
+            gpr_arr  = np.array(h_gpr_anchor, dtype=float)
+            ax4.plot(tc4, true_arc, 'k-',  lw=1.2, alpha=0.7, label='True force')
+            ax4.plot(tc4, rls_arr,  'b--', lw=1.2, alpha=0.8, label='RLS predicted')
+            ax4.plot(tc4, gpr_arr,  'r-',  lw=1.5, alpha=0.9, label='GPR anchor (μ)')
+            ax4.axhline(f_taut, color='purple', ls=':', lw=1, label=f'f_taut={f_taut:.2f}N')
+            gpr_used_pct = np.sum(~np.isnan(gpr_arr)) / max(len(gpr_arr), 1) * 100
+            ax4.set_title(f'Force: True vs GPR vs RLS  (GPR采用率{gpr_used_pct:.0f}%)')
+        else:
+            ax4.set_title('Force: True vs GPR vs RLS (no arc data)')
+        ax4.set_ylabel('Force (N)'); ax4.set_xlabel('Time step')
+        ax4.legend(fontsize=7); ax4.grid(True, alpha=0.3)
 
         # 5. RLS 刚度收敛（force_model 可能是线性也可能是非线性材料，
         # 没有统一保证存在的单一"真值"标量；用 estimate_ks_max 采样

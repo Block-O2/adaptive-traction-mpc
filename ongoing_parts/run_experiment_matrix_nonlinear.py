@@ -82,8 +82,8 @@ def run_one(material_name, force_model, arc_deg, w_time, seed=42):
 
     新增 gpr_usage_pct 字段：这份矩阵存在的核心目的就是回答"GPR 在
     非线性材料下是否被更多采用"，所以直接在 run_sim 跑完之后，对
-    arc 阶段的轨迹重放一遍，统计 local_ratio 实际命中 GPR(而非
-    fallback 到 RLS)的步数占比。
+    arc 阶段的轨迹重放一遍，统计 gpr_force_anchor 实际命中 GPR(而非
+    返回 None)的步数占比。
     """
     r = run_sim(force_model=force_model, arc_deg=arc_deg,
                 STRETCH_MAX=STRETCH_MAX, f_max_safe=F_MAX_SAFE,
@@ -150,9 +150,8 @@ def compute_gpr_usage_pct(result):
             vel = 0.
         else:
             vel = np.linalg.norm((hp_arc[i] - hp_arc[i-1]) / DT)
-        ks_for_pf = gpr.local_ratio(stretch, vel, theta,
-                                     ks_fallback=theta_frozen[0])
-        if ks_for_pf != theta_frozen[0]:
+        mu_anchor, _ = gpr.gpr_force_anchor(stretch, vel, theta)
+        if mu_anchor is not None:
             gpr_used += 1
     return round(gpr_used / n * 100, 1)
 
