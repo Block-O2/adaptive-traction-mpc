@@ -82,6 +82,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
+import scipy.sparse as sp
+import osqp
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel
 from scipy.stats import t as student_t
@@ -406,6 +408,161 @@ def retract_velocity(p_cur, anchor_est, speed=0.1):
     return d/norm * speed
 
 # ══════════════════════════════════════════════════════
+# Tube-MPC QP版（OSQP，解析线性化，替代SLSQP数值微分）
+# ══════════════════════════════════════════════════════
+def run_mpc_3d_qp(p_cur, v_cur, ks_eff, b_rls, m_rls,
+                  anchor_est, dist_taut, f_taut,
+                  theta_cur, theta_target,
+                  STRETCH_MAX, f_max_safe,
+                  gpr_model=None, gpr_sigma_thresh=0.3,
+                  sigma_gpr=0., v_max_cur=0.3,
+                  R_ref=None, w_time=None,
+                  n_sqp_iter=3):
+    """
+    和 run_mpc_3d 完全相同的优化目标和约束，但把所有非线性函数在当前
+    工作点线性化，把非线性规划（NLP）转成二次规划（QP），用 OSQP 求解。
+
+    n_sqp_iter：Sequential Linearization 迭代次数（默认3）。
+    第1次在 p_cur 处线性化；之后每次用上一轮解的预测轨迹中点作为新的
+    线性化点，重建 QP 矩阵，OSQP warm-start 继续求解。迭代次数越多轨迹
+    质量越接近 SLSQP，但每次迭代只重建矩阵不重新 setup，额外开销很小。
+
+    线性化核心（每次迭代在各自的 p_lin 处执行）：
+    - n = (p_lin - anchor_est) / dist_lin   径向单位向量
+    - t = [-sin(θ_lin), cos(θ_lin), 0]     切向单位向量
+    - dist(p_k) ≈ dist_lin + n·(p_k - p_lin)
+    - stretch_k ≈ stretch_lin + n·(p_k - p_lin)
+    - Δθ_k ≈ t·(p_k - p_lin) / dist_lin
+    """
+    if w_time is None: w_time = W_TIME
+    if R_ref is None: R_ref = np.linalg.norm(p_cur - anchor_est)
+
+    # 约束边界（不随线性化点变化）
+    dist_lower     = dist_taut
+    dist_upper     = dist_taut + STRETCH_MAX
+    dist_upper_eff = dist_upper - np.clip(sigma_gpr * 0.5, 0., STRETCH_MAX * 0.3)
+    dist_upper_eff = max(dist_upper_eff, dist_lower + 0.01)
+
+    # GPR 力锚点（只查询一次，不随迭代变化）
+    stretch_cur0 = max(0., np.linalg.norm(p_cur - anchor_est) - dist_taut)
+    mu_anchor, stretch_anchor = None, None
+    if gpr_model is not None:
+        mu_anchor, stretch_anchor = gpr_model.gpr_force_anchor(
+            stretch_cur0, np.linalg.norm(v_cur), theta_cur,
+            sigma_threshold=gpr_sigma_thresh)
+
+    N = MPC_N
+    dim = 3
+    n_u = N * dim
+
+    lb = np.full(n_u, -v_max_cur)
+    ub = np.full(n_u,  v_max_cur)
+
+    def build_qp(p_lin):
+        """在 p_lin 处线性化，返回 (P_sp, q, A_sp, l_full, u_full)"""
+        dist_lin = max(np.linalg.norm(p_lin - anchor_est), 1e-6)
+        n_lin = (p_lin - anchor_est) / dist_lin
+        theta_lin = np.arctan2((p_lin - anchor_est)[1],
+                                (p_lin - anchor_est)[0])
+        t_lin = np.array([-np.sin(theta_lin), np.cos(theta_lin), 0.])
+        stretch_lin = max(0., dist_lin - dist_taut)
+
+        def n_row(k):
+            row = np.zeros(n_u)
+            for i in range(k + 1):
+                row[i*dim:(i+1)*dim] += dt * n_lin
+            return row
+
+        def t_row(k):
+            row = np.zeros(n_u)
+            for i in range(k + 1):
+                row[i*dim:(i+1)*dim] += dt * t_lin
+            return row
+
+        W_FORCE_GUIDE = 20.0
+        P_mat = np.zeros((n_u, n_u))
+        q_vec = np.zeros(n_u)
+
+        if mu_anchor is not None:
+            f_base = mu_anchor - ks_eff * stretch_anchor
+        else:
+            f_base = ks_eff * stretch_lin
+
+        dir_sign = 1. if (theta_target - theta_cur) > 0 else -1.
+
+        for k in range(N):
+            nr = n_row(k)
+            a_k = ks_eff * nr
+            c_k = f_base - f_taut
+            P_mat += W_FORCE_GUIDE * np.outer(a_k, a_k)
+            q_vec += W_FORCE_GUIDE * 2 * c_k * a_k
+            tr = t_row(k)
+            q_vec += -W_ANGLE * np.clip(1.0 / dist_lin, 0., 20.) * tr * dir_sign
+
+        P_mat = (P_mat + P_mat.T) * 0.5
+        P_mat += np.eye(n_u) * 1e-4
+
+        n_con = N * 4
+        A_con = np.zeros((n_con, n_u))
+        l_con = np.full(n_con, -np.inf)
+        u_con = np.zeros(n_con)
+
+        for k in range(N):
+            nr = n_row(k)
+            base = k * 4
+            dp = np.dot(n_lin, p_lin - p_cur)  # p_lin 相对 p_cur 的径向偏移
+            A_con[base]     =  nr; u_con[base]     = dist_upper_eff - dist_lin
+            A_con[base + 1] = -nr; u_con[base + 1] = -(dist_lower   - dist_lin)
+            A_con[base + 2] =  nr; u_con[base + 2] = R_ref + R_TOL  - dist_lin
+            A_con[base + 3] = -nr; u_con[base + 3] = -(R_ref - R_TOL - dist_lin)
+
+        I_sp = sp.eye(n_u, format='csc')
+        A_sp = sp.vstack([sp.csc_matrix(A_con), I_sp], format='csc')
+        l_full = np.concatenate([l_con, lb])
+        u_full = np.concatenate([u_con, ub])
+        return sp.csc_matrix(P_mat), q_vec, A_sp, l_full, u_full
+
+    # ── Sequential Linearization 主循环 ─────────────────
+    u_flat = np.tile(
+        np.array([-np.sin(theta_cur), np.cos(theta_cur), 0.]) * 0.05, N)
+    p_lin = p_cur.copy()
+    solver = None
+
+    for sqp_it in range(n_sqp_iter):
+        P_sp, q_vec, A_sp, l_full, u_full = build_qp(p_lin)
+
+        if solver is None or sqp_it > 0:
+            solver = osqp.OSQP()
+            solver.setup(P_sp, q_vec, A_sp, l_full, u_full,
+                         warm_starting=True, verbose=False,
+                         eps_abs=1e-3, eps_rel=1e-3,
+                         max_iter=200, polish=False)
+
+        res = solver.solve()
+
+        if res.info.status not in ('solved', 'solved_inaccurate') or res.x is None:
+            # 本轮求解失败，退出迭代，走 fallback
+            u_flat = None
+            break
+
+        u_flat = res.x
+        # 用预测轨迹中间帧（第 N//2 步）作为下一次迭代的线性化点
+        p_pred = p_cur.copy()
+        mid = max(0, N // 2 - 1)
+        for i in range(mid + 1):
+            p_pred = p_pred + dt * u_flat.reshape(N, dim)[i]
+        p_lin = p_pred
+
+    if u_flat is not None:
+        return u_flat.reshape(N, dim)[0]
+    else:
+        dist_cur_ = max(np.linalg.norm(p_cur - anchor_est), 1e-6)
+        room_to_lower = max(0., dist_cur_ - dist_lower)
+        fallback_speed = min(0.02, room_to_lower / dt)
+        return retract_velocity(p_cur, anchor_est, speed=fallback_speed)
+
+
+# ══════════════════════════════════════════════════════
 # Tube-MPC（动态速度上限）
 # ══════════════════════════════════════════════════════
 def run_mpc_3d(p_cur, v_cur, ks_eff, b_rls, m_rls,
@@ -609,7 +766,8 @@ def taubin_fit(pts):
 # 主仿真函数
 # ══════════════════════════════════════════════════════
 def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
-            w_time=None, L0_true=0.5, noise_std=0.1, seed=42, verbose=True):
+            w_time=None, L0_true=0.5, noise_std=0.1, seed=42, verbose=True,
+            solver='qp'):
     """
     单次仿真入口：给定材料模型/任务/临床参数，跑完整的三阶段流程并返回结果。
 
@@ -1113,13 +1271,14 @@ def run_sim(force_model, arc_deg=90, STRETCH_MAX=0.25, f_max_safe=3.0,
             mu_anc, _ = gpr.gpr_force_anchor(st, vs, theta_cur)
             h_gpr_anchor.append(float(mu_anc) if mu_anc is not None else float('nan'))
 
-            u = run_mpc_3d(p_cur, v_cur, trls[0], b_rls, m_rls,
-                           anchor_est, dist_taut, f_taut,
-                           theta_cur, theta_target,
-                           STRETCH_MAX, f_max_safe,
-                           gpr_model=gpr, gpr_sigma_thresh=0.3,
-                           sigma_gpr=sigma_s, v_max_cur=v_max_cur,
-                           R_ref=R_ref, w_time=w_time)
+            _mpc_fn = run_mpc_3d_qp if solver == 'qp' else run_mpc_3d
+            u = _mpc_fn(p_cur, v_cur, trls[0], b_rls, m_rls,
+                        anchor_est, dist_taut, f_taut,
+                        theta_cur, theta_target,
+                        STRETCH_MAX, f_max_safe,
+                        gpr_model=gpr, gpr_sigma_thresh=0.3,
+                        sigma_gpr=sigma_s, v_max_cur=v_max_cur,
+                        R_ref=R_ref, w_time=w_time)
 
         hphase.append(phase)
         v_prev = v_cur.copy(); v_cur = u.copy()

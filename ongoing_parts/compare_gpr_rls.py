@@ -36,7 +36,7 @@ import os
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from integrated_sim_3d import run_sim
+from ongoing_parts.integrated_sim_3d import run_sim
 from material_models import LinearSpring, HardeningSpring, HysteresisSpring
 
 
@@ -51,7 +51,7 @@ def reconstruct_arc_features(result):
     run_sim 内部相同的步长(0.05，从 integrated_sim_3d 导入的模块级
     常量，跟 run_sim 内部完全一致)。
     """
-    from integrated_sim_3d import dt as DT
+    from ongoing_parts.integrated_sim_3d import dt as DT
 
     hp = result['hp']
     anchor_est = result['anchor_est']
