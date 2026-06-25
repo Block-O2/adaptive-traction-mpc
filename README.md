@@ -22,23 +22,23 @@ This repository implements a four-layer algorithm stack for robotic arc traction
 
 ## Simulation Results
 
-![Material 1 linear spring simulation](ongoing_parts/integrated_sim_3d_v15_1.gif)
+![Material 1 linear spring simulation](stage_1/ongoing_parts/integrated_sim_3d_v15_1.gif)
 
 Material 1: Linear spring (ks=30). Trajectory, force, distance constraint, and GPR/RLS estimates over time.
 
-![Material 2 hardening spring simulation](ongoing_parts/integrated_sim_3d_v15_2.gif)
+![Material 2 hardening spring simulation](stage_1/ongoing_parts/integrated_sim_3d_v15_2.gif)
 
 Material 2: Hardening spring. Stiffness increases with stretch.
 
-![Material 3 hysteresis spring simulation](ongoing_parts/integrated_sim_3d_v15_3.gif)
+![Material 3 hysteresis spring simulation](stage_1/ongoing_parts/integrated_sim_3d_v15_3.gif)
 
 Material 3: Hysteresis spring. Loading and unloading follow different force curves.
 
-![Material 4 piecewise anisotropic spring simulation](ongoing_parts/integrated_sim_3d_v15_4.gif)
+![Material 4 piecewise anisotropic spring simulation](stage_1/ongoing_parts/integrated_sim_3d_v15_4.gif)
 
 Material 4: Piecewise anisotropic spring. Direction-dependent stiffness; known edge case for the current architecture.
 
-![Material 5 soft linear spring simulation](ongoing_parts/integrated_sim_3d_v15_5.gif)
+![Material 5 soft linear spring simulation](stage_1/ongoing_parts/integrated_sim_3d_v15_5.gif)
 
 Material 5: Soft linear spring (ks=10). Low SNR operating condition.
 
@@ -48,6 +48,3 @@ The Python simulation campaign covers 4 material types across 3 arc angles (30, 
 
 The method was migrated from Python simulation to the MuJoCo physics simulator to evaluate sim-to-sim transfer under a more realistic dynamics backend. A key migration issue was that `data.ten_velocity` returned zero for mocap bodies, which corrupted damping and radius estimates. This was fixed by estimating mocap body velocity from end-effector displacement, using `||Delta ee_pos|| / ctrl_dt`. After the fix, arc radius stability improved substantially, with `R_std` decreasing from 0.026 m to 0.009 m.
 
-## Target Venue
-
-IEEE Robotics and Automation Letters (RA-L)
