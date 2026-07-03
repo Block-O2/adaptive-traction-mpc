@@ -24,35 +24,162 @@ Observation conditions:
 
 ## 2. Mathematical Formulation
 
+### 2.1 Pipeline
+
+The current Stage 1 pipeline is:
+
+```text
+Spring2D dynamics
+  -> observation wrapper
+  -> Windowed NLS identifier
+  -> fixed/adaptive MPC
+  -> local force action
+```
+
+The environment provides the Spring2D state and physical response. The observation wrapper optionally adds measurement noise and bias. The Windowed NLS identifier estimates task-relevant prediction parameters from recent transitions. Fixed MPC uses fixed model parameters, while adaptive MPC updates its prediction parameters online. The final control command is the local contact-force action.
+
+### 2.2 State, Action, and Observation
+
 State:
 
 ```text
-x = [theta, omega, r, r_dot]
+x = [theta, omega, r, r_dot]^T
 ```
 
 Action:
 
 ```text
-u = [F_tan, F_rad]
+u = [F_tan, F_rad]^T
 ```
 
-All fixed and adaptive MPC runs use the same shared cost structure and base constraints. The current acceleration-related MPC quantity is:
+Observation:
 
 ```text
-alpha = (omega_next - omega) / dt
+y = x + noise + bias
 ```
 
-The MPC task includes penalties on angular target tracking, radial deformation, control effort, angular acceleration, and forward angular progress. The shared base constraints include force limits, radial deformation limits, angular velocity limits, and angular acceleration limits.
+`F_tan` and `F_rad` are local tangential and radial contact-force components. They are not separate physical actuators; they are the resolved local force components applied at the contact point in the Spring2D model.
 
-There is no explicit gravity compensation outside the dynamics. Gravity appears only through the Spring2D dynamics model.
+### 2.3 Dynamics and Prediction Model
+
+The compact continuous-time model is written as:
+
+$$
+\dot{x} = f(x, u; \theta_p), \qquad
+\theta_p = [m, k, b_r]^T
+$$
+
+The discrete prediction model used by MPC and identification is:
+
+$$
+x_{k+1} = \Phi_{\Delta t}(x_k, u_k; \theta_p)
+$$
+
+Gravity is inside the Spring2D dynamics. There is no explicit gravity compensation outside the model.
+
+### 2.4 Windowed NLS Identifier
 
 The online identifier estimates task-relevant effective parameters:
 
-```text
-[m, k, b_r]
-```
+$$
+\theta_p = [m, k, b_r]^T
+$$
 
-These estimates are useful for prediction control but should not be interpreted as guaranteed recovery of true physical parameters under noisy or biased observations.
+At update time, it solves a windowed nonlinear least-squares problem:
+
+$$
+\hat{\theta}_t =
+\arg\min_{\theta \in \mathcal{B}}
+\sum_i
+\left\lVert
+y_{i+1} - \Phi_{\Delta t}(y_i, u_i; \theta)
+\right\rVert_W^2
++ \lambda
+\left\lVert
+\theta - \hat{\theta}_{t-1}
+\right\rVert^2
+$$
+
+These estimates are used for MPC prediction. They should be interpreted as task-relevant effective parameters, not guaranteed recovery of true physical parameters under noisy or biased observations.
+
+### 2.5 MPC Formulation
+
+The fixed and adaptive controllers solve an approximate nonlinear MPC problem:
+
+$$
+\begin{aligned}
+\min_{u_{0:H-1}} \quad
+& \sum_{k=0}^{H-1} \ell(x_k, u_k) + \ell_T(x_H) \\
+\text{s.t.} \quad
+& x_{k+1} = \Phi_{\Delta t}(x_k, u_k; \hat{\theta})
+\end{aligned}
+$$
+
+For fixed true-parameter MPC, `theta_hat` is the known model parameter set. For fixed mismatched MPC, `theta_hat` remains the initial mismatched model. For adaptive MPC, `theta_hat` is updated online using the identifier output.
+
+Shared stage cost:
+
+$$
+\ell =
+w_\theta(\theta - \theta_g)^2
++ w_{\Delta r}\Delta r^2
++ w_{F_{\mathrm{tan}}}F_{\mathrm{tan}}^2
++ w_{F_{\mathrm{rad}}}F_{\mathrm{rad}}^2
++ w_\alpha \alpha^2
+- w_{\omega,\mathrm{progress}}\omega
+$$
+
+Terminal cost:
+
+$$
+\ell_T = w_{\mathrm{terminal},\theta}(\theta_H - \theta_g)^2
+$$
+
+Definitions:
+
+$$
+\alpha = \frac{\omega_{\mathrm{next}} - \omega}{\Delta t},
+\qquad
+\Delta r = r - L_0
+$$
+
+### 2.6 Shared Constraints
+
+All fixed and adaptive MPC runs use the same shared base constraints:
+
+$$
+\begin{aligned}
+|F_{\mathrm{rad}}| &\le F_{\mathrm{rad,max}} \\
+|F_{\mathrm{tan}}| &\le F_{\mathrm{tan,max}} \\
+|\Delta r| &\le \Delta r_{\max} \\
+|\omega| &\le \omega_{\max} \\
+|\alpha| &\le \alpha_{\max}
+\end{aligned}
+$$
+
+Both `F_rad` and `delta_r` are retained. `F_rad` represents interaction/contact safety, while `delta_r` represents object/state deformation safety.
+
+### 2.7 Random Shooting Solver
+
+The current MPC solver is random shooting:
+
+- sample candidate control sequences
+- roll each candidate through the nonlinear prediction model
+- evaluate the objective and constraint penalties
+- select the best sampled sequence
+- execute only the first action
+
+This is derivative-free approximate NMPC. It is not a strict constrained QP/NLP solver. As a result, selected trajectories can still be infeasible under strict `omega` and `alpha` constraints.
+
+### 2.8 Compared Controllers
+
+The Stage 1 comparison includes:
+
+- fixed true-parameter MPC
+- fixed mismatched MPC with identifier logging only
+- adaptive MPC using online `theta_hat`
+
+The fixed mismatched condition records identifier estimates but does not feed them back to MPC. Adaptive MPC feeds the current online estimate back into the prediction model.
 
 ## 3. Experiment Summary
 
