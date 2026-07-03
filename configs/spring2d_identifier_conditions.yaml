@@ -1,0 +1,80 @@
+base_config: configs/spring2d.yaml
+mpc_config: configs/spring2d_fixed_mpc.yaml
+
+true_param_overrides:
+  m: 1.2
+  k: 450.0
+  b_r: 18.0
+
+initial_model_overrides:
+  m: 0.95
+  k: 360.0
+  b_r: 12.0
+
+mpc_overrides:
+  solver:
+    seed: 23
+  constraints:
+    F_tan_max: 35.0
+    F_rad_max: 1.0
+    delta_r_max: 0.06
+    omega_max: 1.2
+    alpha_max: 3.0
+
+identifier:
+  window_size: 70
+  update_interval: 10
+  lambda_reg: 0.001
+  max_nfev: 45
+  state_weights: [1.0, 0.25, 8.0, 0.6]
+  param_scale: [1.0, 450.0, 20.0]
+  bounds:
+    m: [0.5, 2.0]
+    k: [150.0, 800.0]
+    b_r: [2.0, 45.0]
+
+run:
+  control_hold_steps: 3
+  max_steps: 1200
+
+conditions:
+  clean:
+    seed: 101
+    observation_noise:
+      theta_std: 0.0
+      omega_std: 0.0
+      r_std: 0.0
+      r_dot_std: 0.0
+      theta_bias: 0.0
+      omega_bias: 0.0
+      r_bias: 0.0
+      r_dot_bias: 0.0
+  noise:
+    seed: 102
+    observation_noise:
+      theta_std: 0.004
+      omega_std: 0.035
+      r_std: 0.0008
+      r_dot_std: 0.004
+      theta_bias: 0.0
+      omega_bias: 0.0
+      r_bias: 0.0
+      r_dot_bias: 0.0
+  noise_bias:
+    seed: 103
+    observation_noise:
+      theta_std: 0.004
+      omega_std: 0.035
+      r_std: 0.0008
+      r_dot_std: 0.004
+      theta_bias: 0.01
+      omega_bias: -0.02
+      r_bias: 0.0015
+      r_dot_bias: 0.002
+
+outputs:
+  log_dir: results/logs/spring2d_identifier_conditions
+  video_dir: results/videos/spring2d_identifier_conditions
+  figure: results/figures/spring2d_identifier_conditions/identifier_conditions_comparison.png
+  summary_table: results/figures/spring2d_identifier_conditions/summary_table.csv
+  fps: 25

@@ -1,64 +1,101 @@
 # adaptive-traction-mpc
 
-This repository studies safe online payload/contact identification and adaptive MPC for robotic traction tasks. The target use case is rehabilitation-oriented motion where a robot pulls or guides an elastic, spring-like, or limb-like object along a desired angular trajectory while limiting radial deformation.
+Adaptive traction MPC experiments with online task-relevant parameter adaptation.
 
-## Current Status
+The current repository scope is the Stage 1 Spring2D 2D simulation only. MuJoCo assets and legacy prototypes are kept for reference, but the current closed-loop adaptive MPC results are based on the Spring2D environment.
 
-- The MuJoCo elastic rod scene has been validated with a hardcoded known-trajectory controller.
-- The formal algorithm integration is pending.
-- Current simulation uses the UR5e model from `third_party/mujoco_menagerie`.
-- `assets/robots/cr12_12_pending` contains pending CR12-12 lab robot assets only. It is not part of the current runnable simulation flow.
-- Historical prototypes are archived under `legacy/`.
+## Goal
 
-## Repository Layout
+The project studies robotic traction control for elastic, spring-like, or limb-like objects. The controller applies a local contact force
 
-- `src/traction_mpc/`: formal package namespace for future environment, estimation, identification, safety, MPC, controller, experiment, evaluation, and visualization modules.
-- `scripts/`: runnable utility scripts, including MuJoCo scene generation and validation.
-- `assets/mujoco/`: generated MuJoCo scene XML used by the current validation flow.
-- `assets/robots/cr12_12_pending/`: pending CR12-12 URDF and meshes for future lab integration.
-- `third_party/mujoco_menagerie/`: external MuJoCo robot model assets.
-- `legacy/`: archived stage 1 and stage 2 prototypes kept for reference.
-- `results/`: logs, figures, videos, and debug outputs.
-- `docs/`: project notes and archived documentation.
-- `tests/`: future test suite.
+```text
+u = [F_tan, F_rad]
+```
+
+where `F_tan` is the tangential traction force and `F_rad` is the radial/contact force. The immediate goal is to compare fixed MPC, online identification, and adaptive MPC under clean, noisy, and biased observations.
+
+## Current Pipeline
+
+- Spring2D moving-base elastic rod dynamics
+- Observation wrapper for clean, noisy, and biased observations
+- Windowed nonlinear least-squares identifier for task-relevant parameters `[m, k, b_r]`
+- Fixed-model MPC baseline
+- Adaptive MPC with online parameter updates
+
+The current MPC uses shared cost and shared base constraints across fixed and adaptive variants. There is no explicit gravity compensation outside the dynamics.
+
+## Stage 1 Report
+
+Current report:
+
+- [Stage 1 Spring2D Adaptive MPC Report](docs/reports/stage1_spring2d_adaptive_mpc_report.md)
+
+Curated Stage 1 outputs are organized under:
+
+```text
+results/stage1_spring2d/
+```
 
 ## Setup
 
-Install the Python dependencies in a virtual environment or conda environment:
+Install dependencies in a virtual environment or conda environment:
 
 ```bash
 pip install -r requirements.txt
 pip install -e .
 ```
 
-If the MuJoCo scene XML needs to be regenerated:
+## How To Run
+
+Fixed true-parameter MPC:
 
 ```bash
-python scripts/make_mujoco_scene.py
+python scripts/run_spring2d_fixed_mpc.py --config configs/spring2d_fixed_mpc.yaml
 ```
 
-## Scene Check
-
-Run the validated hardcoded MuJoCo scene check:
+Fixed mismatched MPC with identifier logging:
 
 ```bash
-python scripts/check_mujoco_scene.py
+python scripts/run_spring2d_identifier_conditions.py --config configs/spring2d_identifier_conditions.yaml
 ```
 
-The script loads `assets/mujoco/scene_rod.xml`, drives the known contact trajectory, and writes debug CSV output under `results/debug/mujoco_scene_validation/`.
-
-Useful target checks:
+Adaptive MPC conditions:
 
 ```bash
-python scripts/check_mujoco_scene.py --target-deg 60
-python scripts/check_mujoco_scene.py --target-deg 90
-python scripts/check_mujoco_scene.py --target-deg 120
+python scripts/run_spring2d_adaptive_mpc_conditions.py --config configs/spring2d_adaptive_mpc_conditions.yaml
 ```
 
-## TODO
+## Current Findings
 
-- Connect the validated MuJoCo scene to the formal environment API.
-- Port selected legacy MPC and estimation ideas into `src/traction_mpc/` only after the scene interface is stable.
-- Add reproducible experiment configs and evaluation scripts.
-- Add tests for sensor consistency, scene loading, and trajectory metrics.
-- Keep CR12-12 integration separate until the URDF and lab workflow are stable.
+- Fixed true-parameter MPC nearly reaches the target under the strict threshold.
+- Mismatched fixed MPC underperforms.
+- Adaptive MPC improves after online parameter updates and after preserving warm-start state across parameter updates.
+- Noise and bias expose instability.
+- Random shooting struggles with strict `omega` and `alpha` constraints.
+
+Bad results are kept as experimental evidence rather than hidden or tuned away.
+
+## Limitations
+
+- No CEM solver yet.
+- No robust identifier yet.
+- No runtime safety filter yet.
+- No MuJoCo closed-loop adaptive MPC yet.
+- No real robot validation yet.
+
+## Next Steps
+
+- Add a `theta_tolerance_deg` success criterion.
+- Add a CEM-MPC solver abstraction.
+- Run identifier ablation experiments.
+- Add safe adaptive MPC with uncertainty tightening and runtime safety filtering.
+
+## Repository Layout
+
+- `src/traction_mpc/`: Spring2D dynamics, environments, estimation, identification, MPC, evaluation, and visualization code.
+- `configs/`: reproducible experiment configs.
+- `scripts/`: runnable experiment scripts.
+- `docs/reports/`: curated reports.
+- `results/stage1_spring2d/`: curated Stage 1 outputs intended for tracking.
+- `legacy/`: archived prototypes kept for reference.
+- `assets/` and `third_party/`: robot and MuJoCo assets for later stages.

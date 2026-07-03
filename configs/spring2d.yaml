@@ -1,0 +1,47 @@
+params:
+  m: 1.2
+  g: 9.81
+  L0: 0.35
+  k: 450.0
+  b_r: 18.0
+  b_theta: 0.08
+  rho: 0.9
+  dt: 0.01
+
+  theta_init: 0.12
+  omega_init: 0.0
+  r_init: 0.35
+  r_dot_init: 0.0
+  theta_target: 1.57079632679
+
+  F_tan_max: 35.0
+  F_rad_max: 20.0
+  delta_r_max: 0.06
+  omega_max: 8.0
+  alpha_max: 35.0
+  max_time: 8.0
+
+  base_mode: linear_sin
+  base_x0: 0.0
+  base_y0: 0.0
+  base_slide_amp: 0.035
+  base_x_range: 0.05
+  base_slide_beta: 2.0
+
+run:
+  policy: constant_tangential
+
+policy:
+  constant_F_tan: 8.0
+  kp_theta: 18.0
+  kd_theta: 5.0
+  omega_des: 0.9
+  kp_omega: 14.0
+  radial_bias: 0.0
+  slowdown_deg: 8.0
+
+outputs:
+  timeseries_csv: results/logs/spring2d_openloop/timeseries.csv
+  gif: results/videos/spring2d_openloop.gif
+  summary_png: results/figures/spring2d_summary.png
+  fps: 25

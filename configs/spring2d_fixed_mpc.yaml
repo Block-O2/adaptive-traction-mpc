@@ -1,0 +1,50 @@
+base_config: configs/spring2d.yaml
+
+mpc:
+  target_theta: 1.57079632679
+
+  solver:
+    type: random_shooting
+    horizon: 18
+    prediction_dt: 0.03
+    num_samples: 96
+    elite_frac: 0.15
+    iterations: 2
+    action_std: [2.5, 0.8]
+    min_std: [0.25, 0.1]
+    seed: 12
+
+  constraints:
+    F_tan_max: 35.0
+    F_rad_max: 1.0
+    delta_r_max: 0.06
+    omega_max: 1.2
+    alpha_max: 3.0
+    violation_penalty: 1000000.0
+
+  weights:
+    w_theta: 90.0
+    w_terminal_theta: 520.0
+    w_delta_r: 300.0
+    w_F_tan: 0.008
+    w_F_rad: 300.0
+    w_alpha: 50.0
+    w_omega_progress: 10.0
+
+  nominal_policy:
+    kp_theta: 7.5
+    kd_omega: 1.6
+    radial_kp: 60.0
+    radial_kd: 8.0
+    terminal_taper: 0.45
+    warm_start_blend: 0.35
+
+run:
+  control_hold_steps: 3
+  max_steps: 1200
+
+outputs:
+  timeseries_csv: results/logs/spring2d_fixed_mpc/timeseries.csv
+  gif: results/videos/spring2d_fixed_mpc.gif
+  summary_png: results/figures/spring2d_fixed_mpc_summary.png
+  fps: 25

@@ -1,0 +1,26 @@
+base_config: configs/spring2d.yaml
+
+run:
+  policy_order:
+    - zero_force
+    - constant_tangential_force
+    - constant_radial_force
+    - omega_tracking_pd
+
+policies:
+  zero_force: {}
+  constant_tangential_force:
+    F_tan_const: 8.0
+  constant_radial_force:
+    F_rad_const: 8.0
+  omega_tracking_pd:
+    omega_ref: 0.9
+    Kp_omega: 8.0
+    Kd_omega: 0.05
+
+outputs:
+  log_dir: results/logs/spring2d_policies
+  video_dir: results/videos/spring2d_policies
+  figure_dir: results/figures/spring2d_policies
+  comparison_png: results/figures/spring2d_policies/policy_comparison.png
+  fps: 25

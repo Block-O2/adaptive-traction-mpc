@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 *$py.class
 *.egg-info/
+.pytest_cache/
 
 # Virtual environments
 .venv/
@@ -15,18 +16,27 @@ env/
 .idea/
 .vscode/
 
-# Generated results
+# Generated results and raw experiment outputs
 results/logs/
 results/debug/
-results/videos/*.mp4
-results/videos/*.gif
-!results/logs/
-!results/logs/.gitkeep
-!results/debug/
-!results/debug/.gitkeep
+results/tmp/
+results/archive/
+results/reports/
+results/**/*.csv
+results/**/*.png
+results/**/*.gif
+results/**/*.mp4
+legacy/**/*.mp4
+
+# Curated Stage 1 outputs are intentionally tracked.
+!results/stage1_spring2d/
+!results/stage1_spring2d/**
+
+# Curated documentation reports are intentionally tracked.
+!docs/reports/
+!docs/reports/*.md
 
 # CAD / STEP model files
 *.stp
 *.step
 third_party/mujoco_menagerie/
-.vscode/
