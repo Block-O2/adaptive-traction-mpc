@@ -31,6 +31,9 @@ class AdaptiveMPC(BaseMPC):
     def act(self, observation: Spring2DObservation) -> np.ndarray:
         return self.controller.act(observation)
 
+    def set_target_theta(self, target_theta: float) -> None:
+        self.controller.set_target_theta(float(target_theta))
+
     def get_last_solve_diagnostics(self) -> dict[str, Any]:
         return self.controller.get_last_diagnostics()
 

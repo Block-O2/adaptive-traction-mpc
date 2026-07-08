@@ -1,0 +1,29 @@
+Stage 6b sign-convention probe
+Action probe: F_tan = +/-1.0, F_rad = 0.0
+Rollouts use the existing Spring2D step_dynamics / environment step.
+
+zero_F_tan:
+  MPC rollout: theta_next-theta=-0.00209268754, omega_next-omega=-0.416932457, contact_y_delta=-0.000652587522
+  safety-filter rollout: theta_next-theta=-0.00209268754, omega_next-omega=-0.416932457, contact_y_delta=-0.000652587522
+  environment step: theta_next-theta=-0.0020955891, omega_next-omega=-0.417801482, contact_y_delta=-0.000653522019
+
+positive_F_tan:
+  MPC rollout: theta_next-theta=-0.00168467812, omega_next-omega=-0.335750359, contact_y_delta=-0.000526941195
+  safety-filter rollout: theta_next-theta=-0.00168467812, omega_next-omega=-0.335750359, contact_y_delta=-0.000526941195
+  environment step: theta_next-theta=-0.00177224679, omega_next-omega=-0.353430446, contact_y_delta=-0.000553914189
+
+negative_F_tan:
+  MPC rollout: theta_next-theta=-0.00250064655, omega_next-omega=-0.498095434, contact_y_delta=-0.000778234293
+  safety-filter rollout: theta_next-theta=-0.00250064655, omega_next-omega=-0.498095434, contact_y_delta=-0.000778234293
+  environment step: theta_next-theta=-0.00241889992, omega_next-omega=-0.482160615, contact_y_delta=-0.000753130043
+
+mpc_next response relative to zero action:
+  positive_F_tan omega response=0.0811820978
+  negative_F_tan omega response=-0.0811629768
+safety_next response relative to zero action:
+  positive_F_tan omega response=0.0811820978
+  negative_F_tan omega response=-0.0811629768
+env_next response relative to zero action:
+  positive_F_tan omega response=0.0643710355
+  negative_F_tan omega response=-0.064359133
+Sign mismatch detected relative to zero-action response: False

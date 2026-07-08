@@ -1,101 +1,92 @@
 # adaptive-traction-mpc
 
-Adaptive traction MPC experiments with online task-relevant parameter adaptation.
+Adaptive traction MPC experiments for a controlled Spring2D traction task. The repository compares fixed MPC, online identification, adaptive MPC, and safety-oriented variants under reproducible simulation conditions.
 
-The current repository scope is the Stage 1 Spring2D 2D simulation only. MuJoCo assets and legacy prototypes are kept for reference, but the current closed-loop adaptive MPC results are based on the Spring2D environment.
+The current system is a 2D single-link Spring2D traction model with state
 
-## Goal
+```text
+x = [theta, omega, r, r_dot]
+```
 
-The project studies robotic traction control for elastic, spring-like, or limb-like objects. The controller applies a local contact force
+and action
 
 ```text
 u = [F_tan, F_rad]
 ```
 
-where `F_tan` is the tangential traction force and `F_rad` is the radial/contact force. The immediate goal is to compare fixed MPC, online identification, and adaptive MPC under clean, noisy, and biased observations.
+## Current Mainline
 
-## Current Pipeline
+- System: Spring2D 2D single-link traction.
+- MPC solver: CEM.
+- Estimator: UKF-bias.
+- Identifier: filtered Windowed NLS.
+- Main estimator/identifier flow: filtered state into both MPC and identifier.
+- Current safety status: simulation evidence only; no formal safety guarantees.
 
-- Spring2D moving-base elastic rod dynamics
-- Observation wrapper for clean, noisy, and biased observations
-- Windowed nonlinear least-squares identifier for task-relevant parameters `[m, k, b_r]`
-- Fixed-model MPC baseline
-- Adaptive MPC with online parameter updates
+## Result Summary Through Stage 7D
 
-The current MPC uses shared cost and shared base constraints across fixed and adaptive variants. There is no explicit gravity compensation outside the dynamics.
+The project has closed several safety-method lines:
 
-## Stage 1 Report
+- Stage 6 runtime filter: negative baseline; old one-step filtering often destroys target reaching.
+- Stage 6b sign diagnosis: sign convention and `F_tan` reversal issues were ruled out.
+- Stage 7A alpha-soft CEM: better than runtime filtering, but not robust enough to carry forward.
+- Stage 7B fixed-rate governor: failed or mixed; target reaching and safety were not reliable.
+- Stage 7C gatekeeper-lite: preserved target reaching and reduced omega tail risk, but failed alpha tail risk.
+- Stage 7C alpha-tail gatekeeper revision: revised scoring did not fix alpha p95/max severity.
+- Stage 7D safety-aware command governor: failed; target success was `0/3` and safety tails worsened.
 
-Current report:
+Next planned direction: Stage 8 smoother / acceleration-aware CEM action-sequence generation.
 
-- [Stage 1 Spring2D Adaptive MPC Report](docs/reports/stage1_spring2d_adaptive_mpc_report.md)
+Curated results are documented in [results/README.md](results/README.md). Detailed reports are under `docs/reports/` and the relevant `results/stage*/` folders.
 
-Curated Stage 1 outputs are organized under:
+## Repository Structure
 
 ```text
-results/stage1_spring2d/
+configs/        Experiment and controller configs.
+docs/reports/   Consolidated reports.
+results/        Stage-aligned retained evidence and archived raw outputs.
+scripts/        Reproducible experiment and analysis entrypoints.
+src/            Spring2D dynamics, estimation, identification, MPC, and visualization code.
+tests/          Regression tests for core Spring2D and MPC behavior.
 ```
 
 ## Setup
 
-Install dependencies in a virtual environment or conda environment:
+Install dependencies in a Python or conda environment:
 
 ```bash
 pip install -r requirements.txt
 pip install -e .
 ```
 
-## How To Run
-
-Fixed true-parameter MPC:
+The prior experiment scripts were run in the local `mpc_learn` conda environment:
 
 ```bash
-python scripts/run_spring2d_fixed_mpc.py --config configs/spring2d_fixed_mpc.yaml
+conda run -n mpc_learn python -m pytest tests
 ```
 
-Fixed mismatched MPC with identifier logging:
+## Basic Commands
+
+Run tests:
 
 ```bash
-python scripts/run_spring2d_identifier_conditions.py --config configs/spring2d_identifier_conditions.yaml
+python -m pytest tests
 ```
 
-Adaptive MPC conditions:
+Run selected experiment scripts:
 
 ```bash
-python scripts/run_spring2d_adaptive_mpc_conditions.py --config configs/spring2d_adaptive_mpc_conditions.yaml
+python scripts/run_spring2d_solver_comparison.py
+python scripts/run_spring2d_estimator_comparison.py
+python scripts/run_spring2d_safety_filter_comparison.py
+python scripts/run_spring2d_stage7a_final_validation.py
+python scripts/run_spring2d_stage7b_progress_governor.py
+python scripts/run_spring2d_stage7c_gatekeeper_lite.py
+python scripts/run_spring2d_stage7d_safety_aware_governor.py
 ```
 
-## Current Findings
+Use the matching config files under `configs/` when a script exposes `--config`.
 
-- Fixed true-parameter MPC nearly reaches the target under the strict threshold.
-- Mismatched fixed MPC underperforms.
-- Adaptive MPC improves after online parameter updates and after preserving warm-start state across parameter updates.
-- Noise and bias expose instability.
-- Random shooting struggles with strict `omega` and `alpha` constraints.
+## Reporting Discipline
 
-Bad results are kept as experimental evidence rather than hidden or tuned away.
-
-## Limitations
-
-- No CEM solver yet.
-- No robust identifier yet.
-- No runtime safety filter yet.
-- No MuJoCo closed-loop adaptive MPC yet.
-- No real robot validation yet.
-
-## Next Steps
-
-- Add a `theta_tolerance_deg` success criterion.
-- Add a CEM-MPC solver abstraction.
-- Run identifier ablation experiments.
-- Add safe adaptive MPC with uncertainty tightening and runtime safety filtering.
-
-## Repository Layout
-
-- `src/traction_mpc/`: Spring2D dynamics, environments, estimation, identification, MPC, evaluation, and visualization code.
-- `configs/`: reproducible experiment configs.
-- `scripts/`: runnable experiment scripts.
-- `docs/reports/`: curated reports.
-- `results/stage1_spring2d/`: curated Stage 1 outputs intended for tracking.
-- `legacy/`: archived prototypes kept for reference.
-- `assets/` and `third_party/`: robot and MuJoCo assets for later stages.
+Bad results are retained as experimental evidence. Do not hide failed runs by retuning methods after the fact. Current results are simulation evidence for comparing method behavior, not formal safety guarantees.
