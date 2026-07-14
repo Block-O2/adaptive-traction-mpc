@@ -43,6 +43,10 @@ class CEMSolverConfig:
     gatekeeper_force_weight: float = 1.0
     collect_iteration_diagnostics: bool = False
     collect_sample_diagnostics: bool = False
+    action_parameterization_mode: str = "standard"
+    num_action_knots: int = 0
+    move_block_size: int = 1
+    lowpass_beta: float = 0.5
     L0: float = 0.0
 
     @classmethod
@@ -79,6 +83,18 @@ class CEMSolverConfig:
         gatekeeper_mode = str(cfg.get("gatekeeper_mode", "off")).lower()
         if gatekeeper_mode not in {"off", "candidate_select"}:
             raise ValueError("gatekeeper_mode must be one of: off, candidate_select.")
+        action_parameterization_mode = str(cfg.get("action_parameterization_mode", "standard")).lower()
+        if action_parameterization_mode not in {
+            "standard",
+            "u_knots",
+            "du_knots",
+            "move_blocking",
+            "lowpass_perturb",
+        }:
+            raise ValueError(
+                "action_parameterization_mode must be one of: "
+                "standard, u_knots, du_knots, move_blocking, lowpass_perturb."
+            )
         return cls(
             horizon=int(cfg.get("horizon", 18)),
             prediction_dt=dt,
@@ -116,6 +132,10 @@ class CEMSolverConfig:
             gatekeeper_force_weight=float(cfg.get("gatekeeper_force_weight", 1.0)),
             collect_iteration_diagnostics=bool(cfg.get("collect_iteration_diagnostics", False)),
             collect_sample_diagnostics=bool(cfg.get("collect_sample_diagnostics", False)),
+            action_parameterization_mode=action_parameterization_mode,
+            num_action_knots=int(cfg.get("num_action_knots", 0)),
+            move_block_size=max(1, int(cfg.get("move_block_size", 1))),
+            lowpass_beta=float(np.clip(float(cfg.get("lowpass_beta", 0.5)), 0.0, 1.0)),
             L0=float(model_params["L0"]),
         )
 
@@ -140,12 +160,12 @@ class CEMSolver:
         constraint_fn: ConstraintFn,
         initial_sequence: np.ndarray | None = None,
     ) -> SolverResult:
-        mean = self._initial_mean(initial_sequence)
-        std = np.tile(self.config.init_std.reshape(1, 2), (self.config.horizon, 1))
-        min_std = np.tile(self.config.min_std.reshape(1, 2), (self.config.horizon, 1))
+        mean = self._initial_params(initial_sequence)
+        std = np.tile(self.config.init_std.reshape(1, 2), (mean.shape[0], 1))
+        min_std = np.tile(self.config.min_std.reshape(1, 2), (mean.shape[0], 1))
         evaluator = CandidateEvaluator(x0, rollout_fn, cost_fn, constraint_fn)
 
-        best_sequence = mean.copy()
+        best_sequence = self._params_to_sequence(mean)
         best_total_cost = np.inf
         best_task_cost = np.inf
         best_violation_score = np.inf
@@ -172,8 +192,12 @@ class CEMSolver:
         gatekeeper_diagnostics = self._disabled_gatekeeper_diagnostics()
 
         for iteration_index in range(self.config.iterations):
-            candidates = self._sample_candidates(mean, std)
-            candidates[0] = mean
+            param_candidates = self._sample_param_candidates(mean, std)
+            param_candidates[0] = mean
+            candidates = np.asarray(
+                [self._params_to_sequence(params) for params in param_candidates],
+                dtype=float,
+            )
             total_costs = np.empty(candidates.shape[0], dtype=float)
             ranking_costs = np.empty(candidates.shape[0], dtype=float)
             task_costs = np.empty(candidates.shape[0], dtype=float)
@@ -304,18 +328,18 @@ class CEMSolver:
                 best_elite_safety_feasible_count = elite_safety_feasible_count
                 best_rank = int(gatekeeper_rank)
 
-            elites = candidates[elite_order]
+            elites = param_candidates[elite_order]
             elite_mean = elites.mean(axis=0)
             elite_std = np.maximum(elites.std(axis=0), min_std)
             mean = (1.0 - self.config.cem_alpha) * mean + self.config.cem_alpha * elite_mean
             std = (1.0 - self.config.cem_alpha) * std + self.config.cem_alpha * elite_std
-            mean[:, 0] = np.clip(mean[:, 0], -self.constraints.F_tan_max, self.constraints.F_tan_max)
-            mean[:, 1] = np.clip(mean[:, 1], -self.constraints.F_rad_max, self.constraints.F_rad_max)
+            mean = self._clip_params(mean)
             std = np.maximum(std, min_std)
 
         if best_constraint is None:
             raise RuntimeError("CEM did not evaluate any candidates.")
         action = self.constraints.clip_action(best_sequence[0])
+        final_mean_sequence = self._params_to_sequence(mean)
         return SolverResult(
             best_action=action,
             best_sequence=best_sequence,
@@ -351,6 +375,10 @@ class CEMSolver:
                 "gatekeeper_force_weight": float(self.config.gatekeeper_force_weight),
                 "collect_iteration_diagnostics": bool(self.config.collect_iteration_diagnostics),
                 "collect_sample_diagnostics": bool(self.config.collect_sample_diagnostics),
+                "action_parameterization_mode": self.config.action_parameterization_mode,
+                "num_action_knots": int(self.config.num_action_knots),
+                "move_block_size": int(self.config.move_block_size),
+                "lowpass_beta": float(self.config.lowpass_beta),
                 "best_task_cost": float(best_task_cost),
                 "best_ranking_cost": float(best_ranking_cost),
                 "best_violation_score": float(best_violation_score),
@@ -384,8 +412,8 @@ class CEMSolver:
                 "elite_safety_feasible_count": int(best_elite_safety_feasible_count),
                 "selected_candidate_rank": int(best_rank),
                 "best_selected_from": best_selected_from,
-                "final_mean_first_F_tan": float(mean[0, 0]),
-                "final_mean_first_F_rad": float(mean[0, 1]),
+                "final_mean_first_F_tan": float(final_mean_sequence[0, 0]),
+                "final_mean_first_F_rad": float(final_mean_sequence[0, 1]),
                 "final_std_first_F_tan": float(std[0, 0]),
                 "final_std_first_F_rad": float(std[0, 1]),
                 "cem_iteration_diagnostics": iteration_diagnostics,
@@ -406,12 +434,96 @@ class CEMSolver:
         mean[:, 1] = np.clip(mean[:, 1], -self.constraints.F_rad_max, self.constraints.F_rad_max)
         return mean
 
+    def _initial_params(self, initial_sequence: np.ndarray | None) -> np.ndarray:
+        sequence = self._initial_mean(initial_sequence)
+        mode = self.config.action_parameterization_mode
+        if mode in {"standard", "lowpass_perturb"}:
+            return sequence
+        if mode == "move_blocking":
+            block = max(1, int(self.config.move_block_size))
+            starts = list(range(0, self.config.horizon, block))
+            return sequence[starts].copy()
+        knot_indices = self._knot_indices()
+        if mode == "u_knots":
+            return sequence[knot_indices].copy()
+        if mode == "du_knots":
+            deltas = np.diff(np.vstack([np.zeros((1, 2), dtype=float), sequence]), axis=0)
+            return deltas[knot_indices].copy()
+        raise ValueError(f"Unknown action_parameterization_mode: {mode}")
+
+    def _sample_param_candidates(self, mean: np.ndarray, std: np.ndarray) -> np.ndarray:
+        samples = self.rng.normal(loc=mean, scale=std, size=(self.config.num_samples, mean.shape[0], 2))
+        if self.config.action_parameterization_mode == "lowpass_perturb":
+            perturb = samples - mean.reshape(1, mean.shape[0], 2)
+            filtered = perturb.copy()
+            beta = float(self.config.lowpass_beta)
+            for k in range(1, filtered.shape[1]):
+                filtered[:, k, :] = beta * filtered[:, k - 1, :] + (1.0 - beta) * filtered[:, k, :]
+            samples = mean.reshape(1, mean.shape[0], 2) + filtered
+        return self._clip_param_candidates(samples)
+
     def _sample_candidates(self, mean: np.ndarray, std: np.ndarray) -> np.ndarray:
-        shape = (self.config.num_samples, self.config.horizon, 2)
-        samples = self.rng.normal(loc=mean, scale=std, size=shape)
-        samples[..., 0] = np.clip(samples[..., 0], -self.constraints.F_tan_max, self.constraints.F_tan_max)
-        samples[..., 1] = np.clip(samples[..., 1], -self.constraints.F_rad_max, self.constraints.F_rad_max)
-        return samples
+        samples = self._sample_param_candidates(mean, std)
+        if self.config.action_parameterization_mode in {"standard", "lowpass_perturb"}:
+            return samples
+        return np.asarray([self._params_to_sequence(params) for params in samples], dtype=float)
+
+    def _clip_param_candidates(self, samples: np.ndarray) -> np.ndarray:
+        clipped = np.asarray(samples, dtype=float).copy()
+        if self.config.action_parameterization_mode != "du_knots":
+            clipped[..., 0] = np.clip(clipped[..., 0], -self.constraints.F_tan_max, self.constraints.F_tan_max)
+            clipped[..., 1] = np.clip(clipped[..., 1], -self.constraints.F_rad_max, self.constraints.F_rad_max)
+        return clipped
+
+    def _clip_params(self, params: np.ndarray) -> np.ndarray:
+        clipped = np.asarray(params, dtype=float).copy()
+        if self.config.action_parameterization_mode != "du_knots":
+            clipped[:, 0] = np.clip(clipped[:, 0], -self.constraints.F_tan_max, self.constraints.F_tan_max)
+            clipped[:, 1] = np.clip(clipped[:, 1], -self.constraints.F_rad_max, self.constraints.F_rad_max)
+        return clipped
+
+    def _knot_count(self) -> int:
+        if self.config.action_parameterization_mode in {"u_knots", "du_knots"}:
+            default = min(6, self.config.horizon)
+            return max(2, min(int(self.config.num_action_knots or default), self.config.horizon))
+        return self.config.horizon
+
+    def _knot_indices(self) -> np.ndarray:
+        return np.unique(
+            np.rint(np.linspace(0, self.config.horizon - 1, self._knot_count())).astype(int)
+        )
+
+    def _interpolate_knots(self, knots: np.ndarray) -> np.ndarray:
+        knot_values = np.asarray(knots, dtype=float)
+        knot_indices = self._knot_indices()
+        if len(knot_indices) != len(knot_values):
+            knot_indices = np.rint(np.linspace(0, self.config.horizon - 1, len(knot_values))).astype(int)
+        horizon_indices = np.arange(self.config.horizon, dtype=float)
+        sequence = np.column_stack(
+            [
+                np.interp(horizon_indices, knot_indices.astype(float), knot_values[:, action_index])
+                for action_index in range(2)
+            ]
+        )
+        return sequence
+
+    def _params_to_sequence(self, params: np.ndarray) -> np.ndarray:
+        mode = self.config.action_parameterization_mode
+        param_values = np.asarray(params, dtype=float)
+        if mode in {"standard", "lowpass_perturb"}:
+            sequence = param_values.copy()
+        elif mode == "move_blocking":
+            sequence = np.repeat(param_values, max(1, int(self.config.move_block_size)), axis=0)[: self.config.horizon]
+        elif mode == "u_knots":
+            sequence = self._interpolate_knots(param_values)
+        elif mode == "du_knots":
+            delta_sequence = self._interpolate_knots(param_values)
+            sequence = np.cumsum(delta_sequence, axis=0)
+        else:
+            raise ValueError(f"Unknown action_parameterization_mode: {mode}")
+        sequence[:, 0] = np.clip(sequence[:, 0], -self.constraints.F_tan_max, self.constraints.F_tan_max)
+        sequence[:, 1] = np.clip(sequence[:, 1], -self.constraints.F_rad_max, self.constraints.F_rad_max)
+        return sequence
 
     def _candidate_order(
         self,

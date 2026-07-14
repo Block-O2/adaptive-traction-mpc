@@ -1,23 +1,55 @@
-# Results
+# Results Index and Artifact Policy
 
-Results are organized by experimental stage. Each retained stage folder keeps the final report or summary table plus a small set of representative figures. Raw logs, videos, duplicate plots, and intermediate diagnostics are archived under `results/_archive/`.
+## Layout
 
-| Stage | Method | Status | Main conclusion | Key retained files |
-|---|---|---|---|---|
-| Stage 1 | Spring2D adaptive MPC setup | Retained baseline evidence | Established Spring2D simulation, adaptive MPC logging, and initial fixed/adaptive comparisons. | `stage1_spring2d/figures/`, `stage1_spring2d/tables/` |
-| Stage 2 | CEM solver | Retained baseline evidence | CEM improved planning capability but still exposed safety constraint issues. | `stage2_cem/figures/`, `stage2_cem/tables/` |
-| Stage 2 | CEM feasibility-first | Retained comparison evidence | Feasibility-first comparison retained as solver-selection evidence. | `stage2_cem_feasfirst/figures/`, `stage2_cem_feasfirst/tables/` |
-| Stage 3 | Filtering comparison | Retained estimator evidence | Filtering was evaluated under noisy and biased observations. | `stage3_filtering/figures/`, `stage3_filtering/tables/` |
-| Stage 4 | UKF / UKF-bias | Retained mainline estimator evidence | UKF-bias became the mainline estimator for later stages. | `stage4_ukf/figures/`, `stage4_ukf/tables/` |
-| Stage 5 | Estimator-identifier coupling | Retained mainline coupling evidence | Filtered UKF-bias plus filtered Windowed NLS became the mainline data flow. | `stage5_coupling/figures/`, `stage5_coupling/tables/` |
-| Stage 6 | One-step runtime safety filter | Negative baseline | Runtime filter is retained as negative baseline evidence; it often destroys target reaching. | `stage6_safety_filter/closeout/` |
-| Stage 6b | Sign diagnosis | Closed diagnostic | Sign convention and `F_tan` reversal issues were ruled out. | `stage6b/closeout/` |
-| Stage 7A | Alpha-soft CEM | Closed, not carried forward | Better than runtime filtering, but not robust enough as the main safety method. | `stage7a_alpha_soft/stage7a_final_report.md`, `stage7a_alpha_soft/stage7a_final_summary.csv` |
-| Stage 7B | Fixed-rate progress governor | Failed / mixed | Fixed-rate governor failed; target reaching and safety were mixed. | `stage7b_progress_governor/stage7b_minimal_report.md`, `stage7b_progress_governor/stage7b_minimal_summary.csv` |
-| Stage 7C | Gatekeeper-lite | Closed / mixed | Preserves target reaching and reduces omega, but fails alpha tail risk. | `stage7c_gatekeeper_lite/stage7c_report.md`, `stage7c_gatekeeper_lite/stage7c_summary.csv` |
-| Stage 7C | Alpha-tail gatekeeper revision | Closed / failed | Tail-aware scoring revision did not fix alpha p95/max severity. | `stage7c_gatekeeper_alpha_tail/stage7c_alpha_tail_report.md`, `stage7c_gatekeeper_alpha_tail/stage7c_alpha_tail_summary.csv` |
-| Stage 7D | Safety-aware command governor | Closed / failed | Failed target reaching (`0/3`) and worsened safety in the minimal validation. | `stage7d_safety_aware_governor/stage7d_report.md`, `stage7d_safety_aware_governor/stage7d_summary.csv` |
+```text
+results/
+├── archive/legacy_stages/     Curated Stage 1–8 evidence
+├── stage9*/                   Active Stage 9 reports and retained evidence
+└── stage10_*/                 Future Stage 10 estimator experiments
+```
 
-Next planned direction: Stage 8 smoother / acceleration-aware CEM action generation.
+Archived results are closed historical baselines. Active results remain at their script-default paths so existing reproduction commands and the Stage 9J-to-9K replay dependency do not break.
 
-These outputs are simulation evidence only. They are not formal safety guarantees.
+## Authoritative Stage 9 evidence
+
+| Stage | Role | Authoritative files |
+|---|---|---|
+| Stage 9C | Scaled multiple-shooting NMPC validation | `stage9c_scaled_nmpc_validation/stage9c_report.md`, `stage9c_summary.csv` |
+| Stage 9D | Stress and initial-offset validation | `stage9d_nmpc_stress_validation/stage9d_report.md`, `stage9d_summary.csv` |
+| Stage 9G | Crossing–alpha feasibility frontier | `stage9g_crossing_alpha_frontier/stage9g_report.md`, `stage9g_summary.csv` |
+| Stage 9H | Long-horizon planner plus short-horizon tracker | `stage9h_planner_tracker/stage9h_report.md`, `stage9h_summary.csv`, `stage9h_boundary_summary.csv` |
+| Stage 9J | Mode audit and adaptive–oracle gap decomposition | `stage9j_gap_decomposition/stage9j_report.md`, `stage9j_summary.csv`, `stage9j_per_run.csv`, `stage9j_mode_audit.csv` |
+| Stage 9K | Identifier diagnosis and robust offline ablation | `stage9k_identifier_ablation/stage9k_report.md`, `stage9k_offline_summary.csv`, `stage9k_offline_per_run.csv`, `stage9k_conditioning.csv`, `stage9k_uncertainty_calibration.csv` |
+
+The authoritative replay input for Stage 10 offline estimator comparison is:
+
+```text
+results/stage9j_gap_decomposition/stage9j_replay.csv
+```
+
+Do not rename, filter, or regenerate this file implicitly. Stage 10 comparisons should consume the same replay rows and document any explicit preprocessing.
+
+## Retention policy
+
+Every curated stage should contain:
+
+- a final report;
+- a final aggregate summary CSV;
+- the config snapshot, manifest, or exact command needed to interpret it;
+- at most a small representative figure set (normally one to three);
+- only irreplaceable per-run or replay data required for a published conclusion or downstream comparison.
+
+Raw trajectories, debug logs, repeated seed plots, solver output, caches, intermediate tuning exports, and videos are generated locally and should not be committed unless a report explicitly designates one as irreplaceable evidence. Stage 9J/9K retain more than three plots because those named diagnostic figures jointly support the decomposition and identifier conclusions. The local Stage 9J GIF is for visual inspection and is not an authoritative metric source.
+
+## Future Stage 10 naming
+
+Use one directory per scientific stage, with lowercase snake-case names:
+
+```text
+results/stage10_joint_state_parameter_estimator/
+```
+
+Follow-up ablations should use a clear suffix, for example `stage10a_offline_estimator_comparison`, only after their scope is defined. Do not place temporary runs in a curated stage directory; use an ignored local output root and promote only final evidence.
+
+The complete Stage 9 reproduction map is in `results/reproducibility_manifest.md`. Results are empirical simulation evidence and do not establish formal safety or stability.

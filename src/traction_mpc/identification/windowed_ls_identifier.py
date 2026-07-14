@@ -37,6 +37,9 @@ class WindowedLeastSquaresIdentifier(BaseIdentifier):
         self.num_transitions = 0
         self.last_prediction_error = np.nan
         self.last_success = True
+        self.last_optimizer_status = 0
+        self.last_optimizer_message = "not_updated"
+        self.last_optimizer_iterations = 0
 
     def reset(self) -> None:
         self.theta_hat = self.theta0.copy()
@@ -44,6 +47,9 @@ class WindowedLeastSquaresIdentifier(BaseIdentifier):
         self.num_transitions = 0
         self.last_prediction_error = np.nan
         self.last_success = True
+        self.last_optimizer_status = 0
+        self.last_optimizer_message = "not_updated"
+        self.last_optimizer_iterations = 0
 
     def add_transition(self, x_obs: np.ndarray, action: np.ndarray, x_next_obs: np.ndarray) -> IdentifierResult:
         x = self._state_array(x_obs)
@@ -63,6 +69,9 @@ class WindowedLeastSquaresIdentifier(BaseIdentifier):
                 bounds=self.bounds,
                 max_nfev=self.max_nfev,
             )
+            self.last_optimizer_status = int(result.status)
+            self.last_optimizer_message = str(result.message)
+            self.last_optimizer_iterations = int(result.nfev)
             if result.success and np.all(np.isfinite(result.x)):
                 self.theta_hat = result.x.astype(float)
                 success = True

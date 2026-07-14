@@ -18,6 +18,9 @@ class Spring2DMPCWeights:
     w_F_rad: float
     w_alpha: float
     w_omega_progress: float
+    w_action_rate: float = 0.0
+    w_F_tan_rate: float = 0.0
+    w_F_rad_rate: float = 0.0
 
     @classmethod
     def from_config(cls, cfg: dict[str, Any]) -> "Spring2DMPCWeights":
@@ -33,6 +36,9 @@ class Spring2DMPCWeights:
             w_F_rad=float(cfg.get("w_F_rad", 300.0)),
             w_alpha=float(w_alpha),
             w_omega_progress=float(cfg.get("w_omega_progress", 10.0)),
+            w_action_rate=float(cfg.get("w_action_rate", 0.0)),
+            w_F_tan_rate=float(cfg.get("w_F_tan_rate", 0.0)),
+            w_F_rad_rate=float(cfg.get("w_F_rad_rate", 0.0)),
         )
 
 
@@ -57,6 +63,21 @@ def stage_cost(
         + weights.w_F_rad * F_rad**2
         + weights.w_alpha * alpha**2
         - weights.w_omega_progress * omega
+    )
+
+
+def action_rate_cost(
+    action: np.ndarray,
+    prev_action: np.ndarray,
+    weights: Spring2DMPCWeights,
+) -> float:
+    """Optional diagnostic action-rate cost; default weights keep baseline unchanged."""
+
+    du = np.asarray(action, dtype=float) - np.asarray(prev_action, dtype=float)
+    return float(
+        weights.w_action_rate * float(np.dot(du, du))
+        + weights.w_F_tan_rate * float(du[0] ** 2)
+        + weights.w_F_rad_rate * float(du[1] ** 2)
     )
 
 

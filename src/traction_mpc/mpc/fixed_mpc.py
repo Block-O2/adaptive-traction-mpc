@@ -10,7 +10,7 @@ from traction_mpc.common.types import Spring2DObservation
 from traction_mpc.models.spring2d_dynamics import step_dynamics
 from traction_mpc.mpc.base_mpc import BaseMPC
 from traction_mpc.mpc.constraints import Spring2DMPCConstraints
-from traction_mpc.mpc.cost import Spring2DMPCWeights, stage_cost, terminal_cost
+from traction_mpc.mpc.cost import Spring2DMPCWeights, action_rate_cost, stage_cost, terminal_cost
 from traction_mpc.mpc.solvers import ConstraintResult, RolloutResult, ShootingResult, make_solver
 
 
@@ -92,6 +92,9 @@ class FixedModelMPC(BaseMPC):
             "mpc_solver_type": self.solver_type,
             "mpc_solver_selection": str(result.diagnostics.get("selection", "")),
             "mpc_target_theta": float(self.target_theta),
+            "mpc_w_action_rate": float(self.weights.w_action_rate),
+            "mpc_w_F_tan_rate": float(self.weights.w_F_tan_rate),
+            "mpc_w_F_rad_rate": float(self.weights.w_F_rad_rate),
             "best_task_cost": float(result.diagnostics.get("best_task_cost", np.nan)),
             "best_violation_score": float(result.diagnostics.get("best_violation_score", np.nan)),
             "best_max_violation_F_tan": float(result.diagnostics.get("best_max_violation_F_tan", np.nan)),
@@ -177,6 +180,7 @@ class FixedModelMPC(BaseMPC):
         if not rollout.valid:
             return float("inf")
         cost = 0.0
+        prev_action = np.asarray(self.last_action, dtype=float)
         for k, action in enumerate(rollout.actions):
             prev_x = rollout.states[k]
             x = rollout.states[k + 1]
@@ -189,6 +193,8 @@ class FixedModelMPC(BaseMPC):
                 self.model_params,
                 self.weights,
             )
+            cost += action_rate_cost(action, prev_action, self.weights)
+            prev_action = np.asarray(action, dtype=float)
         cost += terminal_cost(rollout.states[-1], self.target_theta, self.model_params, self.weights)
         return float(cost)
 

@@ -1,0 +1,249 @@
+{
+  "true_params": {
+    "m": 1.2,
+    "g": 9.81,
+    "L0": 0.35,
+    "k": 450.0,
+    "b_r": 18.0,
+    "b_theta": 0.08,
+    "rho": 0.9,
+    "dt": 0.01,
+    "theta_init": 0.12,
+    "omega_init": 0.0,
+    "r_init": 0.35,
+    "r_dot_init": 0.0,
+    "theta_target": 1.57079632679,
+    "F_tan_max": 35.0,
+    "F_rad_max": 20.0,
+    "delta_r_max": 0.06,
+    "omega_max": 8.0,
+    "alpha_max": 35.0,
+    "max_time": 8.0,
+    "base_mode": "linear_sin",
+    "base_x0": 0.0,
+    "base_y0": 0.0,
+    "base_slide_amp": 0.035,
+    "base_x_range": 0.05,
+    "base_slide_beta": 2.0
+  },
+  "model_params": {
+    "m": 0.95,
+    "g": 9.81,
+    "L0": 0.35,
+    "k": 360.0,
+    "b_r": 12.0,
+    "b_theta": 0.08,
+    "rho": 0.9,
+    "dt": 0.01,
+    "theta_init": 0.12,
+    "omega_init": 0.0,
+    "r_init": 0.35,
+    "r_dot_init": 0.0,
+    "theta_target": 1.57079632679,
+    "F_tan_max": 35.0,
+    "F_rad_max": 20.0,
+    "delta_r_max": 0.06,
+    "omega_max": 8.0,
+    "alpha_max": 35.0,
+    "max_time": 8.0,
+    "base_mode": "linear_sin",
+    "base_x0": 0.0,
+    "base_y0": 0.0,
+    "base_slide_amp": 0.035,
+    "base_x_range": 0.05,
+    "base_slide_beta": 2.0
+  },
+  "mpc_params": {
+    "target_theta": 1.57079632679,
+    "solver": {
+      "type": "cem",
+      "horizon": 18,
+      "prediction_dt": 0.03,
+      "num_samples": 128,
+      "elite_frac": 0.15,
+      "iterations": 3,
+      "action_std": [
+        2.5,
+        0.8
+      ],
+      "min_std": [
+        0.25,
+        0.1
+      ],
+      "seed": 23,
+      "num_elites": 16,
+      "cem_alpha": 0.7,
+      "init_std_F_tan": 4.0,
+      "init_std_F_rad": 0.3,
+      "min_std_F_tan": 0.2,
+      "min_std_F_rad": 0.05,
+      "warm_start": true,
+      "safety_mode": false,
+      "safety_penalty_weight": 1.0,
+      "alpha_constraint_mode": "hard",
+      "alpha_soft_weight": 1.0,
+      "alpha_soft_weight_list": [
+        1,
+        10,
+        100,
+        1000
+      ],
+      "alpha_relaxed_multiplier": 2.0,
+      "alpha_relaxed_multiplier_list": [
+        2.0,
+        3.0
+      ],
+      "collect_iteration_diagnostics": false,
+      "collect_sample_diagnostics": false,
+      "safety_violation_weights": {
+        "F_tan": 1.0,
+        "F_rad": 1.0,
+        "delta_r": 1.0,
+        "omega": 1.0,
+        "alpha": 1.0
+      }
+    },
+    "constraints": {
+      "F_tan_max": 35.0,
+      "F_rad_max": 1.0,
+      "delta_r_max": 0.06,
+      "omega_max": 1.2,
+      "alpha_max": 3.0,
+      "violation_penalty": 1000000.0
+    },
+    "weights": {
+      "w_theta": 90.0,
+      "w_terminal_theta": 520.0,
+      "w_delta_r": 300.0,
+      "w_F_tan": 0.008,
+      "w_F_rad": 300.0,
+      "w_alpha": 50.0,
+      "w_omega_progress": 10.0
+    },
+    "nominal_policy": {
+      "kp_theta": 7.5,
+      "kd_omega": 1.6,
+      "radial_kp": 60.0,
+      "radial_kd": 8.0,
+      "terminal_taper": 0.45,
+      "warm_start_blend": 0.35
+    }
+  },
+  "identifier": {
+    "window_size": 70,
+    "update_interval": 10,
+    "lambda_reg": 0.001,
+    "max_nfev": 45,
+    "state_weights": [
+      1.0,
+      0.25,
+      8.0,
+      0.6
+    ],
+    "param_scale": [
+      1.0,
+      450.0,
+      20.0
+    ],
+    "bounds": {
+      "m": [
+        0.5,
+        2.0
+      ],
+      "k": [
+        150.0,
+        800.0
+      ],
+      "b_r": [
+        2.0,
+        45.0
+      ]
+    }
+  },
+  "run": {
+    "control_hold_steps": 3,
+    "max_steps": 1200
+  },
+  "conditions": {
+    "clean": {
+      "seed": 101,
+      "observation_noise": {
+        "theta_std": 0.0,
+        "omega_std": 0.0,
+        "r_std": 0.0,
+        "r_dot_std": 0.0,
+        "theta_bias": 0.0,
+        "omega_bias": 0.0,
+        "r_bias": 0.0,
+        "r_dot_bias": 0.0
+      }
+    },
+    "noise": {
+      "seed": 102,
+      "observation_noise": {
+        "theta_std": 0.004,
+        "omega_std": 0.035,
+        "r_std": 0.0008,
+        "r_dot_std": 0.004,
+        "theta_bias": 0.0,
+        "omega_bias": 0.0,
+        "r_bias": 0.0,
+        "r_dot_bias": 0.0
+      }
+    },
+    "noise_bias": {
+      "seed": 103,
+      "observation_noise": {
+        "theta_std": 0.004,
+        "omega_std": 0.035,
+        "r_std": 0.0008,
+        "r_dot_std": 0.004,
+        "theta_bias": 0.01,
+        "omega_bias": -0.02,
+        "r_bias": 0.0015,
+        "r_dot_bias": 0.002
+      }
+    }
+  },
+  "adaptive": {
+    "warmup_steps": 0,
+    "parameter_smoothing_alpha": 1.0,
+    "parameter_bounds": {
+      "m": [
+        0.5,
+        2.0
+      ],
+      "k": [
+        150.0,
+        800.0
+      ],
+      "b_r": [
+        2.0,
+        45.0
+      ]
+    }
+  },
+  "outputs": {
+    "log_dir": "results/stage7a_safety_aware_cem/logs",
+    "video_dir": "results/stage7a_safety_aware_cem/videos",
+    "figure": "results/stage7a_safety_aware_cem/figs/safety_aware_cem_comparison.png",
+    "summary_table": "results/stage7a_safety_aware_cem/stage7a_summary.csv",
+    "fps": 25
+  },
+  "observation_filter": {
+    "type": "ukf_bias",
+    "identifier_input": "filtered"
+  },
+  "coupling_ablation": {
+    "name": "safety_aware_cem_filtered_identifier_adaptive",
+    "mpc_state_input": "filtered",
+    "identifier_input": "filtered",
+    "identifier_mode": "adaptive",
+    "estimator_model_params_source": "adaptive",
+    "mpc_model_params_source": "adaptive"
+  },
+  "safety_filter": {
+    "enabled": false
+  },
+  "baseline_summary_table": "results/figures/spring2d_identifier_conditions/summary_table.csv"
+}

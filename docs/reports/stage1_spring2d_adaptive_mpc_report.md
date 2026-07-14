@@ -183,7 +183,7 @@ The fixed mismatched condition records identifier estimates but does not feed th
 
 ## 3. Experiment Summary
 
-These metrics are from the current organized Stage 1 result set in `results/stage1_spring2d/`. `alpha_step` is computed from logged adjacent angular velocities.
+These metrics are from the curated Stage 1 result set in `results/archive/legacy_stages/stage1_spring2d/`. `alpha_step` is computed from logged adjacent angular velocities.
 
 | run | target_reached | final theta deg | T_reach s | max \|F_rad\| N | max \|delta_r\| mm | max \|omega\| rad/s | max \|alpha_step\| rad/s^2 | max \|F_tan\| N | done_reason |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
@@ -195,27 +195,11 @@ These metrics are from the current organized Stage 1 result set in `results/stag
 | Adaptive MPC / noise | False | 89.62 | NA | 0.880 | 12.11 | 1.940 | 16.61 | 9.291 | max_time |
 | Adaptive MPC / noise_bias | False | 86.09 | NA | 1.000 | 13.85 | 2.300 | 19.90 | 9.193 | max_time |
 
-## 4. Embedded Visuals
+## 4. Retained Visual
 
-### Fixed True-Parameter MPC
+Stage 10-0 removed the regenerable per-run GIFs and retained the aggregate comparison figure.
 
-![Fixed true-parameter MPC](../../results/stage1_spring2d/videos/fixed_true.gif)
-
-### Fixed Mismatched MPC, Clean Observation
-
-![Fixed mismatched clean](../../results/stage1_spring2d/videos/fixed_mismatch_clean.gif)
-
-### Adaptive MPC, Clean Observation
-
-![Adaptive clean](../../results/stage1_spring2d/videos/adaptive_clean.gif)
-
-### Adaptive MPC, Noisy Observation
-
-![Adaptive noise](../../results/stage1_spring2d/videos/adaptive_noise.gif)
-
-### Adaptive MPC, Noisy and Biased Observation
-
-![Adaptive noise bias](../../results/stage1_spring2d/videos/adaptive_noise_bias.gif)
+![Adaptive conditions comparison](../../results/archive/legacy_stages/stage1_spring2d/figures/adaptive_conditions_comparison.png)
 
 ## 5. Analysis
 
@@ -253,11 +237,10 @@ Random shooting struggles to find strictly feasible trajectories under the curre
 Stage 1 organized result folder:
 
 ```text
-results/stage1_spring2d/
+results/archive/legacy_stages/stage1_spring2d/
 ```
 
 Main subfolders:
 
-- `results/stage1_spring2d/figures/`
-- `results/stage1_spring2d/videos/`
-- `results/stage1_spring2d/tables/`
+- `results/archive/legacy_stages/stage1_spring2d/figures/`
+- `results/archive/legacy_stages/stage1_spring2d/tables/`

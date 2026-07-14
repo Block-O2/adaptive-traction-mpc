@@ -5,11 +5,11 @@
 This report consolidates the Stage 2-5 Spring2D adaptive traction MPC results. It is a summary-only document. No experiments were rerun, no results were changed, and no source code, configs, dynamics, costs, constraints, solvers, estimators, or identifiers were modified for this consolidation.
 
 Source reports:
-- `results/reports/stage2_cem_solver_comparison_report.md`
-- `results/reports/stage2_cem_feasfirst_report.md`
-- `results/reports/stage3_filtering_report.md`
-- `results/reports/stage4_ukf_estimator_report.md`
-- `results/reports/stage5_estimator_identifier_coupling_report.md`
+- `results/archive/legacy_stages/stage2_cem/stage2_cem_solver_comparison_report.md`
+- `results/archive/legacy_stages/stage2_cem_feasfirst/stage2_cem_feasfirst_report.md`
+- `results/archive/legacy_stages/stage3_filtering/stage3_filtering_report.md`
+- `results/archive/legacy_stages/stage4_ukf/stage4_ukf_estimator_report.md`
+- `results/archive/legacy_stages/stage5_coupling/stage5_estimator_identifier_coupling_report.md`
 
 ## Current Pipeline
 

@@ -5,11 +5,20 @@ __pycache__/
 *$py.class
 *.egg-info/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+htmlcov/
+build/
+dist/
 
 # Virtual environments
 .venv/
 venv/
 env/
+.tox/
+.nox/
 
 # Local/editor metadata
 .DS_Store
@@ -20,18 +29,26 @@ env/
 *.tmp
 *.temp
 *.log
+*.bak
+*~
 
 # Generated raw experiment outputs
 results/logs/
 results/debug/
 results/tmp/
-results/_archive/
+results/local/
 results/**/logs/
+results/**/solver/
+results/**/solver_output/
 results/**/*.gif
 results/**/*.mp4
 results/**/*.mov
 results/**/*.avi
 legacy/**/*.mp4
+
+# Solver runtime artifacts
+ipopt.out
+.casadi/
 
 # Final reports, summary CSVs, and representative figures are intentionally tracked.
 !results/**/*.md
