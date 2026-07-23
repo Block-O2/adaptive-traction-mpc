@@ -1,0 +1,71 @@
+# Draft only: this spec requires research approval before any formal execution.
+experiment_id: stage11c_state_source_audit
+title: Estimated-state versus true-state paired parameter-subspace audit
+status: draft_pending_research_approval
+research_question: Is errors-in-variables/state-estimation error the dominant limitation in passive parameter identification?
+mechanism_hypothesis: Replacing only the regression state source with replay true states may restore parameter-profile truth coverage if estimated-state EIV is the dominant limitation.
+competing_explanations:
+  - Passive trajectories do not contain sufficient information for a stable parameter subspace.
+  - The model structure limits practical identifiability independently of state-source error.
+
+baseline: estimated-state affine regression using UKF-bias replay state estimates
+treatment: true-state oracle affine regression using replay true states
+single_variable: regression state source
+fixed_variables:
+  - Stage 9J replay rows and condition/seed identities
+  - actions and replay alignment
+  - 70-transition window endpoints
+  - row weights
+  - affine parameterization [lambda, kappa, beta]
+  - adaptive profiles
+  - SVD and subspace diagnostics
+
+dataset: results/stage9j_gap_decomposition/stage9j_replay.csv
+conditions:
+  - clean
+  - initial_theta_offset
+  - noise
+  - noise_bias
+  - stronger_noise
+  - mass_mismatch
+  - parameter_mismatch_low_k
+  - parameter_mismatch_high_k
+seeds: [101, 102, 103]
+required_logs:
+  - paired_window_metrics.csv
+  - paired_profile_summary.csv
+  - state_source_summary.csv
+  - run_manifest.json
+  - stage11c_report.md
+primary_metrics:
+  - 1D and 2D profile truth inclusion
+  - profile optimum relative error and relative width
+  - weighted residual RMS
+  - physical-scale condition number
+  - conditional lambda information
+  - direction and subspace stability
+secondary_metrics:
+  - numerical rank
+  - state-source paired direction angles
+
+pass_criteria: pending_research_approval
+fail_criteria: pending_research_approval
+inconclusive_criteria: pending_research_approval
+
+allowed_changes:
+  - replace estimated replay states with true replay states only within the affine regression construction
+forbidden_changes:
+  - new estimator, controller, safety architecture, or active excitation
+  - changes to replay actions, window endpoints, weights, parameterization, profiles, or diagnostics
+  - treating true-state oracle regression as a deployable estimator
+
+smoke_execution: Codex may run only explicitly authorized unit tests, compile checks, and smoke validation outside authoritative result directories.
+formal_execution: User manually runs the approved full paired audit; Codex must not run the full audit.
+expected_outputs:
+  - local/non-authoritative results/stage11c_state_source_audit/ until explicit promotion
+  - expected matrix: 8 conditions, 3 seeds, 24 runs, 710 windows, 70 transitions per window
+provenance:
+  baseline_replay: results/stage9j_gap_decomposition/stage9j_replay.csv
+  implementation: scripts/run_stage11b_parameter_subspace_audit.py
+  existing_authoritative_context: results/stage11b_parameter_subspace_audit/
+result_status: smoke_only

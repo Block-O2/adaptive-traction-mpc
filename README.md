@@ -96,6 +96,8 @@ These experiment commands are expensive and overwrite files at the selected outp
 
 ## Results and reports index
 
+- [Live research state](docs/research/CURRENT_STATE.md)
+- [Research execution workflow](docs/research/WORKFLOW.md)
 - [Results index](results/README.md)
 - [Reproducibility manifest](results/reproducibility_manifest.md)
 - [Legacy Stage 1–8 archive](results/archive/legacy_stages/README.md)
