@@ -101,6 +101,10 @@ These experiment commands are expensive and overwrite files at the selected outp
 - [Legacy Stage 1–8 archive](results/archive/legacy_stages/README.md)
 - [Stage 9J report](results/stage9j_gap_decomposition/stage9j_report.md)
 - [Stage 9K report](results/stage9k_identifier_ablation/stage9k_report.md)
+- [Stage 10A dynamics and parameterization audit](results/stage10a_dynamics_audit/stage10a_dynamics_parameterization_audit.md)
+- [Stage 10F MHE branch closeout](results/stage10f_mhe_divergence_audit/stage10f_report.md)
+- [Stage 11A information-metric audit](results/stage11a_information_metric_validation/stage11a_report.md)
+- [Stage 11B passive parameter-subspace audit](results/stage11b_parameter_subspace_audit/stage11b_report.md)
 
 ## Current validated findings
 
@@ -109,6 +113,10 @@ These experiment commands are expensive and overwrite files at the selected outp
 - Stage 9J identifies parameter error as the dominant measured contribution to the adaptive–oracle true-alpha gap; its interaction residual is diagnostic, not causal proof.
 - Stage 9K identifies errors-in-variables bias in the current UKF-to-NLS cascade.
 - Huber and Cauchy Windowed NLS variants did not pass the offline improvement gate, so the Stage 9K closed-loop comparison was not run.
+- Stage 10A shows that inverse-mass ratios provide a valid affine parameterization, while `k` and `b_r` are not reliably separable on the retained trajectories.
+- Stage 10B–10F show that the tested fixed-weight online MHE route does not pass the alpha, state, failure-rate, or solve-time gates; the branch is closed after alignment and fallback audits.
+- Stage 11A finds that information level predicts parameter-update quality only moderately and does not justify hard or soft update gating.
+- Stage 11B finds numerical rank without a practically stable passive parameter subspace. Stage 11C estimated-state/true-state pairing is implemented and smoke-tested, but its full audit remains pending.
 
 Negative and mixed results are retained rather than tuned away.
 
@@ -121,15 +129,13 @@ Negative and mixed results are retained rather than tuned away.
 - Current uncertainty diagnostics do not justify formal confidence bounds, robust tightening, or safety claims.
 - Event-triggered replanning was not validated as beneficial and is not the primary architecture.
 
-## Stage 10 roadmap
+## Midterm closeout and next method
 
-Stage 10 will redesign and evaluate state–parameter estimation, beginning with offline comparisons on the frozen Stage 9J replay and then applying an explicit gate before any closed-loop test. Candidate work includes estimator-aware errors-in-variables handling or a joint state–parameter estimator. Stage 10 is not implemented in this consolidation.
+Stages 10A–10F completed the current joint-MHE investigation on the frozen Stage 9J replay. The single- and multiple-shooting variants failed their predeclared offline gates, and the rolling audit found no remaining hidden indexing, output-selection, or failed-solve overwrite bug after the confirmed corrections. The tested fixed-weight online MHE route is therefore closed rather than tuned further.
 
-Recommended result directory:
+Stages 11A–11B then audited passive information and identifiable parameter subspaces. Their evidence does not support information-gated reduced NLS or a stable passive coordinate subspace. Stage 11C contains a paired estimated-state/true-state implementation for separating EIV from passive-information limits; only its smoke validation is complete, so no Stage 11C scientific conclusion is claimed here.
 
-```text
-results/stage10_joint_state_parameter_estimator/
-```
+Future experiments should use a separately scoped method and result directory. Existing negative and mixed results remain part of the retained empirical record.
 
 ## Reproducibility and artifact policy
 
