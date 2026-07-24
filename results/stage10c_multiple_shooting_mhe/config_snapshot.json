@@ -1,0 +1,66 @@
+{
+  "config_path": "configs/spring2d_safety_aware_cem.yaml",
+  "replay_path": "results/stage9j_gap_decomposition/stage9j_replay.csv",
+  "replay_sha256": "3a2965b0c54928a877fc6a78854ce35ed238acca03cc295186aba1eeb2dabe4f",
+  "stage10b_path": "results/stage10b_estimator_benchmark/offline_per_run.csv",
+  "stage10b_sha256": "a2f78a58e6bd200e0f1655362243197b9639b51d06db0c8c30116191c7337dcb",
+  "multiple_shooting_config": {
+    "window_size": 70,
+    "update_interval": 10,
+    "max_nfev": 45,
+    "measurement_weights": [
+      1.0,
+      0.25,
+      8.0,
+      0.6
+    ],
+    "arrival_state_scale": [
+      0.1,
+      1.0,
+      0.02,
+      0.1
+    ],
+    "lambda_arrival_state": 0.001,
+    "lambda_arrival_parameter": 0.001,
+    "mass_scale": 1.0,
+    "mass_bounds": [
+      0.5,
+      2.0
+    ],
+    "xtol": 1e-08,
+    "ftol": 1e-08,
+    "gtol": 1e-08,
+    "process_weights": [
+      316.2277660168,
+      31.6227766017,
+      1000.0,
+      100.0
+    ],
+    "state_scale": [
+      0.1,
+      1.0,
+      0.02,
+      0.1
+    ],
+    "lambda_scale": 1.0,
+    "state_lower": [
+      -3.1415926536,
+      -10.0,
+      0.29,
+      -5.0
+    ],
+    "state_upper": [
+      3.1415926536,
+      10.0,
+      0.41,
+      5.0
+    ],
+    "initialization_probe": true
+  },
+  "closed_loop_conditions_if_gate_passes": [
+    "clean",
+    "initial_theta_offset",
+    "stronger_noise",
+    "mass_mismatch"
+  ]
+}

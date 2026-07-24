@@ -1,0 +1,106 @@
+# Approved experiment contract. Formal execution remains reserved for the user.
+experiment_id: stage11c_state_source_audit
+title: Estimated-state versus true-state paired parameter-subspace audit
+status: approved
+research_question: Is errors-in-variables/state-estimation error the dominant limitation in passive parameter identification?
+mechanism_hypothesis: Using replay true states instead of estimated states restores a practically supported and cross-condition stable passive parameter subspace.
+competing_explanations:
+  - Passive trajectories do not contain sufficient information for a stable parameter subspace.
+  - The model structure limits practical identifiability independently of state-source error.
+
+baseline: estimated-state affine regression using UKF-bias replay state estimates
+treatment: true-state oracle affine regression using replay true states
+single_variable: regression state source
+fixed_variables:
+  - Stage 9J replay rows and condition/seed identities
+  - actions and replay alignment
+  - 70-transition window endpoints
+  - row weights
+  - affine parameterization [lambda, kappa, beta]
+  - adaptive profiles
+  - SVD and subspace diagnostics
+
+dataset: results/stage9j_gap_decomposition/stage9j_replay.csv
+conditions:
+  - clean
+  - initial_theta_offset
+  - noise
+  - noise_bias
+  - stronger_noise
+  - mass_mismatch
+  - parameter_mismatch_low_k
+  - parameter_mismatch_high_k
+seeds: [101, 102, 103]
+required_logs:
+  - paired_window_metrics.csv
+  - paired_profile_summary.csv
+  - state_source_summary.csv
+  - run_manifest.json
+  - stage11c_report.md
+primary_metrics:
+  - 1D and 2D profile truth inclusion
+  - profile optimum relative error and relative width
+  - weighted residual RMS
+  - physical-scale condition number
+  - conditional lambda information
+  - direction and subspace stability
+secondary_metrics:
+  - numerical rank
+  - state-source paired direction angles
+
+pass_criteria:
+  - The full matrix is complete and has valid provenance.
+  - The estimated-state source remains unsupported.
+  - The true-state source satisfies the unchanged Stage 11B support logic for lambda-only, [lambda, kappa], or a stable parameter combination.
+  - Relevant profile accuracy improves consistently in at least 6 of 8 conditions.
+  - No fixed variable changed.
+fail_criteria:
+  - The full matrix is complete and has valid provenance.
+  - The true-state source still establishes no stable passive parameter subspace.
+  - Neither the 1D nor 2D result reaches the existing Stage 11B practical-support standard.
+  - There is no consistent cross-condition restoration of profile accuracy or subspace stability.
+inconclusive_criteria:
+  - Mixed 1D and 2D results.
+  - Accuracy improvement without stable subspace restoration.
+  - Conflicting condition-level results.
+  - Incomplete matrix or invalid provenance.
+
+allowed_changes:
+  - replace estimated replay states with true replay states only within the affine regression construction
+forbidden_changes:
+  - new estimator, controller, safety architecture, or active excitation
+  - changes to replay actions, window endpoints, weights, parameterization, profiles, or diagnostics
+  - treating true-state oracle regression as a deployable estimator
+
+smoke_execution:
+  command: conda run -n mpc_learn python scripts/run_stage11b_parameter_subspace_audit.py --smoke --state-source paired
+  performed_by: Codex when explicitly authorized
+smoke_output_root: results/local/stage11c_state_source_audit_smoke
+formal_execution:
+  command: conda run -n mpc_learn python scripts/run_stage11b_parameter_subspace_audit.py --full --state-source paired
+  performed_by: user
+  unsupported_options:
+    - --resume
+    - --compute-only
+formal_output_root: results/stage11c_state_source_audit
+expected_matrix:
+  conditions: 8
+  seeds_per_condition: 3
+  runs: 24
+  windows: 710
+  transitions_per_window: 70
+  completeness: Exact run and window identity sets must match the identities derived from the authoritative replay and unchanged window rule; counts alone are insufficient.
+expected_outputs:
+  - paired_window_metrics.csv
+  - paired_profile_summary.csv
+  - state_source_summary.csv
+  - run_manifest.json
+  - command.txt
+  - mechanical_status.json
+  - resolved_config_snapshot.json
+  - stage11c_report.md
+provenance:
+  baseline_replay: results/stage9j_gap_decomposition/stage9j_replay.csv
+  implementation: scripts/run_stage11b_parameter_subspace_audit.py
+  existing_authoritative_context: results/stage11b_parameter_subspace_audit/
+result_status: smoke_only
