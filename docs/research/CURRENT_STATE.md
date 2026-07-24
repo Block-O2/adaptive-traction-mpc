@@ -37,7 +37,7 @@ Is passive parameter-identification failure mainly caused by errors-in-variables
 
 ## Next authorized action
 
-- Implement and smoke-test the approved Stage 11C experiment contract.
+- Review the Stage 11C mechanical-completeness patch.
 - Do not run the formal audit.
 
 ## Known documentation debt

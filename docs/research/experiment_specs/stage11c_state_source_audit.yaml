@@ -79,6 +79,9 @@ smoke_output_root: results/local/stage11c_state_source_audit_smoke
 formal_execution:
   command: conda run -n mpc_learn python scripts/run_stage11b_parameter_subspace_audit.py --full --state-source paired
   performed_by: user
+  unsupported_options:
+    - --resume
+    - --compute-only
 formal_output_root: results/stage11c_state_source_audit
 expected_matrix:
   conditions: 8
@@ -86,6 +89,7 @@ expected_matrix:
   runs: 24
   windows: 710
   transitions_per_window: 70
+  completeness: Exact run and window identity sets must match the identities derived from the authoritative replay and unchanged window rule; counts alone are insufficient.
 expected_outputs:
   - paired_window_metrics.csv
   - paired_profile_summary.csv
@@ -93,6 +97,7 @@ expected_outputs:
   - run_manifest.json
   - command.txt
   - mechanical_status.json
+  - resolved_config_snapshot.json
   - stage11c_report.md
 provenance:
   baseline_replay: results/stage9j_gap_decomposition/stage9j_replay.csv

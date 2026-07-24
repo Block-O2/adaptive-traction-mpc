@@ -10,7 +10,7 @@ import os
 import shlex
 import subprocess
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -51,6 +51,17 @@ DEFAULT_PROFILE_GRID_SIZE = 15
 STAGE11C_EXPERIMENT_ID = "stage11c_state_source_audit"
 STAGE11C_EXPECTED_RUNS = 24
 STAGE11C_EXPECTED_WINDOWS = 710
+STAGE11C_PROFILE_NAMES = frozenset({"lambda_1d", "lambda_kappa_2d"})
+STAGE11C_REQUIRED_OUTPUTS = (
+    "paired_window_metrics.csv",
+    "paired_profile_summary.csv",
+    "state_source_summary.csv",
+    "run_manifest.json",
+    "command.txt",
+    "mechanical_status.json",
+    "resolved_config_snapshot.json",
+    "stage11c_report.md",
+)
 PROFILE_CONFIDENCE = 0.95
 PROFILE_MAX_EXPANSIONS = 8
 PROFILE_MAX_REFINEMENTS = 4
@@ -926,6 +937,10 @@ def resolve_output_root(execution_mode: str, output_root: Path | None) -> Path:
 def validate_full_options(args: argparse.Namespace) -> None:
     if args.state_source != "paired":
         raise ValueError("full mode requires --state-source paired")
+    if args.compute_only:
+        raise ValueError("full mode rejects --compute-only")
+    if args.resume:
+        raise ValueError("full mode rejects --resume")
     if args.conditions is not None and (
         len(args.conditions) != len(CONDITIONS) or set(args.conditions) != set(CONDITIONS)
     ):
@@ -989,31 +1004,122 @@ def exact_command() -> str:
     return shlex.join([sys.executable, str(Path(__file__).resolve()), *sys.argv[1:]])
 
 
-def mechanical_status_for_run(
+def effective_command() -> str:
+    return exact_command()
+
+
+def output_root_is_nonempty(output_root: Path) -> bool:
+    return output_root.exists() and any(output_root.iterdir())
+
+
+def write_resolved_config_snapshot(
+    output_root: Path,
+    config: dict[str, Any],
+) -> str:
+    snapshot = output_root / "resolved_config_snapshot.json"
+    snapshot.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
+    return sha256_file(snapshot)
+
+
+def required_outputs_exist(output_root: Path) -> bool:
+    return all((output_root / name).is_file() for name in STAGE11C_REQUIRED_OUTPUTS)
+
+
+def run_identity(row: dict[str, Any]) -> tuple[str, int]:
+    return str(row["condition"]), int(row["seed"])
+
+
+def window_identity(row: dict[str, Any]) -> tuple[str, int, int, int]:
+    return (
+        str(row["condition"]),
+        int(row["seed"]),
+        int(row["window_start"]),
+        int(row["window_end"]),
+    )
+
+
+def expected_identity_matrix(
+    replay: dict[tuple[str, int], list[dict[str, Any]]],
+    conditions: list[str],
+    max_runs: int,
+    max_windows: int,
+) -> tuple[set[tuple[str, int]], set[tuple[str, int, int, int]]]:
+    expected_runs: set[tuple[str, int]] = set()
+    expected_windows: set[tuple[str, int, int, int]] = set()
+    for condition in conditions:
+        for seed in SEEDS:
+            if len(expected_runs) >= max_runs:
+                break
+            data = arrays(replay[(condition, seed)])
+            expected_runs.add((condition, int(seed)))
+            ends = [
+                end
+                for end in range(UPDATE_INTERVAL, len(data["time"]), UPDATE_INTERVAL)
+                if end >= WINDOW_TRANSITIONS
+            ][-max_windows:]
+            for end in ends:
+                start = end - WINDOW_TRANSITIONS + 1
+                expected_windows.add((condition, int(seed), start, end))
+        if len(expected_runs) >= max_runs:
+            break
+    return expected_runs, expected_windows
+
+
+def exact_identity_checks(
     execution_mode: str,
     state_source: str,
-    conditions: list[str],
-    seeds: list[int],
-    actual_runs: int,
-    actual_windows: int,
-    expected_runs: int,
-    expected_windows: int,
+    expected_runs: set[tuple[str, int]],
+    expected_windows: set[tuple[str, int, int, int]],
+    paired_windows: list[dict[str, Any]],
+    paired_profiles: list[dict[str, Any]],
+    estimated_windows: list[dict[str, Any]],
+    true_windows: list[dict[str, Any]],
     profile_grid_size: int,
     git_dirty_before_run: bool,
-) -> tuple[str, dict[str, bool]]:
-    checks = {
+    required_outputs_complete: bool,
+) -> dict[str, bool]:
+    observed_window_list = [window_identity(row) for row in paired_windows]
+    observed_window_counter = Counter(observed_window_list)
+    observed_window_set = set(observed_window_list)
+    observed_run_set = {run_identity(row) for row in paired_windows}
+    expected_profile_ids = {
+        (*identity, profile)
+        for identity in expected_windows
+        for profile in STAGE11C_PROFILE_NAMES
+    }
+    observed_profile_counter = Counter(
+        (*window_identity(row), str(row["profile"])) for row in paired_profiles
+    )
+    estimated_counter = Counter(window_identity(row) for row in estimated_windows)
+    true_counter = Counter(window_identity(row) for row in true_windows)
+    paired_counter = Counter(observed_window_list)
+    return {
         "state_source_valid": state_source == "paired",
-        "conditions_complete": (
-            set(conditions) == set(CONDITIONS)
+        "run_identity_complete": observed_run_set == expected_runs,
+        "window_identity_complete": observed_window_set == expected_windows,
+        "expected_matrix_size_valid": (
+            len(expected_runs) == STAGE11C_EXPECTED_RUNS
+            and len(expected_windows) == STAGE11C_EXPECTED_WINDOWS
             if execution_mode == "full"
-            else len(conditions) >= 1
+            else len(expected_runs) >= 1 and len(expected_windows) >= 1
         ),
-        "seeds_complete": (
-            set(seeds) == set(SEEDS) if execution_mode == "full" else len(seeds) >= 1
+        "no_duplicate_windows": all(count == 1 for count in observed_window_counter.values()),
+        "profile_identity_complete": (
+            set(observed_profile_counter) == expected_profile_ids
+            and all(count == 1 for count in observed_profile_counter.values())
         ),
-        "runs_complete": actual_runs == expected_runs,
-        "windows_complete": actual_windows == expected_windows,
-        "window_transitions_fixed": WINDOW_TRANSITIONS == 70,
+        "paired_identity_complete": (
+            estimated_counter == true_counter == paired_counter
+            and set(paired_counter) == expected_windows
+            and all(count == 1 for count in estimated_counter.values())
+            and all(count == 1 for count in true_counter.values())
+            and all(count == 1 for count in paired_counter.values())
+        ),
+        "runs_complete": len(observed_run_set) == len(expected_runs),
+        "windows_complete": len(paired_windows) == len(expected_windows),
+        "window_transitions_fixed": all(
+            int(row["transitions"]) == WINDOW_TRANSITIONS for row in paired_windows
+        ),
         "profile_grid_valid": (
             profile_grid_size == DEFAULT_PROFILE_GRID_SIZE
             if execution_mode == "full"
@@ -1022,7 +1128,14 @@ def mechanical_status_for_run(
         "git_clean_for_formal": (
             not git_dirty_before_run if execution_mode == "full" else True
         ),
+        "required_outputs_complete": bool(required_outputs_complete),
     }
+
+
+def mechanical_status_for_run(
+    execution_mode: str,
+    checks: dict[str, bool],
+) -> str:
     if execution_mode == "smoke":
         status = "valid_smoke" if all(checks.values()) else "invalid_incomplete_run"
     elif not checks["git_clean_for_formal"]:
@@ -1031,7 +1144,7 @@ def mechanical_status_for_run(
         status = "valid_full_run"
     else:
         status = "invalid_incomplete_run"
-    return status, checks
+    return status
 
 
 def build_run_manifest(
@@ -1040,27 +1153,20 @@ def build_run_manifest(
     state_source: str,
     conditions: list[str],
     seeds: list[int],
+    expected_runs: int,
     actual_runs: int,
+    expected_windows: int,
     actual_windows: int,
     profile_grid_size: int,
     git_commit: str,
     git_dirty_before_run: bool,
     command: str,
+    effective_command_value: str,
+    conda_environment: str,
+    resolved_config_sha256: str,
+    checks: dict[str, bool],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    expected_runs = 1 if execution_mode == "smoke" else STAGE11C_EXPECTED_RUNS
-    expected_windows = 3 if execution_mode == "smoke" else STAGE11C_EXPECTED_WINDOWS
-    status, checks = mechanical_status_for_run(
-        execution_mode,
-        state_source,
-        conditions,
-        seeds,
-        actual_runs,
-        actual_windows,
-        expected_runs,
-        expected_windows,
-        profile_grid_size,
-        git_dirty_before_run,
-    )
+    status = mechanical_status_for_run(execution_mode, checks)
     script_path = Path(__file__).resolve()
     replay_path = Path(DEFAULT_REPLAY).resolve()
     config_path = Path(DEFAULT_CONFIG).resolve()
@@ -1070,12 +1176,16 @@ def build_run_manifest(
         "git_commit": git_commit,
         "git_dirty_before_run": bool(git_dirty_before_run),
         "exact_command": command,
+        "effective_command": effective_command_value,
+        "conda_environment": conda_environment,
         "script_path": repository_path(script_path),
         "script_sha256": sha256_file(script_path),
         "replay_path": repository_path(replay_path),
         "replay_sha256": sha256_file(replay_path),
         "config_path": repository_path(config_path),
         "config_sha256": sha256_file(config_path),
+        "resolved_config_snapshot": "resolved_config_snapshot.json",
+        "resolved_config_sha256": resolved_config_sha256,
         "state_source": state_source,
         "conditions": conditions,
         "seeds": seeds,
@@ -1096,6 +1206,7 @@ def build_run_manifest(
         "execution_mode": execution_mode,
         "mechanical_status": status,
         "mechanical_completeness": manifest["mechanical_completeness"],
+        **checks,
         "checks": checks,
     }
     return manifest, mechanical
@@ -1134,12 +1245,17 @@ def main(argv: list[str] | None = None) -> None:
     git_commit, git_dirty_before_run = git_state_before_run()
     if args.execution_mode == "full" and git_dirty_before_run:
         parser.error("full mode requires a clean Git worktree before execution")
+    if args.execution_mode == "full" and output_root_is_nonempty(output_root):
+        parser.error("full mode requires an absent or empty output root")
     output_root.mkdir(parents=True, exist_ok=True)
     conditions = args.conditions or list(CONDITIONS)
     max_runs = args.max_runs if args.max_runs is not None else (1 if args.execution_mode == "smoke" else 10**9)
     max_windows = args.max_windows if args.max_windows is not None else (3 if args.execution_mode == "smoke" else 10**9)
     grid_size = min(args.profile_grid_size, 5) if args.execution_mode == "smoke" else args.profile_grid_size
     replay = load_replay(DEFAULT_REPLAY); config = load_experiment_config(DEFAULT_CONFIG)
+    expected_runs, expected_windows = expected_identity_matrix(
+        replay, conditions, max_runs, max_windows
+    )
     sources = ("estimated", "true") if args.state_source == "paired" else (args.state_source,)
     source_windows: dict[str, list[dict[str, Any]]] = {source: [] for source in sources}
     source_profiles: dict[str, list[dict[str, Any]]] = {source: [] for source in sources}
@@ -1183,23 +1299,83 @@ def main(argv: list[str] | None = None) -> None:
     write_dict_csv(output_root / "paired_window_metrics.csv", paired_windows)
     write_dict_csv(output_root / "paired_profile_summary.csv", paired_profiles)
     write_dict_csv(output_root / "state_source_summary.csv", source_summary_rows)
+    resolved_config_sha256 = write_resolved_config_snapshot(output_root, config)
     run_pairs = {(str(row["condition"]), int(row["seed"])) for row in paired_windows}
     observed_conditions = [
         condition for condition in CONDITIONS if condition in {str(row["condition"]) for row in paired_windows}
     ]
     observed_seeds = sorted({int(row["seed"]) for row in paired_windows})
+    checks = exact_identity_checks(
+        args.execution_mode,
+        args.state_source,
+        expected_runs,
+        expected_windows,
+        paired_windows,
+        paired_profiles,
+        source_windows.get("estimated", []),
+        source_windows.get("true", []),
+        grid_size,
+        git_dirty_before_run,
+        required_outputs_complete=False,
+    )
+    command = exact_command()
+    effective = effective_command()
+    conda_environment = os.environ.get("CONDA_DEFAULT_ENV", "")
     manifest, mechanical = build_run_manifest(
         args.execution_mode,
         output_root,
         args.state_source,
         observed_conditions,
         observed_seeds,
+        len(expected_runs),
         len(run_pairs),
+        len(expected_windows),
         len(paired_windows),
         grid_size,
         git_commit,
         git_dirty_before_run,
-        exact_command(),
+        command,
+        effective,
+        conda_environment,
+        resolved_config_sha256,
+        checks,
+    )
+    write_run_provenance(output_root, manifest, mechanical)
+    if not args.compute_only:
+        write_stage11c_report(
+            manifest, source_summary_rows, paired_profiles, output_root
+        )
+    checks = exact_identity_checks(
+        args.execution_mode,
+        args.state_source,
+        expected_runs,
+        expected_windows,
+        paired_windows,
+        paired_profiles,
+        source_windows.get("estimated", []),
+        source_windows.get("true", []),
+        grid_size,
+        git_dirty_before_run,
+        required_outputs_complete=required_outputs_exist(output_root),
+    )
+    manifest, mechanical = build_run_manifest(
+        args.execution_mode,
+        output_root,
+        args.state_source,
+        observed_conditions,
+        observed_seeds,
+        len(expected_runs),
+        len(run_pairs),
+        len(expected_windows),
+        len(paired_windows),
+        grid_size,
+        git_commit,
+        git_dirty_before_run,
+        command,
+        effective,
+        conda_environment,
+        resolved_config_sha256,
+        checks,
     )
     write_run_provenance(output_root, manifest, mechanical)
     if not args.compute_only:

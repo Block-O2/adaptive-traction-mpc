@@ -20,6 +20,8 @@ from run_stage11b_parameter_subspace_audit import (
     analyze_window,
     build_run_manifest,
     build_affine_window,
+    exact_identity_checks,
+    expected_identity_matrix,
     mechanical_status_for_run,
     pair_profile_rows,
     pair_window_rows,
@@ -27,8 +29,10 @@ from run_stage11b_parameter_subspace_audit import (
     profile_lambda_kappa,
     ridge_direction_from_accepted,
     residual_cost,
+    sha256_file,
     svd_metrics,
     verify_truth_metadata,
+    write_resolved_config_snapshot,
     write_stage11c_report,
 )
 
@@ -212,6 +216,8 @@ def test_execution_mode_must_be_selected_explicitly():
         ["--full", "--max-runs", "1"],
         ["--full", "--max-windows", "3"],
         ["--full", "--profile-grid-size", "5"],
+        ["--full", "--compute-only"],
+        ["--full", "--resume"],
     ],
 )
 def test_full_rejects_partial_options(arguments):
@@ -238,7 +244,79 @@ def test_report_only_uses_specified_output_root(tmp_path):
     assert report.output_root == tmp_path.resolve()
 
 
+def synthetic_full_identity_rows():
+    expected_runs = {
+        (f"condition_{run_index}", run_index)
+        for run_index in range(stage11b.STAGE11C_EXPECTED_RUNS)
+    }
+    run_ids = sorted(expected_runs)
+    paired_windows = []
+    paired_profiles = []
+    for index in range(stage11b.STAGE11C_EXPECTED_WINDOWS):
+        condition, seed = run_ids[index % len(run_ids)]
+        window = {
+            "condition": condition,
+            "seed": seed,
+            "window_start": index,
+            "window_end": index + stage11b.WINDOW_TRANSITIONS - 1,
+            "transitions": stage11b.WINDOW_TRANSITIONS,
+        }
+        paired_windows.append(window)
+        for profile in sorted(stage11b.STAGE11C_PROFILE_NAMES):
+            paired_profiles.append({**window, "profile": profile})
+    expected_windows = {stage11b.window_identity(row) for row in paired_windows}
+    return expected_runs, expected_windows, paired_windows, paired_profiles
+
+
+def test_authoritative_replay_defines_exact_full_identity_matrix():
+    replay = load_replay(DEFAULT_REPLAY)
+    expected_runs, expected_windows = expected_identity_matrix(
+        replay,
+        list(stage11b.CONDITIONS),
+        10**9,
+        10**9,
+    )
+    assert len(expected_runs) == stage11b.STAGE11C_EXPECTED_RUNS
+    assert len(expected_windows) == stage11b.STAGE11C_EXPECTED_WINDOWS
+
+
+def exact_full_checks(paired_windows=None, paired_profiles=None):
+    expected_runs, expected_windows, complete_windows, complete_profiles = (
+        synthetic_full_identity_rows()
+    )
+    paired_windows = complete_windows if paired_windows is None else paired_windows
+    paired_profiles = complete_profiles if paired_profiles is None else paired_profiles
+    return exact_identity_checks(
+        "full",
+        "paired",
+        expected_runs,
+        expected_windows,
+        paired_windows,
+        paired_profiles,
+        paired_windows,
+        paired_windows,
+        DEFAULT_PROFILE_GRID_SIZE,
+        False,
+        required_outputs_complete=True,
+    )
+
+
 def test_manifest_contains_required_provenance_fields(tmp_path):
+    checks = {
+        "state_source_valid": True,
+        "run_identity_complete": True,
+        "window_identity_complete": True,
+        "expected_matrix_size_valid": True,
+        "no_duplicate_windows": True,
+        "profile_identity_complete": True,
+        "paired_identity_complete": True,
+        "runs_complete": True,
+        "windows_complete": True,
+        "window_transitions_fixed": True,
+        "profile_grid_valid": True,
+        "git_clean_for_formal": True,
+        "required_outputs_complete": True,
+    }
     manifest, mechanical = build_run_manifest(
         "smoke",
         tmp_path,
@@ -246,48 +324,98 @@ def test_manifest_contains_required_provenance_fields(tmp_path):
         ["clean"],
         [101],
         1,
+        1,
+        3,
         3,
         5,
         "abc123",
         True,
         "python runner.py --smoke",
+        "python runner.py --smoke",
+        "mpc_learn",
+        "resolved-sha",
+        checks,
     )
     required = {
         "experiment_id", "execution_mode", "git_commit",
-        "git_dirty_before_run", "exact_command", "script_path",
+        "git_dirty_before_run", "exact_command", "effective_command",
+        "conda_environment", "script_path",
         "script_sha256", "replay_path", "replay_sha256", "config_path",
-        "config_sha256", "state_source", "conditions", "seeds",
+        "config_sha256", "resolved_config_snapshot",
+        "resolved_config_sha256", "state_source", "conditions", "seeds",
         "expected_runs", "actual_runs", "expected_windows",
         "actual_windows", "window_transitions", "profile_grid_size",
         "output_root", "mechanical_completeness", "mechanical_status",
     }
     assert required <= set(manifest)
     assert manifest["mechanical_status"] == "valid_smoke"
+    assert manifest["resolved_config_sha256"] == "resolved-sha"
     assert mechanical["mechanical_status"] == "valid_smoke"
+    for field in (
+        "run_identity_complete",
+        "window_identity_complete",
+        "no_duplicate_windows",
+        "profile_identity_complete",
+        "paired_identity_complete",
+        "required_outputs_complete",
+    ):
+        assert mechanical[field]
 
 
-def test_incomplete_full_matrix_is_mechanically_invalid():
-    status, checks = mechanical_status_for_run(
-        "full",
-        "paired",
-        list(stage11b.CONDITIONS),
-        list(stage11b.SEEDS),
-        23,
-        709,
-        24,
-        710,
-        DEFAULT_PROFILE_GRID_SIZE,
-        False,
-    )
+def test_duplicate_and_missing_window_identity_is_invalid_at_same_count():
+    _, _, complete_windows, complete_profiles = synthetic_full_identity_rows()
+    altered_windows = [dict(row) for row in complete_windows]
+    altered_windows[-1] = dict(altered_windows[0])
+    checks = exact_full_checks(altered_windows, complete_profiles)
+    status = mechanical_status_for_run("full", checks)
     assert status == "invalid_incomplete_run"
-    assert not checks["runs_complete"]
-    assert not checks["windows_complete"]
+    assert len(altered_windows) == stage11b.STAGE11C_EXPECTED_WINDOWS
+    assert not checks["window_identity_complete"]
+    assert not checks["no_duplicate_windows"]
+
+
+@pytest.mark.parametrize("mode", ["missing", "duplicate"])
+def test_missing_or_duplicate_profile_identity_is_invalid(mode):
+    _, _, complete_windows, complete_profiles = synthetic_full_identity_rows()
+    altered_profiles = [dict(row) for row in complete_profiles]
+    if mode == "missing":
+        altered_profiles.pop()
+    else:
+        altered_profiles[-1] = dict(altered_profiles[0])
+    checks = exact_full_checks(complete_windows, altered_profiles)
+    assert mechanical_status_for_run("full", checks) == "invalid_incomplete_run"
+    assert not checks["profile_identity_complete"]
+
+
+def test_exact_full_identity_matrix_is_valid():
+    checks = exact_full_checks()
+    assert all(checks.values())
+    assert mechanical_status_for_run("full", checks) == "valid_full_run"
+
+
+def test_resolved_config_snapshot_and_hash_are_written(tmp_path):
+    config = {"controller": {"horizon": 18}, "conditions": ["clean"]}
+    digest = write_resolved_config_snapshot(tmp_path, config)
+    snapshot = tmp_path / "resolved_config_snapshot.json"
+    assert snapshot.exists()
+    assert digest == sha256_file(snapshot)
+    assert stage11b.json.loads(snapshot.read_text()) == config
 
 
 def test_full_rejects_dirty_worktree_before_loading_replay(monkeypatch):
     monkeypatch.setattr(stage11b, "git_state_before_run", lambda: ("abc123", True))
     with pytest.raises(SystemExit):
         stage11b.main(["--full"])
+
+
+def test_full_rejects_nonempty_output_root_before_loading_replay(
+    monkeypatch, tmp_path
+):
+    (tmp_path / "existing.txt").write_text("preserve")
+    monkeypatch.setattr(stage11b, "git_state_before_run", lambda: ("abc123", False))
+    with pytest.raises(SystemExit):
+        stage11b.main(["--full", "--output-root", str(tmp_path)])
+    assert (tmp_path / "existing.txt").read_text() == "preserve"
 
 
 def test_smoke_and_full_reports_do_not_make_scientific_judgments(tmp_path):
