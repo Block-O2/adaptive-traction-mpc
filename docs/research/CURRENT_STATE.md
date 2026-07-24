@@ -37,8 +37,9 @@ Is passive parameter-identification failure mainly caused by errors-in-variables
 
 ## Next authorized action
 
-- Review the Stage 11C mechanical-completeness patch.
-- Do not run the formal audit.
+- Run the approved Stage 11C full paired audit manually.
+- Do not modify code, configuration, replay data, or the experiment matrix.
+- Return the formal artifacts for PASS/FAIL/INCONCLUSIVE review.
 
 ## Known documentation debt
 
