@@ -11,14 +11,19 @@ from run_spring2d_adaptive_mpc_conditions import load_experiment_config
 from run_spring2d_stage10b_estimator_benchmark import DEFAULT_CONFIG, DEFAULT_REPLAY, arrays, load_replay
 import run_stage11b_parameter_subspace_audit as stage11b
 from run_stage11b_parameter_subspace_audit import (
+    DEFAULT_PROFILE_GRID_SIZE,
+    OUTPUT_STAGE11C_FORMAL,
+    OUTPUT_STAGE11C_SMOKE,
     adaptive_profile_lambda,
     adaptive_profile_lambda_kappa,
     aggregate_directions,
     analyze_window,
+    build_run_manifest,
     build_affine_window,
+    mechanical_status_for_run,
     pair_profile_rows,
     pair_window_rows,
-    paired_full_conclusion,
+    parse_cli_args,
     profile_lambda_kappa,
     ridge_direction_from_accepted,
     residual_cost,
@@ -166,7 +171,7 @@ def test_synthetic_noiseless_true_state_includes_truth(monkeypatch):
     assert all(profile["state_source"] == "true" and profile["truth_in_region_95"] for profile in profiles)
 
 
-def test_stage11c_report_conclusions_require_full_paired_results(monkeypatch, tmp_path):
+def paired_report_rows():
     paired = {
         "state_source": "paired", "scope": "overall",
         "true_minus_estimated_truth_inclusion_1d": 0.5,
@@ -179,10 +184,132 @@ def test_stage11c_report_conclusions_require_full_paired_results(monkeypatch, tm
         "true_minus_estimated_v1_stability_concentration": 0.1,
         "true_minus_estimated_v12_stability_concentration": 0.1,
     }
-    smoke_manifest = {"mode": "smoke", "state_source": "paired", "runs": 1, "windows": 3}
-    full_manifest = {"mode": "full", "state_source": "paired", "runs": 24, "windows": 710}
-    assert paired_full_conclusion(smoke_manifest, [paired]) is None
-    assert paired_full_conclusion(full_manifest, [paired]) is not None
-    monkeypatch.setattr(stage11b, "OUTPUT_STAGE11C", tmp_path)
-    write_stage11c_report(smoke_manifest, [paired], [])
-    assert "Required conclusions" not in (tmp_path / "stage11c_report.md").read_text()
+    source_common = {
+        "scope": "overall",
+        "summary_kind": "state_source",
+        "practical_identifiability": "not established",
+        "profile_truth_inclusion_1d_fraction": 0.5,
+        "profile_truth_inclusion_2d_fraction": 0.1,
+        "cross_condition_stable_1d_subspace": False,
+        "cross_condition_stable_2d_subspace": False,
+    }
+    return [
+        {**source_common, "state_source": "estimated"},
+        {**source_common, "state_source": "true"},
+        paired,
+    ]
+
+
+def test_execution_mode_must_be_selected_explicitly():
+    with pytest.raises(SystemExit):
+        parse_cli_args([])
+
+
+@pytest.mark.parametrize(
+    "arguments",
+    [
+        ["--full", "--conditions", "clean"],
+        ["--full", "--max-runs", "1"],
+        ["--full", "--max-windows", "3"],
+        ["--full", "--profile-grid-size", "5"],
+    ],
+)
+def test_full_rejects_partial_options(arguments):
+    with pytest.raises(SystemExit):
+        parse_cli_args(arguments)
+
+
+def test_full_requires_paired_state_source():
+    with pytest.raises(SystemExit):
+        parse_cli_args(["--full", "--state-source", "true"])
+
+
+def test_default_output_roots_are_separated():
+    _, smoke = parse_cli_args(["--smoke"])
+    _, full = parse_cli_args(["--full"])
+    assert smoke.output_root == OUTPUT_STAGE11C_SMOKE
+    assert full.output_root == OUTPUT_STAGE11C_FORMAL
+
+
+def test_report_only_uses_specified_output_root(tmp_path):
+    _, report = parse_cli_args(
+        ["--report-only", "--output-root", str(tmp_path)]
+    )
+    assert report.output_root == tmp_path.resolve()
+
+
+def test_manifest_contains_required_provenance_fields(tmp_path):
+    manifest, mechanical = build_run_manifest(
+        "smoke",
+        tmp_path,
+        "paired",
+        ["clean"],
+        [101],
+        1,
+        3,
+        5,
+        "abc123",
+        True,
+        "python runner.py --smoke",
+    )
+    required = {
+        "experiment_id", "execution_mode", "git_commit",
+        "git_dirty_before_run", "exact_command", "script_path",
+        "script_sha256", "replay_path", "replay_sha256", "config_path",
+        "config_sha256", "state_source", "conditions", "seeds",
+        "expected_runs", "actual_runs", "expected_windows",
+        "actual_windows", "window_transitions", "profile_grid_size",
+        "output_root", "mechanical_completeness", "mechanical_status",
+    }
+    assert required <= set(manifest)
+    assert manifest["mechanical_status"] == "valid_smoke"
+    assert mechanical["mechanical_status"] == "valid_smoke"
+
+
+def test_incomplete_full_matrix_is_mechanically_invalid():
+    status, checks = mechanical_status_for_run(
+        "full",
+        "paired",
+        list(stage11b.CONDITIONS),
+        list(stage11b.SEEDS),
+        23,
+        709,
+        24,
+        710,
+        DEFAULT_PROFILE_GRID_SIZE,
+        False,
+    )
+    assert status == "invalid_incomplete_run"
+    assert not checks["runs_complete"]
+    assert not checks["windows_complete"]
+
+
+def test_full_rejects_dirty_worktree_before_loading_replay(monkeypatch):
+    monkeypatch.setattr(stage11b, "git_state_before_run", lambda: ("abc123", True))
+    with pytest.raises(SystemExit):
+        stage11b.main(["--full"])
+
+
+def test_smoke_and_full_reports_do_not_make_scientific_judgments(tmp_path):
+    rows = paired_report_rows()
+    smoke_root = tmp_path / "smoke"
+    full_root = tmp_path / "full"
+    smoke_manifest = {
+        "execution_mode": "smoke", "state_source": "paired",
+        "actual_runs": 1, "actual_windows": 3,
+        "mechanical_status": "valid_smoke",
+    }
+    full_manifest = {
+        "execution_mode": "full", "state_source": "paired",
+        "actual_runs": 24, "actual_windows": 710,
+        "mechanical_status": "valid_full_run",
+    }
+    write_stage11c_report(smoke_manifest, rows, [], smoke_root)
+    write_stage11c_report(full_manifest, rows, [], full_root)
+    smoke = (smoke_root / "stage11c_report.md").read_text()
+    full = (full_root / "stage11c_report.md").read_text()
+    assert "implementation validation only" in smoke
+    assert "Required conclusions" not in smoke
+    assert "pending review against the approved Experiment Spec" in full
+    assert "Required conclusions" not in full
+    assert "dominant limitation" not in full

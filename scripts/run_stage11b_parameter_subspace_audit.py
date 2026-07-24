@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
+import shlex
+import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -36,12 +39,18 @@ from run_spring2d_stage10b_estimator_benchmark import (
 from run_spring2d_stage9j_gap_decomposition import CONDITIONS, SEEDS, stage9j_overrides, write_dict_csv
 
 OUTPUT = ROOT / "results" / "stage11b_parameter_subspace_audit"
-OUTPUT_STAGE11C = ROOT / "results" / "stage11c_state_source_audit"
+OUTPUT_STAGE11C_SMOKE = ROOT / "results" / "local" / "stage11c_state_source_audit_smoke"
+OUTPUT_STAGE11C_FORMAL = ROOT / "results" / "stage11c_state_source_audit"
+OUTPUT_STAGE11C = OUTPUT_STAGE11C_FORMAL
 PARAMETER_ORDER = ("lambda", "kappa", "beta")
 PHYSICAL_SCALE = AFFINE_SCALE.copy()
 ROW_SQRT_WEIGHTS = np.array([0.6, 0.25])
 WINDOW_TRANSITIONS = 70
 UPDATE_INTERVAL = 10
+DEFAULT_PROFILE_GRID_SIZE = 15
+STAGE11C_EXPERIMENT_ID = "stage11c_state_source_audit"
+STAGE11C_EXPECTED_RUNS = 24
+STAGE11C_EXPECTED_WINDOWS = 710
 PROFILE_CONFIDENCE = 0.95
 PROFILE_MAX_EXPANSIONS = 8
 PROFILE_MAX_REFINEMENTS = 4
@@ -741,45 +750,47 @@ def summarize_state_sources(
     return summaries
 
 
-def paired_full_conclusion(manifest: dict[str, Any], state_source_summary: list[dict[str, Any]]) -> dict[str, str] | None:
-    if manifest.get("mode") != "full" or manifest.get("state_source") != "paired":
-        return None
-    paired = next(row for row in state_source_summary if row["state_source"] == "paired" and row["scope"] == "overall")
-    restored = (
-        float(paired["true_minus_estimated_truth_inclusion_1d"]) >= 0.25
-        or float(paired["true_minus_estimated_truth_inclusion_2d"]) >= 0.25
-    )
-    if restored:
-        return {
-            "coverage": "True-state regression materially restores truth coverage.",
-            "dominant_limitation": "The paired evidence supports EIV/state-estimation error as the dominant limitation.",
-            "compatible_families": "Mathematically compatible next families are state-space smoothing with smoothed-state regression, EIV-aware/TLS-style offline regression, and joint latent-state parameter estimation or EM.",
-        }
-    return {
-        "coverage": "True-state regression does not materially restore truth coverage.",
-        "dominant_limitation": "Passive trajectories/model structure remain inadequate for a stable identified subspace; this is not primarily resolved by replacing estimated states with true states.",
-        "compatible_families": "No online parameter-estimator family is justified by this passive-information result alone; smoothing/EM may reduce EIV but cannot create missing excitation.",
-    }
-
-
-def write_stage11c_report(manifest: dict[str, Any], state_source_summary: list[dict[str, Any]], paired_profiles: list[dict[str, Any]]) -> None:
-    smoke = manifest["mode"] == "smoke"
+def write_stage11c_report(
+    manifest: dict[str, Any],
+    state_source_summary: list[dict[str, Any]],
+    paired_profiles: list[dict[str, Any]],
+    output_root: Path | None = None,
+) -> None:
+    output_root = OUTPUT_STAGE11C if output_root is None else Path(output_root)
+    execution_mode = str(manifest.get("execution_mode", manifest.get("mode", "unknown")))
+    smoke = execution_mode == "smoke"
     paired = next(row for row in state_source_summary if row["state_source"] == "paired" and row["scope"] == "overall") if manifest["state_source"] == "paired" else None
+    source_overall = {
+        str(row["state_source"]): row
+        for row in state_source_summary
+        if row["scope"] == "overall" and row["state_source"] in {"estimated", "true"}
+    }
     lines = [
         "# Stage 11C: Estimated-State vs True-State Paired Subspace Audit", "", "## Dataset coverage", "",
-        f"- Mode: `{manifest['mode']}`; state source: `{manifest['state_source']}`; runs={manifest['runs']}; windows={manifest['windows']}; transitions/window={WINDOW_TRANSITIONS}.",
+        f"- Mode: `{execution_mode}`; state source: `{manifest['state_source']}`; runs={manifest.get('actual_runs', manifest.get('runs'))}; windows={manifest.get('actual_windows', manifest.get('windows'))}; transitions/window={WINDOW_TRANSITIONS}.",
+        f"- Mechanical status: `{manifest.get('mechanical_status', 'not_recorded')}`.",
         "- Both sources use identical actions, window ends, weights, parameterization, adaptive profiles, and SVD/subspace diagnostics.", "",
     ]
     if smoke:
         lines += ["## Smoke-test status", "", "This is implementation validation only. Paired scientific conclusions are intentionally withheld until a full paired result exists.", ""]
-    elif paired is not None:
-        conclusion = paired_full_conclusion(manifest, state_source_summary)
-        assert conclusion is not None
+    else:
         lines += [
-            "## Required conclusions", "", f"1. {conclusion['coverage']}", f"2. {conclusion['dominant_limitation']}",
-            "3. The paired report distinguishes EIV from passive-information limits through same-window state-source replacement.",
-            f"4. {conclusion['compatible_families']}", "",
+            "## Scientific interpretation", "",
+            "Scientific interpretation is pending review against the approved Experiment Spec.",
+            "This report presents observed metrics only and does not assign scientific PASS, FAIL, or INCONCLUSIVE.", "",
         ]
+    lines += ["## State-source metrics", ""]
+    for source in ("estimated", "true"):
+        if source not in source_overall:
+            continue
+        row = source_overall[source]
+        lines.append(
+            f"- `{source}`: practical identifiability={row['practical_identifiability']}; "
+            f"1D/2D truth inclusion=({float(row['profile_truth_inclusion_1d_fraction']):.3f}, "
+            f"{float(row['profile_truth_inclusion_2d_fraction']):.3f}); "
+            f"1D/2D stable=({row['cross_condition_stable_1d_subspace']}, "
+            f"{row['cross_condition_stable_2d_subspace']})."
+        )
     lines += ["## Paired differences", ""]
     if paired is not None:
         lines += [
@@ -789,7 +800,8 @@ def write_stage11c_report(manifest: dict[str, Any], state_source_summary: list[d
             f"- Direction concentration change: v1={paired['true_minus_estimated_v1_stability_concentration']:.3g}; v12={paired['true_minus_estimated_v12_stability_concentration']:.3g}.",
         ]
     lines += ["", "## Limitations", "", "- Passive rehabilitation trajectories only; no active excitation.", "- True-state regression is an oracle diagnostic, not an implementable online estimator."]
-    (OUTPUT_STAGE11C / "stage11c_report.md").write_text("\n".join(lines) + "\n")
+    output_root.mkdir(parents=True, exist_ok=True)
+    (output_root / "stage11c_report.md").write_text("\n".join(lines) + "\n")
 
 
 def identifiability_conclusion(overall: dict[str, Any]) -> str:
@@ -885,29 +897,257 @@ def coerce_summary_row(row: dict[str, str]) -> dict[str, Any]:
     return output
 
 
-def main() -> None:
+def build_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--smoke", action="store_true"); parser.add_argument("--full", action="store_true"); parser.add_argument("--resume", action="store_true")
-    parser.add_argument("--conditions", nargs="*"); parser.add_argument("--max-runs", type=int); parser.add_argument("--max-windows", type=int)
-    parser.add_argument("--profile-grid-size", type=int, default=15); parser.add_argument("--compute-only", action="store_true"); parser.add_argument("--report-only", action="store_true")
+    execution = parser.add_mutually_exclusive_group(required=True)
+    execution.add_argument("--smoke", dest="execution_mode", action="store_const", const="smoke")
+    execution.add_argument("--full", dest="execution_mode", action="store_const", const="full")
+    execution.add_argument("--report-only", dest="execution_mode", action="store_const", const="report-only")
+    parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--conditions", nargs="*")
+    parser.add_argument("--max-runs", type=int)
+    parser.add_argument("--max-windows", type=int)
+    parser.add_argument("--profile-grid-size", type=int, default=DEFAULT_PROFILE_GRID_SIZE)
+    parser.add_argument("--compute-only", action="store_true")
     parser.add_argument("--state-source", choices=("estimated", "true", "paired"), default="paired")
-    args = parser.parse_args(); OUTPUT_STAGE11C.mkdir(parents=True, exist_ok=True)
-    if args.report_only:
-        manifest = json.loads((OUTPUT_STAGE11C / "run_manifest.json").read_text())
-        summary = [coerce_summary_row(row) for row in read_csv(OUTPUT_STAGE11C / "state_source_summary.csv")]
-        write_stage11c_report(manifest, summary, read_csv(OUTPUT_STAGE11C / "paired_profile_summary.csv"))
-        print((OUTPUT_STAGE11C / "stage11c_report.md").read_text()); return
-    conditions = args.conditions or list(CONDITIONS); max_runs = args.max_runs or (1 if args.smoke else 10**9); max_windows = args.max_windows or (3 if args.smoke else 10**9)
-    grid_size = min(args.profile_grid_size, 5) if args.smoke else args.profile_grid_size
+    parser.add_argument("--output-root", type=Path)
+    return parser
+
+
+def resolve_output_root(execution_mode: str, output_root: Path | None) -> Path:
+    if output_root is not None:
+        candidate = Path(output_root)
+        return candidate.resolve() if candidate.is_absolute() else (ROOT / candidate).resolve()
+    if execution_mode == "smoke":
+        return OUTPUT_STAGE11C_SMOKE
+    return OUTPUT_STAGE11C_FORMAL
+
+
+def validate_full_options(args: argparse.Namespace) -> None:
+    if args.state_source != "paired":
+        raise ValueError("full mode requires --state-source paired")
+    if args.conditions is not None and (
+        len(args.conditions) != len(CONDITIONS) or set(args.conditions) != set(CONDITIONS)
+    ):
+        raise ValueError("full mode requires the complete condition matrix")
+    if args.max_runs is not None:
+        raise ValueError("full mode rejects --max-runs")
+    if args.max_windows is not None:
+        raise ValueError("full mode rejects --max-windows")
+    if args.profile_grid_size != DEFAULT_PROFILE_GRID_SIZE:
+        raise ValueError(
+            f"full mode requires --profile-grid-size {DEFAULT_PROFILE_GRID_SIZE}"
+        )
+
+
+def parse_cli_args(argv: list[str] | None = None) -> tuple[argparse.ArgumentParser, argparse.Namespace]:
+    parser = build_argument_parser()
+    args = parser.parse_args(argv)
+    if args.execution_mode == "full":
+        try:
+            validate_full_options(args)
+        except ValueError as exc:
+            parser.error(str(exc))
+    if args.execution_mode == "report-only" and args.resume:
+        parser.error("--resume cannot be combined with --report-only")
+    args.output_root = resolve_output_root(args.execution_mode, args.output_root)
+    return parser, args
+
+
+def _git_output(*arguments: str) -> str:
+    completed = subprocess.run(
+        ["git", *arguments],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def git_state_before_run() -> tuple[str, bool]:
+    return _git_output("rev-parse", "HEAD"), bool(_git_output("status", "--porcelain"))
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def repository_path(path: Path) -> str:
+    resolved = Path(path).resolve()
+    try:
+        return str(resolved.relative_to(ROOT))
+    except ValueError:
+        return str(resolved)
+
+
+def exact_command() -> str:
+    return shlex.join([sys.executable, str(Path(__file__).resolve()), *sys.argv[1:]])
+
+
+def mechanical_status_for_run(
+    execution_mode: str,
+    state_source: str,
+    conditions: list[str],
+    seeds: list[int],
+    actual_runs: int,
+    actual_windows: int,
+    expected_runs: int,
+    expected_windows: int,
+    profile_grid_size: int,
+    git_dirty_before_run: bool,
+) -> tuple[str, dict[str, bool]]:
+    checks = {
+        "state_source_valid": state_source == "paired",
+        "conditions_complete": (
+            set(conditions) == set(CONDITIONS)
+            if execution_mode == "full"
+            else len(conditions) >= 1
+        ),
+        "seeds_complete": (
+            set(seeds) == set(SEEDS) if execution_mode == "full" else len(seeds) >= 1
+        ),
+        "runs_complete": actual_runs == expected_runs,
+        "windows_complete": actual_windows == expected_windows,
+        "window_transitions_fixed": WINDOW_TRANSITIONS == 70,
+        "profile_grid_valid": (
+            profile_grid_size == DEFAULT_PROFILE_GRID_SIZE
+            if execution_mode == "full"
+            else profile_grid_size >= 5
+        ),
+        "git_clean_for_formal": (
+            not git_dirty_before_run if execution_mode == "full" else True
+        ),
+    }
+    if execution_mode == "smoke":
+        status = "valid_smoke" if all(checks.values()) else "invalid_incomplete_run"
+    elif not checks["git_clean_for_formal"]:
+        status = "invalid_provenance"
+    elif all(checks.values()):
+        status = "valid_full_run"
+    else:
+        status = "invalid_incomplete_run"
+    return status, checks
+
+
+def build_run_manifest(
+    execution_mode: str,
+    output_root: Path,
+    state_source: str,
+    conditions: list[str],
+    seeds: list[int],
+    actual_runs: int,
+    actual_windows: int,
+    profile_grid_size: int,
+    git_commit: str,
+    git_dirty_before_run: bool,
+    command: str,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    expected_runs = 1 if execution_mode == "smoke" else STAGE11C_EXPECTED_RUNS
+    expected_windows = 3 if execution_mode == "smoke" else STAGE11C_EXPECTED_WINDOWS
+    status, checks = mechanical_status_for_run(
+        execution_mode,
+        state_source,
+        conditions,
+        seeds,
+        actual_runs,
+        actual_windows,
+        expected_runs,
+        expected_windows,
+        profile_grid_size,
+        git_dirty_before_run,
+    )
+    script_path = Path(__file__).resolve()
+    replay_path = Path(DEFAULT_REPLAY).resolve()
+    config_path = Path(DEFAULT_CONFIG).resolve()
+    manifest = {
+        "experiment_id": STAGE11C_EXPERIMENT_ID,
+        "execution_mode": execution_mode,
+        "git_commit": git_commit,
+        "git_dirty_before_run": bool(git_dirty_before_run),
+        "exact_command": command,
+        "script_path": repository_path(script_path),
+        "script_sha256": sha256_file(script_path),
+        "replay_path": repository_path(replay_path),
+        "replay_sha256": sha256_file(replay_path),
+        "config_path": repository_path(config_path),
+        "config_sha256": sha256_file(config_path),
+        "state_source": state_source,
+        "conditions": conditions,
+        "seeds": seeds,
+        "expected_runs": expected_runs,
+        "actual_runs": actual_runs,
+        "expected_windows": expected_windows,
+        "actual_windows": actual_windows,
+        "window_transitions": WINDOW_TRANSITIONS,
+        "profile_grid_size": profile_grid_size,
+        "output_root": repository_path(output_root),
+        "mechanical_completeness": status in {"valid_smoke", "valid_full_run"},
+        "mechanical_status": status,
+        "parameter_column_order": PARAMETER_ORDER,
+        "profile_mode": "adaptive_expand_and_refine",
+    }
+    mechanical = {
+        "experiment_id": STAGE11C_EXPERIMENT_ID,
+        "execution_mode": execution_mode,
+        "mechanical_status": status,
+        "mechanical_completeness": manifest["mechanical_completeness"],
+        "checks": checks,
+    }
+    return manifest, mechanical
+
+
+def write_run_provenance(
+    output_root: Path,
+    manifest: dict[str, Any],
+    mechanical: dict[str, Any],
+) -> None:
+    output_root.mkdir(parents=True, exist_ok=True)
+    (output_root / "run_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    (output_root / "command.txt").write_text(str(manifest["exact_command"]) + "\n")
+    (output_root / "mechanical_status.json").write_text(
+        json.dumps(mechanical, indent=2) + "\n"
+    )
+
+
+def main(argv: list[str] | None = None) -> None:
+    parser, args = parse_cli_args(argv)
+    output_root = Path(args.output_root)
+    if args.execution_mode == "report-only":
+        manifest = json.loads((output_root / "run_manifest.json").read_text())
+        summary = [
+            coerce_summary_row(row)
+            for row in read_csv(output_root / "state_source_summary.csv")
+        ]
+        write_stage11c_report(
+            manifest,
+            summary,
+            read_csv(output_root / "paired_profile_summary.csv"),
+            output_root,
+        )
+        print((output_root / "stage11c_report.md").read_text())
+        return
+    git_commit, git_dirty_before_run = git_state_before_run()
+    if args.execution_mode == "full" and git_dirty_before_run:
+        parser.error("full mode requires a clean Git worktree before execution")
+    output_root.mkdir(parents=True, exist_ok=True)
+    conditions = args.conditions or list(CONDITIONS)
+    max_runs = args.max_runs if args.max_runs is not None else (1 if args.execution_mode == "smoke" else 10**9)
+    max_windows = args.max_windows if args.max_windows is not None else (3 if args.execution_mode == "smoke" else 10**9)
+    grid_size = min(args.profile_grid_size, 5) if args.execution_mode == "smoke" else args.profile_grid_size
     replay = load_replay(DEFAULT_REPLAY); config = load_experiment_config(DEFAULT_CONFIG)
     sources = ("estimated", "true") if args.state_source == "paired" else (args.state_source,)
     source_windows: dict[str, list[dict[str, Any]]] = {source: [] for source in sources}
     source_profiles: dict[str, list[dict[str, Any]]] = {source: [] for source in sources}
     paired_windows: list[dict[str, Any]] = []
     paired_profiles: list[dict[str, Any]] = []
-    if args.resume and args.state_source == "paired" and (OUTPUT_STAGE11C / "paired_window_metrics.csv").exists():
-        paired_windows = read_csv(OUTPUT_STAGE11C / "paired_window_metrics.csv")
-        paired_profiles = read_csv(OUTPUT_STAGE11C / "paired_profile_summary.csv")
+    if args.resume and args.state_source == "paired" and (output_root / "paired_window_metrics.csv").exists():
+        paired_windows = read_csv(output_root / "paired_window_metrics.csv")
+        paired_profiles = read_csv(output_root / "paired_profile_summary.csv")
         for source in sources:
             source_windows[source] = restore_paired_source_rows(paired_windows, source)
             source_profiles[source] = restore_paired_source_rows(paired_profiles, source, profile=True)
@@ -940,14 +1180,49 @@ def main() -> None:
         assert paired_windows and len(paired_profiles) == 2 * len(paired_windows)
         source_summary_rows = summarize_state_sources(source_windows["estimated"], source_profiles["estimated"], source_windows["true"], source_profiles["true"], paired_windows, paired_profiles)
     assert all(np.isfinite(float(row["estimated_column_normalized_geometric_condition_number"])) for row in paired_windows) if args.state_source == "paired" else True
-    write_dict_csv(OUTPUT_STAGE11C / "paired_window_metrics.csv", paired_windows)
-    write_dict_csv(OUTPUT_STAGE11C / "paired_profile_summary.csv", paired_profiles)
-    write_dict_csv(OUTPUT_STAGE11C / "state_source_summary.csv", source_summary_rows)
+    write_dict_csv(output_root / "paired_window_metrics.csv", paired_windows)
+    write_dict_csv(output_root / "paired_profile_summary.csv", paired_profiles)
+    write_dict_csv(output_root / "state_source_summary.csv", source_summary_rows)
     run_pairs = {(str(row["condition"]), int(row["seed"])) for row in paired_windows}
-    manifest = {"mode": "smoke" if args.smoke else "full", "state_source": args.state_source, "conditions": conditions, "runs": len(run_pairs), "windows": len(paired_windows), "window_transitions": WINDOW_TRANSITIONS, "parameter_column_order": PARAMETER_ORDER, "profile_grid_size": grid_size, "profile_mode": "adaptive_expand_and_refine"}
-    (OUTPUT_STAGE11C / "run_manifest.json").write_text(json.dumps(manifest, indent=2))
-    if not args.compute_only: write_stage11c_report(manifest, source_summary_rows, paired_profiles)
-    print(json.dumps({"mode": manifest["mode"], "state_source": args.state_source, "runs": manifest["runs"], "windows": manifest["windows"], "output": str(OUTPUT_STAGE11C)}, indent=2))
+    observed_conditions = [
+        condition for condition in CONDITIONS if condition in {str(row["condition"]) for row in paired_windows}
+    ]
+    observed_seeds = sorted({int(row["seed"]) for row in paired_windows})
+    manifest, mechanical = build_run_manifest(
+        args.execution_mode,
+        output_root,
+        args.state_source,
+        observed_conditions,
+        observed_seeds,
+        len(run_pairs),
+        len(paired_windows),
+        grid_size,
+        git_commit,
+        git_dirty_before_run,
+        exact_command(),
+    )
+    write_run_provenance(output_root, manifest, mechanical)
+    if not args.compute_only:
+        write_stage11c_report(
+            manifest, source_summary_rows, paired_profiles, output_root
+        )
+    print(
+        json.dumps(
+            {
+                "execution_mode": manifest["execution_mode"],
+                "state_source": args.state_source,
+                "actual_runs": manifest["actual_runs"],
+                "actual_windows": manifest["actual_windows"],
+                "mechanical_status": manifest["mechanical_status"],
+                "output": str(output_root),
+            },
+            indent=2,
+        )
+    )
+    if args.execution_mode == "full" and not manifest["mechanical_completeness"]:
+        raise RuntimeError(
+            f"full execution is mechanically invalid: {manifest['mechanical_status']}"
+        )
 
 
 if __name__ == "__main__":

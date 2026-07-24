@@ -3,7 +3,7 @@
 ## Repository checkpoint
 
 - Observed branch: `agent/midterm-stage11-closeout`
-- Observed HEAD: `efe0e6b41735f8e40b17bfe907ab07eafff19bee`
+- Scientific-state checkpoint reviewed: `efe0e6b41735f8e40b17bfe907ab07eafff19bee`
 
 ## Current stage
 
@@ -37,7 +37,8 @@ Is passive parameter-identification failure mainly caused by errors-in-variables
 
 ## Next authorized action
 
-Review these workflow files and the Stage 11C draft Experiment Spec. Do not run the Stage 11C full audit yet.
+- Implement and smoke-test the approved Stage 11C experiment contract.
+- Do not run the formal audit.
 
 ## Known documentation debt
 

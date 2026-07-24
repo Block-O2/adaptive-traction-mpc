@@ -4,10 +4,10 @@ This workflow separates research decisions from implementation and preserves the
 
 ## Roles
 
-- **Research and experiment-planning dialogue**: frames the research question, mechanism hypothesis, Experiment Spec, and result interpretation.
+- **Research and experiment-planning dialogue**: frames the research question, mechanism hypothesis, and Experiment Spec; evaluates formal results against the approved spec and returns PASS/FAIL/INCONCLUSIVE.
 - **Learning dialogue**: supports concepts, derivations, code understanding, and reverse engineering.
-- **Codex**: implements approved increments, adds logging, runs tests, and runs only explicitly authorized smoke checks.
-- **User**: reviews diffs, runs formal experiments manually, decides PASS/FAIL/INCONCLUSIVE, and decides whether to commit or promote results.
+- **Codex**: implements approved increments, adds logging, runs tests and explicitly authorized smoke checks, and reports metrics and mechanical completeness only.
+- **User**: reviews diffs and the research dialogue's judgment, runs formal experiments manually, and decides result promotion, continuation, local modification, or branch closure.
 
 ## Experiment lifecycle
 

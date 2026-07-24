@@ -1,9 +1,9 @@
-# Draft only: this spec requires research approval before any formal execution.
+# Approved experiment contract. Formal execution remains reserved for the user.
 experiment_id: stage11c_state_source_audit
 title: Estimated-state versus true-state paired parameter-subspace audit
-status: draft_pending_research_approval
+status: approved
 research_question: Is errors-in-variables/state-estimation error the dominant limitation in passive parameter identification?
-mechanism_hypothesis: Replacing only the regression state source with replay true states may restore parameter-profile truth coverage if estimated-state EIV is the dominant limitation.
+mechanism_hypothesis: Using replay true states instead of estimated states restores a practically supported and cross-condition stable passive parameter subspace.
 competing_explanations:
   - Passive trajectories do not contain sufficient information for a stable parameter subspace.
   - The model structure limits practical identifiability independently of state-source error.
@@ -48,9 +48,22 @@ secondary_metrics:
   - numerical rank
   - state-source paired direction angles
 
-pass_criteria: pending_research_approval
-fail_criteria: pending_research_approval
-inconclusive_criteria: pending_research_approval
+pass_criteria:
+  - The full matrix is complete and has valid provenance.
+  - The estimated-state source remains unsupported.
+  - The true-state source satisfies the unchanged Stage 11B support logic for lambda-only, [lambda, kappa], or a stable parameter combination.
+  - Relevant profile accuracy improves consistently in at least 6 of 8 conditions.
+  - No fixed variable changed.
+fail_criteria:
+  - The full matrix is complete and has valid provenance.
+  - The true-state source still establishes no stable passive parameter subspace.
+  - Neither the 1D nor 2D result reaches the existing Stage 11B practical-support standard.
+  - There is no consistent cross-condition restoration of profile accuracy or subspace stability.
+inconclusive_criteria:
+  - Mixed 1D and 2D results.
+  - Accuracy improvement without stable subspace restoration.
+  - Conflicting condition-level results.
+  - Incomplete matrix or invalid provenance.
 
 allowed_changes:
   - replace estimated replay states with true replay states only within the affine regression construction
@@ -59,11 +72,28 @@ forbidden_changes:
   - changes to replay actions, window endpoints, weights, parameterization, profiles, or diagnostics
   - treating true-state oracle regression as a deployable estimator
 
-smoke_execution: Codex may run only explicitly authorized unit tests, compile checks, and smoke validation outside authoritative result directories.
-formal_execution: User manually runs the approved full paired audit; Codex must not run the full audit.
+smoke_execution:
+  command: conda run -n mpc_learn python scripts/run_stage11b_parameter_subspace_audit.py --smoke --state-source paired
+  performed_by: Codex when explicitly authorized
+smoke_output_root: results/local/stage11c_state_source_audit_smoke
+formal_execution:
+  command: conda run -n mpc_learn python scripts/run_stage11b_parameter_subspace_audit.py --full --state-source paired
+  performed_by: user
+formal_output_root: results/stage11c_state_source_audit
+expected_matrix:
+  conditions: 8
+  seeds_per_condition: 3
+  runs: 24
+  windows: 710
+  transitions_per_window: 70
 expected_outputs:
-  - local/non-authoritative results/stage11c_state_source_audit/ until explicit promotion
-  - expected matrix: 8 conditions, 3 seeds, 24 runs, 710 windows, 70 transitions per window
+  - paired_window_metrics.csv
+  - paired_profile_summary.csv
+  - state_source_summary.csv
+  - run_manifest.json
+  - command.txt
+  - mechanical_status.json
+  - stage11c_report.md
 provenance:
   baseline_replay: results/stage9j_gap_decomposition/stage9j_replay.csv
   implementation: scripts/run_stage11b_parameter_subspace_audit.py
