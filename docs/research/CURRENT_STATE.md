@@ -3,11 +3,11 @@
 ## Repository checkpoint
 
 - Observed branch: `agent/midterm-stage11-closeout`
-- Stage 11D formal-input checkpoint: `44ad70466523ce30a6e897261acac90b1fc3ffbf`
+- Stage 11E implementation checkpoint: `17e8915e9c60813bbaf381c02140d441695ff439`
 
 ## Current stage
 
-Stage 11E: block-aware lambda coverage calibration audit.
+Stage 11F: exact discrete one-step closure audit.
 
 ## Authoritative inputs
 
@@ -21,11 +21,16 @@ Stage 11E: block-aware lambda coverage calibration audit.
 - The fixed-weight online MHE branch was closed after Stage 10F.
 - Stage 11A does not support hard or soft information gating.
 - Stage 11B did not establish a stable passive parameter subspace.
+- The reviewed Stage 11E block-aware calibration result does not explain the
+  true-state lambda undercoverage through simple serial-correlation calibration.
+- The simple serial-correlation calibration branch is closed; structured
+  point-bias H2 remains the active explanation.
 
 ## Unresolved question
 
-Why does true-state regression greatly improve the `[lambda, kappa]` geometry
-while the one-dimensional lambda profile still under-covers lambda?
+Is the remaining structured lambda bias introduced mainly by the
+continuous-time finite-difference affine regression, or is it already present
+in the exact discrete simulator transition?
 
 ## Stage 11C status
 
@@ -44,15 +49,29 @@ while the one-dimensional lambda profile still under-covers lambda?
 
 ## Stage 11E status
 
-- The approved increment calibrates only the Stage 11C true-state lambda
-  interval width with a transition-level circular moving-block score bootstrap.
-- The two weighted regression channels remain paired by transition.
-- Block length 10, 2000 replicates per window, deterministic window seeds,
-  70-transition windows, WLS point estimates, and Stage 11C profile results are
-  fixed by the experiment contract.
-- Codex is authorized to implement, run tests and compile checks, and run one
-  explicit local smoke only.
-- The complete Stage 11E diagnostic remains reserved for the user.
+- The reviewed full result is mechanically valid: 24 runs and 710 windows.
+- Baseline lambda coverage was 0.494; block-calibrated coverage was 0.266,
+  for an absolute gain of -0.228.
+- Zero of eight conditions gained at least 0.10 coverage.
+- Median width inflation was 0.649 and the WLS point-estimate changed fraction
+  was zero.
+- Under the preregistered block-aware treatment, the user review records H1 as
+  insufficient and practical calibration as failed.
+- The simple serial-correlation calibration branch is closed. Structured
+  point-bias H2 remains active.
+
+## Stage 11F status
+
+- The approved increment compares the unchanged Stage 11D affine truth
+  residual with exact one-step replay closure under the simulator RK4
+  transition.
+- It uses replay true states, recorded actions, true condition parameters, and
+  the exact Stage 11C/11D 24-run, 710-window identities.
+- No parameter fitting, optimization, estimator, controller, or identifier
+  change is permitted.
+- Codex may implement, run tests and compile checks, and run one explicit local
+  smoke only.
+- The complete Stage 11F diagnostic remains reserved for the user.
 
 ## Current freeze
 
@@ -61,10 +80,10 @@ while the one-dimensional lambda profile still under-covers lambda?
 
 ## Next authorized action
 
-- Review the Stage 11E implementation, tests, and local smoke artifact.
-- Do not run the complete Stage 11E diagnostic yet.
-- Do not modify Stage 11C/11D results or assign an automatic scientific
-  outcome.
+- Review the Stage 11F implementation, tests, and local smoke artifact.
+- Do not run the complete Stage 11F diagnostic yet.
+- Do not modify Stage 11C/11D/11E results or assign an automatic Stage 11F
+  scientific outcome.
 
 ## Known documentation debt
 
