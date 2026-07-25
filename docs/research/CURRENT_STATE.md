@@ -3,11 +3,11 @@
 ## Repository checkpoint
 
 - Observed branch: `agent/midterm-stage11-closeout`
-- Stage 11D implementation checkpoint: `d049a332b9353f578c8c49fe84e854590bb3969c`
+- Stage 11D formal-input checkpoint: `44ad70466523ce30a6e897261acac90b1fc3ffbf`
 
 ## Current stage
 
-Stage 11D: residual-and-coverage diagnostic.
+Stage 11E: block-aware lambda coverage calibration audit.
 
 ## Authoritative inputs
 
@@ -36,19 +36,23 @@ while the one-dimensional lambda profile still under-covers lambda?
 
 ## Stage 11D status
 
-- The initial residual-and-coverage implementation is committed at `d049a33`.
-- Formal-provenance hardening is implemented locally and awaits diff review.
-- It must use the exact Stage 11C true-state window identities and unchanged
-  Stage 11B regression construction.
-- A full run must pass exact 24-run/710-window identity checks, preserve the
-  resolved configuration, and record command, environment, hashes, and
-  mechanical status.
-- Full preflight also binds the replay, config, and Stage 11B runner hashes to
-  the Stage 11C manifest, and verifies every reconstructed WLS lambda against
-  its saved Stage 11C true-state profile minimum at absolute tolerance 1e-10.
-- Codex may run tests only for the provenance patch; no additional smoke or
-  full execution is authorized.
-- The complete Stage 11D diagnostic is not authorized for Codex execution.
+- The user-run full residual-and-coverage matrix is present and mechanically
+  marked `valid_full_run`.
+- It contains the exact 24 runs and 710 Stage 11C true-state windows.
+- Its generated report is neutral; no H1/H2 choice or scientific status has
+  been assigned automatically.
+
+## Stage 11E status
+
+- The approved increment calibrates only the Stage 11C true-state lambda
+  interval width with a transition-level circular moving-block score bootstrap.
+- The two weighted regression channels remain paired by transition.
+- Block length 10, 2000 replicates per window, deterministic window seeds,
+  70-transition windows, WLS point estimates, and Stage 11C profile results are
+  fixed by the experiment contract.
+- Codex is authorized to implement, run tests and compile checks, and run one
+  explicit local smoke only.
+- The complete Stage 11E diagnostic remains reserved for the user.
 
 ## Current freeze
 
@@ -57,10 +61,10 @@ while the one-dimensional lambda profile still under-covers lambda?
 
 ## Next authorized action
 
-- Review the Stage 11D formal-provenance patch and actual Git diff.
-- Commit the patch only after user approval.
-- Do not run the complete Stage 11D diagnostic yet.
-- Do not modify Stage 11C results or assign an automatic scientific outcome.
+- Review the Stage 11E implementation, tests, and local smoke artifact.
+- Do not run the complete Stage 11E diagnostic yet.
+- Do not modify Stage 11C/11D results or assign an automatic scientific
+  outcome.
 
 ## Known documentation debt
 
