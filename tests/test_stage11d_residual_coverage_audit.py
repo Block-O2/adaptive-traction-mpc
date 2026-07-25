@@ -1,5 +1,6 @@
 import json
 import sys
+from argparse import Namespace
 from pathlib import Path
 
 import numpy as np
@@ -52,6 +53,37 @@ def paired_profile_rows(identities):
                 }
             )
     return rows
+
+
+def synthetic_full_diagnostics():
+    run_identities = [
+        (condition, seed)
+        for condition in stage11d.CONDITIONS
+        for seed in (101, 102, 103)
+    ]
+    rows = []
+    per_run_count = {identity: 0 for identity in run_identities}
+    for index in range(stage11d.STAGE11D_EXPECTED_WINDOWS):
+        condition, seed = run_identities[index % len(run_identities)]
+        local_index = per_run_count[(condition, seed)]
+        per_run_count[(condition, seed)] += 1
+        start = 1 + 10 * local_index
+        rows.append(
+            {
+                "condition": condition,
+                "seed": seed,
+                "window_start": start,
+                "window_end": start + stage11d.WINDOW_TRANSITIONS - 1,
+                "transitions": stage11d.WINDOW_TRANSITIONS,
+                "state_source": "true",
+            }
+        )
+    expected_windows = {stage11d.window_identity(row) for row in rows}
+    expected_runs = {
+        (condition, seed)
+        for condition, seed, _, _ in expected_windows
+    }
+    return expected_runs, expected_windows, rows
 
 
 def test_exact_stage11c_window_identity_alignment():
@@ -129,6 +161,8 @@ def test_smoke_output_is_local_and_non_authoritative(tmp_path):
     assert args.output_root == stage11d.OUTPUT_SMOKE
     manifest = {
         "execution_mode": "smoke",
+        "evidence_level": "smoke",
+        "mechanical_status": "valid_smoke",
         "actual_runs": 1,
         "actual_windows": 3,
     }
@@ -181,3 +215,196 @@ def test_manifest_marks_smoke_non_authoritative_contract():
     assert stage11d.resolve_output_root("full", None) == stage11d.OUTPUT_FORMAL
     source_manifest = json.loads(stage11d.STAGE11C_MANIFEST.read_text())
     assert source_manifest["mechanical_status"] == "valid_full_run"
+
+
+def test_declared_untracked_stage11c_input_is_the_only_cleanliness_exception():
+    allowed, unexpected = stage11d.classify_git_status(
+        [
+            "?? results/stage11c_state_source_audit/run_manifest.json",
+            " M scripts/run_stage11d_residual_coverage_audit.py",
+            "?? unrelated.txt",
+        ]
+    )
+    assert allowed == [
+        "?? results/stage11c_state_source_audit/run_manifest.json"
+    ]
+    assert unexpected == [
+        " M scripts/run_stage11d_residual_coverage_audit.py",
+        "?? unrelated.txt",
+    ]
+
+
+def test_full_rejects_dirty_source_before_reading_stage11c(
+    monkeypatch, tmp_path
+):
+    args = stage11d.parse_args(
+        ["--full", "--output-root", str(tmp_path / "formal")]
+    )
+    monkeypatch.setattr(
+        stage11d,
+        "git_context",
+        lambda: {
+            "commit": "abc",
+            "status_lines": [" M scripts/runner.py"],
+            "allowed_untracked_input_lines": [],
+            "unexpected_status_lines": [" M scripts/runner.py"],
+            "dirty": True,
+            "clean_for_formal": False,
+        },
+    )
+    monkeypatch.setattr(
+        stage11d, "STAGE11C_MANIFEST", tmp_path / "must_not_be_read.json"
+    )
+    with pytest.raises(SystemExit, match="clean committed source tree"):
+        stage11d.run(args)
+    assert not args.output_root.exists()
+
+
+def test_full_rejects_nonempty_output_before_reading_stage11c(
+    monkeypatch, tmp_path
+):
+    output = tmp_path / "formal"
+    output.mkdir()
+    (output / "preserve.txt").write_text("keep")
+    args = stage11d.parse_args(
+        ["--full", "--output-root", str(output)]
+    )
+    monkeypatch.setattr(
+        stage11d,
+        "git_context",
+        lambda: {
+            "commit": "abc",
+            "status_lines": [],
+            "allowed_untracked_input_lines": [],
+            "unexpected_status_lines": [],
+            "dirty": False,
+            "clean_for_formal": True,
+        },
+    )
+    monkeypatch.setattr(
+        stage11d, "STAGE11C_MANIFEST", tmp_path / "must_not_be_read.json"
+    )
+    with pytest.raises(SystemExit, match="non-empty"):
+        stage11d.run(args)
+    assert (output / "preserve.txt").read_text() == "keep"
+
+
+def test_exact_full_identity_matrix_is_valid():
+    expected_runs, expected_windows, rows = synthetic_full_diagnostics()
+    checks = stage11d.exact_identity_checks(
+        "full",
+        expected_runs,
+        expected_windows,
+        rows,
+        source_stage11c_valid=True,
+        source_profile_identity_complete=True,
+        git_clean_for_formal=True,
+        required_outputs_complete=True,
+    )
+    assert all(checks.values())
+    assert stage11d.mechanical_status_for_run("full", checks) == "valid_full_run"
+
+
+def test_duplicate_and_missing_window_is_invalid_even_at_710_rows():
+    expected_runs, expected_windows, rows = synthetic_full_diagnostics()
+    altered = [dict(row) for row in rows]
+    altered[-1] = dict(altered[0])
+    checks = stage11d.exact_identity_checks(
+        "full",
+        expected_runs,
+        expected_windows,
+        altered,
+        source_stage11c_valid=True,
+        source_profile_identity_complete=True,
+        git_clean_for_formal=True,
+        required_outputs_complete=True,
+    )
+    assert len(altered) == stage11d.STAGE11D_EXPECTED_WINDOWS
+    assert not checks["window_identity_complete"]
+    assert not checks["no_duplicate_windows"]
+    assert (
+        stage11d.mechanical_status_for_run("full", checks)
+        == "invalid_incomplete_run"
+    )
+
+
+def test_resolved_config_snapshot_and_hash(tmp_path):
+    config = {"controller": {"horizon": 18}, "conditions": ["clean"]}
+    digest = stage11d.write_resolved_config_snapshot(tmp_path, config)
+    snapshot = tmp_path / "resolved_config_snapshot.json"
+    assert json.loads(snapshot.read_text()) == config
+    assert digest == stage11d.sha256_file(snapshot)
+
+
+def test_formal_manifest_has_provenance_and_is_not_authoritative(tmp_path):
+    expected_runs, expected_windows, rows = synthetic_full_diagnostics()
+    args = Namespace(mode="full", output_root=tmp_path)
+    git_state = {
+        "commit": "abc123",
+        "status_lines": [
+            "?? results/stage11c_state_source_audit/run_manifest.json"
+        ],
+        "allowed_untracked_input_lines": [
+            "?? results/stage11c_state_source_audit/run_manifest.json"
+        ],
+        "unexpected_status_lines": [],
+        "dirty": True,
+        "clean_for_formal": True,
+    }
+    checks = stage11d.exact_identity_checks(
+        "full",
+        expected_runs,
+        expected_windows,
+        rows,
+        True,
+        True,
+        True,
+        True,
+    )
+    stage11c_manifest = {
+        "actual_windows": stage11d.STAGE11D_EXPECTED_WINDOWS,
+        "git_commit": "stage11c-commit",
+    }
+    manifest, mechanical = stage11d.build_run_manifest(
+        args,
+        tmp_path,
+        git_state,
+        "python runner.py --full",
+        "python runner.py --full",
+        "mpc_learn",
+        "resolved-sha",
+        stage11c_manifest,
+        expected_runs,
+        expected_windows,
+        rows,
+        checks,
+    )
+    required = {
+        "exact_command",
+        "effective_command",
+        "conda_environment",
+        "resolved_config_snapshot",
+        "resolved_config_sha256",
+        "git_status_before_run",
+        "git_allowed_untracked_inputs",
+        "git_unexpected_changes_before_run",
+        "expected_runs",
+        "actual_runs",
+        "expected_windows",
+        "actual_windows",
+        "mechanical_status",
+    }
+    assert required <= set(manifest)
+    assert manifest["mechanical_status"] == "valid_full_run"
+    assert manifest["evidence_level"] == "formal"
+    assert manifest["authoritative"] is False
+    assert manifest["resolved_config_sha256"] == "resolved-sha"
+    assert mechanical["required_outputs_complete"]
+
+
+def test_required_formal_provenance_outputs_are_declared():
+    assert {
+        "command.txt",
+        "mechanical_status.json",
+        "resolved_config_snapshot.json",
+    } <= set(stage11d.STAGE11D_REQUIRED_OUTPUTS)

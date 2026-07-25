@@ -13,6 +13,7 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 import shlex
 import subprocess
 import sys
@@ -51,11 +52,24 @@ STAGE11C_MANIFEST = STAGE11C_ROOT / "run_manifest.json"
 STAGE11C_PROFILES = STAGE11C_ROOT / "paired_profile_summary.csv"
 OUTPUT_FORMAL = ROOT / "results" / "stage11d_residual_coverage_audit"
 OUTPUT_SMOKE = ROOT / "results" / "local" / "stage11d_residual_coverage_audit_smoke"
+STAGE11D_EXPERIMENT_ID = "stage11d_residual_coverage_audit"
+STAGE11D_EXPECTED_RUNS = 24
+STAGE11D_EXPECTED_WINDOWS = 710
+STAGE11D_REQUIRED_OUTPUTS = (
+    "window_residual_diagnostics.csv",
+    "condition_residual_summary.csv",
+    "stage11d_report.md",
+    "run_manifest.json",
+    "command.txt",
+    "mechanical_status.json",
+    "resolved_config_snapshot.json",
+)
 PROFILE_NAMES = frozenset({"lambda_1d", "lambda_kappa_2d"})
 CHANNEL_NAMES = ("radial", "angular")
 LAGS = (1, 5, 10)
 PROXY_NAMES = ("state_magnitude", "state_rate_magnitude", "action_magnitude")
 IDENTITY_FIELDS = ("condition", "seed", "window_start", "window_end")
+DECLARED_UNTRACKED_INPUT_ROOT = STAGE11C_ROOT.relative_to(ROOT).as_posix()
 
 
 def sha256_file(path: Path) -> str:
@@ -64,6 +78,14 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def repository_path(path: Path) -> str:
+    resolved = Path(path).resolve()
+    try:
+        return str(resolved.relative_to(ROOT))
+    except ValueError:
+        return str(resolved)
 
 
 def read_csv(path: Path) -> list[dict[str, str]]:
@@ -140,6 +162,161 @@ def validate_and_index_stage11c_profiles(
             f"missing={missing[:3]}, extra={extra[:3]}"
         )
     return dict(grouped)
+
+
+def expected_identity_sets(
+    profile_index: dict[
+        tuple[str, int, int, int], dict[str, dict[str, Any]]
+    ],
+) -> tuple[set[tuple[str, int]], set[tuple[str, int, int, int]]]:
+    expected_windows = set(profile_index)
+    expected_runs = {
+        (condition, seed)
+        for condition, seed, _, _ in expected_windows
+    }
+    return expected_runs, expected_windows
+
+
+def _git_output(*arguments: str) -> str:
+    completed = subprocess.run(
+        ["git", *arguments],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def classify_git_status(
+    status_lines: Iterable[str],
+) -> tuple[list[str], list[str]]:
+    """Separate the declared untracked Stage 11C input from source changes."""
+    allowed: list[str] = []
+    unexpected: list[str] = []
+    prefix = f"{DECLARED_UNTRACKED_INPUT_ROOT}/"
+    for raw_line in status_lines:
+        line = str(raw_line)
+        path = line[3:] if len(line) >= 4 else ""
+        if (
+            line.startswith("?? ")
+            and (
+                path == DECLARED_UNTRACKED_INPUT_ROOT
+                or path.startswith(prefix)
+            )
+        ):
+            allowed.append(line)
+        else:
+            unexpected.append(line)
+    return allowed, unexpected
+
+
+def git_context() -> dict[str, Any]:
+    status_lines = [
+        line
+        for line in _git_output(
+            "status", "--porcelain", "--untracked-files=all"
+        ).splitlines()
+        if line
+    ]
+    allowed, unexpected = classify_git_status(status_lines)
+    return {
+        "commit": _git_output("rev-parse", "HEAD"),
+        "status_lines": status_lines,
+        "allowed_untracked_input_lines": allowed,
+        "unexpected_status_lines": unexpected,
+        "dirty": bool(status_lines),
+        "clean_for_formal": not unexpected,
+    }
+
+
+def exact_identity_checks(
+    execution_mode: str,
+    expected_runs: set[tuple[str, int]],
+    expected_windows: set[tuple[str, int, int, int]],
+    diagnostics: list[dict[str, Any]],
+    source_stage11c_valid: bool,
+    source_profile_identity_complete: bool,
+    git_clean_for_formal: bool,
+    required_outputs_complete: bool,
+) -> dict[str, bool]:
+    observed_window_list = [window_identity(row) for row in diagnostics]
+    observed_window_counter = Counter(observed_window_list)
+    observed_window_set = set(observed_window_list)
+    observed_run_set = {
+        (condition, seed)
+        for condition, seed, _, _ in observed_window_set
+    }
+    return {
+        "source_stage11c_valid_full_run": bool(source_stage11c_valid),
+        "source_profile_identity_complete": bool(
+            source_profile_identity_complete
+        ),
+        "run_identity_complete": observed_run_set == expected_runs,
+        "window_identity_complete": observed_window_set == expected_windows,
+        "no_duplicate_windows": (
+            len(observed_window_list) == len(observed_window_set)
+            and all(
+                count == 1 for count in observed_window_counter.values()
+            )
+        ),
+        "expected_matrix_size_valid": (
+            len(expected_runs) == STAGE11D_EXPECTED_RUNS
+            and len(expected_windows) == STAGE11D_EXPECTED_WINDOWS
+            if execution_mode == "full"
+            else len(expected_runs) >= 1 and len(expected_windows) >= 1
+        ),
+        "window_transitions_fixed": all(
+            int(row["transitions"]) == WINDOW_TRANSITIONS
+            for row in diagnostics
+        ),
+        "true_state_only": all(
+            str(row["state_source"]) == "true" for row in diagnostics
+        ),
+        "git_clean_for_formal": (
+            bool(git_clean_for_formal)
+            if execution_mode == "full"
+            else True
+        ),
+        "required_outputs_complete": bool(required_outputs_complete),
+    }
+
+
+def mechanical_status_for_run(
+    execution_mode: str,
+    checks: dict[str, bool],
+) -> str:
+    if execution_mode == "smoke":
+        return (
+            "valid_smoke"
+            if all(checks.values())
+            else "invalid_incomplete_run"
+        )
+    if not checks["git_clean_for_formal"]:
+        return "invalid_provenance"
+    return (
+        "valid_full_run"
+        if all(checks.values())
+        else "invalid_incomplete_run"
+    )
+
+
+def write_resolved_config_snapshot(
+    output_root: Path,
+    config: dict[str, Any],
+) -> str:
+    snapshot = output_root / "resolved_config_snapshot.json"
+    snapshot.write_text(
+        json.dumps(config, indent=2, sort_keys=True) + "\n"
+    )
+    return sha256_file(snapshot)
+
+
+def required_outputs_exist(output_root: Path) -> bool:
+    return all(
+        (output_root / filename).is_file()
+        for filename in STAGE11D_REQUIRED_OUTPUTS
+    )
 
 
 def split_residual_channels(residual: np.ndarray) -> dict[str, np.ndarray]:
@@ -440,6 +617,8 @@ def write_report(
         "## Scope",
         "",
         f"- Execution mode: `{manifest['execution_mode']}`.",
+        f"- Evidence level: `{manifest['evidence_level']}`; mechanical status: "
+        f"`{manifest['mechanical_status']}`.",
         f"- Analyzed runs/windows: {manifest['actual_runs']}/{manifest['actual_windows']}.",
         "- State source: replay true states only.",
         "- Window identities, actions, 70-transition rule, row weights, affine "
@@ -450,6 +629,12 @@ def write_report(
         lines += [
             "This is local implementation validation only. It is non-authoritative "
             "and is not evidence for either competing explanation.",
+            "",
+        ]
+    else:
+        lines += [
+            "This is a user-run formal artifact awaiting review. It is not "
+            "automatically authoritative and does not contain a scientific judgment.",
             "",
         ]
     lines += [
@@ -536,24 +721,114 @@ def exact_command(argv: list[str] | None = None) -> str:
     )
 
 
-def git_context() -> tuple[str, bool]:
-    commit = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-    dirty = bool(
-        subprocess.run(
-            ["git", "status", "--porcelain"],
-            cwd=ROOT,
-            check=True,
-            capture_output=True,
-            text=True,
-        ).stdout.strip()
+def effective_command(argv: list[str] | None = None) -> str:
+    return exact_command(argv)
+
+
+def build_run_manifest(
+    args: argparse.Namespace,
+    output_root: Path,
+    git_state: dict[str, Any],
+    command: str,
+    effective_command_value: str,
+    conda_environment: str,
+    resolved_config_sha256: str,
+    stage11c_manifest: dict[str, Any],
+    expected_runs: set[tuple[str, int]],
+    expected_windows: set[tuple[str, int, int, int]],
+    diagnostics: list[dict[str, Any]],
+    checks: dict[str, bool],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    status = mechanical_status_for_run(args.mode, checks)
+    observed_runs = {
+        (str(row["condition"]), int(row["seed"]))
+        for row in diagnostics
+    }
+    observed_conditions = [
+        condition
+        for condition in CONDITIONS
+        if condition in {run[0] for run in observed_runs}
+    ]
+    observed_seeds = sorted({run[1] for run in observed_runs})
+    manifest = {
+        "experiment_id": STAGE11D_EXPERIMENT_ID,
+        "execution_mode": args.mode,
+        "evidence_level": "formal" if args.mode == "full" else "smoke",
+        "authoritative": False,
+        "scientific_status_assigned": False,
+        "hypothesis_selected_automatically": False,
+        "git_commit": git_state["commit"],
+        "git_dirty_before_run": bool(git_state["dirty"]),
+        "git_clean_for_formal": bool(git_state["clean_for_formal"]),
+        "git_status_before_run": list(git_state["status_lines"]),
+        "git_allowed_untracked_inputs": list(
+            git_state["allowed_untracked_input_lines"]
+        ),
+        "git_unexpected_changes_before_run": list(
+            git_state["unexpected_status_lines"]
+        ),
+        "exact_command": command,
+        "effective_command": effective_command_value,
+        "conda_environment": conda_environment,
+        "script_path": repository_path(Path(__file__)),
+        "script_sha256": sha256_file(Path(__file__)),
+        "replay_path": repository_path(Path(DEFAULT_REPLAY)),
+        "replay_sha256": sha256_file(Path(DEFAULT_REPLAY)),
+        "config_path": repository_path(Path(DEFAULT_CONFIG)),
+        "config_sha256": sha256_file(Path(DEFAULT_CONFIG)),
+        "resolved_config_snapshot": "resolved_config_snapshot.json",
+        "resolved_config_sha256": resolved_config_sha256,
+        "stage11c_manifest_path": repository_path(STAGE11C_MANIFEST),
+        "stage11c_manifest_sha256": sha256_file(STAGE11C_MANIFEST),
+        "stage11c_profile_path": repository_path(STAGE11C_PROFILES),
+        "stage11c_profile_sha256": sha256_file(STAGE11C_PROFILES),
+        "stage11c_source_commit": stage11c_manifest.get("git_commit", ""),
+        "source_state": "true",
+        "window_transitions": WINDOW_TRANSITIONS,
+        "row_sqrt_weights": ROW_SQRT_WEIGHTS.tolist(),
+        "parameter_order": list(PARAMETER_ORDER),
+        "conditions": observed_conditions,
+        "seeds": observed_seeds,
+        "expected_runs": len(expected_runs),
+        "actual_runs": len(observed_runs),
+        "expected_windows": len(expected_windows),
+        "actual_windows": len(diagnostics),
+        "source_stage11c_windows": int(stage11c_manifest["actual_windows"]),
+        "output_root": repository_path(output_root),
+        "mechanical_completeness": status in {
+            "valid_smoke",
+            "valid_full_run",
+        },
+        "mechanical_status": status,
+        "smoke_non_authoritative": args.mode == "smoke",
+    }
+    mechanical = {
+        "experiment_id": STAGE11D_EXPERIMENT_ID,
+        "execution_mode": args.mode,
+        "mechanical_status": status,
+        "mechanical_completeness": manifest[
+            "mechanical_completeness"
+        ],
+        **checks,
+        "checks": checks,
+    }
+    return manifest, mechanical
+
+
+def write_run_provenance(
+    output_root: Path,
+    manifest: dict[str, Any],
+    mechanical: dict[str, Any],
+) -> None:
+    (output_root / "run_manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n"
     )
-    return commit, dirty
+    (output_root / "command.txt").write_text(
+        str(manifest["exact_command"]) + "\n"
+    )
+    (output_root / "mechanical_status.json").write_text(
+        json.dumps(mechanical, indent=2, sort_keys=True) + "\n"
+    )
 
 
 def resolve_output_root(mode: str, output_root: Path | None) -> Path:
@@ -596,6 +871,14 @@ def choose_identities(
 
 def run(args: argparse.Namespace, argv: list[str] | None = None) -> Path:
     output_root = Path(args.output_root)
+    git_state = git_context()
+    if args.mode == "full" and not git_state["clean_for_formal"]:
+        unexpected = "; ".join(git_state["unexpected_status_lines"][:5])
+        raise SystemExit(
+            "full mode requires a clean committed source tree; the declared "
+            "untracked Stage 11C input root is the only exception. "
+            f"Unexpected status: {unexpected}"
+        )
     if args.mode == "full" and output_root.exists() and any(output_root.iterdir()):
         raise SystemExit(
             f"refusing to overwrite non-empty complete output root: {output_root}"
@@ -603,13 +886,30 @@ def run(args: argparse.Namespace, argv: list[str] | None = None) -> Path:
     output_root.mkdir(parents=True, exist_ok=True)
 
     stage11c_manifest = json.loads(STAGE11C_MANIFEST.read_text())
-    if stage11c_manifest.get("mechanical_status") != "valid_full_run":
+    source_stage11c_valid = (
+        stage11c_manifest.get("mechanical_status") == "valid_full_run"
+        and bool(stage11c_manifest.get("mechanical_completeness"))
+    )
+    if not source_stage11c_valid:
         raise RuntimeError("Stage 11C source manifest is not a valid full run")
     profile_rows = read_csv(STAGE11C_PROFILES)
     profile_index = validate_and_index_stage11c_profiles(
         profile_rows, stage11c_manifest
     )
     selected = choose_identities(profile_index, args.mode)
+    full_expected_runs, full_expected_windows = expected_identity_sets(
+        profile_index
+    )
+    expected_windows = set(selected)
+    expected_runs = {
+        (condition, seed)
+        for condition, seed, _, _ in expected_windows
+    }
+    if args.mode == "full" and (
+        expected_runs != full_expected_runs
+        or expected_windows != full_expected_windows
+    ):
+        raise RuntimeError("full mode did not select the exact Stage 11C matrix")
 
     replay = load_replay(DEFAULT_REPLAY)
     config = load_experiment_config(DEFAULT_CONFIG)
@@ -644,62 +944,87 @@ def run(args: argparse.Namespace, argv: list[str] | None = None) -> Path:
             )
         )
 
-    if {window_identity(row) for row in diagnostics} != set(selected):
-        raise RuntimeError("generated Stage 11D identities do not exactly align")
     summaries = aggregate_rows(diagnostics)
     write_dict_csv(output_root / "window_residual_diagnostics.csv", diagnostics)
     write_dict_csv(output_root / "condition_residual_summary.csv", summaries)
-
-    commit, dirty = git_context()
-    manifest = {
-        "experiment_id": "stage11d_residual_coverage_audit",
-        "execution_mode": args.mode,
-        "authoritative": args.mode == "full",
-        "scientific_status_assigned": False,
-        "hypothesis_selected_automatically": False,
-        "git_commit": commit,
-        "git_dirty_before_run": dirty,
-        "exact_command": exact_command(argv),
-        "conda_environment": (
-            Path(sys.prefix).name if Path(sys.prefix).name else "unknown"
-        ),
-        "script_path": str(Path(__file__).resolve().relative_to(ROOT)),
-        "script_sha256": sha256_file(Path(__file__).resolve()),
-        "replay_path": str(Path(DEFAULT_REPLAY).resolve().relative_to(ROOT)),
-        "replay_sha256": sha256_file(Path(DEFAULT_REPLAY)),
-        "config_path": str(Path(DEFAULT_CONFIG).resolve().relative_to(ROOT)),
-        "config_sha256": sha256_file(Path(DEFAULT_CONFIG)),
-        "stage11c_manifest_path": str(STAGE11C_MANIFEST.relative_to(ROOT)),
-        "stage11c_manifest_sha256": sha256_file(STAGE11C_MANIFEST),
-        "stage11c_profile_path": str(STAGE11C_PROFILES.relative_to(ROOT)),
-        "stage11c_profile_sha256": sha256_file(STAGE11C_PROFILES),
-        "source_state": "true",
-        "window_transitions": WINDOW_TRANSITIONS,
-        "row_sqrt_weights": ROW_SQRT_WEIGHTS.tolist(),
-        "parameter_order": list(PARAMETER_ORDER),
-        "source_stage11c_windows": len(profile_index),
-        "actual_runs": len({identity[:2] for identity in selected}),
-        "actual_windows": len(diagnostics),
-        "window_identity_aligned": True,
-        "output_root": str(output_root),
-        "smoke_non_authoritative": args.mode == "smoke",
-    }
-    (output_root / "run_manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    resolved_config_sha256 = write_resolved_config_snapshot(
+        output_root, config
     )
+    command = exact_command(argv)
+    effective = effective_command(argv)
+    conda_environment = os.environ.get("CONDA_DEFAULT_ENV", "")
+    checks = exact_identity_checks(
+        args.mode,
+        expected_runs,
+        expected_windows,
+        diagnostics,
+        source_stage11c_valid,
+        source_profile_identity_complete=True,
+        git_clean_for_formal=git_state["clean_for_formal"],
+        required_outputs_complete=False,
+    )
+    manifest, mechanical = build_run_manifest(
+        args,
+        output_root,
+        git_state,
+        command,
+        effective,
+        conda_environment,
+        resolved_config_sha256,
+        stage11c_manifest,
+        expected_runs,
+        expected_windows,
+        diagnostics,
+        checks,
+    )
+    write_run_provenance(output_root, manifest, mechanical)
     write_report(output_root, manifest, summaries)
+
+    checks = exact_identity_checks(
+        args.mode,
+        expected_runs,
+        expected_windows,
+        diagnostics,
+        source_stage11c_valid,
+        source_profile_identity_complete=True,
+        git_clean_for_formal=git_state["clean_for_formal"],
+        required_outputs_complete=required_outputs_exist(output_root),
+    )
+    manifest, mechanical = build_run_manifest(
+        args,
+        output_root,
+        git_state,
+        command,
+        effective,
+        conda_environment,
+        resolved_config_sha256,
+        stage11c_manifest,
+        expected_runs,
+        expected_windows,
+        diagnostics,
+        checks,
+    )
+    write_run_provenance(output_root, manifest, mechanical)
+    write_report(output_root, manifest, summaries)
+    if args.mode == "full" and not manifest["mechanical_completeness"]:
+        raise RuntimeError(
+            "full execution is mechanically invalid: "
+            f"{manifest['mechanical_status']}"
+        )
     return output_root
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     output_root = run(args, argv)
+    manifest = json.loads((output_root / "run_manifest.json").read_text())
     print(
         json.dumps(
             {
                 "mode": args.mode,
                 "output_root": str(output_root),
-                "authoritative": args.mode == "full",
+                "authoritative": False,
+                "mechanical_status": manifest["mechanical_status"],
             },
             indent=2,
         )

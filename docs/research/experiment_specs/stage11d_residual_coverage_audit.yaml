@@ -45,6 +45,42 @@ expected_outputs:
   - condition_residual_summary.csv
   - stage11d_report.md
   - run_manifest.json
+  - command.txt
+  - mechanical_status.json
+  - resolved_config_snapshot.json
+
+formal_provenance:
+  preflight:
+    - Capture Git commit and porcelain status before creating outputs or loading replay.
+    - Reject full execution when tracked source changes or unexpected untracked files exist.
+    - The declared read-only untracked input root results/stage11c_state_source_audit/ is the only Git-cleanliness exception.
+    - Reject a non-empty formal output root.
+  exact_identity_matrix:
+    runs: 24
+    windows: 710
+    run_identity: [condition, seed]
+    window_identity: [condition, seed, window_start, window_end]
+    requirements:
+      - Observed run identities equal the Stage 11C source run identities.
+      - Observed window identities equal the Stage 11C source window identities.
+      - No duplicate Stage 11D window rows exist.
+      - Every Stage 11C source window has exactly lambda_1d and lambda_kappa_2d profile rows.
+      - Every Stage 11D row uses true state and 70 transitions.
+  manifest_fields:
+    - exact_command
+    - effective_command
+    - conda_environment
+    - git status and declared-input exception
+    - source and implementation hashes
+    - expected and actual run/window counts
+    - resolved_config_sha256
+    - mechanical_status
+  resolved_config:
+    snapshot: resolved_config_snapshot.json
+    content: Exact loaded configuration without scientific modification.
+  validity:
+    - Full output is valid_full_run only when every mechanical check and every required output is complete.
+    - A full run is formal evidence awaiting review, never automatically authoritative.
 
 reporting:
   interpretation: neutral descriptive metrics only
@@ -67,5 +103,8 @@ complete_execution:
   command: conda run -n mpc_learn python scripts/run_stage11d_residual_coverage_audit.py --full
   output_root: results/stage11d_residual_coverage_audit
   performed_by: user
+  requires_committed_implementation: true
+  overwrite_existing_output: forbidden
+  automatic_authoritative_promotion: forbidden
 
-result_status: smoke_only
+result_status: implementation_ready_formal_not_run

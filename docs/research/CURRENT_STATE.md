@@ -3,7 +3,7 @@
 ## Repository checkpoint
 
 - Observed branch: `agent/midterm-stage11-closeout`
-- Scientific-state checkpoint reviewed: `26f735ad514aef14d16f65ca1a7a747bd1ea54c8`
+- Stage 11D implementation checkpoint: `d049a332b9353f578c8c49fe84e854590bb3969c`
 
 ## Current stage
 
@@ -36,10 +36,15 @@ while the one-dimensional lambda profile still under-covers lambda?
 
 ## Stage 11D status
 
-- The residual-and-coverage diagnostic is approved as exploratory work.
+- The initial residual-and-coverage implementation is committed at `d049a33`.
+- Formal-provenance hardening is implemented locally and awaits diff review.
 - It must use the exact Stage 11C true-state window identities and unchanged
   Stage 11B regression construction.
-- Codex may run tests and one local, non-authoritative smoke only.
+- A full run must pass exact 24-run/710-window identity checks, preserve the
+  resolved configuration, and record command, environment, hashes, and
+  mechanical status.
+- Codex may run tests only for the provenance patch; no additional smoke or
+  full execution is authorized.
 - The complete Stage 11D diagnostic is not authorized for Codex execution.
 
 ## Current freeze
@@ -49,7 +54,8 @@ while the one-dimensional lambda profile still under-covers lambda?
 
 ## Next authorized action
 
-- Review the Stage 11D implementation and local smoke output.
+- Review the Stage 11D formal-provenance patch and actual Git diff.
+- Commit the patch only after user approval.
 - Do not run the complete Stage 11D diagnostic yet.
 - Do not modify Stage 11C results or assign an automatic scientific outcome.
 
