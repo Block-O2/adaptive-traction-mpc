@@ -50,6 +50,7 @@ from run_stage11b_parameter_subspace_audit import (
 STAGE11C_ROOT = ROOT / "results" / "stage11c_state_source_audit"
 STAGE11C_MANIFEST = STAGE11C_ROOT / "run_manifest.json"
 STAGE11C_PROFILES = STAGE11C_ROOT / "paired_profile_summary.csv"
+STAGE11B_RUNNER = ROOT / "scripts" / "run_stage11b_parameter_subspace_audit.py"
 OUTPUT_FORMAL = ROOT / "results" / "stage11d_residual_coverage_audit"
 OUTPUT_SMOKE = ROOT / "results" / "local" / "stage11d_residual_coverage_audit_smoke"
 STAGE11D_EXPERIMENT_ID = "stage11d_residual_coverage_audit"
@@ -70,6 +71,7 @@ LAGS = (1, 5, 10)
 PROXY_NAMES = ("state_magnitude", "state_rate_magnitude", "action_magnitude")
 IDENTITY_FIELDS = ("condition", "seed", "window_start", "window_end")
 DECLARED_UNTRACKED_INPUT_ROOT = STAGE11C_ROOT.relative_to(ROOT).as_posix()
+STAGE11C_LAMBDA_RECONCILIATION_ATOL = 1.0e-10
 
 
 def sha256_file(path: Path) -> str:
@@ -177,6 +179,24 @@ def expected_identity_sets(
     return expected_runs, expected_windows
 
 
+def stage11c_input_hash_checks(
+    stage11c_manifest: dict[str, Any],
+) -> dict[str, bool]:
+    """Bind Stage 11D reconstruction inputs to the Stage 11C provenance."""
+    current_hashes = {
+        "replay_sha256": sha256_file(Path(DEFAULT_REPLAY)),
+        "config_sha256": sha256_file(Path(DEFAULT_CONFIG)),
+        "script_sha256": sha256_file(STAGE11B_RUNNER),
+    }
+    return {
+        f"stage11c_{field}_matches": (
+            isinstance(stage11c_manifest.get(field), str)
+            and current_hash == stage11c_manifest[field]
+        )
+        for field, current_hash in current_hashes.items()
+    }
+
+
 def _git_output(*arguments: str) -> str:
     completed = subprocess.run(
         ["git", *arguments],
@@ -237,6 +257,7 @@ def exact_identity_checks(
     diagnostics: list[dict[str, Any]],
     source_stage11c_valid: bool,
     source_profile_identity_complete: bool,
+    stage11c_input_hashes_match: bool,
     git_clean_for_formal: bool,
     required_outputs_complete: bool,
 ) -> dict[str, bool]:
@@ -252,6 +273,7 @@ def exact_identity_checks(
         "source_profile_identity_complete": bool(
             source_profile_identity_complete
         ),
+        "stage11c_input_hashes_match": bool(stage11c_input_hashes_match),
         "run_identity_complete": observed_run_set == expected_runs,
         "window_identity_complete": observed_window_set == expected_windows,
         "no_duplicate_windows": (
@@ -272,6 +294,10 @@ def exact_identity_checks(
         ),
         "true_state_only": all(
             str(row["state_source"]) == "true" for row in diagnostics
+        ),
+        "weighted_ls_lambda_matches_stage11c_profiles": all(
+            bool(row.get("weighted_ls_lambda_matches_stage11c", False))
+            for row in diagnostics
         ),
         "git_clean_for_formal": (
             bool(git_clean_for_formal)
@@ -455,6 +481,11 @@ def compute_window_diagnostic(
             f"{identity}: weighted LS normal-equation score is not near zero"
         )
 
+    lambda_profile_minimum = float(
+        lambda_profile["true_lambda_at_minimum"]
+    )
+    lambda_reconciliation_error = abs(float(optimum[0]) - lambda_profile_minimum)
+
     row: dict[str, Any] = {
         "condition": condition,
         "seed": seed,
@@ -468,8 +499,16 @@ def compute_window_diagnostic(
         "lambda_ls_optimum": float(optimum[0]),
         "kappa_ls_optimum": float(optimum[1]),
         "beta_ls_optimum": float(optimum[2]),
-        "lambda_profile_minimum": float(
-            lambda_profile["true_lambda_at_minimum"]
+        "lambda_profile_minimum": lambda_profile_minimum,
+        "weighted_ls_lambda_profile_abs_error": lambda_reconciliation_error,
+        "weighted_ls_lambda_profile_atol": STAGE11C_LAMBDA_RECONCILIATION_ATOL,
+        "weighted_ls_lambda_matches_stage11c": bool(
+            np.isclose(
+                optimum[0],
+                lambda_profile_minimum,
+                rtol=0.0,
+                atol=STAGE11C_LAMBDA_RECONCILIATION_ATOL,
+            )
         ),
         "lambda_truth_inclusion_95": parse_bool(
             lambda_profile["true_truth_in_region_95"]
@@ -734,6 +773,7 @@ def build_run_manifest(
     conda_environment: str,
     resolved_config_sha256: str,
     stage11c_manifest: dict[str, Any],
+    stage11c_hash_checks: dict[str, bool],
     expected_runs: set[tuple[str, int]],
     expected_windows: set[tuple[str, int, int, int]],
     diagnostics: list[dict[str, Any]],
@@ -783,6 +823,10 @@ def build_run_manifest(
         "stage11c_profile_path": repository_path(STAGE11C_PROFILES),
         "stage11c_profile_sha256": sha256_file(STAGE11C_PROFILES),
         "stage11c_source_commit": stage11c_manifest.get("git_commit", ""),
+        "stage11c_input_hash_checks": dict(stage11c_hash_checks),
+        "stage11c_input_hashes_match": bool(
+            all(stage11c_hash_checks.values())
+        ),
         "source_state": "true",
         "window_transitions": WINDOW_TRANSITIONS,
         "row_sqrt_weights": ROW_SQRT_WEIGHTS.tolist(),
@@ -883,7 +927,6 @@ def run(args: argparse.Namespace, argv: list[str] | None = None) -> Path:
         raise SystemExit(
             f"refusing to overwrite non-empty complete output root: {output_root}"
         )
-    output_root.mkdir(parents=True, exist_ok=True)
 
     stage11c_manifest = json.loads(STAGE11C_MANIFEST.read_text())
     source_stage11c_valid = (
@@ -892,6 +935,16 @@ def run(args: argparse.Namespace, argv: list[str] | None = None) -> Path:
     )
     if not source_stage11c_valid:
         raise RuntimeError("Stage 11C source manifest is not a valid full run")
+    stage11c_hash_checks = stage11c_input_hash_checks(stage11c_manifest)
+    if args.mode == "full" and not all(stage11c_hash_checks.values()):
+        failed = [
+            name for name, valid in stage11c_hash_checks.items() if not valid
+        ]
+        raise RuntimeError(
+            "Stage 11C provenance hash mismatch before computation: "
+            + ", ".join(failed)
+        )
+    output_root.mkdir(parents=True, exist_ok=True)
     profile_rows = read_csv(STAGE11C_PROFILES)
     profile_index = validate_and_index_stage11c_profiles(
         profile_rows, stage11c_manifest
@@ -944,6 +997,15 @@ def run(args: argparse.Namespace, argv: list[str] | None = None) -> Path:
             )
         )
 
+    if args.mode == "full" and not all(
+        bool(row["weighted_ls_lambda_matches_stage11c"])
+        for row in diagnostics
+    ):
+        raise RuntimeError(
+            "recomputed weighted-LS lambda does not match the corresponding "
+            "Stage 11C true_lambda_at_minimum within the declared tolerance"
+        )
+
     summaries = aggregate_rows(diagnostics)
     write_dict_csv(output_root / "window_residual_diagnostics.csv", diagnostics)
     write_dict_csv(output_root / "condition_residual_summary.csv", summaries)
@@ -960,6 +1022,7 @@ def run(args: argparse.Namespace, argv: list[str] | None = None) -> Path:
         diagnostics,
         source_stage11c_valid,
         source_profile_identity_complete=True,
+        stage11c_input_hashes_match=all(stage11c_hash_checks.values()),
         git_clean_for_formal=git_state["clean_for_formal"],
         required_outputs_complete=False,
     )
@@ -972,6 +1035,7 @@ def run(args: argparse.Namespace, argv: list[str] | None = None) -> Path:
         conda_environment,
         resolved_config_sha256,
         stage11c_manifest,
+        stage11c_hash_checks,
         expected_runs,
         expected_windows,
         diagnostics,
@@ -987,6 +1051,7 @@ def run(args: argparse.Namespace, argv: list[str] | None = None) -> Path:
         diagnostics,
         source_stage11c_valid,
         source_profile_identity_complete=True,
+        stage11c_input_hashes_match=all(stage11c_hash_checks.values()),
         git_clean_for_formal=git_state["clean_for_formal"],
         required_outputs_complete=required_outputs_exist(output_root),
     )
@@ -999,6 +1064,7 @@ def run(args: argparse.Namespace, argv: list[str] | None = None) -> Path:
         conda_environment,
         resolved_config_sha256,
         stage11c_manifest,
+        stage11c_hash_checks,
         expected_runs,
         expected_windows,
         diagnostics,

@@ -52,6 +52,8 @@ expected_outputs:
 formal_provenance:
   preflight:
     - Capture Git commit and porcelain status before creating outputs or loading replay.
+    - Compare current replay_sha256, config_sha256, and the Stage 11B runner sha256 against the corresponding Stage 11C manifest fields before computation.
+    - Reject full execution if any Stage 11C input-provenance hash differs.
     - Reject full execution when tracked source changes or unexpected untracked files exist.
     - The declared read-only untracked input root results/stage11c_state_source_audit/ is the only Git-cleanliness exception.
     - Reject a non-empty formal output root.
@@ -66,6 +68,7 @@ formal_provenance:
       - No duplicate Stage 11D window rows exist.
       - Every Stage 11C source window has exactly lambda_1d and lambda_kappa_2d profile rows.
       - Every Stage 11D row uses true state and 70 transitions.
+      - Every reconstructed weighted-LS lambda matches the corresponding Stage 11C true_lambda_at_minimum with absolute tolerance 1e-10.
   manifest_fields:
     - exact_command
     - effective_command

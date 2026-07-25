@@ -43,6 +43,9 @@ while the one-dimensional lambda profile still under-covers lambda?
 - A full run must pass exact 24-run/710-window identity checks, preserve the
   resolved configuration, and record command, environment, hashes, and
   mechanical status.
+- Full preflight also binds the replay, config, and Stage 11B runner hashes to
+  the Stage 11C manifest, and verifies every reconstructed WLS lambda against
+  its saved Stage 11C true-state profile minimum at absolute tolerance 1e-10.
 - Codex may run tests only for the provenance patch; no additional smoke or
   full execution is authorized.
 - The complete Stage 11D diagnostic is not authorized for Codex execution.

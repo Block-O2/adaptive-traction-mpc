@@ -55,6 +55,16 @@ def paired_profile_rows(identities):
     return rows
 
 
+def synthetic_stage11c_paths(monkeypatch, tmp_path):
+    manifest_path = tmp_path / "stage11c_manifest.json"
+    profiles_path = tmp_path / "stage11c_profiles.csv"
+    manifest_path.write_text("{}\n")
+    profiles_path.write_text("condition,seed,window_start,window_end,profile\n")
+    monkeypatch.setattr(stage11d, "STAGE11C_MANIFEST", manifest_path)
+    monkeypatch.setattr(stage11d, "STAGE11C_PROFILES", profiles_path)
+    return manifest_path, profiles_path
+
+
 def synthetic_full_diagnostics():
     run_identities = [
         (condition, seed)
@@ -76,6 +86,7 @@ def synthetic_full_diagnostics():
                 "window_end": start + stage11d.WINDOW_TRANSITIONS - 1,
                 "transitions": stage11d.WINDOW_TRANSITIONS,
                 "state_source": "true",
+                "weighted_ls_lambda_matches_stage11c": True,
             }
         )
     expected_windows = {stage11d.window_identity(row) for row in rows}
@@ -210,10 +221,12 @@ def test_smoke_selects_one_run_and_at_most_three_windows():
     assert len({identity[:2] for identity in selected}) == 1
 
 
-def test_manifest_marks_smoke_non_authoritative_contract():
+def test_manifest_marks_smoke_non_authoritative_contract(tmp_path, monkeypatch):
     assert stage11d.resolve_output_root("smoke", None) == stage11d.OUTPUT_SMOKE
     assert stage11d.resolve_output_root("full", None) == stage11d.OUTPUT_FORMAL
-    source_manifest = json.loads(stage11d.STAGE11C_MANIFEST.read_text())
+    manifest_path, _ = synthetic_stage11c_paths(monkeypatch, tmp_path)
+    manifest_path.write_text(json.dumps({"mechanical_status": "valid_full_run"}))
+    source_manifest = json.loads(manifest_path.read_text())
     assert source_manifest["mechanical_status"] == "valid_full_run"
 
 
@@ -298,6 +311,7 @@ def test_exact_full_identity_matrix_is_valid():
         rows,
         source_stage11c_valid=True,
         source_profile_identity_complete=True,
+        stage11c_input_hashes_match=True,
         git_clean_for_formal=True,
         required_outputs_complete=True,
     )
@@ -316,6 +330,7 @@ def test_duplicate_and_missing_window_is_invalid_even_at_710_rows():
         altered,
         source_stage11c_valid=True,
         source_profile_identity_complete=True,
+        stage11c_input_hashes_match=True,
         git_clean_for_formal=True,
         required_outputs_complete=True,
     )
@@ -336,7 +351,9 @@ def test_resolved_config_snapshot_and_hash(tmp_path):
     assert digest == stage11d.sha256_file(snapshot)
 
 
-def test_formal_manifest_has_provenance_and_is_not_authoritative(tmp_path):
+def test_formal_manifest_has_provenance_and_is_not_authoritative(
+    tmp_path, monkeypatch
+):
     expected_runs, expected_windows, rows = synthetic_full_diagnostics()
     args = Namespace(mode="full", output_root=tmp_path)
     git_state = {
@@ -360,11 +377,13 @@ def test_formal_manifest_has_provenance_and_is_not_authoritative(tmp_path):
         True,
         True,
         True,
+        True,
     )
     stage11c_manifest = {
         "actual_windows": stage11d.STAGE11D_EXPECTED_WINDOWS,
         "git_commit": "stage11c-commit",
     }
+    synthetic_stage11c_paths(monkeypatch, tmp_path)
     manifest, mechanical = stage11d.build_run_manifest(
         args,
         tmp_path,
@@ -374,6 +393,11 @@ def test_formal_manifest_has_provenance_and_is_not_authoritative(tmp_path):
         "mpc_learn",
         "resolved-sha",
         stage11c_manifest,
+        {
+            "stage11c_replay_sha256_matches": True,
+            "stage11c_config_sha256_matches": True,
+            "stage11c_script_sha256_matches": True,
+        },
         expected_runs,
         expected_windows,
         rows,
@@ -399,6 +423,7 @@ def test_formal_manifest_has_provenance_and_is_not_authoritative(tmp_path):
     assert manifest["evidence_level"] == "formal"
     assert manifest["authoritative"] is False
     assert manifest["resolved_config_sha256"] == "resolved-sha"
+    assert manifest["stage11c_input_hashes_match"]
     assert mechanical["required_outputs_complete"]
 
 
@@ -408,3 +433,88 @@ def test_required_formal_provenance_outputs_are_declared():
         "mechanical_status.json",
         "resolved_config_snapshot.json",
     } <= set(stage11d.STAGE11D_REQUIRED_OUTPUTS)
+
+
+def test_stage11c_input_hashes_match_and_detect_mismatch():
+    matching = {
+        "replay_sha256": stage11d.sha256_file(stage11d.DEFAULT_REPLAY),
+        "config_sha256": stage11d.sha256_file(stage11d.DEFAULT_CONFIG),
+        "script_sha256": stage11d.sha256_file(stage11d.STAGE11B_RUNNER),
+    }
+    assert all(stage11d.stage11c_input_hash_checks(matching).values())
+    mismatched = dict(matching)
+    mismatched["script_sha256"] = "not-the-stage11b-runner"
+    checks = stage11d.stage11c_input_hash_checks(mismatched)
+    assert not checks["stage11c_script_sha256_matches"]
+
+
+def test_full_rejects_stage11c_hash_mismatch_before_reading_profiles(
+    monkeypatch, tmp_path
+):
+    manifest_path = tmp_path / "stage11c_manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "mechanical_status": "valid_full_run",
+                "mechanical_completeness": True,
+                "replay_sha256": "mismatch",
+                "config_sha256": "mismatch",
+                "script_sha256": "mismatch",
+            }
+        )
+    )
+    monkeypatch.setattr(stage11d, "STAGE11C_MANIFEST", manifest_path)
+    monkeypatch.setattr(stage11d, "STAGE11C_PROFILES", tmp_path / "absent.csv")
+    monkeypatch.setattr(
+        stage11d,
+        "git_context",
+        lambda: {
+            "commit": "abc",
+            "status_lines": [],
+            "allowed_untracked_input_lines": [],
+            "unexpected_status_lines": [],
+            "dirty": False,
+            "clean_for_formal": True,
+        },
+    )
+    args = stage11d.parse_args(
+        ["--full", "--output-root", str(tmp_path / "formal")]
+    )
+    with pytest.raises(RuntimeError, match="provenance hash mismatch"):
+        stage11d.run(args)
+    assert not args.output_root.exists()
+
+
+def test_weighted_ls_lambda_must_match_saved_stage11c_profile_value():
+    H, y, truth, proxies, profile = synthetic_problem()
+    Hw, yw = stage11d.weighted_design(H, y, stage11d.ROW_SQRT_WEIGHTS)
+    lambda_optimum = np.linalg.lstsq(Hw, yw, rcond=None)[0][0]
+    matching = dict(profile, true_lambda_at_minimum=str(lambda_optimum))
+    row = stage11d.compute_window_diagnostic(
+        ("clean", 101, 1, 70), H, y, truth, proxies, matching
+    )
+    assert row["weighted_ls_lambda_matches_stage11c"]
+    assert row["weighted_ls_lambda_profile_abs_error"] == pytest.approx(0.0)
+
+    mismatching = dict(
+        profile,
+        true_lambda_at_minimum=str(
+            lambda_optimum + 2.0 * stage11d.STAGE11C_LAMBDA_RECONCILIATION_ATOL
+        ),
+    )
+    mismatch_row = stage11d.compute_window_diagnostic(
+        ("clean", 101, 1, 70), H, y, truth, proxies, mismatching
+    )
+    assert not mismatch_row["weighted_ls_lambda_matches_stage11c"]
+    checks = stage11d.exact_identity_checks(
+        "smoke",
+        {("clean", 101)},
+        {("clean", 101, 1, 70)},
+        [mismatch_row],
+        source_stage11c_valid=True,
+        source_profile_identity_complete=True,
+        stage11c_input_hashes_match=True,
+        git_clean_for_formal=True,
+        required_outputs_complete=True,
+    )
+    assert not checks["weighted_ls_lambda_matches_stage11c_profiles"]
