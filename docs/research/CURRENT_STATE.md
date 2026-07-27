@@ -3,11 +3,11 @@
 ## Repository checkpoint
 
 - Observed branch: `agent/midterm-stage11-closeout`
-- Stage 11E implementation checkpoint: `17e8915e9c60813bbaf381c02140d441695ff439`
+- Stage 11F implementation checkpoint: `9cd59740865781e0188f596b9e820f1f3591dc81`
 
 ## Current stage
 
-Stage 11F: exact discrete one-step closure audit.
+Stage 11G: exact-discrete local information audit.
 
 ## Authoritative inputs
 
@@ -25,12 +25,17 @@ Stage 11F: exact discrete one-step closure audit.
   true-state lambda undercoverage through simple serial-correlation calibration.
 - The simple serial-correlation calibration branch is closed; structured
   point-bias H2 remains the active explanation.
+- The reviewed Stage 11F replay-closure result supports
+  finite-difference/continuous-regression formulation bias: exact discrete
+  residual RMS and its affine ratio are zero in all 710 windows.
+- Stage 11F does not support discrete simulator/model mismatch, but it does not
+  establish that a discrete identifier will work with estimated or noisy states.
 
 ## Unresolved question
 
-Is the remaining structured lambda bias introduced mainly by the
-continuous-time finite-difference affine regression, or is it already present
-in the exact discrete simulator transition?
+After removing affine finite-difference formulation bias, does the exact
+discrete one-step model retain sufficient passive local information for
+`theta = [lambda, kappa, beta]`?
 
 ## Stage 11C status
 
@@ -62,16 +67,30 @@ in the exact discrete simulator transition?
 
 ## Stage 11F status
 
-- The approved increment compares the unchanged Stage 11D affine truth
-  residual with exact one-step replay closure under the simulator RK4
-  transition.
-- It uses replay true states, recorded actions, true condition parameters, and
-  the exact Stage 11C/11D 24-run, 710-window identities.
-- No parameter fitting, optimization, estimator, controller, or identifier
-  change is permitted.
+- The reviewed full result is mechanically valid: 24 runs and 710 windows.
+- Exact discrete weighted residual RMS and the discrete/affine weighted RMS
+  ratio are zero in every window and all eight conditions.
+- The user review records finite-difference/continuous-regression formulation
+  bias as supported and discrete simulator/model mismatch as not supported by
+  this audit.
+- This is a replay-closure result only. It is not evidence that an exact
+  discrete identifier will work with estimated or noisy states.
+
+## Stage 11G status
+
+- The approved increment computes the local Jacobian of the exact discrete
+  one-step acceleration-equivalent output with respect to
+  `[lambda, kappa, beta]`.
+- It uses deterministic central differences at relative step `1e-5`, repeats
+  with half-step, and reuses the Stage 11B weighting, physical scaling, SVD,
+  rank, weak-direction, and conditional-lambda-information definitions.
+- Exact and affine Jacobians use the same Stage 11C/11D/11F 24-run,
+  710-window identities.
+- No fitting, optimization, estimator, identifier, or controller execution is
+  permitted.
 - Codex may implement, run tests and compile checks, and run one explicit local
   smoke only.
-- The complete Stage 11F diagnostic remains reserved for the user.
+- The complete Stage 11G diagnostic remains reserved for the user.
 
 ## Current freeze
 
@@ -80,9 +99,9 @@ in the exact discrete simulator transition?
 
 ## Next authorized action
 
-- Review the Stage 11F implementation, tests, and local smoke artifact.
-- Do not run the complete Stage 11F diagnostic yet.
-- Do not modify Stage 11C/11D/11E results or assign an automatic Stage 11F
+- Review the Stage 11G implementation, tests, and local smoke artifact.
+- Do not run the complete Stage 11G diagnostic yet.
+- Do not modify Stage 11C/11D/11F results or assign an automatic Stage 11G
   scientific outcome.
 
 ## Known documentation debt
