@@ -83,3 +83,34 @@ At the end of each task, report:
 - key metrics
 - any bad or unexpected result
 - whether any parameter/config/scientific change was made
+
+## Research Workflow Guardrails
+
+`docs/research/CURRENT_STATE.md` is the entry point for the current research state. Read it before beginning a research-workflow task.
+
+An approved Experiment Spec is the direct contract for implementation. If it conflicts with general suggestions or informal discussion, follow the approved spec.
+
+Keep evidence categories distinct:
+
+- **exploratory**: preliminary investigation; not a basis for formal claims or result promotion;
+- **smoke**: mechanical implementation validation only; not a scientific conclusion;
+- **formal**: user-run execution of an approved Experiment Spec, awaiting review;
+- **authoritative**: reviewed formal evidence promoted under the repository artifact policy.
+
+Codex may run unit tests, compile checks, and explicitly authorized smoke tests only. Codex must not run a full or formal scientific experiment; the user runs formal experiments manually. Smoke or local outputs must not be written to, or overwrite, an authoritative result directory.
+
+Codex must not independently label a scientific result PASS, FAIL, or INCONCLUSIVE. Report observed metrics and whether mechanical completeness checks passed.
+
+Do not modify historical authoritative results or old Stage scientific scripts unless the prompt explicitly names the file and explains the reason. Before editing, confirm the baseline, the single variable, allowed changes, and forbidden changes.
+
+Unless explicitly authorized, do not commit, push, merge, delete files, or switch branches.
+
+For a research-workflow task, finish by reporting:
+
+- files changed;
+- scientific variables changed;
+- scientific variables explicitly unchanged;
+- commands run;
+- tests/checks;
+- unexpected findings;
+- formal command reserved for the user.

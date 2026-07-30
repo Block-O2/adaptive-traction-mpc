@@ -1,0 +1,176 @@
+# Approved exploratory experiment contract. Complete execution remains reserved
+# for the user.
+experiment_id: stage11g_discrete_information_audit
+title: Exact-discrete local information audit
+status: reviewed_exploratory
+
+research_question: After removing affine finite-difference formulation bias, does the exact discrete one-step model retain sufficient passive local information for theta = [lambda, kappa, beta]?
+
+authoritative_inputs:
+  replay: results/stage9j_gap_decomposition/stage9j_replay.csv
+  stage11c_manifest: results/stage11c_state_source_audit/run_manifest.json
+  stage11c_profiles: results/stage11c_state_source_audit/paired_profile_summary.csv
+  stage11d_manifest: results/stage11d_residual_coverage_audit/run_manifest.json
+  stage11d_diagnostics: results/stage11d_residual_coverage_audit/window_residual_diagnostics.csv
+  reviewed_stage11f_manifest: results/stage11f_discrete_closure_audit/run_manifest.json
+  reviewed_stage11f_metrics: results/stage11f_discrete_closure_audit/window_discrete_closure_metrics.csv
+
+fixed_inputs:
+  - Exact Stage 11C/11D/11F 24-run and 710-window identities
+  - Replay true x_t and recorded u_t
+  - True Stage 9J condition parameters and dt
+  - Exact replay-generation step_dynamics
+  - Stage 11C true-state affine H as the unchanged comparison
+  - Channel order [radial, angular]
+  - Row square-root weights [0.6, 0.25]
+
+parameter_mapping:
+  theta_order: [lambda, kappa, beta]
+  forward:
+    m: 1 / lambda
+    k: kappa / lambda
+    b_r: beta / lambda
+  inverse:
+    lambda: 1 / m
+    kappa: k / m
+    beta: b_r / m
+
+exact_discrete_output:
+  per_transition:
+    radial: (r_dot_next(theta) - r_dot_t) / dt
+    angular: (omega_next(theta) - omega_t) / dt
+  channel_order: [radial, angular]
+  replay_next_state_usage: forbidden
+
+jacobian_contract:
+  evaluation_point: True theta for each condition
+  method: Deterministic central differences
+  primary_relative_step: 1.0e-5
+  component_step: h_j = 1.0e-5 * max(abs(theta_j), 1.0)
+  stability_repeat: Repeat central differences with h_j / 2
+  transitions_per_window: 70
+  unweighted_shape: [140, 3]
+  weighting: Repeated row square-root weights [0.6, 0.25]
+  numerical_stability_metric: Frobenius and maximum column-relative discrepancy between primary and half-step Jacobians
+  mechanical_stability_threshold: 1.0e-4 maximum column-relative discrepancy
+
+stage11b_metric_reuse:
+  implementation: scripts/run_stage11b_parameter_subspace_audit.py::svd_metrics
+  physical_scale: [1.0, 450.0, 20.0]
+  metrics:
+    - numerical rank
+    - raw condition number
+    - physical-scale condition number
+    - column-normalized geometric condition number
+    - physical-scaled weighted singular values
+    - column-normalized singular values
+    - physical weak direction
+    - conditional lambda information absolute value and ratio
+
+forbidden:
+  - using replay x_(t+1) to construct the exact-discrete Jacobian
+  - duplicating or approximating step_dynamics
+  - parameter fitting or optimization
+  - estimator, identifier, or controller execution
+  - changing replay, actions, alignment, weights, physical scaling, or parameterization
+
+primary_comparisons:
+  - exact-discrete versus affine numerical rank
+  - exact-discrete versus affine singular values
+  - exact versus affine conditional lambda information absolute value
+  - exact/affine conditional-lambda-information ratio
+  - exact versus affine physical weak-direction angle
+  - central-difference half-step relative discrepancy
+
+human_review_criteria:
+  exact_discrete_local_information_retained:
+    overall_median_conditional_lambda_information_ratio_minimum: 0.5
+    conditions_with_median_ratio_at_least_0_25_minimum: 6
+    total_conditions: 8
+    exact_rank3_fraction_minimum: 0.95
+  exact_discrete_information_collapse:
+    any_of:
+      - overall_median_conditional_lambda_information_ratio_maximum: 0.10
+      - conditions_with_median_ratio_at_most_0_10_minimum: 4
+    total_conditions: 8
+  otherwise: inconclusive
+  numerical_derivative_validity: Separate mechanical requirement
+  automatic_application: forbidden
+
+expected_outputs:
+  - window_discrete_information_metrics.csv
+  - condition_discrete_information_summary.csv
+  - stage11g_report.md
+  - run_manifest.json
+  - command.txt
+  - mechanical_status.json
+
+mechanical_completeness:
+  source_provenance:
+    - Stage 11C, Stage 11D, and reviewed Stage 11F manifests must be valid_full_run.
+    - Current replay, config, Stage 11B runner, Stage 11F runner, and transition source hashes must match recorded provenance.
+    - Stage 11C, Stage 11D, and Stage 11F exact identity sets must be equal.
+  exact_identity_matrix:
+    runs: 24
+    windows: 710
+    run_identity: [condition, seed]
+    window_identity: [condition, seed, window_start, window_end]
+    requirements:
+      - No duplicate source or output window rows exist.
+      - Every exact and affine window contains exactly 70 transitions.
+      - Every exact-discrete Jacobian has shape 140 x 3.
+      - Every Jacobian uses true x_t, recorded u_t, true parameters, and dt.
+      - The exact-discrete Jacobian never consumes replay x_(t+1).
+      - Radial/angular order and row weights equal Stage 11B.
+      - Primary and half-step Jacobians satisfy the fixed mechanical stability threshold.
+      - No fit, optimizer, estimator, identifier, or controller is invoked.
+  validity:
+    - Full output is valid_full_run only when every mechanical check and required output passes.
+    - A full run is formal evidence awaiting review and is never automatically authoritative.
+
+reporting:
+  interpretation: Neutral descriptive metrics only
+  automatic_scientific_classification: forbidden
+  limitations:
+    - Local true-state information does not establish estimator performance under state error or noise.
+    - Central differences diagnose local sensitivity at true parameters only.
+    - Numerical derivative validity is mechanical and separate from scientific classification.
+
+smoke_execution:
+  command: conda run -n mpc_learn python scripts/run_stage11g_discrete_information_audit.py --smoke
+  output_root: results/local/stage11g_discrete_information_audit_smoke
+  maximum_runs: 1
+  maximum_windows: 3
+  authoritative: false
+  performed_by: Codex when explicitly authorized
+
+complete_execution:
+  command: conda run -n mpc_learn python scripts/run_stage11g_discrete_information_audit.py --full
+  output_root: results/stage11g_discrete_information_audit
+  performed_by: user
+  requires_committed_implementation: true
+  overwrite_existing_output: forbidden
+  automatic_authoritative_promotion: forbidden
+
+reviewed_result:
+  mechanical_status: valid_full_run
+  runs: 24
+  windows: 710
+  exact_jacobian_rank3_fraction: 1.0
+  overall_median_exact_to_affine_conditional_lambda_information_ratio: 689.197
+  conditions_satisfying_retained_information_criterion: 8
+  total_conditions: 8
+  numerical_derivatives: mechanically_stable
+  human_review:
+    exact_discrete_local_information: retained
+    exact_discrete_information_collapse: not supported by this audit
+    limitation: Local true-state evidence does not establish estimated-state or online identifier performance.
+    interpretation_guardrail: The information ratio is not a parameter-accuracy multiplier.
+
+result_status: reviewed_exact_discrete_local_information_retained
+
+phase_disposition:
+  single_link_spring2d: closed_after_professor_review
+  stage11h: cancelled_not_implemented
+  exact_discrete_parameter_recovery: untested
+  next_phase: maintained_separately_from_professor_supplied_matlab_linkage_reference

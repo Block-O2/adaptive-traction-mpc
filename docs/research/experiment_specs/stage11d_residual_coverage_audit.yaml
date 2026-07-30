@@ -1,0 +1,113 @@
+# Approved exploratory experiment contract. Complete execution remains reserved
+# for the user.
+experiment_id: stage11d_residual_coverage_audit
+title: True-state residual and lambda-profile coverage diagnostic
+status: approved_exploratory
+
+research_question: Why does true-state regression greatly improve the [lambda, kappa] geometry while still under-covering lambda in the one-dimensional profile?
+competing_explanations:
+  H1: Residual autocorrelation or heteroscedasticity makes the unchanged SSE/dof profile threshold overconfident.
+  H2: A structured residual remains projected onto the lambda direction because of differentiation, discretization, or model mismatch.
+
+authoritative_inputs:
+  replay: results/stage9j_gap_decomposition/stage9j_replay.csv
+  stage11c_manifest: results/stage11c_state_source_audit/run_manifest.json
+  stage11c_profiles: results/stage11c_state_source_audit/paired_profile_summary.csv
+state_source: replay true states only
+
+fixed_variables:
+  - Stage 9J replay
+  - exact Stage 11C true-state window identities
+  - actions and alignment
+  - 70-transition windows
+  - row square-root weights [0.6, 0.25]
+  - affine parameter order [lambda, kappa, beta]
+  - weighted least-squares optimum
+  - existing Stage 11C profile results and threshold
+
+diagnostics:
+  - truth-parameter and weighted-LS residuals separated into radial and angular regression channels
+  - weighted residual mean, standard deviation, and RMS
+  - within-channel residual autocorrelation at lags 1, 5, and 10
+  - correlation of weighted squared residual with state magnitude, state-rate magnitude, and action magnitude
+  - raw and normalized weighted truth score H_w^T e_w for lambda, kappa, and beta
+  - Stage 11C lambda truth inclusion, optimum error, and profile width
+
+metric_definitions:
+  state_magnitude: Euclidean norm of destination-state [theta, r] for each aligned transition
+  state_rate_magnitude: Euclidean norm of destination-state [omega, r_dot] for each aligned transition
+  action_magnitude: Euclidean norm of aligned [F_tan, F_rad]
+  normalized_truth_score: (H_w[:,j]^T e_w) / (norm(H_w[:,j]) * norm(e_w))
+  autocorrelation: Mean-centered within-channel lag correlation; radial and angular samples are never interleaved.
+
+expected_outputs:
+  - window_residual_diagnostics.csv
+  - condition_residual_summary.csv
+  - stage11d_report.md
+  - run_manifest.json
+  - command.txt
+  - mechanical_status.json
+  - resolved_config_snapshot.json
+
+formal_provenance:
+  preflight:
+    - Capture Git commit and porcelain status before creating outputs or loading replay.
+    - Compare current replay_sha256, config_sha256, and the Stage 11B runner sha256 against the corresponding Stage 11C manifest fields before computation.
+    - Reject full execution if any Stage 11C input-provenance hash differs.
+    - Reject full execution when tracked source changes or unexpected untracked files exist.
+    - The declared read-only untracked input root results/stage11c_state_source_audit/ is the only Git-cleanliness exception.
+    - Reject a non-empty formal output root.
+  exact_identity_matrix:
+    runs: 24
+    windows: 710
+    run_identity: [condition, seed]
+    window_identity: [condition, seed, window_start, window_end]
+    requirements:
+      - Observed run identities equal the Stage 11C source run identities.
+      - Observed window identities equal the Stage 11C source window identities.
+      - No duplicate Stage 11D window rows exist.
+      - Every Stage 11C source window has exactly lambda_1d and lambda_kappa_2d profile rows.
+      - Every Stage 11D row uses true state and 70 transitions.
+      - Every reconstructed weighted-LS lambda matches the corresponding Stage 11C true_lambda_at_minimum with absolute tolerance 1e-10.
+  manifest_fields:
+    - exact_command
+    - effective_command
+    - conda_environment
+    - git status and declared-input exception
+    - source and implementation hashes
+    - expected and actual run/window counts
+    - resolved_config_sha256
+    - mechanical_status
+  resolved_config:
+    snapshot: resolved_config_snapshot.json
+    content: Exact loaded configuration without scientific modification.
+  validity:
+    - Full output is valid_full_run only when every mechanical check and every required output is complete.
+    - A full run is formal evidence awaiting review, never automatically authoritative.
+
+reporting:
+  interpretation: neutral descriptive metrics only
+  automatic_hypothesis_choice: forbidden
+  automatic_scientific_classification: forbidden
+  limitations:
+    - State and state-rate magnitude proxies combine variables with different physical units and are descriptive only.
+    - True-state regression is an oracle diagnostic, not a deployable estimator.
+    - Passive rehabilitation trajectories only; no active excitation.
+
+smoke_execution:
+  command: conda run -n mpc_learn python scripts/run_stage11d_residual_coverage_audit.py --smoke
+  output_root: results/local/stage11d_residual_coverage_audit_smoke
+  maximum_runs: 1
+  maximum_windows: 3
+  authoritative: false
+  performed_by: Codex when explicitly authorized
+
+complete_execution:
+  command: conda run -n mpc_learn python scripts/run_stage11d_residual_coverage_audit.py --full
+  output_root: results/stage11d_residual_coverage_audit
+  performed_by: user
+  requires_committed_implementation: true
+  overwrite_existing_output: forbidden
+  automatic_authoritative_promotion: forbidden
+
+result_status: implementation_ready_formal_not_run
