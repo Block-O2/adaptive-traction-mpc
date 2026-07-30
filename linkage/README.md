@@ -2,12 +2,12 @@
 
 This directory is the next research phase after the frozen single-link
 Spring2D archive. It begins from a professor-supplied MATLAB reference model.
-The original source remains private/local until publishing permission is
-confirmed.
+The original source remains preserved and ignored; publishing permission is no
+longer a blocker for the intake branch and its derived documentation.
 
-Current scope is preservation, code audit, and baseline reproduction. No
-Python port, adaptive identifier, MPC design, or final controller architecture
-has been selected.
+The intake now covers preservation, reproducible baseline execution, and an
+independent dynamics-consistency audit. Controller implementation has not
+started.
 
 ## Structure
 
@@ -16,27 +16,28 @@ linkage/
 ├── docs/                         Intake state, source audit, system draft
 ├── matlab/
 │   ├── reference/                Local original and its tracked preservation note
-│   ├── runners/                  Future non-invasive baseline wrappers
+│   ├── runners/                  Non-invasive baseline wrappers
 │   └── src/                      Future derived/clean MATLAB implementations
 └── results/local/                Ignored local baseline outputs
 ```
 
 ## Baseline status
 
-MATLAB was not installed or callable on the intake machine, so no baseline was
-executed and no runner is claimed to be validated. Once MATLAB is available,
-the unmodified source is expected to be assessed with a command of this form:
+The unmodified professor baseline runs successfully in MATLAB R2025b Update 1
+through the tracked runner:
 
 ```bash
-matlab -batch "run('linkage/matlab/reference/professor_original/singleArmDual.m')"
+/Users/hankli/Desktop/MATLAB_R2025b.app/bin/matlab \
+  -batch "addpath('linkage/matlab/runners'); run_professor_reference_capture"
 ```
 
-This command is provisional, not yet verified. The source creates interactive
-figures and an animation, so headless compatibility remains unresolved.
+Generated logs, workspaces, diagnostics, and figures remain ignored under
+`linkage/results/local/professor_reference_baseline/`.
 
 ## Documents
 
 - [Current intake state](docs/CURRENT_STATE.md)
 - [MATLAB source audit](docs/MATLAB_CODE_AUDIT.md)
+- [Independent dynamics-consistency audit](docs/DYNAMICS_CONSISTENCY_AUDIT.md)
 - [Draft system definition](docs/SYSTEM_DEFINITION_DRAFT.md)
 - [Reference preservation note](matlab/reference/README.md)

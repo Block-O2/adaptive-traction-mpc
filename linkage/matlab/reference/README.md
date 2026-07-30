@@ -1,7 +1,8 @@
 # Professor MATLAB Reference
 
-The professor-supplied source is preserved locally and is not committed.
-Publishing permission has not been confirmed.
+The professor-supplied source is preserved locally and is not committed by the
+intake branch. Publishing permission is no longer a blocker for the intake
+documentation.
 
 - Expected local path:
   `linkage/matlab/reference/professor_original/singleArmDual.m`

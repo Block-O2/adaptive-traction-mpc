@@ -1,41 +1,62 @@
-# Linkage Intake Current State
+# Linkage Project Current State
 
 ## Phase status
 
 - The single-link Spring2D phase is closed and tagged
   `single-link-spring2d-v1`.
-- The linkage-model intake phase has started under `linkage/` in this
-  repository.
-- Source received: `singleArmDual.m`.
-- The source is preserved locally at
-  `linkage/matlab/reference/professor_original/singleArmDual.m`.
-- The local source is ignored by Git and is not authorized for publication.
+- The professor-supplied `singleArmDual.m` is retained unchanged as a
+  legacy/reference baseline.
+- The preserved source remains ignored at
+  `linkage/matlab/reference/professor_original/singleArmDual.m` and is not
+  added by the intake commit.
+- The reference baseline runs successfully in MATLAB R2025b Update 1 through
+  `linkage/matlab/runners/run_professor_reference_capture.m`.
+- The independent dynamics-consistency audit is accepted.
+- Publishing permission is no longer a blocker for the intake branch and its
+  detailed derived documentation.
 
-## Current task
+## Agreed model decisions
 
-Understand the professor's reference model, reconstruct its equations and
-assumptions, and establish whether its original baseline can be reproduced
-without changing the source.
+- Positive knee flexion is defined with shank absolute angle
+  \(\theta_{\mathrm{shank}}=q_1-q_2\).
+- The new plant will use independently consistent \(M(q)\),
+  \(C(q,\dot q)\), and \(G(q)\) derived for that coordinate convention.
+- The first implementation will use one robot arm and only the shank contact
+  point.
+- The initial contact baseline will be damping-only.
+- The actual robot control input will be selected from the real robot
+  interface rather than assumed from the legacy reference.
+- Required generalization is across rehabilitation trajectories and patient
+  parameters, not across robot platforms.
 
-No controller modification, equation correction, MATLAB-to-Python conversion,
-adaptive identification, MPC work, or Spring2D experiment is authorized in
-this intake.
+## Architecture direction
 
-## Baseline status
+- A planner/reference-manager plus short-horizon tracker remains the primary
+  architectural candidate.
+- This is an architectural direction, not an implemented or validated
+  controller.
+- Controller implementation has not started.
+- No legacy equation will be silently corrected in the preserved professor
+  baseline; the new plant will be implemented separately when authorized.
 
-The intake machine returned `matlab not found`, and no MATLAB application was
-found under `/Applications`. MATLAB was not installed automatically. The
-reference baseline therefore remains unexecuted; this is an environment
-blocker, not a classification of the model.
-
-No MATLAB-to-Python conversion decision has been made. The possible
-MATLAB-first, hybrid, and Python-port routes remain open pending source review,
-professor clarification, and a reproducible MATLAB baseline.
-
-## Immediate evidence
+## Reproduced reference evidence
 
 - Preservation SHA-256:
   `b8c95ab1df3507efd610a3a72057e31a33724626d37341bd5d5a4abaa833c19f`
-- Source audit: [MATLAB_CODE_AUDIT.md](MATLAB_CODE_AUDIT.md)
-- Draft equations:
+- MATLAB version: `25.2.0.3042426 (R2025b) Update 1`
+- Baseline execution: exit code 0, 191 captured workspace variables, three
+  captured figures, and no source runtime error.
+- Generated results remain ignored under
+  `linkage/results/local/professor_reference_baseline/`.
+- Source/execution audit: [MATLAB_CODE_AUDIT.md](MATLAB_CODE_AUDIT.md)
+- Independent dynamics audit:
+  [DYNAMICS_CONSISTENCY_AUDIT.md](DYNAMICS_CONSISTENCY_AUDIT.md)
+- Earlier system reconstruction:
   [SYSTEM_DEFINITION_DRAFT.md](SYSTEM_DEFINITION_DRAFT.md)
+
+## Scope boundary
+
+The current intake establishes the preserved reference, reproducible execution,
+independent dynamics findings, and agreed direction. It does not implement the
+new plant or controller, select a robot command interface, or validate the
+future architecture.

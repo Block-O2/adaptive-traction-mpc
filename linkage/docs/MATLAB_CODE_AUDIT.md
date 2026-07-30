@@ -22,8 +22,8 @@ The root-level untracked file was moved byte-for-byte to
 | Mode / modification time | read-only `-r--r--r--`; 2026-07-30 18:00:51 +0800 |
 | Git state on receipt | untracked |
 
-Publishing permission has not been confirmed. This audit does not reproduce
-the private source.
+Publishing permission is no longer a blocker for the intake documentation.
+This audit does not reproduce the preserved source.
 
 ## 1. File form
 
@@ -330,18 +330,189 @@ None of these observations is silently corrected in the preserved source.
 
 No route is selected in this intake.
 
-## Baseline execution status
+## Baseline execution evidence
 
-Read-only environment probes returned:
+This section records observed execution evidence only. It does not change or
+resolve the source-code inferences in Sections 1–9.
+
+### Superseded intake probe
+
+The earlier `which matlab` and `/Applications` probes did not find MATLAB.
+That observation was limited to the shell path and `/Applications`; it did not
+establish that MATLAB was absent from the machine. The Desktop installation
+described below supersedes the earlier execution blocker.
+
+### MATLAB location and version
+
+On 2026-07-30, the requested Desktop search returned:
 
 ```text
-which matlab
-matlab not found
-
-ls /Applications | grep -i MATLAB
-no match
+$ find ~/Desktop -maxdepth 3 -name "MATLAB*.app" -print
+/Users/hankli/Desktop/MATLAB_R2025b.app
+/Users/hankli/Desktop/matlab/MATLAB_R2025b.app
 ```
 
-No MATLAB installation was attempted, no wrapper was created, and the source
-was not executed or modified. The exact blocker is **MATLAB unavailable on the
-intake machine**.
+The first path is the actual application bundle and contains the executable
+`bin/matlab`. The second path is an empty directory and is not runnable.
+
+The exact version command was:
+
+```text
+/Users/hankli/Desktop/MATLAB_R2025b.app/bin/matlab -batch "disp(version)"
+```
+
+Observed output:
+
+```text
+[警告: 目录访问失败: /Users/hankli/Documents/MATLAB]
+25.2.0.3042426 (R2025b) Update 1
+```
+
+The warning is a MATLAB startup-path warning. It did not prevent the version
+probe or the reference execution.
+
+### Exact reference command and preservation check
+
+The successful reference/capture command was:
+
+```text
+/Users/hankli/Desktop/MATLAB_R2025b.app/bin/matlab \
+  -logfile /Users/hankli/Desktop/coding/adaptive-traction-mpc/linkage/results/local/professor_reference_baseline/console.log \
+  -batch "addpath('/Users/hankli/Desktop/coding/adaptive-traction-mpc/linkage/matlab/runners'); run_professor_reference_capture"
+```
+
+`linkage/matlab/runners/run_professor_reference_capture.m` is an external
+runner. It calls the preserved script with `run`, then captures data after the
+script returns. It does not edit, preprocess, or replace any line in the
+professor source.
+
+The professor source SHA-256 was checked before and after execution and remained
+exactly:
+
+```text
+b8c95ab1df3507efd610a3a72057e31a33724626d37341bd5d5a4abaa833c19f
+```
+
+No source, parameter, equation, controller, constraint, time step, duration,
+solver, or graphics setting was changed.
+
+### Observed execution result
+
+- MATLAB exited with code 0 on the final capture run.
+- The numeric loop reached `仿真完成！`.
+- The animation initialized, printed its Q-key instruction, ran at the
+  source-coded pace, and reached `动画播放完成！`.
+- All three expected figure windows initialized and were saved:
+  1. `双机械臂仰卧位屈髋屈膝康复训练`;
+  2. `双机械臂仰卧位康复训练 - 仿真结果汇总`;
+  3. `安全约束与协调性分析`.
+- Visual inspection of the three exported PNGs found complete axes, traces,
+  legends, Chinese text, and the final animation pose. The four-component trail
+  colors, `yyaxis`, and `sgtitle` did not produce a graphics error in R2025b.
+- The only warning in the successful console log was the startup-path warning
+  for `/Users/hankli/Documents/MATLAB`.
+- The preserved script itself raised no runtime error. The final
+  `runtime_error.txt` contains `NONE`.
+
+There was one capture-tool incident before the successful run: after the
+professor script had completed its simulation, animation, plots, and printed
+summary, the external runner referenced an empty error-report variable that the
+source's initial `clear` had removed. This was not an error in
+`singleArmDual.m`. The ignored external runner was corrected to recreate that
+capture variable, and the unchanged professor script was rerun successfully.
+
+The original script's final printed metrics were:
+
+```text
+total simulation time: 12.0 s
+hip range: 0.0 deg to 65.0 deg
+knee range: -0.0 deg to 70.0 deg
+arm 1 maximum force: 4.4 N
+arm 2 maximum force: 5.3 N
+safety-constraint activation count: 0
+maximum tracking error: hip 1.16 deg, knee 1.14 deg
+```
+
+The captured arrays give the corresponding unrounded values:
+
+| Metric | Observed value |
+|---|---:|
+| Hip range | 0.000000000 to 64.984906062 deg |
+| Knee range | -0.015910729 to 70.004111824 deg |
+| Arm 1 maximum force | 4.437117175 N |
+| Arm 2 maximum force | 5.345507135 N |
+| Hip maximum tracking error | 1.155851439 deg |
+| Knee maximum tracking error | 1.144779620 deg |
+
+### Workspace-derived numerical checks
+
+The runner saved 191 numeric/text/struct workspace variables to a MATLAB v7.3
+MAT file. MATLAB R2025b then loaded that file successfully for the checks below.
+All transition checks cover the 24,000 integration transitions; the initial
+zero-filled log column is not treated as a simulated transition.
+
+| Check | Observed value |
+|---|---:|
+| Arm 1 spring displacement error range | -5.5511151231257827e-17 to 5.5511151231257827e-17 m |
+| Arm 2 spring displacement error range | -8.3266726846886741e-17 to 8.3266726846886741e-17 m |
+| Arm 1 stiffness normal-force component | -1.9428902930940239e-14 to 1.9428902930940239e-14 N |
+| Arm 2 stiffness normal-force component | -2.4980018054066022e-14 to 2.4980018054066022e-14 N |
+| Arm 1 damping normal-force component | -4.437117175256356 to 4.372439832855359 N |
+| Arm 2 damping normal-force component | -5.345507135192400 to 5.342024600522790 N |
+| Coded gravity-vector norm | 0.037562405740526 to 31.557924490804872 N·m |
+| Maximum gravity cancellation residual | 1.4654943925052066e-14 N·m |
+| Minimum eigenvalue of `M(q)` | 0.065597346526537 |
+| Condition-number range of `M(q)` | 13.124517550184029 to 36.083563011945969 |
+| Hip/knee/any velocity clipping | 0 / 0 / 0 transitions |
+| Hip/knee/any hard angle clipping | 0 / 0 / 0 transitions |
+| Hip/knee/any safety-torque activation | 0 / 0 / 0 transitions |
+| Source safety-activation log count | 0 |
+
+The stiffness and damping values above are the signed scalar components along
+each coded limb normal, before the source's total-force saturation. The
+workspace reconstruction also matched the logged arm-force vectors to
+floating-point precision.
+
+For the gravity check, the diagnostic reconstructed, at every transition, both
+the coded right-hand side with `tau_gravity` added in `tau_ctrl` and subtracted
+in forward dynamics, and the algebraically cancelled right-hand side. The
+maximum difference was `1.4654943925052066e-14 N·m`, while the coded gravity
+vector itself reached `31.557924490804872 N·m`. This is execution evidence that
+the coded compensation cancels the coded gravity term to floating-point
+precision in this baseline.
+
+Velocity- and angle-clipping counts were reconstructed from each logged state,
+logged total torque, and the coded `M`, `C`, gravity, integration order, and
+limits. Safety-torque counts were reconstructed from each state using the coded
+four safety conditions and were cross-checked against
+`constraint_violation_log`.
+
+### Saved local evidence
+
+All runtime artifacts are under the ignored directory
+`linkage/results/local/professor_reference_baseline/`:
+
+- `console.log` — successful run console output and warning;
+- `commands.txt` — exact locator, version, run, and verification commands;
+- `runtime_error.txt` — `NONE` for the successful reference run;
+- `workspace_numeric.mat` — load-verified workspace data;
+- `numerical_diagnostics.mat` and `numerical_diagnostics.txt`;
+- `capture_status.mat` and `verification.log`;
+- `figure_manifest.tsv`;
+- `figure_01.fig` / `figure_01.png` — final animation window;
+- `figure_02.fig` / `figure_02.png` — twelve-panel summary;
+- `figure_03.fig` / `figure_03.png` — safety and coordination analysis;
+- `run_dynamics_consistency_checks.m` — ignored local numerical-audit runner.
+
+## Dynamics-consistency follow-up
+
+The cleaned capture runner now explicitly restores
+`execution_completed=false` after a source runtime error and guards runner
+state against the source's initial `clear`. The unchanged professor baseline
+was rerun through this runner in MATLAB R2025b and exited 0 with three figures,
+a loadable workspace, and unchanged final metrics.
+
+An independent COM/energy derivation, source comparison, deterministic
+trajectory/grid checks, and descriptive torque decomposition are recorded in
+[DYNAMICS_CONSISTENCY_AUDIT.md](DYNAMICS_CONSISTENCY_AUDIT.md). No source
+equation was corrected.
