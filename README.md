@@ -190,10 +190,9 @@ them solely because a branch failed. Use
 [the research workflow](docs/research/WORKFLOW.md) and the matching experiment
 spec before touching historical scientific code or evidence.
 
-## Separately maintained next phase
+## Linkage phase
 
-The next phase will begin in a separate repository from a
-professor-supplied MATLAB linkage reference implementation. It will first audit
-the linkage dynamics and controller, then may progress toward rehabilitation
-end-effector grasping. The MATLAB reference has not been imported here, and
-this repository contains no implementation of that next phase.
+The linkage phase is maintained under [`linkage/`](linkage/) in this
+repository. The Spring2D portion remains a frozen research archive. Intake
+begins from a professor-supplied MATLAB reference whose original source remains
+local and is not committed while publishing permission is unresolved.

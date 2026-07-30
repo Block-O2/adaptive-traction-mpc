@@ -291,3 +291,8 @@ end-effector grasping and upper/lower-limb rehabilitation.
 The MATLAB program has not been imported, and no linkage implementation belongs
 to this closeout. A suitable empty repository name is
 `adaptive-linkage-rehabilitation-mpc`.
+
+## Post-closeout organizational note
+
+A later organizational decision keeps the linkage phase under `linkage/` in
+this repository.
