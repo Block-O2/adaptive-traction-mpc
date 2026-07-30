@@ -14,16 +14,20 @@
 - The independent dynamics-consistency audit is accepted.
 - Publishing permission is no longer a blocker for the intake branch and its
   detailed derived documentation.
+- A separate physical human two-link MATLAB plant baseline is now implemented
+  and validated without modifying the professor reference.
 
 ## Agreed model decisions
 
 - Positive knee flexion is defined with shank absolute angle
   \(\theta_{\mathrm{shank}}=q_1-q_2\).
-- The new plant will use independently consistent \(M(q)\),
+- The new plant uses independently consistent \(M(q)\),
   \(C(q,\dot q)\), and \(G(q)\) derived for that coordinate convention.
 - The first implementation will use one robot arm and only the shank contact
   point.
 - The initial contact baseline will be damping-only.
+- The implemented first baseline has one shank contact point with a continuous
+  local normal and damping-only interaction.
 - The actual robot control input will be selected from the real robot
   interface rather than assumed from the legacy reference.
 - Required generalization is across rehabilitation trajectories and patient
@@ -35,9 +39,28 @@
   architectural candidate.
 - This is an architectural direction, not an implemented or validated
   controller.
-- Controller implementation has not started.
+- The implemented computed-torque PD law is only an oracle plant-validation
+  controller using the true parameters and abstract human generalized torque.
+- Rehabilitation controller and real-robot interface implementation have not
+  started.
 - No legacy equation will be silently corrected in the preserved professor
-  baseline; the new plant will be implemented separately when authorized.
+  baseline; the new plant is maintained as a separate implementation.
+
+## Physical plant baseline evidence
+
+- The new \(q_1-q_2\) plant uses independently consistent \(M(q)\),
+  \(h(q,\dot q)=C(q,\dot q)\dot q\), and \(G(q)\).
+- Fifteen deterministic MATLAB tests cover mass-matrix properties, Coriolis
+  consistency, the manipulator skew identity, the potential-energy gradient,
+  contact kinematics and dissipativity, finite values, and RK4 convergence.
+- All 15 tests pass in MATLAB R2025b Update 1.
+- The deterministic three-trajectory by three-profile by two-contact-mode
+  matrix completed 18/18 runs with no joint-limit, velocity-limit,
+  dissipativity, or finite-value violations.
+- Generated evidence remains ignored under
+  `linkage/results/local/human_two_link_baseline/`.
+- Baseline methods and observed results:
+  [PHYSICAL_PLANT_BASELINE.md](PHYSICAL_PLANT_BASELINE.md)
 
 ## Reproduced reference evidence
 
@@ -56,7 +79,10 @@
 
 ## Scope boundary
 
-The current intake establishes the preserved reference, reproducible execution,
-independent dynamics findings, and agreed direction. It does not implement the
-new plant or controller, select a robot command interface, or validate the
-future architecture.
+The intake and physical-plant baseline now establish the preserved reference,
+reproducible legacy execution, independent dynamics findings, a separate
+tested human plant, and the initial damping-only interaction abstraction. No
+real robot interface, robot dynamics, NMPC, adaptation, or clinical
+trajectory dataset has been integrated. The next decision is
+controller/interface design after reviewing the real robot control modes and
+rehabilitation trajectory sources.
