@@ -2,7 +2,7 @@
 # for the user.
 experiment_id: stage11g_discrete_information_audit
 title: Exact-discrete local information audit
-status: approved_exploratory
+status: reviewed_exploratory
 
 research_question: After removing affine finite-difference formulation bias, does the exact discrete one-step model retain sufficient passive local information for theta = [lambda, kappa, beta]?
 
@@ -152,4 +152,25 @@ complete_execution:
   overwrite_existing_output: forbidden
   automatic_authoritative_promotion: forbidden
 
-result_status: implementation_pending_validation
+reviewed_result:
+  mechanical_status: valid_full_run
+  runs: 24
+  windows: 710
+  exact_jacobian_rank3_fraction: 1.0
+  overall_median_exact_to_affine_conditional_lambda_information_ratio: 689.197
+  conditions_satisfying_retained_information_criterion: 8
+  total_conditions: 8
+  numerical_derivatives: mechanically_stable
+  human_review:
+    exact_discrete_local_information: retained
+    exact_discrete_information_collapse: not supported by this audit
+    limitation: Local true-state evidence does not establish estimated-state or online identifier performance.
+    interpretation_guardrail: The information ratio is not a parameter-accuracy multiplier.
+
+result_status: reviewed_exact_discrete_local_information_retained
+
+phase_disposition:
+  single_link_spring2d: closed_after_professor_review
+  stage11h: cancelled_not_implemented
+  exact_discrete_parameter_recovery: untested
+  next_phase: maintained_separately_from_professor_supplied_matlab_linkage_reference

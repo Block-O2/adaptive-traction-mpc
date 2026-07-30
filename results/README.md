@@ -7,7 +7,7 @@ results/
 ├── archive/legacy_stages/     Curated Stage 1–8 evidence
 ├── stage9*/                   Active Stage 9 reports and retained evidence
 ├── stage10*/                  Joint-estimator audits and MHE closeout
-└── stage11*/                  Passive-information and subspace audits
+└── stage11*/                  Final identification-mechanism audits
 ```
 
 Archived results are closed historical baselines. Active results remain at their script-default paths so existing reproduction commands and the Stage 9J-to-9K replay dependency do not break.
@@ -44,7 +44,26 @@ Do not rename, filter, or regenerate this file implicitly. Stage 10 comparisons 
 | Stage 11A | Task-relevant information-metric validation | `stage11a_information_metric_validation/stage11a_report.md`, `metric_summary.csv`, `gate_validation.csv`, `window_metrics.csv` |
 | Stage 11B | Passive parameter-subspace audit | `stage11b_parameter_subspace_audit/stage11b_report.md`, `condition_summary.csv`, `subspace_summary.csv`, `profile_summary.csv`, `window_metrics.csv` |
 
-Stage 11C is implemented and smoke-tested but is not yet authoritative full-run evidence. Its smoke output remains local.
+## Single-link closeout evidence
+
+The final Stage 11C–11G formal matrices were user-run and mechanically complete.
+Stage 11E–11G interpretations were reviewed and recorded in the final research
+state. Stage 11C–11D remain diagnostic inputs to that reviewed mechanism chain;
+their generated reports intentionally do not assign an automatic scientific
+classification.
+
+| Stage | Role | Curated closeout files | Status / boundary |
+|---|---|---|---|
+| Stage 11C | Paired estimated-state/true-state source audit | `stage11c_state_source_audit/stage11c_report.md`, `state_source_summary.csv`, command, resolved config, manifest, mechanical status | 24 runs/710 windows; `valid_full_run`; true-state evidence does not by itself establish a deployable estimator |
+| Stage 11D | True-state residual and coverage audit | `stage11d_residual_coverage_audit/stage11d_report.md`, `condition_residual_summary.csv`, command, resolved config, manifest, mechanical status | 24 runs/710 windows; `valid_full_run`; descriptive diagnostic |
+| Stage 11E | Block-aware lambda coverage calibration | `stage11e_block_coverage_calibration/stage11e_report.md`, `condition_calibration_summary.csv`, command, manifest, mechanical status | Reviewed: calibration did not repair coverage; branch closed |
+| Stage 11F | Exact-discrete replay closure | `stage11f_discrete_closure_audit/stage11f_report.md`, `condition_discrete_closure_summary.csv`, command, manifest, mechanical status | Reviewed: exact transition closes all 710 replay windows |
+| Stage 11G | Exact-discrete local information | `stage11g_discrete_information_audit/stage11g_report.md`, `condition_discrete_information_summary.csv`, command, manifest, mechanical status | Reviewed: local true-state information retained; recovery untested |
+
+Large profile/window tables are not committed in the compact closeout. The
+closeout machine preserves them under the ignored
+`results/local/archive/single_link_closeout/` tree, and
+`docs/research/SINGLE_LINK_CLOSEOUT.md` records their paths and SHA-256 hashes.
 
 ## Retention policy
 
@@ -56,7 +75,13 @@ Every curated stage should contain:
 - at most a small representative figure set (normally one to three);
 - only irreplaceable per-run or replay data required for a published conclusion or downstream comparison.
 
-Raw trajectories, debug logs, repeated seed plots, solver output, caches, intermediate tuning exports, and videos are generated locally and should not be committed unless a report explicitly designates one as irreplaceable evidence. Stage 9J/9K retain more than three plots because those named diagnostic figures jointly support the decomposition and identifier conclusions. The local Stage 9J GIF is for visual inspection and is not an authoritative metric source.
+Raw trajectories, debug logs, repeated seed plots, solver output, caches,
+intermediate tuning exports, window-level closeout tables, and videos are
+generated locally and should not be committed unless a report explicitly
+designates one as irreplaceable evidence. Stage 9J/9K retain more than three
+plots because those named diagnostic figures jointly support the decomposition
+and identifier conclusions. The local Stage 9J GIF is for visual inspection and
+is not an authoritative metric source.
 
 Adaptive profile grids such as `profile_grid.csv` are recomputable raw artifacts and are intentionally ignored. Compact profile, window, condition, and subspace summaries are the retained evidence.
 

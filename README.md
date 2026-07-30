@@ -2,21 +2,35 @@
 
 ## Project overview
 
-This repository studies adaptive model-predictive control for a compliant traction task. It compares fixed-model control, online state/parameter estimation, adaptive control, and diagnostic robustness variants in reproducible Spring2D simulation.
+This repository is the research archive for adaptive model-predictive control
+of a compliant single-link Spring2D traction task. It contains the dynamics,
+controllers, state estimators, online identifiers, experiment runners, tests,
+and curated empirical evidence used to compare fixed, oracle, and adaptive
+control.
 
-The current evidence is empirical. No formal safety or stability guarantee is claimed.
+The evidence is simulation-only. No formal safety, stability, robustness, or
+identifiability guarantee is claimed.
 
-## Problem definition
+## Current status: single-link phase closed
 
-The main system is a Spring2D compliant single-link traction model. The task succeeds only when the true simulated angle satisfies:
+The single-link Spring2D phase is **closed after professor review**. The final
+diagnosis is:
 
-```text
-theta >= theta_target
-```
+- known-state/known-parameter MPC and a long-horizon planner plus
+  short-horizon tracker can complete the tested task;
+- the current estimated-state Windowed NLS path is not reliable enough to
+  support strong adaptive-control claims;
+- affine finite-difference identification introduces structured point bias on
+  the retained replay;
+- the exact discrete transition closes that replay and retains local
+  true-state parameter information;
+- exact-discrete parameter recovery remains untested.
 
-Near-target tolerances are not substituted for this crossing criterion.
+Stage 11H is cancelled. See the
+[scientific closeout](docs/research/SINGLE_LINK_CLOSEOUT.md) and
+[final research state](docs/research/CURRENT_STATE.md).
 
-## State, action, and key constraints
+## System definition
 
 ```text
 x = [theta, omega, r, r_dot]
@@ -25,120 +39,161 @@ delta_r = r - L0
 alpha_k = (omega[k+1] - omega[k]) / dt
 ```
 
-Experiments track force bounds, radial deformation, angular velocity, and angular acceleration. In the current scaled NMPC line, alpha is a high-priority soft path constraint with explicit slack. There is no separate gravity-compensation term.
+The task crosses only when the true simulated angle satisfies
+`theta >= theta_target`; a near-target tolerance is not substituted for this
+criterion.
 
-## Current controller architecture
+The adaptive physical parameters are `[m, k, b_r]`, with later identification
+audits expressed in
+`[lambda, kappa, beta] = [1/m, k/m, b_r/m]`. The compact fixed-MPC
+configuration tests force, radial-deformation, angular-velocity, and
+angular-acceleration limits. These constraints are empirical controller
+requirements, not a formal safety certificate.
 
-The validated Stage 9 architecture contains:
+## Control and estimation architecture
 
-- a long-horizon crossing planner;
-- a short-horizon multiple-shooting NMPC tracker;
-- a UKF-bias state estimator;
-- the current filtered Windowed NLS parameter baseline for `[m, k, b_r]`.
+The final researched architecture combines:
 
-Planner/tracker comparisons distinguish true-state/true-parameter oracle modes, state-error-only and parameter-error-only ablations, fixed nominal control, and full adaptive control. Parameters are frozen within each solve and may update only between control steps.
+- a one-shot long-horizon crossing planner;
+- a short-horizon multiple-shooting NMPC reference tracker;
+- a bias-aware UKF state estimator;
+- a filtered Windowed NLS / affine parameter identifier.
+
+Parameters remain frozen inside each planner or tracker solve and may be
+updated only between control steps. The repository also retains fixed/oracle
+ablations, MHE variants, information diagnostics, and exact-discrete replay
+audits needed to reproduce positive, negative, and mixed findings.
 
 ## Repository structure
 
 ```text
-assets/          MuJoCo and robot assets
-configs/         Experiment and controller configurations
-docs/reports/    Consolidation and historical reports
-legacy/          Preserved early prototypes
-results/         Curated evidence, archive, and reproducibility manifest
-scripts/         Experiment and analysis entry points
-src/             Dynamics, estimation, identification, MPC, and visualization
-tests/           Core Spring2D and fixed-MPC regression tests
+assets/          MuJoCo and robot assets retained from supporting work
+configs/         Spring2D, MPC, estimator, and experiment configurations
+docs/reports/    Historical consolidation and audit reports
+docs/research/   Workflow, experiment specs, live/final state, and closeout
+legacy/          Preserved early prototypes and historical material
+results/         Curated reports, summaries, replay, and artifact policy
+scripts/         Demo, experiment, and diagnostic entry points
+src/             Dynamics, environments, estimation, identification, and MPC
+tests/           Dynamics, environment, controller, estimator, and audit tests
 ```
 
-## Installation
+## Environment setup
 
-Python 3.10 or newer is required. A local conda environment named `mpc_learn` was used for the retained Stage 9 runs.
+Python 3.10 or newer is required. The retained runs used a conda environment
+named `mpc_learn`.
 
 ```bash
+conda create -n mpc_learn python=3.10
+conda activate mpc_learn
 python -m pip install -r requirements.txt
-python -m pip install -e .
+python -m pip install -e ".[dev]"
 ```
 
-The constrained Stage 9 scripts also require CasADi in the execution environment.
+CasADi is required by the constrained NMPC research runners. MuJoCo is an
+installed project dependency but is not required by the canonical Spring2D
+demo below.
 
-## Minimal execution example
+## Canonical minimal demo
 
-Run the Spring2D open-loop example with the checked-in config:
+Run the existing fixed-model MPC baseline:
 
 ```bash
-conda run -n mpc_learn python scripts/run_spring2d_openloop.py --config configs/spring2d.yaml
+conda run -n mpc_learn python scripts/run_spring2d_fixed_mpc.py --config configs/spring2d_fixed_mpc.yaml
 ```
 
-Generated logs, figures, and videos use ignored local output directories.
+The command writes a CSV, GIF, and summary plot to ignored generated-output
+paths. It is a compact mechanical demonstration of the Spring2D environment and
+MPC interface; it is not a reproduction of the reviewed planner/tracker study.
+During closeout validation it exited normally at `max_time` with final angle
+89.97 degrees and maximum true alpha 42.175 rad/s². It therefore must not be
+treated as a successful crossing or constraint-validation result.
 
-## Core reproduction commands
-
-Run regression tests and import/compile checks:
+## Tests
 
 ```bash
-conda run -n mpc_learn python -m pytest tests
+conda run -n mpc_learn python -m pytest -q
+```
+
+An import/bytecode check is also available:
+
+```bash
 conda run -n mpc_learn python -m compileall -q src scripts tests
 ```
 
-Reproduce the authoritative Stage 9 lines:
+## Key reviewed findings
 
-```bash
-conda run -n mpc_learn python scripts/run_spring2d_stage9c_scaled_nmpc_validation.py --config configs/spring2d_safety_aware_cem.yaml --output-root results/stage9c_scaled_nmpc_validation
-conda run -n mpc_learn python scripts/run_spring2d_stage9d_nmpc_stress_validation.py --config configs/spring2d_safety_aware_cem.yaml --output-root results/stage9d_nmpc_stress_validation
-conda run -n mpc_learn python scripts/run_spring2d_stage9g_crossing_alpha_frontier.py --config configs/spring2d_safety_aware_cem.yaml --output-root results/stage9g_crossing_alpha_frontier
-conda run -n mpc_learn python scripts/run_spring2d_stage9h_planner_tracker.py --config configs/spring2d_safety_aware_cem.yaml --output-root results/stage9h_planner_tracker
-conda run -n mpc_learn python scripts/run_spring2d_stage9j_gap_decomposition.py --config configs/spring2d_safety_aware_cem.yaml --output-root results/stage9j_gap_decomposition
-conda run -n mpc_learn python scripts/run_spring2d_stage9k_identifier_ablation.py --replay results/stage9j_gap_decomposition/stage9j_replay.csv --config configs/spring2d_safety_aware_cem.yaml --output-root results/stage9k_identifier_ablation
-```
+- Oracle scaled NMPC works in the tested nominal and mismatch conditions.
+- The long-horizon planner plus short-horizon tracker restores the
+  initial-angle-offset crossing under oracle state and parameters.
+- In the Stage 9J decomposition, parameter error is the largest measured
+  contributor to the adaptive-oracle true-alpha gap; the interaction residual
+  is diagnostic rather than causal proof.
+- Robust Windowed NLS losses and the tested fixed-weight online MHE routes did
+  not pass their declared gates.
+- Passive information level, information gating, and a stable passive
+  parameter subspace did not provide a reliable replacement identifier.
+- Block-aware calibration did not repair lambda coverage.
+- Across 24 runs and 710 windows, the exact discrete transition closes the
+  replay exactly and the exact-discrete local Jacobian has rank-3 fraction 1.0.
+  Its median exact/affine conditional-lambda-information ratio is 689.197, but
+  that number is not an estimator-accuracy multiplier.
 
-These experiment commands are expensive and overwrite files at the selected output root. Use a separate local output directory when validating changes.
+Negative and mixed results are part of the retained scientific record.
 
-## Results and reports index
+## Key limitations
 
-- [Live research state](docs/research/CURRENT_STATE.md)
-- [Research execution workflow](docs/research/WORKFLOW.md)
-- [Results index](results/README.md)
-- [Reproducibility manifest](results/reproducibility_manifest.md)
-- [Legacy Stage 1–8 archive](results/archive/legacy_stages/README.md)
-- [Stage 9J report](results/stage9j_gap_decomposition/stage9j_report.md)
-- [Stage 9K report](results/stage9k_identifier_ablation/stage9k_report.md)
-- [Stage 10A dynamics and parameterization audit](results/stage10a_dynamics_audit/stage10a_dynamics_parameterization_audit.md)
-- [Stage 10F MHE branch closeout](results/stage10f_mhe_divergence_audit/stage10f_report.md)
-- [Stage 11A information-metric audit](results/stage11a_information_metric_validation/stage11a_report.md)
-- [Stage 11B passive parameter-subspace audit](results/stage11b_parameter_subspace_audit/stage11b_report.md)
+- Single-link, simulation-only validation.
+- Passive trajectories and one dominant saved replay.
+- Estimated-state EIV and biased/overconfident parameter estimates.
+- True-state exact-discrete diagnostics do not establish estimator recovery
+  under noise.
+- No exact-discrete parameter fit, online test, or closed-loop adaptive test.
+- No formal safety/stability proof, hardware validation, or linkage model.
+- Some historical Stage 9 generating revisions were not recorded.
 
-## Current validated findings
+## Curated result locations
 
-- Scaled multiple-shooting NMPC works under oracle or nominally accurate models in the tested Spring2D conditions.
-- A long-horizon planner plus short-horizon tracker restores crossing in the initial-angle-offset case.
-- Stage 9J identifies parameter error as the dominant measured contribution to the adaptive–oracle true-alpha gap; its interaction residual is diagnostic, not causal proof.
-- Stage 9K identifies errors-in-variables bias in the current UKF-to-NLS cascade.
-- Huber and Cauchy Windowed NLS variants did not pass the offline improvement gate, so the Stage 9K closed-loop comparison was not run.
-- Stage 10A shows that inverse-mass ratios provide a valid affine parameterization, while `k` and `b_r` are not reliably separable on the retained trajectories.
-- Stage 10B–10F show that the tested fixed-weight online MHE route does not pass the alpha, state, failure-rate, or solve-time gates; the branch is closed after alignment and fallback audits.
-- Stage 11A finds that information level predicts parameter-update quality only moderately and does not justify hard or soft update gating.
-- Stage 11B finds numerical rank without a practically stable passive parameter subspace. Stage 11C estimated-state/true-state pairing is implemented and smoke-tested, but its full audit remains pending.
+| Topic | Primary record |
+|---|---|
+| Planner/tracker feasibility | [Stage 9H report](results/stage9h_planner_tracker/stage9h_report.md) |
+| Adaptive-oracle gap decomposition | [Stage 9J report](results/stage9j_gap_decomposition/stage9j_report.md) |
+| Identifier diagnosis | [Stage 9K report](results/stage9k_identifier_ablation/stage9k_report.md) |
+| Closed MHE route | [Stage 10F report](results/stage10f_mhe_divergence_audit/stage10f_report.md) |
+| Paired state source through exact-discrete information | [Stage 11C–11G index](results/README.md#single-link-closeout-evidence) |
+| Final synthesis | [Single-link closeout](docs/research/SINGLE_LINK_CLOSEOUT.md) |
 
-Negative and mixed results are retained rather than tuned away.
+The complete artifact rules and retained-file map are in
+[results/README.md](results/README.md) and
+[results/reproducibility_manifest.md](results/reproducibility_manifest.md).
 
-## Known limitations
+## Reproducibility policy
 
-- Validation is simulation-only and single-link.
-- The current UKF-to-NLS cascade uses estimated state as regressor input and shows biased/overconfident parameter estimates.
-- Initial long-horizon planning occurs before the current identifier has meaningful episode data.
-- Stronger noise and model mismatch can amplify true alpha.
-- Current uncertainty diagnostics do not justify formal confidence bounds, robust tightening, or safety claims.
-- Event-triggered replanning was not validated as beneficial and is not the primary architecture.
+Each curated experiment retains a report, aggregate summary, and enough
+command/config/manifest provenance to interpret or reproduce it. Irreplaceable
+replay data may be retained when downstream comparisons depend on it. Raw
+trajectories, window-level tables, solver output, videos, repeated figures,
+caches, and smoke outputs remain local unless the artifact policy explicitly
+designates them as evidence.
 
-## Midterm closeout and next method
+Formal experiment commands can be expensive and may overwrite files at their
+selected output root. Reproduction or mechanical checks should use a separate
+ignored `results/local/` output unless the approved experiment contract says
+otherwise.
 
-Stages 10A–10F completed the current joint-MHE investigation on the frozen Stage 9J replay. The single- and multiple-shooting variants failed their predeclared offline gates, and the rolling audit found no remaining hidden indexing, output-selection, or failed-solve overwrite bug after the confirmed corrections. The tested fixed-weight online MHE route is therefore closed rather than tuned further.
+## Historical experiment policy
 
-Stages 11A–11B then audited passive information and identifiable parameter subspaces. Their evidence does not support information-gated reduced NLS or a stable passive coordinate subspace. Stage 11C contains a paired estimated-state/true-state implementation for separating EIV from passive-information limits; only its smoke validation is complete, so no Stage 11C scientific conclusion is claimed here.
+Old Stage-numbered scripts are not the recommended onboarding path, but they
+remain intentionally: many are the only implementations behind reviewed
+negative results, ablations, or diagnosis. Do not delete, rerun, or reinterpret
+them solely because a branch failed. Use
+[the research workflow](docs/research/WORKFLOW.md) and the matching experiment
+spec before touching historical scientific code or evidence.
 
-Future experiments should use a separately scoped method and result directory. Existing negative and mixed results remain part of the retained empirical record.
+## Separately maintained next phase
 
-## Reproducibility and artifact policy
-
-Each new stage must preserve its report, aggregate summary CSV, exact command/config or manifest, and only a small representative figure set. Irreplaceable replay/per-run data may be retained when a downstream comparison depends on it. Raw logs, solver artifacts, videos, caches, and repeated plots remain local. See [results/README.md](results/README.md) for the authoritative policy.
+The next phase will begin in a separate repository from a
+professor-supplied MATLAB linkage reference implementation. It will first audit
+the linkage dynamics and controller, then may progress toward rehabilitation
+end-effector grasping. The MATLAB reference has not been imported here, and
+this repository contains no implementation of that next phase.

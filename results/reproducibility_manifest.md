@@ -27,8 +27,18 @@ All Stage 10–11 runs reuse the retained Stage 9J replay. Stage 10B and later c
 | 10F | `results/stage10f_mhe_divergence_audit/` | `scripts/run_spring2d_stage10f_mhe_divergence_audit.py` | `conda run -n mpc_learn python scripts/run_spring2d_stage10f_mhe_divergence_audit.py` | report; update trace; first-divergence events; consistency checks; two figures | 24/24 runs passed alignment/output checks; fixed-weight online MHE branch closed |
 | 11A | `results/stage11a_information_metric_validation/` | `scripts/run_spring2d_stage11a_information_metric_validation.py` | `conda run -n mpc_learn python scripts/run_spring2d_stage11a_information_metric_validation.py` | report; window metrics; metric summary; held-out gate validation; one figure | Offline diagnostic; no gating method advanced |
 | 11B | `results/stage11b_parameter_subspace_audit/` | `scripts/run_stage11b_parameter_subspace_audit.py` | Historical generating command: `conda run -n mpc_learn python scripts/run_stage11b_parameter_subspace_audit.py --full` before the paired-state-source extension | full report and manifest; window, condition, subspace, and compact profile summaries; one figure | No stable passive parameter subspace established; raw `profile_grid.csv` is recomputable and ignored; the current runner defaults to Stage 11C paired output |
+| 11C | `results/stage11c_state_source_audit/` | `scripts/run_stage11b_parameter_subspace_audit.py` | `conda run -n mpc_learn python scripts/run_stage11b_parameter_subspace_audit.py --full --state-source paired` | paired-state report; state-source summary; command; resolved config; manifest; mechanical status | 24 runs/710 windows; `valid_full_run`; generated report remains neutral |
+| 11D | `results/stage11d_residual_coverage_audit/` | `scripts/run_stage11d_residual_coverage_audit.py` | `conda run -n mpc_learn python scripts/run_stage11d_residual_coverage_audit.py --full` | residual/coverage report; condition summary; command; resolved config; manifest; mechanical status | 24 runs/710 windows; `valid_full_run`; diagnostic input to the reviewed mechanism chain |
+| 11E | `results/stage11e_block_coverage_calibration/` | `scripts/run_stage11e_block_coverage_calibration.py` | `conda run -n mpc_learn python scripts/run_stage11e_block_coverage_calibration.py --full` | calibration report; condition summary; command; manifest; mechanical status | Reviewed: coverage 0.494 to 0.266; simple calibration branch closed |
+| 11F | `results/stage11f_discrete_closure_audit/` | `scripts/run_stage11f_discrete_closure_audit.py` | `conda run -n mpc_learn python scripts/run_stage11f_discrete_closure_audit.py --full` | closure report; condition summary; command; manifest; mechanical status | Reviewed: exact-discrete weighted residual and exact/affine ratio are zero in all 710 windows |
+| 11G | `results/stage11g_discrete_information_audit/` | `scripts/run_stage11g_discrete_information_audit.py` | `conda run -n mpc_learn python scripts/run_stage11g_discrete_information_audit.py --full` | information report; condition summary; command; manifest; mechanical status | Reviewed: rank-3 fraction 1.0; median information ratio 689.197; local true-state recovery limitation |
 
-Stage 11C uses the same Stage 11B runner with `--state-source paired`. Its implementation and tests are retained, but only a smoke result exists at this closeout, so the Stage 11C result directory is not promoted as authoritative evidence.
+The large Stage 11C–11G profile/window tables are omitted from the compact Git
+closeout. On the closeout machine they remain under the ignored
+`results/local/archive/single_link_closeout/` tree. Their exact relative paths
+and SHA-256 hashes are recorded in
+`docs/research/SINGLE_LINK_CLOSEOUT.md`. A fresh clone can regenerate them
+sequentially from the retained replay, scripts, specs, commands, and manifests.
 
 ## Replay integrity
 

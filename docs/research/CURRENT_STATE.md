@@ -3,107 +3,83 @@
 ## Repository checkpoint
 
 - Observed branch: `agent/midterm-stage11-closeout`
-- Stage 11F implementation checkpoint: `9cd59740865781e0188f596b9e820f1f3591dc81`
+- Stage 11G implementation checkpoint: `d96ddb6`
+- Research state: **single-link Spring2D phase closed after professor review**
 
-## Current stage
+## Final reviewed mechanism chain
 
-Stage 11G: exact-discrete local information audit.
+1. Fixed/oracle MPC and the long-horizon planner plus short-horizon tracker can
+   complete the tested single-link task.
+2. Estimated-state errors-in-variables degrade the Windowed NLS identification
+   path, but the paired true-state audit shows that EIV is not the complete
+   explanation.
+3. A fixed block-aware bootstrap did not repair lambda coverage: overall
+   coverage changed from 0.494 to 0.266, with zero of eight conditions gaining
+   at least 0.10.
+4. The affine finite-difference/continuous-regression identifier introduces
+   structured point bias on the retained replay.
+5. The exact discrete simulator transition closes that replay exactly: the
+   weighted residual RMS and exact/affine residual ratio are zero in all 710
+   audited windows.
+6. Exact-discrete local parameter information is retained at true states and
+   true parameters.
+7. Exact-discrete parameter recovery itself remains untested.
+8. Stage 11H is cancelled because the professor closed the single-link phase.
 
-## Authoritative inputs
+## Final reviewed Stage 11G result
 
-- Stage 9J replay: `results/stage9j_gap_decomposition/stage9j_replay.csv`
-- Stage 11B estimated-state passive subspace audit: `results/stage11b_parameter_subspace_audit/`
-- Stage 11C true-state window identities and profile summaries:
-  `results/stage11c_state_source_audit/`
+- Mechanical status: `valid_full_run`.
+- Matrix: 24 runs, 710 windows, eight conditions.
+- Exact-discrete Jacobian rank-3 fraction: 1.0.
+- Overall median exact/affine conditional-lambda-information ratio: 689.197.
+- All eight conditions satisfy the retained-information criterion.
+- Registered central-difference stability requirement: passed.
+- Human-reviewed interpretation: exact-discrete local information is retained;
+  exact-discrete information collapse is not supported by this audit.
 
-## Validated findings
+This is local true-state evidence only. It does not prove parameter recovery
+with noisy or estimated states, online estimator performance, closed-loop
+adaptive performance, or a safety/stability guarantee. The value 689.197 is an
+information ratio, not an estimator-accuracy improvement factor.
 
-- The fixed-weight online MHE branch was closed after Stage 10F.
-- Stage 11A does not support hard or soft information gating.
-- Stage 11B did not establish a stable passive parameter subspace.
-- The reviewed Stage 11E block-aware calibration result does not explain the
-  true-state lambda undercoverage through simple serial-correlation calibration.
-- The simple serial-correlation calibration branch is closed; structured
-  point-bias H2 remains the active explanation.
-- The reviewed Stage 11F replay-closure result supports
-  finite-difference/continuous-regression formulation bias: exact discrete
-  residual RMS and its affine ratio are zero in all 710 windows.
-- Stage 11F does not support discrete simulator/model mismatch, but it does not
-  establish that a discrete identifier will work with estimated or noisy states.
+## Retained evidence
 
-## Unresolved question
+- Authoritative replay input:
+  `results/stage9j_gap_decomposition/stage9j_replay.csv`
+- Planner/tracker and gap evidence:
+  `results/stage9h_planner_tracker/` and
+  `results/stage9j_gap_decomposition/`
+- Identification diagnosis:
+  `results/stage9k_identifier_ablation/`
+- Closed MHE branch:
+  `results/stage10f_mhe_divergence_audit/`
+- Final paired-state, residual, calibration, closure, and information evidence:
+  `results/stage11c_state_source_audit/` through
+  `results/stage11g_discrete_information_audit/`
+- Scientific closeout:
+  `docs/research/SINGLE_LINK_CLOSEOUT.md`
 
-After removing affine finite-difference formulation bias, does the exact
-discrete one-step model retain sufficient passive local information for
-`theta = [lambda, kappa, beta]`?
+## Closed work
 
-## Stage 11C status
+- No Stage 11H implementation or execution.
+- No new single-link estimator, controller, or safety architecture is
+  authorized under this phase.
+- Historical negative-result implementations and curated evidence remain for
+  reproducibility; they are not active development branches.
 
-- The full paired matrix is present and mechanically marked `valid_full_run`.
-- Stage 11C contains 24 runs and 710 aligned true/estimated windows.
-- Its generated report remains neutral and does not assign an automatic scientific
-  outcome.
+## Explicitly unresolved
 
-## Stage 11D status
+- Offline exact-discrete parameter recovery at true states.
+- Recovery under estimated-state error and measurement noise.
+- Online exact-discrete identification and its closed-loop interaction with the
+  planner/tracker.
+- Formal safety, stability, robustness, hardware, and multi-link validation.
 
-- The user-run full residual-and-coverage matrix is present and mechanically
-  marked `valid_full_run`.
-- It contains the exact 24 runs and 710 Stage 11C true-state windows.
-- Its generated report is neutral; no H1/H2 choice or scientific status has
-  been assigned automatically.
-
-## Stage 11E status
-
-- The reviewed full result is mechanically valid: 24 runs and 710 windows.
-- Baseline lambda coverage was 0.494; block-calibrated coverage was 0.266,
-  for an absolute gain of -0.228.
-- Zero of eight conditions gained at least 0.10 coverage.
-- Median width inflation was 0.649 and the WLS point-estimate changed fraction
-  was zero.
-- Under the preregistered block-aware treatment, the user review records H1 as
-  insufficient and practical calibration as failed.
-- The simple serial-correlation calibration branch is closed. Structured
-  point-bias H2 remains active.
-
-## Stage 11F status
-
-- The reviewed full result is mechanically valid: 24 runs and 710 windows.
-- Exact discrete weighted residual RMS and the discrete/affine weighted RMS
-  ratio are zero in every window and all eight conditions.
-- The user review records finite-difference/continuous-regression formulation
-  bias as supported and discrete simulator/model mismatch as not supported by
-  this audit.
-- This is a replay-closure result only. It is not evidence that an exact
-  discrete identifier will work with estimated or noisy states.
-
-## Stage 11G status
-
-- The approved increment computes the local Jacobian of the exact discrete
-  one-step acceleration-equivalent output with respect to
-  `[lambda, kappa, beta]`.
-- It uses deterministic central differences at relative step `1e-5`, repeats
-  with half-step, and reuses the Stage 11B weighting, physical scaling, SVD,
-  rank, weak-direction, and conditional-lambda-information definitions.
-- Exact and affine Jacobians use the same Stage 11C/11D/11F 24-run,
-  710-window identities.
-- No fitting, optimization, estimator, identifier, or controller execution is
-  permitted.
-- Codex may implement, run tests and compile checks, and run one explicit local
-  smoke only.
-- The complete Stage 11G diagnostic remains reserved for the user.
-
-## Current freeze
-
-- No new estimator, controller, or safety architecture.
-- Allowed work is limited to baseline reconstruction, single-variable ablation, logging, offline replay, and failure-case diagnosis.
-
-## Next authorized action
-
-- Review the Stage 11G implementation, tests, and local smoke artifact.
-- Do not run the complete Stage 11G diagnostic yet.
-- Do not modify Stage 11C/11D/11F results or assign an automatic Stage 11G
-  scientific outcome.
+The next project phase is maintained separately. It will begin with the
+professor-supplied MATLAB linkage reference model, which is not present in this
+repository.
 
 ## Known documentation debt
 
-- The `WindowedLeastSquaresIdentifier` logging-only docstring may not reflect its Stage 9J adaptive use. Record only; do not edit source in this task.
+- The `WindowedLeastSquaresIdentifier` logging-only docstring may not reflect
+  its Stage 9J adaptive use. It is retained unchanged as historical code.
