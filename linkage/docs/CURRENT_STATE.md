@@ -26,6 +26,8 @@
   and interpretation must not be rewritten by later model/controller work.
 - A parallel anthropometric Human Two-Link Model V2 is implemented and
   validated without modifying V1 or the frozen negative baseline.
+- An isolated equilibrium-preserving single-arm V2 endpoint-force baseline
+  is implemented and evaluated without modifying those frozen baselines.
 
 ## Agreed model decisions
 
@@ -105,6 +107,30 @@
 - Model, assumptions, metrics, and source separation:
   [HUMAN_MODEL_V2.md](HUMAN_MODEL_V2.md)
 
+## Single-arm V2 equilibrium evidence
+
+- The analytic local-force map is
+  \(A=[-L_1\sin q_2,\ L_1\cos q_2+s_c;\ 0,-s_c]\), with
+  \(\det A=L_1s_c\sin q_2\); implementation uses SVD and records mapping
+  conditioning rather than forming an inverse.
+- Reference preflight finds a 316.55 N peak ideal force and zero feasible
+  samples under the fixed ±80 N component bound. Static support dominates the
+  dynamic increment.
+- The ideal-authority case completes with 0.00234/0.00616 degree RMSE, no
+  force or slew saturation, and numerical-precision torque residual, but it
+  still activates the V2 soft limit during 473 return samples.
+- The engineering-bound case completes numerically but is force-limited from
+  the initial hold, with 10.81/52.48 degree RMSE, 97.85% hard saturation, and
+  8.19 N m RMS torque residual. This is constraint infeasibility, not a
+  runtime error.
+- All 57 MATLAB tests pass: 42 retained tests and 15 new equilibrium tests.
+- The specified ideal acceptance criteria are not fully met; the project is
+  not yet eligible to move to fixed-model planner/NMPC implementation.
+- Generated evidence remains ignored under
+  `linkage/results/local/single_arm_v2_equilibrium_baseline/`.
+- Methods and observed results:
+  [SINGLE_ARM_V2_EQUILIBRIUM_BASELINE.md](SINGLE_ARM_V2_EQUILIBRIUM_BASELINE.md)
+
 ## Physical plant baseline evidence
 
 - The new \(q_1-q_2\) plant uses independently consistent \(M(q)\),
@@ -139,10 +165,10 @@
 ## Scope boundary
 
 The intake, V1 plant, frozen single-contact negative baseline, interface audit,
-and Human Model V2 now establish the preserved reference, isolated tested
-human dynamics, unresolved hardware-interface gate, and measured
-single-contact limitation. No real robot adapter/dynamics, endpoint-force V2
-controller, NMPC, adaptation, or clinically validated trajectory dataset has
-been integrated. A next endpoint-force task must be a new V2 comparison with
-an approved equilibrium-preserving and conditioning-aware design; it must not
-edit or reinterpret the historical negative baseline.
+Human Model V2, and equilibrium-preserving V2 endpoint comparison establish
+the preserved reference, isolated human dynamics, unresolved hardware gate,
+and measured single-contact force limitation. No real robot adapter/dynamics,
+NMPC, adaptation, or clinically validated trajectory dataset has been
+integrated. The equilibrium baseline does not yet satisfy its ideal acceptance
+criteria, so planner/NMPC implementation remains gated. Future work must not
+edit or reinterpret either historical endpoint-force result.
