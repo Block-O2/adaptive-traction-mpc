@@ -21,6 +21,11 @@
   pending hardware/nameplate and manufacturer-package evidence.
 - An ideal single-shank-contact endpoint-force controller baseline is now
   implemented and evaluated as an actuator upper-bound study.
+- That endpoint-force version is frozen as the **single-contact negative
+  baseline**. Its historical parameters, metrics, generated-result meaning,
+  and interpretation must not be rewritten by later model/controller work.
+- A parallel anthropometric Human Two-Link Model V2 is implemented and
+  validated without modifying V1 or the frozen negative baseline.
 
 ## Agreed model decisions
 
@@ -78,6 +83,28 @@
 - Methods and observed results:
   [IDEAL_ENDPOINT_FORCE_BASELINE.md](IDEAL_ENDPOINT_FORCE_BASELINE.md)
 
+## Human Model V2 evidence
+
+- V2 uses isolated `human_two_link_v2_*` functions and preserves the same
+  (q_1,q_2,\phi=q_1-q_2) coordinate convention.
+- Nominal adult parameters are constructed from height 1.72 m and mass 75 kg
+  using documented anthropometric length, mass, COM, and inertia fractions;
+  arbitrary positive finite height/mass inputs remain supported.
+- The passive resistance is consistently defined on the dynamics left side
+  with positive-semidefinite damping. Smooth ROM soft limits apply no hard
+  clipping and remain inactive on the nominal trajectory.
+- `slow_passive_flexion_v2` is a 16 s SmartSling-range-inspired synchronous
+  slow engineering trajectory, not a clinical protocol or therapist
+  demonstration.
+- The nominal exact-model oracle achieves RMSE
+  (7.18\times10^{-10}/2.74\times10^{-9}) degrees with zero ROM violation,
+  zero soft-limit activation, and zero nonfinite values.
+- All 42 MATLAB tests pass: 24 retained V1/endpoint tests and 18 V2 tests.
+- Generated evidence remains ignored under
+  `linkage/results/local/human_model_v2/`.
+- Model, assumptions, metrics, and source separation:
+  [HUMAN_MODEL_V2.md](HUMAN_MODEL_V2.md)
+
 ## Physical plant baseline evidence
 
 - The new \(q_1-q_2\) plant uses independently consistent \(M(q)\),
@@ -111,11 +138,11 @@
 
 ## Scope boundary
 
-The intake, physical plant, interface audit, and ideal endpoint-force baseline
-now establish the preserved reference, tested human dynamics, unresolved
-hardware-interface gate, and a measured single-contact force-control limit.
-No real robot adapter/dynamics, NMPC, adaptation, or clinical trajectory
-dataset has been integrated. The next decision is an approved controller
-design review addressing scale-consistent regularization, equilibrium
-preservation, and reference feasibility while the real robot evidence is
-collected.
+The intake, V1 plant, frozen single-contact negative baseline, interface audit,
+and Human Model V2 now establish the preserved reference, isolated tested
+human dynamics, unresolved hardware-interface gate, and measured
+single-contact limitation. No real robot adapter/dynamics, endpoint-force V2
+controller, NMPC, adaptation, or clinically validated trajectory dataset has
+been integrated. A next endpoint-force task must be a new V2 comparison with
+an approved equilibrium-preserving and conditioning-aware design; it must not
+edit or reinterpret the historical negative baseline.
