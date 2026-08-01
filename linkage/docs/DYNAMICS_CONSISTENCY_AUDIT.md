@@ -538,7 +538,7 @@ results remain ignored under
 Headless audit command:
 
 ```text
-/Users/hankli/Desktop/MATLAB_R2025b.app/bin/matlab -batch "addpath('linkage/matlab/audits'); run_dynamics_consistency_checks"
+matlab -batch "addpath('linkage/matlab/audits'); run_dynamics_consistency_checks"
 ```
 
 Relevant local evidence:
