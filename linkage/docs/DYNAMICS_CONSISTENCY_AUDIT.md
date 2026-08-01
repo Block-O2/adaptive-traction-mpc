@@ -528,16 +528,24 @@ The minimum high-value questions are:
 
 The successful baseline was rerun through
 `linkage/matlab/runners/run_professor_reference_capture.m` and exited 0.
-Generated workspaces, figures, logs, the local numerical-check script, and
-numerical results remain ignored under
+The numerical-check implementation is tracked at
+`linkage/matlab/audits/run_dynamics_consistency_checks.m`; it reads the
+captured workspace and writes its numerical results back to the ignored
+baseline directory. Generated workspaces, figures, logs, and numerical
+results remain ignored under
 `linkage/results/local/professor_reference_baseline/`.
+
+Headless audit command:
+
+```text
+matlab -batch "addpath('linkage/matlab/audits'); run_dynamics_consistency_checks"
+```
 
 Relevant local evidence:
 
 - `dynamics_consistency_console.log`;
 - `dynamics_consistency_results.txt`;
 - `dynamics_consistency_results.mat`;
-- `run_dynamics_consistency_checks.m`;
 - refreshed `console.log`, `workspace_numeric.mat`, and figures;
 - `runner_checkcode.log` and `runner_checkcode_crash_dump.txt`.
 
@@ -558,7 +566,9 @@ parameters, coded equations, or independently derived equations:
 - `linkage/docs/DYNAMICS_CONSISTENCY_AUDIT.md` — recorded parameters,
   independently derived equations, source comparisons, and numerical results;
 - `linkage/matlab/runners/run_professor_reference_capture.m` — replicated
-  source equations used for post-run diagnostics.
+  source equations used for post-run diagnostics;
+- `linkage/matlab/audits/run_dynamics_consistency_checks.m` — independently
+  derived equations and deterministic source-comparison calculations.
 
 The professor source and generated local evidence remain ignored and are not
 tracked.

@@ -1,5 +1,12 @@
 # Linkage System Definition Draft
 
+> **Archived / Superseded.** This source-only reconstruction is retained for
+> historical context and is not the current model definition. Start from
+> [CURRENT_STATE.md](CURRENT_STATE.md), then use
+> [HUMAN_MODEL_V2.md](HUMAN_MODEL_V2.md) for the current human model and
+> [SINGLE_ARM_TRAJECTORY_FEASIBILITY_STUDY.md](SINGLE_ARM_TRAJECTORY_FEASIBILITY_STUDY.md)
+> for the latest single-contact trajectory mechanics analysis.
+
 This reconstruction uses only the preserved `singleArmDual.m` source. It is a
 description of the code, not a validation or correction of the model.
 
