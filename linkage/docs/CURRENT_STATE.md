@@ -28,6 +28,9 @@
   validated without modifying V1 or the frozen negative baseline.
 - An isolated equilibrium-preserving single-arm V2 endpoint-force baseline
   is implemented and evaluated without modifying those frozen baselines.
+- The single-arm V2 equilibrium study is closed out: the controller and ideal
+  mathematical authority are confirmed, while the unsupported ±80 N
+  architecture is infeasible at reference level.
 
 ## Agreed model decisions
 
@@ -126,10 +129,16 @@
 - All 57 MATLAB tests pass: 42 retained tests and 15 new equilibrium tests.
 - The specified ideal acceptance criteria are not fully met; the project is
   not yet eligible to move to fixed-model planner/NMPC implementation.
+- The 473-sample ideal soft-limit boundary phenomenon has not received an
+  independent penetration/torque audit and remains unresolved.
+- NMPC work is paused pending an architecture decision and confirmation of
+  the real rehabilitation posture, support, contact, and hardware context.
 - Generated evidence remains ignored under
   `linkage/results/local/single_arm_v2_equilibrium_baseline/`.
 - Methods and observed results:
   [SINGLE_ARM_V2_EQUILIBRIUM_BASELINE.md](SINGLE_ARM_V2_EQUILIBRIUM_BASELINE.md)
+- Minimal diagnostic closeout:
+  [SINGLE_ARM_V2_DIAGNOSTIC_CLOSEOUT.md](SINGLE_ARM_V2_DIAGNOSTIC_CLOSEOUT.md)
 
 ## Physical plant baseline evidence
 
