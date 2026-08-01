@@ -1,43 +1,37 @@
-# Linkage Model Intake
+# Linkage Research Workspace
 
-This directory is the next research phase after the frozen single-link
-Spring2D archive. It begins from a professor-supplied MATLAB reference model.
-The original source remains preserved and ignored; publishing permission is no
-longer a blocker for the intake branch and its derived documentation.
+This directory contains the preserved professor reference, the independently
+implemented human two-link plants, frozen single-contact baselines, and the
+current single-arm trajectory/contact-mechanics studies.
 
-The intake now covers preservation, reproducible baseline execution, and an
-independent dynamics-consistency audit. Controller implementation has not
-started.
+The single source of truth for the current project status, accepted evidence,
+open gates, and next-stage boundary is:
 
-## Structure
+- [Linkage Project Current State](docs/CURRENT_STATE.md)
+
+The complete document index separates current guidance from frozen and
+archived evidence:
+
+- [Linkage Documentation Index](docs/README.md)
+
+## Layout
 
 ```text
 linkage/
-├── docs/                         Intake state, source audit, system draft
+├── docs/                         Current state and experiment reports
 ├── matlab/
-│   ├── reference/                Local original and its tracked preservation note
-│   ├── runners/                  Non-invasive baseline wrappers
-│   └── src/                      Future derived/clean MATLAB implementations
-└── results/local/                Ignored local baseline outputs
+│   ├── audits/                   Tracked reproducibility/audit tools
+│   ├── reference/                Preserved-reference policy and local source
+│   ├── runners/                  Headless test and experiment entry points
+│   ├── src/                      V1, V2, and single-arm MATLAB implementations
+│   └── tests/                    MATLAB regression tests
+└── results/local/                Ignored local workspaces and generated media
 ```
 
-## Baseline status
+The professor source remains byte-preserved and ignored under
+`matlab/reference/professor_original/`. Generated MATLAB workspaces, logs,
+figures, animations, and CSV files remain ignored under `results/local/`.
 
-The unmodified professor baseline runs successfully in MATLAB R2025b Update 1
-through the tracked runner:
-
-```bash
-/Users/hankli/Desktop/MATLAB_R2025b.app/bin/matlab \
-  -batch "addpath('linkage/matlab/runners'); run_professor_reference_capture"
-```
-
-Generated logs, workspaces, diagnostics, and figures remain ignored under
-`linkage/results/local/professor_reference_baseline/`.
-
-## Documents
-
-- [Current intake state](docs/CURRENT_STATE.md)
-- [MATLAB source audit](docs/MATLAB_CODE_AUDIT.md)
-- [Independent dynamics-consistency audit](docs/DYNAMICS_CONSISTENCY_AUDIT.md)
-- [Draft system definition](docs/SYSTEM_DEFINITION_DRAFT.md)
-- [Reference preservation note](matlab/reference/README.md)
+No result directory is an implicit current-state authority: use
+`docs/CURRENT_STATE.md`, then follow its links to the relevant frozen report
+and reproduction command.

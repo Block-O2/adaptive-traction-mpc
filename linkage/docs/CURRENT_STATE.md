@@ -1,5 +1,11 @@
 # Linkage Project Current State
 
+This document is the single entry point for the current linkage research
+status, accepted evidence, unresolved gates, and next-stage scope. The
+[documentation index](README.md) separates current guidance from frozen and
+archived reports. Stage-specific reports preserve the metrics and conclusions
+observed at that stage; they do not independently override this state summary.
+
 ## Phase status
 
 - The single-link Spring2D phase is closed and tagged
@@ -31,6 +37,12 @@
 - The single-arm V2 equilibrium study is closed out: the controller and ideal
   mathematical authority are confirmed, while the unsupported ±80 N
   architecture is infeasible at reference level.
+- An open-loop trajectory/contact-force feasibility study is complete. It
+  confirms that the current V2 reference is a contact-independent joint-space
+  validation trajectory, that the translated professor reference reaches an
+  exactly rank-deficient extended-knee posture under the current single distal
+  contact model, and that a minimal force-aware waypoint candidate reduces
+  force RMS but not the endpoint-dominated peak force.
 
 ## Agreed model decisions
 
@@ -40,9 +52,8 @@
   \(C(q,\dot q)\), and \(G(q)\) derived for that coordinate convention.
 - The first implementation will use one robot arm and only the shank contact
   point.
-- The initial contact baseline will be damping-only.
-- The implemented first baseline has one shank contact point with a continuous
-  local normal and damping-only interaction.
+- The historical V1 physical-contact baseline uses one shank contact point
+  with a continuous local normal and damping-only interaction.
 - The actual robot control input will be selected from the real robot
   interface rather than assumed from the legacy reference.
 - Required generalization is across rehabilitation trajectories and patient
@@ -56,10 +67,8 @@
 ## Architecture direction
 
 - A planner/reference-manager plus short-horizon tracker remains the primary
-  architectural candidate.
-- The planner/reference-manager plus short-horizon tracker remains an
-  architectural direction; the implemented endpoint-force law is only a
-  simple constrained baseline, not that full architecture.
+  architectural direction; the implemented endpoint-force laws are constrained
+  baselines, not that full architecture.
 - The implemented computed-torque PD law is only an oracle plant-validation
   controller using the true parameters and abstract human generalized torque.
 - A real-robot controller/adapter has not started because the supported robot
@@ -72,8 +81,8 @@
 - A deterministic active-set/boundary-enumeration solver implements the
   two-input force/slew-bounded regularized least-squares controller without
   Optimization Toolbox.
-- Twenty-four MATLAB tests pass: 15 retained plant tests and 9 endpoint-force
-  tests.
+- Historical endpoint-force-stage snapshot: 24 MATLAB tests passed, comprising
+  15 retained plant tests and 9 endpoint-force tests.
 - All 9 endpoint-force and 9 oracle comparison rollouts finish without
   nonfinite dynamics signals.
 - With one fixed parameter set, only the tall/heavy profile tracks the
@@ -104,7 +113,8 @@
 - The nominal exact-model oracle achieves RMSE
   (7.18\times10^{-10}/2.74\times10^{-9}) degrees with zero ROM violation,
   zero soft-limit activation, and zero nonfinite values.
-- All 42 MATLAB tests pass: 24 retained V1/endpoint tests and 18 V2 tests.
+- Historical Human Model V2-stage snapshot: all 42 MATLAB tests passed,
+  comprising 24 retained V1/endpoint tests and 18 V2 tests.
 - Generated evidence remains ignored under
   `linkage/results/local/human_model_v2/`.
 - Model, assumptions, metrics, and source separation:
@@ -126,7 +136,8 @@
   the initial hold, with 10.81/52.48 degree RMSE, 97.85% hard saturation, and
   8.19 N m RMS torque residual. This is constraint infeasibility, not a
   runtime error.
-- All 57 MATLAB tests pass: 42 retained tests and 15 new equilibrium tests.
+- Historical equilibrium-stage snapshot: all 57 MATLAB tests passed,
+  comprising 42 retained tests and 15 new equilibrium tests.
 - The specified ideal acceptance criteria are not fully met; the project is
   not yet eligible to move to fixed-model planner/NMPC implementation.
 - The 473-sample ideal soft-limit boundary phenomenon has not received an
@@ -140,14 +151,36 @@
 - Minimal diagnostic closeout:
   [SINGLE_ARM_V2_DIAGNOSTIC_CLOSEOUT.md](SINGLE_ARM_V2_DIAGNOSTIC_CLOSEOUT.md)
 
+## Single-arm trajectory feasibility evidence
+
+- The current V2 `[5;10]` to `[45;84]` degree reference uses a shared quintic
+  progress and was created for plant/oracle validation, not contact-force or
+  conditioning feasibility.
+- Under the present single distal contact and Human Model V2 assumptions, the
+  current reference requires a 316.551 N peak ideal force; static support
+  dominates its dynamic generalized-torque increment.
+- The professor reference can be translated without a coordinate ambiguity,
+  but that diagnostic is not a reproduction of the original two-contact,
+  direct-joint-torque experiment. It reaches `q2=0`, where the current
+  single-contact force map is rank deficient.
+- The fixed-grid force-aware candidate preserves the current start, target ROM,
+  duration, and slow speed/acceleration bounds. It reduces force RMS from
+  198.090 N to 160.076 N (19.2%) but reduces peak force by only 0.052%, because
+  the unchanged low-flexion endpoint retains the same static lower bound.
+- This was an open-loop inverse-dynamics/contact-force preflight. No closed-loop
+  tracking or GIF was generated, and it does not establish clinical efficacy.
+- Methods, artifacts, and bounded conclusions:
+  [SINGLE_ARM_TRAJECTORY_FEASIBILITY_STUDY.md](SINGLE_ARM_TRAJECTORY_FEASIBILITY_STUDY.md)
+
 ## Physical plant baseline evidence
 
 - The new \(q_1-q_2\) plant uses independently consistent \(M(q)\),
   \(h(q,\dot q)=C(q,\dot q)\dot q\), and \(G(q)\).
-- Fifteen deterministic MATLAB tests cover mass-matrix properties, Coriolis
+- The historical physical-plant-stage suite contained 15 deterministic MATLAB
+  tests covering mass-matrix properties, Coriolis
   consistency, the manipulator skew identity, the potential-energy gradient,
   contact kinematics and dissipativity, finite values, and RK4 convergence.
-- All 15 tests pass in MATLAB R2025b Update 1.
+- All 15 passed in MATLAB R2025b Update 1 at that stage.
 - The deterministic three-trajectory by three-profile by two-contact-mode
   matrix completed 18/18 runs with no joint-limit, velocity-limit,
   dissipativity, or finite-value violations.
@@ -174,10 +207,11 @@
 ## Scope boundary
 
 The intake, V1 plant, frozen single-contact negative baseline, interface audit,
-Human Model V2, and equilibrium-preserving V2 endpoint comparison establish
-the preserved reference, isolated human dynamics, unresolved hardware gate,
-and measured single-contact force limitation. No real robot adapter/dynamics,
-NMPC, adaptation, or clinically validated trajectory dataset has been
-integrated. The equilibrium baseline does not yet satisfy its ideal acceptance
-criteria, so planner/NMPC implementation remains gated. Future work must not
-edit or reinterpret either historical endpoint-force result.
+Human Model V2, equilibrium-preserving V2 endpoint comparison, diagnostic
+closeout, and open-loop trajectory feasibility study establish the preserved
+reference, isolated human dynamics, unresolved hardware gate, and measured
+single-contact force limitation. No real robot adapter/dynamics, NMPC,
+adaptation, or clinically validated trajectory dataset has been integrated.
+Planner/NMPC implementation remains gated by architecture and real
+rehabilitation-context decisions. Future work must not edit or reinterpret
+either historical endpoint-force result.
