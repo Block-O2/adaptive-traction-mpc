@@ -214,6 +214,11 @@ validate endpoint-force authority or a rehabilitation controller.
 
 ## Tests, commands, and artifacts
 
+> **Test-scope note.** The 42-test validation below is the historical snapshot
+> that included V1/endpoint regressions. Those V1 tests are archived at tag
+> `linkage-pre-v1-code-cleanup`. The current retained suite uses
+> `run_linkage_tests`; checkout the tag to reproduce the exact 42-test scope.
+
 The V2 test file adds 18 deterministic tests covering the requested
 anthropometric formulas and input validation, mass/Coriolis/gravity identities,
 passive sign and damping, soft limits, distal contact position, trajectory

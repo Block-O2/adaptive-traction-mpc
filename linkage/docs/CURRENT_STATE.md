@@ -20,13 +20,17 @@ observed at that stage; they do not independently override this state summary.
 - The independent dynamics-consistency audit is accepted.
 - Publishing permission is no longer a blocker for the intake branch and its
   detailed derived documentation.
-- A separate physical human two-link MATLAB plant baseline is now implemented
-  and validated without modifying the professor reference.
+- A separate physical human two-link MATLAB plant baseline was implemented and
+  validated without modifying the professor reference. Its V1 implementation,
+  runners, and tests are archived at tag `linkage-pre-v1-code-cleanup`; its
+  frozen report and ignored local results remain available.
 - The laboratory robot-interface audit is complete, but exact robot,
   controller, SDK, command modes, feedback, and rates remain unresolved
   pending hardware/nameplate and manufacturer-package evidence.
-- An ideal single-shank-contact endpoint-force controller baseline is now
-  implemented and evaluated as an actuator upper-bound study.
+- An ideal single-shank-contact endpoint-force controller baseline was
+  implemented and evaluated as an actuator upper-bound study. Its V1
+  implementation, runners, and tests are archived at tag
+  `linkage-pre-v1-code-cleanup`.
 - That endpoint-force version is frozen as the **single-contact negative
   baseline**. Its historical parameters, metrics, generated-result meaning,
   and interpretation must not be rewritten by later model/controller work.
@@ -43,6 +47,23 @@ observed at that stage; they do not independently override this state summary.
   exactly rank-deficient extended-knee posture under the current single distal
   contact model, and that a minimal force-aware waypoint candidate reduces
   force RMS but not the endpoint-dominated peak force.
+
+## Active implementation and regression
+
+- The retained active implementation is Human Model V2 under
+  `linkage/matlab/src/human_two_link_v2/`, the single-arm V2 force
+  map/equilibrium implementation under
+  `linkage/matlab/src/single_arm_v2_equilibrium/`, and the open-loop trajectory
+  feasibility runner.
+- The canonical retained test entry is
+  `linkage/matlab/runners/run_linkage_tests.m`. It runs only the V2 and
+  single-arm V2 equilibrium tests and reports aggregate passed, failed, and
+  incomplete counts.
+- Existing V2/equilibrium-specific test runners remain for their documented
+  stage-level uses. Historical 15/24/42/57 counts below describe the suites at
+  those stages, not the current retained suite size.
+- The removed V1 implementation is recoverable without rewritten history from
+  annotated tag `linkage-pre-v1-code-cleanup`.
 
 ## Agreed model decisions
 
@@ -94,6 +115,9 @@ observed at that stage; they do not independently override this state summary.
   and/or limit violations; these are scientific outcomes, not runtime errors.
 - Generated MAT/CSV/log/GIF evidence remains ignored under
   `linkage/results/local/ideal_endpoint_force_baseline/`.
+- The corresponding V1 source, runners, and tests are archived at tag
+  `linkage-pre-v1-code-cleanup`; the report metrics and conclusions remain
+  frozen.
 - Methods and observed results:
   [IDEAL_ENDPOINT_FORCE_BASELINE.md](IDEAL_ENDPOINT_FORCE_BASELINE.md)
 
@@ -186,6 +210,9 @@ observed at that stage; they do not independently override this state summary.
   dissipativity, or finite-value violations.
 - Generated evidence remains ignored under
   `linkage/results/local/human_two_link_baseline/`.
+- The corresponding V1 source, runners, and tests are archived at tag
+  `linkage-pre-v1-code-cleanup`; the report metrics and conclusions remain
+  frozen.
 - Baseline methods and observed results:
   [PHYSICAL_PLANT_BASELINE.md](PHYSICAL_PLANT_BASELINE.md)
 
@@ -206,7 +233,8 @@ observed at that stage; they do not independently override this state summary.
 
 ## Scope boundary
 
-The intake, V1 plant, frozen single-contact negative baseline, interface audit,
+The intake, archived V1 plant, frozen single-contact negative baseline,
+interface audit,
 Human Model V2, equilibrium-preserving V2 endpoint comparison, diagnostic
 closeout, and open-loop trajectory feasibility study establish the preserved
 reference, isolated human dynamics, unresolved hardware gate, and measured
