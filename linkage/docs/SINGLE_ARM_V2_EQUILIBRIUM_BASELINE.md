@@ -1,5 +1,10 @@
 # Single-Arm V2 Equilibrium-Preserving Baseline
 
+> **Test-scope note.** The reported 57-test validation is the historical
+> snapshot that included archived V1/endpoint regressions. Checkout annotated
+> tag `linkage-pre-v1-code-cleanup` to reproduce that exact suite. The current
+> retained active suite uses `run_linkage_tests`.
+
 ## Scope and interpretation
 
 This local engineering baseline evaluates whether one ideal two-dimensional

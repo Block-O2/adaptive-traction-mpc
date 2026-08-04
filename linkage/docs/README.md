@@ -13,11 +13,16 @@ The categories below are navigational only; existing reports remain in place.
   SDK evidence gate.
 - [SINGLE_ARM_TRAJECTORY_FEASIBILITY_STUDY.md](SINGLE_ARM_TRAJECTORY_FEASIBILITY_STUDY.md)
   — current open-loop trajectory/contact-force preflight.
+- [Local results policy](../results/README.md) — ignored artifact and retention
+  rules.
 
 ## Frozen evidence
 
 These reports preserve historical setups, metrics, and interpretations. They
 are evidence records rather than current implementation recommendations.
+The V1 implementation associated with the physical-plant and ideal
+endpoint-force reports is archived at annotated tag
+`linkage-pre-v1-code-cleanup`.
 
 - [MATLAB_CODE_AUDIT.md](MATLAB_CODE_AUDIT.md)
 - [DYNAMICS_CONSISTENCY_AUDIT.md](DYNAMICS_CONSISTENCY_AUDIT.md)

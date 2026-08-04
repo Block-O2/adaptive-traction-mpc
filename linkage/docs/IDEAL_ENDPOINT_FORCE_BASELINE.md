@@ -1,5 +1,10 @@
 # Ideal Endpoint-Force Baseline
 
+> **Frozen V1 evidence.** The implementation, runners, and tests used for this
+> report are archived at annotated tag `linkage-pre-v1-code-cleanup`. The
+> metrics and conclusions below remain frozen. Checkout that tag to reproduce
+> this baseline; ignored local result artifacts are retained separately.
+
 ## Scope and interpretation
 
 This baseline replaces direct human joint-torque actuation with one ideal

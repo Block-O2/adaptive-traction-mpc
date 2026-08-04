@@ -1,5 +1,10 @@
 # Physical Human Two-Link Plant Baseline
 
+> **Frozen V1 evidence.** The implementation, runners, and tests used for this
+> report are archived at annotated tag `linkage-pre-v1-code-cleanup`. The
+> metrics and conclusions below remain frozen. Checkout that tag to reproduce
+> this baseline; ignored local result artifacts are retained separately.
+
 ## Coordinate convention
 
 The implemented state is \(q=[q_1,q_2]^\mathsf{T}\). The hip is fixed at the
