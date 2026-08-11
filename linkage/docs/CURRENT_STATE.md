@@ -212,6 +212,10 @@ observed at that stage; they do not independently override this state summary.
 - The current V2 start `[5,10] deg` requires
   `F_parallel=-315.030 N`, `F_perp=21.011 N`, and `315.730 N` total, whereas
   `[45,84] deg` requires `103.484 N` total and is much better conditioned.
+- Along the current V2 reference, the quasistatic peak is approximately
+  `315.73 N` at the shared start/end pose `[5,10] deg`. It is dominated by
+  `F_parallel`, with a much smaller `F_perp`, and places the reference start in
+  the mechanically unfavorable low-flexion/near-extension region.
 - Exact feasible fractions over all 8,181 samples are 2.4569%, 57.1691%, and
   83.4372% for the `+/-80`, `+/-120`, and `+/-200 N` component boxes. The
   start is infeasible under all three; the peak is feasible under 120 N and
@@ -219,6 +223,11 @@ observed at that stage; they do not independently override this state summary.
 - This is a quasistatic mechanical diagnostic only. It does not establish
   closed-loop controllability, comfort, clinical safety, or an architecture
   decision; professor and hardware confirmation remain required.
+- The 80 N, 120 N, and 200 N limits are engineering comparison bounds, not
+  clinical safety standards, and the atlas does not establish failure of the
+  single-arm architecture. Before further NMPC/controller tuning, the next
+  stage must first confirm trajectory strictness, permitted safety
+  intervention, and the operating envelope.
 - Methods and bounded interpretation:
   [SINGLE_ARM_QUASISTATIC_FEASIBILITY_ATLAS.md](SINGLE_ARM_QUASISTATIC_FEASIBILITY_ATLAS.md)
 

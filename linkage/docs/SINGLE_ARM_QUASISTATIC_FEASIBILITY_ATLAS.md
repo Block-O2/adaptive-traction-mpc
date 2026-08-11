@@ -130,6 +130,12 @@ the previously reported approximately `315.73 N` static requirement as an
 endpoint/low-knee-flexion property of the frozen reference, not a uniform
 workspace requirement.
 
+The reference-force profile confirms that its quasistatic peak is the
+start/end pose `[5,10] deg`, with approximately `315.73 N` total force. The
+peak is dominated by `F_parallel`; `F_perp` is comparatively small. The
+reference therefore starts in the mechanically unfavorable low-knee-flexion,
+near-extension region identified by the atlas.
+
 ## Component-bound feasibility
 
 The percentages below use all 8,181 grid points as the denominator; the 81
@@ -153,6 +159,12 @@ moderate/high-knee-flexion, well-conditioned portion of the workspace under
 the 120 N and 200 N component studies. The current `[45,84] deg` peak lies in
 that region for 120 N and 200 N, whereas the `[5,10] deg` start lies outside
 all three boxes.
+
+The 80 N, 120 N, and 200 N component limits are engineering comparison bounds,
+not clinical safety standards. These observations do not establish failure of
+the single-arm architecture. Before further NMPC or controller tuning, the
+next stage should first confirm trajectory strictness, permitted safety
+intervention, and the intended operating envelope.
 
 ## Artifacts and reproduction
 

@@ -36,6 +36,14 @@ summary.reference_min_time_s = reference.t(reference_min_index);
 summary.reference_max_time_s = reference.t(reference_max_index);
 summary.reference_min_q_deg = rad2deg(reference.q(:, reference_min_index));
 summary.reference_max_q_deg = rad2deg(reference.q(:, reference_max_index));
+summary.reference_start = reference_point_summary( ...
+    reference, 1, p, component_bounds_N, svd_relative_tolerance);
+summary.reference_end = reference_point_summary( ...
+    reference, numel(reference.t), p, component_bounds_N, ...
+    svd_relative_tolerance);
+summary.reference_maximum_force = reference_point_summary( ...
+    reference, reference_max_index, p, component_bounds_N, ...
+    svd_relative_tolerance);
 
 write_grid_csv(atlas, fullfile(output_dir, 'atlas_grid.csv'));
 write_minimum_knee_csv(atlas, fullfile(output_dir, ...
@@ -54,10 +62,20 @@ fprintf(['START [5,10] deg: F_parallel=%.6f N F_perp=%.6f N ' ...
     '|F|=%.6f N cond(A)=%.6f\n'], ...
     summary.start.F_parallel_N, summary.start.F_perp_N, ...
     summary.start.force_norm_N, summary.start.condition_number);
-fprintf(['PEAK [45,84] deg: F_parallel=%.6f N F_perp=%.6f N ' ...
-    '|F|=%.6f N cond(A)=%.6f\n'], ...
-    summary.peak.F_parallel_N, summary.peak.F_perp_N, ...
-    summary.peak.force_norm_N, summary.peak.condition_number);
+fprintf(['END [%.6f,%.6f] deg at t=%.6f s: F_parallel=%.6f N ' ...
+    'F_perp=%.6f N |F|=%.6f N cond(A)=%.6f\n'], ...
+    summary.reference_end.q_deg, summary.reference_end.time_s, ...
+    summary.reference_end.F_parallel_N, ...
+    summary.reference_end.F_perp_N, ...
+    summary.reference_end.force_norm_N, ...
+    summary.reference_end.condition_number);
+fprintf(['REFERENCE MAXIMUM at [%.6f,%.6f] deg, t=%.6f s: ' ...
+    'F_parallel=%.6f N F_perp=%.6f N |F|=%.6f N\n'], ...
+    summary.reference_maximum_force.q_deg, ...
+    summary.reference_maximum_force.time_s, ...
+    summary.reference_maximum_force.F_parallel_N, ...
+    summary.reference_maximum_force.F_perp_N, ...
+    summary.reference_maximum_force.force_norm_N);
 for bound_index = 1:numel(component_bounds_N)
     fprintf(['BOUND +/-%.0f N: feasible=%d/%d (%.6f%% all grid), ' ...
         'start=%d peak=%d\n'], component_bounds_N(bound_index), ...
@@ -168,6 +186,14 @@ record = struct('q_deg', rad2deg(q), ...
 end
 
 
+function record = reference_point_summary(reference, index, p, bounds, tolerance)
+record = point_summary(reference.q(:, index), p, bounds, tolerance);
+record.index = index;
+record.time_s = reference.t(index);
+record.force_norm_from_search_N = reference.force_norm(index);
+end
+
+
 function range = mask_q2_range(Q2, mask)
 values = Q2(mask);
 if isempty(values)
@@ -265,9 +291,12 @@ end
 
 
 function create_plots(atlas, reference, output_dir)
-save_log_map(atlas, atlas.force_norm, 'log_{10}(|F| / N)', ...
-    'Quasistatic holding-force norm (q_2=0 singular)', ...
-    fullfile(output_dir, 'force_norm_map.png'));
+save_force_map_linear_with_contours(atlas, reference, fullfile(output_dir, ...
+    'force_norm_map_linear_with_contours.png'));
+save_force_map_log_global(atlas, fullfile(output_dir, ...
+    'force_norm_map_log_global.png'));
+save_reference_force_profile(reference, fullfile(output_dir, ...
+    'v2_reference_quasistatic_force_profile.png'));
 save_signed_map(atlas, atlas.F_parallel, 'F_{parallel} (N)', ...
     'Force along the shank axis', ...
     fullfile(output_dir, 'force_parallel_map.png'));
@@ -287,8 +316,6 @@ for bound_index = 1:numel(atlas.component_bounds_N)
 end
 save_minimum_knee_plot(atlas, fullfile(output_dir, ...
     'minimum_feasible_knee_flexion.png'));
-save_reference_overlay(atlas, reference, fullfile(output_dir, ...
-    'force_norm_map_with_v2_reference.png'));
 end
 
 
@@ -307,7 +334,24 @@ title(ax, title_text);
 cb = colorbar(ax);
 cb.Label.String = label_text;
 xlim(ax, [atlas.q1_deg(1), atlas.q1_deg(end)]);
-ylim(ax, [atlas.q2_deg(1), atlas.q2_deg(end)]);
+ylim(ax, [-0.5, atlas.q2_deg(end)]);
+end
+
+
+function image_handle = atlas_image(ax, atlas, display_data)
+display_data(atlas.rank_deficient) = NaN;
+image_handle = imagesc(ax, atlas.q1_deg, atlas.q2_deg, display_data);
+set(image_handle, 'AlphaData', ~isnan(display_data));
+set(ax, 'Color', [0.72, 0.72, 0.72]);
+end
+
+
+function label_singular_row(ax)
+text(ax, 2, 0, 'singular', 'Color', [0.1, 0.1, 0.1], ...
+    'FontWeight', 'bold', 'FontSize', 10, ...
+    'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle', ...
+    'BackgroundColor', [0.82, 0.82, 0.82], 'Margin', 1, ...
+    'Clipping', 'on');
 end
 
 
@@ -315,8 +359,9 @@ function save_log_map(atlas, data, label_text, title_text, path)
 [fig, ax] = base_figure();
 display_data = log10(data);
 display_data(~isfinite(display_data)) = NaN;
-imagesc(ax, atlas.q1_deg, atlas.q2_deg, display_data);
+atlas_image(ax, atlas, display_data);
 decorate_map(ax, atlas, label_text, title_text);
+label_singular_row(ax);
 exportgraphics(fig, path, 'Resolution', 180);
 close(fig);
 end
@@ -326,8 +371,9 @@ function save_linear_map(atlas, data, label_text, title_text, path)
 [fig, ax] = base_figure();
 display_data = data;
 display_data(~isfinite(display_data)) = NaN;
-imagesc(ax, atlas.q1_deg, atlas.q2_deg, display_data);
+atlas_image(ax, atlas, display_data);
 decorate_map(ax, atlas, label_text, title_text);
+label_singular_row(ax);
 exportgraphics(fig, path, 'Resolution', 180);
 close(fig);
 end
@@ -335,13 +381,14 @@ end
 
 function save_signed_map(atlas, data, label_text, title_text, path)
 [fig, ax] = base_figure();
-imagesc(ax, atlas.q1_deg, atlas.q2_deg, data);
+atlas_image(ax, atlas, data);
 finite_absolute = sort(abs(data(isfinite(data))));
 display_limit = finite_absolute(max(1, ceil(0.99*numel(finite_absolute))));
 display_limit = max(display_limit, 1);
 clim(ax, [-display_limit, display_limit]);
 decorate_map(ax, atlas, label_text, ...
     sprintf('%s (display clipped at +/-%.1f N)', title_text, display_limit));
+label_singular_row(ax);
 exportgraphics(fig, path, 'Resolution', 180);
 close(fig);
 end
@@ -349,11 +396,13 @@ end
 
 function save_feasibility_map(atlas, mask, limit, path)
 [fig, ax] = base_figure();
-imagesc(ax, atlas.q1_deg, atlas.q2_deg, double(mask));
+display_data = double(mask);
+atlas_image(ax, atlas, display_data);
 colormap(ax, [0.75, 0.20, 0.20; 0.15, 0.65, 0.30]);
 clim(ax, [0, 1]);
 decorate_map(ax, atlas, '0 infeasible, 1 feasible', ...
     sprintf('Exact quasistatic feasibility under +/-%.0f N components', limit));
+label_singular_row(ax);
 exportgraphics(fig, path, 'Resolution', 180);
 close(fig);
 end
@@ -380,22 +429,112 @@ close(fig);
 end
 
 
-function save_reference_overlay(atlas, reference, path)
+function save_force_map_linear_with_contours(atlas, reference, path)
+[fig, ax] = base_figure();
+display_data = min(atlas.force_norm, 400);
+atlas_image(ax, atlas, display_data);
+clim(ax, [0, 400]);
+hold(ax, 'on');
+contour_data = atlas.force_norm;
+contour_data(atlas.rank_deficient) = NaN;
+[contour_matrix, contour_handle] = contour(ax, atlas.q1_deg, atlas.q2_deg, ...
+    contour_data, [80, 120, 200], 'LineColor', [0.12, 0.12, 0.12], ...
+    'LineWidth', 1.2, 'LineStyle', '--', 'HandleVisibility', 'off');
+clabel(contour_matrix, contour_handle, 'FontSize', 10, ...
+    'FontWeight', 'bold', 'Color', [0.05, 0.05, 0.05], ...
+    'LabelSpacing', 240);
+
+q1_path_deg = rad2deg(reference.q(1, :));
+q2_path_deg = rad2deg(reference.q(2, :));
+plot(ax, q1_path_deg, q2_path_deg, 'k-', 'LineWidth', 4, ...
+    'HandleVisibility', 'off');
+path_handle = plot(ax, q1_path_deg, q2_path_deg, 'w-', 'LineWidth', 2.2, ...
+    'DisplayName', 'V2 path');
+[~, maximum_index] = max(reference.force_norm);
+start_handle = plot(ax, q1_path_deg(1), q2_path_deg(1), 'o', ...
+    'MarkerEdgeColor', 'k', 'MarkerFaceColor', [0.20, 0.85, 0.25], ...
+    'MarkerSize', 7, 'LineWidth', 1.2, 'DisplayName', 'start');
+maximum_handle = plot(ax, q1_path_deg(maximum_index), ...
+    q2_path_deg(maximum_index), 'd', 'MarkerEdgeColor', [0.75, 0, 0], ...
+    'MarkerFaceColor', 'none', 'MarkerSize', 16, 'LineWidth', 2.2, ...
+    'DisplayName', 'maximum quasistatic force');
+end_handle = plot(ax, q1_path_deg(end), q2_path_deg(end), 's', ...
+    'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'none', ...
+    'MarkerSize', 12, 'LineWidth', 2.2, 'DisplayName', 'end');
+decorate_map(ax, atlas, '|F| (N), values above 400 N saturated', ...
+    'Quasistatic single-contact force over joint configuration');
+label_singular_row(ax);
+text(ax, 77, 96, '>400 N display saturation', ...
+    'HorizontalAlignment', 'right', 'Color', 'k', 'FontSize', 9, ...
+    'BackgroundColor', 'w', 'Margin', 2);
+if isequal(reference.q(:, 1), reference.q(:, end))
+    text(ax, q1_path_deg(1)+2, q2_path_deg(1)+5, ...
+        'start and end coincide', 'Color', 'k', 'FontSize', 9, ...
+        'BackgroundColor', 'w', 'Margin', 2);
+end
+legend(ax, [path_handle, start_handle, end_handle, maximum_handle], ...
+    'Location', 'southoutside', 'Orientation', 'horizontal');
+exportgraphics(fig, path, 'Resolution', 180);
+close(fig);
+end
+
+
+function save_force_map_log_global(atlas, path)
 [fig, ax] = base_figure();
 display_data = log10(atlas.force_norm);
-display_data(~isfinite(display_data)) = NaN;
-imagesc(ax, atlas.q1_deg, atlas.q2_deg, display_data);
-hold(ax, 'on');
-plot(ax, rad2deg(reference.q(1, :)), rad2deg(reference.q(2, :)), ...
-    'w-', 'LineWidth', 2.5);
-plot(ax, rad2deg(reference.q(1, 1)), rad2deg(reference.q(2, 1)), ...
-    'wo', 'MarkerFaceColor', 'k', 'MarkerSize', 7);
-plot(ax, rad2deg(reference.q(1, 3751)), rad2deg(reference.q(2, 3751)), ...
-    'ws', 'MarkerFaceColor', 'k', 'MarkerSize', 7);
+display_data(atlas.rank_deficient | ~isfinite(display_data)) = NaN;
+atlas_image(ax, atlas, display_data);
+finite_values = display_data(isfinite(display_data));
+clim(ax, [min(finite_values), max(finite_values)]);
 decorate_map(ax, atlas, 'log_{10}(|F| / N)', ...
-    'Current V2 reference over quasistatic force map');
-legend(ax, {'V2 reference path', 'start', 'peak'}, ...
-    'Location', 'southoutside', 'Orientation', 'horizontal');
+    'Global log-scale quasistatic single-contact force');
+label_singular_row(ax);
+exportgraphics(fig, path, 'Resolution', 180);
+close(fig);
+end
+
+
+function save_reference_force_profile(reference, path)
+fig = figure('Visible', 'off', 'Color', 'w', ...
+    'Position', [100, 100, 1100, 650]);
+ax = axes(fig);
+hold(ax, 'on');
+plot(ax, reference.t, reference.force_norm, 'k-', ...
+    'LineWidth', 2.0, 'DisplayName', '|F|');
+plot(ax, reference.t, reference.force_local(1, :), ...
+    'LineWidth', 1.7, 'DisplayName', 'F_{parallel}');
+plot(ax, reference.t, reference.force_local(2, :), ...
+    'LineWidth', 1.7, 'DisplayName', 'F_{perp}');
+colors = [0.20, 0.55, 0.90; 0.90, 0.55, 0.10; 0.70, 0.15, 0.20];
+limits = [80, 120, 200];
+for index = 1:numel(limits)
+    yline(ax, limits(index), '--', sprintf('%d N', limits(index)), ...
+        'Color', colors(index, :), 'LineWidth', 1.1, ...
+        'LabelHorizontalAlignment', 'left', 'HandleVisibility', 'off');
+end
+[maximum_force, maximum_index] = max(reference.force_norm);
+maximum_handle = plot(ax, reference.t(maximum_index), maximum_force, 'd', ...
+    'MarkerEdgeColor', [0.75, 0, 0], 'MarkerFaceColor', 'none', ...
+    'MarkerSize', 14, 'LineWidth', 2.0, ...
+    'DisplayName', 'maximum quasistatic force');
+start_handle = plot(ax, reference.t(1), reference.force_norm(1), 'o', ...
+    'MarkerEdgeColor', 'k', 'MarkerFaceColor', [0.20, 0.85, 0.25], ...
+    'MarkerSize', 7, 'LineWidth', 1.2, 'DisplayName', 'start');
+end_handle = plot(ax, reference.t(end), reference.force_norm(end), 's', ...
+    'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'none', ...
+    'MarkerSize', 9, 'LineWidth', 1.7, 'DisplayName', 'end');
+yline(ax, 0, 'k:', 'HandleVisibility', 'off');
+xlabel(ax, 'Time (s)');
+ylabel(ax, 'Quasistatic force (N)');
+title(ax, 'Quasistatic force along current V2 reference');
+grid(ax, 'on');
+legend(ax, 'Location', 'south', 'Orientation', 'horizontal', ...
+    'NumColumns', 3);
+xlim(ax, [reference.t(1), reference.t(end)]);
+ylim(ax, [-350, 350]);
+uistack(maximum_handle, 'top');
+uistack(start_handle, 'top');
+uistack(end_handle, 'top');
 exportgraphics(fig, path, 'Resolution', 180);
 close(fig);
 end
@@ -431,6 +570,10 @@ fprintf(file, 'maximum_exact_torque_residual_Nm=%.12g\n', ...
     summary.maximum_exact_torque_residual_Nm);
 write_point(file, 'start', summary.start);
 write_point(file, 'peak', summary.peak);
+write_reference_point(file, 'reference_start', summary.reference_start);
+write_reference_point(file, 'reference_end', summary.reference_end);
+write_reference_point(file, 'reference_maximum_force', ...
+    summary.reference_maximum_force);
 fprintf(file, 'reference_min_static_force_N=%.12g\n', ...
     summary.reference_min_force_N);
 fprintf(file, 'reference_max_static_force_N=%.12g\n', ...
@@ -473,4 +616,13 @@ for index = 1:numel(point.feasible)
         point.component_bounds_N(index), ...
         point.feasible(index));
 end
+end
+
+
+function write_reference_point(file, prefix, point)
+write_point(file, prefix, point);
+fprintf(file, '%s_index=%d\n%s_time_s=%.12g\n', ...
+    prefix, point.index, prefix, point.time_s);
+fprintf(file, '%s_force_norm_from_search_N=%.12g\n', ...
+    prefix, point.force_norm_from_search_N);
 end
