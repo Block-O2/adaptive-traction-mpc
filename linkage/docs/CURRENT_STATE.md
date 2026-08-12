@@ -62,6 +62,9 @@ observed at that stage; they do not independently override this state summary.
 - The current force-mode-stage retained suite contains 44 tests: the previous
   39 retained V2/equilibrium/atlas tests and five near-extension mechanics
   tests.
+- Hybrid Tube Force Controller V1 adds nine implementation-contract tests,
+  bringing the retained suite to 53 tests. Its formal 12-case dynamic matrix
+  remains pending user execution and is not yet accepted scientific evidence.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
@@ -262,6 +265,31 @@ observed at that stage; they do not independently override this state summary.
   low-flexion region.
 - Methods and bounded conclusion:
   [NEAR_EXTENSION_FORCE_MODE_FEASIBILITY.md](NEAR_EXTENSION_FORCE_MODE_FEASIBILITY.md)
+
+## Hybrid tube force controller V1
+
+- The first task-level closed-loop implementation retains the frozen V2
+  geometric path while adding monotone flexible progress, a continuous
+  component-wise trajectory tube, a deterministic force-aware spatial
+  reference plan, and terminal task-set classification.
+- Tube caps of 0, 5, and 10 degrees and force-component bounds of 80, 120, and
+  200 N are engineering sensitivity cases, not clinical tolerances or safety
+  limits. Force/hold feasibility is prioritized over nominal path fidelity,
+  and bounded torque residual remains explicit.
+- The existing Human Model V2, passive model, distal force map, equilibrium
+  controller, and original V2 reference files remain unchanged. V1 does not
+  implement bed contact, load transfer, retreat, CBF, NMPC, or a complete
+  safety supervisor.
+- The implementation and its mechanical contract tests are present, but the
+  formal 12-case dynamic experiment is reserved for user execution. No dynamic
+  force reduction, boundary-seeking, flexible-timing use, completion state, or
+  GIF is yet promoted as accepted evidence.
+- This stage addresses only the suspended single-contact path to the existing
+  V2 terminal region. It does not establish safe full extension; the
+  structural rank loss at `q2=0` remains, and any required external load
+  transfer must be modeled separately in a later stage.
+- Formulation, runner, validation boundary, and formal command:
+  [HYBRID_TUBE_FORCE_CONTROLLER_V1.md](HYBRID_TUBE_FORCE_CONTROLLER_V1.md)
 
 ## Physical plant baseline evidence
 
