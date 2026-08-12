@@ -59,8 +59,9 @@ observed at that stage; they do not independently override this state summary.
   `linkage/matlab/runners/run_linkage_tests.m`. It runs only the V2 and
   single-arm V2 equilibrium/atlas tests and reports aggregate passed, failed,
   and incomplete counts.
-- The current atlas-stage retained suite contains 39 tests: the previous 33
-  retained V2/equilibrium tests and six quasistatic-atlas tests.
+- The current force-mode-stage retained suite contains 44 tests: the previous
+  39 retained V2/equilibrium/atlas tests and five near-extension mechanics
+  tests.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
@@ -230,6 +231,37 @@ observed at that stage; they do not independently override this state summary.
   intervention, and the operating envelope.
 - Methods and bounded interpretation:
   [SINGLE_ARM_QUASISTATIC_FEASIBILITY_ATLAS.md](SINGLE_ARM_QUASISTATIC_FEASIBILITY_ATLAS.md)
+
+## Near-extension force-mode feasibility
+
+- An offline quasistatic scan tests the proposed relaxation of strict
+  hip-knee coordination near extension. It is a mechanics study, not a
+  controller, NMPC, safety supervisor, or closed-loop experiment.
+- At the frozen `[5,10] deg` posture, the static force remains `315.730 N`.
+  Searching hip posture at the same `q2=10 deg` selects `q1=0 deg`, reducing
+  `abs(F_parallel)` from `315.030 N` to `22.992 N` and total force to
+  `30.985 N`.
+- The posture solution is boundary-seeking rather than a smooth policy:
+  optimum `abs(F_parallel)` rises to `189.492 N` at `q2=2 deg` and
+  `218.476 N` at `q2=1 deg`, where the selected hip posture jumps to
+  `q1=79 deg`. At `q2=0`, the map remains rank deficient with no finite exact
+  suspended single-contact solution.
+- Under the 80 N, 120 N, and 200 N engineering component bounds, the current
+  V2 return has peak abstract support residuals of 7.398, 6.139, and
+  3.621 N m, respectively, all knee-dominated. The minimum-axial-force
+  posture curve confines nonzero residual to `q2=1..5`, `1..4`, and `1 deg`,
+  with much smaller peaks of 0.949, 0.572, and 0.058 N m.
+- The residual is generalized torque that must be carried by unspecified
+  external load transfer; it is not a bed-contact force or a concrete support
+  model. The force bounds are not clinical safety thresholds.
+- Force-mode posture adjustment can mitigate much of the positive-flexion
+  demand but does not remove near-zero rank/force limitations. Before further
+  controller work, the project must confirm trajectory strictness, permitted
+  safety intervention, and operating envelope. A specific load-transfer model
+  is warranted only if the required envelope includes the residual-producing
+  low-flexion region.
+- Methods and bounded conclusion:
+  [NEAR_EXTENSION_FORCE_MODE_FEASIBILITY.md](NEAR_EXTENSION_FORCE_MODE_FEASIBILITY.md)
 
 ## Physical plant baseline evidence
 

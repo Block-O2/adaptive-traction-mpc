@@ -15,6 +15,8 @@ The categories below are navigational only; existing reports remain in place.
   — current open-loop trajectory/contact-force preflight.
 - [SINGLE_ARM_QUASISTATIC_FEASIBILITY_ATLAS.md](SINGLE_ARM_QUASISTATIC_FEASIBILITY_ATLAS.md)
   — current joint-workspace static holding-force and component-bound map.
+- [NEAR_EXTENSION_FORCE_MODE_FEASIBILITY.md](NEAR_EXTENSION_FORCE_MODE_FEASIBILITY.md)
+  — offline near-extension posture objectives and abstract support residual.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
