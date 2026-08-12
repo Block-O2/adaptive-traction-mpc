@@ -126,3 +126,21 @@ wide = single_arm_quasistatic_hold_point(sample.q, p, [], 1e-12);
 verifyLessThan(testCase, abs(wide.F_parallel), abs(strict.F_parallel));
 verifyLessThan(testCase, wide.force_norm, strict.force_norm);
 end
+
+
+function testInfeasibleSuspendedStartStopsBeforePlantDrift(testCase)
+p = testCase.TestData.p;
+config = hybrid_tube_v1_config(200, 10);
+config.plan_node_count = 41;
+config.candidate_step_deg = 2;
+plan = testCase.TestData.wide_plan;
+result = simulate_hybrid_tube_force_controller_v1(config, p, plan);
+verifyEqual(testCase, result.metrics.terminal_state, ...
+    "INITIAL_SUPPORT_REQUIRED");
+verifyEqual(testCase, numel(result.t), 1);
+verifyEqual(testCase, rad2deg(result.x(1:2, 1)), [5; 10], ...
+    'AbsTol', 1e-12);
+verifyFalse(testCase, result.metrics.initial_hold_feasible);
+verifyEqual(testCase, result.metrics.initial_required_force_norm_N, ...
+    315.730, 'AbsTol', 0.02);
+end

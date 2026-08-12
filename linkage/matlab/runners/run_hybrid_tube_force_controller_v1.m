@@ -295,14 +295,15 @@ for ax = axes_list, xlim(ax, [0 max(t(end), eps)]); end
 frames = unique(round(linspace(1, numel(t), min(240, numel(t)))));
 for frame_index = 1:numel(frames)
     k = frames(frame_index); q = result.x(1:2, k);
-    phi = q(1)-q(2); hip = [0;0]; knee = p.L1*[sin(q(1)); cos(q(1))];
-    ankle = knee+p.L2*[sin(phi); cos(phi)];
-    contact = knee+p.sc*[sin(phi); cos(phi)];
+    phi = q(1)-q(2); hip = [0;0]; knee = p.L1*[cos(q(1)); sin(q(1))];
+    ankle = knee+p.L2*[cos(phi); sin(phi)];
+    contact = knee+p.sc*[cos(phi); sin(phi)];
     set(leg, 'XData', [hip(1) knee(1) ankle(1)], 'YData', [hip(2) knee(2) ankle(2)]);
     mapping = single_arm_v2_force_map(q, result.x(3:4,k), p);
     fw = mapping.rotation*result.force_local(:,k)/800;
     set(force_arrow, 'XData', contact(1), 'YData', contact(2), 'UData', fw(1), 'VData', fw(2));
-    set(info, 'String', sprintf(['t=%.2f s  s=%.3f  %s\n' ...
+    set(info, 'String', sprintf(['+x right, +y up; q1 from +x\n' ...
+        't=%.2f s  s=%.3f  %s\n' ...
         'F_parallel=%.1f N  F_perp=%.1f N'], t(k), result.progress(k), ...
         result.status(k), result.force_local(1,k), result.force_local(2,k)));
     set(q1, 'XData', t(1:k), 'YData', rad2deg(result.x(1,1:k)));

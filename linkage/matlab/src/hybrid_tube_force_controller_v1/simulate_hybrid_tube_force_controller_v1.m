@@ -15,8 +15,17 @@ x(:, 1) = [initial.nominal_q; zeros(2, 1)];
 initial_hold = single_arm_quasistatic_hold_point(initial.nominal_q, p, ...
     config.force_bound_N, config.svd_relative_tolerance);
 u_previous = initial_hold.bounded_force(:, 1);
+initial_hold_feasible = ~initial_hold.rank_deficient && ...
+    initial_hold.exact_feasible(1) && ...
+    initial_hold.bounded_residual_norm(1) <= ...
+    config.plan_residual_tolerance_Nm;
+if initial_hold_feasible
+    initial_status = "RUNNING";
+else
+    initial_status = "INITIAL_SUPPORT_REQUIRED";
+end
 manager = struct('s', 0, 's_dot', 0, 's_ddot', 0, ...
-    'pause_time', 0, 'status', "RUNNING", ...
+    'pause_time', 0, 'status', initial_status, ...
     'previous_force', initial.force_local);
 
 q_reference = zeros(2, max_samples);
@@ -176,6 +185,9 @@ metrics.pause_duration_s = config.dt*sum(result.progress_rate <= 1e-6);
 metrics.force_aware_deviation_duration_s = config.dt*sum( ...
     any(abs(result.q_reference-result.q_nominal) > deg2rad(0.05), 1));
 metrics.controller_feasible_fraction = mean(result.controller_feasible);
+metrics.initial_hold_feasible = initial_hold_feasible;
+metrics.initial_required_force_N = initial_hold.force_local;
+metrics.initial_required_force_norm_N = initial_hold.force_norm;
 result.jerk = jerk;
 result.tracking_error = tracking_error;
 result.task_error = task_error;

@@ -62,9 +62,9 @@ observed at that stage; they do not independently override this state summary.
 - The current force-mode-stage retained suite contains 44 tests: the previous
   39 retained V2/equilibrium/atlas tests and five near-extension mechanics
   tests.
-- Hybrid Tube Force Controller V1 adds nine implementation-contract tests,
-  bringing the retained suite to 53 tests. Its formal 12-case dynamic matrix
-  remains pending user execution and is not yet accepted scientific evidence.
+- Hybrid Tube Force Controller V1 adds ten implementation-contract tests,
+  bringing the retained suite to 54 tests. Its user-run formal matrix is
+  retained as an unsupported-initialization negative baseline.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
@@ -281,9 +281,17 @@ observed at that stage; they do not independently override this state summary.
   implement bed contact, load transfer, retreat, CBF, NMPC, or a complete
   safety supervisor.
 - The implementation and its mechanical contract tests are present, but the
-  formal 12-case dynamic experiment is reserved for user execution. No dynamic
-  force reduction, boundary-seeking, flexible-timing use, completion state, or
-  GIF is yet promoted as accepted evidence.
+  first formal 12-case dynamic matrix was run by the user. It confirms that
+  the frozen `[5,10] deg` fully suspended initialization is infeasible under
+  all three engineering force boxes. The corrected manager now returns
+  `INITIAL_SUPPORT_REQUIRED` before integration instead of allowing drift and
+  later labeling the state `TRANSFER_REQUIRED`.
+- The mathematical frame is +x right/+y up with q1 measured from +x, so q1=0
+  is horizontal and `[5,10] deg` is nearly horizontal. The initial GIF used a
+  sine/cosine-swapped drawing convention; only the visualization was wrong.
+- This is an unsupported/suspended initialization negative baseline, not a
+  rejection of the tube formulation with an explicit support/load-transfer
+  phase.
 - This stage addresses only the suspended single-contact path to the existing
   V2 terminal region. It does not establish safe full extension; the
   structural rank loss at `q2=0` remains, and any required external load

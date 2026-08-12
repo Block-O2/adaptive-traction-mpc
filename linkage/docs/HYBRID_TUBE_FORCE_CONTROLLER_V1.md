@@ -18,6 +18,13 @@ tracked report records the implemented contract and mechanical validation; it
 does not promote unrun dynamic metrics, GIFs, or terminal classifications as
 formal evidence.
 
+The mathematical coordinate convention is unchanged and was not erroneous:
++x is horizontal to the right, +y is upward, and q1 is measured from +x.
+Therefore q1=0 degrees is a horizontal thigh and `[5,10] deg` is a nearly
+horizontal supine posture. An earlier generated GIF incorrectly exchanged
+sine and cosine only in its drawing code, making the leg look vertical; that
+visualization error did not affect kinematics, dynamics, forces, or metrics.
+
 ## Frozen task and governed reference
 
 The existing `slow_passive_flexion_v2` reference is unchanged. It is
@@ -95,17 +102,21 @@ or support phase.
 
 ## Terminal and failure contract
 
-- `TASK_COMPLETE`: (s=1), the measured posture is inside the terminal tube,
+- `TASK_COMPLETE`: \(s=1\), the measured posture is inside the terminal tube,
   and the current posture has an exact bounded holding solution.
 - `TRANSFER_REQUIRED`: progress cannot continue, but the present posture can
   be held within the configured force bound.
 - `INFEASIBLE`: the present posture itself lacks an exact bounded holding
   solution.
+- `INITIAL_SUPPORT_REQUIRED`: the frozen suspended start posture cannot be
+  held inside the configured force box. This is returned at the initial sample
+  before plant integration, so gravity-driven drift cannot be misclassified as
+  a successful transfer.
 
 V1 implements neither retreat nor external support. It validates only a
 suspended single-contact task ending in the existing V2 terminal region. It
-does not claim safe achievement of (q_2=0); the structural rank loss at
-(q_2=0) remains. If full lowering requires external load transfer, that
+does not claim safe achievement of \(q_2=0\); the structural rank loss at
+\(q_2=0\) remains. If full lowering requires external load transfer, that
 contact must be modeled in a later stage.
 
 ## Comparison matrix and recorded metrics
@@ -130,8 +141,9 @@ It writes MAT/CSV/text, five static comparison figures, and representative
 linkage/results/local/hybrid_tube_force_controller_v1/
 ```
 
-No tracked report should be updated with those dynamic results until the
-formal output has been reviewed.
+The first user-run output has now been reviewed for its suspended-initialization
+finding. A corrected rerun would terminate each bounded tube case at the first
+sample as `INITIAL_SUPPORT_REQUIRED` rather than reproducing the earlier drift.
 
 ## Mechanical validation
 
@@ -142,7 +154,17 @@ terminal classification, ROM and soft-limit exclusion, reproduction of the
 approximately 315.73 N strict static start demand, and the lower-force
 direction of the wider tube at that endpoint.
 
-These checks establish implementation contracts only. Whether flexible timing
-is materially used, whether the PR #12 quasistatic reduction survives the full
-dynamic closed loop, whether any case seeks a hip boundary, and the final
-classification of all 12 cases remain formal-run questions.
+These checks establish implementation contracts only. Because every bounded
+case encounters the unsupported initialization gate, that run cannot answer
+whether flexible timing is materially used or whether the PR #12 quasistatic
+reduction survives a supported load-takeover and suspended-motion cycle.
+
+## User-run suspended formal evidence
+
+The first user-run 12-case matrix showed that the frozen `[5,10] deg` fully
+suspended initialization is not hold-feasible under any of the 80, 120, or
+200 N component boxes. The earlier runner allowed the plant to drift before
+reporting `TRANSFER_REQUIRED`; V1 now stops at the initial sample and reports
+`INITIAL_SUPPORT_REQUIRED` instead. This negative result establishes an
+unsupported initialization boundary. It does not by itself reject the tube
+concept once an explicit initial support/load-transfer phase is modeled.
