@@ -17,6 +17,9 @@ The categories below are navigational only; existing reports remain in place.
   — current joint-workspace static holding-force and component-bound map.
 - [NEAR_EXTENSION_FORCE_MODE_FEASIBILITY.md](NEAR_EXTENSION_FORCE_MODE_FEASIBILITY.md)
   — offline near-extension posture objectives and abstract support residual.
+- [HYBRID_TUBE_FORCE_CONTROLLER_V1.md](HYBRID_TUBE_FORCE_CONTROLLER_V1.md)
+  — implemented geometric-path, flexible-progress, and force-aware tube
+  reference-manager contract; formal 12-case dynamic evidence is pending.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
