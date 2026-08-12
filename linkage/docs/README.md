@@ -13,6 +13,8 @@ The categories below are navigational only; existing reports remain in place.
   SDK evidence gate.
 - [SINGLE_ARM_TRAJECTORY_FEASIBILITY_STUDY.md](SINGLE_ARM_TRAJECTORY_FEASIBILITY_STUDY.md)
   — current open-loop trajectory/contact-force preflight.
+- [SINGLE_ARM_QUASISTATIC_FEASIBILITY_ATLAS.md](SINGLE_ARM_QUASISTATIC_FEASIBILITY_ATLAS.md)
+  — current joint-workspace static holding-force and component-bound map.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 

@@ -53,12 +53,14 @@ observed at that stage; they do not independently override this state summary.
 - The retained active implementation is Human Model V2 under
   `linkage/matlab/src/human_two_link_v2/`, the single-arm V2 force
   map/equilibrium implementation under
-  `linkage/matlab/src/single_arm_v2_equilibrium/`, and the open-loop trajectory
-  feasibility runner.
+  `linkage/matlab/src/single_arm_v2_equilibrium/`, the open-loop trajectory
+  feasibility runner, and the quasistatic feasibility-atlas diagnostic.
 - The canonical retained test entry is
   `linkage/matlab/runners/run_linkage_tests.m`. It runs only the V2 and
-  single-arm V2 equilibrium tests and reports aggregate passed, failed, and
-  incomplete counts.
+  single-arm V2 equilibrium/atlas tests and reports aggregate passed, failed,
+  and incomplete counts.
+- The current atlas-stage retained suite contains 39 tests: the previous 33
+  retained V2/equilibrium tests and six quasistatic-atlas tests.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
@@ -195,6 +197,39 @@ observed at that stage; they do not independently override this state summary.
   tracking or GIF was generated, and it does not establish clinical efficacy.
 - Methods, artifacts, and bounded conclusions:
   [SINGLE_ARM_TRAJECTORY_FEASIBILITY_STUDY.md](SINGLE_ARM_TRAJECTORY_FEASIBILITY_STUDY.md)
+
+## Single-arm quasistatic feasibility atlas
+
+- The nominal `q1=0:1:80 deg`, `q2=0:1:100 deg` posture scan retains the
+  current Human Model V2, passive torque, contact position, and force map.
+- `q2=0` is explicitly rank deficient and has no fabricated finite exact
+  force. Across the nonsingular grid, the exact holding-force residual stays
+  below `3.57e-14 N m`.
+- The finite force range is `18.466 N` to `4432.666 N`; the maximum occurs at
+  `[0,1] deg`, while all sampled points at or above `300 N` lie within
+  `q2=1..19 deg`. This localizes the largest amplification to low knee
+  flexion under the frozen model/contact assumptions.
+- The current V2 start `[5,10] deg` requires
+  `F_parallel=-315.030 N`, `F_perp=21.011 N`, and `315.730 N` total, whereas
+  `[45,84] deg` requires `103.484 N` total and is much better conditioned.
+- Along the current V2 reference, the quasistatic peak is approximately
+  `315.73 N` at the shared start/end pose `[5,10] deg`. It is dominated by
+  `F_parallel`, with a much smaller `F_perp`, and places the reference start in
+  the mechanically unfavorable low-flexion/near-extension region.
+- Exact feasible fractions over all 8,181 samples are 2.4569%, 57.1691%, and
+  83.4372% for the `+/-80`, `+/-120`, and `+/-200 N` component boxes. The
+  start is infeasible under all three; the peak is feasible under 120 N and
+  200 N but not 80 N.
+- This is a quasistatic mechanical diagnostic only. It does not establish
+  closed-loop controllability, comfort, clinical safety, or an architecture
+  decision; professor and hardware confirmation remain required.
+- The 80 N, 120 N, and 200 N limits are engineering comparison bounds, not
+  clinical safety standards, and the atlas does not establish failure of the
+  single-arm architecture. Before further NMPC/controller tuning, the next
+  stage must first confirm trajectory strictness, permitted safety
+  intervention, and the operating envelope.
+- Methods and bounded interpretation:
+  [SINGLE_ARM_QUASISTATIC_FEASIBILITY_ATLAS.md](SINGLE_ARM_QUASISTATIC_FEASIBILITY_ATLAS.md)
 
 ## Physical plant baseline evidence
 
