@@ -110,38 +110,84 @@ controller residuals are logged separately.
 The implementation records these modes:
 
 1. `BED_SUPPORT`;
-2. `LOAD_TAKEOVER`;
-3. `LIFTOFF`;
-4. `SUSPENDED_MOTION`;
-5. `RECONTACT`;
-6. `LOAD_RETURN`;
-7. `RELEASE`.
+2. `SUPPORTED_PREPOSITION`;
+3. `LOAD_TAKEOVER`;
+4. `LIFTOFF`;
+5. `SUSPENDED_MOTION`;
+6. `RECONTACT`;
+7. `LOAD_RETURN`;
+8. `RELEASE`.
 
-Load-takeover and load-return references use quintic ramps. Robot force remains
-subject to the retained slew box. Entry to suspended motion requires both bed
+`SUPPORTED_PREPOSITION` is a bed-supported, pre-liftoff configuration
+adjustment. Formal rehabilitation progress remains exactly `s=0`. A
+deterministic enumeration searches only the initial 5 or 10 degree tube and
+rejects ROM violations, active soft limits, inadequate force margin, excessive
+bounded residual, or loss of bed support. Its normalized objective includes
+nominal-posture deviation, predicted robot-only axial and total force, force
+change, and soft/ROM clearance. PR #12's low-force posture is mechanics
+evidence only and is not hard-coded as a target.
+
+At every candidate, robot-only feasibility is evaluated independently from
+the current bed-supported balance using
+
+\[
+A(q)F_{robot}=G(q)+\tau_{passive}(q,0).
+\]
+
+The witness force, component margin, bounded residual, mapping conditioning,
+and ROM/soft-limit margins are logged. Only a continuously reached robust
+witness can enter `LOAD_TAKEOVER`. This is not hidden pre-positioning: the
+plant begins at `[5,10] deg`, follows a quintic reference while visibly
+supported by the bed, and formal task progress has not begun.
+
+Load takeover continuously reduces the bed generalized-torque credit used by
+the robot controller from one to zero; robot force remains subject to the
+retained slew box. If robot-only feasibility is lost, the sequence returns to
+supported preposition once, then reports `PREPOSITION_INFEASIBLE` rather than
+forcing liftoff. Entry to suspended motion requires both bed
 normal force below the contact threshold and an exact robot-only holding
 solution within the configured force bound. Re-contact is contact-driven on
 the return portion, not a fixed-time declaration. Release is accepted only
 after bed support has remained active for the configured stable interval.
 
 Terminal classifications are `TASK_COMPLETE`, `INITIAL_SUPPORT_REQUIRED`,
-`LIFTOFF_INFEASIBLE`, `SUSPENDED_INFEASIBLE`, `RECONTACT_FAILED`,
+`PREPOSITION_INFEASIBLE`, `LIFTOFF_INFEASIBLE`, `SUSPENDED_INFEASIBLE`, `RECONTACT_FAILED`,
 `LOAD_RETURN_FAILED`, and `ABORTED`. A failed handoff is never represented as
 a successful transfer.
 
 ## Validation boundary and smoke observation
 
-Thirteen new tests cover the requested coordinate convention, bed-off identity,
+Twenty bed-stage tests cover the requested coordinate convention, bed-off identity,
 unilateral force, zero force without contact, Jacobian torque accumulation,
 calibrated equilibrium, force-slew continuity, robot-only liftoff guard,
 re-contact force restoration, stable external support before release, and
-total dynamics balance.
+total dynamics balance. The added preposition checks cover `s=0`, tube and ROM
+containment, bed-supported versus robot-only feasibility, takeover blocking,
+failure classification, feasibility loss during takeover, liftoff guards, and
+reference/force continuity.
 
-A reduced 12 s nominal-bed, 200 N, 10 degree smoke rollout exercised
-`BED_SUPPORT -> LOAD_TAKEOVER -> LIFTOFF`. The robot-only liftoff guard did not
-permit suspended motion and the rollout ended `LIFTOFF_INFEASIBLE`; it also
-recorded soft-limit activity. This is a mechanical smoke observation, not a
-formal scientific conclusion, and parameters were not tuned in response.
+A six-case nominal-bed smoke used the fixed 80/120/200 N bounds and 5/10 degree
+tubes. No case entered `LIFTOFF`, so the formal matrix was not run and no
+parameter was tuned. Five cases contained no robust robot-only target and
+stopped from `BED_SUPPORT` as `PREPOSITION_INFEASIBLE`. The 200 N/10 degree
+case found the enumerated target `[7,20] deg`, reached
+`SUPPORTED_PREPOSITION`, and entered `LOAD_TAKEOVER`. Near the end of takeover,
+the actual posture `[7.057,19.292] deg` required the robot-only witness
+`[-195.030,16.116] N`; its remaining component margin fell to `4.970 N`, just
+below the fixed `5 N` guard. The sequence did not continue to liftoff and
+reported `PREPOSITION_INFEASIBLE`. There was no soft-limit activation, ROM
+violation, or boundary-seeking in this smoke. This is mechanical smoke
+evidence, not a formal scientific conclusion.
+
+The representative ignored smoke GIF and metrics are under
+`linkage/results/local/bed_supported_load_transfer_v1/smoke_preposition/`.
+They explicitly display the mode, bed and actual robot forces, robot-only
+witness, bounded residual, nominal/governed/tube joint signals, and `s=0`.
+
+Within the present tube and support abstraction, the smoke does not justify
+running the formal matrix. A viable next attempt would require explicitly
+approved wider task freedom, a different support/load-transfer strategy, or an
+architecture change rather than hidden weight tuning.
 
 ## Formal matrix and outputs
 

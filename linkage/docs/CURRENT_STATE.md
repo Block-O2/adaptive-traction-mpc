@@ -65,8 +65,8 @@ observed at that stage; they do not independently override this state summary.
 - Hybrid Tube Force Controller V1 adds ten implementation-contract tests,
   bringing the retained suite to 54 tests. Its user-run formal matrix is
   retained as an unsupported-initialization negative baseline.
-- Bed-Supported Load Transfer V1 adds 13 mechanics and guard tests, bringing
-  the retained suite to 67 tests. Its formal 18-case matrix remains reserved
+- Bed-Supported Load Transfer V1 adds 20 mechanics and guard tests, bringing
+  the retained suite to 74 tests. Its formal 18-case matrix remains reserved
   for user execution.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
@@ -315,14 +315,21 @@ observed at that stage; they do not independently override this state summary.
   stiffness sensitivities. At the nominal initial posture the bed supplies
   `152.540 N` total normal force and the remaining exact robot force is
   `[-8.543,21.011] N` (`22.681 N` norm), with numerical-zero torque balance.
-- The seven-mode implementation covers bed support, load takeover, guarded
-  liftoff, suspended motion, re-contact, load return, and release. Liftoff
+- The eight-mode implementation adds bed-supported `SUPPORTED_PREPOSITION`
+  before load takeover, followed by guarded liftoff, suspended motion,
+  re-contact, load return, and release. Formal task progress stays at `s=0`
+  during preposition. Liftoff
   requires both near-zero bed force and exact bounded robot-only hold
   feasibility; failed handoffs retain explicit failure classifications.
-- A reduced nominal 200 N/10 degree smoke reached `LIFTOFF` but did not satisfy
-  its guard, ending `LIFTOFF_INFEASIBLE` with recorded soft-limit activity.
-  This is implementation smoke evidence only; no parameter was tuned and no
-  formal cycle claim is made.
+- The six nominal-bed smoke cases produced no liftoff. Five tubes contained no
+  robust robot-only preposition. The 200 N/10 degree case reached the
+  enumerated `[7,20] deg` target and entered `LOAD_TAKEOVER`, but a small
+  dynamic posture deviation reduced its fixed force margin below 5 N; it
+  returned `PREPOSITION_INFEASIBLE`. There was no soft-limit activation, ROM
+  violation, or boundary-seeking. No parameter was tuned.
+- This smoke does not justify the formal matrix. Wider task freedom, a
+  different support strategy, or an architecture change requires explicit
+  review before another dynamic study.
 - The formal 5/10 degree by 80/120/200 N by three-stiffness dynamic matrix and
   GIF generation remain reserved for user execution.
 - Model, calibration, guards, assumptions, and formal command:

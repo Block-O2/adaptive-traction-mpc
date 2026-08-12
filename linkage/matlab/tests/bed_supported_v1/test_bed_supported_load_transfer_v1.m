@@ -129,3 +129,80 @@ x = [deg2rad([7;14]);0.03;-0.02];
     testCase.TestData.calibration.h_hip_m, p, c);
 verifyLessThan(testCase, norm(d.balance_residual_Nm), 1e-10);
 end
+
+
+function testPrepositionCandidateStaysAtZeroTaskProgress(testCase)
+p=testCase.TestData.p;c=testCase.TestData.config;
+c.plan_node_count=41;c.candidate_step_deg=2;c.max_time_s=1;
+z=testCase.TestData.calibration;plan=hybrid_tube_v1_build_plan(p,c);
+r=simulate_bed_supported_load_transfer_v1(c,p,plan,z);
+indices=r.mode=="SUPPORTED_PREPOSITION";
+verifyTrue(testCase,any(indices));
+verifyEqual(testCase,r.progress(indices),zeros(1,sum(indices)),'AbsTol',0);
+end
+
+
+function testPrepositionCandidateIsInsideTubeAndRom(testCase)
+p=testCase.TestData.p;c=testCase.TestData.config;z=testCase.TestData.calibration;
+target=bed_supported_v1_preposition_target(p,c,z.h_hip_m,z.robot_force_N);
+verifyTrue(testCase,target.found);
+verifyLessThanOrEqual(testCase,abs(target.q-target.nominal_q),target.tube_rad+1e-12);
+verifyGreaterThanOrEqual(testCase,target.q,p.q_min);
+verifyLessThanOrEqual(testCase,target.q,p.q_max);
+end
+
+
+function testBedSupportedAndRobotOnlyFeasibilityAreDistinct(testCase)
+p=testCase.TestData.p;c=testCase.TestData.config;z=testCase.TestData.calibration;
+hold=bed_supported_v1_robot_only_hold(z.q_initial_rad,p,c);
+verifyLessThan(testCase,norm(z.balance_residual_Nm),1e-10);
+verifyFalse(testCase,hold.feasible);
+verifyGreaterThan(testCase,z.bed.total_normal_force_N,c.contact_force_threshold_N);
+end
+
+
+function testMissingCandidateBlocksLoadTakeover(testCase)
+p=testCase.TestData.p;c=bed_supported_v1_config(80,5,"nominal");
+c.plan_node_count=21;c.candidate_step_deg=2;c.max_time_s=1;
+z=bed_supported_v1_calibrate_hip_height(p,c);plan=hybrid_tube_v1_build_plan(p,c);
+r=simulate_bed_supported_load_transfer_v1(c,p,plan,z);
+verifyEqual(testCase,r.terminal_state,"PREPOSITION_INFEASIBLE");
+verifyFalse(testCase,any(r.mode=="LOAD_TAKEOVER"));
+verifyFalse(testCase,any(r.mode=="LIFTOFF"));
+end
+
+
+function testTakeoverLossDoesNotContinueToLiftoff(testCase)
+p=testCase.TestData.p;c=testCase.TestData.config;
+c.plan_node_count=41;c.candidate_step_deg=2;c.max_time_s=10;
+z=testCase.TestData.calibration;plan=hybrid_tube_v1_build_plan(p,c);
+r=simulate_bed_supported_load_transfer_v1(c,p,plan,z);
+if any(r.mode=="LOAD_TAKEOVER") && ...
+        any(~r.robot_only_feasible(r.mode=="LOAD_TAKEOVER"))
+    verifyFalse(testCase,any(r.mode=="SUSPENDED_MOTION"));
+end
+end
+
+
+function testLiftoffSamplesSatisfyGuards(testCase)
+p=testCase.TestData.p;c=testCase.TestData.config;
+c.plan_node_count=41;c.candidate_step_deg=2;c.max_time_s=10;
+z=testCase.TestData.calibration;plan=hybrid_tube_v1_build_plan(p,c);
+r=simulate_bed_supported_load_transfer_v1(c,p,plan,z);
+index=find(r.mode=="SUSPENDED_MOTION",1,'first');
+if ~isempty(index)
+    verifyLessThanOrEqual(testCase,r.bed_force_N(index),c.contact_force_threshold_N);
+    verifyTrue(testCase,r.robot_only_feasible(index));
+end
+end
+
+
+function testReferenceAndForceCommandsRemainContinuous(testCase)
+p=testCase.TestData.p;c=testCase.TestData.config;
+c.plan_node_count=41;c.candidate_step_deg=2;c.max_time_s=4;
+z=testCase.TestData.calibration;plan=hybrid_tube_v1_build_plan(p,c);
+r=simulate_bed_supported_load_transfer_v1(c,p,plan,z);
+verifyLessThanOrEqual(testCase,max(abs(diff(r.robot_force_N,1,2)),[],'all'), ...
+    max(c.du_max)*c.dt+1e-9);
+verifyLessThan(testCase,max(abs(diff(r.q_ref,1,2)),[],'all'),deg2rad(0.1));
+end
