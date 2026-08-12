@@ -1,0 +1,9 @@
+function hold = bed_supported_v1_robot_only_hold(q, p, config)
+%BED_SUPPORTED_V1_ROBOT_ONLY_HOLD Exact suspended feasibility at a posture.
+
+point = single_arm_quasistatic_hold_point(q, p, config.force_bound_N, ...
+    config.svd_relative_tolerance);
+hold = struct('feasible', ~point.rank_deficient && ...
+    point.exact_feasible(1) && point.bounded_residual_norm(1) <= ...
+    config.plan_residual_tolerance_Nm, 'point', point);
+end

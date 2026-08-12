@@ -65,6 +65,9 @@ observed at that stage; they do not independently override this state summary.
 - Hybrid Tube Force Controller V1 adds ten implementation-contract tests,
   bringing the retained suite to 54 tests. Its user-run formal matrix is
   retained as an unsupported-initialization negative baseline.
+- Bed-Supported Load Transfer V1 adds 13 mechanics and guard tests, bringing
+  the retained suite to 67 tests. Its formal 18-case matrix remains reserved
+  for user execution.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
@@ -298,6 +301,32 @@ observed at that stage; they do not independently override this state summary.
   transfer must be modeled separately in a later stage.
 - Formulation, runner, validation boundary, and formal command:
   [HYBRID_TUBE_FORCE_CONTROLLER_V1.md](HYBRID_TUBE_FORCE_CONTROLLER_V1.md)
+
+## Bed-supported load transfer V1
+
+- The mathematical frame remains +x right/+y up with q1 measured from +x;
+  q1=0 is horizontal and `[5,10] deg` is a nearly horizontal supine posture.
+  No Human Model V2 equation or gravity convention was rotated.
+- A horizontal `y=0` unilateral Kelvin-Voigt bed abstraction now acts through
+  eight fixed, uniformly spaced lower-surface candidates. It has no tensile
+  force or tangential friction, and bed/robot forces and generalized torques
+  are recorded separately.
+- A deterministic nominal-bed calibration fixes `h_hip=0.06825 m` for all
+  stiffness sensitivities. At the nominal initial posture the bed supplies
+  `152.540 N` total normal force and the remaining exact robot force is
+  `[-8.543,21.011] N` (`22.681 N` norm), with numerical-zero torque balance.
+- The seven-mode implementation covers bed support, load takeover, guarded
+  liftoff, suspended motion, re-contact, load return, and release. Liftoff
+  requires both near-zero bed force and exact bounded robot-only hold
+  feasibility; failed handoffs retain explicit failure classifications.
+- A reduced nominal 200 N/10 degree smoke reached `LIFTOFF` but did not satisfy
+  its guard, ending `LIFTOFF_INFEASIBLE` with recorded soft-limit activity.
+  This is implementation smoke evidence only; no parameter was tuned and no
+  formal cycle claim is made.
+- The formal 5/10 degree by 80/120/200 N by three-stiffness dynamic matrix and
+  GIF generation remain reserved for user execution.
+- Model, calibration, guards, assumptions, and formal command:
+  [BED_SUPPORTED_LOAD_TRANSFER_V1.md](BED_SUPPORTED_LOAD_TRANSFER_V1.md)
 
 ## Physical plant baseline evidence
 

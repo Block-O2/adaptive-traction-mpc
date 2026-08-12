@@ -19,7 +19,10 @@ The categories below are navigational only; existing reports remain in place.
   — offline near-extension posture objectives and abstract support residual.
 - [HYBRID_TUBE_FORCE_CONTROLLER_V1.md](HYBRID_TUBE_FORCE_CONTROLLER_V1.md)
   — implemented geometric-path, flexible-progress, and force-aware tube
-  reference-manager contract; formal 12-case dynamic evidence is pending.
+  reference-manager contract and unsupported-initialization negative baseline.
+- [BED_SUPPORTED_LOAD_TRANSFER_V1.md](BED_SUPPORTED_LOAD_TRANSFER_V1.md)
+  — horizontal unilateral bed abstraction, load-transfer state machine, fixed
+  calibration, tests, smoke boundary, and pending formal matrix.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
