@@ -157,6 +157,12 @@ dynamic study would first need an approved response to the parameter-dependent
 force requirement; this diagnostic does not authorize guard changes, force-
 bound changes, controller tuning, or a different support model.
 
+The follow-on full-path implementation reuses this exact registered case set
+to compute nominal and registered-robust liftoff boundaries plus same-posture
+bed-support overlap. The subsequent user-run result finds a continuous robust
+overlap only for the 200 N box; see
+[ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md](ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md).
+
 ## Reproduction and artifacts
 
 Headless command:

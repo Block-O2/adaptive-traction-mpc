@@ -26,6 +26,9 @@ The categories below are navigational only; existing reports remain in place.
 - [ROBUST_FORCE_MARGIN_SENSITIVITY.md](ROBUST_FORCE_MARGIN_SENSITIVITY.md)
   — deterministic robot-only quasistatic sensitivity of the nominal 200 N
   preposition reserve and 5 N engineering guard.
+- [ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md](ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md)
+  — user-run full-path nominal/registered-robust liftoff boundaries and
+  same-posture bed-overlap envelope.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 

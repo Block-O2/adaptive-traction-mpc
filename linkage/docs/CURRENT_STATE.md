@@ -65,8 +65,8 @@ observed at that stage; they do not independently override this state summary.
 - Hybrid Tube Force Controller V1 adds ten implementation-contract tests,
   bringing the retained suite to 54 tests. Its user-run formal matrix is
   retained as an unsupported-initialization negative baseline.
-- Bed-Supported Load Transfer V1 adds 33 mechanics, guard, and quasistatic
-  diagnostic tests, bringing the retained suite to 87 tests. Its formal
+- Bed-Supported Load Transfer V1 adds 44 mechanics, guard, and quasistatic
+  diagnostic tests, bringing the retained suite to 98 tests. Its formal
   18-case matrix remains reserved
   for user execution.
 - Existing V2/equilibrium-specific test runners remain for their documented
@@ -362,6 +362,33 @@ observed at that stage; they do not independently override this state summary.
   or nominal Human V2 parameter was changed, and no dynamic matrix was run.
 - Cases, deterministic combination rule, artifacts, and bounded conclusion:
   [ROBUST_FORCE_MARGIN_SENSITIVITY.md](ROBUST_FORCE_MARGIN_SENSITIVITY.md)
+
+## Robust suspended feasibility envelope
+
+- A deterministic quasistatic implementation covers the frozen outbound
+  `[5,10]` to `[45,84] deg` geometry, strict/5/10 degree tubes, and
+  80/120/200 N component boxes.
+- It reuses the complete registered one-at-a-time and mild/moderate/adverse
+  engineering uncertainty set, excludes ROM/rank/soft-active candidates from
+  recommendations, and refines threshold crossings locally.
+- Bed availability uses the unchanged nominal calibration and retained contact
+  threshold. Transfer overlap requires bed support and registered-robust
+  robot-only reserve at the same candidate posture; unrelated postures are not
+  combined.
+- Eleven contract tests bring the retained suite to 98 passing tests, and the
+  new source/runner have zero MATLAB `checkcode` issues.
+- The user-run envelope finds no nominal 80 N region and no registered-robust
+  80 N or 120 N suspended region. At peak flexion, the best 120 N robust
+  margin remains `-0.224 N` even with the 10 degree tube.
+- The 200 N robust zero-margin entries are `s=0.230`, `0.198`, and `0.108`
+  for strict, 5 degree, and 10 degree tubes. Their same-posture bed-overlap
+  intervals end at `s=0.394`, `0.414`, and `0.432`, so all three have one
+  continuous quasistatic transfer window and no support gap.
+- All 51 reached refined boundaries satisfy the recorded numerical convergence
+  criteria. The result remains quasistatic engineering evidence and does not
+  prove dynamic liftoff/recontact, clinical safety, or mattress validity.
+- Registered method, detailed boundaries, artifacts, and reproduction command:
+  [ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md](ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md)
 
 ## Physical plant baseline evidence
 

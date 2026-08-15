@@ -198,6 +198,16 @@ The approximately 10 N nominal reserve is therefore not robust to that
 sensitivity set. Full methods and bounded interpretation are in
 [ROBUST_FORCE_MARGIN_SENSITIVITY.md](ROBUST_FORCE_MARGIN_SENSITIVITY.md).
 
+A deterministic full-path quasistatic envelope implementation now combines
+the registered robot-only uncertainty set with the unchanged bed geometry.
+It distinguishes nominal-path support, any support within the existing tube,
+and a same-posture support/robust-suspension overlap. The user-run envelope
+finds a continuous quasistatic overlap only for the 200 N box: progress
+intervals are `[0.230,0.394]`, `[0.198,0.414]`, and `[0.108,0.432]` for
+strict, 5 degree, and 10 degree tubes. The 80 N and 120 N boxes never form a
+registered-robust suspended region over the current path. See
+[ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md](ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md).
+
 ## Formal matrix and outputs
 
 The formal runner covers tube caps 5/10 degrees, force-component bounds
