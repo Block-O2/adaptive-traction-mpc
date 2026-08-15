@@ -189,6 +189,15 @@ running the formal matrix. A viable next attempt would require explicitly
 approved wider task freedom, a different support/load-transfer strategy, or an
 architecture change rather than hidden weight tuning.
 
+The subsequent robot-only quasistatic robustness diagnostic preserves this
+setup and evaluates the nominal preposition reserve under registered
+engineering parameter/contact perturbations. The nominal `[7,20] deg` margin
+is `9.515 N`, but the worst one-at-a-time `+10%` mass case reaches
+`-6.803 N`, and the Layer-1-selected mild combined case reaches `-5.975 N`.
+The approximately 10 N nominal reserve is therefore not robust to that
+sensitivity set. Full methods and bounded interpretation are in
+[ROBUST_FORCE_MARGIN_SENSITIVITY.md](ROBUST_FORCE_MARGIN_SENSITIVITY.md).
+
 ## Formal matrix and outputs
 
 The formal runner covers tube caps 5/10 degrees, force-component bounds

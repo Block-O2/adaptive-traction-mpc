@@ -23,6 +23,9 @@ The categories below are navigational only; existing reports remain in place.
 - [BED_SUPPORTED_LOAD_TRANSFER_V1.md](BED_SUPPORTED_LOAD_TRANSFER_V1.md)
   — horizontal unilateral bed abstraction, load-transfer state machine, fixed
   calibration, tests, smoke boundary, and pending formal matrix.
+- [ROBUST_FORCE_MARGIN_SENSITIVITY.md](ROBUST_FORCE_MARGIN_SENSITIVITY.md)
+  — deterministic robot-only quasistatic sensitivity of the nominal 200 N
+  preposition reserve and 5 N engineering guard.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 

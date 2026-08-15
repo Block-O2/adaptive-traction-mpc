@@ -65,8 +65,8 @@ observed at that stage; they do not independently override this state summary.
 - Hybrid Tube Force Controller V1 adds ten implementation-contract tests,
   bringing the retained suite to 54 tests. Its user-run formal matrix is
   retained as an unsupported-initialization negative baseline.
-- Bed-Supported Load Transfer V1 adds 25 mechanics, guard, and quasistatic
-  diagnostic tests, bringing the retained suite to 79 tests. Its formal
+- Bed-Supported Load Transfer V1 adds 33 mechanics, guard, and quasistatic
+  diagnostic tests, bringing the retained suite to 87 tests. Its formal
   18-case matrix remains reserved
   for user execution.
 - Existing V2/equilibrium-specific test runners remain for their documented
@@ -335,6 +335,33 @@ observed at that stage; they do not independently override this state summary.
   GIF generation remain reserved for user execution.
 - Model, calibration, guards, assumptions, and formal command:
   [BED_SUPPORTED_LOAD_TRANSFER_V1.md](BED_SUPPORTED_LOAD_TRANSFER_V1.md)
+
+## Robust force-margin sensitivity
+
+- The robot-only dense map retains nominal 200 N / 10 degree margins of
+  `10.554 N` at `[5,20] deg` and `9.515 N` at the practical `[7,20] deg`
+  posture. The latter gives up only `1.039 N` while retaining 2 degrees of
+  soft-limit clearance.
+- A validated sensitivity-only parameter override evaluates mass, independent
+  thigh/shank COM locations, passive stiffness, independent/same-direction
+  rest angles, and robot contact location without modifying the Human V2
+  constructor or copying its dynamics formulas.
+- The worst one-at-a-time case is `+10%` mass: the 200 N margin becomes
+  `-6.803 N` at `[7,20] deg` and `-5.893 N` at `[5,20] deg`.
+- Layer-1-selected mild, moderate, and adverse deterministic combinations give
+  `[7,20] deg` margins of `-5.975`, `-17.969`, and `-39.092 N`; all are
+  engineering stress cases, not patient distributions.
+- The approximately 1 N `[5,20]` advantage does not change the robustness
+  class, so `[7,20]` remains the more defensible practical posture because of
+  its soft-limit clearance.
+- A 5 N cutoff filters several registered cases when their required force is
+  evaluated, but nominal 5 N reserve is clearly insufficient as an uncertainty
+  allowance under this sensitivity set. This is not a clinical safety result.
+- The nominal 200 N result alone does not justify a dynamic takeover experiment
+  as robustness evidence. No controller, guard, force bound, tube, bed model,
+  or nominal Human V2 parameter was changed, and no dynamic matrix was run.
+- Cases, deterministic combination rule, artifacts, and bounded conclusion:
+  [ROBUST_FORCE_MARGIN_SENSITIVITY.md](ROBUST_FORCE_MARGIN_SENSITIVITY.md)
 
 ## Physical plant baseline evidence
 
