@@ -65,6 +65,10 @@ observed at that stage; they do not independently override this state summary.
 - Hybrid Tube Force Controller V1 adds ten implementation-contract tests,
   bringing the retained suite to 54 tests. Its user-run formal matrix is
   retained as an unsupported-initialization negative baseline.
+- Bed-Supported Load Transfer V1 adds 44 mechanics, guard, and quasistatic
+  diagnostic tests, bringing the retained suite to 98 tests. Its formal
+  18-case matrix remains reserved
+  for user execution.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
@@ -298,6 +302,93 @@ observed at that stage; they do not independently override this state summary.
   transfer must be modeled separately in a later stage.
 - Formulation, runner, validation boundary, and formal command:
   [HYBRID_TUBE_FORCE_CONTROLLER_V1.md](HYBRID_TUBE_FORCE_CONTROLLER_V1.md)
+
+## Bed-supported load transfer V1
+
+- The mathematical frame remains +x right/+y up with q1 measured from +x;
+  q1=0 is horizontal and `[5,10] deg` is a nearly horizontal supine posture.
+  No Human Model V2 equation or gravity convention was rotated.
+- A horizontal `y=0` unilateral Kelvin-Voigt bed abstraction now acts through
+  eight fixed, uniformly spaced lower-surface candidates. It has no tensile
+  force or tangential friction, and bed/robot forces and generalized torques
+  are recorded separately.
+- A deterministic nominal-bed calibration fixes `h_hip=0.06825 m` for all
+  stiffness sensitivities. At the nominal initial posture the bed supplies
+  `152.540 N` total normal force and the remaining exact robot force is
+  `[-8.543,21.011] N` (`22.681 N` norm), with numerical-zero torque balance.
+- The eight-mode implementation adds bed-supported `SUPPORTED_PREPOSITION`
+  before load takeover, followed by guarded liftoff, suspended motion,
+  re-contact, load return, and release. Formal task progress stays at `s=0`
+  during preposition. Liftoff
+  requires both near-zero bed force and exact bounded robot-only hold
+  feasibility; failed handoffs retain explicit failure classifications.
+- The six nominal-bed smoke cases produced no liftoff. Five tubes contained no
+  robust robot-only preposition. The 200 N/10 degree case reached the
+  enumerated `[7,20] deg` target and entered `LOAD_TAKEOVER`, but a small
+  dynamic posture deviation reduced its fixed force margin below 5 N; it
+  returned `PREPOSITION_INFEASIBLE`. There was no soft-limit activation, ROM
+  violation, or boundary-seeking. No parameter was tuned.
+- This smoke does not justify the formal matrix. Wider task freedom, a
+  different support strategy, or an architecture change requires explicit
+  review before another dynamic study.
+- The formal 5/10 degree by 80/120/200 N by three-stiffness dynamic matrix and
+  GIF generation remain reserved for user execution.
+- Model, calibration, guards, assumptions, and formal command:
+  [BED_SUPPORTED_LOAD_TRANSFER_V1.md](BED_SUPPORTED_LOAD_TRANSFER_V1.md)
+
+## Robust force-margin sensitivity
+
+- The robot-only dense map retains nominal 200 N / 10 degree margins of
+  `10.554 N` at `[5,20] deg` and `9.515 N` at the practical `[7,20] deg`
+  posture. The latter gives up only `1.039 N` while retaining 2 degrees of
+  soft-limit clearance.
+- A validated sensitivity-only parameter override evaluates mass, independent
+  thigh/shank COM locations, passive stiffness, independent/same-direction
+  rest angles, and robot contact location without modifying the Human V2
+  constructor or copying its dynamics formulas.
+- The worst one-at-a-time case is `+10%` mass: the 200 N margin becomes
+  `-6.803 N` at `[7,20] deg` and `-5.893 N` at `[5,20] deg`.
+- Layer-1-selected mild, moderate, and adverse deterministic combinations give
+  `[7,20] deg` margins of `-5.975`, `-17.969`, and `-39.092 N`; all are
+  engineering stress cases, not patient distributions.
+- The approximately 1 N `[5,20]` advantage does not change the robustness
+  class, so `[7,20]` remains the more defensible practical posture because of
+  its soft-limit clearance.
+- A 5 N cutoff filters several registered cases when their required force is
+  evaluated, but nominal 5 N reserve is clearly insufficient as an uncertainty
+  allowance under this sensitivity set. This is not a clinical safety result.
+- The nominal 200 N result alone does not justify a dynamic takeover experiment
+  as robustness evidence. No controller, guard, force bound, tube, bed model,
+  or nominal Human V2 parameter was changed, and no dynamic matrix was run.
+- Cases, deterministic combination rule, artifacts, and bounded conclusion:
+  [ROBUST_FORCE_MARGIN_SENSITIVITY.md](ROBUST_FORCE_MARGIN_SENSITIVITY.md)
+
+## Robust suspended feasibility envelope
+
+- A deterministic quasistatic implementation covers the frozen outbound
+  `[5,10]` to `[45,84] deg` geometry, strict/5/10 degree tubes, and
+  80/120/200 N component boxes.
+- It reuses the complete registered one-at-a-time and mild/moderate/adverse
+  engineering uncertainty set, excludes ROM/rank/soft-active candidates from
+  recommendations, and refines threshold crossings locally.
+- Bed availability uses the unchanged nominal calibration and retained contact
+  threshold. Transfer overlap requires bed support and registered-robust
+  robot-only reserve at the same candidate posture; unrelated postures are not
+  combined.
+- Eleven contract tests bring the retained suite to 98 passing tests, and the
+  new source/runner have zero MATLAB `checkcode` issues.
+- The user-run envelope finds no nominal 80 N region and no registered-robust
+  80 N or 120 N suspended region. At peak flexion, the best 120 N robust
+  margin remains `-0.224 N` even with the 10 degree tube.
+- The 200 N robust zero-margin entries are `s=0.230`, `0.198`, and `0.108`
+  for strict, 5 degree, and 10 degree tubes. Their same-posture bed-overlap
+  intervals end at `s=0.394`, `0.414`, and `0.432`, so all three have one
+  continuous quasistatic transfer window and no support gap.
+- All 51 reached refined boundaries satisfy the recorded numerical convergence
+  criteria. The result remains quasistatic engineering evidence and does not
+  prove dynamic liftoff/recontact, clinical safety, or mattress validity.
+- Registered method, detailed boundaries, artifacts, and reproduction command:
+  [ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md](ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md)
 
 ## Physical plant baseline evidence
 
