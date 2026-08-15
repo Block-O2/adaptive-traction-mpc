@@ -8,9 +8,12 @@ function setupOnce(testCase)
 p = human_two_link_v2_parameters(1.72, 75);
 config = bed_supported_v1_config(200, 10, "nominal");
 calibration = bed_supported_v1_calibrate_hip_height(p, config);
+force_margin_study = bed_supported_v1_force_margin_map( ...
+    p, [5, 10], [80, 120, 200], 0.1, config.svd_relative_tolerance);
 testCase.TestData.p = p;
 testCase.TestData.config = config;
 testCase.TestData.calibration = calibration;
+testCase.TestData.force_margin_study = force_margin_study;
 end
 
 
@@ -205,4 +208,55 @@ r=simulate_bed_supported_load_transfer_v1(c,p,plan,z);
 verifyLessThanOrEqual(testCase,max(abs(diff(r.robot_force_N,1,2)),[],'all'), ...
     max(c.du_max)*c.dt+1e-9);
 verifyLessThan(testCase,max(abs(diff(r.q_ref,1,2)),[],'all'),deg2rad(0.1));
+end
+
+
+function testForceMarginDefinition(testCase)
+p = testCase.TestData.p;
+point = bed_supported_v1_force_margin_point( ...
+    deg2rad([7;20]), p, [80,120,200], 1e-12);
+verifyEqual(testCase, point.force_margin_N, ...
+    [80,120,200]-norm(point.force_local_N,Inf), 'AbsTol', 1e-12);
+end
+
+
+function testForceMarginExactTorqueResidual(testCase)
+p = testCase.TestData.p;
+point = bed_supported_v1_force_margin_point( ...
+    deg2rad([7;20]), p, 200, 1e-12);
+verifyLessThan(testCase, point.exact_torque_residual_norm_Nm, 1e-10);
+verifyEqual(testCase, point.exact_torque_residual_Nm, ...
+    zeros(2,1), 'AbsTol', 1e-10);
+end
+
+
+function testCurrentPrepositionForceIsReproduced(testCase)
+p = testCase.TestData.p;
+point = bed_supported_v1_force_margin_point( ...
+    deg2rad([7;20]), p, 200, 1e-12);
+verifyEqual(testCase, point.F_parallel_N, -190.48528, 'AbsTol', 1e-3);
+end
+
+
+function testDenseGridOptimumIsNoWorseThanCurrent(testCase)
+study = testCase.TestData.force_margin_study;
+tube = study.tubes([study.tubes.cap_deg] == 10);
+bound_index = find(study.component_bounds_N == 200);
+point = bed_supported_v1_force_margin_point(deg2rad([7;20]), ...
+    testCase.TestData.p, 200, 1e-12);
+verifyGreaterThanOrEqual(testCase, ...
+    tube.best(bound_index).maximum_margin_N, ...
+    point.force_margin_N-1e-12);
+end
+
+
+function testSoftLimitActiveSamplesAreNotRecommended(testCase)
+study = testCase.TestData.force_margin_study;
+for tube_index = 1:numel(study.tubes)
+    tube = study.tubes(tube_index);
+    verifyFalse(testCase, any(tube.robust_feasible & ...
+        repmat(tube.soft_limit_active, 1, 1, ...
+        numel(study.component_bounds_N)), 'all'));
+    verifyFalse(testCase, any([tube.best.soft_limit_active]));
+end
 end

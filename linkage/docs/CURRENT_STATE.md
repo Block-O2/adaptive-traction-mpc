@@ -65,8 +65,9 @@ observed at that stage; they do not independently override this state summary.
 - Hybrid Tube Force Controller V1 adds ten implementation-contract tests,
   bringing the retained suite to 54 tests. Its user-run formal matrix is
   retained as an unsupported-initialization negative baseline.
-- Bed-Supported Load Transfer V1 adds 20 mechanics and guard tests, bringing
-  the retained suite to 74 tests. Its formal 18-case matrix remains reserved
+- Bed-Supported Load Transfer V1 adds 25 mechanics, guard, and quasistatic
+  diagnostic tests, bringing the retained suite to 79 tests. Its formal
+  18-case matrix remains reserved
   for user execution.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
