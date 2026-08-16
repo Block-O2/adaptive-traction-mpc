@@ -254,3 +254,12 @@ matlab -batch "addpath(genpath('linkage/matlab')); run_robust_suspended_feasibil
 
 Review `summary.txt`, `boundary_summary.csv`, and `boundary_details.csv`
 before using a force-bound case for a later dynamic load-transfer study.
+
+## Dynamic follow-up
+
+The 200 N / 10 degree, 20 N-reserve candidate is consumed by the separate
+[Dynamic Robust Load Transfer V1](DYNAMIC_ROBUST_LOAD_TRANSFER_V1.md).
+That implementation does not reinterpret this quasistatic envelope as a
+dynamic safety proof: it additionally predicts inverse-dynamics force and
+bounded residual at the current candidate motion, and it requires real stable
+bed unloading/recontact before the corresponding hybrid transitions.

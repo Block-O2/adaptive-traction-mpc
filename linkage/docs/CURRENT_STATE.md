@@ -69,6 +69,52 @@ observed at that stage; they do not independently override this state summary.
   diagnostic tests, bringing the retained suite to 98 tests. Its formal
   18-case matrix remains reserved
   for user execution.
+- Dynamic Robust Load Transfer V1 originally added 19 supervisor,
+  initialization, and model-boundary tests, bringing the retained suite to
+  117 tests. R1 Safe Takeover adds six deterministic handover tests; the
+  current retained suite completed with `123/123` passing. Its first
+  user-run formal directory retained a valid nominal completion but invalid
+  Stage 2 initialization exits. The corrected suite completed with 117/117
+  tests, and the corrected formal directory retained valid initial-admissibility
+  reports for all four cases. Nominal again completed; all three mismatch cases
+  reached physical joint-1 soft-limit termination within 0.026--0.030 s.
+  The R1 non-formal 4 s startup smoke reached `TRACKING` in all four cases
+  without takeover soft/ROM violation. The reviewed R1 formal directory
+  `20260815_171801` confirms nominal `TASK_COMPLETE` in `22.512 s`; all three
+  mismatch cases safely entered `TRACKING` and later produced tracking-phase
+  soft-limit exits before transfer.
+- R2A Oracle Model Feasibility Gate now provides an isolated fixed
+  `controller_model` boundary and a dedicated formal runner. The default path
+  remains nominal-model tracking; oracle cases set the controller model equal
+  to the fixed true case parameters from `t=0` while preserving R1, the task,
+  supervisor, plant, limits, and stopping rules. Seven deterministic tests
+  bring the Dynamic Robust V1 suite to 32 tests and the retained aggregate to
+  130 tests; the full suite completed with `130/130` passing. The reviewed
+  user-run oracle directory `20260815_174540` is a Case-B partial improvement:
+  oracle mild completes, while moderate/adverse increase phase-aligned
+  tracking survival to `4.068/3.490 s` but still terminate at the q2 lower
+  soft boundary before transfer. Exact oracle and realized dynamic margins
+  coincide yet remain strongly negative, so that global robot-only demand
+  metric is not a parameter-mismatch residual. At that R2A review point, no
+  adaptive tracking was implemented.
+- R2B Windowed-NLS Adaptive Tracking now has a seven-parameter registered
+  mismatch model, exact-discrete 0.2 s window, fixed 1 Hz update cadence,
+  rank/condition/fit/bounds gates, bounded accepted-model updates, and safe
+  last-model fallback. The reviewed offline replay gate `20260815_182639`
+  retains zero nominal drift, improves mild/moderate parameter error, and
+  rejects all adverse updates because its pre-failure natural data remain
+  rank deficient. The six-second smoke `20260815_183824` preserves R1 and all
+  existing safety checks without estimator corruption. Ten R2B tests bring
+  the Dynamic Robust V1 group to 42 tests and the retained aggregate to 140;
+  the full suite completed with `140/140` passing. The reviewed formal
+  directory `20260816_083505` retains exact nominal completion. Adaptive mild
+  reaches transfer and closes 72.44% of the progress gap and 95.06% of the
+  tracking-survival gap, then reaches `RECONTACT` but times out before stable
+  contact. Moderate closes 34.16% of the progress gap but only 7.04% of the
+  survival gap before the same q2 soft boundary. Adverse accepts no update
+  because natural data remain rank deficient and exactly retains the R1
+  endpoint. No estimator solve fails or corrupts the accepted model. The R2B
+  evaluation scope is complete; R3 has not started.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
@@ -106,6 +152,24 @@ observed at that stage; they do not independently override this state summary.
   command and feedback contract remains unresolved.
 - No legacy equation will be silently corrected in the preserved professor
   baseline; the new plant is maintained as a separate implementation.
+- Dynamic Robust Load Transfer V1 implements the approved full-cycle hybrid
+  sequence for the fixed 200 N / 10 degree engineering case. The supervisor
+  keeps registered quasistatic reserve separate from nominal dynamic force
+  prediction, uses real unilateral bed contact, and never scales plant bed
+  force. The first Stage 2 run ended at the initialization boundary because a
+  nominal equilibrium force was reused for perturbed plants at zero joint-1
+  soft-zone clearance; it is retained as diagnostic history, not robustness
+  evidence. The initialization-only force is now plant-consistent and logged,
+  and the corrected formal run shows that the unchanged nominal controller
+  subsequently drives all three perturbed plants back across that boundary
+  before meaningful task progress. These are physical safety terminations after
+  valid initialization, not solver failures; they do not characterize the later
+  transfer path. R1 now inserts an explicit safe hold and constraint-aware
+  handover before the unchanged nominal tracking path. Its startup smoke
+  removes the old 26--30 ms takeover exit. The reviewed formal run confirms
+  that the remaining mismatch exits occur later in tracking, not during
+  initialization or takeover. See
+  [DYNAMIC_ROBUST_LOAD_TRANSFER_V1.md](DYNAMIC_ROBUST_LOAD_TRANSFER_V1.md).
 
 ## Ideal endpoint-force evidence
 
