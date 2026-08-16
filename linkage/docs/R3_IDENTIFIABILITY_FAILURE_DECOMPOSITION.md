@@ -234,6 +234,14 @@ multi-variable experiment. Candidate A may be studied offline, but the
 current evidence does not authorize a fixed four-physical-parameter estimator
 or any closed-loop R3 change.
 
+The subsequent isolated Candidate-D experiment is documented in
+[R3B_RECONTACT_MARGIN_CONTROLLER.md](R3B_RECONTACT_MARGIN_CONTROLLER.md).
+Its fixed 1 N reserve produces a reviewed negative result: mild adaptive
+completes, but nominal and mild oracle cannot reach the 3 N target inside the
+unchanged local tube and mild adaptive introduces later soft-zone activation.
+That result does not revise this R3A diagnosis or support carrying R3B into the
+separate constraint-aware experiment.
+
 ## Artifacts
 
 The final directory contains nine required figures:
