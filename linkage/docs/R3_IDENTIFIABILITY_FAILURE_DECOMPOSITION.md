@@ -234,6 +234,17 @@ multi-variable experiment. Candidate A may be studied offline, but the
 current evidence does not authorize a fixed four-physical-parameter estimator
 or any closed-loop R3 change.
 
+## Follow-up status
+
+Candidate D was evaluated separately as R3B at commit `0c3a2a3` / Draft PR
+#17 and classified `R3B_FAIL`; it is not merged or inherited by R3C. Candidate
+E was evaluated from clean post-R3A main as the
+[R3C Constraint-Aware Reference Layer](R3C_CONSTRAINT_AWARE_REFERENCE_LAYER.md).
+R3C prevents the reviewed moderate/adverse q2 soft-boundary violations by
+terminating `TASK_INFEASIBLE` before the boundary, including adverse with zero
+accepted ID updates, but finds no force-feasible recovery candidate. This is a
+partial safe-stop result, not task completion or a formal safety guarantee.
+
 ## Artifacts
 
 The final directory contains nine required figures:

@@ -48,6 +48,9 @@ The categories below are navigational only; existing reports remain in place.
 - [R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md](R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md)
   — offline R2B window identifiability, moderate failure decomposition, mild
   recontact diagnosis, and evidence-separated next-step decisions.
+- [R3C_CONSTRAINT_AWARE_REFERENCE_LAYER.md](R3C_CONSTRAINT_AWARE_REFERENCE_LAYER.md)
+  — predictive progress scaling, hold/recovery hierarchy, oracle gate,
+  unchanged-estimator adaptive evidence, and reviewed partial classification.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
