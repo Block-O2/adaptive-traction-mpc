@@ -8,6 +8,13 @@ state.entry_guard_time_s = stable_timer(state.entry_guard_time_s, ...
     signals.entry_ready, config.dt);
 state.contact_stable_time_s = stable_timer(state.contact_stable_time_s, ...
     signals.bed_supported, config.dt);
+if isfield(signals,'recontact_stable')
+    recontact_stable=signals.recontact_stable;
+else
+    recontact_stable=signals.bed_supported;
+end
+state.recontact_stable_time_s=stable_timer( ...
+    state.recontact_stable_time_s,recontact_stable,config.dt);
 state.absent_stable_time_s = stable_timer(state.absent_stable_time_s, ...
     signals.bed_absent, config.dt);
 action = default_action(state.mode);
@@ -115,7 +122,10 @@ switch state.mode
     case "RECONTACT"
         action.use_return_target = true;
         action.bed_credit = 0;
-        if state.contact_stable_time_s >= config.contact_stable_duration_s
+        if isfield(signals,'recontact_unsafe') && signals.recontact_unsafe
+            state = fail(state, "RECONTACT_FAILED");
+        elseif recontact_timer(state,config) >= ...
+                config.contact_stable_duration_s
             state = change_mode(state, "LOAD_RETURN");
         elseif state.mode_time_s >= config.recontact_timeout_s
             state = fail(state, "RECONTACT_FAILED");
@@ -129,7 +139,7 @@ switch state.mode
                 signals.robust_static_margin_N <= ...
                 config.robust_entry_hysteresis_N
             state = fail(state, "LOAD_RETURN_FAILED");
-        elseif fraction >= 1 && state.contact_stable_time_s >= ...
+        elseif fraction >= 1 && recontact_timer(state,config) >= ...
                 config.contact_stable_duration_s
             state = change_mode(state, "BED_SUPPORTED_RETURN");
             state.bed_credit = 1;
@@ -168,7 +178,18 @@ if mode == "LOAD_TAKEOVER"
     state.bed_credit = 1; state.takeover_time_s = 0;
     state.takeover_paused = false;
 end
-if mode == "RECONTACT", state.contact_stable_time_s = 0; end
+if mode == "RECONTACT"
+    state.contact_stable_time_s = 0;
+    state.recontact_stable_time_s = 0;
+end
+end
+
+
+function value=recontact_timer(state,config)
+enabled=isfield(config,'r3b_recontact_enabled') && ...
+    config.r3b_recontact_enabled;
+if enabled,value=state.recontact_stable_time_s;
+else,value=state.contact_stable_time_s;end
 end
 
 

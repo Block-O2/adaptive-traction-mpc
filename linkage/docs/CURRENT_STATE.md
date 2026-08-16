@@ -135,6 +135,21 @@ observed at that stage; they do not independently override this state summary.
   suite completed with `150/150` passing, zero failed and zero incomplete in
   `224.9304 s`. R3A implements no controller, estimator replacement, safety
   layer, or scientific-parameter change.
+- R3B Recontact Margin Controller is complete as an isolated negative formal
+  experiment. The reviewed directory is
+  `linkage/results/local/r3b_recontact_margin_controller/20260816_141525`.
+  It preserves the 2 N stable-contact threshold, 0.5 s dwell, 8 s timeout,
+  existing bed, 10 degree tube, +/-200 N component box, path, and unchanged
+  Windowed NLS, while adding one fixed 1 N engineering reserve. Mild adaptive
+  reaches the reserve and completes, but nominal and mild oracle settle at
+  only `2.644/2.657 N` after their commands reach the existing local
+  `[-1.5,+1.5] deg` tube boundary and both terminate `RECONTACT_FAILED`.
+  Mild adaptive also records 490 soft-limit-active samples, almost entirely
+  during later bed-supported return. The reviewed classification is
+  `R3B_FAIL`; its branch must remain unmerged, and the independent R3C safety
+  experiment must start from clean post-R3A main. Twelve R3B tests bring the
+  retained aggregate to 162; the complete suite passes `162/162` with zero
+  failed and zero incomplete tests in `237.4918 s`.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.

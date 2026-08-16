@@ -48,6 +48,9 @@ The categories below are navigational only; existing reports remain in place.
 - [R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md](R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md)
   — offline R2B window identifiability, moderate failure decomposition, mild
   recontact diagnosis, and evidence-separated next-step decisions.
+- [R3B_RECONTACT_MARGIN_CONTROLLER.md](R3B_RECONTACT_MARGIN_CONTROLLER.md)
+  — isolated 1 N engineering-reserve recontact controller, reviewed
+  nominal/adaptive/oracle negative result, and R3B_FAIL base decision.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
