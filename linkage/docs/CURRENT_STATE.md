@@ -114,7 +114,27 @@ observed at that stage; they do not independently override this state summary.
   survival gap before the same q2 soft boundary. Adverse accepts no update
   because natural data remain rank deficient and exactly retains the R1
   endpoint. No estimator solve fails or corrupts the accepted model. The R2B
-  evaluation scope is complete; R3 has not started.
+  closed-loop evaluation scope is complete.
+- R3A Identifiability and Failure-Mode Decomposition is complete as an offline
+  audit of the frozen R1 `20260815_171801`, R2A `20260815_174540`, and R2B
+  `20260816_083505` formal MAT files. It reconstructs every R2B 100-transition
+  identifier window without changing Windowed NLS or running a new closed-loop
+  trajectory. The reviewed output is
+  `linkage/results/local/r3_identifiability_failure_decomposition/20260816_093111`.
+  Adverse attempt ranks are `5/4/4`; the final spectrum has four strong
+  directions and three effectively null directions, while the stacked
+  condition `2.84e11` remains far beyond the unchanged R2B gate. Strong
+  correlations show that those four directions are parameter combinations,
+  not four independently identified physical parameters. Moderate is a mixed
+  estimator-history and oracle-level q2 feasibility failure: the adaptive
+  same-state model approaches the true model by termination, but adaptive and
+  oracle still reach the same q2 lower soft boundary. Mild recontact is genuine
+  continuous contact without chatter; it settles near `1.834 N`, below the
+  unchanged `2 N` stability threshold, while oracle remains above threshold
+  and completes. Ten R3A tests bring the retained aggregate to 150; the full
+  suite completed with `150/150` passing, zero failed and zero incomplete in
+  `224.9304 s`. R3A implements no controller, estimator replacement, safety
+  layer, or scientific-parameter change.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.

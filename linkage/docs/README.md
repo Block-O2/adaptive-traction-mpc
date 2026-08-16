@@ -45,6 +45,9 @@ The categories below are navigational only; existing reports remain in place.
 - [DYNAMIC_ROBUST_LOAD_TRANSFER_V1_ADAPTIVE_TRACKING_R2B.md](DYNAMIC_ROBUST_LOAD_TRANSFER_V1_ADAPTIVE_TRACKING_R2B.md)
   — bounded seven-parameter Windowed-NLS, replay gate, nominal-start adaptive
   model boundary, startup smoke, diagnostics, and reviewed formal comparison.
+- [R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md](R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md)
+  — offline R2B window identifiability, moderate failure decomposition, mild
+  recontact diagnosis, and evidence-separated next-step decisions.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 

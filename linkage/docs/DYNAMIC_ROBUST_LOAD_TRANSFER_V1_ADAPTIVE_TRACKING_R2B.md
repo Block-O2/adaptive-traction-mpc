@@ -6,7 +6,10 @@ R2B asks whether a bounded online Windowed Nonlinear Least Squares identifier,
 using only naturally occurring task transitions, can recover a meaningful part
 of the nominal-to-oracle tracking gap. It does not add deliberate excitation,
 change the reference or controller gains, relax constraints, replace R1 Safe
-Takeover, or add a safety filter. R3 is not implemented.
+Takeover, or add a safety filter. The later offline R3A diagnosis is documented
+separately in
+[R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md](R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md);
+it does not alter this frozen R2B experiment.
 
 Every adaptive case starts with `theta_model = theta_nominal`. True simulation
 parameters enter only the physical plant and post-hoc result reporting. A
@@ -242,8 +245,9 @@ This one fixed formal matrix completes the approved R2B evaluation scope. The
 evidence answers the Windowed-NLS question positively for mild, weakly for
 moderate, and negatively for adverse under the available natural excitation.
 It supports carrying the documented return/contact, moderate constraint, and
-adverse identifiability limitations into a separately approved R3 decision;
-R3 is not implemented here.
+adverse identifiability limitations into a separately approved R3 decision.
+R3 is not implemented here; the subsequent R3A work is an offline
+failure-decomposition report only.
 
 The executed reproducibility command was:
 

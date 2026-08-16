@@ -13,6 +13,8 @@ hybrid_tube_test_dir = fullfile(test_root, 'hybrid_tube_v1');
 bed_supported_test_dir = fullfile(test_root, 'bed_supported_v1');
 dynamic_robust_test_dir = fullfile(test_root, ...
     'dynamic_robust_load_transfer_v1');
+r3a_test_dir = fullfile(test_root, ...
+    'r3_identifiability_failure_decomposition');
 output_dir = fullfile(repo_root, 'linkage', 'results', 'local', ...
     'linkage_tests');
 if ~isfolder(output_dir)
@@ -35,6 +37,7 @@ fprintf('NEAR-EXTENSION FORCE-MODE TEST DIRECTORY: %s\n', ...
 fprintf('HYBRID TUBE V1 TEST DIRECTORY: %s\n', hybrid_tube_test_dir);
 fprintf('BED-SUPPORTED V1 TEST DIRECTORY: %s\n', bed_supported_test_dir);
 fprintf('DYNAMIC ROBUST V1 TEST DIRECTORY: %s\n', dynamic_robust_test_dir);
+fprintf('R3A OFFLINE ANALYSIS TEST DIRECTORY: %s\n', r3a_test_dir);
 v2_results = runtests(v2_test_dir, 'IncludeSubfolders', false);
 equilibrium_results = runtests(equilibrium_test_dir, ...
     'IncludeSubfolders', false);
@@ -47,9 +50,10 @@ bed_supported_results = runtests(bed_supported_test_dir, ...
     'IncludeSubfolders', false);
 dynamic_robust_results = runtests(dynamic_robust_test_dir, ...
     'IncludeSubfolders', false);
+r3a_results = runtests(r3a_test_dir, 'IncludeSubfolders', false);
 results = [v2_results(:); equilibrium_results(:); atlas_results(:); ...
     force_mode_results(:); hybrid_tube_results(:); ...
-    bed_supported_results(:); dynamic_robust_results(:)];
+    bed_supported_results(:); dynamic_robust_results(:); r3a_results(:)];
 disp(results);
 
 summary = struct();
@@ -64,6 +68,7 @@ summary.test_directories = {v2_test_dir; equilibrium_test_dir; ...
     atlas_test_dir; force_mode_test_dir; hybrid_tube_test_dir};
 summary.test_directories{end+1} = bed_supported_test_dir;
 summary.test_directories{end+1} = dynamic_robust_test_dir;
+summary.test_directories{end+1} = r3a_test_dir;
 save(fullfile(output_dir, 'test_summary.mat'), 'summary');
 
 fprintf(['LINKAGE ACTIVE TEST SUMMARY: total=%d passed=%d failed=%d ' ...
