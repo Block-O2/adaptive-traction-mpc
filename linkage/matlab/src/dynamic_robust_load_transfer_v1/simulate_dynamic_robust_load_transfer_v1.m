@@ -22,6 +22,7 @@ end
 if nargin < 7 || isempty(controller_model), controller_model = nominal; end
 adaptive_enabled=nargin>=8 && ~isempty(adaptive_config) && ...
     isfield(adaptive_config,'enabled') && adaptive_config.enabled;
+r3c_enabled=isfield(config,'r3c_enabled') && config.r3c_enabled;
 human_two_link_v2_validate_parameters(nominal);
 human_two_link_v2_validate_parameters(plant);
 human_two_link_v2_validate_parameters(controller_model);
@@ -52,6 +53,7 @@ if ~initialization.pass
         'The case does not satisfy the explicit initial-admissibility contract.');
 end
 q_start = initialization.q_rad;
+safety=r3c_safety_initial_state(q_start);
 n_max = floor(config.max_time_s/config.dt)+1;
 t = (0:n_max-1)*config.dt;
 x = zeros(4,n_max); x(:,1) = [q_start;zeros(2,1)];
@@ -103,6 +105,13 @@ identifier_fit_rms=nan(1,n_max);identifier_current_fit_rms=nan(1,n_max);
 identifier_rank=nan(1,n_max);identifier_condition_number=nan(1,n_max);
 identifier_solve_time=nan(1,n_max);identifier_accepted_count=zeros(1,n_max);
 identifier_rejected_count=zeros(1,n_max);identifier_solver_failures=zeros(1,n_max);
+safety_state=strings(1,n_max);safety_state(:)="NORMAL";
+safety_alpha=ones(1,n_max);safety_current_clearance=nan(1,n_max);
+safety_predicted_clearance=nan(1,n_max);safety_one_step_clearance=nan(1,n_max);
+safety_predicted_q2_clearance=nan(1,n_max);
+safety_force_infeasible=false(1,n_max);safety_recovery_feasible=false(1,n_max);
+safety_recovery_reference=zeros(2,n_max);safety_reference_deviation=zeros(1,n_max);
+safety_reason=strings(1,n_max);safety_reason(:)="NONE";
 last_robust=[]; last_index=n_max;
 
 for index=1:n_max
@@ -216,6 +225,63 @@ for index=1:n_max
         transfer_target, recontact_target, plan, config);
     dynamic = dynamic_robust_v1_dynamic_margin(q,dq,reference.q, ...
         reference.dq,reference.ddq,controller_model,config);
+    safety_base_reference=reference;
+    current_clearance_now=NaN;predicted_clearance_now=NaN;
+    one_step_clearance_now=NaN;predicted_q2_clearance_now=NaN;
+    force_infeasible_now=false;recovery=empty_recovery(reference.q);
+    if r3c_enabled && takeover.tracking_entered && ...
+            manager.classification=="RUNNING"
+        soft_lower=nominal.q_min+nominal.soft_limit_margin;
+        soft_upper=nominal.q_max-nominal.soft_limit_margin;
+        current_clearance_now=min([q-soft_lower;soft_upper-q]);
+        one_step_q=q+config.dt*dq;
+        one_step_clearance_now=predictive_soft_clearance( ...
+            one_step_q,dq,soft_lower,soft_upper,config);
+        predicted_q=q+config.r3c_prediction_horizon_s*dq;
+        predicted_clearance_now=predictive_soft_clearance( ...
+            predicted_q,dq,soft_lower,soft_upper,config);
+        predicted_q2_clearance_now=predicted_q(2)-soft_lower(2);
+        force_infeasible_now=dynamic.margin_N<=0 || ...
+            dynamic.bounded_residual_norm_Nm> ...
+            config.dynamic_residual_tolerance_Nm || previous_force_saturated;
+        if predicted_clearance_now<=config.r3c_resume_buffer_rad || ...
+                safety.mode~="NORMAL"
+            recovery=r3c_select_recovery_reference(q,dq,nominal_path.q, ...
+                tube_now,bed.generalized_torque_Nm,u_previous, ...
+                controller_model,config);
+        end
+        safety_signals=struct('time_s',now,'progress',progress.s, ...
+            'current_min_soft_clearance_rad',current_clearance_now, ...
+            'predicted_min_soft_clearance_rad',predicted_clearance_now, ...
+            'predicted_q2_clearance_rad',predicted_q2_clearance_now, ...
+            'force_infeasible',force_infeasible_now, ...
+            'recovery_feasible',recovery.feasible);
+        safety_mode_before=safety.mode;
+        safety=r3c_safety_step(safety,safety_signals,config);
+        if safety.classification~="RUNNING"
+            manager.classification=safety.classification;
+        end
+        if safety.mode=="RECOVERY_REFERENCE"
+            if safety_mode_before~="RECOVERY_REFERENCE"
+                safety.recovery_command_q=reference.q;
+                safety.recovery_command_dq=zeros(2,1);
+            end
+            target=safety.recovery_command_q;
+            if recovery.found,target=recovery.q;end
+            [safety.recovery_command_q,safety.recovery_command_dq,~]= ...
+                move_reference(safety.recovery_command_q,target,config);
+            reference=struct('q',safety.recovery_command_q, ...
+                'dq',safety.recovery_command_dq,'ddq',zeros(2,1));
+        elseif safety.resume_blending
+            [safety.recovery_command_q,safety.recovery_command_dq,done]= ...
+                move_reference(safety.recovery_command_q,reference.q,config);
+            reference=struct('q',safety.recovery_command_q, ...
+                'dq',safety.recovery_command_dq,'ddq',zeros(2,1));
+            safety.resume_blending=~done;
+        end
+        dynamic = dynamic_robust_v1_dynamic_margin(q,dq,reference.q, ...
+            reference.dq,reference.ddq,controller_model,config);
+    end
     realized_dynamic = dynamic_robust_v1_dynamic_margin(q,dq,reference.q, ...
         reference.dq,reference.ddq,plant,config);
     [u_candidate,controller]=bed_supported_v1_robot_controller(q,dq,reference.q, ...
@@ -226,6 +292,7 @@ for index=1:n_max
         bed.generalized_torque_Nm,controller_model,config);
     startup_progress_enabled=action.progress_enabled && ...
         ~ismember(takeover.mode,["TAKEOVER","TAKEOVER_ABORT"]);
+    startup_progress_scale=double(startup_progress_enabled)*safety.alpha;
     controller.torque_residual_Nm=controller.mapping.A*u- ...
         controller.tau_robot_desired_Nm;
     controller.force_rate_N_s=(u-u_previous)/config.dt;
@@ -270,8 +337,19 @@ for index=1:n_max
     rom_violation(index)=signals.rom_violation;inside_tube(index)=in_tube;
     recovery_active(index)=action.pause_unloading || ...
         ~startup_progress_enabled || ...
-        (~action.progress_enabled && manager.mode=="SUSPENDED_MOTION");
-    progress_enabled(index)=startup_progress_enabled;
+        (~action.progress_enabled && manager.mode=="SUSPENDED_MOTION") || ...
+        safety.mode~="NORMAL" || safety.resume_blending;
+    progress_enabled(index)=startup_progress_scale>0;
+    safety_state(index)=safety.mode;safety_alpha(index)=safety.alpha;
+    safety_current_clearance(index)=current_clearance_now;
+    safety_predicted_clearance(index)=predicted_clearance_now;
+    safety_one_step_clearance(index)=one_step_clearance_now;
+    safety_predicted_q2_clearance(index)=predicted_q2_clearance_now;
+    safety_force_infeasible(index)=force_infeasible_now;
+    safety_recovery_feasible(index)=recovery.feasible;
+    safety_recovery_reference(:,index)=safety.recovery_command_q;
+    safety_reference_deviation(index)=norm(reference.q-safety_base_reference.q);
+    safety_reason(index)=safety.last_reason;
     takeover_mode(index)=takeover_details.mode;
     takeover_reason(index)=takeover_details.reason;
     takeover_nominal_force(:,index)=takeover_details.nominal_desired_force_N;
@@ -297,7 +375,7 @@ for index=1:n_max
             manager.classification="ABORTED";last_index=index;break;
         end
         progress=dynamic_robust_v1_advance_progress( ...
-            progress,startup_progress_enabled,config);
+            progress,startup_progress_scale,config);
         if adaptive_enabled
             [identifier,identifier_details]= ...
                 dynamic_robust_v1_adaptive_add_transition( ...
@@ -322,7 +400,15 @@ for index=1:n_max
         previous_force_saturated=controller.force_saturated;
     end
 end
-if manager.classification=="RUNNING",manager.classification="ABORTED";end
+if manager.classification=="RUNNING"
+    if r3c_enabled && safety.mode=="HOLD"
+        manager.classification="SAFE_HOLD";
+    elseif r3c_enabled && safety.mode=="RECOVERY_REFERENCE"
+        manager.classification="SAFE_RECOVERY";
+    else
+        manager.classification="ABORTED";
+    end
+end
 if ~isequaln(nominal,nominal_before) || ~isequaln(plant,plant_before) || ...
         (~adaptive_enabled && ~isequaln(controller_model,controller_model_before))
     error('DynamicRobustV1:ParameterMutation', ...
@@ -352,7 +438,12 @@ fields={'t','state','q_ref','dq_ref','ddq_ref','q_nominal','tube_rad', ...
     'identifier_fit_rms','identifier_current_fit_rms','identifier_rank', ...
     'identifier_condition_number','identifier_solve_time_s', ...
     'identifier_accepted_count','identifier_rejected_count', ...
-    'identifier_solver_failures'};
+    'identifier_solver_failures','safety_state','safety_alpha', ...
+    'safety_current_clearance_rad','safety_predicted_clearance_rad', ...
+    'safety_one_step_clearance_rad', ...
+    'safety_predicted_q2_clearance_rad','safety_force_infeasible', ...
+    'safety_recovery_feasible','safety_recovery_reference_rad', ...
+    'safety_reference_deviation_rad','safety_reason'};
 values={t,x,q_ref,dq_ref,ddq_ref,q_nominal,tube_rad,task_s,mode, ...
     classification,robot_force,bed_force,bed_credit,robust_static_margin, ...
     robust_required,robust_worst_case,nominal_static_force,dynamic_margin, ...
@@ -372,7 +463,11 @@ values={t,x,q_ref,dq_ref,ddq_ref,q_nominal,tube_rad,task_s,mode, ...
     identifier_current_fit_rms,identifier_rank, ...
     identifier_condition_number,identifier_solve_time, ...
     identifier_accepted_count,identifier_rejected_count, ...
-    identifier_solver_failures};
+    identifier_solver_failures,safety_state,safety_alpha, ...
+    safety_current_clearance,safety_predicted_clearance, ...
+    safety_one_step_clearance,safety_predicted_q2_clearance, ...
+    safety_force_infeasible,safety_recovery_feasible, ...
+    safety_recovery_reference,safety_reference_deviation,safety_reason};
 result=struct();
 for k=1:numel(fields)
     value=values{k};
@@ -395,6 +490,7 @@ else,result.adaptive_config=struct();end
 result.identifier_state=identifier;
 result.initial_admissibility=initialization;
 result.takeover_state=takeover;
+result.r3c_enabled=r3c_enabled;result.safety_state_final=safety;
 result.uncertainty=uncertainty;result.plan=plan;
 result.metrics=dynamic_robust_v1_metrics(result);
 end
@@ -460,4 +556,42 @@ r=min(max(elapsed/duration,0),1);g=10*r^3-15*r^4+6*r^5;
 gd=(30*r^2-60*r^3+30*r^4)/duration;
 gdd=(60*r-180*r^2+120*r^3)/duration^2;delta=q1-q0;
 reference=struct('q',q0+delta*g,'dq',delta*gd,'ddq',delta*gdd);
+end
+
+
+function recovery=empty_recovery(q)
+recovery=struct('found',false,'feasible',false,'q',q(:), ...
+    'force_N',[NaN;NaN],'predicted_q_rad',[NaN;NaN], ...
+    'predicted_clearance_rad',NaN,'predicted_q2_clearance_rad',NaN, ...
+    'force_margin_N',NaN,'residual_Nm',NaN,'candidate_count',0);
+end
+
+
+function [command,velocity,done]=move_reference(previous,target,config)
+previous=previous(:);target=target(:);delta=target-previous;
+distance=norm(delta);
+max_step=config.r3c_recovery_reference_rate_rad_s*config.dt;
+if distance<=max_step
+    command=target;velocity=delta/config.dt;done=true;
+elseif distance>0
+    step=max_step*delta/distance;
+    command=previous+step;velocity=step/config.dt;done=false;
+else
+    command=previous;velocity=zeros(2,1);done=true;
+end
+end
+
+
+function clearance=predictive_soft_clearance( ...
+        predicted_q,dq,lower,upper,config)
+% The positive engineering buffer is specific to q2. q1 remains monitored
+% against actual predicted crossing because the frozen task endpoint itself
+% lies on the q1 soft-zone boundary.
+candidates=[predicted_q(2)-lower(2),upper(2)-predicted_q(2),Inf];
+if dq(1)<0
+    candidates(3)=predicted_q(1)-lower(1)+config.r3c_warning_buffer_rad;
+elseif dq(1)>0
+    candidates(3)=upper(1)-predicted_q(1)+config.r3c_warning_buffer_rad;
+end
+clearance=min(candidates);
 end

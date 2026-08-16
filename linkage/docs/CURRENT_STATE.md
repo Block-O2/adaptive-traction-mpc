@@ -135,6 +135,26 @@ observed at that stage; they do not independently override this state summary.
   suite completed with `150/150` passing, zero failed and zero incomplete in
   `224.9304 s`. R3A implements no controller, estimator replacement, safety
   layer, or scientific-parameter change.
+- R3B Recontact Margin Controller is preserved separately at commit `0c3a2a3`
+  and Draft PR #17. Its mild adaptive case completed, but nominal and mild
+  oracle regressed to `RECONTACT_FAILED`, and mild introduced 490 soft-limit
+  samples during bed-supported return. It is classified `R3B_FAIL`, is not in
+  R3C ancestry, and is not ready to merge.
+- R3C Constraint-Aware Reference Layer is complete on clean post-R3A main. It
+  adds a transparent `NORMAL -> SLOWDOWN -> HOLD -> RECOVERY_REFERENCE`
+  hierarchy with a fixed 1.0/0.5/1.5 degree warning/hold/resume engineering
+  buffer derived from the existing 5 degree soft zone. The reviewed oracle
+  gate `20260816_151618` preserves nominal `TASK_COMPLETE`; moderate/adverse
+  oracle terminate `TASK_INFEASIBLE` with 3.992/2.992 degrees q2 clearance and
+  no soft, ROM, or force-bound violation. The reviewed adaptive directory
+  `20260816_152124` preserves nominal and mild final outcomes, changes moderate
+  and adverse from frozen R2B `SOFT_LIMIT_VIOLATION` to `TASK_INFEASIBLE` with
+  2.453/3.653 degrees clearance, and protects adverse with zero accepted ID
+  updates. No formal case finds a feasible recovery candidate; survival and
+  progress decrease slightly because the layer stops before the old boundary.
+  Thirteen R3C tests bring the retained aggregate to 163; the full suite
+  completed `163/163` with zero failed/incomplete. R3C is `PARTIAL`, not a
+  formal safety guarantee or task-feasibility result, and remains a Draft PR.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
