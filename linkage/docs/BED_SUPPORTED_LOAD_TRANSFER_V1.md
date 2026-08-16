@@ -234,3 +234,13 @@ This V1 does not claim q2=0 fully suspended holding or clinical safety. More
 realistic mattress deformation, straps, limb radii, pressure distribution,
 soft tissue, hip motion, or tangential contact require a separate contact-
 model upgrade.
+
+## Dynamic robust follow-up
+
+The approved dynamic follow-up is implemented separately in
+[DYNAMIC_ROBUST_LOAD_TRANSFER_V1.md](DYNAMIC_ROBUST_LOAD_TRANSFER_V1.md). It
+removes the old `s=0` preposition/liftoff assumption: the original task first
+advances under real bed support, takeover is enabled only inside the
+registered robust interior, and static reserve is checked separately from
+nominal dynamic force demand. This document and the historical controller
+remain unchanged as the earlier boundary evidence.

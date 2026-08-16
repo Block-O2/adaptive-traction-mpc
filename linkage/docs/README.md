@@ -29,6 +29,22 @@ The categories below are navigational only; existing reports remain in place.
 - [ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md](ROBUST_SUSPENDED_FEASIBILITY_ENVELOPE.md)
   — user-run full-path nominal/registered-robust liftoff boundaries and
   same-posture bed-overlap envelope.
+- [DYNAMIC_ROBUST_LOAD_TRANSFER_V1.md](DYNAMIC_ROBUST_LOAD_TRANSFER_V1.md)
+  — dynamic bed-to-suspended-to-bed supervisor, distinct static/dynamic
+  margins, nominal-controller/perturbed-plant contract, and formal runner.
+- [DYNAMIC_ROBUST_LOAD_TRANSFER_V1_INITIALIZATION_DIAGNOSIS.md](DYNAMIC_ROBUST_LOAD_TRANSFER_V1_INITIALIZATION_DIAGNOSIS.md)
+  — exact first-run Stage 2 soft-limit trigger, scenario-initialization fix,
+  explicit admissibility contract, and corrected formal rerun boundary.
+- [DYNAMIC_ROBUST_LOAD_TRANSFER_V1_SAFE_TAKEOVER_R1.md](DYNAMIC_ROBUST_LOAD_TRANSFER_V1_SAFE_TAKEOVER_R1.md)
+  — exact old 0--30 ms handover chain, R1 safe-hold/takeover/tracking
+  governor, deterministic tests, startup smoke evidence, and reviewed formal
+  phase-separated result.
+- [DYNAMIC_ROBUST_LOAD_TRANSFER_V1_ORACLE_MODEL_R2A.md](DYNAMIC_ROBUST_LOAD_TRANSFER_V1_ORACLE_MODEL_R2A.md)
+  — fixed true-model tracking diagnostic, preserved R1 boundary, parameter
+  isolation, metrics, tests, and reviewed Case-B formal decision gate.
+- [DYNAMIC_ROBUST_LOAD_TRANSFER_V1_ADAPTIVE_TRACKING_R2B.md](DYNAMIC_ROBUST_LOAD_TRANSFER_V1_ADAPTIVE_TRACKING_R2B.md)
+  — bounded seven-parameter Windowed-NLS, replay gate, nominal-start adaptive
+  model boundary, startup smoke, diagnostics, and reviewed formal comparison.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
