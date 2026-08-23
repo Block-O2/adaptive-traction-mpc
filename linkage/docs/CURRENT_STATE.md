@@ -180,6 +180,16 @@ observed at that stage; they do not independently override this state summary.
   Consequently there is no minimum feasible handoff estimate, and the current
   `kinematic patch -> normal rehab` physical implementation is unsupported.
   See [MUJOCO_SMALL_ANGLE_HANDOFF_STUDY.md](MUJOCO_SMALL_ANGLE_HANDOFF_STUDY.md).
+- A narrower preparation-only smoke test replaced the taught-trajectory
+  low-angle extrapolation with a Human-V2-geometry-derived `[q1,q2]=[5,5] deg`
+  target, starting at the measured resting state. The smooth Cartesian sleeve
+  reference still produced knee extension while bed contact stayed active:
+  q2 moved from `0.713 deg` to the lower ROM stop near `-0.051 deg`, with peak
+  interaction `34.25 N` and sleeve deformation `0.039 mm`. The 8/10 degree
+  cases were not run under the registered staged rule. This isolates the
+  nominal simulated blocker to the bed-constrained single-point Cartesian load
+  path, not force saturation or interface stretch. See
+  [MUJOCO_BED_ASSISTED_PREPARATION.md](MUJOCO_BED_ASSISTED_PREPARATION.md).
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.

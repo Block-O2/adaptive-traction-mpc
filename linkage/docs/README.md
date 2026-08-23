@@ -59,6 +59,9 @@ The categories below are navigational only; existing reports remain in place.
   — staged 5--30 degree handoff search from measured BED REST, unchanged
   normal-controller adapter, explicit admission gate, synchronized evidence,
   and the retained wrong-direction kinematic-takeoff result.
+- [MUJOCO_BED_ASSISTED_PREPARATION.md](MUJOCO_BED_ASSISTED_PREPARATION.md)
+  — measured-rest to 5 degree preparation-only gate, geometry-derived q1 path,
+  natural bed load, and the retained bed-constrained wrong-direction response.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
