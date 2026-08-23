@@ -6,6 +6,15 @@ status, accepted evidence, unresolved gates, and next-stage scope. The
 archived reports. Stage-specific reports preserve the metrics and conclusions
 observed at that stage; they do not independently override this state summary.
 
+## Repository checkpoint
+
+- Observed branch: `agent/r4-minimal-recovery-corridor`.
+- Branch baseline: clean post-R3A main `f781980`.
+- Current linkage state: **R4 offline corridor study complete; no connected
+  recovery corridor was found in the approved freedom domain**.
+- R3B and R3C controller implementations remain isolated Draft PR work and
+  are not in this branch ancestry. R4 consumes only frozen R3C formal logs.
+
 ## Phase status
 
 - The single-link Spring2D phase is closed and tagged
@@ -135,6 +144,32 @@ observed at that stage; they do not independently override this state summary.
   suite completed with `150/150` passing, zero failed and zero incomplete in
   `224.9304 s`. R3A implements no controller, estimator replacement, safety
   layer, or scientific-parameter change.
+- R3B Recontact Margin Controller remains isolated at commit `0c3a2a3` and
+  Draft PR #17. It is classified `R3B_FAIL` and is not in R4 ancestry.
+- R3C Constraint-Aware Reference Layer remains isolated at commit `1ace292`
+  and Draft PR #18. Its frozen Stage 1 oracle and Stage 2 adaptive runs stop
+  moderate/adverse before the observed q2 soft/ROM/force violations, but no
+  case enters a feasible recovery reference. R3C is `PARTIAL`, not a completed
+  recovery or formal-safety result. The documentation-only report is retained
+  here because it is the direct frozen-evidence source for R4; R3C controller
+  code is not present on this branch.
+- R4 Minimal Recovery Corridor Study is complete as an offline audit of the
+  frozen R3C Stage 1 `20260816_151618` and Stage 2 `20260816_152124` MAT files.
+  The reviewed output is
+  `linkage/results/local/r4_minimal_recovery_corridor/20260817_012427`.
+  It evaluates 1,326 A/B/C settings from nine real anchors and keeps true vs
+  perceived and bed-assisted vs robot-only feasibility separate. All 78
+  selected boundary rows have `seed_count=0`: 76 contain static feasible points
+  that are graph-disconnected and two adverse true/robot-only backward-only
+  rows contain no recovery point. No cap through 30 degrees, backward progress
+  through 0.20, or combined setting yields a continuous recovery corridor.
+  The nearest true/bed-assisted points still produce 4.78--29.14 N m first-step
+  torque residual under the unchanged 0.5 N-per-step force slew, versus the
+  unchanged `1e-8 N m` admission tolerance. Moderate-oracle terminal also
+  predicts below the HOLD clearance. R4 changes no controller or scientific
+  setting. Eighteen R4 tests bring this branch aggregate to 168 tests; the full
+  retained suite completed with `168/168` passing, zero failed and zero
+  incomplete in `230.6275 s`.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
