@@ -5,14 +5,36 @@ from __future__ import annotations
 from .config import HumanV2Parameters, ProtectiveModeConfig
 
 
-def build_mjcf(parameters: HumanV2Parameters, config: ProtectiveModeConfig) -> str:
-    """Build a self-contained model with no external mesh dependency."""
+def build_mjcf(
+    parameters: HumanV2Parameters,
+    config: ProtectiveModeConfig,
+    cuff_interface: str = "tension_only",
+) -> str:
+    """Build a self-contained model with no external mesh dependency.
+
+    ``bilateral_point`` is an M1.5 simulation hypothesis, not a hardware
+    contract.  It uses the same nominal stiffness/damping numbers as the V1
+    tendon, but applies them through a bilateral MuJoCo point connection.
+    """
+
+    if cuff_interface not in {"tension_only", "bilateral_point"}:
+        raise ValueError(f"unsupported cuff interface: {cuff_interface}")
 
     p, c = parameters, config
     # MuJoCo requires a physically valid 3-D inertia tensor. The validated
     # planar y-axis values stay exact; unused x/z entries are 51% of Iyy.
     i1_half = p.thigh_inertia_kg_m2 * 0.51
     i2_half = p.shank_inertia_kg_m2 * 0.51
+    tendon_stiffness = c.cuff_stiffness_n_m if cuff_interface == "tension_only" else 0.0
+    tendon_damping = c.cuff_damping_ns_m if cuff_interface == "tension_only" else 0.0
+    equality = ""
+    if cuff_interface == "bilateral_point":
+        equality = f"""  <equality>
+    <connect name="cuff_bilateral_connection" site1="robot_cuff_attach_site" site2="cuff_site"
+      solref="-{c.cuff_stiffness_n_m:.9g} -{c.cuff_damping_ns_m:.9g}"
+      solimp="0.95 0.99 0.001"/>
+  </equality>
+"""
     return f"""<mujoco model="human_v2_protective_mode_v1">
   <compiler angle="radian" autolimits="true"/>
   <option timestep="{c.simulation_dt_s:.9g}" gravity="0 0 -{p.gravity_m_s2:.9g}" integrator="implicitfast" cone="elliptic" iterations="80"/>
@@ -42,15 +64,16 @@ def build_mjcf(parameters: HumanV2Parameters, config: ProtectiveModeConfig) -> s
         <inertial pos="0 0 0" mass="0.5" diaginertia="0.001 0.001 0.001"/>
         <geom name="robot_ee_geom" type="sphere" size="0.025" rgba="0.18 0.72 0.28 1" contype="0" conaffinity="0"/>
         <site name="robot_site" size="0.012" rgba="0.10 0.80 0.20 1"/>
+        <site name="robot_cuff_attach_site" pos="0 0 -{c.cuff_rest_length_m:.9g}" size="0.009" rgba="0.65 0.20 0.85 1"/>
       </body>
     </body>
   </worldbody>
   <tendon>
-    <spatial name="cuff_tendon" stiffness="{c.cuff_stiffness_n_m:.9g}" damping="{c.cuff_damping_ns_m:.9g}" springlength="{c.cuff_rest_length_m:.9g}" width="0.006" rgba="0.15 0.75 0.20 1">
+    <spatial name="cuff_tendon" stiffness="{tendon_stiffness:.9g}" damping="{tendon_damping:.9g}" springlength="{c.cuff_rest_length_m:.9g}" width="0.006" rgba="0.15 0.75 0.20 1">
       <site site="robot_site"/><site site="cuff_site"/>
     </spatial>
   </tendon>
-  <actuator>
+{equality}  <actuator>
     <motor name="robot_x_motor" joint="robot_x_joint" gear="1" ctrlrange="-{c.actuator_force_limit_n:.9g} {c.actuator_force_limit_n:.9g}"/>
     <motor name="robot_z_motor" joint="robot_z_joint" gear="1" ctrlrange="-{c.actuator_force_limit_n:.9g} {c.actuator_force_limit_n:.9g}"/>
   </actuator>

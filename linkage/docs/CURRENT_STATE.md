@@ -170,6 +170,21 @@ observed at that stage; they do not independently override this state summary.
   tuning is folded back after this result; a justified real robot/cuff/load
   path is required before reconnecting the normal force-aware controller or
   Windowed NLS.
+- M1.5 physical-interface diagnostics retain that failure without controller
+  tuning. The unchanged 2-degree BED_START settles at q2=0.714 degrees after
+  a 481 N initial contact peak; individual contact points switch during the
+  first second but are steady in the final two seconds.
+- Paired 2 mm probes at 2/10/20/30 degrees show that the V1 tension-only
+  tendon absorbs 68--99% of incremental robot motion as interface deformation.
+  A same-parameter bilateral MuJoCo point-connection hypothesis improves
+  translational coupling at 20/30 degrees, but all requested postures collapse
+  and both-direction signed knee authority remains wrong.
+- The physical gate therefore blocks a new 2-to-30-to-2 rollout and q-switch
+  sensitivity. This is evidence against the present simulated interface, not
+  against kinematic protective mode. Detailed assumptions and metrics:
+  [MUJOCO_PHYSICAL_INTERFACE_M15.md](MUJOCO_PHYSICAL_INTERFACE_M15.md)
+- Twenty M1.5 contracts bring the repository Python suite to 128 passing
+  tests; bytecode compilation and diff whitespace checks pass.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.

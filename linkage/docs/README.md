@@ -54,6 +54,9 @@ The categories below are navigational only; existing reports remain in place.
 - [MUJOCO_PROTECTIVE_MODE_V1.md](MUJOCO_PROTECTIVE_MODE_V1.md)
   — minimal actuator/cuff/bed contact dynamics, retained negative 30-degree
   baseline, veto-braking probe, and gated q-switch sensitivity.
+- [MUJOCO_PHYSICAL_INTERFACE_M15.md](MUJOCO_PHYSICAL_INTERFACE_M15.md)
+  — BED_START equilibrium, tension-only versus bilateral cuff hypothesis, and
+  paired local actuator-authority probes at 2/10/20/30 degrees.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
