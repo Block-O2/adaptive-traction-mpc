@@ -19,6 +19,7 @@ class PlantObservation:
     time_s: float
     human_q_rad: np.ndarray
     human_dq_rad_s: np.ndarray
+    human_qacc_rad_s2: np.ndarray
     robot_q_rad: np.ndarray
     robot_dq_rad_s: np.ndarray
     ee_position_m: np.ndarray
@@ -33,6 +34,7 @@ class PlantObservation:
     bed_contact_count: int
     fixture_reaction_nm: np.ndarray
     human_dynamics_residual_nm: np.ndarray
+    retained_soft_limit_torque_nm: np.ndarray
     cartesian_force_command_n: np.ndarray
     joint_torque_command_nm: np.ndarray
 
@@ -67,11 +69,13 @@ class SleeveRobotEnvironment:
         human: HumanV2Parameters | None = None,
         robot: RobotV2Parameters | None = None,
         config: PlantV2Config | None = None,
+        include_retained_soft_limit_torque: bool = False,
     ) -> None:
         self.human = human or HumanV2Parameters()
         self.robot = robot or RobotV2Parameters()
         self.config = config or PlantV2Config()
         self.fixture_q2_deg = fixture_q2_deg
+        self.include_retained_soft_limit_torque = include_retained_soft_limit_torque
         self.model = mujoco.MjModel.from_xml_string(
             build_plant_xml(self.human, self.robot, self.config, fixture_q2_deg)
         )
@@ -83,6 +87,10 @@ class SleeveRobotEnvironment:
         )
         self._robot_qpos_indices = np.array(
             [self.model.joint(name).qposadr[0] for name in self._robot_joint_names], dtype=int
+        )
+        self._human_dof_indices = np.array(
+            [self.model.joint(name).dofadr[0] for name in self._human_joint_names],
+            dtype=int,
         )
         self._ee_site_id = self.model.site("robot_ee_site").id
         self._sleeve_site_id = self.model.site("sleeve_attach_site").id
@@ -111,8 +119,19 @@ class SleeveRobotEnvironment:
         )
 
     def reset(self, q2_deg: float) -> PlantObservation:
+        return self.reset_posture(coordinated_posture(math.radians(q2_deg)))
+
+    def reset_posture(self, human_q_rad: np.ndarray) -> PlantObservation:
+        """Reset to an explicit geometrically and robot-IK-consistent posture."""
+
+        human_q = np.asarray(human_q_rad, dtype=float)
+        lower = np.asarray(self.human.q_min_rad)
+        upper = np.asarray(self.human.q_max_rad)
+        if human_q.shape != (2,) or np.any(~np.isfinite(human_q)):
+            raise ValueError("human_q_rad must be a finite two-vector")
+        if np.any(human_q < lower) or np.any(human_q > upper):
+            raise ValueError("human_q_rad is outside Human V2 ROM")
         mujoco.mj_resetData(self.model, self.data)
-        human_q = coordinated_posture(math.radians(q2_deg))
         for name, value in zip(self._human_joint_names, human_q, strict=True):
             self.data.joint(name).qpos[0] = value
         target = sleeve_position(human_q, self.human, self.config)
@@ -126,6 +145,8 @@ class SleeveRobotEnvironment:
         self.data.eq_active[self._sleeve_equality_id] = 1
         for equality_id in self._fixture_equality_ids:
             self.data.eq_active[equality_id] = 1
+        mujoco.mj_forward(self.model, self.data)
+        self._apply_retained_soft_limit_torque()
         mujoco.mj_forward(self.model, self.data)
         ik_error = np.linalg.norm(self.data.site("robot_ee_site").xpos - target)
         if ik_error > 1e-5:
@@ -173,6 +194,7 @@ class SleeveRobotEnvironment:
             time_s=float(self.data.time),
             human_q_rad=human_q,
             human_dq_rad_s=human_dq,
+            human_qacc_rad_s2=self.data.qacc[self._human_dof_indices].copy(),
             robot_q_rad=robot_q,
             robot_dq_rad_s=robot_dq,
             ee_position_m=ee_position,
@@ -187,6 +209,7 @@ class SleeveRobotEnvironment:
             bed_contact_count=contact_count,
             fixture_reaction_nm=self._fixture_reaction(),
             human_dynamics_residual_nm=self._human_dynamics_residual(),
+            retained_soft_limit_torque_nm=self._retained_soft_limit_torque(),
             cartesian_force_command_n=self.last_cartesian_force_command_n.copy(),
             joint_torque_command_nm=self.last_joint_torque_command_nm.copy(),
         )
@@ -206,6 +229,7 @@ class SleeveRobotEnvironment:
         peak_penetration = 0.0
         for _ in range(self.config.control_substeps):
             self._apply_cartesian_control(target_position_m, target_velocity_m_s)
+            self._apply_retained_soft_limit_torque()
             mujoco.mj_step(self.model, self.data)
             observation = self.observe()
             active = observation.bed_force_n >= 2.0
@@ -369,9 +393,50 @@ class SleeveRobotEnvironment:
         residual += self.data.qfrc_bias
         residual -= self.data.qfrc_passive
         residual -= self.data.qfrc_actuator
+        residual -= self.data.qfrc_applied
         residual -= self.data.qfrc_constraint
-        human_dofs = np.array(
-            [self.model.joint(name).dofadr[0] for name in self._human_joint_names],
-            dtype=int,
+        return residual[self._human_dof_indices].copy()
+
+    def _retained_soft_limit_torque(self) -> np.ndarray:
+        """Port the retained Human V2 smooth inward RHS torque exactly."""
+
+        q = np.array(
+            [self.data.joint(name).qpos[0] for name in self._human_joint_names]
         )
-        return residual[human_dofs].copy()
+        dq = np.array(
+            [self.data.joint(name).qvel[0] for name in self._human_joint_names]
+        )
+        lower = np.asarray(self.human.q_min_rad) + self.human.soft_limit_margin_rad
+        upper = np.asarray(self.human.q_max_rad) - self.human.soft_limit_margin_rad
+        lower_activation = lower - self.human.soft_limit_numerical_tolerance
+        upper_activation = upper + self.human.soft_limit_numerical_tolerance
+        torque = np.zeros(2)
+        for index in range(2):
+            if q[index] < lower_activation[index]:
+                depth = (
+                    lower_activation[index] - q[index]
+                ) / self.human.soft_limit_margin_rad
+                torque[index] = self.human.soft_limit_boundary_torque_nm * depth**3
+                torque[index] += (
+                    self.human.soft_limit_damping_nms_rad
+                    * depth**2
+                    * max(-dq[index], 0.0)
+                )
+            elif q[index] > upper_activation[index]:
+                depth = (
+                    q[index] - upper_activation[index]
+                ) / self.human.soft_limit_margin_rad
+                torque[index] = -self.human.soft_limit_boundary_torque_nm * depth**3
+                torque[index] -= (
+                    self.human.soft_limit_damping_nms_rad
+                    * depth**2
+                    * max(dq[index], 0.0)
+                )
+        return torque
+
+    def _apply_retained_soft_limit_torque(self) -> None:
+        self.data.qfrc_applied[self._human_dof_indices] = 0.0
+        if self.include_retained_soft_limit_torque:
+            self.data.qfrc_applied[self._human_dof_indices] = (
+                self._retained_soft_limit_torque()
+            )
