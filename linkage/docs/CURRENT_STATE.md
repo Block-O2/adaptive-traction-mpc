@@ -135,6 +135,26 @@ observed at that stage; they do not independently override this state summary.
   suite completed with `150/150` passing, zero failed and zero incomplete in
   `224.9304 s`. R3A implements no controller, estimator replacement, safety
   layer, or scientific-parameter change.
+- Near-Extension Protective Mode is the active engineering-validation mainline
+  on `agent/near-extension-protective-mode`, based on clean post-R3A main
+  `f781980`. R3B/R3C remain isolated Draft PRs and the R4 diagnostic checkpoint
+  is also excluded from this branch ancestry. The MATLAB version implements a
+  sanity-only command router:
+  `BED_START -> KINEMATIC_TAKEOFF -> BLEND_TO_NORMAL -> NORMAL_REHAB` and
+  `NORMAL_REHAB -> BLEND_TO_LANDING -> KINEMATIC_LANDING -> TERMINAL`.
+  It captures measured state into one C2 quintic patch, lands at q2 = 2 degrees,
+  bypasses force inversion in the kinematic segment, retains the unchanged
+  200 N component force veto, and delegates normal operation exactly to the
+  existing controller. The engineering recommendation `q_switch = 30 deg`
+  corresponds approximately to the frozen strict-path 10 N registered-reserve
+  boundary at q2 = 29.536 degrees; it is not a clinical threshold. The sanity
+  trajectory reports exact state sequences, zero landing capture jump,
+  takeoff q/dq handoff mismatch below `7.2e-14`, terminal q2 = 2 degrees, zero
+  near-extension force-inversion calls, a latched veto, and exact normal-law
+  delegation. Nine new tests bring the retained aggregate to 159; the full
+  suite completed with `159/159` passing, zero failed and zero incomplete in
+  `222.5698 s`. Real position/velocity-controlled contact remains unvalidated
+  and is reserved for MuJoCo after the robot/contact interface is specified.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.

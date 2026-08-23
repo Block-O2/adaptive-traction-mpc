@@ -48,6 +48,9 @@ The categories below are navigational only; existing reports remain in place.
 - [R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md](R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md)
   — offline R2B window identifiability, moderate failure decomposition, mild
   recontact diagnosis, and evidence-separated next-step decisions.
+- [NEAR_EXTENSION_PROTECTIVE_MODE.md](NEAR_EXTENSION_PROTECTIVE_MODE.md)
+  — sanity-only low-speed kinematic takeoff/landing patch, force-veto command
+  interface, q-switch evidence, and MuJoCo validation boundary.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
