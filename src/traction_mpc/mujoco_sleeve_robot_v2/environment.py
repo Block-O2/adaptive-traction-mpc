@@ -31,6 +31,7 @@ class PlantObservation:
     bed_force_n: float
     bed_penetration_m: float
     bed_contact_count: int
+    bed_generalized_torque_nm: np.ndarray
     fixture_reaction_nm: np.ndarray
     human_dynamics_residual_nm: np.ndarray
     cartesian_force_command_n: np.ndarray
@@ -185,6 +186,7 @@ class SleeveRobotEnvironment:
             bed_force_n=bed_force,
             bed_penetration_m=penetration,
             bed_contact_count=contact_count,
+            bed_generalized_torque_nm=self._bed_generalized_torque(),
             fixture_reaction_nm=self._fixture_reaction(),
             human_dynamics_residual_nm=self._human_dynamics_residual(),
             cartesian_force_command_n=self.last_cartesian_force_command_n.copy(),
@@ -225,6 +227,51 @@ class SleeveRobotEnvironment:
             bed_contact_count_transitions=count_transitions,
         )
 
+    def step_cartesian_force(
+        self,
+        force_world_n: np.ndarray,
+        substeps: int | None = None,
+    ) -> PlantStep:
+        """Apply a world-frame Cartesian EE force through the robot motors."""
+
+        force = np.asarray(force_world_n, dtype=float)
+        if force.shape != (3,) or np.any(~np.isfinite(force)):
+            raise ValueError("force_world_n must be a finite three-vector")
+        bound = self.config.actuator_cartesian_force_bound_n
+        if np.any(np.abs(force) > bound + 1e-9):
+            raise ValueError("Cartesian force command exceeds the registered bound")
+        step_count = self.config.control_substeps if substeps is None else substeps
+        if not isinstance(step_count, int) or step_count < 1:
+            raise ValueError("substeps must be a positive integer")
+        before = self.observe()
+        previous_active = before.bed_force_n >= 2.0
+        previous_count = before.bed_contact_count
+        active_transitions = 0
+        count_transitions = 0
+        peak_sleeve = 0.0
+        peak_bed = 0.0
+        peak_penetration = 0.0
+        for _ in range(step_count):
+            self._apply_cartesian_force_control(force)
+            mujoco.mj_step(self.model, self.data)
+            observation = self.observe()
+            active = observation.bed_force_n >= 2.0
+            active_transitions += int(active != previous_active)
+            count_transitions += int(observation.bed_contact_count != previous_count)
+            previous_active = active
+            previous_count = observation.bed_contact_count
+            peak_sleeve = max(peak_sleeve, observation.sleeve_force_n)
+            peak_bed = max(peak_bed, observation.bed_force_n)
+            peak_penetration = max(peak_penetration, observation.bed_penetration_m)
+        return PlantStep(
+            observation=observation,
+            peak_sleeve_force_n=peak_sleeve,
+            peak_bed_force_n=peak_bed,
+            peak_bed_penetration_m=peak_penetration,
+            bed_active_transitions=active_transitions,
+            bed_contact_count_transitions=count_transitions,
+        )
+
     def _apply_cartesian_control(
         self,
         target_position_m: np.ndarray,
@@ -241,6 +288,11 @@ class SleeveRobotEnvironment:
             -self.config.actuator_cartesian_force_bound_n,
             self.config.actuator_cartesian_force_bound_n,
         )
+        self._apply_cartesian_force_control(force)
+
+    def _apply_cartesian_force_control(self, force_world_n: np.ndarray) -> None:
+        observation = self.observe()
+        force = np.asarray(force_world_n, dtype=float)
         jacobian = self.ee_jacobian()
         pinv = jacobian.T @ np.linalg.inv(
             jacobian @ jacobian.T + self.config.jacobian_damping * np.eye(3)
@@ -359,6 +411,27 @@ class SleeveRobotEnvironment:
             penetration = max(penetration, max(0.0, -float(contact.dist)))
             count += 1
         return total_force, penetration, count
+
+    def _bed_generalized_torque(self) -> np.ndarray:
+        """Sum bed-contact constraint contributions on the two human DoFs."""
+
+        generalized = np.zeros(self.model.nv)
+        constraint_jacobian = self.data.efc_J.reshape(-1, self.model.nv)
+        for index in range(self.data.ncon):
+            contact = self.data.contact[index]
+            pair = {int(contact.geom1), int(contact.geom2)}
+            if self._bed_geom_id not in pair or not (pair & self._human_geom_ids):
+                continue
+            start = int(contact.efc_address)
+            if start < 0:
+                continue
+            rows = slice(start, start + int(contact.dim))
+            generalized += constraint_jacobian[rows].T @ self.data.efc_force[rows]
+        human_dofs = np.array(
+            [self.model.joint(name).dofadr[0] for name in self._human_joint_names],
+            dtype=int,
+        )
+        return generalized[human_dofs].copy()
 
     def _human_dynamics_residual(self) -> np.ndarray:
         """Return the two human-DoF residuals of MuJoCo's forward dynamics."""
