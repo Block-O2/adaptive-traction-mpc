@@ -9,3 +9,6 @@
 - `mujoco_sleeve_robot_v2/` is the tracked, compact V2 engineering-validation
   evidence package (summary, CSV tables, compressed traces, and representative
   figures). Exploratory reruns remain under ignored `results/local/` paths.
+- `mujoco_small_angle_handoff_study/` is the tracked staged-search evidence
+  package. Its GIF is intentionally retained despite the general generated-GIF
+  ignore rule because it is the requested boundary visualization.

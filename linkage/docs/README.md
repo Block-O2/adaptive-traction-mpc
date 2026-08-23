@@ -55,6 +55,10 @@ The categories below are navigational only; existing reports remain in place.
   — CR12 asset audit, CR12-like six-DoF engineering plant, bilateral sleeve,
   BED_START equilibrium, fixture topology probes, released dynamic-authority
   gates, and the retained low-angle negative result.
+- [MUJOCO_SMALL_ANGLE_HANDOFF_STUDY.md](MUJOCO_SMALL_ANGLE_HANDOFF_STUDY.md)
+  — staged 5--30 degree handoff search from measured BED REST, unchanged
+  normal-controller adapter, explicit admission gate, synchronized evidence,
+  and the retained wrong-direction kinematic-takeoff result.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 

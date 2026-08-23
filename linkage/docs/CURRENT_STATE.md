@@ -169,6 +169,17 @@ observed at that stage; they do not independently override this state summary.
   protective motion is skipped by the registered gate. This is a low-angle
   physical-support/preload blocker, not evidence that protective mode itself
   is infeasible. See [MUJOCO_SLEEVE_ROBOT_V2.md](MUJOCO_SLEEVE_ROBOT_V2.md).
+- The staged MuJoCo Small-Angle Handoff Study tests the frozen V2 plant from
+  actual settled BED REST at 5/8/10/15/20/25/30 degree candidates. No case
+  reaches its handoff angle. The 5--10 degree cases remain near q2=0.31--0.71
+  degrees; the 15--30 degree cases move in the wrong generalized direction and
+  stop at the extension-side ROM tolerance. Peak interaction remains below
+  41 N and sleeve deformation below 0.052 mm, so the direct mechanism is not
+  force saturation or sleeve stretch. The original normal controller is
+  correctly kept behind the handoff gate and has zero calls in every trial.
+  Consequently there is no minimum feasible handoff estimate, and the current
+  `kinematic patch -> normal rehab` physical implementation is unsupported.
+  See [MUJOCO_SMALL_ANGLE_HANDOFF_STUDY.md](MUJOCO_SMALL_ANGLE_HANDOFF_STUDY.md).
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.

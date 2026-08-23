@@ -17,6 +17,48 @@ class ReferenceSample:
     ddq: np.ndarray
 
 
+def quintic_boundary_sample(
+    time_s: float,
+    duration_s: float,
+    q0: np.ndarray,
+    dq0: np.ndarray,
+    qf: np.ndarray,
+    dqf: np.ndarray | None = None,
+) -> ReferenceSample:
+    """C2 trajectory matching measured initial position and velocity."""
+
+    if duration_s <= 0.0:
+        raise ValueError("duration_s must be positive")
+    q0 = np.asarray(q0, dtype=float)
+    dq0 = np.asarray(dq0, dtype=float)
+    qf = np.asarray(qf, dtype=float)
+    dqf = np.zeros_like(q0) if dqf is None else np.asarray(dqf, dtype=float)
+    elapsed = float(np.clip(time_s, 0.0, duration_s))
+    matrix = np.array(
+        [
+            [duration_s**3, duration_s**4, duration_s**5],
+            [3 * duration_s**2, 4 * duration_s**3, 5 * duration_s**4],
+            [6 * duration_s, 12 * duration_s**2, 20 * duration_s**3],
+        ]
+    )
+    rhs = np.vstack(
+        [
+            qf - q0 - dq0 * duration_s,
+            dqf - dq0,
+            np.zeros_like(q0),
+        ]
+    )
+    coefficients = np.linalg.solve(matrix, rhs).T
+    powers = np.array([elapsed**3, elapsed**4, elapsed**5])
+    velocity_powers = np.array([3 * elapsed**2, 4 * elapsed**3, 5 * elapsed**4])
+    acceleration_powers = np.array([6 * elapsed, 12 * elapsed**2, 20 * elapsed**3])
+    return ReferenceSample(
+        q=q0 + dq0 * elapsed + coefficients @ powers,
+        dq=dq0 + coefficients @ velocity_powers,
+        ddq=coefficients @ acceleration_powers,
+    )
+
+
 def quintic_progress(value: float) -> tuple[float, float, float]:
     r = float(np.clip(value, 0.0, 1.0))
     return (
