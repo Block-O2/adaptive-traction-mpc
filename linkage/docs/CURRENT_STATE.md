@@ -155,6 +155,21 @@ observed at that stage; they do not independently override this state summary.
   suite completed with `159/159` passing, zero failed and zero incomplete in
   `222.5698 s`. Real position/velocity-controlled contact remains unvalidated
   and is reserved for MuJoCo after the robot/contact interface is specified.
+- MuJoCo Protective Mode V1 is implemented on
+  `agent/mujoco-protective-mode-v1` as a minimal nominal Human V2, unilateral
+  bed, tension-only compliant cuff, and bounded x/z servo engineering smoke.
+  The 30-degree baseline retains the full command sequence but is a physical
+  negative result: takeoff ends near q2 = -0.073 degrees rather than 30
+  degrees, terminal settles near 0.714 degrees rather than 2 degrees, cuff
+  extension reaches 97.86 mm, interaction force reaches 176.15 N, and 49 bed
+  contact transitions expose chatter. No automatic 200 N veto occurs. A
+  separately labeled manual-veto probe verifies the braking route but starts
+  from an already stalled knee and is not moving-limb braking evidence. The
+  20/25/30/32.5-degree sensitivity is intentionally skipped because the
+  baseline mechanical-completeness gate is not met. No parameter or contact
+  tuning is folded back after this result; a justified real robot/cuff/load
+  path is required before reconnecting the normal force-aware controller or
+  Windowed NLS.
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.

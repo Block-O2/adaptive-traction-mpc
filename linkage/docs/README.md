@@ -51,6 +51,9 @@ The categories below are navigational only; existing reports remain in place.
 - [NEAR_EXTENSION_PROTECTIVE_MODE.md](NEAR_EXTENSION_PROTECTIVE_MODE.md)
   — sanity-only low-speed kinematic takeoff/landing patch, force-veto command
   interface, q-switch evidence, and MuJoCo validation boundary.
+- [MUJOCO_PROTECTIVE_MODE_V1.md](MUJOCO_PROTECTIVE_MODE_V1.md)
+  — minimal actuator/cuff/bed contact dynamics, retained negative 30-degree
+  baseline, veto-braking probe, and gated q-switch sensitivity.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
