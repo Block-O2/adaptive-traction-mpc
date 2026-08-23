@@ -48,6 +48,12 @@ The categories below are navigational only; existing reports remain in place.
 - [R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md](R3_IDENTIFIABILITY_FAILURE_DECOMPOSITION.md)
   — offline R2B window identifiability, moderate failure decomposition, mild
   recontact diagnosis, and evidence-separated next-step decisions.
+- [R3C_CONSTRAINT_AWARE_REFERENCE_LAYER.md](R3C_CONSTRAINT_AWARE_REFERENCE_LAYER.md)
+  — frozen R3C safety/reference evidence, reviewed partial classification, and
+  the R4 offline follow-up; controller code remains isolated outside R4.
+- [R4_MINIMAL_RECOVERY_CORRIDOR.md](R4_MINIMAL_RECOVERY_CORRIDOR.md)
+  — offline A/B/C freedom scan, static-point versus connected-corridor
+  separation, true/perceived and bed/robot-only comparisons, and next gate.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
