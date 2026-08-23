@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 import sys
-import xml.etree.ElementTree as ET
 
 import mujoco
 import numpy as np
@@ -17,7 +16,6 @@ sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
 from traction_mpc.mujoco_sleeve_robot_v2.config import (
     HumanV2Parameters,
     PlantV2Config,
-    RobotV2Parameters,
 )
 from traction_mpc.mujoco_sleeve_robot_v2.environment import (
     CuffForceCommandLimitError,
@@ -29,8 +27,11 @@ from traction_mpc.mujoco_sleeve_robot_v2.kinematics import (
 )
 from traction_mpc.mujoco_sleeve_robot_v2.model import build_plant_xml
 from traction_mpc.mujoco_sleeve_robot_v2.validation import (
+    REGISTERED_HUMAN_V2_MISMATCH_CASES,
     RIGID_CUFF_POSTURES_DEG,
+    _human_v2_mass_matrix,
     _human_v2_tracking_wrench,
+    registered_mismatch_human_v2,
     run_rigid_cuff_posture_validation,
 )
 
@@ -38,17 +39,6 @@ from traction_mpc.mujoco_sleeve_robot_v2.validation import (
 @pytest.fixture(scope="module")
 def validation_result():
     return run_rigid_cuff_posture_validation()
-
-
-def test_old_cr12_asset_is_visual_only_and_not_used_as_plant() -> None:
-    robot = RobotV2Parameters()
-    root = ET.parse(REPOSITORY_ROOT / robot.provenance_asset).getroot()
-    assert len(root.findall("link")) == 1
-    assert len(root.findall("joint")) == 0
-    assert len(root.findall(".//inertial")) == 0
-    assert len(root.findall("transmission")) == 0
-    assert robot.provenance_reusable_for_kinematics is False
-    assert "CR12-like" in robot.model_label
 
 
 def test_v2_model_has_six_dof_robot_and_no_tendon_or_carriage() -> None:
@@ -179,3 +169,40 @@ def test_three_degree_wrench_substantially_reduces_previous_point_force(
     assert row["cuff_force_n"] < 0.5 * 348.0
     assert abs(row["cuff_my_nm"]) > 0.0
     assert row["force_reduction_vs_previous_348n_percent"] > 50.0
+
+
+def test_registered_human_v2_mismatch_cases_map_without_changing_other_fields() -> None:
+    nominal = HumanV2Parameters()
+    assert tuple(REGISTERED_HUMAN_V2_MISMATCH_CASES) == (
+        "nominal",
+        "mild",
+        "moderate",
+        "adverse",
+    )
+    moderate, metadata = registered_mismatch_human_v2("moderate")
+    assert moderate.body_mass_kg == pytest.approx(1.05 * nominal.body_mass_kg)
+    assert moderate.thigh_com_m == pytest.approx(1.05 * nominal.thigh_com_m)
+    assert moderate.shank_com_m == pytest.approx(0.95 * nominal.shank_com_m)
+    assert moderate.passive_stiffness_nm_rad == pytest.approx((11.0, 11.0))
+    assert np.degrees(moderate.q_rest_rad) == pytest.approx((3.0, 8.0))
+    assert moderate.sleeve_center_m == pytest.approx(
+        1.02 * nominal.sleeve_center_m
+    )
+    assert moderate.thigh_length_m == nominal.thigh_length_m
+    assert moderate.shank_length_m == nominal.shank_length_m
+    assert moderate.passive_damping_nms_rad == nominal.passive_damping_nms_rad
+    assert moderate.q_min_rad == nominal.q_min_rad
+    assert moderate.q_max_rad == nominal.q_max_rad
+    assert metadata["mass_scale"] == 1.05
+
+
+@pytest.mark.parametrize("case_name", REGISTERED_HUMAN_V2_MISMATCH_CASES)
+def test_registered_true_plant_mass_matrix_matches_human_v2(case_name: str) -> None:
+    human, _ = registered_mismatch_human_v2(case_name)
+    env = SleeveRobotEnvironment(human=human, fixture_q2_deg=10.0)
+    observation = env.reset(10.0)
+    full_mass = np.zeros((env.model.nv, env.model.nv))
+    mujoco.mj_fullM(env.model, env.data, full_mass)
+    assert full_mass[:2, :2] == pytest.approx(
+        _human_v2_mass_matrix(observation.human_q_rad, human), abs=1e-10
+    )

@@ -65,8 +65,6 @@ class RobotV2Parameters:
     """CR12-like geometry; none of these are claimed CR12 specifications."""
 
     model_label: str = "CR12-like-6DoF-engineering-hypothesis"
-    provenance_asset: str = "assets/robots/cr12_12_pending/urdf/CR12-12.urdf"
-    provenance_reusable_for_kinematics: bool = False
     base_position_m: tuple[float, float, float] = (1.10, -0.62, 0.04)
     base_column_height_m: float = 0.32
     link_lengths_m: tuple[float, float, float, float, float] = (

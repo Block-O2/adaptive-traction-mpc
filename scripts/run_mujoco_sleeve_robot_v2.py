@@ -14,8 +14,10 @@ sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
 
 from traction_mpc.mujoco_sleeve_robot_v2.validation import (  # noqa: E402
     run_dynamic_rehab_baseline,
+    run_fixed_model_mismatch_baseline,
     run_rigid_cuff_posture_validation,
     write_dynamic_rehab_artifacts,
+    write_fixed_model_mismatch_artifacts,
     write_rigid_cuff_posture_artifacts,
 )
 
@@ -44,16 +46,34 @@ def main() -> None:
         action="store_true",
         help="Run only the required one-second lower-endpoint hold.",
     )
+    parser.add_argument(
+        "--fixed-model-mismatch",
+        action="store_true",
+        help="Run nominal/mild/moderate/adverse true Human V2 plants at 3 degrees.",
+    )
     args = parser.parse_args()
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    output_name = (
-        f"mujoco_rigid_cuff_dynamic_q2_{args.lower_q2_deg:g}_{timestamp}"
-        if args.dynamic_baseline
-        else f"mujoco_rigid_cuff_pose_v2_{timestamp}"
-    )
+    if args.fixed_model_mismatch:
+        output_name = f"mujoco_rigid_cuff_fixed_mismatch_{timestamp}"
+    elif args.dynamic_baseline:
+        output_name = (
+            f"mujoco_rigid_cuff_dynamic_q2_{args.lower_q2_deg:g}_{timestamp}"
+        )
+    else:
+        output_name = f"mujoco_rigid_cuff_pose_v2_{timestamp}"
     output_dir = args.output_dir or (
         REPOSITORY_ROOT / "linkage" / "results" / "local" / output_name
     )
+    if args.fixed_model_mismatch:
+        summary, traces = run_fixed_model_mismatch_baseline()
+        write_fixed_model_mismatch_artifacts(output_dir, summary, traces)
+        print(f"output_dir={output_dir}")
+        for case_name, case in summary["cases"].items():
+            print(
+                f"{case_name}: outcome={case['outcome_reason']} "
+                f"duration_s={case['completed_duration_s']:.6f}"
+            )
+        return
     if args.dynamic_baseline:
         summary, trace = run_dynamic_rehab_baseline(
             args.lower_q2_deg,

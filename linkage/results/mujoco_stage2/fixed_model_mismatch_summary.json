@@ -1,0 +1,673 @@
+{
+  "evidence_category": "engineering_validation_smoke",
+  "experiment": "fixed_nominal_controller_true_human_v2_mismatch",
+  "controller_model": "nominal Human V2 for every case",
+  "true_plant_cases": {
+    "nominal": {
+      "mass_scale": 1.0,
+      "lc1_scale": 1.0,
+      "lc2_scale": 1.0,
+      "passive_stiffness_scale": 1.0,
+      "q_rest_offset_deg": [
+        0.0,
+        0.0
+      ],
+      "sleeve_center_scale": 1.0
+    },
+    "mild": {
+      "mass_scale": 1.05,
+      "lc1_scale": 1.0,
+      "lc2_scale": 1.0,
+      "passive_stiffness_scale": 1.0,
+      "q_rest_offset_deg": [
+        -2.0,
+        -2.0
+      ],
+      "sleeve_center_scale": 1.0
+    },
+    "moderate": {
+      "mass_scale": 1.05,
+      "lc1_scale": 1.05,
+      "lc2_scale": 0.95,
+      "passive_stiffness_scale": 1.1,
+      "q_rest_offset_deg": [
+        -2.0,
+        -2.0
+      ],
+      "sleeve_center_scale": 1.02
+    },
+    "adverse": {
+      "mass_scale": 1.1,
+      "lc1_scale": 1.1,
+      "lc2_scale": 0.9,
+      "passive_stiffness_scale": 1.2,
+      "q_rest_offset_deg": [
+        -2.0,
+        -2.0
+      ],
+      "sleeve_center_scale": 1.05
+    }
+  },
+  "reference": "3 degree full 15 s rehab cycle",
+  "degradation_onset_definition": "first sample where either joint absolute tracking error exceeds that joint's global maximum error in the nominal run",
+  "material_degradation_onset_definition": "first sample where either joint absolute tracking error exceeds twice that joint's global maximum error in the nominal run",
+  "nominal_tracking_error_envelope_deg": [
+    0.21205298198418276,
+    0.4893902241550805
+  ],
+  "cases": {
+    "nominal": {
+      "evidence_category": "engineering_validation_smoke",
+      "controller": "Human V2 computed-acceleration inverse dynamics cuff wrench feedforward plus existing rigid-cuff 6D pose feedback",
+      "case": "rehab_reference",
+      "mismatch_case": "nominal",
+      "reference_start_q_deg": [
+        1.2162162162162167,
+        3.0000000000000004
+      ],
+      "reference_peak_q_deg": [
+        45.0,
+        84.0
+      ],
+      "requested_duration_s": 15.0,
+      "completed_duration_s": 14.999999999997126,
+      "termination_reason": "completed_reference",
+      "mechanically_complete_for_follow_on": true,
+      "tracking": {
+        "rmse_deg": [
+          0.08075967598140468,
+          0.19458474275229035
+        ],
+        "max_abs_error_deg": [
+          0.21205298198418276,
+          0.4893902241550805
+        ],
+        "max_abs_error_time_s": [
+          3.0999999999997696,
+          3.059999999999774
+        ],
+        "q_ref_at_max_error_deg": [
+          9.750514837838741,
+          18.080405845032804
+        ],
+        "terminal_error_deg": [
+          -0.026821219906227434,
+          -0.06535322224245688
+        ],
+        "actual_q_min_deg": [
+          1.1807752137988248,
+          2.9106554277771775
+        ],
+        "actual_q_max_deg": [
+          44.99473868460188,
+          83.96236265866645
+        ],
+        "rom_violation": false,
+        "soft_limit_active": true,
+        "first_soft_limit_active_time_s": 0.0,
+        "peak_abs_soft_limit_torque_nm": [
+          11.143934955266037,
+          1.8249124060095332
+        ],
+        "hold_max_abs_drift_deg": [
+          43.77852246838566,
+          80.96236265866645
+        ],
+        "tail_max_abs_joint_speed_deg_s": 1.8232694250993486,
+        "tail_bed_force_range_n": 4.676966310135167,
+        "hold_stability_gate": null,
+        "first_nominal_envelope_crossing": null,
+        "first_2x_nominal_envelope_crossing": null
+      },
+      "cuff": {
+        "peak_translational_force_n": 109.81418485994223,
+        "force_gate_n": 200.0,
+        "force_gate_respected": true,
+        "peak_abs_sagittal_moment_my_nm": 27.18641097025314,
+        "peak_allocated_translational_force_n": 102.78267877678994,
+        "peak_abs_allocated_my_nm": 27.1864123986693,
+        "moment_limit_nm": null,
+        "peak_relative_position_error_mm": 0.021429021770423277,
+        "peak_relative_rotation_error_deg": 0.3597089352399606,
+        "max_wrench_reconstruction_residual_nm": 3.33565500822984e-13
+      },
+      "robot": {
+        "joint_torque_limits_nm": [
+          300.0,
+          300.0,
+          220.0,
+          100.0,
+          80.0,
+          60.0
+        ],
+        "peak_abs_joint_torque_nm": [
+          44.06097915586792,
+          181.0520178492623,
+          96.01341983175358,
+          6.003808642699838,
+          7.424360037764508,
+          0.015342832462931881
+        ],
+        "peak_joint_torque_limit_fraction": 0.6046620480098964,
+        "torque_limits_respected": true,
+        "torque_saturation_detected": false
+      },
+      "bed": {
+        "peak_force_n": 221.11691059732328,
+        "peak_penetration_mm": 5.551115123125783e-14,
+        "max_contact_count": 1,
+        "contact_active_fraction": 0.17194268577140953,
+        "active_state_transitions": 824
+      },
+      "solver": {
+        "warning_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "warning_lastinfo": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonfinite_detected": false,
+        "max_human_dynamics_residual_nm": 4.213518423057394e-12
+      },
+      "scientific_parameters_changed_for_run": false,
+      "controller_model_held_nominal": true,
+      "protective_logic_used": false,
+      "outcome_reason": "completed_reference",
+      "true_plant_registered_parameters": {
+        "mass_scale": 1.0,
+        "lc1_scale": 1.0,
+        "lc2_scale": 1.0,
+        "passive_stiffness_scale": 1.0,
+        "q_rest_offset_deg": [
+          0.0,
+          0.0
+        ],
+        "sleeve_center_scale": 1.0
+      }
+    },
+    "mild": {
+      "evidence_category": "engineering_validation_smoke",
+      "controller": "Human V2 computed-acceleration inverse dynamics cuff wrench feedforward plus existing rigid-cuff 6D pose feedback",
+      "case": "rehab_reference",
+      "mismatch_case": "mild",
+      "reference_start_q_deg": [
+        1.2162162162162167,
+        3.0000000000000004
+      ],
+      "reference_peak_q_deg": [
+        45.0,
+        84.0
+      ],
+      "requested_duration_s": 15.0,
+      "completed_duration_s": 14.999999999997126,
+      "termination_reason": "completed_reference",
+      "mechanically_complete_for_follow_on": true,
+      "tracking": {
+        "rmse_deg": [
+          0.3598316828988597,
+          0.7235823076940044
+        ],
+        "max_abs_error_deg": [
+          0.6524570302130819,
+          1.3611205276920249
+        ],
+        "max_abs_error_time_s": [
+          2.469999999999839,
+          2.4649999999998395
+        ],
+        "q_ref_at_max_error_deg": [
+          4.718006481450182,
+          9.421199217619106
+        ],
+        "terminal_error_deg": [
+          -0.4434298090567076,
+          -0.8736407595887465
+        ],
+        "actual_q_min_deg": [
+          0.7727297604355049,
+          2.126359240411254
+        ],
+        "actual_q_max_deg": [
+          44.85931008100657,
+          83.80462591181093
+        ],
+        "rom_violation": false,
+        "soft_limit_active": true,
+        "first_soft_limit_active_time_s": 0.0,
+        "peak_abs_soft_limit_torque_nm": [
+          15.108109307807329,
+          4.746023323406541
+        ],
+        "hold_max_abs_drift_deg": [
+          43.64309386479035,
+          80.80462591181093
+        ],
+        "tail_max_abs_joint_speed_deg_s": 1.6723916010470739,
+        "tail_bed_force_range_n": 4.939289636410922,
+        "hold_stability_gate": null,
+        "first_nominal_envelope_crossing": {
+          "time_s": 0.11500000000000009,
+          "phase": "lower_endpoint_hold",
+          "joint": "q1",
+          "q_deg": 0.994119978618464,
+          "q_ref_deg": 1.2162162162162167,
+          "abs_error_deg": 0.22209623759775265,
+          "nominal_global_max_error_deg": 0.21205298198418276
+        },
+        "first_2x_nominal_envelope_crossing": {
+          "time_s": 0.32000000000000023,
+          "phase": "lower_endpoint_hold",
+          "joint": "q1",
+          "q_deg": 0.7912299482777944,
+          "q_ref_deg": 1.2162162162162167,
+          "abs_error_deg": 0.4249862679384223,
+          "twice_nominal_global_max_error_deg": 0.42410596396836553
+        }
+      },
+      "cuff": {
+        "peak_translational_force_n": 114.9751923070785,
+        "force_gate_n": 200.0,
+        "force_gate_respected": true,
+        "peak_abs_sagittal_moment_my_nm": 28.419742725184033,
+        "peak_allocated_translational_force_n": 104.08762175639288,
+        "peak_abs_allocated_my_nm": 27.82546984391807,
+        "moment_limit_nm": null,
+        "peak_relative_position_error_mm": 0.04427496011251693,
+        "peak_relative_rotation_error_deg": 0.3743781411398975,
+        "max_wrench_reconstruction_residual_nm": 3.3755420202157334e-13
+      },
+      "robot": {
+        "joint_torque_limits_nm": [
+          300.0,
+          300.0,
+          220.0,
+          100.0,
+          80.0,
+          60.0
+        ],
+        "peak_abs_joint_torque_nm": [
+          46.01198001059024,
+          184.34566749104454,
+          98.16859186456361,
+          6.719135952384362,
+          9.213883815803115,
+          0.017884221774816553
+        ],
+        "peak_joint_torque_limit_fraction": 0.615647966278251,
+        "torque_limits_respected": true,
+        "torque_saturation_detected": false
+      },
+      "bed": {
+        "peak_force_n": 233.1331508522978,
+        "peak_penetration_mm": 5.551115123125783e-14,
+        "max_contact_count": 1,
+        "contact_active_fraction": 0.16661112962345884,
+        "active_state_transitions": 804
+      },
+      "solver": {
+        "warning_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "warning_lastinfo": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonfinite_detected": false,
+        "max_human_dynamics_residual_nm": 4.11404244005098e-12
+      },
+      "scientific_parameters_changed_for_run": true,
+      "controller_model_held_nominal": true,
+      "protective_logic_used": false,
+      "outcome_reason": "completed_reference",
+      "true_plant_registered_parameters": {
+        "mass_scale": 1.05,
+        "lc1_scale": 1.0,
+        "lc2_scale": 1.0,
+        "passive_stiffness_scale": 1.0,
+        "q_rest_offset_deg": [
+          -2.0,
+          -2.0
+        ],
+        "sleeve_center_scale": 1.0
+      }
+    },
+    "moderate": {
+      "evidence_category": "engineering_validation_smoke",
+      "controller": "Human V2 computed-acceleration inverse dynamics cuff wrench feedforward plus existing rigid-cuff 6D pose feedback",
+      "case": "rehab_reference",
+      "mismatch_case": "moderate",
+      "reference_start_q_deg": [
+        1.2162162162162167,
+        3.0000000000000004
+      ],
+      "reference_peak_q_deg": [
+        45.0,
+        84.0
+      ],
+      "requested_duration_s": 15.0,
+      "completed_duration_s": 14.999999999997126,
+      "termination_reason": "completed_reference",
+      "mechanically_complete_for_follow_on": false,
+      "tracking": {
+        "rmse_deg": [
+          0.4204534911643887,
+          0.7892586679017916
+        ],
+        "max_abs_error_deg": [
+          0.7728851211892378,
+          1.694750609734375
+        ],
+        "max_abs_error_time_s": [
+          2.2549999999998627,
+          2.2649999999998616
+        ],
+        "q_ref_at_max_error_deg": [
+          3.5254149585329837,
+          7.363311912406476
+        ],
+        "terminal_error_deg": [
+          -0.5728002932957755,
+          -1.174734410324893
+        ],
+        "actual_q_min_deg": [
+          0.6432697034556744,
+          1.825244871513266
+        ],
+        "actual_q_max_deg": [
+          45.34170056503268,
+          84.16505849122929
+        ],
+        "rom_violation": false,
+        "soft_limit_active": true,
+        "first_soft_limit_active_time_s": 0.0,
+        "peak_abs_soft_limit_torque_nm": [
+          16.539108969058862,
+          6.399719174839195
+        ],
+        "hold_max_abs_drift_deg": [
+          44.125484348816464,
+          81.16505849122929
+        ],
+        "tail_max_abs_joint_speed_deg_s": 1.9455763434600677,
+        "tail_bed_force_range_n": 0.8266184842071833,
+        "hold_stability_gate": null,
+        "first_nominal_envelope_crossing": {
+          "time_s": 0.09000000000000007,
+          "phase": "lower_endpoint_hold",
+          "joint": "q1",
+          "q_deg": 0.9982911215105758,
+          "q_ref_deg": 1.2162162162162167,
+          "abs_error_deg": 0.21792509470564092,
+          "nominal_global_max_error_deg": 0.21205298198418276
+        },
+        "first_2x_nominal_envelope_crossing": {
+          "time_s": 0.19500000000000015,
+          "phase": "lower_endpoint_hold",
+          "joint": "q1",
+          "q_deg": 0.7904211387987925,
+          "q_ref_deg": 1.2162162162162167,
+          "abs_error_deg": 0.4257950774174242,
+          "twice_nominal_global_max_error_deg": 0.42410596396836553
+        }
+      },
+      "cuff": {
+        "peak_translational_force_n": 120.45249823754129,
+        "force_gate_n": 200.0,
+        "force_gate_respected": true,
+        "peak_abs_sagittal_moment_my_nm": 27.510296426517893,
+        "peak_allocated_translational_force_n": 99.99939762528429,
+        "peak_abs_allocated_my_nm": 27.185404755167433,
+        "moment_limit_nm": null,
+        "peak_relative_position_error_mm": 0.05051473092043476,
+        "peak_relative_rotation_error_deg": 0.36301320930513775,
+        "max_wrench_reconstruction_residual_nm": 2.7860491030941415e-13
+      },
+      "robot": {
+        "joint_torque_limits_nm": [
+          300.0,
+          300.0,
+          220.0,
+          100.0,
+          80.0,
+          60.0
+        ],
+        "peak_abs_joint_torque_nm": [
+          50.98154723737895,
+          184.17296991819654,
+          100.1654949477616,
+          7.995419481554585,
+          11.05361741142302,
+          0.01973767503531494
+        ],
+        "peak_joint_torque_limit_fraction": 0.6150400557173477,
+        "torque_limits_respected": true,
+        "torque_saturation_detected": false
+      },
+      "bed": {
+        "peak_force_n": 230.76821001135585,
+        "peak_penetration_mm": 6.938893903907228e-14,
+        "max_contact_count": 1,
+        "contact_active_fraction": 0.18193935354881707,
+        "active_state_transitions": 888
+      },
+      "solver": {
+        "warning_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "warning_lastinfo": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonfinite_detected": false,
+        "max_human_dynamics_residual_nm": 3.410605131648481e-12
+      },
+      "scientific_parameters_changed_for_run": true,
+      "controller_model_held_nominal": true,
+      "protective_logic_used": false,
+      "outcome_reason": "completed_reference_terminal_tracking_tolerance_not_met",
+      "true_plant_registered_parameters": {
+        "mass_scale": 1.05,
+        "lc1_scale": 1.05,
+        "lc2_scale": 0.95,
+        "passive_stiffness_scale": 1.1,
+        "q_rest_offset_deg": [
+          -2.0,
+          -2.0
+        ],
+        "sleeve_center_scale": 1.02
+      }
+    },
+    "adverse": {
+      "evidence_category": "engineering_validation_smoke",
+      "controller": "Human V2 computed-acceleration inverse dynamics cuff wrench feedforward plus existing rigid-cuff 6D pose feedback",
+      "case": "rehab_reference",
+      "mismatch_case": "adverse",
+      "reference_start_q_deg": [
+        1.2162162162162167,
+        3.0000000000000004
+      ],
+      "reference_peak_q_deg": [
+        45.0,
+        84.0
+      ],
+      "requested_duration_s": 15.0,
+      "completed_duration_s": 14.999999999997126,
+      "termination_reason": "completed_reference",
+      "mechanically_complete_for_follow_on": false,
+      "tracking": {
+        "rmse_deg": [
+          0.9245824705831209,
+          1.347516654430812
+        ],
+        "max_abs_error_deg": [
+          1.220222813523283,
+          2.6755364577414484
+        ],
+        "max_abs_error_time_s": [
+          2.2299999999998654,
+          2.2749999999998605
+        ],
+        "q_ref_at_max_error_deg": [
+          3.4046444909452567,
+          7.45570734575226
+        ],
+        "terminal_error_deg": [
+          -0.9106939241457512,
+          -1.8112924566735737
+        ],
+        "actual_q_min_deg": [
+          0.3048343181807551,
+          1.1880031757211131
+        ],
+        "actual_q_max_deg": [
+          46.081198755818455,
+          84.83958876179543
+        ],
+        "rom_violation": false,
+        "soft_limit_active": true,
+        "first_soft_limit_active_time_s": 0.0,
+        "peak_abs_soft_limit_torque_nm": [
+          20.700603010219417,
+          11.078697428583954
+        ],
+        "hold_max_abs_drift_deg": [
+          44.86498253960224,
+          81.83958876179543
+        ],
+        "tail_max_abs_joint_speed_deg_s": 1.287223012978045,
+        "tail_bed_force_range_n": 10.323519604538436,
+        "hold_stability_gate": null,
+        "first_nominal_envelope_crossing": {
+          "time_s": 0.05000000000000004,
+          "phase": "lower_endpoint_hold",
+          "joint": "q2",
+          "q_deg": 2.5105207874738222,
+          "q_ref_deg": 3.0000000000000004,
+          "abs_error_deg": 0.4894792125261782,
+          "nominal_global_max_error_deg": 0.4893902241550805
+        },
+        "first_2x_nominal_envelope_crossing": {
+          "time_s": 0.11500000000000009,
+          "phase": "lower_endpoint_hold",
+          "joint": "q1",
+          "q_deg": 0.7765501928793823,
+          "q_ref_deg": 1.2162162162162167,
+          "abs_error_deg": 0.43966602333683436,
+          "twice_nominal_global_max_error_deg": 0.42410596396836553
+        }
+      },
+      "cuff": {
+        "peak_translational_force_n": 130.57090085049714,
+        "force_gate_n": 200.0,
+        "force_gate_respected": true,
+        "peak_abs_sagittal_moment_my_nm": 26.72133312159813,
+        "peak_allocated_translational_force_n": 93.2807181438628,
+        "peak_abs_allocated_my_nm": 26.46038989882688,
+        "moment_limit_nm": null,
+        "peak_relative_position_error_mm": 0.07081095868547445,
+        "peak_relative_rotation_error_deg": 0.35096621154459756,
+        "max_wrench_reconstruction_residual_nm": 3.745832854133839e-13
+      },
+      "robot": {
+        "joint_torque_limits_nm": [
+          300.0,
+          300.0,
+          220.0,
+          100.0,
+          80.0,
+          60.0
+        ],
+        "peak_abs_joint_torque_nm": [
+          57.40422014024023,
+          184.37614189844294,
+          102.39328220516778,
+          12.13417060174234,
+          16.985277049296634,
+          0.022099265913189756
+        ],
+        "peak_joint_torque_limit_fraction": 0.615783472175537,
+        "torque_limits_respected": true,
+        "torque_saturation_detected": false
+      },
+      "bed": {
+        "peak_force_n": 237.8668124344325,
+        "peak_penetration_mm": 5.551115123125783e-14,
+        "max_contact_count": 1,
+        "contact_active_fraction": 0.19160279906697766,
+        "active_state_transitions": 883
+      },
+      "solver": {
+        "warning_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "warning_lastinfo": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "nonfinite_detected": false,
+        "max_human_dynamics_residual_nm": 3.424815986363683e-12
+      },
+      "scientific_parameters_changed_for_run": true,
+      "controller_model_held_nominal": true,
+      "protective_logic_used": false,
+      "outcome_reason": "completed_reference_terminal_tracking_tolerance_not_met",
+      "true_plant_registered_parameters": {
+        "mass_scale": 1.1,
+        "lc1_scale": 1.1,
+        "lc2_scale": 0.9,
+        "passive_stiffness_scale": 1.2,
+        "q_rest_offset_deg": [
+          -2.0,
+          -2.0
+        ],
+        "sleeve_center_scale": 1.05
+      }
+    }
+  },
+  "adaptation_used": false
+}

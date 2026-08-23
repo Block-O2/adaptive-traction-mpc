@@ -47,6 +47,68 @@ from .kinematics import (
 POSTURES_DEG = (2.0, 10.0, 20.0, 30.0)
 RIGID_CUFF_POSTURES_DEG = (0.0, 2.0, 3.0, 5.0, 10.0, 20.0)
 
+REGISTERED_HUMAN_V2_MISMATCH_CASES = {
+    "nominal": (1.00, 1.00, 1.00, 1.00, (0.0, 0.0), 1.00),
+    "mild": (1.05, 1.00, 1.00, 1.00, (-2.0, -2.0), 1.00),
+    "moderate": (1.05, 1.05, 0.95, 1.10, (-2.0, -2.0), 1.02),
+    "adverse": (1.10, 1.10, 0.90, 1.20, (-2.0, -2.0), 1.05),
+}
+
+
+@dataclass(frozen=True)
+class _RegisteredMismatchHumanV2(HumanV2Parameters):
+    """Human V2 copy carrying only the registered direct parameter scales."""
+
+    thigh_com_scale: float = 1.0
+    shank_com_scale: float = 1.0
+    sleeve_center_scale: float = 1.0
+
+    @property
+    def thigh_com_m(self) -> float:
+        return super().thigh_com_m * self.thigh_com_scale
+
+    @property
+    def shank_com_m(self) -> float:
+        return super().shank_com_m * self.shank_com_scale
+
+    @property
+    def sleeve_center_m(self) -> float:
+        return super().sleeve_center_m * self.sleeve_center_scale
+
+
+def registered_mismatch_human_v2(
+    case_name: str,
+) -> tuple[HumanV2Parameters, dict[str, Any]]:
+    """Map a registered sensitivity case onto the current Human V2 fields."""
+
+    if case_name not in REGISTERED_HUMAN_V2_MISMATCH_CASES:
+        raise ValueError(f"unknown registered Human V2 mismatch case: {case_name}")
+    mass, lc1, lc2, stiffness, rest_deg, sleeve_center = (
+        REGISTERED_HUMAN_V2_MISMATCH_CASES[case_name]
+    )
+    nominal = HumanV2Parameters()
+    human = _RegisteredMismatchHumanV2(
+        body_mass_kg=nominal.body_mass_kg * mass,
+        q_rest_rad=tuple(
+            np.asarray(nominal.q_rest_rad) + np.radians(rest_deg)
+        ),
+        passive_stiffness_nm_rad=tuple(
+            np.asarray(nominal.passive_stiffness_nm_rad) * stiffness
+        ),
+        thigh_com_scale=lc1,
+        shank_com_scale=lc2,
+        sleeve_center_scale=sleeve_center,
+    )
+    metadata = {
+        "mass_scale": mass,
+        "lc1_scale": lc1,
+        "lc2_scale": lc2,
+        "passive_stiffness_scale": stiffness,
+        "q_rest_offset_deg": list(rest_deg),
+        "sleeve_center_scale": sleeve_center,
+    }
+    return human, metadata
+
 
 @dataclass(frozen=True)
 class DynamicRehabTrace:
@@ -69,6 +131,7 @@ class DynamicRehabTrace:
     bed_contact_count: np.ndarray
     wrench_reconstruction_residual_nm: np.ndarray
     human_dynamics_residual_nm: np.ndarray
+    human_soft_limit_torque_nm: np.ndarray
     qpos: np.ndarray
 
 
@@ -124,6 +187,9 @@ def _dynamic_trace_from_records(
         human_dynamics_residual_nm=np.array(
             [obs.human_dynamics_residual_nm for obs in observations]
         ),
+        human_soft_limit_torque_nm=np.array(
+            [obs.human_soft_limit_torque_nm for obs in observations]
+        ),
         qpos=np.array([record[2] for record in records]),
     )
 
@@ -131,11 +197,15 @@ def _dynamic_trace_from_records(
 def run_dynamic_rehab_baseline(
     lower_q2_deg: float = 10.0,
     hold_only: bool = False,
+    true_human: HumanV2Parameters | None = None,
+    controller_human: HumanV2Parameters | None = None,
+    case_name: str = "nominal",
 ) -> tuple[dict[str, Any], DynamicRehabTrace]:
     """Run a hold or rehab reference with V2 inverse-dynamics cuff feedforward."""
 
     cfg = PlantV2Config()
-    env = SleeveRobotEnvironment(config=cfg)
+    env = SleeveRobotEnvironment(human=true_human, config=cfg)
+    controller_model = controller_human or env.human
     start_q = coordinated_posture(math.radians(lower_q2_deg))
     initial = env.reset(lower_q2_deg)
     torque_limits = np.asarray(env.robot.joint_torque_limits_nm)
@@ -144,7 +214,7 @@ def run_dynamic_rehab_baseline(
         initial.human_q_rad,
         initial.human_dq_rad_s,
         initial_reference,
-        env.human,
+        controller_model,
     )
     records = [
         (
@@ -180,7 +250,7 @@ def run_dynamic_rehab_baseline(
             env.observe().human_q_rad,
             env.observe().human_dq_rad_s,
             reference,
-            env.human,
+            controller_model,
         )
         peak_allocated_force = max(
             peak_allocated_force, allocation["force_norm_n"]
@@ -191,8 +261,8 @@ def run_dynamic_rehab_baseline(
         if allocation["force_norm_n"] > cfg.force_veto_bound_n + 1e-9:
             termination_reason = "allocated_cuff_force_gate"
             break
-        target_position = sleeve_position(reference.q, env.human, cfg)
-        target_velocity = sleeve_jacobian(reference.q, env.human) @ reference.dq
+        target_position = sleeve_position(reference.q, controller_model, cfg)
+        target_velocity = sleeve_jacobian(reference.q, controller_model) @ reference.dq
         target_rotation = sleeve_rotation_matrix(reference.q)
         target_angular_velocity = np.array(
             [0.0, reference.dq[1] - reference.dq[0], 0.0]
@@ -300,6 +370,11 @@ def run_dynamic_rehab_baseline(
     )
     contact_active = trace.bed_contact_count > 0
     contact_transitions = int(np.count_nonzero(np.diff(contact_active.astype(int))))
+    soft_limit_active = np.any(
+        np.abs(trace.human_soft_limit_torque_nm) > 1e-9, axis=1
+    )
+    first_soft_limit_index = np.flatnonzero(soft_limit_active)
+    max_error_indices = np.argmax(np.abs(tracking_error), axis=0)
     summary = {
         "evidence_category": "engineering_validation_smoke",
         "controller": (
@@ -307,6 +382,7 @@ def run_dynamic_rehab_baseline(
             "feedforward plus existing rigid-cuff 6D pose feedback"
         ),
         "case": "one_second_hold" if hold_only else "rehab_reference",
+        "mismatch_case": case_name,
         "reference_start_q_deg": np.degrees(start_q).tolist(),
         "reference_peak_q_deg": [45.0, 84.0],
         "requested_duration_s": requested_duration_s,
@@ -316,10 +392,26 @@ def run_dynamic_rehab_baseline(
         "tracking": {
             "rmse_deg": np.sqrt(np.mean(tracking_error**2, axis=0)).tolist(),
             "max_abs_error_deg": np.max(np.abs(tracking_error), axis=0).tolist(),
+            "max_abs_error_time_s": [
+                float(trace.time_s[index]) for index in max_error_indices
+            ],
+            "q_ref_at_max_error_deg": [
+                float(trace.q_ref_deg[index, joint])
+                for joint, index in enumerate(max_error_indices)
+            ],
             "terminal_error_deg": tracking_error[-1].tolist(),
             "actual_q_min_deg": np.min(trace.q_deg, axis=0).tolist(),
             "actual_q_max_deg": np.max(trace.q_deg, axis=0).tolist(),
             "rom_violation": rom_violation,
+            "soft_limit_active": bool(np.any(soft_limit_active)),
+            "first_soft_limit_active_time_s": (
+                float(trace.time_s[first_soft_limit_index[0]])
+                if len(first_soft_limit_index)
+                else None
+            ),
+            "peak_abs_soft_limit_torque_nm": np.max(
+                np.abs(trace.human_soft_limit_torque_nm), axis=0
+            ).tolist(),
             "hold_max_abs_drift_deg": np.max(
                 np.abs(trace.q_deg - trace.q_deg[0]), axis=0
             ).tolist(),
@@ -369,10 +461,170 @@ def run_dynamic_rehab_baseline(
                 np.max(np.abs(trace.human_dynamics_residual_nm))
             ),
         },
-        "scientific_parameters_changed_for_run": False,
+        "scientific_parameters_changed_for_run": case_name != "nominal",
+        "controller_model_held_nominal": bool(
+            controller_model == HumanV2Parameters()
+        ),
         "protective_logic_used": False,
     }
     return summary, trace
+
+
+def _rehab_phase(time_s: float) -> str:
+    if time_s < 1.0:
+        return "lower_endpoint_hold"
+    if time_s < 7.5:
+        return "departure_to_peak"
+    if time_s < 8.5:
+        return "peak_hold"
+    return "return_to_3deg"
+
+
+def run_fixed_model_mismatch_baseline(
+) -> tuple[dict[str, Any], dict[str, DynamicRehabTrace]]:
+    """Run the registered true-plant mismatch cases with a nominal controller."""
+
+    controller_model = HumanV2Parameters()
+    case_summaries: dict[str, dict[str, Any]] = {}
+    traces: dict[str, DynamicRehabTrace] = {}
+    case_parameters: dict[str, dict[str, Any]] = {}
+    for case_name in REGISTERED_HUMAN_V2_MISMATCH_CASES:
+        true_human, parameters = registered_mismatch_human_v2(case_name)
+        case_summary, trace = run_dynamic_rehab_baseline(
+            lower_q2_deg=3.0,
+            true_human=true_human,
+            controller_human=controller_model,
+            case_name=case_name,
+        )
+        case_summaries[case_name] = case_summary
+        traces[case_name] = trace
+        case_parameters[case_name] = parameters
+
+    nominal_error_envelope_deg = np.max(
+        np.abs(traces["nominal"].q_deg - traces["nominal"].q_ref_deg), axis=0
+    )
+    for case_name, trace in traces.items():
+        case_summary = case_summaries[case_name]
+        if case_name == "nominal":
+            crossing = None
+            material_crossing = None
+        else:
+            error = np.abs(trace.q_deg - trace.q_ref_deg)
+            crossed = error > nominal_error_envelope_deg[None, :] + 1e-12
+            indices = np.argwhere(crossed)
+            if len(indices):
+                sample_index, joint_index = indices[0]
+                crossing = {
+                    "time_s": float(trace.time_s[sample_index]),
+                    "phase": _rehab_phase(float(trace.time_s[sample_index])),
+                    "joint": f"q{joint_index + 1}",
+                    "q_deg": float(trace.q_deg[sample_index, joint_index]),
+                    "q_ref_deg": float(
+                        trace.q_ref_deg[sample_index, joint_index]
+                    ),
+                    "abs_error_deg": float(error[sample_index, joint_index]),
+                    "nominal_global_max_error_deg": float(
+                        nominal_error_envelope_deg[joint_index]
+                    ),
+                }
+            else:
+                crossing = None
+            material_indices = np.argwhere(
+                error > 2.0 * nominal_error_envelope_deg[None, :]
+            )
+            if len(material_indices):
+                sample_index, joint_index = material_indices[0]
+                material_crossing = {
+                    "time_s": float(trace.time_s[sample_index]),
+                    "phase": _rehab_phase(float(trace.time_s[sample_index])),
+                    "joint": f"q{joint_index + 1}",
+                    "q_deg": float(trace.q_deg[sample_index, joint_index]),
+                    "q_ref_deg": float(
+                        trace.q_ref_deg[sample_index, joint_index]
+                    ),
+                    "abs_error_deg": float(error[sample_index, joint_index]),
+                    "twice_nominal_global_max_error_deg": float(
+                        2.0 * nominal_error_envelope_deg[joint_index]
+                    ),
+                }
+            else:
+                material_crossing = None
+        case_summary["tracking"]["first_nominal_envelope_crossing"] = crossing
+        case_summary["tracking"]["first_2x_nominal_envelope_crossing"] = (
+            material_crossing
+        )
+        termination = case_summary["termination_reason"]
+        if termination != "completed_reference":
+            outcome = termination
+        elif case_summary["tracking"]["rom_violation"]:
+            outcome = "completed_with_rom_violation"
+        elif not case_summary["cuff"]["force_gate_respected"]:
+            outcome = "completed_with_cuff_force_violation"
+        elif not case_summary["robot"]["torque_limits_respected"]:
+            outcome = "completed_with_robot_torque_violation"
+        elif not case_summary["mechanically_complete_for_follow_on"]:
+            outcome = "completed_reference_terminal_tracking_tolerance_not_met"
+        else:
+            outcome = "completed_reference"
+        case_summary["outcome_reason"] = outcome
+        case_summary["true_plant_registered_parameters"] = case_parameters[
+            case_name
+        ]
+
+    return (
+        {
+            "evidence_category": "engineering_validation_smoke",
+            "experiment": "fixed_nominal_controller_true_human_v2_mismatch",
+            "controller_model": "nominal Human V2 for every case",
+            "true_plant_cases": case_parameters,
+            "reference": "3 degree full 15 s rehab cycle",
+            "degradation_onset_definition": (
+                "first sample where either joint absolute tracking error exceeds "
+                "that joint's global maximum error in the nominal run"
+            ),
+            "material_degradation_onset_definition": (
+                "first sample where either joint absolute tracking error exceeds "
+                "twice that joint's global maximum error in the nominal run"
+            ),
+            "nominal_tracking_error_envelope_deg": (
+                nominal_error_envelope_deg.tolist()
+            ),
+            "cases": case_summaries,
+            "adaptation_used": False,
+        },
+        traces,
+    )
+
+
+def write_fixed_model_mismatch_artifacts(
+    output_dir: Path,
+    summary: dict[str, Any],
+    traces: dict[str, DynamicRehabTrace],
+) -> None:
+    """Write one compact summary and one compressed required-signal log."""
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "summary.json").write_text(
+        json.dumps(summary, indent=2, allow_nan=False) + "\n", encoding="utf-8"
+    )
+    arrays: dict[str, np.ndarray] = {}
+    for case_name, trace in traces.items():
+        arrays.update(
+            {
+                f"{case_name}_time_s": trace.time_s,
+                f"{case_name}_q_deg": trace.q_deg,
+                f"{case_name}_q_ref_deg": trace.q_ref_deg,
+                f"{case_name}_cuff_force_n": trace.cuff_force_n,
+                f"{case_name}_cuff_my_nm": trace.cuff_my_nm,
+                f"{case_name}_robot_torque_limit_fraction": (
+                    trace.robot_torque_limit_fraction
+                ),
+                f"{case_name}_soft_limit_torque_nm": (
+                    trace.human_soft_limit_torque_nm
+                ),
+            }
+        )
+    np.savez_compressed(output_dir / "timeseries.npz", **arrays)
 
 
 def write_dynamic_rehab_artifacts(
