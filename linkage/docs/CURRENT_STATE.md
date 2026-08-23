@@ -169,6 +169,21 @@ observed at that stage; they do not independently override this state summary.
   protective motion is skipped by the registered gate. This is a low-angle
   physical-support/preload blocker, not evidence that protective mode itself
   is infeasible. See [MUJOCO_SLEEVE_ROBOT_V2.md](MUJOCO_SLEEVE_ROBOT_V2.md).
+- The Contact-Consistent Feasibility Audit is an offline diagnostic based
+  directly on the clean MuJoCo Sleeve/Robot Plant V2 branch. The supplied
+  ankle-level candidate path is nonpenetrating, but all bed points with useful
+  generalized-force directions are separating or geometrically clear. The
+  maintained proximal-thigh point has zero generalized-force direction, so the
+  augmented admissible map provides no more authority than the robot-only
+  sleeve map. There is no feasible interval continuous from measured rest.
+  The complete Human V2 load produces a narrow nominal force-cancellation
+  island at q2=`2.116--2.626 deg`, followed by another infeasible interval;
+  persistent robot-only feasibility begins at q2=`18.795 deg` in the retained
+  scan. The global classification is `SUPPORT_AUTHORITY_GAP`. Dynamic bridge
+  validation is deferred pending a hardware-faithful sleeve moment or second
+  mechanical channel and reconciliation of the Human V2 cubic soft-limit term
+  missing from the current MJCF joints. See
+  [MUJOCO_CONTACT_CONSISTENT_FEASIBILITY_AUDIT.md](MUJOCO_CONTACT_CONSISTENT_FEASIBILITY_AUDIT.md).
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.

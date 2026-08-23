@@ -55,6 +55,9 @@ The categories below are navigational only; existing reports remain in place.
   — CR12 asset audit, CR12-like six-DoF engineering plant, bilateral sleeve,
   BED_START equilibrium, fixture topology probes, released dynamic-authority
   gates, and the retained low-angle negative result.
+- [MUJOCO_CONTACT_CONSISTENT_FEASIBILITY_AUDIT.md](MUJOCO_CONTACT_CONSISTENT_FEASIBILITY_AUDIT.md)
+  — offline candidate-path contact kinematics, complete Human V2 quasistatic
+  load, unilateral reaction solve, force/rank timeline, and support-gap result.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
