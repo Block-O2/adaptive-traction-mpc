@@ -58,6 +58,10 @@ The categories below are navigational only; existing reports remain in place.
 - [MUJOCO_CONTACT_CONSISTENT_FEASIBILITY_AUDIT.md](MUJOCO_CONTACT_CONSISTENT_FEASIBILITY_AUDIT.md)
   — offline candidate-path contact kinematics, complete Human V2 quasistatic
   load, unilateral reaction solve, force/rank timeline, and support-gap result.
+- [MUJOCO_DYNAMIC_PROTECTIVE_TRANSITION_V1.md](MUJOCO_DYNAMIC_PROTECTIVE_TRANSITION_V1.md)
+  — fixed 3-degree-floor dynamic primitive, explicit retained soft-limit
+  dynamics, candidate target matrix, synchronized evidence, and startup-floor
+  negative result.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 

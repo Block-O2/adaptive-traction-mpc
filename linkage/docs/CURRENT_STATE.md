@@ -184,6 +184,18 @@ observed at that stage; they do not independently override this state summary.
   mechanical channel and reconciliation of the Human V2 cubic soft-limit term
   missing from the current MJCF joints. See
   [MUJOCO_CONTACT_CONSISTENT_FEASIBILITY_AUDIT.md](MUJOCO_CONTACT_CONSISTENT_FEASIBILITY_AUDIT.md).
+- Dynamic Protective Transition V1 explicitly initializes the unchanged
+  point-sleeve plant at the 3-degree engineering floor and applies the retained
+  Human V2 cubic soft-limit RHS torque omitted by PR #22's MJCF. One registered
+  minimum-jerk ankle-level primitive with 5 deg/s peak reference speed tests
+  forward targets at 10/15/20/25/30 degrees. All five cases move through the
+  2.95-degree engineering-floor guard within 25--30 ms, before their references
+  differ materially. Peak sleeve interaction remains only 27.01--28.53 N.
+  q1 startup collapse and coupled q2 reversal, sometimes with a brief bed
+  impact, are the direct simulated mechanism; force saturation is not. No
+  target or reverse run is admitted, so no safe dynamic bridge or handoff
+  region is established. The fixed experiment is retained without tuning. See
+  [MUJOCO_DYNAMIC_PROTECTIVE_TRANSITION_V1.md](MUJOCO_DYNAMIC_PROTECTIVE_TRANSITION_V1.md).
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
