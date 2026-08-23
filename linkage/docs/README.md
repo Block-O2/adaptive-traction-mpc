@@ -51,6 +51,10 @@ The categories below are navigational only; existing reports remain in place.
 - [NEAR_EXTENSION_PROTECTIVE_MODE.md](NEAR_EXTENSION_PROTECTIVE_MODE.md)
   — sanity-only low-speed kinematic takeoff/landing patch, force-veto command
   interface, q-switch evidence, and MuJoCo validation boundary.
+- [MUJOCO_SLEEVE_ROBOT_V2.md](MUJOCO_SLEEVE_ROBOT_V2.md)
+  — CR12 asset audit, CR12-like six-DoF engineering plant, bilateral sleeve,
+  BED_START equilibrium, fixture topology probes, released dynamic-authority
+  gates, and the retained low-angle negative result.
 - [Local results policy](../results/README.md) — ignored artifact and retention
   rules.
 
