@@ -1,5 +1,67 @@
 # MuJoCo Sleeve/Robot Plant V2
 
+## Rigid-cuff pose revision
+
+This branch starts from plant V2 commit `9d082c3` and replaces the former
+translation-only `connect` with a six-constraint site-to-site `weld`.  Reset and
+IK now match both cuff position and orientation, and the existing Cartesian
+joint-torque servo now applies `Jp^T F + Jr^T M`.  Translational force retains
+the 200 N gate.  No cuff-moment limit is defined.
+
+The global joint default no longer adds armature to Human V2.  Hip and knee
+armature are explicitly zero; each robot joint retains `0.003`.  The formal
+Human V2 5 degree cubic soft limit, 25 Nm boundary torque, and 2 Nms/rad
+outward-motion damping are applied as physical right-hand-side human torque.
+
+Weld constraint multipliers are not interpreted directly as a six-axis
+physical wrench.  The implementation isolates the weld equality's generalized
+constraint force and reconstructs the world-frame cuff wrench through the
+relative site Jacobian and virtual work.  The recorded reconstruction residual
+is the residual of that generalized-force identity.
+
+### Pre-trajectory validation
+
+The posture validation is an `engineering_validation_smoke`; it does not run a
+protective trajectory or implement MPC/hybrid logic.  At each posture it:
+
+1. compares the MuJoCo human mass block with the analytical Human V2 matrix;
+2. checks reset translation and rotation closure of the weld;
+3. solves the suspended static Human V2 equations for minimum translational
+   cuff force with free sagittal moment `My` (no mixed-unit norm or moment
+   bound), then checks the corresponding robot inverse-static torques against
+   the retained per-joint limits;
+4. verifies physical-wrench reconstruction from MuJoCo generalized constraint
+   force in a separate solver probe.
+
+| q2 (deg) | coordinated q1 (deg) | max mass error | pose error (mm / deg) | force (N) | My (Nm) | peak robot torque / limit | force gate |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0 | -0.4054 | 2.00e-13 | 3.37e-13 / 9.39e-15 | 59.998 | -55.993 | 45.55% | yes |
+| 2 | 0.6757 | 2.00e-13 | 1.17e-13 / 2.19e-14 | 21.376 | -6.696 | 33.77% | yes |
+| 3 | 1.2162 | 2.01e-13 | 1.31e-13 / 1.12e-14 | 42.897 | 5.026 | 41.08% | yes |
+| 5 | 2.2973 | 2.00e-13 | 7.81e-14 / 6.39e-15 | 63.509 | 14.348 | 47.74% | yes |
+| 10 | 5.0000 | 2.01e-13 | 1.23e-12 / 4.90e-14 | 75.396 | 19.203 | 51.61% | yes |
+| 20 | 10.4054 | 2.00e-13 | 1.32e-13 / 1.33e-14 | 80.594 | 21.560 | 53.64% | yes |
+
+At 3 degrees, the revised force is 42.897 N with `My=5.026 Nm`, an 87.67%
+reduction from the previously reported 348 N point-force requirement.  This is
+the expected mechanical effect of admitting cuff moment; it is not a hardware
+validation.  At q2=0 the existing coordinated-posture rule gives q1=-0.4054
+degrees, outside nominal hip ROM, so that row is a requested boundary mechanics
+probe rather than an admissible trajectory state.
+
+Reproduce the table without running a protective trajectory:
+
+```bash
+conda run -n mpc_learn python scripts/run_mujoco_sleeve_robot_v2.py \
+  --output-dir linkage/results/mujoco_rigid_cuff_pose_v2
+```
+
+Machine-readable evidence is in
+`linkage/results/mujoco_rigid_cuff_pose_v2/summary.json` and
+`posture_validation.csv`.
+
+## Historical translation-only baseline at `9d082c3`
+
 ## Scope and result
 
 This is an engineering-validation smoke test of the physical plant interface.

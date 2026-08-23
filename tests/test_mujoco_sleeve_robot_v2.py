@@ -9,22 +9,27 @@ import xml.etree.ElementTree as ET
 import mujoco
 import numpy as np
 import pytest
+from scipy.spatial.transform import Rotation
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
 
 from traction_mpc.mujoco_sleeve_robot_v2.config import (
+    HumanV2Parameters,
     PlantV2Config,
     RobotV2Parameters,
 )
 from traction_mpc.mujoco_sleeve_robot_v2.environment import SleeveRobotEnvironment
 from traction_mpc.mujoco_sleeve_robot_v2.model import build_plant_xml
-from traction_mpc.mujoco_sleeve_robot_v2.validation import run_validation
+from traction_mpc.mujoco_sleeve_robot_v2.validation import (
+    RIGID_CUFF_POSTURES_DEG,
+    run_rigid_cuff_posture_validation,
+)
 
 
 @pytest.fixture(scope="module")
 def validation_result():
-    return run_validation()
+    return run_rigid_cuff_posture_validation()
 
 
 def test_old_cr12_asset_is_visual_only_and_not_used_as_plant() -> None:
@@ -51,12 +56,13 @@ def test_v2_model_has_six_dof_robot_and_no_tendon_or_carriage() -> None:
     assert 'name="sleeve_geom"' in xml
 
 
-@pytest.mark.parametrize("q2_deg", [2.0, 10.0, 20.0, 30.0])
-def test_robot_ik_reaches_sleeve_with_full_cartesian_rank(q2_deg: float) -> None:
+@pytest.mark.parametrize("q2_deg", RIGID_CUFF_POSTURES_DEG)
+def test_robot_ik_reaches_sleeve_with_full_pose_rank(q2_deg: float) -> None:
     env = SleeveRobotEnvironment()
     observation = env.reset(q2_deg)
     assert np.linalg.norm(observation.ee_position_m - observation.sleeve_position_m) < 1e-5
-    assert np.linalg.matrix_rank(env.ee_jacobian(), tol=1e-6) == 3
+    assert observation.sleeve_relative_rotation_rad < 1e-5
+    assert np.linalg.matrix_rank(env.ee_pose_jacobian(), tol=1e-6) == 6
 
 
 def test_bilateral_sleeve_and_unilateral_bed_parameters_are_registered() -> None:
@@ -68,44 +74,61 @@ def test_bilateral_sleeve_and_unilateral_bed_parameters_are_registered() -> None
     assert config.force_veto_bound_n == 200.0
     assert (
         env.model.eq_type[env.model.equality("sleeve_connection").id]
-        == mujoco.mjtEq.mjEQ_CONNECT
+        == mujoco.mjtEq.mjEQ_WELD
     )
+    assert np.allclose(env.model.dof_armature[:2], 0.0)
+    assert np.allclose(env.model.dof_armature[2:], 0.003)
     assert env.model.geom("bed").contype != 0
     assert env.model.geom("sleeve_geom").contype == 0
 
 
-def test_bed_start_distinguishes_initialization_from_resting_equilibrium(
+def test_formal_human_v2_cubic_soft_limit_is_retained() -> None:
+    human = HumanV2Parameters()
+    env = SleeveRobotEnvironment(human=human)
+    assert human.soft_limit_margin_rad == pytest.approx(np.radians(5.0))
+    assert human.soft_limit_boundary_torque_nm == 25.0
+    assert human.soft_limit_damping_nms_rad == 2.0
+    assert env.reset(0.0).human_soft_limit_torque_nm[1] == pytest.approx(25.0, abs=1e-6)
+    assert env.reset(2.0).human_soft_limit_torque_nm[1] == pytest.approx(5.4, abs=1e-6)
+    assert env.reset(5.0).human_soft_limit_torque_nm[1] == pytest.approx(0.0, abs=1e-10)
+
+
+def test_pose_servo_adds_orientation_control_without_a_moment_gate() -> None:
+    env = SleeveRobotEnvironment(fixture_q2_deg=10.0)
+    observation = env.reset(10.0)
+    target_rotation = (
+        Rotation.from_rotvec(np.array([0.0, 0.01, 0.0])).as_matrix()
+        @ observation.ee_rotation_matrix
+    )
+    env.step_cartesian(
+        observation.ee_position_m,
+        np.zeros(3),
+        target_rotation,
+        np.zeros(3),
+    )
+    assert env.last_cartesian_moment_command_nm[1] > 0.0
+    assert np.all(
+        np.abs(env.last_joint_torque_command_nm)
+        <= np.asarray(env.robot.joint_torque_limits_nm) + 1e-9
+    )
+    assert not hasattr(env.config, "moment_veto_bound_nm")
+
+
+def test_six_posture_mass_pose_wrench_and_torque_validation(validation_result) -> None:
+    assert tuple(row["q2_deg"] for row in validation_result) == RIGID_CUFF_POSTURES_DEG
+    assert all(row["mass_matrix_max_abs_error"] < 1e-10 for row in validation_result)
+    assert all(row["relative_position_error_mm"] < 1e-6 for row in validation_result)
+    assert all(row["relative_rotation_error_deg"] < 1e-6 for row in validation_result)
+    assert all(row["static_wrench_equation_residual_nm"] < 1e-10 for row in validation_result)
+    assert all(row["wrench_reconstruction_residual_nm"] < 1e-10 for row in validation_result)
+    assert all(row["translational_force_gate_passed"] for row in validation_result)
+    assert all(row["robot_torque_limits_respected"] for row in validation_result)
+
+
+def test_three_degree_wrench_substantially_reduces_previous_point_force(
     validation_result,
 ) -> None:
-    summary, _ = validation_result
-    bed = summary["bed_start"]
-    assert bed["stable_by_registered_tail_gate"] is True
-    assert bed["initialized_q2_deg"] == 2.0
-    assert bed["terminal_2deg_held_without_preload"] is False
-    assert bed["max_bed_penetration_mm"] < 2.0
-    assert bed["bed_contact_count_transitions"] > 0
-
-
-def test_fixture_topology_gate_passes_at_all_registered_postures(
-    validation_result,
-) -> None:
-    summary, _ = validation_result
-    assert summary["fixture_gate_passed"] is True
-    assert len(summary["fixture_probes"]) == 8
-    assert all(row["force_direction_cosine"] > 0.95 for row in summary["fixture_probes"])
-    assert all(row["sleeve_deformation_over_command"] < 0.01 for row in summary["fixture_probes"])
-
-
-def test_dynamic_gate_blocks_complete_motion_when_low_angle_equilibria_fail(
-    validation_result,
-) -> None:
-    summary, _ = validation_result
-    equilibria = {row["q2_deg"]: row for row in summary["dynamic_equilibria"]}
-    assert equilibria[2.0]["passed"] is False
-    assert equilibria[10.0]["passed"] is False
-    assert equilibria[20.0]["passed"] is True
-    assert equilibria[30.0]["passed"] is True
-    assert summary["dynamic_authority_gate_passed"] is False
-    assert summary["complete_protective_motion"] == "skipped_by_authority_gate"
-    assert {row["q2_deg"] for row in summary["dynamic_probes"]} == {20.0, 30.0}
-    assert all(row["passed"] for row in summary["dynamic_probes"])
+    row = next(row for row in validation_result if row["q2_deg"] == 3.0)
+    assert row["cuff_force_n"] < 0.5 * 348.0
+    assert abs(row["cuff_my_nm"]) > 0.0
+    assert row["force_reduction_vs_previous_348n_percent"] > 50.0

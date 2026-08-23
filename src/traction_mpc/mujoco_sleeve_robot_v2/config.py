@@ -18,6 +18,10 @@ class HumanV2Parameters:
     passive_damping_nms_rad: tuple[float, float] = (5.0, 5.0)
     q_min_rad: tuple[float, float] = (0.0, 0.0)
     q_max_rad: tuple[float, float] = (math.radians(80.0), math.radians(100.0))
+    soft_limit_margin_rad: float = math.radians(5.0)
+    soft_limit_numerical_tolerance_rad: float = 1e-9
+    soft_limit_boundary_torque_nm: float = 25.0
+    soft_limit_damping_nms_rad: float = 2.0
 
     @property
     def thigh_length_m(self) -> float:
@@ -140,6 +144,8 @@ class PlantV2Config:
 
     cartesian_kp_n_m: float = 3000.0
     cartesian_kd_ns_m: float = 140.0
+    orientation_kp_nm_rad: float = 120.0
+    orientation_kd_nms_rad: float = 12.0
     nullspace_kp_nm_rad: float = 12.0
     nullspace_kd_nms_rad: float = 3.0
     jacobian_damping: float = 1e-4

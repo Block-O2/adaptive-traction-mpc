@@ -8,9 +8,10 @@ import math
 import mujoco
 import numpy as np
 from scipy.optimize import least_squares
+from scipy.spatial.transform import Rotation
 
 from .config import HumanV2Parameters, PlantV2Config, RobotV2Parameters
-from .kinematics import coordinated_posture, sleeve_position
+from .kinematics import coordinated_posture, sleeve_position, sleeve_rotation_matrix
 from .model import build_plant_xml
 
 
@@ -23,18 +24,28 @@ class PlantObservation:
     robot_dq_rad_s: np.ndarray
     ee_position_m: np.ndarray
     ee_velocity_m_s: np.ndarray
+    ee_rotation_matrix: np.ndarray
+    ee_angular_velocity_rad_s: np.ndarray
     sleeve_position_m: np.ndarray
     sleeve_velocity_m_s: np.ndarray
+    sleeve_rotation_matrix: np.ndarray
+    sleeve_angular_velocity_rad_s: np.ndarray
     sleeve_force_vector_n: np.ndarray
     sleeve_force_n: float
+    sleeve_moment_vector_nm: np.ndarray
+    sleeve_moment_my_nm: float
+    sleeve_wrench_reconstruction_residual_nm: float
     sleeve_deformation_m: float
+    sleeve_relative_rotation_rad: float
     bed_force_n: float
     bed_penetration_m: float
     bed_contact_count: int
     fixture_reaction_nm: np.ndarray
     human_dynamics_residual_nm: np.ndarray
     cartesian_force_command_n: np.ndarray
+    cartesian_moment_command_nm: np.ndarray
     joint_torque_command_nm: np.ndarray
+    human_soft_limit_torque_nm: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -54,7 +65,9 @@ class PlantSnapshot:
     time_s: float
     eq_active: np.ndarray
     neutral_robot_q: np.ndarray
+    neutral_ee_rotation_matrix: np.ndarray
     cartesian_force_command_n: np.ndarray
+    cartesian_moment_command_nm: np.ndarray
     joint_torque_command_nm: np.ndarray
 
 
@@ -100,7 +113,9 @@ class SleeveRobotEnvironment:
             if equality_id >= 0:
                 self._fixture_equality_ids.append(equality_id)
         self.neutral_robot_q = np.zeros(6)
+        self.neutral_ee_rotation_matrix = np.eye(3)
         self.last_cartesian_force_command_n = np.zeros(3)
+        self.last_cartesian_moment_command_nm = np.zeros(3)
         self.last_joint_torque_command_nm = np.zeros(6)
 
     @property
@@ -116,20 +131,33 @@ class SleeveRobotEnvironment:
         for name, value in zip(self._human_joint_names, human_q, strict=True):
             self.data.joint(name).qpos[0] = value
         target = sleeve_position(human_q, self.human, self.config)
-        robot_q = self._solve_robot_ik(target)
+        target_rotation = sleeve_rotation_matrix(human_q)
+        robot_q = self._solve_robot_ik(target, target_rotation)
         self.data.qpos[self._robot_qpos_indices] = robot_q
         self.data.qvel[:] = 0.0
         self.data.ctrl[:] = 0.0
         self.neutral_robot_q = robot_q.copy()
+        self.neutral_ee_rotation_matrix = target_rotation.copy()
         self.last_cartesian_force_command_n = np.zeros(3)
+        self.last_cartesian_moment_command_nm = np.zeros(3)
         self.last_joint_torque_command_nm = np.zeros(6)
         self.data.eq_active[self._sleeve_equality_id] = 1
         for equality_id in self._fixture_equality_ids:
             self.data.eq_active[equality_id] = 1
+        self._apply_human_soft_limit()
         mujoco.mj_forward(self.model, self.data)
-        ik_error = np.linalg.norm(self.data.site("robot_ee_site").xpos - target)
-        if ik_error > 1e-5:
-            raise RuntimeError(f"robot IK residual is {ik_error:.6g} m")
+        ik_position_error = np.linalg.norm(self.data.site("robot_ee_site").xpos - target)
+        ik_rotation_error = np.linalg.norm(
+            self._rotation_error(
+                target_rotation,
+                self.data.site("robot_ee_site").xmat.reshape(3, 3),
+            )
+        )
+        if ik_position_error > 1e-5 or ik_rotation_error > 1e-5:
+            raise RuntimeError(
+                "robot pose IK residual is "
+                f"{ik_position_error:.6g} m / {ik_rotation_error:.6g} rad"
+            )
         return self.observe()
 
     def release_fixture(self) -> None:
@@ -144,7 +172,9 @@ class SleeveRobotEnvironment:
             time_s=float(self.data.time),
             eq_active=self.data.eq_active.copy(),
             neutral_robot_q=self.neutral_robot_q.copy(),
+            neutral_ee_rotation_matrix=self.neutral_ee_rotation_matrix.copy(),
             cartesian_force_command_n=self.last_cartesian_force_command_n.copy(),
+            cartesian_moment_command_nm=self.last_cartesian_moment_command_nm.copy(),
             joint_torque_command_nm=self.last_joint_torque_command_nm.copy(),
         )
 
@@ -154,8 +184,11 @@ class SleeveRobotEnvironment:
         self.data.time = snapshot.time_s
         self.data.eq_active[:] = snapshot.eq_active
         self.neutral_robot_q = snapshot.neutral_robot_q.copy()
+        self.neutral_ee_rotation_matrix = snapshot.neutral_ee_rotation_matrix.copy()
         self.last_cartesian_force_command_n = snapshot.cartesian_force_command_n.copy()
+        self.last_cartesian_moment_command_nm = snapshot.cartesian_moment_command_nm.copy()
         self.last_joint_torque_command_nm = snapshot.joint_torque_command_nm.copy()
+        self._apply_human_soft_limit()
         mujoco.mj_forward(self.model, self.data)
 
     def observe(self) -> PlantObservation:
@@ -165,9 +198,15 @@ class SleeveRobotEnvironment:
         robot_dq = self.data.qvel[self._robot_dof_indices].copy()
         ee_position = self.data.site("robot_ee_site").xpos.copy()
         sleeve_position_world = self.data.site("sleeve_attach_site").xpos.copy()
-        ee_velocity = self._site_velocity(self._ee_site_id)
-        sleeve_velocity = self._site_velocity(self._sleeve_site_id)
-        sleeve_force = self._sleeve_force()
+        ee_rotation = self.data.site("robot_ee_site").xmat.reshape(3, 3).copy()
+        sleeve_rotation = self.data.site("sleeve_attach_site").xmat.reshape(3, 3).copy()
+        ee_angular_velocity, ee_velocity = self._site_velocity(self._ee_site_id)
+        sleeve_angular_velocity, sleeve_velocity = self._site_velocity(
+            self._sleeve_site_id
+        )
+        sleeve_wrench, wrench_residual = self._sleeve_wrench()
+        sleeve_force = sleeve_wrench[:3]
+        sleeve_moment = sleeve_wrench[3:]
         bed_force, penetration, contact_count = self._bed_contact_metrics()
         return PlantObservation(
             time_s=float(self.data.time),
@@ -177,24 +216,38 @@ class SleeveRobotEnvironment:
             robot_dq_rad_s=robot_dq,
             ee_position_m=ee_position,
             ee_velocity_m_s=ee_velocity,
+            ee_rotation_matrix=ee_rotation,
+            ee_angular_velocity_rad_s=ee_angular_velocity,
             sleeve_position_m=sleeve_position_world,
             sleeve_velocity_m_s=sleeve_velocity,
+            sleeve_rotation_matrix=sleeve_rotation,
+            sleeve_angular_velocity_rad_s=sleeve_angular_velocity,
             sleeve_force_vector_n=sleeve_force,
             sleeve_force_n=float(np.linalg.norm(sleeve_force)),
+            sleeve_moment_vector_nm=sleeve_moment,
+            sleeve_moment_my_nm=float(sleeve_moment[1]),
+            sleeve_wrench_reconstruction_residual_nm=wrench_residual,
             sleeve_deformation_m=float(np.linalg.norm(ee_position - sleeve_position_world)),
+            sleeve_relative_rotation_rad=float(
+                np.linalg.norm(self._rotation_error(sleeve_rotation, ee_rotation))
+            ),
             bed_force_n=bed_force,
             bed_penetration_m=penetration,
             bed_contact_count=contact_count,
             fixture_reaction_nm=self._fixture_reaction(),
             human_dynamics_residual_nm=self._human_dynamics_residual(),
             cartesian_force_command_n=self.last_cartesian_force_command_n.copy(),
+            cartesian_moment_command_nm=self.last_cartesian_moment_command_nm.copy(),
             joint_torque_command_nm=self.last_joint_torque_command_nm.copy(),
+            human_soft_limit_torque_nm=self._human_soft_limit_torque(),
         )
 
     def step_cartesian(
         self,
         target_position_m: np.ndarray,
         target_velocity_m_s: np.ndarray,
+        target_rotation_matrix: np.ndarray | None = None,
+        target_angular_velocity_rad_s: np.ndarray | None = None,
     ) -> PlantStep:
         before = self.observe()
         previous_active = before.bed_force_n >= 2.0
@@ -205,7 +258,13 @@ class SleeveRobotEnvironment:
         peak_bed = 0.0
         peak_penetration = 0.0
         for _ in range(self.config.control_substeps):
-            self._apply_cartesian_control(target_position_m, target_velocity_m_s)
+            self._apply_cartesian_control(
+                target_position_m,
+                target_velocity_m_s,
+                target_rotation_matrix,
+                target_angular_velocity_rad_s,
+            )
+            self._apply_human_soft_limit()
             mujoco.mj_step(self.model, self.data)
             observation = self.observe()
             active = observation.bed_force_n >= 2.0
@@ -229,6 +288,8 @@ class SleeveRobotEnvironment:
         self,
         target_position_m: np.ndarray,
         target_velocity_m_s: np.ndarray,
+        target_rotation_matrix: np.ndarray | None,
+        target_angular_velocity_rad_s: np.ndarray | None,
     ) -> None:
         observation = self.observe()
         force = self.config.cartesian_kp_n_m * (
@@ -241,9 +302,25 @@ class SleeveRobotEnvironment:
             -self.config.actuator_cartesian_force_bound_n,
             self.config.actuator_cartesian_force_bound_n,
         )
-        jacobian = self.ee_jacobian()
+        target_rotation = (
+            self.neutral_ee_rotation_matrix
+            if target_rotation_matrix is None
+            else np.asarray(target_rotation_matrix)
+        )
+        target_angular_velocity = (
+            np.zeros(3)
+            if target_angular_velocity_rad_s is None
+            else np.asarray(target_angular_velocity_rad_s)
+        )
+        moment = self.config.orientation_kp_nm_rad * self._rotation_error(
+            target_rotation, observation.ee_rotation_matrix
+        )
+        moment += self.config.orientation_kd_nms_rad * (
+            target_angular_velocity - observation.ee_angular_velocity_rad_s
+        )
+        jacobian = self.ee_pose_jacobian()
         pinv = jacobian.T @ np.linalg.inv(
-            jacobian @ jacobian.T + self.config.jacobian_damping * np.eye(3)
+            jacobian @ jacobian.T + self.config.jacobian_damping * np.eye(6)
         )
         nullspace = np.eye(6) - pinv @ jacobian
         q = observation.robot_q_rad
@@ -251,14 +328,18 @@ class SleeveRobotEnvironment:
         posture = self.config.nullspace_kp_nm_rad * (self.neutral_robot_q - q)
         posture -= self.config.nullspace_kd_nms_rad * dq
         torque = self.data.qfrc_bias[self._robot_dof_indices].copy()
-        torque += jacobian.T @ force + nullspace.T @ posture
+        torque += jacobian.T @ np.concatenate([force, moment]) + nullspace.T @ posture
         limits = np.asarray(self.robot.joint_torque_limits_nm)
         torque = np.clip(torque, -limits, limits)
         self.data.ctrl[:] = torque
         self.last_cartesian_force_command_n = force
+        self.last_cartesian_moment_command_nm = moment
         self.last_joint_torque_command_nm = torque
 
     def ee_jacobian(self) -> np.ndarray:
+        return self.ee_pose_jacobian()[:3]
+
+    def ee_pose_jacobian(self) -> np.ndarray:
         jacobian_position = np.zeros((3, self.model.nv))
         jacobian_rotation = np.zeros((3, self.model.nv))
         mujoco.mj_jacSite(
@@ -268,9 +349,16 @@ class SleeveRobotEnvironment:
             jacobian_rotation,
             self._ee_site_id,
         )
-        return jacobian_position[:, self._robot_dof_indices]
+        return np.vstack(
+            [
+                jacobian_position[:, self._robot_dof_indices],
+                jacobian_rotation[:, self._robot_dof_indices],
+            ]
+        )
 
-    def _solve_robot_ik(self, target_position_m: np.ndarray) -> np.ndarray:
+    def _solve_robot_ik(
+        self, target_position_m: np.ndarray, target_rotation_matrix: np.ndarray
+    ) -> np.ndarray:
         for equality_id in range(self.model.neq):
             self.data.eq_active[equality_id] = 0
         lower = np.radians([limits[0] for limits in self.robot.joint_ranges_deg])
@@ -287,8 +375,9 @@ class SleeveRobotEnvironment:
             self.data.qpos[self._robot_qpos_indices] = q
             mujoco.mj_kinematics(self.model, self.data)
             position_error = self.data.site("robot_ee_site").xpos - target_position_m
-            regularization = 1e-3 * q[3:]
-            return np.concatenate([position_error, regularization])
+            current_rotation = self.data.site("robot_ee_site").xmat.reshape(3, 3)
+            rotation_error = self._rotation_error(target_rotation_matrix, current_rotation)
+            return np.concatenate([position_error, rotation_error])
 
         best = None
         for guess in guesses:
@@ -301,24 +390,46 @@ class SleeveRobotEnvironment:
                 gtol=1e-12,
                 max_nfev=1000,
             )
-            error = np.linalg.norm(residual(candidate.x)[:3])
+            error = np.linalg.norm(residual(candidate.x))
             if best is None or error < best[0]:
                 best = (error, candidate.x.copy())
         assert best is not None
         if best[0] > 1e-5:
-            raise RuntimeError(f"CR12-like IK failed with residual {best[0]:.6g} m")
+            raise RuntimeError(f"CR12-like pose IK failed with residual {best[0]:.6g}")
         return best[1]
 
-    def _sleeve_force(self) -> np.ndarray:
+    def _sleeve_wrench(self) -> tuple[np.ndarray, float]:
         equality_type = int(mujoco.mjtConstraint.mjCNSTR_EQUALITY)
         rows = np.flatnonzero(
             (self.data.efc_type[: self.data.nefc] == equality_type)
             & (self.data.efc_id[: self.data.nefc] == self._sleeve_equality_id)
         )
-        if len(rows) != 3:
-            return np.zeros(3)
-        # site1 is the robot EE; the equal-and-opposite force acts on sleeve.
-        return -self.data.efc_force[rows].copy()
+        if len(rows) != 6:
+            return np.zeros(6), 0.0
+
+        # Weld rotational constraint multipliers are internally scaled and are
+        # not physical moments.  First reconstruct this equality's generalized
+        # force, then solve virtual work at the coincident cuff sites for the
+        # world-frame physical wrench acting on the human sleeve.
+        equality_multipliers = np.zeros(self.data.nefc)
+        equality_multipliers[rows] = self.data.efc_force[rows]
+        equality_generalized_force = np.zeros(self.model.nv)
+        mujoco.mj_mulJacTVec(
+            self.model,
+            self.data,
+            equality_generalized_force,
+            equality_multipliers,
+        )
+        robot_jacobian = self._site_pose_jacobian(self._ee_site_id)
+        sleeve_jacobian = self._site_pose_jacobian(self._sleeve_site_id)
+        wrench_map = (sleeve_jacobian - robot_jacobian).T
+        wrench, _, _, _ = np.linalg.lstsq(
+            wrench_map, equality_generalized_force, rcond=None
+        )
+        residual = float(
+            np.linalg.norm(wrench_map @ wrench - equality_generalized_force)
+        )
+        return wrench, residual
 
     def _fixture_reaction(self) -> np.ndarray:
         reaction = np.zeros(2)
@@ -332,7 +443,19 @@ class SleeveRobotEnvironment:
                 reaction[output_index] = self.data.efc_force[rows[0]]
         return reaction
 
-    def _site_velocity(self, site_id: int) -> np.ndarray:
+    def _site_pose_jacobian(self, site_id: int) -> np.ndarray:
+        jacobian_position = np.zeros((3, self.model.nv))
+        jacobian_rotation = np.zeros((3, self.model.nv))
+        mujoco.mj_jacSite(
+            self.model,
+            self.data,
+            jacobian_position,
+            jacobian_rotation,
+            site_id,
+        )
+        return np.vstack([jacobian_position, jacobian_rotation])
+
+    def _site_velocity(self, site_id: int) -> tuple[np.ndarray, np.ndarray]:
         velocity = np.zeros(6)
         mujoco.mj_objectVelocity(
             self.model,
@@ -342,7 +465,47 @@ class SleeveRobotEnvironment:
             velocity,
             0,
         )
-        return velocity[3:].copy()
+        return velocity[:3].copy(), velocity[3:].copy()
+
+    @staticmethod
+    def _rotation_error(target: np.ndarray, current: np.ndarray) -> np.ndarray:
+        """World-frame rotation vector taking current orientation to target."""
+
+        return Rotation.from_matrix(np.asarray(target) @ np.asarray(current).T).as_rotvec()
+
+    def _human_soft_limit_torque(self) -> np.ndarray:
+        q = np.array([self.data.joint(name).qpos[0] for name in self._human_joint_names])
+        dq = np.array([self.data.joint(name).qvel[0] for name in self._human_joint_names])
+        lower_start = np.asarray(self.human.q_min_rad) + self.human.soft_limit_margin_rad
+        upper_start = np.asarray(self.human.q_max_rad) - self.human.soft_limit_margin_rad
+        lower_activation = lower_start - self.human.soft_limit_numerical_tolerance_rad
+        upper_activation = upper_start + self.human.soft_limit_numerical_tolerance_rad
+        torque = np.zeros(2)
+        for index in range(2):
+            if q[index] < lower_activation[index]:
+                z = (lower_activation[index] - q[index]) / self.human.soft_limit_margin_rad
+                torque[index] = self.human.soft_limit_boundary_torque_nm * z**3
+                torque[index] += (
+                    self.human.soft_limit_damping_nms_rad
+                    * z**2
+                    * max(-dq[index], 0.0)
+                )
+            elif q[index] > upper_activation[index]:
+                z = (q[index] - upper_activation[index]) / self.human.soft_limit_margin_rad
+                torque[index] = -self.human.soft_limit_boundary_torque_nm * z**3
+                torque[index] -= (
+                    self.human.soft_limit_damping_nms_rad
+                    * z**2
+                    * max(dq[index], 0.0)
+                )
+        return torque
+
+    def _apply_human_soft_limit(self) -> None:
+        human_dofs = np.array(
+            [self.model.joint(name).dofadr[0] for name in self._human_joint_names],
+            dtype=int,
+        )
+        self.data.qfrc_applied[human_dofs] = self._human_soft_limit_torque()
 
     def _bed_contact_metrics(self) -> tuple[float, float, int]:
         total_force = 0.0
@@ -369,6 +532,7 @@ class SleeveRobotEnvironment:
         residual += self.data.qfrc_bias
         residual -= self.data.qfrc_passive
         residual -= self.data.qfrc_actuator
+        residual -= self.data.qfrc_applied
         residual -= self.data.qfrc_constraint
         human_dofs = np.array(
             [self.model.joint(name).dofadr[0] for name in self._human_joint_names],

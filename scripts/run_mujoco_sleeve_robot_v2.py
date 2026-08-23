@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the registered MuJoCo sleeve/robot V2 engineering validation."""
+"""Run the rigid-cuff MuJoCo plant V2 posture validation."""
 
 from __future__ import annotations
 
@@ -13,8 +13,8 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPOSITORY_ROOT / "src"))
 
 from traction_mpc.mujoco_sleeve_robot_v2.validation import (  # noqa: E402
-    run_validation,
-    write_artifacts,
+    run_rigid_cuff_posture_validation,
+    write_rigid_cuff_posture_artifacts,
 )
 
 
@@ -29,22 +29,18 @@ def main() -> None:
     args = parser.parse_args()
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     output_dir = args.output_dir or (
-        REPOSITORY_ROOT / "linkage" / "results" / "local" / f"mujoco_sleeve_robot_v2_{timestamp}"
+        REPOSITORY_ROOT / "linkage" / "results" / "local" / f"mujoco_rigid_cuff_pose_v2_{timestamp}"
     )
-    summary, traces = run_validation()
-    write_artifacts(output_dir, summary, traces)
-    equilibria = ", ".join(
-        f"{row['q2_deg']:g}deg={'pass' if row['passed'] else 'fail'}"
-        for row in summary["dynamic_equilibria"]
-    )
+    rows = run_rigid_cuff_posture_validation()
+    write_rigid_cuff_posture_artifacts(output_dir, rows)
     print(f"output_dir={output_dir}")
-    print(f"fixture_gate_passed={summary['fixture_gate_passed']}")
-    print(f"dynamic_equilibria={equilibria}")
-    print(
-        "dynamic_authority_gate_passed="
-        f"{summary['dynamic_authority_gate_passed']}"
-    )
-    print(f"complete_protective_motion={summary['complete_protective_motion']}")
+    for row in rows:
+        print(
+            f"q2={row['q2_deg']:g}deg force={row['cuff_force_n']:.6f}N "
+            f"My={row['cuff_my_nm']:.6f}Nm "
+            f"torque_fraction={row['robot_peak_torque_limit_fraction']:.6f}"
+        )
+    print("protective_trajectory_run=False")
 
 
 if __name__ == "__main__":

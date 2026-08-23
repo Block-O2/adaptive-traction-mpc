@@ -69,6 +69,22 @@ def sleeve_position(
     )
 
 
+def sleeve_rotation_matrix(q_rad: np.ndarray) -> np.ndarray:
+    """Return the shank/cuff frame orientation in world coordinates."""
+
+    q1, q2 = q_rad
+    angle = q2 - q1
+    cosine = math.cos(angle)
+    sine = math.sin(angle)
+    return np.array(
+        [
+            [cosine, 0.0, sine],
+            [0.0, 1.0, 0.0],
+            [-sine, 0.0, cosine],
+        ]
+    )
+
+
 def sleeve_jacobian(
     q_rad: np.ndarray,
     human: HumanV2Parameters,

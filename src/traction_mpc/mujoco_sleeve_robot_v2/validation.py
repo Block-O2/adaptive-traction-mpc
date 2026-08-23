@@ -8,6 +8,7 @@ has first demonstrated a releasable equilibrium and bidirectional authority.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import csv
 import json
 import math
 import os
@@ -25,12 +26,265 @@ import mujoco
 import numpy as np
 from scipy.optimize import least_squares
 
-from .config import PlantV2Config, RobotV2Parameters
+from .config import HumanV2Parameters, PlantV2Config, RobotV2Parameters
 from .environment import PlantObservation, SleeveRobotEnvironment
-from .kinematics import coordinated_sleeve_direction, quintic_progress
+from .kinematics import (
+    coordinated_posture,
+    coordinated_sleeve_direction,
+    quintic_progress,
+    sleeve_jacobian,
+)
 
 
 POSTURES_DEG = (2.0, 10.0, 20.0, 30.0)
+RIGID_CUFF_POSTURES_DEG = (0.0, 2.0, 3.0, 5.0, 10.0, 20.0)
+
+
+def _human_v2_mass_matrix(q_rad: np.ndarray, human: HumanV2Parameters) -> np.ndarray:
+    q2 = float(q_rad[1])
+    b = human.shank_inertia_kg_m2 + human.shank_mass_kg * human.shank_com_m**2
+    d = human.shank_mass_kg * human.thigh_length_m * human.shank_com_m
+    a = (
+        human.thigh_inertia_kg_m2
+        + human.thigh_mass_kg * human.thigh_com_m**2
+        + b
+        + human.shank_mass_kg * human.thigh_length_m**2
+    )
+    return np.array(
+        [
+            [a + 2.0 * d * math.cos(q2), -(b + d * math.cos(q2))],
+            [-(b + d * math.cos(q2)), b],
+        ]
+    )
+
+
+def _human_v2_static_hold_torque(
+    q_rad: np.ndarray, human: HumanV2Parameters
+) -> np.ndarray:
+    q1, q2 = q_rad
+    phi = q1 - q2
+    gravity = np.array(
+        [
+            human.gravity_m_s2
+            * (
+                (human.thigh_mass_kg * human.thigh_com_m
+                 + human.shank_mass_kg * human.thigh_length_m)
+                * math.cos(q1)
+                + human.shank_mass_kg * human.shank_com_m * math.cos(phi)
+            ),
+            -human.shank_mass_kg
+            * human.gravity_m_s2
+            * human.shank_com_m
+            * math.cos(phi),
+        ]
+    )
+    spring_left = np.asarray(human.passive_stiffness_nm_rad) * (
+        q_rad - np.asarray(human.q_rest_rad)
+    )
+    lower_activation = (
+        np.asarray(human.q_min_rad)
+        + human.soft_limit_margin_rad
+        - human.soft_limit_numerical_tolerance_rad
+    )
+    upper_activation = (
+        np.asarray(human.q_max_rad)
+        - human.soft_limit_margin_rad
+        + human.soft_limit_numerical_tolerance_rad
+    )
+    soft_rhs = np.zeros(2)
+    for index in range(2):
+        if q_rad[index] < lower_activation[index]:
+            z = (lower_activation[index] - q_rad[index]) / human.soft_limit_margin_rad
+            soft_rhs[index] = human.soft_limit_boundary_torque_nm * z**3
+        elif q_rad[index] > upper_activation[index]:
+            z = (q_rad[index] - upper_activation[index]) / human.soft_limit_margin_rad
+            soft_rhs[index] = -human.soft_limit_boundary_torque_nm * z**3
+    return gravity + spring_left - soft_rhs
+
+
+def _minimum_translation_cuff_wrench(
+    force_map: np.ndarray, hold_torque: np.ndarray
+) -> np.ndarray:
+    """Minimize translational force with an unbounded sagittal cuff moment.
+
+    No force/moment weighting or moment limit is introduced.  Projecting the
+    two equilibrium equations onto the complement of the moment column leaves
+    one scalar constraint whose minimum-norm force has a closed-form solution.
+    """
+
+    moment_map = np.array([-1.0, 1.0])
+    moment_orthogonal = np.array([1.0, 1.0]) / math.sqrt(2.0)
+    projected_force_map = force_map.T @ moment_orthogonal
+    projected_torque = float(moment_orthogonal @ hold_torque)
+    denominator = float(projected_force_map @ projected_force_map)
+    if denominator <= 1e-18:
+        raise RuntimeError("cuff force map cannot satisfy moment-compatible equilibrium")
+    force = projected_force_map * projected_torque / denominator
+    moment = float(
+        moment_map @ (hold_torque - force_map @ force)
+        / (moment_map @ moment_map)
+    )
+    return np.array([force[0], force[1], moment])
+
+
+def run_rigid_cuff_posture_validation(
+    postures_deg: tuple[float, ...] = RIGID_CUFF_POSTURES_DEG,
+) -> list[dict[str, Any]]:
+    """Validate the revised plant statically before any protective trajectory.
+
+    Bed contact is disabled only inside this suspended-equilibrium check so the
+    cuff load can be compared directly with the former point-force assumption.
+    The built plant and its normal runtime bed contact are not changed.
+    """
+
+    rows: list[dict[str, Any]] = []
+    for q2_deg in postures_deg:
+        env = SleeveRobotEnvironment()
+        reset_observation = env.reset(q2_deg)
+        env.model.geom("bed").contype = 0
+        env.model.geom("bed").conaffinity = 0
+        mujoco.mj_forward(env.model, env.data)
+
+        q = coordinated_posture(math.radians(q2_deg))
+        full_mass = np.zeros((env.model.nv, env.model.nv))
+        mujoco.mj_fullM(env.model, env.data, full_mass)
+        human_dofs = np.array(
+            [env.model.joint(name).dofadr[0] for name in ("hip_joint", "knee_joint")]
+        )
+        mujoco_mass = full_mass[np.ix_(human_dofs, human_dofs)]
+        analytical_mass = _human_v2_mass_matrix(q, env.human)
+        mass_error = float(np.max(np.abs(mujoco_mass - analytical_mass)))
+
+        hold_torque = _human_v2_static_hold_torque(q, env.human)
+        position_jacobian = sleeve_jacobian(q, env.human)[[0, 2], :].T
+        cuff_map = np.column_stack([position_jacobian, np.array([-1.0, 1.0])])
+        planar_wrench = _minimum_translation_cuff_wrench(
+            position_jacobian, hold_torque
+        )
+        expected_wrench_world = np.array(
+            [planar_wrench[0], 0.0, planar_wrench[1], 0.0, planar_wrench[2], 0.0]
+        )
+
+        point_rank = int(np.linalg.matrix_rank(position_jacobian, tol=1e-10))
+        if point_rank == 2:
+            point_force = np.linalg.solve(position_jacobian, hold_torque)
+            point_force_norm = float(np.linalg.norm(point_force))
+        else:
+            point_force_norm = None
+
+        robot_jacobian = env._site_pose_jacobian(env._ee_site_id)[
+            :, env._robot_dof_indices
+        ]
+        robot_torque = env.data.qfrc_bias[env._robot_dof_indices].copy()
+        robot_torque += robot_jacobian.T @ expected_wrench_world
+        env.data.ctrl[:] = robot_torque
+        env.last_joint_torque_command_nm = robot_torque.copy()
+        env._apply_human_soft_limit()
+        mujoco.mj_forward(env.model, env.data)
+        observation = env.observe()
+
+        torque_limits = np.asarray(env.robot.joint_torque_limits_nm)
+        analytical_force_norm = float(np.linalg.norm(planar_wrench[:2]))
+        force_reduction = None
+        if q2_deg == 3.0:
+            force_reduction = 100.0 * (1.0 - analytical_force_norm / 348.0)
+        rows.append(
+            {
+                "q2_deg": q2_deg,
+                "q1_deg": float(math.degrees(q[0])),
+                "mass_matrix_max_abs_error": mass_error,
+                "relative_position_error_mm": 1e3 * observation.sleeve_deformation_m,
+                "relative_rotation_error_deg": math.degrees(
+                    observation.sleeve_relative_rotation_rad
+                ),
+                "cuff_force_n": analytical_force_norm,
+                "cuff_force_vector_n": expected_wrench_world[:3].tolist(),
+                "cuff_my_nm": float(planar_wrench[2]),
+                "static_wrench_equation_residual_nm": float(
+                    np.linalg.norm(cuff_map @ planar_wrench - hold_torque)
+                ),
+                "translational_force_gate_passed": bool(
+                    analytical_force_norm <= env.config.force_veto_bound_n + 1e-9
+                ),
+                "point_force_requirement_n": point_force_norm,
+                "robot_peak_torque_nm": float(np.max(np.abs(robot_torque))),
+                "robot_peak_torque_limit_fraction": float(
+                    np.max(np.abs(robot_torque) / torque_limits)
+                ),
+                "robot_torque_limits_respected": bool(
+                    np.all(np.abs(robot_torque) <= torque_limits + 1e-9)
+                ),
+                "wrench_reconstruction_residual_nm": (
+                    observation.sleeve_wrench_reconstruction_residual_nm
+                ),
+                "solver_probe_force_n": observation.sleeve_force_n,
+                "solver_probe_my_nm": observation.sleeve_moment_my_nm,
+                "force_reduction_vs_previous_348n_percent": force_reduction,
+                "reset_position_error_mm": 1e3
+                * float(
+                    np.linalg.norm(
+                        reset_observation.ee_position_m
+                        - reset_observation.sleeve_position_m
+                    )
+                ),
+                "reset_rotation_error_deg": math.degrees(
+                    reset_observation.sleeve_relative_rotation_rad
+                ),
+            }
+        )
+    return rows
+
+
+def write_rigid_cuff_posture_artifacts(
+    output_dir: Path, rows: list[dict[str, Any]]
+) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "evidence_category": "engineering_validation_smoke",
+        "protective_trajectory_run": False,
+        "static_wrench_definition": (
+            "minimum translational force satisfying suspended Human V2 static "
+            "equilibrium with unconstrained sagittal cuff moment"
+        ),
+        "bed_contact_in_static_check": False,
+        "solver_probe_is_static_equilibrium": False,
+        "solver_probe_purpose": (
+            "validate equality generalized-force to physical site-wrench reconstruction"
+        ),
+        "postures_deg": [row["q2_deg"] for row in rows],
+        "force_gate_n": PlantV2Config().force_veto_bound_n,
+        "moment_limit_nm": None,
+        "rows": rows,
+    }
+    (output_dir / "summary.json").write_text(
+        json.dumps(payload, indent=2, allow_nan=False) + "\n", encoding="utf-8"
+    )
+    fieldnames = [
+        "q2_deg",
+        "q1_deg",
+        "mass_matrix_max_abs_error",
+        "relative_position_error_mm",
+        "relative_rotation_error_deg",
+        "cuff_force_n",
+        "cuff_my_nm",
+        "point_force_requirement_n",
+        "robot_peak_torque_nm",
+        "robot_peak_torque_limit_fraction",
+        "robot_torque_limits_respected",
+        "translational_force_gate_passed",
+        "static_wrench_equation_residual_nm",
+        "wrench_reconstruction_residual_nm",
+        "force_reduction_vs_previous_348n_percent",
+    ]
+    with (output_dir / "posture_validation.csv").open(
+        "w", newline="", encoding="utf-8"
+    ) as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(
+            {name: row[name] for name in fieldnames}
+            for row in rows
+        )
 
 
 @dataclass(frozen=True)
