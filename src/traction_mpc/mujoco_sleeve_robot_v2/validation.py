@@ -22,22 +22,520 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation, PillowWriter
 import mujoco
 import numpy as np
 from scipy.optimize import least_squares
 
 from .config import HumanV2Parameters, PlantV2Config, RobotV2Parameters
-from .environment import PlantObservation, SleeveRobotEnvironment
+from .environment import (
+    CuffForceCommandLimitError,
+    PlantObservation,
+    SleeveRobotEnvironment,
+)
 from .kinematics import (
     coordinated_posture,
     coordinated_sleeve_direction,
+    human_reference,
     quintic_progress,
     sleeve_jacobian,
+    sleeve_position,
+    sleeve_rotation_matrix,
 )
 
 
 POSTURES_DEG = (2.0, 10.0, 20.0, 30.0)
 RIGID_CUFF_POSTURES_DEG = (0.0, 2.0, 3.0, 5.0, 10.0, 20.0)
+
+
+@dataclass(frozen=True)
+class DynamicRehabTrace:
+    time_s: np.ndarray
+    q_deg: np.ndarray
+    q_ref_deg: np.ndarray
+    dq_deg_s: np.ndarray
+    cuff_force_n: np.ndarray
+    cuff_my_nm: np.ndarray
+    allocated_force_n: np.ndarray
+    allocated_my_nm: np.ndarray
+    required_human_torque_nm: np.ndarray
+    qdd_command_rad_s2: np.ndarray
+    robot_torque_nm: np.ndarray
+    robot_torque_limit_fraction: np.ndarray
+    cuff_relative_position_mm: np.ndarray
+    cuff_relative_rotation_deg: np.ndarray
+    bed_force_n: np.ndarray
+    bed_penetration_mm: np.ndarray
+    bed_contact_count: np.ndarray
+    wrench_reconstruction_residual_nm: np.ndarray
+    human_dynamics_residual_nm: np.ndarray
+    qpos: np.ndarray
+
+
+def _dynamic_trace_from_records(
+    records: list[
+        tuple[
+            PlantObservation,
+            np.ndarray,
+            np.ndarray,
+            float,
+            float,
+            np.ndarray,
+            np.ndarray,
+        ]
+    ],
+    torque_limits_nm: np.ndarray,
+) -> DynamicRehabTrace:
+    observations = [record[0] for record in records]
+    return DynamicRehabTrace(
+        time_s=np.array([obs.time_s for obs in observations]),
+        q_deg=np.degrees(np.array([obs.human_q_rad for obs in observations])),
+        q_ref_deg=np.degrees(np.array([record[1] for record in records])),
+        dq_deg_s=np.degrees(np.array([obs.human_dq_rad_s for obs in observations])),
+        cuff_force_n=np.array([obs.sleeve_force_n for obs in observations]),
+        cuff_my_nm=-np.array([obs.sleeve_moment_my_nm for obs in observations]),
+        allocated_force_n=np.array([record[3] for record in records]),
+        allocated_my_nm=np.array([record[4] for record in records]),
+        required_human_torque_nm=np.array([record[5] for record in records]),
+        qdd_command_rad_s2=np.array([record[6] for record in records]),
+        robot_torque_nm=np.array(
+            [obs.joint_torque_command_nm for obs in observations]
+        ),
+        robot_torque_limit_fraction=np.array(
+            [
+                np.max(np.abs(obs.joint_torque_command_nm) / torque_limits_nm)
+                for obs in observations
+            ]
+        ),
+        cuff_relative_position_mm=1e3
+        * np.array([obs.sleeve_deformation_m for obs in observations]),
+        cuff_relative_rotation_deg=np.degrees(
+            np.array([obs.sleeve_relative_rotation_rad for obs in observations])
+        ),
+        bed_force_n=np.array([obs.bed_force_n for obs in observations]),
+        bed_penetration_mm=1e3
+        * np.array([obs.bed_penetration_m for obs in observations]),
+        bed_contact_count=np.array(
+            [obs.bed_contact_count for obs in observations], dtype=int
+        ),
+        wrench_reconstruction_residual_nm=np.array(
+            [obs.sleeve_wrench_reconstruction_residual_nm for obs in observations]
+        ),
+        human_dynamics_residual_nm=np.array(
+            [obs.human_dynamics_residual_nm for obs in observations]
+        ),
+        qpos=np.array([record[2] for record in records]),
+    )
+
+
+def run_dynamic_rehab_baseline(
+    lower_q2_deg: float = 10.0,
+    hold_only: bool = False,
+) -> tuple[dict[str, Any], DynamicRehabTrace]:
+    """Run a hold or rehab reference with V2 inverse-dynamics cuff feedforward."""
+
+    cfg = PlantV2Config()
+    env = SleeveRobotEnvironment(config=cfg)
+    start_q = coordinated_posture(math.radians(lower_q2_deg))
+    initial = env.reset(lower_q2_deg)
+    torque_limits = np.asarray(env.robot.joint_torque_limits_nm)
+    initial_reference = human_reference(0.0, start_q)
+    initial_allocation = _human_v2_tracking_wrench(
+        initial.human_q_rad,
+        initial.human_dq_rad_s,
+        initial_reference,
+        env.human,
+    )
+    records = [
+        (
+            initial,
+            initial_reference.q.copy(),
+            env.data.qpos.copy(),
+            initial_allocation["force_norm_n"],
+            initial_allocation["my_nm"],
+            initial_allocation["tau_required_nm"].copy(),
+            initial_allocation["qdd_command_rad_s2"].copy(),
+        )
+    ]
+    peak_force = initial.sleeve_force_n
+    peak_abs_my = abs(initial.sleeve_moment_my_nm)
+    peak_torque_fraction = 0.0
+    peak_relative_position_m = initial.sleeve_deformation_m
+    peak_relative_rotation_rad = initial.sleeve_relative_rotation_rad
+    peak_bed_force = initial.bed_force_n
+    peak_bed_penetration_m = initial.bed_penetration_m
+    peak_allocated_force = initial_allocation["force_norm_n"]
+    peak_abs_allocated_my = abs(initial_allocation["my_nm"])
+    termination_reason = "completed_hold" if hold_only else "completed_reference"
+    requested_duration_s = 1.0 if hold_only else 15.0
+    total_steps = int(round(requested_duration_s / cfg.control_dt_s))
+
+    for _ in range(total_steps):
+        reference = (
+            initial_reference
+            if hold_only
+            else human_reference(float(env.data.time), start_q)
+        )
+        allocation = _human_v2_tracking_wrench(
+            env.observe().human_q_rad,
+            env.observe().human_dq_rad_s,
+            reference,
+            env.human,
+        )
+        peak_allocated_force = max(
+            peak_allocated_force, allocation["force_norm_n"]
+        )
+        peak_abs_allocated_my = max(
+            peak_abs_allocated_my, abs(allocation["my_nm"])
+        )
+        if allocation["force_norm_n"] > cfg.force_veto_bound_n + 1e-9:
+            termination_reason = "allocated_cuff_force_gate"
+            break
+        target_position = sleeve_position(reference.q, env.human, cfg)
+        target_velocity = sleeve_jacobian(reference.q, env.human) @ reference.dq
+        target_rotation = sleeve_rotation_matrix(reference.q)
+        target_angular_velocity = np.array(
+            [0.0, reference.dq[1] - reference.dq[0], 0.0]
+        )
+        try:
+            step = env.step_cartesian(
+                target_position,
+                target_velocity,
+                target_rotation,
+                target_angular_velocity,
+                allocation["wrench_world"],
+                True,
+            )
+        except CuffForceCommandLimitError as error:
+            peak_allocated_force = max(peak_allocated_force, error.force_norm_n)
+            termination_reason = "total_commanded_cuff_force_gate"
+            break
+        observation = step.observation
+        logged_reference = (
+            initial_reference
+            if hold_only
+            else human_reference(observation.time_s, start_q)
+        )
+        records.append(
+            (
+                observation,
+                logged_reference.q.copy(),
+                env.data.qpos.copy(),
+                allocation["force_norm_n"],
+                allocation["my_nm"],
+                allocation["tau_required_nm"].copy(),
+                allocation["qdd_command_rad_s2"].copy(),
+            )
+        )
+        peak_force = max(peak_force, step.peak_sleeve_force_n)
+        peak_abs_my = max(peak_abs_my, step.peak_abs_sleeve_moment_my_nm)
+        peak_torque_fraction = max(
+            peak_torque_fraction, step.peak_joint_torque_limit_fraction
+        )
+        peak_relative_position_m = max(
+            peak_relative_position_m, step.peak_sleeve_relative_position_m
+        )
+        peak_relative_rotation_rad = max(
+            peak_relative_rotation_rad, step.peak_sleeve_relative_rotation_rad
+        )
+        peak_bed_force = max(peak_bed_force, step.peak_bed_force_n)
+        peak_bed_penetration_m = max(
+            peak_bed_penetration_m, step.peak_bed_penetration_m
+        )
+
+        finite_values = np.concatenate(
+            [
+                observation.human_q_rad,
+                observation.human_dq_rad_s,
+                observation.sleeve_force_vector_n,
+                observation.sleeve_moment_vector_nm,
+                observation.joint_torque_command_nm,
+            ]
+        )
+        if not np.all(np.isfinite(finite_values)):
+            termination_reason = "nonfinite_state_or_wrench"
+            break
+        if any(warning.number > 0 for warning in env.data.warning):
+            termination_reason = "mujoco_solver_warning"
+            break
+        if peak_force > cfg.force_veto_bound_n + 1e-9:
+            termination_reason = "cuff_translational_force_gate"
+            break
+
+    trace = _dynamic_trace_from_records(records, torque_limits)
+    tracking_error = trace.q_deg - trace.q_ref_deg
+    q_min_deg = np.degrees(np.asarray(env.human.q_min_rad))
+    q_max_deg = np.degrees(np.asarray(env.human.q_max_rad))
+    rom_violation = bool(
+        np.any(trace.q_deg < q_min_deg - 1e-9)
+        or np.any(trace.q_deg > q_max_deg + 1e-9)
+    )
+    torque_saturation = bool(peak_torque_fraction >= 1.0 - 1e-9)
+    warning_counts = [int(warning.number) for warning in env.data.warning]
+    expected_completion_reason = "completed_hold" if hold_only else "completed_reference"
+    completed = bool(
+        termination_reason == expected_completion_reason
+        and trace.time_s[-1] >= requested_duration_s - 0.5 * cfg.control_dt_s
+    )
+    terminal_error = np.abs(tracking_error[-1])
+    tail_mask = trace.time_s >= max(0.0, trace.time_s[-1] - cfg.settle_window_s)
+    tail_max_speed = float(np.max(np.abs(trace.dq_deg_s[tail_mask])))
+    tail_bed_force_range = float(np.ptp(trace.bed_force_n[tail_mask]))
+    hold_stability = bool(
+        np.all(terminal_error <= cfg.terminal_position_tolerance_deg)
+        and tail_max_speed <= cfg.stable_joint_speed_deg_s
+        and tail_bed_force_range <= cfg.stable_force_range_n
+    )
+    mechanically_complete = bool(
+        completed
+        and peak_force <= cfg.force_veto_bound_n + 1e-9
+        and not torque_saturation
+        and not rom_violation
+        and not any(warning_counts)
+        and (
+            hold_stability
+            if hold_only
+            else np.all(terminal_error <= cfg.terminal_position_tolerance_deg)
+        )
+    )
+    contact_active = trace.bed_contact_count > 0
+    contact_transitions = int(np.count_nonzero(np.diff(contact_active.astype(int))))
+    summary = {
+        "evidence_category": "engineering_validation_smoke",
+        "controller": (
+            "Human V2 computed-acceleration inverse dynamics cuff wrench "
+            "feedforward plus existing rigid-cuff 6D pose feedback"
+        ),
+        "case": "one_second_hold" if hold_only else "rehab_reference",
+        "reference_start_q_deg": np.degrees(start_q).tolist(),
+        "reference_peak_q_deg": [45.0, 84.0],
+        "requested_duration_s": requested_duration_s,
+        "completed_duration_s": float(trace.time_s[-1]),
+        "termination_reason": termination_reason,
+        "mechanically_complete_for_follow_on": mechanically_complete,
+        "tracking": {
+            "rmse_deg": np.sqrt(np.mean(tracking_error**2, axis=0)).tolist(),
+            "max_abs_error_deg": np.max(np.abs(tracking_error), axis=0).tolist(),
+            "terminal_error_deg": tracking_error[-1].tolist(),
+            "actual_q_min_deg": np.min(trace.q_deg, axis=0).tolist(),
+            "actual_q_max_deg": np.max(trace.q_deg, axis=0).tolist(),
+            "rom_violation": rom_violation,
+            "hold_max_abs_drift_deg": np.max(
+                np.abs(trace.q_deg - trace.q_deg[0]), axis=0
+            ).tolist(),
+            "tail_max_abs_joint_speed_deg_s": tail_max_speed,
+            "tail_bed_force_range_n": tail_bed_force_range,
+            "hold_stability_gate": hold_stability if hold_only else None,
+        },
+        "cuff": {
+            "peak_translational_force_n": float(peak_force),
+            "force_gate_n": cfg.force_veto_bound_n,
+            "force_gate_respected": bool(
+                peak_force <= cfg.force_veto_bound_n + 1e-9
+            ),
+            "peak_abs_sagittal_moment_my_nm": float(peak_abs_my),
+            "peak_allocated_translational_force_n": float(peak_allocated_force),
+            "peak_abs_allocated_my_nm": float(peak_abs_allocated_my),
+            "moment_limit_nm": None,
+            "peak_relative_position_error_mm": 1e3 * float(peak_relative_position_m),
+            "peak_relative_rotation_error_deg": math.degrees(
+                peak_relative_rotation_rad
+            ),
+            "max_wrench_reconstruction_residual_nm": float(
+                np.max(trace.wrench_reconstruction_residual_nm)
+            ),
+        },
+        "robot": {
+            "joint_torque_limits_nm": torque_limits.tolist(),
+            "peak_abs_joint_torque_nm": np.max(
+                np.abs(trace.robot_torque_nm), axis=0
+            ).tolist(),
+            "peak_joint_torque_limit_fraction": float(peak_torque_fraction),
+            "torque_limits_respected": bool(peak_torque_fraction <= 1.0 + 1e-9),
+            "torque_saturation_detected": torque_saturation,
+        },
+        "bed": {
+            "peak_force_n": float(peak_bed_force),
+            "peak_penetration_mm": 1e3 * float(peak_bed_penetration_m),
+            "max_contact_count": int(np.max(trace.bed_contact_count)),
+            "contact_active_fraction": float(np.mean(contact_active)),
+            "active_state_transitions": contact_transitions,
+        },
+        "solver": {
+            "warning_counts": warning_counts,
+            "warning_lastinfo": [int(warning.lastinfo) for warning in env.data.warning],
+            "nonfinite_detected": termination_reason == "nonfinite_state_or_wrench",
+            "max_human_dynamics_residual_nm": float(
+                np.max(np.abs(trace.human_dynamics_residual_nm))
+            ),
+        },
+        "scientific_parameters_changed_for_run": False,
+        "protective_logic_used": False,
+    }
+    return summary, trace
+
+
+def write_dynamic_rehab_artifacts(
+    output_dir: Path,
+    summary: dict[str, Any],
+    trace: DynamicRehabTrace,
+) -> None:
+    """Write one compact plot, one synchronized schematic GIF, and raw data."""
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "summary.json").write_text(
+        json.dumps(summary, indent=2, allow_nan=False) + "\n", encoding="utf-8"
+    )
+    np.savez_compressed(
+        output_dir / "timeseries.npz",
+        **asdict(trace),
+    )
+
+    fig, axes = plt.subplots(4, 1, figsize=(10, 10), sharex=True, constrained_layout=True)
+    axes[0].plot(trace.time_s, trace.q_deg[:, 0], label="q1")
+    axes[0].plot(trace.time_s, trace.q_ref_deg[:, 0], "--", label="q1 ref")
+    axes[0].plot(trace.time_s, trace.q_deg[:, 1], label="q2")
+    axes[0].plot(trace.time_s, trace.q_ref_deg[:, 1], "--", label="q2 ref")
+    axes[0].set_ylabel("q (deg)")
+    axes[0].legend(ncol=4, fontsize=8)
+
+    axes[1].plot(trace.time_s, trace.cuff_force_n, label="|F cuff|")
+    axes[1].axhline(200.0, color="r", linestyle="--", label="200 N gate")
+    moment_axis = axes[1].twinx()
+    moment_axis.plot(trace.time_s, trace.cuff_my_nm, color="tab:purple", label="My")
+    axes[1].set_ylabel("Force (N)")
+    moment_axis.set_ylabel("My (Nm)")
+    axes[1].legend(loc="upper left", fontsize=8)
+    moment_axis.legend(loc="upper right", fontsize=8)
+
+    axes[2].plot(
+        trace.time_s,
+        trace.robot_torque_limit_fraction,
+        label="max robot torque / limit",
+    )
+    axes[2].axhline(1.0, color="r", linestyle="--")
+    pose_axis = axes[2].twinx()
+    pose_axis.plot(
+        trace.time_s,
+        trace.cuff_relative_position_mm,
+        color="tab:green",
+        label="relative position",
+    )
+    pose_axis.plot(
+        trace.time_s,
+        trace.cuff_relative_rotation_deg,
+        color="tab:orange",
+        label="relative rotation",
+    )
+    axes[2].set_ylabel("Torque fraction")
+    pose_axis.set_ylabel("mm / deg")
+    axes[2].legend(loc="upper left", fontsize=8)
+    pose_axis.legend(loc="upper right", fontsize=8)
+
+    axes[3].plot(trace.time_s, trace.bed_force_n, label="bed force")
+    bed_axis = axes[3].twinx()
+    bed_axis.plot(
+        trace.time_s,
+        trace.bed_penetration_mm,
+        color="tab:brown",
+        label="penetration",
+    )
+    bed_axis.step(
+        trace.time_s,
+        trace.bed_contact_count,
+        where="post",
+        color="0.35",
+        alpha=0.6,
+        label="contact count",
+    )
+    axes[3].set_ylabel("Bed force (N)")
+    bed_axis.set_ylabel("mm / count")
+    axes[3].set_xlabel("Time (s)")
+    axes[3].legend(loc="upper left", fontsize=8)
+    bed_axis.legend(loc="upper right", fontsize=8)
+    fig.suptitle(
+        "Rigid-cuff Human V2 dynamic rehab baseline: "
+        f"{summary['termination_reason']}"
+    )
+    fig.savefig(output_dir / "timeseries.png", dpi=170)
+    plt.close(fig)
+
+    frame_stride = max(1, int(round(0.1 / PlantV2Config().control_dt_s)))
+    frame_indices = list(range(0, len(trace.time_s), frame_stride))
+    if frame_indices[-1] != len(trace.time_s) - 1:
+        frame_indices.append(len(trace.time_s) - 1)
+    animation_env = SleeveRobotEnvironment()
+    animation_fig, axis = plt.subplots(figsize=(9, 5), constrained_layout=True)
+    axis.set_xlim(-0.1, 1.35)
+    axis.set_ylim(-0.03, 1.05)
+    axis.set_aspect("equal")
+    axis.grid(alpha=0.2)
+    axis.set_xlabel("x (m)")
+    axis.set_ylabel("z (m)")
+    axis.axhline(animation_env.config.bed_height_m, color="#4e7fa3", linewidth=5)
+    robot_line, = axis.plot([], [], "o-", color="#335fa8", linewidth=3, label="robot")
+    human_line, = axis.plot([], [], "o-", color="#d56a2a", linewidth=4, label="human")
+    reference_line, = axis.plot(
+        [], [], "--", color="#333333", linewidth=2, label="reference"
+    )
+    cuff_marker, = axis.plot([], [], "o", color="#9c36c7", markersize=10, label="cuff")
+    status_text = axis.text(0.02, 0.97, "", transform=axis.transAxes, va="top")
+    axis.legend(loc="upper right", fontsize=8)
+
+    def update(frame_number: int):
+        index = frame_indices[frame_number]
+        animation_env.data.qpos[:] = trace.qpos[index]
+        animation_env.data.qvel[:] = 0.0
+        mujoco.mj_forward(animation_env.model, animation_env.data)
+        robot_points = np.array(
+            [
+                animation_env.data.body(f"robot_link_{joint}").xpos
+                for joint in range(1, 7)
+            ]
+            + [animation_env.data.site("robot_ee_site").xpos]
+        )
+        hip = animation_env.data.body("hip").xpos.copy()
+        knee = animation_env.data.body("shank").xpos.copy()
+        ankle = animation_env.data.site("sleeve_attach_site").xpos.copy()
+        actual_points = np.vstack([hip, knee, ankle])
+        q_ref = np.radians(trace.q_ref_deg[index])
+        ref_hip = np.array([0.0, 0.0, animation_env.config.hip_height_m])
+        ref_knee = np.array(
+            [
+                animation_env.human.thigh_length_m * math.cos(q_ref[0]),
+                0.0,
+                animation_env.config.hip_height_m
+                + animation_env.human.thigh_length_m * math.sin(q_ref[0]),
+            ]
+        )
+        ref_cuff = sleeve_position(q_ref, animation_env.human, animation_env.config)
+        reference_points = np.vstack([ref_hip, ref_knee, ref_cuff])
+        robot_line.set_data(robot_points[:, 0], robot_points[:, 2])
+        human_line.set_data(actual_points[:, 0], actual_points[:, 2])
+        reference_line.set_data(reference_points[:, 0], reference_points[:, 2])
+        cuff_marker.set_data([ankle[0]], [ankle[2]])
+        status_text.set_text(
+            f"t={trace.time_s[index]:.2f} s  "
+            f"q=[{trace.q_deg[index, 0]:.1f}, {trace.q_deg[index, 1]:.1f}] deg\n"
+            f"|F|={trace.cuff_force_n[index]:.1f} N  "
+            f"My={trace.cuff_my_nm[index]:.1f} Nm  "
+            f"tau/limit={trace.robot_torque_limit_fraction[index]:.2f}"
+        )
+        return robot_line, human_line, reference_line, cuff_marker, status_text
+
+    animation = FuncAnimation(
+        animation_fig,
+        update,
+        frames=len(frame_indices),
+        interval=100,
+        blit=False,
+    )
+    animation.save(
+        output_dir / "synchronized.gif",
+        writer=PillowWriter(fps=10),
+        dpi=100,
+    )
+    plt.close(animation_fig)
 
 
 def _human_v2_mass_matrix(q_rad: np.ndarray, human: HumanV2Parameters) -> np.ndarray:
@@ -58,6 +556,121 @@ def _human_v2_mass_matrix(q_rad: np.ndarray, human: HumanV2Parameters) -> np.nda
     )
 
 
+def _human_v2_tracking_wrench(
+    q_rad: np.ndarray,
+    dq_rad_s: np.ndarray,
+    reference: Any,
+    human: HumanV2Parameters,
+) -> dict[str, Any]:
+    """Existing Human V2 computed-acceleration law and V1 cuff allocation."""
+
+    q = np.asarray(q_rad, dtype=float)
+    dq = np.asarray(dq_rad_s, dtype=float)
+    q2 = float(q[1])
+    q1 = float(q[0])
+    phi = q1 - q2
+    mass = _human_v2_mass_matrix(q, human)
+    coupling = human.shank_mass_kg * human.thigh_length_m * human.shank_com_m
+    h = np.array(
+        [
+            coupling
+            * math.sin(q2)
+            * (-2.0 * dq[0] * dq[1] + dq[1] ** 2),
+            coupling * math.sin(q2) * dq[0] ** 2,
+        ]
+    )
+    gravity = np.array(
+        [
+            human.gravity_m_s2
+            * (
+                (
+                    human.thigh_mass_kg * human.thigh_com_m
+                    + human.shank_mass_kg * human.thigh_length_m
+                )
+                * math.cos(q1)
+                + human.shank_mass_kg * human.shank_com_m * math.cos(phi)
+            ),
+            -human.shank_mass_kg
+            * human.gravity_m_s2
+            * human.shank_com_m
+            * math.cos(phi),
+        ]
+    )
+    lower_activation = (
+        np.asarray(human.q_min_rad)
+        + human.soft_limit_margin_rad
+        - human.soft_limit_numerical_tolerance_rad
+    )
+    upper_activation = (
+        np.asarray(human.q_max_rad)
+        - human.soft_limit_margin_rad
+        + human.soft_limit_numerical_tolerance_rad
+    )
+    soft_rhs = np.zeros(2)
+    for index in range(2):
+        if q[index] < lower_activation[index]:
+            z = (lower_activation[index] - q[index]) / human.soft_limit_margin_rad
+            soft_rhs[index] = human.soft_limit_boundary_torque_nm * z**3
+            soft_rhs[index] += (
+                human.soft_limit_damping_nms_rad
+                * z**2
+                * max(-dq[index], 0.0)
+            )
+        elif q[index] > upper_activation[index]:
+            z = (q[index] - upper_activation[index]) / human.soft_limit_margin_rad
+            soft_rhs[index] = -human.soft_limit_boundary_torque_nm * z**3
+            soft_rhs[index] -= (
+                human.soft_limit_damping_nms_rad
+                * z**2
+                * max(dq[index], 0.0)
+            )
+    passive_left = (
+        np.asarray(human.passive_stiffness_nm_rad)
+        * (q - np.asarray(human.q_rest_rad))
+        + np.asarray(human.passive_damping_nms_rad) * dq
+        - soft_rhs
+    )
+    tracking_kp = np.diag([180.0, 140.0])
+    tracking_kd = np.diag([28.0, 22.0])
+    qdd_command = (
+        np.asarray(reference.ddq)
+        - tracking_kp @ (q - np.asarray(reference.q))
+        - tracking_kd @ (dq - np.asarray(reference.dq))
+    )
+    tau_required = mass @ qdd_command + h + gravity + passive_left
+
+    force_map = sleeve_jacobian(q, human)[[0, 2], :].T
+    moment_map = np.array([1.0, -1.0])
+    moment_orthogonal = np.array([1.0, 1.0]) / math.sqrt(2.0)
+    projected_force_map = force_map.T @ moment_orthogonal
+    projected_torque = float(moment_orthogonal @ tau_required)
+    denominator = float(projected_force_map @ projected_force_map)
+    if denominator <= 1e-18:
+        raise RuntimeError("tracking cuff map cannot satisfy equilibrium")
+    force_xz = projected_force_map * projected_torque / denominator
+    my_nm = float(
+        moment_map @ (tau_required - force_map @ force_xz)
+        / (moment_map @ moment_map)
+    )
+    allocation_residual = float(
+        np.linalg.norm(force_map @ force_xz + moment_map * my_nm - tau_required)
+    )
+    # MuJoCo world-y virtual work is [-1,+1]^T M_world, hence M_world=-My
+    # for the explicitly requested [1,-1]^T My allocation convention.
+    wrench_world = np.array(
+        [force_xz[0], 0.0, force_xz[1], 0.0, -my_nm, 0.0]
+    )
+    return {
+        "qdd_command_rad_s2": qdd_command,
+        "tau_required_nm": tau_required,
+        "force_xz_n": force_xz,
+        "force_norm_n": float(np.linalg.norm(force_xz)),
+        "my_nm": my_nm,
+        "wrench_world": wrench_world,
+        "allocation_residual_nm": allocation_residual,
+        "tracking_kp": np.diag(tracking_kp).copy(),
+        "tracking_kd": np.diag(tracking_kd).copy(),
+    }
 def _human_v2_static_hold_torque(
     q_rad: np.ndarray, human: HumanV2Parameters
 ) -> np.ndarray:

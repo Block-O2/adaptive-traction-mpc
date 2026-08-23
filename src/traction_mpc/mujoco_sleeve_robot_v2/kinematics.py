@@ -31,8 +31,14 @@ def coordinated_posture(q2_rad: float) -> np.ndarray:
     return np.array([q1, q2_rad], dtype=float)
 
 
-def human_reference(time_s: float) -> ReferenceSample:
-    start = np.radians([5.0, 10.0])
+def human_reference(
+    time_s: float, start_q_rad: np.ndarray | None = None
+) -> ReferenceSample:
+    start = (
+        np.radians([5.0, 10.0])
+        if start_q_rad is None
+        else np.asarray(start_q_rad, dtype=float)
+    )
     peak = np.radians([45.0, 84.0])
     delta = peak - start
     if time_s < 1.0:

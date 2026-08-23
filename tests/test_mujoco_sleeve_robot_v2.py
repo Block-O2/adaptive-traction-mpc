@@ -19,10 +19,18 @@ from traction_mpc.mujoco_sleeve_robot_v2.config import (
     PlantV2Config,
     RobotV2Parameters,
 )
-from traction_mpc.mujoco_sleeve_robot_v2.environment import SleeveRobotEnvironment
+from traction_mpc.mujoco_sleeve_robot_v2.environment import (
+    CuffForceCommandLimitError,
+    SleeveRobotEnvironment,
+)
+from traction_mpc.mujoco_sleeve_robot_v2.kinematics import (
+    human_reference,
+    sleeve_jacobian,
+)
 from traction_mpc.mujoco_sleeve_robot_v2.model import build_plant_xml
 from traction_mpc.mujoco_sleeve_robot_v2.validation import (
     RIGID_CUFF_POSTURES_DEG,
+    _human_v2_tracking_wrench,
     run_rigid_cuff_posture_validation,
 )
 
@@ -112,6 +120,45 @@ def test_pose_servo_adds_orientation_control_without_a_moment_gate() -> None:
         <= np.asarray(env.robot.joint_torque_limits_nm) + 1e-9
     )
     assert not hasattr(env.config, "moment_veto_bound_nm")
+
+
+def test_model_based_cuff_allocation_minimizes_translational_force() -> None:
+    human = HumanV2Parameters()
+    q = np.radians([5.0, 10.0])
+    allocation = _human_v2_tracking_wrench(
+        q,
+        np.zeros(2),
+        human_reference(0.0),
+        human,
+    )
+    force_map = sleeve_jacobian(q, human)[[0, 2], :].T
+    moment_map = np.array([1.0, -1.0])
+    reconstructed_tau = (
+        force_map @ allocation["force_xz_n"]
+        + moment_map * allocation["my_nm"]
+    )
+    assert reconstructed_tau == pytest.approx(
+        allocation["tau_required_nm"], abs=1e-10
+    )
+    assert allocation["allocation_residual_nm"] < 1e-10
+    assert allocation["force_norm_n"] < PlantV2Config().force_veto_bound_n
+
+
+def test_total_translational_cuff_command_enforces_existing_force_gate() -> None:
+    env = SleeveRobotEnvironment(fixture_q2_deg=10.0)
+    observation = env.reset(10.0)
+    feedforward = np.array(
+        [env.config.force_veto_bound_n + 1.0, 0.0, 0.0, 0.0, 50.0, 0.0]
+    )
+    with pytest.raises(CuffForceCommandLimitError):
+        env.step_cartesian(
+            observation.ee_position_m,
+            np.zeros(3),
+            observation.ee_rotation_matrix,
+            np.zeros(3),
+            feedforward,
+            True,
+        )
 
 
 def test_six_posture_mass_pose_wrench_and_torque_validation(validation_result) -> None:

@@ -15,6 +15,17 @@ from .kinematics import coordinated_posture, sleeve_position, sleeve_rotation_ma
 from .model import build_plant_xml
 
 
+class CuffForceCommandLimitError(RuntimeError):
+    """Raised before applying a commanded cuff force above the retained gate."""
+
+    def __init__(self, force_norm_n: float, force_bound_n: float) -> None:
+        self.force_norm_n = force_norm_n
+        self.force_bound_n = force_bound_n
+        super().__init__(
+            f"cuff force command {force_norm_n:.6g} N exceeds {force_bound_n:.6g} N"
+        )
+
+
 @dataclass(frozen=True)
 class PlantObservation:
     time_s: float
@@ -52,6 +63,10 @@ class PlantObservation:
 class PlantStep:
     observation: PlantObservation
     peak_sleeve_force_n: float
+    peak_abs_sleeve_moment_my_nm: float
+    peak_joint_torque_limit_fraction: float
+    peak_sleeve_relative_position_m: float
+    peak_sleeve_relative_rotation_rad: float
     peak_bed_force_n: float
     peak_bed_penetration_m: float
     bed_active_transitions: int
@@ -248,6 +263,8 @@ class SleeveRobotEnvironment:
         target_velocity_m_s: np.ndarray,
         target_rotation_matrix: np.ndarray | None = None,
         target_angular_velocity_rad_s: np.ndarray | None = None,
+        feedforward_wrench_world: np.ndarray | None = None,
+        enforce_force_norm_gate: bool = False,
     ) -> PlantStep:
         before = self.observe()
         previous_active = before.bed_force_n >= 2.0
@@ -255,6 +272,10 @@ class SleeveRobotEnvironment:
         active_transitions = 0
         count_transitions = 0
         peak_sleeve = 0.0
+        peak_abs_sleeve_moment_my = 0.0
+        peak_joint_torque_fraction = 0.0
+        peak_relative_position = 0.0
+        peak_relative_rotation = 0.0
         peak_bed = 0.0
         peak_penetration = 0.0
         for _ in range(self.config.control_substeps):
@@ -263,6 +284,8 @@ class SleeveRobotEnvironment:
                 target_velocity_m_s,
                 target_rotation_matrix,
                 target_angular_velocity_rad_s,
+                feedforward_wrench_world,
+                enforce_force_norm_gate,
             )
             self._apply_human_soft_limit()
             mujoco.mj_step(self.model, self.data)
@@ -273,11 +296,34 @@ class SleeveRobotEnvironment:
             previous_active = active
             previous_count = observation.bed_contact_count
             peak_sleeve = max(peak_sleeve, observation.sleeve_force_n)
+            peak_abs_sleeve_moment_my = max(
+                peak_abs_sleeve_moment_my,
+                abs(observation.sleeve_moment_my_nm),
+            )
+            peak_joint_torque_fraction = max(
+                peak_joint_torque_fraction,
+                float(
+                    np.max(
+                        np.abs(observation.joint_torque_command_nm)
+                        / np.asarray(self.robot.joint_torque_limits_nm)
+                    )
+                ),
+            )
+            peak_relative_position = max(
+                peak_relative_position, observation.sleeve_deformation_m
+            )
+            peak_relative_rotation = max(
+                peak_relative_rotation, observation.sleeve_relative_rotation_rad
+            )
             peak_bed = max(peak_bed, observation.bed_force_n)
             peak_penetration = max(peak_penetration, observation.bed_penetration_m)
         return PlantStep(
             observation=observation,
             peak_sleeve_force_n=peak_sleeve,
+            peak_abs_sleeve_moment_my_nm=peak_abs_sleeve_moment_my,
+            peak_joint_torque_limit_fraction=peak_joint_torque_fraction,
+            peak_sleeve_relative_position_m=peak_relative_position,
+            peak_sleeve_relative_rotation_rad=peak_relative_rotation,
             peak_bed_force_n=peak_bed,
             peak_bed_penetration_m=peak_penetration,
             bed_active_transitions=active_transitions,
@@ -290,6 +336,8 @@ class SleeveRobotEnvironment:
         target_velocity_m_s: np.ndarray,
         target_rotation_matrix: np.ndarray | None,
         target_angular_velocity_rad_s: np.ndarray | None,
+        feedforward_wrench_world: np.ndarray | None,
+        enforce_force_norm_gate: bool,
     ) -> None:
         observation = self.observe()
         force = self.config.cartesian_kp_n_m * (
@@ -318,6 +366,18 @@ class SleeveRobotEnvironment:
         moment += self.config.orientation_kd_nms_rad * (
             target_angular_velocity - observation.ee_angular_velocity_rad_s
         )
+        if feedforward_wrench_world is not None:
+            feedforward = np.asarray(feedforward_wrench_world, dtype=float)
+            if feedforward.shape != (6,) or not np.all(np.isfinite(feedforward)):
+                raise ValueError("feedforward_wrench_world must be a finite 6-vector")
+            force = force + feedforward[:3]
+            moment = moment + feedforward[3:]
+        force_norm = float(np.linalg.norm(force))
+        if enforce_force_norm_gate and force_norm > self.config.force_veto_bound_n + 1e-9:
+            raise CuffForceCommandLimitError(
+                force_norm,
+                self.config.force_veto_bound_n,
+            )
         jacobian = self.ee_pose_jacobian()
         pinv = jacobian.T @ np.linalg.inv(
             jacobian @ jacobian.T + self.config.jacobian_damping * np.eye(6)
