@@ -155,6 +155,20 @@ observed at that stage; they do not independently override this state summary.
   suite completed with `159/159` passing, zero failed and zero incomplete in
   `222.5698 s`. Real position/velocity-controlled contact remains unvalidated
   and is reserved for MuJoCo after the robot/contact interface is specified.
+- MuJoCo Sleeve/Robot Plant V2 is the current physical-interface validation
+  branch. The old `CR12-12.urdf` was found but is only a one-link visual
+  assembly with no joints, inertials, transmissions, or control contract, so
+  the plant uses an explicitly hypothetical CR12-like 6-DoF serial arm. A
+  bilateral compliant sleeve replaces the V1 tension-only cuff path. Fixture
+  topology probes pass in both directions at q2=2/10/20/30 degrees, with
+  sleeve deformation below 0.4% of the 2 mm command. Bounded preload and
+  two-second release tests establish local equilibrium and bidirectional
+  authority only at 20 and 30 degrees. The 2 and 10 degree cases retain 7.00
+  and 3.52 Nm diagnostic-fixture reaction, exceed the 200 N interaction-force
+  veto, and collapse after release. Therefore the complete 2-to-30-to-2
+  protective motion is skipped by the registered gate. This is a low-angle
+  physical-support/preload blocker, not evidence that protective mode itself
+  is infeasible. See [MUJOCO_SLEEVE_ROBOT_V2.md](MUJOCO_SLEEVE_ROBOT_V2.md).
 - Existing V2/equilibrium-specific test runners remain for their documented
   stage-level uses. Historical 15/24/42/57 counts below describe the suites at
   those stages, not the current retained suite size.
