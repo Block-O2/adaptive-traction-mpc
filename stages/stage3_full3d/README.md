@@ -110,3 +110,15 @@ plant. `CR12DryRunBackend` contains no network or SDK transport and always
 rejects transmission. In particular, the laboratory CR12 torque-control
 capability remains unknown until confirmed by the exact controller and its
 matching manufacturer API documentation.
+
+## Stage 4 one-shot adaptive checkpoint
+
+The `stage4-one-shot-adaptive-high-flexion` tag preserves the approved
+population-prior cold-start implementation and its single 23-second adaptive
+high-flexion execution. Estimator and controller inputs are restricted to
+robot state/FK, measured cuff pose/twist, reconstructed cuff wrench, and the
+nominal Human-V2 population prior. MuJoCo Human truth is evaluation-only.
+
+See [`docs/STAGE4_ONE_SHOT_ADAPTIVE_CLOSEOUT.md`](docs/STAGE4_ONE_SHOT_ADAPTIVE_CLOSEOUT.md)
+for the frozen evidence boundary, commands, metrics, and remaining hardware
+blocker.
