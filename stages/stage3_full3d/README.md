@@ -95,3 +95,18 @@ The 200 N cuff gate applies only to translational force. No cuff moment limit or
 moment clipping is introduced. Physical cuff wrench is reconstructed through
 virtual work from the weld generalized force; raw rotational equality
 multipliers are never interpreted as N m.
+
+## Real-robot-facing software boundary
+
+The post-Stage-3C interface work is deliberately hardware-independent and does
+not command a real robot. See:
+
+- [`docs/REAL_ROBOT_INTERFACE_CONTRACT.md`](docs/REAL_ROBOT_INTERFACE_CONTRACT.md)
+- [`docs/CR12_LOCAL_HARDWARE_AUDIT.md`](docs/CR12_LOCAL_HARDWARE_AUDIT.md)
+- [`docs/REAL_ROBOT_COMMISSIONING_PLAN.md`](docs/REAL_ROBOT_COMMISSIONING_PLAN.md)
+
+`Stage3SimulationBackend` implements the contract using the validated MuJoCo
+plant. `CR12DryRunBackend` contains no network or SDK transport and always
+rejects transmission. In particular, the laboratory CR12 torque-control
+capability remains unknown until confirmed by the exact controller and its
+matching manufacturer API documentation.
