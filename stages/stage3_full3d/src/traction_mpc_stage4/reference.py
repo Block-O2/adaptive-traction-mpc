@@ -9,12 +9,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+from scipy.interpolate import make_interp_spline
 
 from traction_mpc_stage3.reference import CuffPoseReference, _world_from_cuff, quintic_progress
 
 
 TEACHING_DURATION_S = 18.0
 COLD_START_TEACHING_DURATION_S = 23.0
+CONTINUOUS_TEACHING_DURATION_S = 23.0
 
 
 @dataclass(frozen=True)
@@ -55,6 +57,44 @@ COLD_START_TEACHING_WAYPOINTS = (
     TeachingWaypoint(19.0, (28.0, 25.0), "staged_return_2"),
     TeachingWaypoint(22.0, (5.0, 10.0), "return"),
     TeachingWaypoint(23.0, (5.0, 10.0), "final_hold"),
+)
+
+
+# These are definition knots, not stop points.  The two motion splines pass
+# through their internal knots with continuous, generally nonzero velocity and
+# acceleration.  Only the initial, high-flexion, and final postures are held.
+CONTINUOUS_TEACHING_WAYPOINTS = (
+    TeachingWaypoint(0.0, (5.0, 10.0), "initial_hold_start"),
+    TeachingWaypoint(1.0, (5.0, 10.0), "continuous_motion_start"),
+    TeachingWaypoint(3.5, (18.0, 12.0), "hip_dominant_excitation"),
+    TeachingWaypoint(6.5, (22.0, 35.0), "knee_dominant_excitation"),
+    TeachingWaypoint(10.0, (48.0, 60.0), "combined_flexion"),
+    TeachingWaypoint(13.0, (75.0, 90.0), "high_flexion_hold_start"),
+    TeachingWaypoint(14.5, (75.0, 90.0), "high_flexion_hold_end"),
+    TeachingWaypoint(17.0, (55.0, 62.0), "continuous_return_1"),
+    TeachingWaypoint(19.0, (28.0, 28.0), "continuous_return_2"),
+    TeachingWaypoint(22.0, (5.0, 10.0), "final_hold_start"),
+    TeachingWaypoint(23.0, (5.0, 10.0), "final_hold_end"),
+)
+
+
+def _motion_splines(
+    waypoints: tuple[TeachingWaypoint, ...],
+) -> tuple[object, object]:
+    times = np.array([item.time_s for item in waypoints])
+    q_rad = np.radians(np.array([item.q_deg for item in waypoints]))
+    boundary = ([(1, 0.0), (2, 0.0)], [(1, 0.0), (2, 0.0)])
+    return tuple(
+        make_interp_spline(times, q_rad[:, joint], k=5, bc_type=boundary)
+        for joint in range(2)
+    )
+
+
+_CONTINUOUS_FLEXION_SPLINES = _motion_splines(
+    CONTINUOUS_TEACHING_WAYPOINTS[1:6]
+)
+_CONTINUOUS_RETURN_SPLINES = _motion_splines(
+    CONTINUOUS_TEACHING_WAYPOINTS[6:10]
 )
 
 
@@ -116,4 +156,31 @@ def cold_start_teaching_reference(time_s: float) -> CuffPoseReference:
     # This nominal pose is only a population-prior placeholder.  The cold-start
     # rollout replaces it with the online geometry model anchored at measured
     # cuff pose before sending any target to the robot.
+    return CuffPoseReference(q, dq, ddq, _world_from_cuff(q))
+
+
+def continuous_teaching_joint_reference(
+    time_s: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """C2 one-shot reference with informative internal knots but no waypoint stops."""
+
+    time = float(np.clip(time_s, 0.0, CONTINUOUS_TEACHING_DURATION_S))
+    if time <= 1.0:
+        return np.radians([5.0, 10.0]), np.zeros(2), np.zeros(2)
+    if time < 13.0:
+        splines = _CONTINUOUS_FLEXION_SPLINES
+    elif time <= 14.5:
+        return np.radians([75.0, 90.0]), np.zeros(2), np.zeros(2)
+    elif time < 22.0:
+        splines = _CONTINUOUS_RETURN_SPLINES
+    else:
+        return np.radians([5.0, 10.0]), np.zeros(2), np.zeros(2)
+    return tuple(
+        np.array([float(spline(time, order)) for spline in splines])
+        for order in range(3)
+    )
+
+
+def continuous_teaching_reference(time_s: float) -> CuffPoseReference:
+    q, dq, ddq = continuous_teaching_joint_reference(time_s)
     return CuffPoseReference(q, dq, ddq, _world_from_cuff(q))

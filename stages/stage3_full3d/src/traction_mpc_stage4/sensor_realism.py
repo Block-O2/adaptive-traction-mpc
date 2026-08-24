@@ -7,11 +7,12 @@ Human state and contact truth are read exclusively in the evaluation blocks.
 
 from __future__ import annotations
 
+from dataclasses import dataclass, replace
 import json
 import math
 from pathlib import Path
 import time as wall_time
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
@@ -21,8 +22,14 @@ from traction_mpc_stage3.coupled import (
     CuffForceCommandLimitError,
     HIP_HEIGHT_M,
 )
-from traction_mpc_stage3.human import CUFF_TRANSLATIONAL_FORCE_GATE_N, soft_limit_torque
+from traction_mpc_stage3.human import (
+    CUFF_TRANSLATIONAL_FORCE_GATE_N,
+    HumanV2Parameters,
+    soft_limit_torque,
+)
+from traction_mpc_stage3.reference import CuffPoseReference
 from traction_mpc_stage3.robot import UR10eTorqueRobot
+from scipy.spatial.transform import Rotation
 
 from .adaptive_estimators import IntegralAdaptiveHumanEstimator
 from .cold_start import _geometry_vector
@@ -44,6 +51,46 @@ from .measurement import (
 from .mpc import HumanSpaceMPC
 from .reference import COLD_START_TEACHING_DURATION_S, COLD_START_TEACHING_WAYPOINTS, cold_start_teaching_reference
 from .state_ukf import StateUKFConfig
+
+
+@dataclass(frozen=True)
+class MeasurementRouting:
+    """Independent timestamp delays for the three controller-facing loops."""
+
+    estimator_delay_s: float = 0.0
+    mpc_state_delay_s: float = 0.0
+    low_level_delay_s: float = 0.0
+    extrapolate_low_level_to_arrival: bool = False
+
+
+def _measurement_with_delay(case: MeasurementCase, delay_s: float, name: str) -> MeasurementCase:
+    return replace(case, name=name, latency_s=float(delay_s))
+
+
+def _extrapolate_measurement_to_arrival(
+    measurement: ControllerMeasurement,
+) -> ControllerMeasurement:
+    dt = max(0.0, measurement.age_s)
+    rotation = (
+        Rotation.from_rotvec(measurement.attachment_angular_velocity_rad_s * dt).as_matrix()
+        @ measurement.attachment_rotation_matrix
+    )
+    return ControllerMeasurement(
+        arrival_time_s=measurement.arrival_time_s,
+        sample_time_s=measurement.arrival_time_s,
+        robot_q_rad=measurement.robot_q_rad + measurement.robot_dq_rad_s * dt,
+        robot_dq_rad_s=measurement.robot_dq_rad_s.copy(),
+        attachment_position_m=(
+            measurement.attachment_position_m
+            + measurement.attachment_velocity_m_s * dt
+        ),
+        attachment_rotation_matrix=rotation,
+        attachment_velocity_m_s=measurement.attachment_velocity_m_s.copy(),
+        attachment_angular_velocity_rad_s=measurement.attachment_angular_velocity_rad_s.copy(),
+        cuff_force_vector_n=measurement.cuff_force_vector_n.copy(),
+        cuff_moment_vector_nm=measurement.cuff_moment_vector_nm.copy(),
+        new_sample=measurement.new_sample,
+    )
 
 
 class SensorBoundaryStage4Plant(Stage4CoupledPlant):
@@ -135,31 +182,62 @@ def run_sensor_realism_case(
     *,
     duration_s: float = COLD_START_TEACHING_DURATION_S,
     estimator_architecture: str = "instantaneous_v2",
+    measurement_routing: MeasurementRouting | None = None,
+    result_case_name: str | None = None,
+    true_human_override: HumanV2Parameters | None = None,
+    true_metadata_override: dict[str, Any] | None = None,
+    reference_fn: Callable[[float], CuffPoseReference] = cold_start_teaching_reference,
+    trajectory_label: str = "stage4_population_prior_cold_start_high_flexion_23s",
+    trajectory_waypoints: tuple[Any, ...] = COLD_START_TEACHING_WAYPOINTS,
 ) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     """Run the registered perturbed Human through one fixed sensor case."""
 
-    true_human, true_metadata = registered_cold_start_perturbed_human()
+    default_human, default_metadata = registered_cold_start_perturbed_human()
+    true_human = default_human if true_human_override is None else true_human_override
+    true_metadata = (
+        default_metadata if true_metadata_override is None else true_metadata_override
+    )
+    routing = measurement_routing
+    if routing is None:
+        routing = MeasurementRouting(
+            estimator_delay_s=case.latency_s,
+            mpc_state_delay_s=case.latency_s,
+            low_level_delay_s=case.latency_s,
+        )
     plant = SensorBoundaryStage4Plant(true_human)
-    initial_reference = cold_start_teaching_reference(0.0)
+    initial_reference = reference_fn(0.0)
     truth = plant.reset(initial_reference.q_rad)
-    measurement_layer = CausalMeasurementLayer(case, truth)
-    measurement = measurement_layer.current
+    estimator_layer = CausalMeasurementLayer(
+        _measurement_with_delay(case, routing.estimator_delay_s, "estimator_channel"),
+        truth,
+    )
+    mpc_layer = CausalMeasurementLayer(
+        _measurement_with_delay(case, routing.mpc_state_delay_s, "mpc_state_channel"),
+        truth,
+    )
+    low_level_layer = CausalMeasurementLayer(
+        _measurement_with_delay(case, routing.low_level_delay_s, "low_level_channel"),
+        truth,
+    )
+    estimator_measurement = estimator_layer.current
+    mpc_measurement = mpc_layer.current
+    low_level_measurement = low_level_layer.current
     # The retained posture target is a robot-known startup measurement, not a
     # hidden copy of the simulator's clean initial joint configuration.
-    plant.neutral_robot_q = measurement.robot_q_rad.copy()
+    plant.neutral_robot_q = low_level_measurement.robot_q_rad.copy()
     if estimator_architecture == "instantaneous_v2":
         estimator = OneShotHumanEstimatorV2(
-            measurement.attachment_position_m,
-            measurement.attachment_rotation_matrix,
+            estimator_measurement.attachment_position_m,
+            estimator_measurement.attachment_rotation_matrix,
             initial_reference.q_rad,
         )
     elif estimator_architecture in {"integral_minimal", "integral_state_ukf"}:
         estimator = IntegralAdaptiveHumanEstimator(
-            measurement.attachment_position_m,
-            measurement.attachment_rotation_matrix,
+            estimator_measurement.attachment_position_m,
+            estimator_measurement.attachment_rotation_matrix,
             initial_reference.q_rad,
             use_state_ukf=estimator_architecture == "integral_state_ukf",
-            initial_time_s=measurement.sample_time_s,
+            initial_time_s=estimator_measurement.sample_time_s,
         )
     else:
         raise ValueError(
@@ -172,10 +250,10 @@ def run_sensor_realism_case(
         raise RuntimeError("MPC period must be an integer number of control periods")
 
     estimated_state = estimator.geometry.estimate_state(
-        measurement.attachment_position_m,
-        measurement.attachment_rotation_matrix,
-        measurement.attachment_velocity_m_s,
-        measurement.attachment_angular_velocity_rad_s,
+        mpc_measurement.attachment_position_m,
+        mpc_measurement.attachment_rotation_matrix,
+        mpc_measurement.attachment_velocity_m_s,
+        mpc_measurement.attachment_angular_velocity_rad_s,
     )
     current_action = np.zeros(2)
     current_model = estimator.model
@@ -195,6 +273,9 @@ def run_sensor_realism_case(
     local_moments = [truth.attachment_rotation_matrix.T @ truth.cuff_moment_vector_nm]
     torque_fractions = [0.0]
     measurement_ages: list[float] = []
+    estimator_measurement_ages: list[float] = []
+    mpc_measurement_ages: list[float] = []
+    low_level_measurement_ages: list[float] = []
     measurement_new: list[bool] = []
     measured_forces: list[np.ndarray] = []
     measured_moments: list[np.ndarray] = []
@@ -219,20 +300,34 @@ def run_sensor_realism_case(
 
     for control_index in range(requested_steps):
         current_truth = plant.observe()
-        measurement = measurement_layer.update(current_truth)
-        if not _finite_measurement(measurement):
+        estimator_measurement = estimator_layer.update(current_truth)
+        mpc_measurement = mpc_layer.update(current_truth)
+        low_level_measurement_raw = low_level_layer.update(current_truth)
+        low_level_measurement = (
+            _extrapolate_measurement_to_arrival(low_level_measurement_raw)
+            if routing.extrapolate_low_level_to_arrival
+            else low_level_measurement_raw
+        )
+        if not all(
+            _finite_measurement(item)
+            for item in (
+                estimator_measurement,
+                mpc_measurement,
+                low_level_measurement,
+            )
+        ):
             termination = "nonfinite_controller_measurement"
             break
         if control_index % high_level_steps == 0:
             estimator_start = wall_time.perf_counter()
-            estimated_state, diagnostics = estimator.observe(
-                time_s=measurement.sample_time_s,
-                position_world_m=measurement.attachment_position_m,
-                rotation_world_from_cuff=measurement.attachment_rotation_matrix,
-                linear_velocity_world_m_s=measurement.attachment_velocity_m_s,
-                angular_velocity_world_rad_s=measurement.attachment_angular_velocity_rad_s,
-                force_world_n=measurement.cuff_force_vector_n,
-                moment_world_nm=measurement.cuff_moment_vector_nm,
+            estimator_output_state, diagnostics = estimator.observe(
+                time_s=estimator_measurement.sample_time_s,
+                position_world_m=estimator_measurement.attachment_position_m,
+                rotation_world_from_cuff=estimator_measurement.attachment_rotation_matrix,
+                linear_velocity_world_m_s=estimator_measurement.attachment_velocity_m_s,
+                angular_velocity_world_rad_s=estimator_measurement.attachment_angular_velocity_rad_s,
+                force_world_n=estimator_measurement.cuff_force_vector_n,
+                moment_world_nm=estimator_measurement.cuff_moment_vector_nm,
                 # No MuJoCo bed/contact truth crosses the measurement boundary.
                 bed_contaminated=False,
             )
@@ -240,11 +335,20 @@ def run_sensor_realism_case(
             current_geometry_diag = diagnostics["geometry"]
             current_dynamic_diag = diagnostics["dynamics"]
             current_model = estimator.model
+            if estimator_architecture == "integral_state_ukf":
+                estimated_state = estimator_output_state
+            else:
+                estimated_state = current_model.geometry.estimate_state(
+                    mpc_measurement.attachment_position_m,
+                    mpc_measurement.attachment_rotation_matrix,
+                    mpc_measurement.attachment_velocity_m_s,
+                    mpc_measurement.attachment_angular_velocity_rad_s,
+                )
             mpc_start = wall_time.perf_counter()
             current_action, _ = mpc.solve(
                 estimated_state,
-                float(measurement.arrival_time_s),
-                cold_start_teaching_reference,
+                float(mpc_measurement.arrival_time_s),
+                reference_fn,
                 current_model,
             )
             mpc_compute_s.append(wall_time.perf_counter() - mpc_start)
@@ -253,10 +357,10 @@ def run_sensor_realism_case(
                 estimated_state = estimator.last_state.copy()
             else:
                 estimated_state = current_model.geometry.estimate_state(
-                    measurement.attachment_position_m,
-                    measurement.attachment_rotation_matrix,
-                    measurement.attachment_velocity_m_s,
-                    measurement.attachment_angular_velocity_rad_s,
+                    mpc_measurement.attachment_position_m,
+                    mpc_measurement.attachment_rotation_matrix,
+                    mpc_measurement.attachment_velocity_m_s,
+                    mpc_measurement.attachment_angular_velocity_rad_s,
                 )
         current_allocation = current_model.allocate_generalized_action(
             current_action, estimated_state[:2]
@@ -266,14 +370,14 @@ def run_sensor_realism_case(
             force_gate_event_count += 1
             break
 
-        reference = cold_start_teaching_reference(float(measurement.arrival_time_s))
+        reference = reference_fn(float(low_level_measurement.arrival_time_s))
         target_pose = current_model.geometry.cuff_pose(reference.q_rad)
         target_linear_velocity, target_angular_velocity = current_model.geometry.cuff_velocity(
             reference.q_rad, reference.dq_rad_s
         )
         try:
             plant.apply_measured_nominal_cartesian_control(
-                measurement,
+                low_level_measurement,
                 target_pose.translation,
                 target_linear_velocity,
                 target_pose.rotation,
@@ -293,17 +397,20 @@ def run_sensor_realism_case(
         control_true_dq.append(current_truth.human_dq_rad_s.copy())
         control_estimated_state.append(estimated_state.copy())
         control_bed_force.append(float(current_truth.bed_force_n))
-        measurement_ages.append(measurement.age_s)
-        measurement_new.append(measurement.new_sample)
-        measured_forces.append(measurement.cuff_force_vector_n.copy())
-        measured_moments.append(measurement.cuff_moment_vector_nm.copy())
+        measurement_ages.append(low_level_measurement_raw.age_s)
+        estimator_measurement_ages.append(estimator_measurement.age_s)
+        mpc_measurement_ages.append(mpc_measurement.age_s)
+        low_level_measurement_ages.append(low_level_measurement_raw.age_s)
+        measurement_new.append(low_level_measurement_raw.new_sample)
+        measured_forces.append(estimator_measurement.cuff_force_vector_n.copy())
+        measured_moments.append(estimator_measurement.cuff_moment_vector_nm.copy())
         control_truth_forces.append(current_truth.cuff_force_vector_n.copy())
         control_truth_moments.append(current_truth.cuff_moment_vector_nm.copy())
 
         for _ in range(CONTROL_SUBSTEPS):
             truth = plant.step()
             observations.append(truth)
-            references.append(cold_start_teaching_reference(truth.time_s).q_rad.copy())
+            references.append(reference_fn(truth.time_s).q_rad.copy())
             estimated_states.append(estimated_state.copy())
             desired_actions.append(current_action.copy())
             allocated_wrenches.append(np.asarray(current_allocation["wrench_world"]).copy())
@@ -412,7 +519,7 @@ def run_sensor_realism_case(
     last_dynamic_attempt = estimator.dynamic_diagnostics[-1] if estimator.dynamic_diagnostics else estimator.dynamic_identifier.last_diagnostics
     summary = {
         "evidence_category": "stage4_sensor_realism_engineering_rollout",
-        "case": case.name,
+        "case": result_case_name or case.name,
         "estimator_architecture": {
             "name": estimator_architecture,
             "state_observer": "state_only_ukf"
@@ -427,6 +534,12 @@ def run_sensor_realism_case(
             else None,
         },
         "measurement_model": measurement_case_dict(case),
+        "measurement_routing": {
+            "estimator_delay_ms": 1000.0 * routing.estimator_delay_s,
+            "mpc_state_delay_ms": 1000.0 * routing.mpc_state_delay_s,
+            "low_level_delay_ms": 1000.0 * routing.low_level_delay_s,
+            "low_level_timestamp_extrapolation": routing.extrapolate_low_level_to_arrival,
+        },
         "preprocessing": {
             "shared_across_all_nonideal_cases": True,
             "lowpass_cutoff_hz": MeasurementPreprocessing().lowpass_cutoff_hz,
@@ -437,12 +550,12 @@ def run_sensor_realism_case(
         },
         "controller_or_estimator_clean_mujoco_truth_access": False,
         "truth_scope": "god_view_evaluation_and_simulated_plant_only",
-        "true_human_case": "cold_start_perturbed",
+        "true_human_case": str(true_metadata.get("case", "custom_override")),
         "true_human_parameters_god_view_only": true_metadata,
-        "trajectory": "stage4_population_prior_cold_start_high_flexion_23s",
+        "trajectory": trajectory_label,
         "trajectory_waypoints": [
             {"time_s": item.time_s, "q_deg": list(item.q_deg), "label": item.label}
-            for item in COLD_START_TEACHING_WAYPOINTS
+            for item in trajectory_waypoints
         ],
         "requested_duration_s": float(duration_s),
         "completed_duration_s": float(time[-1]),
@@ -497,6 +610,15 @@ def run_sensor_realism_case(
         "measurement_and_derivative_quality_god_view": {
             "mean_measurement_age_ms": float(1000.0 * np.mean(measurement_ages)),
             "max_measurement_age_ms": float(1000.0 * np.max(measurement_ages)),
+            "mean_estimator_measurement_age_ms": float(
+                1000.0 * np.mean(estimator_measurement_ages)
+            ),
+            "mean_mpc_state_measurement_age_ms": float(
+                1000.0 * np.mean(mpc_measurement_ages)
+            ),
+            "mean_low_level_measurement_age_ms": float(
+                1000.0 * np.mean(low_level_measurement_ages)
+            ),
             "delivered_new_sample_count": int(np.sum(measurement_new)),
             "force_vector_measurement_error_rms_n": float(np.sqrt(np.mean(force_measurement_error**2))),
             "moment_vector_measurement_error_rms_nm": float(np.sqrt(np.mean(moment_measurement_error**2))),
@@ -557,6 +679,9 @@ def run_sensor_realism_case(
         "control_true_q_rad_god_view": np.asarray(control_true_q),
         "control_true_dq_rad_s_god_view": control_dq_true,
         "measurement_age_s": np.asarray(measurement_ages),
+        "estimator_measurement_age_s": np.asarray(estimator_measurement_ages),
+        "mpc_state_measurement_age_s": np.asarray(mpc_measurement_ages),
+        "low_level_measurement_age_s": np.asarray(low_level_measurement_ages),
         "measurement_new_sample": np.asarray(measurement_new, dtype=bool),
         "measured_cuff_force_world_n": measured_force_array,
         "measured_cuff_moment_world_nm": measured_moment_array,

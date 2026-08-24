@@ -8,7 +8,9 @@ from traction_mpc_stage3.human import HUMAN
 from traction_mpc_stage4.evaluation import Stage4CoupledPlant
 from traction_mpc_stage4.measurement import CausalMeasurementLayer, sensor_realism_cases
 from traction_mpc_stage4.sensor_realism import (
+    MeasurementRouting,
     SensorBoundaryStage4Plant,
+    _extrapolate_measurement_to_arrival,
     run_sensor_realism_case,
 )
 
@@ -91,3 +93,51 @@ def test_ideal_measured_low_level_law_matches_validated_stage4_law() -> None:
         atol=1e-10,
         rtol=1e-10,
     )
+
+
+def test_timestamp_extrapolation_advances_pose_and_robot_state_only() -> None:
+    plant = Stage4CoupledPlant()
+    truth = plant.reset(np.radians([5.0, 10.0]))
+    delayed = replace(sensor_realism_cases()[0], latency_s=0.010)
+    layer = CausalMeasurementLayer(delayed, truth)
+    for _ in range(10):
+        truth = plant.step()
+    measured = layer.update(truth)
+    predicted = _extrapolate_measurement_to_arrival(measured)
+    assert np.isclose(measured.age_s, 0.010)
+    assert predicted.age_s == 0.0
+    np.testing.assert_allclose(
+        predicted.robot_q_rad,
+        measured.robot_q_rad + 0.010 * measured.robot_dq_rad_s,
+    )
+    np.testing.assert_allclose(
+        predicted.attachment_position_m,
+        measured.attachment_position_m
+        + 0.010 * measured.attachment_velocity_m_s,
+    )
+    np.testing.assert_array_equal(
+        predicted.cuff_force_vector_n, measured.cuff_force_vector_n
+    )
+
+
+def test_independent_measurement_routing_is_reported() -> None:
+    routing = MeasurementRouting(
+        estimator_delay_s=0.010,
+        mpc_state_delay_s=0.0,
+        low_level_delay_s=0.0,
+    )
+    summary, _ = run_sensor_realism_case(
+        sensor_realism_cases()[1],
+        duration_s=0.10,
+        estimator_architecture="integral_minimal",
+        measurement_routing=routing,
+        result_case_name="estimator_delay_only_short",
+    )
+    assert summary["mechanically_completed_requested_duration"]
+    assert summary["case"] == "estimator_delay_only_short"
+    assert summary["measurement_routing"] == {
+        "estimator_delay_ms": 10.0,
+        "mpc_state_delay_ms": 0.0,
+        "low_level_delay_ms": 0.0,
+        "low_level_timestamp_extrapolation": False,
+    }
