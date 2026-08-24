@@ -1,2 +1,7 @@
 # Keep generated scientific tables portable and avoid CRLF-only whitespace noise.
 *.csv text eol=lf
+
+# Preserve only the recovered Stage-1 CRLF evidence byte-for-byte so recorded
+# SHA-256 provenance remains valid. Later Stage-10/11 CSVs remain normalized.
+stages/stage1/results/final/archive/legacy_stages/**/*.csv -text whitespace=cr-at-eol
+stages/stage1/results/final/stage9*/**/*.csv -text whitespace=cr-at-eol
