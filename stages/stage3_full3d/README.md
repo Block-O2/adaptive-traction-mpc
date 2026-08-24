@@ -122,3 +122,14 @@ nominal Human-V2 population prior. MuJoCo Human truth is evaluation-only.
 See [`docs/STAGE4_ONE_SHOT_ADAPTIVE_CLOSEOUT.md`](docs/STAGE4_ONE_SHOT_ADAPTIVE_CLOSEOUT.md)
 for the frozen evidence boundary, commands, metrics, and remaining hardware
 blocker.
+
+The post-checkpoint sensor-realism engineering ladder is documented separately
+in [`docs/STAGE4_SENSOR_REALISM_ENGINEERING.md`](docs/STAGE4_SENSOR_REALISM_ENGINEERING.md).
+It does not modify the frozen Stage-4 estimator/controller checkpoint and does
+not claim that its deterministic perturbations are measured CR12 sensor data.
+
+The follow-on comparison replacing instantaneous acceleration regression with
+a causal integral base-parameter identifier is documented in
+[`docs/STAGE4_INTEGRAL_UKF_COMPARISON.md`](docs/STAGE4_INTEGRAL_UKF_COMPARISON.md).
+Its registered engineering evidence selects the minimal architecture without
+a state UKF; no checkpoint or formal evidence is changed.
