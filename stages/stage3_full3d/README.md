@@ -1,8 +1,9 @@
-# Stage 3B: independent full-3D UR10e robot core
+# Stage 3: full-3D UR10e surrogate
 
-This stage establishes a robot-only MuJoCo execution plant. It does not import,
-modify, or couple either frozen `traction_mpc` package, Human V2, the cuff weld,
-the rehabilitation controller, or adaptive control.
+The `stage3b-ur10e-robot-core` tag preserves the independent robot-only torque
+plant. The current Stage 3C work couples that core to an explicit port of frozen
+Human V2 through a six-constraint rigid cuff. Stage 3 remains an independent
+package and never imports either frozen `traction_mpc` package at runtime.
 
 ## Setup and validation
 
@@ -13,10 +14,14 @@ python -m pip install -r requirements.txt
 python -m pip install -e ".[dev]"
 conda run -n mpc_learn pytest -q
 conda run -n mpc_learn python scripts/run_robot_core_validation.py --samples 301
+PYTHONPATH=src conda run -n mpc_learn python scripts/run_stage3c_nominal_smoke.py \
+  --output-dir results/engineering_stage3c
 ```
 
-The validation script prints robot-only diagnostic JSON and does not promote a
-formal or authoritative result.
+The Stage 3C script runs the bounded `[5 deg, 10 deg]` hold and 3-degree
+departure gates before the single 15-second frozen nominal smoke. It preserves
+JSON and compressed traces under the requested output directory. These are
+engineering validation artifacts, not formal or authoritative evidence.
 
 ## Model boundary
 
@@ -66,5 +71,27 @@ WORLD_FROM_CUFF
   * ATTACHMENT_FROM_CUFF
 ```
 
-The adapter remains a robot-only frame definition in this stage. No Human V2
-weld or contact is present.
+At the Stage 3B tag the adapter is only a robot-side frame definition; no Human
+V2 weld or contact is present there.
+
+## Stage 3C coupling contract
+
+The coupled model adds only the frozen planar two-joint Human V2, its unilateral
+bed contact, and an equality weld between `attachment_site` and
+`sleeve_attach_site`. The provisional adapter stays explicitly identity. Robot
+self-collision remains active. Collision bit domains isolate it from the Human
+and bed so model composition does not introduce robot--Human or robot--bed
+contacts; the Human--bed contact parameters are unchanged from Stage 2.
+
+The nominal controller is a direct semantic port of Stage 2:
+
+1. frozen Human reference and inverse dynamics;
+2. minimum-translational-force cuff allocation with unbounded sagittal moment;
+3. full 6D pose/wrench command;
+4. `J_robot.T @ wrench`, bias torque, and the retained nullspace term;
+5. explicit gear-1 torque motors with modeled UR10e limits.
+
+The 200 N cuff gate applies only to translational force. No cuff moment limit or
+moment clipping is introduced. Physical cuff wrench is reconstructed through
+virtual work from the weld generalized force; raw rotational equality
+multipliers are never interpreted as N m.
