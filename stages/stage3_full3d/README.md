@@ -133,3 +133,24 @@ a causal integral base-parameter identifier is documented in
 [`docs/STAGE4_INTEGRAL_UKF_COMPARISON.md`](docs/STAGE4_INTEGRAL_UKF_COMPARISON.md).
 Its registered engineering evidence selects the minimal architecture without
 a state UKF; no checkpoint or formal evidence is changed.
+
+## Current Stage-4 adaptive baseline
+
+The current baseline extends the earlier one-shot checkpoint with the frozen
+1:1 cuff-aware allocator, integral 11-base estimator, hierarchical statistical
+trust using one incumbent and at most one challenger, confidence pacing, and
+the unchanged 32-candidate / 2-iteration / 15-step CEM MPC definition. The
+batched MPC implementation is the default engineering path; the scalar path is
+retained as a regression and fallback reference.
+
+The registered prior-only versus trusted-adaptive simulation completed in both
+arms. Trusted adaptation improved tracking and generalized-torque prediction,
+but did not materially reduce cuff interaction. The implementation replay
+measured approximately 9.4 ms per MPC call and 16.5 ms per full cycle on the
+audited desktop. This is replay evidence, not a hard-realtime or hardware proof,
+and no clinical or production claim is made.
+
+The checkpoint manifest, exact metrics, evidence hashes, reproduction commands,
+and current limitations are maintained in
+[`docs/research/CURRENT_STATE.md`](docs/research/CURRENT_STATE.md). Patient/model
+mismatch robustness is the next planned scientific question.

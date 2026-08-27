@@ -33,6 +33,17 @@ Treat exploratory runs as exploratory only. Do not fold exploratory tuning back 
 
 If a run fails, gets stuck, violates constraints, or produces poor performance, Codex must report the issue instead of silently fixing it.
 
+## Usage Efficiency
+
+Minimize unnecessary agent and tool usage, but never trade away scientific correctness, reproducibility, safety, or required validation to save usage.
+
+- For long-running terminal commands, estimate runtime from prior runs, logs, configuration, or workload size and use adaptive sparse polling. Check roughly every 30–60 seconds for 1–5 minute jobs, every 1–2 minutes for 5–15 minute jobs, and every 3–5 minutes for longer jobs; increase the interval when repeated checks show no meaningful change. Poll every few seconds only when rapid interaction or immediate error handling is genuinely required. Prefer progress markers, completion signals, or concise log tails over repeatedly reading unchanged full output.
+- Escalate validation from the cheapest, narrowest relevant check to broader tests only when justified by the change, a failure, repository policy, or the user's request. Do not skip checks required for scientific correctness or reproducibility.
+- Inspect the repository enough to ground the task, then reuse unchanged findings. Prefer targeted searches and focused reads over repeatedly scanning the same files or the entire repository.
+- Keep intermediate updates concise and send them only for meaningful progress, decisions, failures, or long waits; avoid narrating routine tool calls or repeating unchanged status.
+- Use a single agent by default. Do not create subagents or parallel work unless the user requests them or independent work clearly provides necessary value that outweighs the added usage and coordination cost.
+- When progress depends on a user decision, new scientific authority, or a meaningful scope choice, summarize the evidence and stop for approval instead of spending usage on speculative implementation, tuning, experiments, or broad exploration.
+
 ## Required Behavior When Results Look Bad
 
 If results are poor but scripts complete:

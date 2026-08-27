@@ -33,6 +33,8 @@ from scipy.spatial.transform import Rotation
 
 from .adaptive_estimators import IntegralAdaptiveHumanEstimator
 from .cold_start import _geometry_vector
+from .confidence_execution import ReferenceExecutionLayer
+from .cuff_allocator import default_engineering_cuff_allocator
 from .estimator_v2 import (
     DYNAMIC_BASE_PARAMETER_NAMES,
     OneShotHumanEstimatorV2,
@@ -189,8 +191,16 @@ def run_sensor_realism_case(
     reference_fn: Callable[[float], CuffPoseReference] = cold_start_teaching_reference,
     trajectory_label: str = "stage4_population_prior_cold_start_high_flexion_23s",
     trajectory_waypoints: tuple[Any, ...] = COLD_START_TEACHING_WAYPOINTS,
+    plant_factory: Callable[[HumanV2Parameters], SensorBoundaryStage4Plant] | None = None,
+    reference_execution: ReferenceExecutionLayer | None = None,
+    mpc_factory: Callable[[], HumanSpaceMPC] | None = None,
+    cuff_allocator: Any | None = None,
+    estimator_factory: Callable[[ControllerMeasurement, np.ndarray], Any] | None = None,
 ) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     """Run the registered perturbed Human through one fixed sensor case."""
+
+    if cuff_allocator is None:
+        cuff_allocator = default_engineering_cuff_allocator()
 
     default_human, default_metadata = registered_cold_start_perturbed_human()
     true_human = default_human if true_human_override is None else true_human_override
@@ -204,8 +214,39 @@ def run_sensor_realism_case(
             mpc_state_delay_s=case.latency_s,
             low_level_delay_s=case.latency_s,
         )
-    plant = SensorBoundaryStage4Plant(true_human)
-    initial_reference = reference_fn(0.0)
+    plant = (
+        SensorBoundaryStage4Plant(true_human)
+        if plant_factory is None
+        else plant_factory(true_human)
+    )
+    def executed_reference(time_s: float) -> CuffPoseReference:
+        return (
+            reference_fn(time_s)
+            if reference_execution is None
+            else reference_execution.reference(time_s)
+        )
+
+    def execution_status(time_s: float) -> dict[str, float]:
+        if reference_execution is None:
+            return {
+                "reference_phase_time_s": float(time_s),
+                "speed_scale": 1.0,
+                "speed_scale_rate_per_s": 0.0,
+                "geometry_confidence": 0.0,
+                "dynamic_confidence": 0.0,
+                "combined_confidence": 0.0,
+                "geometry_model_confidence": 0.0,
+                "dynamic_model_confidence": 0.0,
+                "combined_model_confidence_raw": 0.0,
+                "filtered_model_confidence": 0.0,
+                "execution_confidence_high": 0.0,
+                "geometry_information_confidence": 0.0,
+                "dynamic_information_confidence": 0.0,
+                "combined_information_confidence": 0.0,
+            }
+        return reference_execution.status(time_s)
+
+    initial_reference = executed_reference(0.0)
     truth = plant.reset(initial_reference.q_rad)
     estimator_layer = CausalMeasurementLayer(
         _measurement_with_delay(case, routing.estimator_delay_s, "estimator_channel"),
@@ -225,7 +266,9 @@ def run_sensor_realism_case(
     # The retained posture target is a robot-known startup measurement, not a
     # hidden copy of the simulator's clean initial joint configuration.
     plant.neutral_robot_q = low_level_measurement.robot_q_rad.copy()
-    if estimator_architecture == "instantaneous_v2":
+    if estimator_factory is not None:
+        estimator = estimator_factory(estimator_measurement, initial_reference.q_rad)
+    elif estimator_architecture == "instantaneous_v2":
         estimator = OneShotHumanEstimatorV2(
             estimator_measurement.attachment_position_m,
             estimator_measurement.attachment_rotation_matrix,
@@ -244,7 +287,7 @@ def run_sensor_realism_case(
             "estimator_architecture must be instantaneous_v2, integral_minimal, "
             "or integral_state_ukf"
         )
-    mpc = HumanSpaceMPC()
+    mpc = HumanSpaceMPC() if mpc_factory is None else mpc_factory()
     high_level_steps = int(round(mpc.config.prediction_dt_s / CONTROL_DT_S))
     if high_level_steps * CONTROL_DT_S != mpc.config.prediction_dt_s:
         raise RuntimeError("MPC period must be an integer number of control periods")
@@ -257,7 +300,9 @@ def run_sensor_realism_case(
     )
     current_action = np.zeros(2)
     current_model = estimator.model
-    current_allocation = current_model.allocate_generalized_action(current_action, estimated_state[:2])
+    current_allocation = cuff_allocator.allocate(
+        current_action, estimated_state[:2], current_model
+    )
     current_geometry_diag = estimator.geometry_identifier.last_diagnostics
     current_dynamic_diag = estimator.dynamic_identifier.last_diagnostics
 
@@ -266,12 +311,52 @@ def run_sensor_realism_case(
     estimated_states = [estimated_state.copy()]
     desired_actions = [current_action.copy()]
     allocated_wrenches = [np.asarray(current_allocation["wrench_world"]).copy()]
+    allocation_equality_residuals = [
+        float(
+            current_allocation.get(
+                "equality_residual_nm",
+                current_allocation.get("allocation_residual_nm", 0.0),
+            )
+        )
+    ]
+    allocated_sagittal_wrenches = [
+        np.asarray(current_allocation.get("sagittal_wrench", np.zeros(3))).copy()
+    ]
     geometry_estimates = [_geometry_vector(estimator)]
-    dynamic_estimates = [estimator.dynamic_identifier.last_valid.copy()]
+    dynamic_estimates = [
+        np.asarray(
+            getattr(
+                estimator,
+                "control_beta",
+                estimator.dynamic_identifier.last_valid,
+            ),
+            dtype=float,
+        ).copy()
+    ]
     estimator_status = [0]
     local_forces = [truth.attachment_rotation_matrix.T @ truth.cuff_force_vector_n]
     local_moments = [truth.attachment_rotation_matrix.T @ truth.cuff_moment_vector_nm]
     torque_fractions = [0.0]
+    execution_statuses = [execution_status(truth.time_s)]
+    distributed_cuff_enabled = hasattr(truth, "station_force_world_n")
+    station_forces_world = (
+        [truth.station_force_world_n.copy()] if distributed_cuff_enabled else []
+    )
+    station_relative_translations = (
+        [truth.station_relative_translation_world_m.copy()]
+        if distributed_cuff_enabled
+        else []
+    )
+    center_relative_translations = (
+        [truth.cuff_center_relative_translation_world_m.copy()]
+        if distributed_cuff_enabled
+        else []
+    )
+    cuff_shank_relative_rotations = (
+        [float(truth.cuff_shank_relative_rotation_rad)]
+        if distributed_cuff_enabled
+        else []
+    )
     measurement_ages: list[float] = []
     estimator_measurement_ages: list[float] = []
     mpc_measurement_ages: list[float] = []
@@ -320,21 +405,33 @@ def run_sensor_realism_case(
             break
         if control_index % high_level_steps == 0:
             estimator_start = wall_time.perf_counter()
-            estimator_output_state, diagnostics = estimator.observe(
-                time_s=estimator_measurement.sample_time_s,
-                position_world_m=estimator_measurement.attachment_position_m,
-                rotation_world_from_cuff=estimator_measurement.attachment_rotation_matrix,
-                linear_velocity_world_m_s=estimator_measurement.attachment_velocity_m_s,
-                angular_velocity_world_rad_s=estimator_measurement.attachment_angular_velocity_rad_s,
-                force_world_n=estimator_measurement.cuff_force_vector_n,
-                moment_world_nm=estimator_measurement.cuff_moment_vector_nm,
-                # No MuJoCo bed/contact truth crosses the measurement boundary.
-                bed_contaminated=False,
-            )
+            if hasattr(estimator, "observe_measurement"):
+                estimator_output_state, diagnostics = estimator.observe_measurement(
+                    estimator_measurement
+                )
+            else:
+                estimator_output_state, diagnostics = estimator.observe(
+                    time_s=estimator_measurement.sample_time_s,
+                    position_world_m=estimator_measurement.attachment_position_m,
+                    rotation_world_from_cuff=estimator_measurement.attachment_rotation_matrix,
+                    linear_velocity_world_m_s=estimator_measurement.attachment_velocity_m_s,
+                    angular_velocity_world_rad_s=estimator_measurement.attachment_angular_velocity_rad_s,
+                    force_world_n=estimator_measurement.cuff_force_vector_n,
+                    moment_world_nm=estimator_measurement.cuff_moment_vector_nm,
+                    # No MuJoCo bed/contact truth crosses the measurement boundary.
+                    bed_contaminated=False,
+                )
             estimator_compute_s.append(wall_time.perf_counter() - estimator_start)
             current_geometry_diag = diagnostics["geometry"]
             current_dynamic_diag = diagnostics["dynamics"]
             current_model = estimator.model
+            if reference_execution is not None:
+                reference_execution.update_from_estimator(
+                    float(mpc_measurement.arrival_time_s),
+                    estimator,
+                    current_geometry_diag,
+                    current_dynamic_diag,
+                )
             if estimator_architecture == "integral_state_ukf":
                 estimated_state = estimator_output_state
             else:
@@ -348,7 +445,7 @@ def run_sensor_realism_case(
             current_action, _ = mpc.solve(
                 estimated_state,
                 float(mpc_measurement.arrival_time_s),
-                reference_fn,
+                executed_reference,
                 current_model,
             )
             mpc_compute_s.append(wall_time.perf_counter() - mpc_start)
@@ -362,15 +459,15 @@ def run_sensor_realism_case(
                     mpc_measurement.attachment_velocity_m_s,
                     mpc_measurement.attachment_angular_velocity_rad_s,
                 )
-        current_allocation = current_model.allocate_generalized_action(
-            current_action, estimated_state[:2]
+        current_allocation = cuff_allocator.allocate(
+            current_action, estimated_state[:2], current_model
         )
         if float(current_allocation["force_norm_n"]) > CUFF_TRANSLATIONAL_FORCE_GATE_N + 1e-9:
             termination = "allocated_cuff_force_gate"
             force_gate_event_count += 1
             break
 
-        reference = reference_fn(float(low_level_measurement.arrival_time_s))
+        reference = executed_reference(float(low_level_measurement.arrival_time_s))
         target_pose = current_model.geometry.cuff_pose(reference.q_rad)
         target_linear_velocity, target_angular_velocity = current_model.geometry.cuff_velocity(
             reference.q_rad, reference.dq_rad_s
@@ -410,12 +507,34 @@ def run_sensor_realism_case(
         for _ in range(CONTROL_SUBSTEPS):
             truth = plant.step()
             observations.append(truth)
-            references.append(reference_fn(truth.time_s).q_rad.copy())
+            references.append(executed_reference(truth.time_s).q_rad.copy())
             estimated_states.append(estimated_state.copy())
             desired_actions.append(current_action.copy())
             allocated_wrenches.append(np.asarray(current_allocation["wrench_world"]).copy())
+            allocation_equality_residuals.append(
+                float(
+                    current_allocation.get(
+                        "equality_residual_nm",
+                        current_allocation.get("allocation_residual_nm", 0.0),
+                    )
+                )
+            )
+            allocated_sagittal_wrenches.append(
+                np.asarray(
+                    current_allocation.get("sagittal_wrench", np.zeros(3))
+                ).copy()
+            )
             geometry_estimates.append(_geometry_vector(estimator))
-            dynamic_estimates.append(estimator.dynamic_identifier.last_valid.copy())
+            dynamic_estimates.append(
+                np.asarray(
+                    getattr(
+                        estimator,
+                        "control_beta",
+                        estimator.dynamic_identifier.last_valid,
+                    ),
+                    dtype=float,
+                ).copy()
+            )
             status_code = 0
             if current_geometry_diag.get("attempted", False):
                 status_code = 1 if current_geometry_diag.get("accepted", False) else -1
@@ -425,6 +544,18 @@ def run_sensor_realism_case(
             local_forces.append(truth.attachment_rotation_matrix.T @ truth.cuff_force_vector_n)
             local_moments.append(truth.attachment_rotation_matrix.T @ truth.cuff_moment_vector_nm)
             torque_fractions.append(unclipped_fraction)
+            execution_statuses.append(execution_status(truth.time_s))
+            if distributed_cuff_enabled:
+                station_forces_world.append(truth.station_force_world_n.copy())
+                station_relative_translations.append(
+                    truth.station_relative_translation_world_m.copy()
+                )
+                center_relative_translations.append(
+                    truth.cuff_center_relative_translation_world_m.copy()
+                )
+                cuff_shank_relative_rotations.append(
+                    float(truth.cuff_shank_relative_rotation_rad)
+                )
             unintended_contacts.update(truth.unintended_contact_pairs)
 
             true_q = truth.human_q_rad
@@ -453,25 +584,94 @@ def run_sensor_realism_case(
     force_local = np.asarray(local_forces)
     moment_local = np.asarray(local_moments)
     force_norm = np.linalg.norm(force_local, axis=1)
+    moment_norm = np.linalg.norm(moment_local, axis=1)
     force_rate = np.zeros_like(force_local)
+    moment_rate = np.zeros_like(moment_local)
     if len(force_local) > 1:
         force_rate[1:] = np.diff(force_local, axis=0) / 0.001
+        moment_rate[1:] = np.diff(moment_local, axis=0) / 0.001
     force_rate_norm = np.linalg.norm(force_rate, axis=1)
+    moment_rate_norm = np.linalg.norm(moment_rate, axis=1)
     tracking_deg = np.degrees(true_q - q_ref)
     estimation_error_deg = np.degrees(q_est - true_q)
     robot_velocity = np.array([item.robot_dq_rad_s for item in observations])
     completed = bool(termination == "completed" and time[-1] >= duration_s - 0.5 * CONTROL_DT_S)
     rollout_wall_elapsed_s = wall_time.perf_counter() - rollout_wall_start
+    execution_phase = np.asarray(
+        [item["reference_phase_time_s"] for item in execution_statuses], dtype=float
+    )
+    execution_speed = np.asarray(
+        [item["speed_scale"] for item in execution_statuses], dtype=float
+    )
+    execution_speed_rate = np.asarray(
+        [item["speed_scale_rate_per_s"] for item in execution_statuses],
+        dtype=float,
+    )
+    geometry_confidence = np.asarray(
+        [item["geometry_confidence"] for item in execution_statuses], dtype=float
+    )
+    dynamic_confidence = np.asarray(
+        [item["dynamic_confidence"] for item in execution_statuses], dtype=float
+    )
+    combined_confidence = np.asarray(
+        [item["combined_confidence"] for item in execution_statuses], dtype=float
+    )
+    geometry_model_confidence = np.asarray(
+        [item["geometry_model_confidence"] for item in execution_statuses],
+        dtype=float,
+    )
+    dynamic_model_confidence = np.asarray(
+        [item["dynamic_model_confidence"] for item in execution_statuses],
+        dtype=float,
+    )
+    combined_model_confidence_raw = np.asarray(
+        [item["combined_model_confidence_raw"] for item in execution_statuses],
+        dtype=float,
+    )
+    filtered_model_confidence = np.asarray(
+        [item["filtered_model_confidence"] for item in execution_statuses],
+        dtype=float,
+    )
+    execution_confidence_high = np.asarray(
+        [item["execution_confidence_high"] for item in execution_statuses],
+        dtype=float,
+    )
+    geometry_information_confidence = np.asarray(
+        [item["geometry_information_confidence"] for item in execution_statuses],
+        dtype=float,
+    )
+    dynamic_information_confidence = np.asarray(
+        [item["dynamic_information_confidence"] for item in execution_statuses],
+        dtype=float,
+    )
+    combined_information_confidence = np.asarray(
+        [item["combined_information_confidence"] for item in execution_statuses],
+        dtype=float,
+    )
 
     control_time = np.asarray(control_times)
     control_dq_true = np.asarray(control_true_dq)
     control_state_est = np.asarray(control_estimated_state)
-    estimated_ddq = np.gradient(control_state_est[:, 2:], control_time, axis=0, edge_order=2)
-    true_ddq = np.gradient(control_dq_true, control_time, axis=0, edge_order=2)
+    if len(control_time) >= 3:
+        estimated_ddq = np.gradient(
+            control_state_est[:, 2:], control_time, axis=0, edge_order=2
+        )
+        true_ddq = np.gradient(control_dq_true, control_time, axis=0, edge_order=2)
+    elif len(control_time) == 2:
+        estimated_ddq = np.gradient(
+            control_state_est[:, 2:], control_time, axis=0, edge_order=1
+        )
+        true_ddq = np.gradient(control_dq_true, control_time, axis=0, edge_order=1)
+    else:
+        estimated_ddq = np.zeros((len(control_time), 2))
+        true_ddq = np.zeros((len(control_time), 2))
     acceleration_error = estimated_ddq - true_ddq
 
     true_beta = nominal_base_parameters(true_human)
-    final_beta = estimator.dynamic_identifier.last_valid.copy()
+    final_beta = np.asarray(
+        getattr(estimator, "control_beta", estimator.dynamic_identifier.last_valid),
+        dtype=float,
+    ).copy()
     final_geometry = estimator.geometry
     clean_prediction = np.asarray(control_bed_force) <= BED_CONTACT_CONTAMINATION_FORCE_N
     for index, (angles, velocity) in enumerate(
@@ -633,6 +833,8 @@ def run_sensor_realism_case(
         "interaction_metrics_engineering_not_clinical": {
             "peak_total_translational_force_n": float(np.max(force_norm)),
             "rms_total_translational_force_n": float(np.sqrt(np.mean(force_norm**2))),
+            "peak_total_cuff_moment_nm": float(np.max(moment_norm)),
+            "rms_total_cuff_moment_nm": float(np.sqrt(np.mean(moment_norm**2))),
             "peak_abs_task_axial_force_n": float(np.max(np.abs(force_local[:, 0]))),
             "rms_parasitic_shear_force_n": float(np.sqrt(np.mean(np.sum(force_local[:, 1:] ** 2, axis=1)))),
             "peak_parasitic_shear_force_n": float(np.max(np.linalg.norm(force_local[:, 1:], axis=1))),
@@ -640,12 +842,32 @@ def run_sensor_realism_case(
             "peak_off_axis_cuff_moment_nm": float(np.max(np.linalg.norm(moment_local[:, [0, 2]], axis=1))),
             "rms_force_rate_n_s": float(np.sqrt(np.mean(force_rate_norm[1:] ** 2))) if len(force_rate_norm) > 1 else 0.0,
             "peak_force_rate_n_s": float(np.max(force_rate_norm)),
+            "rms_moment_rate_nm_s": float(
+                np.sqrt(np.mean(moment_rate_norm[1:] ** 2))
+            ) if len(moment_rate_norm) > 1 else 0.0,
+            "peak_moment_rate_nm_s": float(np.max(moment_rate_norm)),
         },
         "robot": {
             "peak_unclipped_torque_limit_fraction": float(np.max(torque_fractions)),
             "torque_saturation_control_samples": torque_saturation_count,
             "joint_position_limit_samples": robot_position_limit_count,
             "peak_abs_joint_velocity_deg_s": np.degrees(np.max(np.abs(robot_velocity), axis=0)).tolist(),
+            "rms_joint_velocity_deg_s": np.degrees(
+                np.sqrt(np.mean(robot_velocity**2, axis=0))
+            ).tolist(),
+            "peak_abs_commanded_joint_torque_nm": np.max(
+                np.abs(np.array([item.joint_torque_command_nm for item in observations])),
+                axis=0,
+            ).tolist(),
+            "rms_commanded_joint_torque_nm": np.sqrt(
+                np.mean(
+                    np.array(
+                        [item.joint_torque_command_nm for item in observations]
+                    )
+                    ** 2,
+                    axis=0,
+                )
+            ).tolist(),
         },
         "events": {
             "force_gate_events": force_gate_event_count,
@@ -656,7 +878,88 @@ def run_sensor_realism_case(
         },
         "force_gate_n": CUFF_TRANSLATIONAL_FORCE_GATE_N,
         "moment_limit_nm": None,
+        "mpc": {
+            "interaction_aware": mpc.config.interaction_aware,
+            "objective_contract": mpc.config.objective_contract(),
+            "solve_count": mpc.solve_count,
+            "failure_count": mpc.failure_count,
+            "last_diagnostics": mpc.last_diagnostics,
+        },
     }
+    if reference_execution is not None:
+        summary["reference_execution"] = {
+            **reference_execution.summary(float(time[-1])),
+            "mean_speed_scale": float(np.mean(execution_speed)),
+            "minimum_observed_speed_scale": float(np.min(execution_speed)),
+            "maximum_observed_speed_scale": float(np.max(execution_speed)),
+            "final_reference_phase_time_s": float(execution_phase[-1]),
+        }
+    if hasattr(estimator, "trust_summary"):
+        summary["hierarchical_trust"] = estimator.trust_summary()
+    if distributed_cuff_enabled:
+        station_force_world = np.asarray(station_forces_world)
+        attachment_rotations = np.asarray(
+            [item.attachment_rotation_matrix for item in observations]
+        )
+        station_force_local = np.einsum(
+            "tji,tnj->tni", attachment_rotations, station_force_world
+        )
+        station_force_norm = np.linalg.norm(station_force_local, axis=2)
+        station_shear_norm = np.linalg.norm(station_force_local[:, :, 1:], axis=2)
+        relative_translation = np.asarray(station_relative_translations)
+        center_relative_translation = np.asarray(center_relative_translations)
+        station_offsets = np.asarray(truth.station_offsets_m)
+        force_balance_residual = np.linalg.norm(
+            np.sum(station_force_world, axis=1)
+            - np.asarray([item.cuff_force_vector_n for item in observations]),
+            axis=1,
+        )
+        summary["cuff_plant"] = {
+            "mechanics": "finite_length_four_station_translational_coupling",
+            "robot_to_cuff_connection": "rigid",
+            "station_direct_moments": False,
+            "resultant_wrench_only_to_estimator_controller": True,
+            "center_placement_sc_m_god_view_plant_only": true_human.sleeve_center_m,
+            "config": plant.cuff_config.as_dict(),
+            "station_force_distribution_engineering": {
+                "station_offsets_m": station_offsets.tolist(),
+                "peak_force_norm_n": np.max(station_force_norm, axis=0).tolist(),
+                "rms_force_norm_n": np.sqrt(
+                    np.mean(station_force_norm**2, axis=0)
+                ).tolist(),
+                "peak_abs_axial_force_n": np.max(
+                    np.abs(station_force_local[:, :, 0]), axis=0
+                ).tolist(),
+                "peak_transverse_force_n": np.max(
+                    station_shear_norm, axis=0
+                ).tolist(),
+                "proximal_station_peak_force_n": float(
+                    np.max(station_force_norm[:, 0])
+                ),
+                "distal_station_peak_force_n": float(
+                    np.max(station_force_norm[:, -1])
+                ),
+                "peak_sum_station_force_balance_residual_n": float(
+                    np.max(force_balance_residual)
+                ),
+            },
+            "relative_motion": {
+                "peak_center_translation_mm": float(
+                    1000.0
+                    * np.max(np.linalg.norm(center_relative_translation, axis=1))
+                ),
+                "peak_station_translation_mm": float(
+                    1000.0 * np.max(np.linalg.norm(relative_translation, axis=2))
+                ),
+                "peak_station_translation_mm_per_station": (
+                    1000.0
+                    * np.max(np.linalg.norm(relative_translation, axis=2), axis=0)
+                ).tolist(),
+                "peak_cuff_shank_rotation_deg": float(
+                    np.degrees(np.max(cuff_shank_relative_rotations))
+                ),
+            },
+        }
     trace = {
         "time_s": time,
         "human_q_deg_god_view": np.degrees(true_q),
@@ -671,6 +974,10 @@ def run_sensor_realism_case(
         "cuff_moment_local_nm_god_view": moment_local,
         "desired_human_action_nm": np.asarray(desired_actions),
         "allocated_wrench_world": np.asarray(allocated_wrenches),
+        "allocated_sagittal_wrench": np.asarray(allocated_sagittal_wrenches),
+        "allocation_equality_residual_nm": np.asarray(
+            allocation_equality_residuals
+        ),
         "geometry_estimate": np.asarray(geometry_estimates),
         "dynamic_base_estimate": np.asarray(dynamic_estimates),
         "estimator_status_code": np.asarray(estimator_status),
@@ -686,7 +993,38 @@ def run_sensor_realism_case(
         "measured_cuff_force_world_n": measured_force_array,
         "measured_cuff_moment_world_nm": measured_moment_array,
         "bed_force_n_god_view": np.array([item.bed_force_n for item in observations]),
+        "tracking_error_deg_god_view": tracking_deg,
+        "cuff_wrench_local_god_view": np.column_stack([force_local, moment_local]),
+        "reference_phase_time_s": execution_phase,
+        "reference_speed_scale": execution_speed,
+        "reference_speed_scale_rate_per_s": execution_speed_rate,
+        "geometry_confidence_level": geometry_confidence,
+        "dynamic_confidence_level": dynamic_confidence,
+        "combined_confidence_level": combined_confidence,
+        "geometry_model_confidence": geometry_model_confidence,
+        "dynamic_model_confidence": dynamic_model_confidence,
+        "combined_model_confidence_raw": combined_model_confidence_raw,
+        "filtered_model_confidence": filtered_model_confidence,
+        "execution_confidence_high": execution_confidence_high,
+        "geometry_information_confidence": geometry_information_confidence,
+        "dynamic_information_confidence": dynamic_information_confidence,
+        "combined_information_confidence": combined_information_confidence,
     }
+    if distributed_cuff_enabled:
+        trace.update(
+            {
+                "station_force_world_n": np.asarray(station_forces_world),
+                "station_relative_translation_world_m": np.asarray(
+                    station_relative_translations
+                ),
+                "cuff_center_relative_translation_world_m": np.asarray(
+                    center_relative_translations
+                ),
+                "cuff_shank_relative_rotation_rad": np.asarray(
+                    cuff_shank_relative_rotations
+                ),
+            }
+        )
     return summary, trace
 
 
