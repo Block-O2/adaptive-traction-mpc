@@ -1,0 +1,320 @@
+{
+  "baseline_commit": "ef1fe90e61c5981df8e934585780ce188d104ea4",
+  "baseline_tag": "stage4-baseline-v1",
+  "code_commit": "ef1fe90e61c5981df8e934585780ce188d104ea4",
+  "evidence_category": "formal_user_run_unreviewed",
+  "expected_rollout_count": 6,
+  "measurement_seed": 44104,
+  "mpc_seed": 20260824,
+  "pre_run_validation": {
+    "baseline_is_ancestor_of_head": true,
+    "baseline_tag_resolves_to_expected_commit": true,
+    "preregistered_patient_case_count": 13,
+    "record": {
+      "base_parameter_names": [
+        "a_inertia_combination",
+        "b_distal_inertia_combination",
+        "d_mass_length_com_combination",
+        "g1_proximal_gravity_combination",
+        "g2_distal_gravity_combination",
+        "k1_passive_stiffness",
+        "k2_passive_stiffness",
+        "rho1_stiffness_rest_combination",
+        "rho2_stiffness_rest_combination",
+        "bv1_viscous_damping",
+        "bv2_viscous_damping"
+      ],
+      "beta_11": [
+        1.4508174768147026,
+        0.19868084092008,
+        0.338787595728,
+        33.064998596820004,
+        7.607366586,
+        10.0,
+        10.0,
+        0.8726646259971648,
+        1.7453292519943295,
+        5.0,
+        5.0
+      ],
+      "case_id": "nominal_reference",
+      "engineering_range_not_clinical": true,
+      "expected_dominant_torque_effect": "none; deterministic zero-mismatch sanity reference",
+      "geometry": {
+        "changed_fields": [],
+        "changes": false,
+        "requires_separate_geometry_estimator": false
+      },
+      "mechanism": "none",
+      "normalized_difference_from_prior": {
+        "definition": "(beta_case-beta_population_prior)/(estimator_upper-estimator_lower)",
+        "per_parameter": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "span_l2": 0.0,
+        "span_linf": 0.0
+      },
+      "physical_validity_checks": {
+        "com_inside_segments": true,
+        "cuff_center_on_shank": true,
+        "finite_raw_parameters": true,
+        "nonnegative_passive_coefficients": true,
+        "positive_definite_mass_matrix_over_rom": true,
+        "positive_height_and_mass": true,
+        "positive_segment_lengths_and_masses": true,
+        "rest_angles_inside_rom": true,
+        "soft_limit_definition_unchanged": true
+      },
+      "physically_valid": true,
+      "raw_human_parameters": {
+        "body_mass_kg": 75.0,
+        "gravity_m_s2": 9.81,
+        "height_m": 1.72,
+        "passive_damping_nms_rad": [
+          5.0,
+          5.0
+        ],
+        "passive_stiffness_nm_rad": [
+          10.0,
+          10.0
+        ],
+        "q_max_rad": [
+          1.3962634015954636,
+          1.7453292519943295
+        ],
+        "q_min_rad": [
+          0.0,
+          0.0
+        ],
+        "q_rest_rad": [
+          0.08726646259971647,
+          0.17453292519943295
+        ],
+        "shank_com_m": 0.1723268,
+        "shank_inertia_kg_m2": 0.065046473928,
+        "shank_length_m": 0.40076,
+        "shank_mass_kg": 4.5,
+        "sleeve_center_m": 0.360684,
+        "soft_limit_boundary_torque_nm": 25.0,
+        "soft_limit_damping_nms_rad": 2.0,
+        "soft_limit_margin_rad": 0.08726646259971647,
+        "thigh_com_m": 0.18916903999999998,
+        "thigh_inertia_kg_m2": 0.12754495781279998,
+        "thigh_length_m": 0.43688,
+        "thigh_mass_kg": 7.425000000000001
+      },
+      "representability": {
+        "base_dynamics": "exact_11_base_when_soft_limit_torque_is_inactive",
+        "geometry": "population_geometry_exact",
+        "inside_current_estimator_box": true,
+        "inside_current_model_family": true,
+        "soft_limit_caveat": "11-base excludes nonlinear soft-limit torque; every preregistered case keeps the frozen soft-limit definition"
+      },
+      "schema_version": "stage4_patient_mismatch_case_record_v1",
+      "severity": "near_prior",
+      "source": "population_prior_sanity_reference",
+      "variation_spec": {
+        "body_mass_scale": 1.0,
+        "case_id": "nominal_reference",
+        "expected_dominant_torque_effect": "none; deterministic zero-mismatch sanity reference",
+        "height_scale": 1.0,
+        "mechanism": "none",
+        "passive_damping_scale": [
+          1.0,
+          1.0
+        ],
+        "passive_stiffness_scale": [
+          1.0,
+          1.0
+        ],
+        "rest_offset_deg": [
+          0.0,
+          0.0
+        ],
+        "severity": "near_prior",
+        "shank_com_scale": 1.0,
+        "sleeve_center_scale": 1.0,
+        "source": "population_prior_sanity_reference",
+        "thigh_com_scale": 1.0
+      }
+    },
+    "true_beta_equals_population_prior": true
+  },
+  "reference_duration_s": 23.0,
+  "registered_arms": [
+    "prior_only",
+    "trusted_adaptive"
+  ],
+  "registered_sensor_cases": [
+    "ideal_200hz",
+    "noise_200hz",
+    "noise_bias_drift_200hz"
+  ],
+  "schema_version": "stage4_nominal_sensor_decomposition_v1",
+  "sensor_definitions": {
+    "ideal_200hz": {
+      "actual_cr12_sensor_specification": false,
+      "force_bias_drift_n_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "force_bias_n": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "latency_s": 0.0,
+      "moment_bias_drift_nm_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "moment_bias_nm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "name": "ideal_200hz",
+      "noise_std": {
+        "cuff_orientation_deg": 0.0,
+        "cuff_position_mm": 0.0,
+        "force_n": 0.0,
+        "moment_nm": 0.0,
+        "robot_position_deg": 0.0,
+        "robot_velocity_deg_s": 0.0
+      },
+      "preprocessing_enabled": false,
+      "random_seed": 44104,
+      "update_rate_hz": 200.0
+    },
+    "noise_200hz": {
+      "actual_cr12_sensor_specification": false,
+      "force_bias_drift_n_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "force_bias_n": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "latency_s": 0.0,
+      "moment_bias_drift_nm_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "moment_bias_nm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "name": "noise_200hz",
+      "noise_std": {
+        "cuff_orientation_deg": 0.05,
+        "cuff_position_mm": 0.3,
+        "force_n": 0.5,
+        "moment_nm": 0.02,
+        "robot_position_deg": 0.02,
+        "robot_velocity_deg_s": 0.1
+      },
+      "preprocessing_enabled": true,
+      "random_seed": 44104,
+      "update_rate_hz": 200.0
+    },
+    "noise_bias_drift_200hz": {
+      "actual_cr12_sensor_specification": false,
+      "force_bias_drift_n_s": [
+        0.04,
+        -0.03,
+        0.02
+      ],
+      "force_bias_n": [
+        1.5,
+        -1.0,
+        0.8
+      ],
+      "latency_s": 0.0,
+      "moment_bias_drift_nm_s": [
+        0.001,
+        -0.0008,
+        0.0006
+      ],
+      "moment_bias_nm": [
+        0.03,
+        -0.02,
+        0.015
+      ],
+      "name": "noise_bias_drift_200hz",
+      "noise_std": {
+        "cuff_orientation_deg": 0.05,
+        "cuff_position_mm": 0.3,
+        "force_n": 0.5,
+        "moment_nm": 0.02,
+        "robot_position_deg": 0.02,
+        "robot_velocity_deg_s": 0.1
+      },
+      "preprocessing_enabled": true,
+      "random_seed": 44104,
+      "update_rate_hz": 200.0
+    }
+  },
+  "source_hashes": {
+    "allocator": {
+      "path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/src/traction_mpc_stage4/cuff_allocator.py",
+      "sha256": "672bea8d59a231b4243e41e1842199d42ce101f3e495599eb9fc3d202e9920f5"
+    },
+    "estimator": {
+      "path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/src/traction_mpc_stage4/integral_identifier.py",
+      "sha256": "fa4920382562dd53742fc42923835d12bf0888660d36641f7e123336b3109940"
+    },
+    "formal_runner": {
+      "path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/scripts/run_stage4_nominal_sensor_decomposition.py",
+      "sha256": "14357bfd33b7dfec00783b02167271e97d5f4973261b89ef8d9c8c1d3e33a6ed"
+    },
+    "measurement": {
+      "path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/src/traction_mpc_stage4/measurement.py",
+      "sha256": "f6fc6b493d2558e99645a2b3fd1b38c3f633673082daac1db759dc493852df08"
+    },
+    "mpc": {
+      "path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/src/traction_mpc_stage4/mpc.py",
+      "sha256": "0b97c1e139a9bf7b6cffee4bd644d1aea680f4f6d0d0b55c11e2207f4f4e701c"
+    },
+    "pacing": {
+      "path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/src/traction_mpc_stage4/confidence_execution.py",
+      "sha256": "a87d5b3f4b17d8719129325fc2851a2495d2fd5f8484817a9032af6e4f6a073c"
+    },
+    "paired_runner": {
+      "path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/scripts/run_stage4_single_challenger_closed_loop_ab.py",
+      "sha256": "0d5361839d55ec83d113ac9185117ce5544197ea90eeddefc7b7ab11b59a4706"
+    },
+    "preregistration": {
+      "path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/docs/research/STAGE4_NOMINAL_SENSOR_DECOMPOSITION_SPEC.md",
+      "sha256": "145195b8bedaa41f1d94466b1c4c20c8d2031149efea0304c5a29c2b177f8db3"
+    },
+    "statistical_trust": {
+      "path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/src/traction_mpc_stage4/statistical_trust.py",
+      "sha256": "c19f8e2c52f6e92d33016709f0c1163793d8e98b8eaa9b2d9b8c2dd6c1a70a57"
+    },
+    "trust": {
+      "path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/src/traction_mpc_stage4/online_trust.py",
+      "sha256": "baaaa0ca75e971eb0667850664199f4a865d335da0a3934d00fff324683e378c"
+    }
+  },
+  "trajectory": "stage4_population_prior_cold_start_high_flexion_23s",
+  "true_patient": "nominal_reference",
+  "wall_time_limit_s": 32.0,
+  "working_tree_dirty": true
+}

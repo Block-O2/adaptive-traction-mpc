@@ -12,7 +12,7 @@ Run from this directory in the recorded `mpc_learn` environment:
 ```bash
 python -m pip install -r requirements.txt
 python -m pip install -e ".[dev]"
-conda run -n mpc_learn pytest -q
+PYTHONPATH=src:. conda run -n mpc_learn pytest -q
 conda run -n mpc_learn python scripts/run_robot_core_validation.py --samples 301
 PYTHONPATH=src conda run -n mpc_learn python scripts/run_stage3c_nominal_smoke.py \
   --output-dir results/engineering_stage3c
@@ -150,7 +150,11 @@ measured approximately 9.4 ms per MPC call and 16.5 ms per full cycle on the
 audited desktop. This is replay evidence, not a hard-realtime or hardware proof,
 and no clinical or production claim is made.
 
-The checkpoint manifest, exact metrics, evidence hashes, reproduction commands,
-and current limitations are maintained in
-[`docs/research/CURRENT_STATE.md`](docs/research/CURRENT_STATE.md). Patient/model
-mismatch robustness is the next planned scientific question.
+The authoritative technical state is maintained in
+[`docs/research/CURRENT_STATE.md`](docs/research/CURRENT_STATE.md), with the
+canonical inventory and hashes in
+[`docs/research/STAGE4_EVIDENCE_MAP.md`](docs/research/STAGE4_EVIDENCE_MAP.md).
+Stage 4 now includes reviewed patient, sensor, trajectory, and crossed-
+replication evidence. The next phase is a separately specified professor-facing
+baseline/visualization study and hardware preparation; optional out-of-family
+model-inadequacy work remains a separate future question.

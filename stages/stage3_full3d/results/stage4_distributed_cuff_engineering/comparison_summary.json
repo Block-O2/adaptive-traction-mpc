@@ -1,0 +1,142 @@
+{
+  "architecture": "A_integral_minimal_no_ukf",
+  "evidence_category": "stage4_finite_distributed_cuff_engineering",
+  "hardware_claim": false,
+  "human_case": "cold_start_perturbed",
+  "length_160mm_excluded_reason": "with fixed sc it extends beyond the modeled distal shank; 100 mm is inserted so 60/80/100/120 mm remain fully supported",
+  "lengths_mm": [
+    60.0,
+    80.0,
+    100.0,
+    120.0
+  ],
+  "measurement_case": "noise_200hz_no_delay",
+  "measurement_to_estimator_controller": "resultant_actual_cuff_wrench_only",
+  "nominal_single_weld_comparison": {
+    "finite_cuff_case": "distributed_cuff_080mm",
+    "finite_cuff_completed": false,
+    "finite_cuff_events": {
+      "force_gate_events": 1,
+      "mpc_solver_failures": 0,
+      "mujoco_warning_counts": {},
+      "rom_event_samples": 0,
+      "unintended_contact_pairs": []
+    },
+    "metrics": {
+      "peak_off_axis_moment_nm": {
+        "absolute_delta": 5.716338156534971,
+        "finite_cuff": 7.52415296433842,
+        "relative_delta_percent": 316.2015341317234,
+        "single_weld": 1.8078148078034484
+      },
+      "peak_resultant_force_n": {
+        "absolute_delta": 829.5946205733829,
+        "finite_cuff": 944.9418137630387,
+        "relative_delta_percent": 719.2152644835926,
+        "single_weld": 115.34719318965574
+      },
+      "peak_robot_torque_fraction": {
+        "absolute_delta": 0.7848067272973147,
+        "finite_cuff": 1.2487701557413673,
+        "relative_delta_percent": 169.1527131630271,
+        "single_weld": 0.46396342844405253
+      },
+      "peak_robot_velocity_deg_s": {
+        "absolute_delta": 443.69933267855515,
+        "finite_cuff": 456.60756151744226,
+        "relative_delta_percent": 3437.337052329557,
+        "single_weld": 12.908228838887085
+      },
+      "peak_sagittal_moment_nm": {
+        "absolute_delta": 23.263080310828926,
+        "finite_cuff": 48.08619534255059,
+        "relative_delta_percent": 93.71539503040148,
+        "single_weld": 24.823115031721663
+      },
+      "tracking_combined_rmse_deg": {
+        "absolute_delta": 0.05358292791457209,
+        "finite_cuff": 0.758752994377128,
+        "relative_delta_percent": 7.5985823084306015,
+        "single_weld": 0.7051700664625559
+      }
+    },
+    "single_weld_case": "continuous_perturbed_human_one_shot",
+    "single_weld_completed": true,
+    "single_weld_events": {
+      "force_gate_events": 0,
+      "mpc_solver_failures": 0,
+      "mujoco_warning_counts": {},
+      "rom_event_samples": 0,
+      "unintended_contact_pairs": []
+    }
+  },
+  "plant_single_variable": "cuff_to_shank_mechanics_and_registered_cuff_length",
+  "robot_to_cuff_connection": "rigid",
+  "rows": [
+    {
+      "case": "distributed_cuff_080mm",
+      "completed": false,
+      "cuff_length_mm": 80.0,
+      "distal_peak_force_n": 963.7815456948778,
+      "duration_s": 0.46100000000000035,
+      "dynamics_accepted_rejected": [
+        0,
+        0
+      ],
+      "dynamics_condition_number": NaN,
+      "dynamics_prediction_rmse_nm_god_view": 5.262982118198634,
+      "dynamics_rank": 0,
+      "dynamics_trusted_s": null,
+      "events": {
+        "force_gate_events": 1,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "geometry_accepted_rejected": [
+        0,
+        0
+      ],
+      "geometry_condition_number": NaN,
+      "geometry_rank": 0,
+      "geometry_trusted_s": null,
+      "peak_center_translation_mm": 0.029773798359432984,
+      "peak_off_axis_moment_nm": 7.52415296433842,
+      "peak_relative_rotation_deg": 8.300129728306056,
+      "peak_resultant_force_n": 944.9418137630387,
+      "peak_robot_torque_fraction": 1.2487701557413673,
+      "peak_robot_velocity_deg_s": 456.60756151744226,
+      "peak_sagittal_moment_nm": 48.08619534255059,
+      "peak_station_force_norm_n": [
+        493.98797207310594,
+        101.06125351800871,
+        463.0703859955568,
+        963.7815456948778
+      ],
+      "peak_station_translation_mm": 0.25988271560387555,
+      "proximal_peak_force_n": 493.98797207310594,
+      "rms_station_force_norm_n": [
+        324.0363370956699,
+        80.52203371284563,
+        64.81230239978417,
+        272.35261403921277
+      ],
+      "station_offsets_m": [
+        -0.03,
+        -0.01,
+        0.01,
+        0.03
+      ],
+      "termination": "physical_cuff_force_gate",
+      "tracking_combined_rmse_deg": 0.758752994377128,
+      "tracking_max_abs_error_deg": [
+        0.9533031977199186,
+        2.032003444857076
+      ]
+    }
+  ],
+  "station_count": 4,
+  "station_direct_moments": false,
+  "trajectory": "stage4_continuous_c2_high_flexion_23s"
+}

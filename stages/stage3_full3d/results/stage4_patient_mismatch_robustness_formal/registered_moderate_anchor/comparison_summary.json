@@ -1,0 +1,911 @@
+{
+  "ab_isolation": {
+    "controller_population_prior_equal_to_nominal": true,
+    "first_qualification_times_equal": true,
+    "first_qualification_times_s": {
+      "prior_only": 10.019999999999886,
+      "trusted_adaptive": 10.019999999999886
+    },
+    "geometry_case_changes_true_plant": true,
+    "geometry_estimation_active_and_equal_before_promotion": true,
+    "geometry_prior_uses_nominal_lengths_not_true_patient_oracle": true,
+    "initial_human_state_equal": true,
+    "initial_robot_state_equal": true,
+    "measurement_seed_and_realization_equal_before_promotion": true,
+    "pre_promotion_trace_max_abs_difference": {
+      "allocated_wrench_world": 0.0,
+      "desired_human_action_nm": 0.0,
+      "dynamic_base_estimate": 0.0,
+      "estimated_human_dq_deg_s": 0.0,
+      "estimated_human_q_deg": 0.0,
+      "geometry_estimate": 0.0,
+      "human_q_deg_god_view": 0.0,
+      "human_q_ref_deg": 0.0,
+      "measured_cuff_force_world_n": 0.0,
+      "measured_cuff_moment_world_nm": 0.0,
+      "measurement_new_sample": 0.0,
+      "reference_phase_time_s": 0.0,
+      "reference_speed_scale": 0.0,
+      "robot_dq_rad_s": 0.0,
+      "robot_q_rad": 0.0
+    },
+    "prior_control_model_constant": true,
+    "prior_only_control_beta_constant_population_prior": true,
+    "selected_true_patient_equal_between_arms": true,
+    "shared_configuration_fields_equal": true,
+    "single_challenger_invariants_held": true,
+    "trusted_control_beta_population_prior_before_promotion": true
+  },
+  "arms": {
+    "prior_only": {
+      "active_bound_pressure": {
+        "active_bound_count": 3,
+        "active_or_pressured_bounds": [
+          {
+            "bound": 0.09934042046004,
+            "constrained_candidate": 0.09934042046004002,
+            "constrained_distance_to_bound": 1.3877787807814457e-17,
+            "constrained_hit": true,
+            "direction": "lower",
+            "index": 1,
+            "name": "b_distal_inertia_combination",
+            "unconstrained_candidate": -0.24764775561214006,
+            "unconstrained_violation": 0.3469881760721801,
+            "unconstrained_violation_fraction_of_span": 1.7464601743444257
+          },
+          {
+            "bound": -0.4363323129985824,
+            "constrained_candidate": -0.4363323129980402,
+            "constrained_distance_to_bound": 5.421774140756952e-13,
+            "constrained_hit": true,
+            "direction": "lower",
+            "index": 7,
+            "name": "rho1_stiffness_rest_combination",
+            "unconstrained_candidate": -3.987108273850981,
+            "unconstrained_violation": 3.5507759608523988,
+            "unconstrained_violation_fraction_of_span": 0.8137779062134084
+          },
+          {
+            "bound": 7.5,
+            "constrained_candidate": 7.5,
+            "constrained_distance_to_bound": 0.0,
+            "constrained_hit": true,
+            "direction": "upper",
+            "index": 9,
+            "name": "bv1_viscous_damping",
+            "unconstrained_candidate": 8.310368261828158,
+            "unconstrained_violation": 0.8103682618281578,
+            "unconstrained_violation_fraction_of_span": 0.16207365236563157
+          }
+        ],
+        "available": true,
+        "unconstrained_violation_l2_fraction_of_span": 1.9335525568247107,
+        "unconstrained_violation_maximum_fraction_of_span": 1.7464601743444257
+      },
+      "arm": "prior_only",
+      "candidate_status": "pending_statistical_evidence",
+      "challenger_to_true_beta_span_l2": 0.180498517097494,
+      "cuff_force_peak_n": 148.02843104894401,
+      "cuff_force_rms_n": 104.68250903328831,
+      "cuff_moment_peak_nm": 23.95374749585304,
+      "cuff_moment_rms_nm": 14.683605040174719,
+      "cylindrical_surface_proxy_peak_n": 155.90670513848113,
+      "cylindrical_surface_proxy_rms_n": 97.93935707045402,
+      "first_challenger_qualification_time_s": 10.019999999999886,
+      "first_promotion_time_s": null,
+      "generalized_torque_prediction_rmse_nm": 2.0560490504688858,
+      "generalized_torque_prediction_sample_count": 4657,
+      "incumbent_to_true_beta_span_l2": 0.18812851758019686,
+      "maximum_tracking_error_deg": 1.9499756118430966,
+      "prior_to_true_beta_span_l2": 0.18812851758019686,
+      "promotion_count": 0,
+      "promotion_timeline": [
+        {
+          "applied_to_control": false,
+          "challenger_index": 0,
+          "creation_reference_phase_s": 2.760000000000089,
+          "creation_time_s": 5.520000000000178,
+          "decision_reference_phase_s": 5.009999999999943,
+          "decision_time_s": 10.019999999999886,
+          "oracle_post_decision_only": {
+            "challenger_prediction_rmse_nm": 1.8311523847898632,
+            "challenger_true_beta_distance_span_l2": 0.21752751206667995,
+            "improvement_nm": 0.20520755527028078,
+            "incumbent_prediction_rmse_nm": 2.036359940060144,
+            "incumbent_true_beta_distance_span_l2": 0.18812851758019686,
+            "sample_count": 790,
+            "used_online": false
+          },
+          "remaining_reference_duration_s": 17.99000000000006,
+          "status": "qualified_not_applied_prior_only",
+          "validation_duration_s": 4.499999999999708,
+          "validation_timeline": {
+            "all_evaluated_looks": [
+              {
+                "against_fixed_incumbent_upper_bound_nms2": -0.14577348161051001,
+                "against_prior_upper_bound_nms2": -0.14577348161051001,
+                "decision_reference_phase_s": 5.009999999999943,
+                "decision_time_s": 10.019999999999886,
+                "look_block_count": 8,
+                "promotion_supported": true
+              }
+            ],
+            "decision_look_block_count": 8,
+            "first_block_start_reference_phase_s": 3.0100000000001725,
+            "first_block_start_time_s": 6.020000000000345,
+            "last_block_end_reference_phase_s": 5.009999999999943,
+            "last_block_end_time_s": 10.019999999999886
+          }
+        },
+        {
+          "applied_to_control": false,
+          "challenger_index": 1,
+          "creation_reference_phase_s": 5.009999999999943,
+          "creation_time_s": 10.019999999999886,
+          "decision_reference_phase_s": 8.519999999997715,
+          "decision_time_s": 14.53999999999738,
+          "oracle_post_decision_only": {
+            "challenger_prediction_rmse_nm": 1.9029514493406912,
+            "challenger_true_beta_distance_span_l2": 0.20150331502953625,
+            "improvement_nm": 0.20438405347747945,
+            "incumbent_prediction_rmse_nm": 2.1073355028181706,
+            "incumbent_true_beta_distance_span_l2": 0.18812851758019686,
+            "sample_count": 768,
+            "used_online": false
+          },
+          "remaining_reference_duration_s": 14.480000000002285,
+          "status": "qualified_not_applied_prior_only",
+          "validation_duration_s": 4.519999999997495,
+          "validation_timeline": {
+            "all_evaluated_looks": [
+              {
+                "against_fixed_incumbent_upper_bound_nms2": -0.19712097978893037,
+                "against_prior_upper_bound_nms2": -0.19712097978893037,
+                "decision_reference_phase_s": 8.519999999997715,
+                "decision_time_s": 14.53999999999738,
+                "look_block_count": 8,
+                "promotion_supported": true
+              }
+            ],
+            "decision_look_block_count": 8,
+            "first_block_start_reference_phase_s": 5.259999999999804,
+            "first_block_start_time_s": 10.519999999999609,
+            "last_block_end_reference_phase_s": 8.499999999997726,
+            "last_block_end_time_s": 14.519999999997392
+          }
+        },
+        {
+          "applied_to_control": false,
+          "challenger_index": 2,
+          "creation_reference_phase_s": 8.519999999997715,
+          "creation_time_s": 14.53999999999738,
+          "decision_reference_phase_s": 13.020000000000621,
+          "decision_time_s": 19.040000000000287,
+          "oracle_post_decision_only": {
+            "challenger_prediction_rmse_nm": 1.788724832396139,
+            "challenger_true_beta_distance_span_l2": 0.20885389265542006,
+            "improvement_nm": 0.2906340559474916,
+            "incumbent_prediction_rmse_nm": 2.0793588883436307,
+            "incumbent_true_beta_distance_span_l2": 0.18812851758019686,
+            "sample_count": 731,
+            "used_online": false
+          },
+          "remaining_reference_duration_s": 9.979999999999379,
+          "status": "qualified_not_applied_prior_only",
+          "validation_duration_s": 4.500000000002906,
+          "validation_timeline": {
+            "all_evaluated_looks": [
+              {
+                "against_fixed_incumbent_upper_bound_nms2": -0.12264237968049282,
+                "against_prior_upper_bound_nms2": -0.12264237968049282,
+                "decision_reference_phase_s": 13.020000000000621,
+                "decision_time_s": 19.040000000000287,
+                "look_block_count": 8,
+                "promotion_supported": true
+              }
+            ],
+            "decision_look_block_count": 8,
+            "first_block_start_reference_phase_s": 9.019999999997438,
+            "first_block_start_time_s": 15.039999999997104,
+            "last_block_end_reference_phase_s": 13.000000000000597,
+            "last_block_end_time_s": 19.020000000000262
+          }
+        },
+        {
+          "applied_to_control": false,
+          "challenger_index": 3,
+          "creation_reference_phase_s": 13.020000000000621,
+          "creation_time_s": 19.040000000000287,
+          "decision_reference_phase_s": 17.52000000000612,
+          "decision_time_s": 23.540000000005787,
+          "oracle_post_decision_only": {
+            "challenger_prediction_rmse_nm": 1.8519273375289893,
+            "challenger_true_beta_distance_span_l2": 0.18885750599591442,
+            "improvement_nm": 0.18545152217619765,
+            "incumbent_prediction_rmse_nm": 2.037378859705187,
+            "incumbent_true_beta_distance_span_l2": 0.18812851758019686,
+            "sample_count": 683,
+            "used_online": false
+          },
+          "remaining_reference_duration_s": 5.479999999993879,
+          "status": "qualified_not_applied_prior_only",
+          "validation_duration_s": 4.5000000000055,
+          "validation_timeline": {
+            "all_evaluated_looks": [
+              {
+                "against_fixed_incumbent_upper_bound_nms2": -0.006634688373809677,
+                "against_prior_upper_bound_nms2": -0.006634688373809677,
+                "decision_reference_phase_s": 17.52000000000612,
+                "decision_time_s": 23.540000000005787,
+                "look_block_count": 8,
+                "promotion_supported": true
+              }
+            ],
+            "decision_look_block_count": 8,
+            "first_block_start_reference_phase_s": 13.520000000001232,
+            "first_block_start_time_s": 19.540000000000898,
+            "last_block_end_reference_phase_s": 17.500000000006096,
+            "last_block_end_time_s": 23.520000000005762
+          }
+        },
+        {
+          "applied_to_control": false,
+          "challenger_index": 4,
+          "creation_reference_phase_s": 17.52000000000612,
+          "creation_time_s": 23.540000000005787,
+          "decision_time_s": null,
+          "status": "pending_statistical_evidence",
+          "validation_duration_s": null
+        }
+      ],
+      "provenance": {
+        "arm": "prior_only",
+        "baseline_commit": "ef1fe90e61c5981df8e934585780ce188d104ea4",
+        "baseline_tag": "stage4-baseline-v1",
+        "code_commit": "ef1fe90e61c5981df8e934585780ce188d104ea4",
+        "evidence_category": "formal_user_run_unreviewed",
+        "frozen_controller_fingerprint_sha256": "faa50c1a34ee0f618de424b28f49432ffd13f8143d4e9f15eb5a04acdf6d3754",
+        "measurement_seed": 44104,
+        "mpc_seed": 20260824,
+        "patient_case_config_sha256": "a51d3cb086ebeb21ea01b59c7cb6d7cb8a422fa3e9bab0028d84002cf2ed129b",
+        "patient_case_id": "registered_moderate_anchor",
+        "runtime_allowance_s": 32.0,
+        "sensor_regime": "noise_bias_drift_200hz",
+        "trajectory_id": "stage4_population_prior_cold_start_high_flexion_23s",
+        "working_tree_dirty": true
+      },
+      "reference_completion_time_s": 29.020000000012484,
+      "reference_progress_fraction": 1.0,
+      "safety_events": {
+        "force_gate_events": 0,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "termination_reason": "completed",
+      "tracking_rmse_deg": 1.027241369877455,
+      "trajectory_remaining_after_first_promotion_s": null,
+      "trusted_adaptation_entered_control": false
+    },
+    "trusted_adaptive": {
+      "active_bound_pressure": {
+        "active_bound_count": 1,
+        "active_or_pressured_bounds": [
+          {
+            "bound": 0.09934042046004,
+            "constrained_candidate": 0.09934042134303614,
+            "constrained_distance_to_bound": 8.829961345435677e-10,
+            "constrained_hit": true,
+            "direction": "lower",
+            "index": 1,
+            "name": "b_distal_inertia_combination",
+            "unconstrained_candidate": -0.04253219767059327,
+            "unconstrained_violation": 0.1418726181306333,
+            "unconstrained_violation_fraction_of_span": 0.7140729698627658
+          }
+        ],
+        "available": true,
+        "unconstrained_violation_l2_fraction_of_span": 0.7140729698627658,
+        "unconstrained_violation_maximum_fraction_of_span": 0.7140729698627658
+      },
+      "arm": "trusted_adaptive",
+      "candidate_status": "pending_statistical_evidence",
+      "challenger_to_true_beta_span_l2": 0.26086896252915615,
+      "cuff_force_peak_n": 147.39432635978426,
+      "cuff_force_rms_n": 104.85338528424606,
+      "cuff_moment_peak_nm": 23.95374749585304,
+      "cuff_moment_rms_nm": 14.654257808281226,
+      "cylindrical_surface_proxy_peak_n": 155.90670513848113,
+      "cylindrical_surface_proxy_rms_n": 97.76924179229793,
+      "first_challenger_qualification_time_s": 10.019999999999886,
+      "first_promotion_time_s": 10.019999999999886,
+      "generalized_torque_prediction_rmse_nm": 1.8174232662507332,
+      "generalized_torque_prediction_sample_count": 4662,
+      "incumbent_to_true_beta_span_l2": 0.2696512919636549,
+      "maximum_tracking_error_deg": 1.8789174338075698,
+      "prior_to_true_beta_span_l2": 0.18812851758019686,
+      "promotion_count": 4,
+      "promotion_timeline": [
+        {
+          "applied_to_control": true,
+          "challenger_index": 0,
+          "creation_reference_phase_s": 2.760000000000089,
+          "creation_time_s": 5.520000000000178,
+          "decision_reference_phase_s": 5.009999999999943,
+          "decision_time_s": 10.019999999999886,
+          "oracle_post_decision_only": {
+            "challenger_prediction_rmse_nm": 1.8311571014151333,
+            "challenger_true_beta_distance_span_l2": 0.21752751206667995,
+            "improvement_nm": 0.20520586703244392,
+            "incumbent_prediction_rmse_nm": 2.0363629684475772,
+            "incumbent_true_beta_distance_span_l2": 0.18812851758019686,
+            "sample_count": 790,
+            "used_online": false
+          },
+          "remaining_reference_duration_s": 17.99000000000006,
+          "status": "promoted_to_control_incumbent",
+          "validation_duration_s": 4.499999999999708,
+          "validation_timeline": {
+            "all_evaluated_looks": [
+              {
+                "against_fixed_incumbent_upper_bound_nms2": -0.14577348161051001,
+                "against_prior_upper_bound_nms2": -0.14577348161051001,
+                "decision_reference_phase_s": 5.009999999999943,
+                "decision_time_s": 10.019999999999886,
+                "look_block_count": 8,
+                "promotion_supported": true
+              }
+            ],
+            "decision_look_block_count": 8,
+            "first_block_start_reference_phase_s": 3.0100000000001725,
+            "first_block_start_time_s": 6.020000000000345,
+            "last_block_end_reference_phase_s": 5.009999999999943,
+            "last_block_end_time_s": 10.019999999999886
+          }
+        },
+        {
+          "applied_to_control": true,
+          "challenger_index": 1,
+          "creation_reference_phase_s": 5.009999999999943,
+          "creation_time_s": 10.019999999999886,
+          "decision_reference_phase_s": 8.519999999997715,
+          "decision_time_s": 14.53999999999738,
+          "oracle_post_decision_only": {
+            "challenger_prediction_rmse_nm": 1.754151161748994,
+            "challenger_true_beta_distance_span_l2": 0.2365698387240591,
+            "improvement_nm": 0.1841799706042644,
+            "incumbent_prediction_rmse_nm": 1.9383311323532584,
+            "incumbent_true_beta_distance_span_l2": 0.21752751206667995,
+            "sample_count": 775,
+            "used_online": false
+          },
+          "remaining_reference_duration_s": 14.480000000002285,
+          "status": "promoted_to_control_incumbent",
+          "validation_duration_s": 4.519999999997495,
+          "validation_timeline": {
+            "all_evaluated_looks": [
+              {
+                "against_fixed_incumbent_upper_bound_nms2": -0.15823200193771278,
+                "against_prior_upper_bound_nms2": -0.35147355321939133,
+                "decision_reference_phase_s": 8.519999999997715,
+                "decision_time_s": 14.53999999999738,
+                "look_block_count": 8,
+                "promotion_supported": true
+              }
+            ],
+            "decision_look_block_count": 8,
+            "first_block_start_reference_phase_s": 5.259999999999804,
+            "first_block_start_time_s": 10.519999999999609,
+            "last_block_end_reference_phase_s": 8.499999999997726,
+            "last_block_end_time_s": 14.519999999997392
+          }
+        },
+        {
+          "applied_to_control": true,
+          "challenger_index": 2,
+          "creation_reference_phase_s": 8.519999999997715,
+          "creation_time_s": 14.53999999999738,
+          "decision_reference_phase_s": 13.020000000000621,
+          "decision_time_s": 19.040000000000287,
+          "oracle_post_decision_only": {
+            "challenger_prediction_rmse_nm": 1.5957051504502187,
+            "challenger_true_beta_distance_span_l2": 0.2711609198813266,
+            "improvement_nm": 0.2782209873443262,
+            "incumbent_prediction_rmse_nm": 1.8739261377945449,
+            "incumbent_true_beta_distance_span_l2": 0.2365698387240591,
+            "sample_count": 718,
+            "used_online": false
+          },
+          "remaining_reference_duration_s": 9.979999999999379,
+          "status": "promoted_to_control_incumbent",
+          "validation_duration_s": 4.500000000002906,
+          "validation_timeline": {
+            "all_evaluated_looks": [
+              {
+                "against_fixed_incumbent_upper_bound_nms2": -0.13659733325791457,
+                "against_prior_upper_bound_nms2": -0.2784934634731139,
+                "decision_reference_phase_s": 13.020000000000621,
+                "decision_time_s": 19.040000000000287,
+                "look_block_count": 8,
+                "promotion_supported": true
+              }
+            ],
+            "decision_look_block_count": 8,
+            "first_block_start_reference_phase_s": 9.019999999997438,
+            "first_block_start_time_s": 15.039999999997104,
+            "last_block_end_reference_phase_s": 13.000000000000597,
+            "last_block_end_time_s": 19.020000000000262
+          }
+        },
+        {
+          "applied_to_control": true,
+          "challenger_index": 3,
+          "creation_reference_phase_s": 13.020000000000621,
+          "creation_time_s": 19.040000000000287,
+          "decision_reference_phase_s": 21.52000000001101,
+          "decision_time_s": 27.540000000010675,
+          "oracle_post_decision_only": {
+            "challenger_prediction_rmse_nm": 1.3776354823320751,
+            "challenger_true_beta_distance_span_l2": 0.2696512919636549,
+            "improvement_nm": 0.11970508989547834,
+            "incumbent_prediction_rmse_nm": 1.4973405722275535,
+            "incumbent_true_beta_distance_span_l2": 0.2711609198813266,
+            "sample_count": 1430,
+            "used_online": false
+          },
+          "remaining_reference_duration_s": 1.4799999999889906,
+          "status": "promoted_to_control_incumbent",
+          "validation_duration_s": 8.500000000010388,
+          "validation_timeline": {
+            "all_evaluated_looks": [
+              {
+                "against_fixed_incumbent_upper_bound_nms2": -0.0013854921973927986,
+                "against_prior_upper_bound_nms2": 0.12642721962121106,
+                "decision_reference_phase_s": 17.52000000000612,
+                "decision_time_s": 23.540000000005787,
+                "look_block_count": 8,
+                "promotion_supported": false
+              },
+              {
+                "against_fixed_incumbent_upper_bound_nms2": -0.027968536899354232,
+                "against_prior_upper_bound_nms2": 0.0050142030368901525,
+                "decision_reference_phase_s": 19.520000000008565,
+                "decision_time_s": 25.54000000000823,
+                "look_block_count": 12,
+                "promotion_supported": false
+              },
+              {
+                "against_fixed_incumbent_upper_bound_nms2": -0.03927592460310587,
+                "against_prior_upper_bound_nms2": -0.11675924456806913,
+                "decision_reference_phase_s": 21.52000000001101,
+                "decision_time_s": 27.540000000010675,
+                "look_block_count": 16,
+                "promotion_supported": true
+              }
+            ],
+            "decision_look_block_count": 16,
+            "first_block_start_reference_phase_s": 13.520000000001232,
+            "first_block_start_time_s": 19.540000000000898,
+            "last_block_end_reference_phase_s": 21.500000000010985,
+            "last_block_end_time_s": 27.52000000001065
+          }
+        },
+        {
+          "applied_to_control": false,
+          "challenger_index": 4,
+          "creation_reference_phase_s": 21.52000000001101,
+          "creation_time_s": 27.540000000010675,
+          "decision_time_s": null,
+          "status": "pending_statistical_evidence",
+          "validation_duration_s": null
+        }
+      ],
+      "provenance": {
+        "arm": "trusted_adaptive",
+        "baseline_commit": "ef1fe90e61c5981df8e934585780ce188d104ea4",
+        "baseline_tag": "stage4-baseline-v1",
+        "code_commit": "ef1fe90e61c5981df8e934585780ce188d104ea4",
+        "evidence_category": "formal_user_run_unreviewed",
+        "frozen_controller_fingerprint_sha256": "faa50c1a34ee0f618de424b28f49432ffd13f8143d4e9f15eb5a04acdf6d3754",
+        "measurement_seed": 44104,
+        "mpc_seed": 20260824,
+        "patient_case_config_sha256": "a51d3cb086ebeb21ea01b59c7cb6d7cb8a422fa3e9bab0028d84002cf2ed129b",
+        "patient_case_id": "registered_moderate_anchor",
+        "runtime_allowance_s": 32.0,
+        "sensor_regime": "noise_bias_drift_200hz",
+        "trajectory_id": "stage4_population_prior_cold_start_high_flexion_23s",
+        "working_tree_dirty": true
+      },
+      "reference_completion_time_s": 29.020000000012484,
+      "reference_progress_fraction": 1.0,
+      "safety_events": {
+        "force_gate_events": 0,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "termination_reason": "completed",
+      "tracking_rmse_deg": 0.9561387101120247,
+      "trajectory_remaining_after_first_promotion_s": 17.99000000000006,
+      "trusted_adaptation_entered_control": true
+    }
+  },
+  "case_record": {
+    "base_parameter_names": [
+      "a_inertia_combination",
+      "b_distal_inertia_combination",
+      "d_mass_length_com_combination",
+      "g1_proximal_gravity_combination",
+      "g2_distal_gravity_combination",
+      "k1_passive_stiffness",
+      "k2_passive_stiffness",
+      "rho1_stiffness_rest_combination",
+      "rho2_stiffness_rest_combination",
+      "bv1_viscous_damping",
+      "bv2_viscous_damping"
+    ],
+    "beta_11": [
+      1.5382738255965798,
+      0.1949340646452698,
+      0.33794062673868,
+      35.44164240399405,
+      7.588348169535,
+      11.0,
+      11.0,
+      0.5759586531581287,
+      1.53588974175501,
+      5.0,
+      5.0
+    ],
+    "case_id": "registered_moderate_anchor",
+    "engineering_range_not_clinical": true,
+    "expected_dominant_torque_effect": "existing mixed mass, COM, stiffness, equilibrium, and cuff-geometry mismatch",
+    "geometry": {
+      "changed_fields": [
+        "sleeve_center_m"
+      ],
+      "changes": true,
+      "requires_separate_geometry_estimator": true
+    },
+    "mechanism": "mixed",
+    "normalized_difference_from_prior": {
+      "definition": "(beta_case-beta_population_prior)/(estimator_upper-estimator_lower)",
+      "per_parameter": [
+        0.060280738397147794,
+        -0.01885826664241552,
+        -0.0025000000000000543,
+        0.07187793461459936,
+        -0.002500000000000032,
+        0.1,
+        0.1,
+        -0.06800000000000003,
+        -0.040000000000000015,
+        0.0,
+        0.0
+      ],
+      "span_l2": 0.18812851758019686,
+      "span_linf": 0.1
+    },
+    "physical_validity_checks": {
+      "com_inside_segments": true,
+      "cuff_center_on_shank": true,
+      "finite_raw_parameters": true,
+      "nonnegative_passive_coefficients": true,
+      "positive_definite_mass_matrix_over_rom": true,
+      "positive_height_and_mass": true,
+      "positive_segment_lengths_and_masses": true,
+      "rest_angles_inside_rom": true,
+      "soft_limit_definition_unchanged": true
+    },
+    "physically_valid": true,
+    "raw_human_parameters": {
+      "body_mass_kg": 78.75,
+      "gravity_m_s2": 9.81,
+      "height_m": 1.72,
+      "passive_damping_nms_rad": [
+        5.0,
+        5.0
+      ],
+      "passive_stiffness_nm_rad": [
+        11.0,
+        11.0
+      ],
+      "q_max_rad": [
+        1.3962634015954636,
+        1.7453292519943295
+      ],
+      "q_min_rad": [
+        0.0,
+        0.0
+      ],
+      "q_rest_rad": [
+        0.05235987755982988,
+        0.13962634015954636
+      ],
+      "shank_com_m": 0.16371046,
+      "shank_inertia_kg_m2": 0.0682987976244,
+      "shank_length_m": 0.40076,
+      "shank_mass_kg": 4.725,
+      "sleeve_center_m": 0.36789768,
+      "soft_limit_boundary_torque_nm": 25.0,
+      "soft_limit_damping_nms_rad": 2.0,
+      "soft_limit_margin_rad": 0.08726646259971647,
+      "thigh_com_m": 0.198627492,
+      "thigh_inertia_kg_m2": 0.13392220570344,
+      "thigh_length_m": 0.43688,
+      "thigh_mass_kg": 7.796250000000001
+    },
+    "representability": {
+      "base_dynamics": "exact_11_base_when_soft_limit_torque_is_inactive",
+      "geometry": "current_separate_planar_geometry_estimator_required",
+      "inside_current_estimator_box": true,
+      "inside_current_model_family": true,
+      "soft_limit_caveat": "11-base excludes nonlinear soft-limit torque; every preregistered case keeps the frozen soft-limit definition"
+    },
+    "schema_version": "stage4_patient_mismatch_case_record_v1",
+    "severity": "moderate",
+    "source": "existing_registered_moderate_human",
+    "variation_spec": {
+      "body_mass_scale": 1.05,
+      "case_id": "registered_moderate_anchor",
+      "expected_dominant_torque_effect": "existing mixed mass, COM, stiffness, equilibrium, and cuff-geometry mismatch",
+      "height_scale": 1.0,
+      "mechanism": "mixed",
+      "passive_damping_scale": [
+        1.0,
+        1.0
+      ],
+      "passive_stiffness_scale": [
+        1.1,
+        1.1
+      ],
+      "rest_offset_deg": [
+        -2.0,
+        -2.0
+      ],
+      "severity": "moderate",
+      "shank_com_scale": 0.95,
+      "sleeve_center_scale": 1.02,
+      "source": "existing_registered_moderate_human",
+      "thigh_com_scale": 1.05
+    }
+  },
+  "comparison": {
+    "full_task": {
+      "available": true,
+      "cuff_force_peak_n": -0.6341046891597557,
+      "cuff_force_rms_n": 0.17087625095774683,
+      "cuff_moment_peak_nm": 0.0,
+      "cuff_moment_rms_nm": -0.02934723189349242,
+      "cylindrical_surface_proxy_peak_n": 0.0,
+      "cylindrical_surface_proxy_rms_n": -0.1701152781560893,
+      "speed_scale_maximum": 0.0,
+      "speed_scale_mean": 0.0,
+      "speed_scale_minimum": 0.0,
+      "tracking_combined_rmse_deg": -0.07110265976543029,
+      "tracking_max_abs_error_deg": -0.07105817803552683
+    },
+    "post_first_trusted_adaptive_promotion": {
+      "available": true,
+      "cuff_force_peak_n": -0.6341046891597557,
+      "cuff_force_rms_n": 0.25229124335835706,
+      "cuff_moment_peak_nm": -0.03620073366986887,
+      "cuff_moment_rms_nm": -0.06189754735883923,
+      "cylindrical_surface_proxy_peak_n": -0.14475253208104277,
+      "cylindrical_surface_proxy_rms_n": -0.3461656743622541,
+      "speed_scale_maximum": 0.0,
+      "speed_scale_mean": 0.0,
+      "speed_scale_minimum": 0.0,
+      "tracking_combined_rmse_deg": -0.13541287844990202,
+      "tracking_max_abs_error_deg": -0.2425821109203281
+    },
+    "pre_first_trusted_adaptive_promotion": {
+      "available": true,
+      "cuff_force_peak_n": 0.0,
+      "cuff_force_rms_n": 0.0,
+      "cuff_moment_peak_nm": 0.0,
+      "cuff_moment_rms_nm": 0.0,
+      "cylindrical_surface_proxy_peak_n": 0.0,
+      "cylindrical_surface_proxy_rms_n": 0.0,
+      "speed_scale_maximum": 0.0,
+      "speed_scale_mean": 0.0,
+      "speed_scale_minimum": 0.0,
+      "tracking_combined_rmse_deg": 0.0,
+      "tracking_max_abs_error_deg": 0.0
+    },
+    "reference_completion_time_s": 0.0,
+    "reference_progress_fraction": 0.0,
+    "sign_convention": "trusted_adaptive_minus_prior_only"
+  },
+  "evidence_category": "formal_user_run_unreviewed",
+  "provenance": {
+    "baseline_commit": "ef1fe90e61c5981df8e934585780ce188d104ea4",
+    "baseline_tag": "stage4-baseline-v1",
+    "code_commit": "ef1fe90e61c5981df8e934585780ce188d104ea4",
+    "frozen_controller_fingerprint_payload": {
+      "confidence_pacing_config": {
+        "high_confidence_enter_threshold": 0.75,
+        "high_confidence_exit_threshold": 0.25,
+        "minimum_speed_scale": 0.5,
+        "model_confidence_filter_time_constant_s": 0.75,
+        "nominal_speed_scale": 1.0,
+        "recovery_rate_per_s": 0.25,
+        "slowdown_rate_per_s": 1.0
+      },
+      "measurement_model": {
+        "actual_cr12_sensor_specification": false,
+        "force_bias_drift_n_s": [
+          0.04,
+          -0.03,
+          0.02
+        ],
+        "force_bias_n": [
+          1.5,
+          -1.0,
+          0.8
+        ],
+        "latency_s": 0.0,
+        "moment_bias_drift_nm_s": [
+          0.001,
+          -0.0008,
+          0.0006
+        ],
+        "moment_bias_nm": [
+          0.03,
+          -0.02,
+          0.015
+        ],
+        "name": "noise_bias_drift_200hz",
+        "noise_std": {
+          "cuff_orientation_deg": 0.05,
+          "cuff_position_mm": 0.3,
+          "force_n": 0.5,
+          "moment_nm": 0.02,
+          "robot_position_deg": 0.02,
+          "robot_velocity_deg_s": 0.1
+        },
+        "preprocessing_enabled": true,
+        "random_seed": 44104,
+        "update_rate_hz": 200.0
+      },
+      "measurement_routing": {
+        "estimator_delay_ms": 0.0,
+        "low_level_delay_ms": 0.0,
+        "low_level_timestamp_extrapolation": false,
+        "mpc_state_delay_ms": 0.0
+      },
+      "mpc_objective_contract": {
+        "equivalent_cylindrical_surface_effort": "cylindrical_surface_effort_weight * sum(||A_dagger*w_cuff||^2/F_normalization^2)",
+        "generalized_action": "action_weight * sum(||u/action_scale||^2)",
+        "generalized_action_slew": "action_rate_weight * sum(||delta_u/action_rate_scale||^2)",
+        "normalization": {
+          "action_rate_scale_nm": [
+            20.0,
+            10.0
+          ],
+          "action_scale_nm": [
+            60.0,
+            30.0
+          ],
+          "dq_error_scale_rad_s": [
+            0.13962634015954636,
+            0.13962634015954636
+          ],
+          "interaction_force_normalization_n": 200.0,
+          "moment_to_force_lever_arm_m": 0.045,
+          "q_error_scale_rad": [
+            0.03490658503988659,
+            0.03490658503988659
+          ]
+        },
+        "raw_shear_comfort_metric_used": false,
+        "resultant_cuff_force": "resultant_force_weight * sum(||F||^2/F_normalization^2)",
+        "surface_proxy_interpretation": "minimum-norm equivalent cylindrical patch-force effort; not pressure and not a comfort or tissue-load measurement",
+        "tracking": "sum(||(q-q_ref)/q_scale||^2 + ||(dq-dq_ref)/dq_scale||^2)",
+        "weights": {
+          "action_rate_weight": 0.005,
+          "action_weight": 0.002,
+          "cylindrical_surface_effort_weight": 0.0,
+          "resultant_force_weight": 0.0,
+          "wrench_slew_weight": 0.0
+        },
+        "wrench_slew": "wrench_slew_weight * sum((||delta_F_world||^2 + ||delta_M_world/r_cuff||^2)/F_normalization^2)"
+      },
+      "plant_integrator": {
+        "control_dt_s": 0.005,
+        "control_substeps": 5,
+        "simulation_dt_s": 0.001
+      },
+      "preregistered_contract": {
+        "allocator": "registered_1_to_1_cuff_aware",
+        "confidence_pacing": "existing_lowpass_hysteretic_model_confidence",
+        "dynamic_identifier": "causal_accumulated_integral_11_base_parameter_regression",
+        "hybrid_optimizer": false,
+        "measurement_seed": 44104,
+        "mpc_candidate_count": 32,
+        "mpc_elite_count": 6,
+        "mpc_horizon_steps": 15,
+        "mpc_implementation": "batched",
+        "mpc_interaction_weights": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mpc_iteration_count": 2,
+        "mpc_seed": 20260824,
+        "new_active_excitation": false,
+        "plant_integration": "existing_mujoco_human_v2_rigid_cuff",
+        "reference": "continuous_high_flexion_23s",
+        "reference_duration_s": 23.0,
+        "sensor_case": "noise_bias_drift_200hz",
+        "statistical_rule": "primary_single_challenger_hac_lag2",
+        "tracking_corridor_or_tube": false,
+        "trust_lifecycle": "single_fixed_incumbent_at_most_one_challenger",
+        "ukf_or_kalman": false,
+        "wall_time_limit_s": 32.0
+      },
+      "statistical_trust_config": {
+        "alpha_spending": "alpha_j=0.05/[j(j+1)]",
+        "bootstrap_block_length": 2,
+        "bootstrap_replicates": 4000,
+        "bootstrap_seed": 481516,
+        "familywise_alpha": 0.05,
+        "hac_lag_blocks": 2,
+        "look_step_blocks": 4,
+        "maximum_clean_blocks": 16,
+        "method": "hac",
+        "minimum_clean_blocks": 8,
+        "name": "primary_single_challenger_hac_lag2",
+        "scheduled_looks": [
+          8,
+          12,
+          16
+        ]
+      }
+    },
+    "frozen_controller_fingerprint_sha256": "faa50c1a34ee0f618de424b28f49432ffd13f8143d4e9f15eb5a04acdf6d3754",
+    "measurement_seed": 44104,
+    "mpc_seed": 20260824,
+    "patient_case_config_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/configs/stage4_patient_mismatch_cases.json",
+    "patient_case_config_schema": "stage4_patient_mismatch_cases_v1",
+    "patient_case_config_sha256": "a51d3cb086ebeb21ea01b59c7cb6d7cb8a422fa3e9bab0028d84002cf2ed129b",
+    "preregistered_case_count": 13,
+    "reference_duration_s": 23.0,
+    "runtime_allowance_s": 32.0,
+    "sensor_regime": "noise_bias_drift_200hz",
+    "structural_smoke": false,
+    "trajectory_id": "stage4_population_prior_cold_start_high_flexion_23s",
+    "working_tree_dirty": true
+  },
+  "schema_version": "stage4_patient_mismatch_paired_result_v1",
+  "shared_ab_contract": {
+    "allocator": "registered_1_to_1_cuff_aware",
+    "confidence_pacing": "existing_lowpass_hysteretic_model_confidence",
+    "dynamic_identifier": "causal_accumulated_integral_11_base_parameter_regression",
+    "hybrid_optimizer": false,
+    "measurement_seed": 44104,
+    "mpc_candidate_count": 32,
+    "mpc_elite_count": 6,
+    "mpc_horizon_steps": 15,
+    "mpc_implementation": "batched",
+    "mpc_interaction_weights": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mpc_iteration_count": 2,
+    "mpc_seed": 20260824,
+    "new_active_excitation": false,
+    "plant_integration": "existing_mujoco_human_v2_rigid_cuff",
+    "reference": "continuous_high_flexion_23s",
+    "reference_duration_s": 23.0,
+    "sensor_case": "noise_bias_drift_200hz",
+    "statistical_rule": "primary_single_challenger_hac_lag2",
+    "tracking_corridor_or_tube": false,
+    "trust_lifecycle": "single_fixed_incumbent_at_most_one_challenger",
+    "ukf_or_kalman": false,
+    "wall_time_limit_s": 32.0
+  }
+}

@@ -1,8 +1,9 @@
 # Stage-4 Single-Challenger Closed-Loop A/B Experiment Spec
 
-Status: preregistered implementation, awaiting user-run formal execution and
-review. This spec is not evidence and does not make the trust rule production
-default.
+Status: frozen preregistration text; the user subsequently completed the formal
+execution and repository review. Canonical evidence is in
+`results/stage4_single_challenger_closed_loop_ab_formal/`. This spec is not
+itself evidence and does not make the trust rule production default.
 
 ## Question
 

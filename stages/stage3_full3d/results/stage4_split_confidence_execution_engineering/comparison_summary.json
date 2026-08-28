@@ -1,0 +1,118 @@
+{
+  "confidence_contract": {
+    "filter_and_hysteresis": {
+      "high_confidence_enter_threshold": 0.75,
+      "high_confidence_exit_threshold": 0.25,
+      "minimum_speed_scale": 0.5,
+      "model_confidence_filter_time_constant_s": 0.75,
+      "nominal_speed_scale": 1.0,
+      "recovery_rate_per_s": 0.25,
+      "slowdown_rate_per_s": 1.0
+    },
+    "information_confidence_affects_speed": false,
+    "rejected_candidate_invalidates_current_model": false,
+    "speed_input": "current_last_valid_model_confidence_only"
+  },
+  "evidence_category": "stage4_split_confidence_execution_engineering_comparison",
+  "formal_experiment": false,
+  "registered_modes": {
+    "adaptive_speed": {
+      "confidence_aware": true,
+      "duration_s": 32.0
+    },
+    "fixed_speed": {
+      "confidence_aware": false,
+      "duration_s": 23.0
+    }
+  },
+  "rows": [
+    {
+      "completed_duration_s": 23.000000000005127,
+      "completed_requested_wall_duration": true,
+      "dynamic_accepted_updates": 4,
+      "dynamic_rejected_updates": 35,
+      "events": {
+        "force_gate_events": 0,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "execution_confidence_high_fraction": 0.7677927046650146,
+      "final_reference_phase_time_s": 23.000000000005127,
+      "first_execution_confidence_high_time_s": 5.341000000000118,
+      "first_model_confidence_high_time_s": 4.320999999999778,
+      "force_gate_n": 200.0,
+      "geometry_accepted_updates": 38,
+      "geometry_rejected_updates": 2,
+      "information_confidence_high_fraction": 0.8338767879657406,
+      "maximum_speed_scale": 1.0,
+      "mean_speed_scale": 1.0,
+      "minimum_speed_fraction": 0.0,
+      "minimum_speed_scale": 1.0,
+      "mode": "fixed_speed",
+      "model_confidence_high_fraction": 0.8121386026694492,
+      "moment_limit_nm": null,
+      "nominal_speed_fraction": 1.0,
+      "peak_cuff_force_n": 117.29387678560461,
+      "peak_sagittal_cuff_moment_nm": 27.096794704943722,
+      "reference_completion_time_s": 23.000000000005127,
+      "rms_cuff_force_n": 89.08059501430738,
+      "termination": "completed",
+      "tracking_combined_rmse_deg": 0.7006943942616681,
+      "tracking_max_abs_error_deg": [
+        0.9840529552357298,
+        1.4860083793344967
+      ]
+    },
+    {
+      "completed_duration_s": 32.00000000001612,
+      "completed_requested_wall_duration": true,
+      "dynamic_accepted_updates": 13,
+      "dynamic_rejected_updates": 40,
+      "events": {
+        "force_gate_events": 0,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "execution_confidence_high_fraction": 0.7906002937408206,
+      "final_reference_phase_time_s": 28.155000000015843,
+      "first_execution_confidence_high_time_s": 6.7010000000005725,
+      "first_model_confidence_high_time_s": 5.681000000000232,
+      "force_gate_n": 200.0,
+      "geometry_accepted_updates": 40,
+      "geometry_rejected_updates": 5,
+      "information_confidence_high_fraction": 0.8224742976781976,
+      "maximum_speed_scale": 1.0,
+      "mean_speed_scale": 0.8798318802537457,
+      "minimum_speed_fraction": 0.2093997062591794,
+      "minimum_speed_scale": 0.5,
+      "mode": "adaptive_speed",
+      "model_confidence_high_fraction": 0.8224742976781976,
+      "moment_limit_nm": null,
+      "nominal_speed_fraction": 0.7287272272741477,
+      "peak_cuff_force_n": 117.95295582061974,
+      "peak_sagittal_cuff_moment_nm": 27.08645005263774,
+      "reference_completion_time_s": 26.845000000009826,
+      "rms_cuff_force_n": 87.3645228320193,
+      "termination": "completed",
+      "tracking_combined_rmse_deg": 0.5633455238053886,
+      "tracking_max_abs_error_deg": [
+        0.9103862536212949,
+        1.681581482942193
+      ]
+    }
+  ],
+  "shared": {
+    "estimator": "integral_minimal_unchanged",
+    "measurement_case": "ideal_200hz",
+    "mpc": "HumanSpaceMPC_unchanged",
+    "plant": "existing_stage4_rigid_cuff_resultant_wrench_plant",
+    "safety_limits_changed": false,
+    "trajectory": "stage4_population_prior_cold_start_high_flexion_23s",
+    "tube_mpc": false
+  },
+  "single_variable": "reference_speed_from_filtered_hysteretic_current_model_confidence"
+}

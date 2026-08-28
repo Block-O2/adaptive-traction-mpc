@@ -4,13 +4,14 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
-from traction_mpc_stage3.human import HUMAN, soft_limit_torque
+from traction_mpc_stage3.human import HUMAN, HumanV2Parameters, soft_limit_torque
 from traction_mpc_stage4.confidence_execution import ReferenceExecutionLayer
 from traction_mpc_stage4.estimator_v2 import dynamic_regressor_row, nominal_base_parameters
 from traction_mpc_stage4.evaluation import BED_CONTACT_CONTAMINATION_FORCE_N
@@ -20,8 +21,10 @@ from traction_mpc_stage4.measurement import sensor_realism_cases
 from traction_mpc_stage4.online_trust import OnlineSingleChallengerTrustEstimator
 from traction_mpc_stage4.reference import (
     COLD_START_TEACHING_DURATION_S,
+    COLD_START_TEACHING_WAYPOINTS,
     cold_start_teaching_reference,
 )
+from traction_mpc_stage3.reference import CuffPoseReference
 from traction_mpc_stage4.sensor_realism import run_sensor_realism_case, save_sensor_case
 from traction_mpc_stage4.surface_loads import (
     CylindricalSurfaceConfig,
@@ -135,6 +138,8 @@ def _promotion_timeline(
     summary: dict[str, Any],
     trace: dict[str, np.ndarray],
     true_beta: np.ndarray,
+    *,
+    reference_phase_duration_s: float,
 ) -> list[dict[str, Any]]:
     time = np.asarray(trace["time_s"])
     phase = np.asarray(trace["reference_phase_time_s"])
@@ -169,7 +174,7 @@ def _promotion_timeline(
             )
             item["decision_reference_phase_s"] = decision_phase
             item["remaining_reference_duration_s"] = max(
-                0.0, COLD_START_TEACHING_DURATION_S - decision_phase
+                0.0, reference_phase_duration_s - decision_phase
             )
             evidence = challenger["evidence_history"][-1]
             validation_blocks = evidence["validation_blocks"]
@@ -256,13 +261,14 @@ def _row(
     *,
     split_time_s: float | None,
     true_beta: np.ndarray,
+    reference_phase_duration_s: float,
 ) -> dict[str, Any]:
     time = np.asarray(trace["time_s"])
     phase = np.asarray(trace["reference_phase_time_s"])
     completion = _first_time(
-        time, phase >= COLD_START_TEACHING_DURATION_S - 1e-9
+        time, phase >= reference_phase_duration_s - 1e-9
     )
-    task_mask = phase <= COLD_START_TEACHING_DURATION_S + 1e-9
+    task_mask = phase <= reference_phase_duration_s + 1e-9
     if split_time_s is None:
         pre = task_mask
         post = np.zeros_like(task_mask)
@@ -291,9 +297,14 @@ def _row(
         "reference_completion_time_s": completion,
         "final_reference_phase_s": float(phase[-1]),
         "reference_progress_fraction": float(
-            min(1.0, phase[-1] / COLD_START_TEACHING_DURATION_S)
+            min(1.0, phase[-1] / reference_phase_duration_s)
         ),
-        "promotion_timeline": _promotion_timeline(summary, trace, true_beta),
+        "promotion_timeline": _promotion_timeline(
+            summary,
+            trace,
+            true_beta,
+            reference_phase_duration_s=reference_phase_duration_s,
+        ),
         "full_task": _window_metrics(trace, task_mask),
         "pre_first_trusted_adaptive_promotion": _window_metrics(trace, pre),
         "post_first_trusted_adaptive_promotion": _window_metrics(trace, post),
@@ -484,45 +495,20 @@ def _write_markdown_summary(path: Path, comparison: dict[str, Any]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--output-dir", type=Path, required=True)
-    args = parser.parse_args()
-    if args.output_dir.exists():
-        raise FileExistsError(f"refusing to overwrite {args.output_dir}")
-
-    cases = {item.name: item for item in sensor_realism_cases()}
-    case = cases[REGISTERED_SENSOR_CASE]
-    summaries: dict[str, dict[str, Any]] = {}
-    traces: dict[str, dict[str, np.ndarray]] = {}
-    for arm, apply_model in REGISTERED_ARMS.items():
-        execution = ReferenceExecutionLayer(
-            cold_start_teaching_reference, confidence_aware=True
-        )
-
-        def estimator_factory(
-            measurement: Any,
-            q_prior: np.ndarray,
-            apply: bool = apply_model,
-        ) -> Any:
-            return OnlineSingleChallengerTrustEstimator(
-                measurement,
-                q_prior,
-                measurement_case=case,
-                apply_qualified_model=apply,
-            )
-
-        summary, trace = run_sensor_realism_case(
-            case,
-            duration_s=REGISTERED_WALL_LIMIT_S,
-            estimator_architecture="integral_minimal",
-            result_case_name=arm,
-            reference_execution=execution,
-            estimator_factory=estimator_factory,
-        )
-        save_sensor_case(args.output_dir, summary, trace)
-        summaries[arm] = summary
-        traces[arm] = trace
+def build_paired_ab_comparison(
+    summaries: dict[str, dict[str, Any]],
+    traces: dict[str, dict[str, np.ndarray]],
+    *,
+    sensor_case_name: str,
+    measurement_seed: int,
+    true_human: HumanV2Parameters,
+    human_label: str,
+    wall_time_limit_s: float,
+    evidence_category: str,
+    reference_phase_duration_s: float,
+    trajectory_label: str,
+) -> dict[str, Any]:
+    """Build the paired result from completed arm summaries and traces."""
 
     adaptive_promotions = summaries["trusted_adaptive"]["hierarchical_trust"][
         "control_promotions"
@@ -532,7 +518,6 @@ def main() -> None:
         if adaptive_promotions
         else None
     )
-    true_human, _ = registered_cold_start_perturbed_human()
     true_beta = nominal_base_parameters(true_human)
     isolation = _verify_ab_isolation(
         summaries,
@@ -546,22 +531,23 @@ def main() -> None:
             traces[arm],
             split_time_s=split_time,
             true_beta=true_beta,
+            reference_phase_duration_s=reference_phase_duration_s,
         )
         for arm in REGISTERED_ARMS
     ]
     comparison = {
-        "evidence_category": "formal_user_run_unreviewed",
+        "evidence_category": evidence_category,
         "production_default": False,
         "single_scientific_variable": "apply_statistically_qualified_dynamics_model_to_control",
         "registered_configuration": {
             "arms": REGISTERED_ARMS,
-            "sensor_case": REGISTERED_SENSOR_CASE,
-            "measurement_seed": case.seed,
+            "sensor_case": sensor_case_name,
+            "measurement_seed": measurement_seed,
             "mpc_seed": 20260824,
-            "wall_time_limit_s": REGISTERED_WALL_LIMIT_S,
-            "reference_phase_duration_s": COLD_START_TEACHING_DURATION_S,
-            "human": "registered_cold_start_perturbed_human",
-            "trajectory": "stage4_population_prior_cold_start_high_flexion_23s",
+            "wall_time_limit_s": wall_time_limit_s,
+            "reference_phase_duration_s": reference_phase_duration_s,
+            "human": human_label,
+            "trajectory": trajectory_label,
             "estimator": "unchanged_11_base_integral",
             "trust": "four_layer_single_incumbent_challenger_anytime_alpha_spending",
             "allocator": "frozen_1_to_1_cuff_aware",
@@ -585,11 +571,116 @@ def main() -> None:
         "rows": rows,
     }
     comparison["trusted_adaptive_minus_prior_only"] = _comparison_deltas(rows)
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    (args.output_dir / "comparison_summary.json").write_text(
-        json.dumps(comparison, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    return comparison
+
+
+def run_paired_ab(
+    output_dir: Path,
+    *,
+    sensor_case_name: str = REGISTERED_SENSOR_CASE,
+    measurement_seed: int | None = None,
+    true_human: HumanV2Parameters | None = None,
+    true_metadata: dict[str, Any] | None = None,
+    human_label: str = "registered_cold_start_perturbed_human",
+    wall_time_limit_s: float = REGISTERED_WALL_LIMIT_S,
+    evidence_category: str = "formal_user_run_unreviewed",
+    write_comparison_outputs: bool = True,
+    reference_fn: Callable[[float], CuffPoseReference] = cold_start_teaching_reference,
+    reference_phase_duration_s: float = COLD_START_TEACHING_DURATION_S,
+    trajectory_label: str = "stage4_population_prior_cold_start_high_flexion_23s",
+    trajectory_waypoints: tuple[Any, ...] = COLD_START_TEACHING_WAYPOINTS,
+) -> tuple[
+    dict[str, Any],
+    dict[str, dict[str, Any]],
+    dict[str, dict[str, np.ndarray]],
+]:
+    """Execute the frozen paired A/B path for one supplied true Human plant."""
+
+    if reference_phase_duration_s <= 0.0:
+        raise ValueError("reference phase duration must be positive")
+    if wall_time_limit_s <= 0.0:
+        raise ValueError("wall-time limit must be positive")
+    if true_human is None:
+        true_human, registered_metadata = registered_cold_start_perturbed_human()
+        if true_metadata is None:
+            true_metadata = registered_metadata
+    if true_metadata is None:
+        true_metadata = {"case": human_label}
+    cases = {item.name: item for item in sensor_realism_cases()}
+    if sensor_case_name not in cases:
+        available = ", ".join(sorted(cases))
+        raise ValueError(
+            f"unknown existing sensor case {sensor_case_name!r}; available: {available}"
+        )
+    case = cases[sensor_case_name]
+    if measurement_seed is not None:
+        if isinstance(measurement_seed, bool) or not isinstance(measurement_seed, int):
+            raise TypeError("measurement seed must be an integer")
+        if measurement_seed < 0:
+            raise ValueError("measurement seed must be nonnegative")
+        case = replace(case, seed=measurement_seed)
+    summaries: dict[str, dict[str, Any]] = {}
+    traces: dict[str, dict[str, np.ndarray]] = {}
+    for arm, apply_model in REGISTERED_ARMS.items():
+        execution = ReferenceExecutionLayer(reference_fn, confidence_aware=True)
+
+        def estimator_factory(
+            measurement: Any,
+            q_prior: np.ndarray,
+            apply: bool = apply_model,
+        ) -> Any:
+            return OnlineSingleChallengerTrustEstimator(
+                measurement,
+                q_prior,
+                measurement_case=case,
+                apply_qualified_model=apply,
+            )
+
+        summary, trace = run_sensor_realism_case(
+            case,
+            duration_s=wall_time_limit_s,
+            estimator_architecture="integral_minimal",
+            result_case_name=arm,
+            true_human_override=true_human,
+            true_metadata_override=true_metadata,
+            reference_fn=reference_fn,
+            trajectory_label=trajectory_label,
+            trajectory_waypoints=trajectory_waypoints,
+            reference_execution=execution,
+            estimator_factory=estimator_factory,
+        )
+        save_sensor_case(output_dir, summary, trace)
+        summaries[arm] = summary
+        traces[arm] = trace
+
+    comparison = build_paired_ab_comparison(
+        summaries,
+        traces,
+        sensor_case_name=sensor_case_name,
+        measurement_seed=case.seed,
+        true_human=true_human,
+        human_label=human_label,
+        wall_time_limit_s=wall_time_limit_s,
+        evidence_category=evidence_category,
+        reference_phase_duration_s=reference_phase_duration_s,
+        trajectory_label=trajectory_label,
     )
-    _write_markdown_summary(args.output_dir / "comparison_summary.md", comparison)
+    if write_comparison_outputs:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / "comparison_summary.json").write_text(
+            json.dumps(comparison, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        _write_markdown_summary(output_dir / "comparison_summary.md", comparison)
+    return comparison, summaries, traces
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output-dir", type=Path, required=True)
+    args = parser.parse_args()
+    if args.output_dir.exists():
+        raise FileExistsError(f"refusing to overwrite {args.output_dir}")
+    run_paired_ab(args.output_dir)
 
 
 if __name__ == "__main__":

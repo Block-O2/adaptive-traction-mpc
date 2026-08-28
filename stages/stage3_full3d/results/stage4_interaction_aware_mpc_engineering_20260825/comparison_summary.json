@@ -1,0 +1,430 @@
+{
+  "constraints": {
+    "human_rom": "unchanged q_min <= q <= q_max",
+    "moment_limit_nm": null,
+    "new_constraints": [],
+    "post_hoc_filter": false,
+    "resultant_force_gate_n": 200.0
+  },
+  "current_mpc_peak_driver_audit": {
+    "allocated_resultant_force_n": 95.89603619623658,
+    "allocated_resultant_moment_nm": 21.02570764333801,
+    "allocated_wrench_world": [
+      -64.35739215090668,
+      0.00023589043185040008,
+      71.09272700936916,
+      1.7587235162096426e-05,
+      21.02570764326171,
+      -5.384368875380932e-05
+    ],
+    "allocation_explanation": "rigid-cuff minimum-force allocation maps generalized-action common mode primarily to translation and differential mode to free sagittal moment",
+    "desired_action_common_mode_nm": 31.36705872556859,
+    "desired_action_differential_mode_nm": 29.962874428929787,
+    "measured_equivalent_cylindrical_surface_effort_n": 148.41464195173157,
+    "measured_resultant_force_n": 113.1410841956462,
+    "measured_resultant_moment_nm": 22.664741884634775,
+    "mpc_desired_generalized_action_nm": [
+      43.36681162326347,
+      0.9929082381889633
+    ],
+    "peak_force_reference_phase_s": 9.65199999999664,
+    "peak_force_wall_time_s": 13.901999999997734,
+    "registered_human": {
+      "case": "cold_start_perturbed",
+      "height_scale": 1.06,
+      "mass_scale": 1.08,
+      "rest_offset_deg": [
+        -2.0,
+        3.0
+      ],
+      "shank_com_scale": 0.96,
+      "sleeve_center_scale": 0.94,
+      "stiffness_scale": 1.15,
+      "thigh_com_scale": 1.04
+    },
+    "true_dynamics_generalized_torque_breakdown_nm": {
+      "coriolis": [
+        -0.020945134296385157,
+        0.021346268577812584
+      ],
+      "gravity": [
+        36.6982809639016,
+        -8.170104857370381
+      ],
+      "inertia": [
+        -1.1959043518422838,
+        0.09136809462993015
+      ],
+      "passive_stiffness_damping_and_soft_limit": [
+        9.148868223761166,
+        9.424298149383262
+      ],
+      "sum": [
+        44.630299701524095,
+        1.3669076552206239
+      ]
+    }
+  },
+  "evidence_category": "stage4_interaction_aware_mpc_engineering_ab",
+  "formal_experiment": false,
+  "registered_interaction_objective": {
+    "equivalent_cylindrical_surface_effort": "cylindrical_surface_effort_weight * sum(||A_dagger*w_cuff||^2/F_normalization^2)",
+    "generalized_action": "action_weight * sum(||u/action_scale||^2)",
+    "generalized_action_slew": "action_rate_weight * sum(||delta_u/action_rate_scale||^2)",
+    "normalization": {
+      "action_rate_scale_nm": [
+        20.0,
+        10.0
+      ],
+      "action_scale_nm": [
+        60.0,
+        30.0
+      ],
+      "dq_error_scale_rad_s": [
+        0.13962634015954636,
+        0.13962634015954636
+      ],
+      "interaction_force_normalization_n": 200.0,
+      "moment_to_force_lever_arm_m": 0.045,
+      "q_error_scale_rad": [
+        0.03490658503988659,
+        0.03490658503988659
+      ]
+    },
+    "raw_shear_comfort_metric_used": false,
+    "resultant_cuff_force": "resultant_force_weight * sum(||F||^2/F_normalization^2)",
+    "surface_proxy_interpretation": "minimum-norm equivalent cylindrical patch-force effort; not pressure and not a comfort or tissue-load measurement",
+    "tracking": "sum(||(q-q_ref)/q_scale||^2 + ||(dq-dq_ref)/dq_scale||^2)",
+    "weights": {
+      "action_rate_weight": 0.005,
+      "action_weight": 0.002,
+      "cylindrical_surface_effort_weight": 0.05,
+      "resultant_force_weight": 0.1,
+      "wrench_slew_weight": 0.05
+    },
+    "wrench_slew": "wrench_slew_weight * sum((||delta_F_world||^2 + ||delta_M_world/r_cuff||^2)/F_normalization^2)"
+  },
+  "rows": [
+    {
+      "cuff_force": {
+        "peak": {
+          "reference_phase_s": 9.65199999999664,
+          "value": 113.1410841956462,
+          "wall_time_s": 13.901999999997734
+        },
+        "rms_n": 86.97531820320889
+      },
+      "cuff_moment": {
+        "peak": {
+          "reference_phase_s": 8.363999999997354,
+          "value": 24.54383728044259,
+          "wall_time_s": 12.613999999998448
+        },
+        "rms_nm": 18.98843471920874
+      },
+      "equivalent_cylindrical_surface_load": {
+        "definition": "||A_dagger*w_cuff||_2",
+        "interpretation": "minimum-norm equivalent cylindrical surface-load effort proxy; not real pressure",
+        "peak_effort_n": 160.05056923154936,
+        "peak_reference_phase_s": 8.53499999999726,
+        "peak_wall_time_s": 12.784999999998353,
+        "rms_effort_n": 123.97818120947146
+      },
+      "estimator": {
+        "dynamic": {
+          "accepted_updates": 2,
+          "reference_phase_s": 3.2400000000002493,
+          "rejected_updates": 50,
+          "wall_time_s": 6.480000000000499
+        },
+        "dynamic_base_torque_prediction_combined_rmse_nm": 3.647974869224303,
+        "geometry": {
+          "accepted_updates": 39,
+          "reference_phase_s": 3.2400000000002493,
+          "rejected_updates": 6,
+          "wall_time_s": 6.480000000000499
+        }
+      },
+      "final_reference_phase_s": 27.750000000015028,
+      "force_gate_n": 200.0,
+      "interaction_aware": false,
+      "mechanically_completed_requested_duration": true,
+      "mode": "current_adaptive_mpc",
+      "moment_limit_nm": null,
+      "mpc_objective": {
+        "equivalent_cylindrical_surface_effort": "cylindrical_surface_effort_weight * sum(||A_dagger*w_cuff||^2/F_normalization^2)",
+        "generalized_action": "action_weight * sum(||u/action_scale||^2)",
+        "generalized_action_slew": "action_rate_weight * sum(||delta_u/action_rate_scale||^2)",
+        "normalization": {
+          "action_rate_scale_nm": [
+            20.0,
+            10.0
+          ],
+          "action_scale_nm": [
+            60.0,
+            30.0
+          ],
+          "dq_error_scale_rad_s": [
+            0.13962634015954636,
+            0.13962634015954636
+          ],
+          "interaction_force_normalization_n": 200.0,
+          "moment_to_force_lever_arm_m": 0.045,
+          "q_error_scale_rad": [
+            0.03490658503988659,
+            0.03490658503988659
+          ]
+        },
+        "raw_shear_comfort_metric_used": false,
+        "resultant_cuff_force": "resultant_force_weight * sum(||F||^2/F_normalization^2)",
+        "surface_proxy_interpretation": "minimum-norm equivalent cylindrical patch-force effort; not pressure and not a comfort or tissue-load measurement",
+        "tracking": "sum(||(q-q_ref)/q_scale||^2 + ||(dq-dq_ref)/dq_scale||^2)",
+        "weights": {
+          "action_rate_weight": 0.005,
+          "action_weight": 0.002,
+          "cylindrical_surface_effort_weight": 0.0,
+          "resultant_force_weight": 0.0,
+          "wrench_slew_weight": 0.0
+        },
+        "wrench_slew": "wrench_slew_weight * sum((||delta_F_world||^2 + ||delta_M_world/r_cuff||^2)/F_normalization^2)"
+      },
+      "reference_completion_time_s": 27.25000000001032,
+      "robot": {
+        "peak_abs_commanded_joint_torque_nm": [
+          57.94569683032264,
+          147.02222935180555,
+          67.80306535594391,
+          18.045030666139027,
+          19.9740954785858,
+          0.018590505362180654
+        ],
+        "peak_abs_joint_velocity_deg_s": [
+          7.572267892740575,
+          11.932747168004852,
+          9.476775365964908,
+          11.715745744186846,
+          10.063100095077381,
+          7.879029317867346
+        ],
+        "peak_unclipped_torque_limit_fraction": 0.45202043570629274,
+        "rms_commanded_joint_torque_nm": [
+          29.602434561230233,
+          125.0645112182567,
+          40.710925299573134,
+          14.26692738439869,
+          15.49949415078992,
+          0.004781424068662221
+        ],
+        "rms_joint_velocity_deg_s": [
+          2.766745100943628,
+          4.5224873538804236,
+          3.277185962006818,
+          4.812260653040523,
+          2.9668244013164906,
+          2.8583128317184565
+        ],
+        "torque_saturation_control_samples": 0
+      },
+      "safety_events": {
+        "force_gate_events": 0,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "termination": "completed",
+      "tracking": {
+        "combined_max_abs_error_deg": 1.7391054572894156,
+        "combined_rmse_deg": 0.7988894528915255,
+        "per_joint_max_abs_error_deg": [
+          0.997725046086785,
+          1.7391054572894156
+        ],
+        "per_joint_rmse_deg": [
+          0.5822533502740331,
+          0.9682095599492772
+        ]
+      },
+      "wrench_slew_and_rate": {
+        "allocated_wrench": {
+          "metric": "sqrt(||delta_F_world||^2 + ||delta_M_world/r_cuff||^2)",
+          "peak_force_equivalent_rate_per_s": 21660.277595192776,
+          "peak_force_equivalent_step": 433.2055519038555,
+          "rms_force_equivalent_rate_per_s": 543.7920565181275,
+          "rms_force_equivalent_step": 10.87584113036255,
+          "update_count": 1600
+        },
+        "measured_force_rate_peak_n_s": 67183.88586664191,
+        "measured_force_rate_rms_n_s": 1697.4803104385958,
+        "measured_moment_rate_peak_nm_s": 15526.88708737798,
+        "measured_moment_rate_rms_nm_s": 184.38999141263307
+      }
+    },
+    {
+      "cuff_force": {
+        "peak": {
+          "reference_phase_s": 9.65199999999664,
+          "value": 113.1410841956462,
+          "wall_time_s": 13.901999999997734
+        },
+        "rms_n": 86.97531820320889
+      },
+      "cuff_moment": {
+        "peak": {
+          "reference_phase_s": 8.363999999997354,
+          "value": 24.54383728044259,
+          "wall_time_s": 12.613999999998448
+        },
+        "rms_nm": 18.98843471920874
+      },
+      "equivalent_cylindrical_surface_load": {
+        "definition": "||A_dagger*w_cuff||_2",
+        "interpretation": "minimum-norm equivalent cylindrical surface-load effort proxy; not real pressure",
+        "peak_effort_n": 160.05056923154936,
+        "peak_reference_phase_s": 8.53499999999726,
+        "peak_wall_time_s": 12.784999999998353,
+        "rms_effort_n": 123.97818120947146
+      },
+      "estimator": {
+        "dynamic": {
+          "accepted_updates": 2,
+          "reference_phase_s": 3.2400000000002493,
+          "rejected_updates": 50,
+          "wall_time_s": 6.480000000000499
+        },
+        "dynamic_base_torque_prediction_combined_rmse_nm": 3.647974869224303,
+        "geometry": {
+          "accepted_updates": 39,
+          "reference_phase_s": 3.2400000000002493,
+          "rejected_updates": 6,
+          "wall_time_s": 6.480000000000499
+        }
+      },
+      "final_reference_phase_s": 27.750000000015028,
+      "force_gate_n": 200.0,
+      "interaction_aware": true,
+      "mechanically_completed_requested_duration": true,
+      "mode": "interaction_aware_adaptive_mpc",
+      "moment_limit_nm": null,
+      "mpc_objective": {
+        "equivalent_cylindrical_surface_effort": "cylindrical_surface_effort_weight * sum(||A_dagger*w_cuff||^2/F_normalization^2)",
+        "generalized_action": "action_weight * sum(||u/action_scale||^2)",
+        "generalized_action_slew": "action_rate_weight * sum(||delta_u/action_rate_scale||^2)",
+        "normalization": {
+          "action_rate_scale_nm": [
+            20.0,
+            10.0
+          ],
+          "action_scale_nm": [
+            60.0,
+            30.0
+          ],
+          "dq_error_scale_rad_s": [
+            0.13962634015954636,
+            0.13962634015954636
+          ],
+          "interaction_force_normalization_n": 200.0,
+          "moment_to_force_lever_arm_m": 0.045,
+          "q_error_scale_rad": [
+            0.03490658503988659,
+            0.03490658503988659
+          ]
+        },
+        "raw_shear_comfort_metric_used": false,
+        "resultant_cuff_force": "resultant_force_weight * sum(||F||^2/F_normalization^2)",
+        "surface_proxy_interpretation": "minimum-norm equivalent cylindrical patch-force effort; not pressure and not a comfort or tissue-load measurement",
+        "tracking": "sum(||(q-q_ref)/q_scale||^2 + ||(dq-dq_ref)/dq_scale||^2)",
+        "weights": {
+          "action_rate_weight": 0.005,
+          "action_weight": 0.002,
+          "cylindrical_surface_effort_weight": 0.05,
+          "resultant_force_weight": 0.1,
+          "wrench_slew_weight": 0.05
+        },
+        "wrench_slew": "wrench_slew_weight * sum((||delta_F_world||^2 + ||delta_M_world/r_cuff||^2)/F_normalization^2)"
+      },
+      "reference_completion_time_s": 27.25000000001032,
+      "robot": {
+        "peak_abs_commanded_joint_torque_nm": [
+          57.94569683032264,
+          147.02222935180555,
+          67.80306535594391,
+          18.045030666139027,
+          19.9740954785858,
+          0.018590505362180654
+        ],
+        "peak_abs_joint_velocity_deg_s": [
+          7.572267892740575,
+          11.932747168004852,
+          9.476775365964908,
+          11.715745744186846,
+          10.063100095077381,
+          7.879029317867346
+        ],
+        "peak_unclipped_torque_limit_fraction": 0.45202043570629274,
+        "rms_commanded_joint_torque_nm": [
+          29.602434561230233,
+          125.0645112182567,
+          40.710925299573134,
+          14.26692738439869,
+          15.49949415078992,
+          0.004781424068662221
+        ],
+        "rms_joint_velocity_deg_s": [
+          2.766745100943628,
+          4.5224873538804236,
+          3.277185962006818,
+          4.812260653040523,
+          2.9668244013164906,
+          2.8583128317184565
+        ],
+        "torque_saturation_control_samples": 0
+      },
+      "safety_events": {
+        "force_gate_events": 0,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "termination": "completed",
+      "tracking": {
+        "combined_max_abs_error_deg": 1.7391054572894156,
+        "combined_rmse_deg": 0.7988894528915255,
+        "per_joint_max_abs_error_deg": [
+          0.997725046086785,
+          1.7391054572894156
+        ],
+        "per_joint_rmse_deg": [
+          0.5822533502740331,
+          0.9682095599492772
+        ]
+      },
+      "wrench_slew_and_rate": {
+        "allocated_wrench": {
+          "metric": "sqrt(||delta_F_world||^2 + ||delta_M_world/r_cuff||^2)",
+          "peak_force_equivalent_rate_per_s": 21660.277595192776,
+          "peak_force_equivalent_step": 433.2055519038555,
+          "rms_force_equivalent_rate_per_s": 543.7920565181275,
+          "rms_force_equivalent_step": 10.87584113036255,
+          "update_count": 1600
+        },
+        "measured_force_rate_peak_n_s": 67183.88586664191,
+        "measured_force_rate_rms_n_s": 1697.4803104385958,
+        "measured_moment_rate_peak_nm_s": 15526.88708737798,
+        "measured_moment_rate_rms_nm_s": 184.38999141263307
+      }
+    }
+  ],
+  "shared": {
+    "confidence_pacing": "split_confidence_execution_unchanged",
+    "estimator": "validated_integral_minimal_unchanged",
+    "measurement_case": "ideal_200hz",
+    "plant": "validated_rigid_cuff_unchanged",
+    "rollout_duration_s": 32.0,
+    "safety_limits_changed": false,
+    "trajectory": "stage4_registered_continuous_high_flexion_23s",
+    "true_human": "registered_cold_start_perturbed"
+  },
+  "single_variable": "mpc_interaction_objective_terms"
+}
