@@ -1,0 +1,113 @@
+{
+  "authoritative_stage4_evidence": false,
+  "code_commit": "cc04765761d08ffaf1914f0236f0201d9c7e1475",
+  "common_allocator": {
+    "constraint": "B(q)*[Fx,Fz,My] = tau_h",
+    "cuff_length_m": 0.08,
+    "cylindrical_surface_effort_weight": 1.0,
+    "objective": "lambda_F*||[Fx,Fz]||^2 + lambda_A*||A_dagger*w_cuff||^2",
+    "resultant_force_weight": 1.0,
+    "surface_proxy_interpretation": "minimum-norm equivalent cylindrical patch-force effort; not pressure or comfort",
+    "wrench_continuity_weight": 0.0
+  },
+  "common_low_level_execution": "existing_measured_nominal_cartesian_control",
+  "control_beta_constant_population_prior": false,
+  "controller": "trusted_adaptive_mpc",
+  "controller_fingerprint_payload": {
+    "allocator": {
+      "constraint": "B(q)*[Fx,Fz,My] = tau_h",
+      "cuff_length_m": 0.08,
+      "cylindrical_surface_effort_weight": 1.0,
+      "objective": "lambda_F*||[Fx,Fz]||^2 + lambda_A*||A_dagger*w_cuff||^2",
+      "resultant_force_weight": 1.0,
+      "surface_proxy_interpretation": "minimum-norm equivalent cylindrical patch-force effort; not pressure or comfort",
+      "wrench_continuity_weight": 0.0
+    },
+    "apply_qualified_model_to_control": true,
+    "controller_id": "trusted_adaptive_mpc",
+    "experiment_schema": "stage4_report_validation_matrix_v2_coupled_pd",
+    "external_reference_clock_controller_independent": true,
+    "external_reference_clock_sha256": "2ef8e9b9b34b20bebed9c02f562e39240cb912424c4ebc24edaa48b81ee981b2",
+    "gain_lock_sha256": null,
+    "human_action_boundary": "human_generalized_cuff_action_nm",
+    "low_level_execution": "existing_measured_nominal_cartesian_control",
+    "mpc_config": {
+      "action_rate_scale_nm": [
+        20.0,
+        10.0
+      ],
+      "action_rate_weight": 0.005,
+      "action_scale_nm": [
+        60.0,
+        30.0
+      ],
+      "action_weight": 0.002,
+      "candidate_count": 32,
+      "cem_iterations": 2,
+      "cylindrical_cuff_length_m": 0.08,
+      "cylindrical_surface_effort_weight": 0.0,
+      "dq_error_scale_rad_s": [
+        0.13962634015954636,
+        0.13962634015954636
+      ],
+      "elite_count": 6,
+      "exploration_std_floor_nm": [
+        1.0,
+        0.5
+      ],
+      "exploration_std_nm": [
+        10.0,
+        5.0
+      ],
+      "horizon_steps": 15,
+      "interaction_force_normalization_n": 200.0,
+      "prediction_dt_s": 0.02,
+      "q_error_scale_rad": [
+        0.03490658503988659,
+        0.03490658503988659
+      ],
+      "random_seed": 20260824,
+      "resultant_force_weight": 0.0,
+      "wrench_slew_weight": 0.0
+    },
+    "mpc_implementation": "batched",
+    "report_validation_config_sha256": "46c6e9552a205d73bc8567a6ebf7af8e1887ef53b16c7e81703b0568cd3d635f",
+    "safety_limits_modified": false
+  },
+  "controller_fingerprint_sha256": "21a29ff738f3c8f36462318ed6cec2ed258d3eea1092016cf3c6ea61acbd6c2b",
+  "evidence_category": "report_generalization_statistical",
+  "experiment_gain_lock_sha256": "b83a8ca4c84484fad9f3687263cae6c5c038a25c2512b8e1e182bffe6b0ceea1",
+  "external_reference_clock_controller_independent": true,
+  "formal_execution": true,
+  "fresh_plant_estimator_controller_clock_per_arm": true,
+  "frozen_stage4_base_commit": "cc04765761d08ffaf1914f0236f0201d9c7e1475",
+  "frozen_stage4_base_tag": "stage4-robustness-final-v1",
+  "gain_lock_sha256": null,
+  "generalization_arm_fingerprint_payload": {
+    "controller": "trusted_adaptive_mpc",
+    "controller_fingerprint_sha256": "21a29ff738f3c8f36462318ed6cec2ed258d3eea1092016cf3c6ea61acbd6c2b",
+    "duration_s": 32.0,
+    "evidence_category": "report_generalization_statistical",
+    "external_reference_clock_sha256": "2ef8e9b9b34b20bebed9c02f562e39240cb912424c4ebc24edaa48b81ee981b2",
+    "formal_execution": true,
+    "gain_lock_sha256": "b83a8ca4c84484fad9f3687263cae6c5c038a25c2512b8e1e182bffe6b0ceea1",
+    "generalization_config_sha256": "f424c435572738b62e4f04ca8a708497ebdd7a240bd04d159050dd069eb0f4ae",
+    "measurement_seed": 54113,
+    "metric_config_sha256": "64c4421090b3aa1125b841ad6109f7b3160e5df881668d82eb6bcb46b75827ac",
+    "patient": "mass_mild_plus_05pct",
+    "trajectory": "registered_high_flexion_23s"
+  },
+  "generalization_arm_fingerprint_sha256": "fbe0c55e48a12d0f2d81285e74e4bf1a54c992905c448e65a0f5bb7f99665b34",
+  "generalization_config_sha256": "f424c435572738b62e4f04ca8a708497ebdd7a240bd04d159050dd069eb0f4ae",
+  "generalization_metric_config_sha256": "64c4421090b3aa1125b841ad6109f7b3160e5df881668d82eb6bcb46b75827ac",
+  "measurement_seed": 54113,
+  "patient": "mass_mild_plus_05pct",
+  "patient_definition_source": "existing_stage4_definition_read_only",
+  "reference_clock_sha256": "2ef8e9b9b34b20bebed9c02f562e39240cb912424c4ebc24edaa48b81ee981b2",
+  "report_validation_config_sha256": "46c6e9552a205d73bc8567a6ebf7af8e1887ef53b16c7e81703b0568cd3d635f",
+  "schema_version": "stage4_report_validation_run_manifest_v1",
+  "source_trace_sha256": null,
+  "structural_smoke": false,
+  "trajectory": "registered_high_flexion_23s",
+  "working_tree_dirty": true
+}

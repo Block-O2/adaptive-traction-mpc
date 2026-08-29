@@ -155,6 +155,9 @@ The authoritative technical state is maintained in
 canonical inventory and hashes in
 [`docs/research/STAGE4_EVIDENCE_MAP.md`](docs/research/STAGE4_EVIDENCE_MAP.md).
 Stage 4 now includes reviewed patient, sensor, trajectory, and crossed-
-replication evidence. The next phase is a separately specified professor-facing
-baseline/visualization study and hardware preparation; optional out-of-family
-model-inadequacy work remains a separate future question.
+replication evidence. The follow-on professor-facing baseline/generalization
+study and visualizations are complete and indexed in
+[`docs/research/STAGE4_REPORT_VALIDATION_EVIDENCE_MAP.md`](docs/research/STAGE4_REPORT_VALIDATION_EVIDENCE_MAP.md).
+The project remains simulation-qualified; the next engineering step is
+hardware-preparation and robot-only commissioning planning. Optional
+out-of-family model-inadequacy work remains a separate future question.

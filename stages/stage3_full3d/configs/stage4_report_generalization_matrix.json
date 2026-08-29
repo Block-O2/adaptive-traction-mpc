@@ -1,0 +1,341 @@
+{
+  "schema_version": "stage4_report_generalization_matrix_v1_demo_reuse_amendment",
+  "design_status": "approved_prospective_demo_reuse_amendment_no_formal_execution",
+  "preregistered_before_any_new_generalization_result": true,
+  "prospective_amendment": {
+    "kind": "demo_rendering_read_only_trace_reuse",
+    "original_matrix_sha256": "66cf1757c083cfdc9fa1868e18cbc48b9fe9eb51c6971e8cea4b0adc10155e90",
+    "original_metric_config_sha256": "2795b23731832704f3e5414104d42afc4dfc5b4b8f4172b983c309dceb95606b",
+    "defined_before_any_formal_generalization_rollout": true,
+    "scientific_36_arm_matrix_changed": false,
+    "policy": "demo_media_may_read_exact_match_statistical_or_trajectory_demo_traces_without_relabelling_source_evidence",
+    "visualization_evidence_category": "professor_report_visualization",
+    "source_trace_path_and_sha256_required": true
+  },
+  "frozen_start": {
+    "tag": "stage4-robustness-final-v1",
+    "commit": "cc04765761d08ffaf1914f0236f0201d9c7e1475",
+    "branch": "codex/report-validation",
+    "authoritative_stage4_mutation_allowed": false,
+    "controller_retuning_allowed": false
+  },
+  "source_artifacts": {
+    "report_validation_v2_config": {
+      "path": "configs/stage4_report_validation_matrix_v2_coupled_pd.json",
+      "sha256": "46c6e9552a205d73bc8567a6ebf7af8e1887ef53b16c7e81703b0568cd3d635f"
+    },
+    "frozen_v2_gain_lock": {
+      "path": "results/stage4_report_validation_gain_tuning_formal_v2_coupled_pd/frozen_pd_gains.json",
+      "sha256": "b83a8ca4c84484fad9f3687263cae6c5c038a25c2512b8e1e182bffe6b0ceea1",
+      "payload_sha256": "b21ddb1b53c1c6e535d22e9158834b4d57b3e7c32c7e52f46edc22231e793458",
+      "selected_candidate_id": "kp_1.5__kd_0.5",
+      "retuning_allowed": false
+    },
+    "patient_config": {
+      "path": "configs/stage4_patient_mismatch_cases.json",
+      "sha256": "a51d3cb086ebeb21ea01b59c7cb6d7cb8a422fa3e9bab0028d84002cf2ed129b"
+    },
+    "trajectory_config": {
+      "path": "configs/stage4_trajectory_excitation_suite.json",
+      "sha256": "3024919e822297af06f01afa0a775f1453fe08abc0ed12cc313339811706ac14"
+    },
+    "external_reference_clock": {
+      "path": "results/stage4_patient_mismatch_robustness_formal/registered_formal_perturbed_anchor/prior_only_trace.npz",
+      "sha256": "2ef8e9b9b34b20bebed9c02f562e39240cb912424c4ebc24edaa48b81ee981b2",
+      "use": "read_only_exogenous_reference_phase_only"
+    },
+    "metric_schema": {
+      "path": "configs/stage4_report_generalization_metrics.json",
+      "sha256": "64c4421090b3aa1125b841ad6109f7b3160e5df881668d82eb6bcb46b75827ac"
+    }
+  },
+  "evidence_categories": {
+    "stage4_authoritative_historical": {
+      "mutable": false,
+      "new_rollouts": 0
+    },
+    "report_validation_baseline": {
+      "path": "results/stage4_report_validation_baseline_formal",
+      "mutable": false,
+      "use": "historical_lower_level_reference_and_reuse_audit_only"
+    },
+    "report_generalization_statistical": {
+      "planned_output_root": "results/stage4_report_generalization_statistical_formal_v1",
+      "formal_user_execution_required": true,
+      "planned_rollouts": 36
+    },
+    "report_patient_demo_only": {
+      "planned_output_root": null,
+      "formal_statistical_evidence": false,
+      "planned_rollouts": 0,
+      "rendered_from_exact_match_statistical_traces": 12
+    },
+    "report_trajectory_demo_only": {
+      "planned_output_root": "results/stage4_report_generalization_trajectory_demo_v1",
+      "formal_statistical_evidence": false,
+      "planned_rollouts": 6,
+      "rendered_high_flexion_from_exact_match_statistical_traces": 3
+    },
+    "professor_report_visualization": {
+      "planned_output_root": "results/stage4_professor_report_visualization_v1",
+      "dynamical_rollouts": 0,
+      "source_evidence_relabelled": false,
+      "source_trace_path_and_sha256_required": true
+    }
+  },
+  "shared_contract": {
+    "trajectory_id_for_main_study": "registered_high_flexion_23s",
+    "trajectory_duration_s": 23.0,
+    "wall_time_limit_s": 32.0,
+    "simulation_dt_s": 0.001,
+    "low_level_control_dt_s": 0.005,
+    "high_level_period_s": 0.02,
+    "sensor_case": "noise_bias_drift_200hz",
+    "measurement_seeds": [44104, 54113, 64122],
+    "measurement_seed_selection_rule": "first_three_preregistered_seeds_from_existing_stage4_sequence_not_selected_from_report_validation_outcomes",
+    "mpc_seed": 20260824,
+    "reference_clock": "same_frozen_exogenous_phase_replay_semantics_as_report_validation_v2",
+    "measurement_frontend": "existing_causal_robot_and_cuff_measurement_boundary",
+    "state_and_geometry_estimator": "existing_accumulated_cuff_geometry_estimator",
+    "dynamic_identifier_and_trust": "existing_integral_11_base_single_challenger_lifecycle",
+    "plant": "existing_mujoco_ur10e_human_v2_rigid_cuff",
+    "cuff_mechanics": "existing_rigid_cuff_and_virtual_work_reconstruction",
+    "allocator": "registered_1_to_1_cuff_aware_memoryless_allocator",
+    "low_level_execution": "existing_measured_nominal_cartesian_control",
+    "actuator_limits": "unchanged_stage4_robot_actuator_limits",
+    "safety_gates": "unchanged_stage4_force_rom_contact_and_termination_semantics",
+    "initial_human_q_deg": [5.0, 10.0],
+    "initial_robot_state": "deterministic_patient_specific_ik_reset_shared_across_controllers_and_seeds_for_each_patient",
+    "controller_specific_trajectory_tuning": false,
+    "patient_specific_controller_tuning": false,
+    "dedicated_identification_motion": false
+  },
+  "controllers": [
+    {
+      "controller_id": "pd_nominal_inverse_dynamics_ff",
+      "label": "PD+FF",
+      "gain_lock_required": true,
+      "control_beta": "population_prior_constant",
+      "retuning": false
+    },
+    {
+      "controller_id": "fixed_mpc_prior_only",
+      "label": "Fixed MPC",
+      "gain_lock_required_for_experiment_provenance_only": true,
+      "control_beta": "population_prior_constant",
+      "retuning": false
+    },
+    {
+      "controller_id": "trusted_adaptive_mpc",
+      "label": "Trusted Adaptive MPC",
+      "gain_lock_required_for_experiment_provenance_only": true,
+      "control_beta": "population_prior_until_trusted_promotion_then_retained_incumbent",
+      "retuning": false
+    }
+  ],
+  "excluded_from_main_study": [
+    {
+      "controller_id": "pd_feedback",
+      "reason": "retained_only_in_completed_report_validation_baseline_as_lower_level_reference"
+    }
+  ],
+  "patients": [
+    {
+      "patient_id": "nominal_reference",
+      "role": "P1_nominal",
+      "source": "existing_validated_config",
+      "mechanism": "none"
+    },
+    {
+      "patient_id": "mass_mild_plus_05pct",
+      "role": "P2_isolated_mass",
+      "source": "existing_validated_config",
+      "mechanism": "body_mass_scale_1.05_only"
+    },
+    {
+      "patient_id": "height_moderate_plus_03pct_report_only",
+      "role": "P3_isolated_geometry",
+      "source": "report_validation_only_inline_definition",
+      "stage4_canonical_evidence": false,
+      "mechanism": "height_and_both_segment_lengths_scale_1.03",
+      "definition": {
+        "height_scale": 1.03,
+        "body_mass_scale": 1.0,
+        "thigh_com_scale": 1.0,
+        "shank_com_scale": 1.0,
+        "passive_stiffness_scale": [1.0, 1.0],
+        "passive_damping_scale": [1.0, 1.0],
+        "rest_offset_deg": [0.0, 0.0],
+        "sleeve_center_scale": 1.0
+      }
+    },
+    {
+      "patient_id": "registered_moderate_anchor",
+      "role": "P4_mixed_mismatch",
+      "source": "existing_validated_config",
+      "mechanism": "mass_com_stiffness_rest_and_cuff_location",
+      "selection_reason": "mixed_mismatch_without_overall_height_change_is_more_complementary_to_the_isolated_geometry_P3_than_registered_formal_perturbed_anchor"
+    }
+  ],
+  "main_statistical_matrix": {
+    "crossing": "4_patients_x_3_controllers_x_3_measurement_seeds",
+    "trajectory_id": "registered_high_flexion_23s",
+    "logical_arm_count": 36,
+    "pure_pd_included": false,
+    "arms": [
+      {"arm_id":"G01","patient_id":"nominal_reference","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":44104},
+      {"arm_id":"G02","patient_id":"nominal_reference","controller_id":"fixed_mpc_prior_only","measurement_seed":44104},
+      {"arm_id":"G03","patient_id":"nominal_reference","controller_id":"trusted_adaptive_mpc","measurement_seed":44104},
+      {"arm_id":"G04","patient_id":"nominal_reference","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":54113},
+      {"arm_id":"G05","patient_id":"nominal_reference","controller_id":"fixed_mpc_prior_only","measurement_seed":54113},
+      {"arm_id":"G06","patient_id":"nominal_reference","controller_id":"trusted_adaptive_mpc","measurement_seed":54113},
+      {"arm_id":"G07","patient_id":"nominal_reference","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":64122},
+      {"arm_id":"G08","patient_id":"nominal_reference","controller_id":"fixed_mpc_prior_only","measurement_seed":64122},
+      {"arm_id":"G09","patient_id":"nominal_reference","controller_id":"trusted_adaptive_mpc","measurement_seed":64122},
+      {"arm_id":"G10","patient_id":"mass_mild_plus_05pct","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":44104},
+      {"arm_id":"G11","patient_id":"mass_mild_plus_05pct","controller_id":"fixed_mpc_prior_only","measurement_seed":44104},
+      {"arm_id":"G12","patient_id":"mass_mild_plus_05pct","controller_id":"trusted_adaptive_mpc","measurement_seed":44104},
+      {"arm_id":"G13","patient_id":"mass_mild_plus_05pct","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":54113},
+      {"arm_id":"G14","patient_id":"mass_mild_plus_05pct","controller_id":"fixed_mpc_prior_only","measurement_seed":54113},
+      {"arm_id":"G15","patient_id":"mass_mild_plus_05pct","controller_id":"trusted_adaptive_mpc","measurement_seed":54113},
+      {"arm_id":"G16","patient_id":"mass_mild_plus_05pct","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":64122},
+      {"arm_id":"G17","patient_id":"mass_mild_plus_05pct","controller_id":"fixed_mpc_prior_only","measurement_seed":64122},
+      {"arm_id":"G18","patient_id":"mass_mild_plus_05pct","controller_id":"trusted_adaptive_mpc","measurement_seed":64122},
+      {"arm_id":"G19","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":44104},
+      {"arm_id":"G20","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"fixed_mpc_prior_only","measurement_seed":44104},
+      {"arm_id":"G21","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"trusted_adaptive_mpc","measurement_seed":44104},
+      {"arm_id":"G22","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":54113},
+      {"arm_id":"G23","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"fixed_mpc_prior_only","measurement_seed":54113},
+      {"arm_id":"G24","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"trusted_adaptive_mpc","measurement_seed":54113},
+      {"arm_id":"G25","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":64122},
+      {"arm_id":"G26","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"fixed_mpc_prior_only","measurement_seed":64122},
+      {"arm_id":"G27","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"trusted_adaptive_mpc","measurement_seed":64122},
+      {"arm_id":"G28","patient_id":"registered_moderate_anchor","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":44104},
+      {"arm_id":"G29","patient_id":"registered_moderate_anchor","controller_id":"fixed_mpc_prior_only","measurement_seed":44104},
+      {"arm_id":"G30","patient_id":"registered_moderate_anchor","controller_id":"trusted_adaptive_mpc","measurement_seed":44104},
+      {"arm_id":"G31","patient_id":"registered_moderate_anchor","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":54113},
+      {"arm_id":"G32","patient_id":"registered_moderate_anchor","controller_id":"fixed_mpc_prior_only","measurement_seed":54113},
+      {"arm_id":"G33","patient_id":"registered_moderate_anchor","controller_id":"trusted_adaptive_mpc","measurement_seed":54113},
+      {"arm_id":"G34","patient_id":"registered_moderate_anchor","controller_id":"pd_nominal_inverse_dynamics_ff","measurement_seed":64122},
+      {"arm_id":"G35","patient_id":"registered_moderate_anchor","controller_id":"fixed_mpc_prior_only","measurement_seed":64122},
+      {"arm_id":"G36","patient_id":"registered_moderate_anchor","controller_id":"trusted_adaptive_mpc","measurement_seed":64122}
+    ]
+  },
+  "reuse_audit": {
+    "required_exact_match_fields": [
+      "controller_definition",
+      "patient",
+      "trajectory",
+      "measurement_seed",
+      "external_reference_clock",
+      "gain_lock",
+      "controller_fingerprint",
+      "config_hashes",
+      "runtime",
+      "evidence_semantics"
+    ],
+    "baseline_candidate_matches_before_evidence_semantics_check": 9,
+    "baseline_candidate_description": "seed_44104_for_nominal_mass_plus_05_and_registered_moderate_across_all_three_controllers",
+    "reusable_rollout_count": 0,
+    "new_statistical_rollout_count": 36,
+    "rejection_reason": "existing_arms_are_report_validation_baseline_evidence_but_target_arms_are_distinct_report_generalization_statistical_evidence_so_the_required_evidence_semantics_do_not_match",
+    "source_artifacts_remain_read_only": true,
+    "rerun_deterministic_matches_only_because_required_evidence_semantics_are_distinct": true
+  },
+  "patient_demo_matrix": {
+    "evidence_category": "professor_report_visualization",
+    "measurement_seed": 44104,
+    "trajectory_id": "registered_high_flexion_23s",
+    "logical_arm_count": 12,
+    "new_rollout_count": 0,
+    "reused_from_statistical_matrix": 12,
+    "reuse_policy": "read_exact_match_seed_44104_statistical_traces_without_relabelling_source_evidence",
+    "media_provenance_requires_source_trace_path_and_sha256": true,
+    "arms": [
+      {"arm_id":"D01","patient_id":"nominal_reference","controller_id":"pd_nominal_inverse_dynamics_ff"},
+      {"arm_id":"D02","patient_id":"nominal_reference","controller_id":"fixed_mpc_prior_only"},
+      {"arm_id":"D03","patient_id":"nominal_reference","controller_id":"trusted_adaptive_mpc"},
+      {"arm_id":"D04","patient_id":"mass_mild_plus_05pct","controller_id":"pd_nominal_inverse_dynamics_ff"},
+      {"arm_id":"D05","patient_id":"mass_mild_plus_05pct","controller_id":"fixed_mpc_prior_only"},
+      {"arm_id":"D06","patient_id":"mass_mild_plus_05pct","controller_id":"trusted_adaptive_mpc"},
+      {"arm_id":"D07","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"pd_nominal_inverse_dynamics_ff"},
+      {"arm_id":"D08","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"fixed_mpc_prior_only"},
+      {"arm_id":"D09","patient_id":"height_moderate_plus_03pct_report_only","controller_id":"trusted_adaptive_mpc"},
+      {"arm_id":"D10","patient_id":"registered_moderate_anchor","controller_id":"pd_nominal_inverse_dynamics_ff"},
+      {"arm_id":"D11","patient_id":"registered_moderate_anchor","controller_id":"fixed_mpc_prior_only"},
+      {"arm_id":"D12","patient_id":"registered_moderate_anchor","controller_id":"trusted_adaptive_mpc"}
+    ]
+  },
+  "trajectory_demo_matrix": {
+    "evidence_category": "report_trajectory_demo_only",
+    "measurement_seed": 44104,
+    "controller_id": "trusted_adaptive_mpc",
+    "logical_arm_count": 9,
+    "new_rollout_count": 6,
+    "reused_from_statistical_matrix": 3,
+    "reused_trajectory_id": "registered_high_flexion_23s",
+    "reuse_policy": "read_exact_match_seed_44104_statistical_adaptive_traces_without_relabelling_source_evidence",
+    "media_provenance_requires_source_trace_path_and_sha256": true,
+    "arms": [
+      {"arm_id":"T01","patient_id":"nominal_reference","trajectory_id":"registered_high_flexion_23s"},
+      {"arm_id":"T02","patient_id":"nominal_reference","trajectory_id":"moderate_rom_23s"},
+      {"arm_id":"T03","patient_id":"nominal_reference","trajectory_id":"hip_dominant_low_knee_23s"},
+      {"arm_id":"T04","patient_id":"height_moderate_plus_03pct_report_only","trajectory_id":"registered_high_flexion_23s"},
+      {"arm_id":"T05","patient_id":"height_moderate_plus_03pct_report_only","trajectory_id":"moderate_rom_23s"},
+      {"arm_id":"T06","patient_id":"height_moderate_plus_03pct_report_only","trajectory_id":"hip_dominant_low_knee_23s"},
+      {"arm_id":"T07","patient_id":"registered_moderate_anchor","trajectory_id":"registered_high_flexion_23s"},
+      {"arm_id":"T08","patient_id":"registered_moderate_anchor","trajectory_id":"moderate_rom_23s"},
+      {"arm_id":"T09","patient_id":"registered_moderate_anchor","trajectory_id":"hip_dominant_low_knee_23s"}
+    ],
+    "new_execution_arms": [
+      {"arm_id":"T02","patient_id":"nominal_reference","trajectory_id":"moderate_rom_23s"},
+      {"arm_id":"T03","patient_id":"nominal_reference","trajectory_id":"hip_dominant_low_knee_23s"},
+      {"arm_id":"T05","patient_id":"height_moderate_plus_03pct_report_only","trajectory_id":"moderate_rom_23s"},
+      {"arm_id":"T06","patient_id":"height_moderate_plus_03pct_report_only","trajectory_id":"hip_dominant_low_knee_23s"},
+      {"arm_id":"T08","patient_id":"registered_moderate_anchor","trajectory_id":"moderate_rom_23s"},
+      {"arm_id":"T09","patient_id":"registered_moderate_anchor","trajectory_id":"hip_dominant_low_knee_23s"}
+    ]
+  },
+  "statistical_plan": {
+    "cell_statistics": ["mean", "sample_standard_deviation_ddof_1", "minimum", "maximum"],
+    "sample_size_per_patient_controller_cell": 3,
+    "significance_tests": false,
+    "population_level_inference": false,
+    "matched_seed_contrasts": [
+      "pd_nominal_inverse_dynamics_ff_vs_fixed_mpc_prior_only",
+      "fixed_mpc_prior_only_vs_trusted_adaptive_mpc"
+    ],
+    "primary_question": "which_controller_maintains_the_most_stable_descriptive_performance_envelope_as_patient_mismatch_increases",
+    "adaptive_required_to_win_every_absolute_metric": false,
+    "composite_generalization_score": false
+  },
+  "cost_estimate": {
+    "statistical_new_rollouts": 36,
+    "patient_demo_new_rollouts": 0,
+    "trajectory_demo_new_rollouts": 6,
+    "total_new_rollouts": 42,
+    "simulated_seconds_per_rollout": 32.0,
+    "statistical_simulated_seconds": 1152.0,
+    "all_planned_simulated_seconds": 1344.0,
+    "estimated_sequential_wall_minutes_statistical": 17.2,
+    "estimated_sequential_wall_minutes_all_rollouts": 20.6,
+    "wall_time_planning_range_minutes_all_rollouts": [18, 30],
+    "observed_baseline_trace_storage_mib_per_arm": 8.45,
+    "estimated_statistical_storage_mib": 305,
+    "estimated_all_trace_storage_mib": 355,
+    "estimated_media_storage_mib_range": [200, 500],
+    "estimated_total_incremental_storage_mib_range": [555, 855]
+  },
+  "execution_authorization": {
+    "formal_statistical_runs_now": false,
+    "demo_simulations_now": false,
+    "media_rendering_now": false,
+    "infrastructure_implementation_authorized": true,
+    "required_before_execution": [
+      "user_approval_of_this_preregistration",
+      "report_only_geometry_patient_resolution_implemented_and_schema_validated",
+      "new_output_roots_confirmed_absent",
+      "new_generalization_config_and_controller_fingerprints_frozen"
+    ]
+  }
+}

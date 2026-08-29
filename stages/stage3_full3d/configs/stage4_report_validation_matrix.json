@@ -1,0 +1,351 @@
+{
+  "schema_version": "stage4_report_validation_matrix_v1",
+  "design_status": "preregistered_design_only_no_formal_execution",
+  "frozen_start": {
+    "tag": "stage4-robustness-final-v1",
+    "commit": "cc04765761d08ffaf1914f0236f0201d9c7e1475",
+    "authoritative_stage4_mutation_allowed": false
+  },
+  "source_artifacts": {
+    "patient_config": {
+      "path": "configs/stage4_patient_mismatch_cases.json",
+      "sha256": "a51d3cb086ebeb21ea01b59c7cb6d7cb8a422fa3e9bab0028d84002cf2ed129b"
+    },
+    "trajectory_config": {
+      "path": "configs/stage4_trajectory_excitation_suite.json",
+      "sha256": "3024919e822297af06f01afa0a775f1453fe08abc0ed12cc313339811706ac14"
+    },
+    "shared_reference_phase_trace": {
+      "path": "results/stage4_patient_mismatch_robustness_formal/registered_formal_perturbed_anchor/prior_only_trace.npz",
+      "sha256": "2ef8e9b9b34b20bebed9c02f562e39240cb912424c4ebc24edaa48b81ee981b2",
+      "time_key": "time_s",
+      "phase_key": "reference_phase_time_s",
+      "use": "read_only_exogenous_reference_clock_only_not_performance_evidence"
+    }
+  },
+  "evidence_categories": {
+    "existing_authoritative_stage4": {
+      "mutable": false,
+      "new_rollouts": 0,
+      "use": "context_and_provenance_only"
+    },
+    "nominal_gain_selection": {
+      "mutable": true,
+      "new_rollouts": 9,
+      "use": "gain_selection_only_excluded_from_primary_controller_comparison"
+    },
+    "report_validation_scientific_baseline": {
+      "mutable": true,
+      "new_rollouts": 16,
+      "use": "primary_four_controller_comparison"
+    },
+    "visualization_demo_only": {
+      "mutable": true,
+      "new_rollouts": 8,
+      "benchmark_rollouts_reused": 4,
+      "use": "communication_only_not_stage4_canonical_evidence"
+    }
+  },
+  "shared_contract": {
+    "wall_time_limit_s": 32.0,
+    "simulation_dt_s": 0.001,
+    "low_level_control_dt_s": 0.005,
+    "high_level_period_s": 0.02,
+    "sensor_case": "noise_bias_drift_200hz",
+    "measurement_seed": 44104,
+    "mpc_seed": 20260824,
+    "reference_clock": {
+      "kind": "frozen_exogenous_phase_replay",
+      "source_duration_s": 23.0,
+      "mapping": "phase(t)=clip(source_phase(t)*trajectory_duration_s/23.0,0,trajectory_duration_s)",
+      "interpolation": "linear_on_recorded_time_grid",
+      "controller_oracle_feedback": false,
+      "controller_specific_pacing": false
+    },
+    "measurement_frontend": "existing_causal_robot_and_cuff_measurement_boundary",
+    "state_and_geometry_estimator": "existing_accumulated_cuff_geometry_estimator_shared_by_all_arms",
+    "dynamic_identifier_sidecar": "existing_integral_11_base_single_challenger_lifecycle_shared_by_all_arms",
+    "allocator": "registered_1_to_1_cuff_aware_memoryless_allocator",
+    "low_level_execution": "existing_measured_nominal_cartesian_control",
+    "plant": "existing_mujoco_ur10e_human_v2_rigid_cuff",
+    "safety_and_limits": "unchanged_stage4_force_gate_rom_contact_and_robot_torque_limits",
+    "initial_human_q_deg": [
+      5.0,
+      10.0
+    ],
+    "shared_invariants": [
+      "same_patient_within_case",
+      "same_reference_phase_trace_within_case",
+      "same_initial_human_and_robot_state_within_case",
+      "same_sensor_case_seed_and_realization_within_case",
+      "same_robot_plant_and_cuff_mechanics",
+      "same_safety_gates_and_actuator_limits",
+      "same_allocator_and_low_level_cartesian_execution",
+      "no_controller_specific_trajectory_tuning",
+      "no_patient_or_trajectory_specific_gain_tuning"
+    ]
+  },
+  "controllers": [
+    {
+      "controller_id": "pd_feedback",
+      "deployable_interpretation": "feedback_baseline",
+      "human_action_nm": "diag(Kp_tau)*(q_ref-q_hat)+diag(Kd_tau)*(dq_ref-dq_hat)",
+      "dynamic_model_in_action": "none",
+      "control_beta": "not_used",
+      "geometry": "shared_causal_estimate",
+      "trust_qualification": "sidecar_only_not_applied_to_action"
+    },
+    {
+      "controller_id": "pd_nominal_inverse_dynamics_ff",
+      "deployable_interpretation": "feedback_plus_population_prior_feedforward",
+      "human_action_nm": "pd_feedback+population_prior_model.inverse_dynamics(q_ref,dq_ref,ddq_ref)",
+      "dynamic_model_in_action": "fixed_population_prior_feedforward_only",
+      "control_beta": "population_prior_constant",
+      "geometry": "shared_causal_estimate",
+      "trust_qualification": "sidecar_only_not_applied_to_action"
+    },
+    {
+      "controller_id": "fixed_mpc_prior_only",
+      "deployable_interpretation": "predictive_control_with_fixed_population_dynamics",
+      "human_action_nm": "first_action_of_frozen_feasible_first_cem_mpc",
+      "dynamic_model_in_action": "fixed_population_prior",
+      "control_beta": "population_prior_constant",
+      "geometry": "shared_causal_estimate",
+      "trust_qualification": "existing_prior_only_qualification_not_applied_to_control"
+    },
+    {
+      "controller_id": "trusted_adaptive_mpc",
+      "deployable_interpretation": "predictive_control_with_trust_gated_control_effective_dynamics",
+      "human_action_nm": "first_action_of_frozen_feasible_first_cem_mpc",
+      "dynamic_model_in_action": "population_prior_until_existing_trust_promotion_then_retained_incumbent",
+      "control_beta": "existing_single_challenger_trusted_incumbent",
+      "geometry": "shared_causal_estimate",
+      "trust_qualification": "existing_trusted_adaptive_semantics"
+    }
+  ],
+  "optional_oracle": {
+    "controller_id": "oracle_patient_model_mpc",
+    "included_in_any_matrix": false,
+    "new_rollouts": 0,
+    "interpretation": "non_deployable_god_view_upper_bound_only",
+    "approval_required_before_adding": true
+  },
+  "gain_tuning": {
+    "status": "pending_one_preregistered_nominal_tuning_execution",
+    "controller_tuned": "pd_feedback",
+    "gains_shared_with": "pd_nominal_inverse_dynamics_ff",
+    "patient_id": "nominal_reference",
+    "trajectory_id": "moderate_rom_23s",
+    "measurement_seed": 44104,
+    "initial_q_deg": [
+      5.0,
+      10.0
+    ],
+    "derivation": "diagonal_nominal_mass_at_initial_q_times_frozen_stage3_computed_acceleration_gains",
+    "base_kp_tau_nm_per_rad": [
+      381.2577801496745,
+      27.815317728811202
+    ],
+    "base_kd_tau_nms_per_rad": [
+      59.30676580106047,
+      4.37097850024176
+    ],
+    "kp_scales": [
+      0.5,
+      1.0,
+      1.5
+    ],
+    "kd_scales": [
+      0.5,
+      1.0,
+      1.5
+    ],
+    "candidate_count": 9,
+    "mechanical_eligibility": [
+      "termination_reason_is_completed",
+      "reference_progress_fraction_is_1",
+      "no_recorded_safety_event",
+      "all_required_metrics_finite"
+    ],
+    "selection_order": [
+      "minimum_tracking_combined_rmse_deg",
+      "minimum_tracking_max_abs_error_deg",
+      "minimum_cuff_force_rms_n",
+      "minimum_kp_scale",
+      "minimum_kd_scale"
+    ],
+    "tie_tolerance": 1e-12,
+    "if_no_candidate_is_mechanically_eligible": "preserve_outputs_stop_and_request_user_direction_without_expanding_grid",
+    "freeze_artifact": "results/stage4_report_validation_gain_tuning_formal/frozen_pd_gains.json",
+    "benchmark_runner_requires_frozen_gain_hash": true
+  },
+  "patient_cases": {
+    "existing": [
+      "nominal_reference",
+      "mass_mild_plus_05pct",
+      "registered_moderate_anchor",
+      "registered_formal_perturbed_anchor"
+    ],
+    "report_only": [
+      {
+        "case_id": "height_moderate_plus_03pct_report_only",
+        "severity": "moderate",
+        "mechanism": "isolated_geometry_leg_length",
+        "source": "new_report_only_case_not_stage4_evidence",
+        "height_scale": 1.03,
+        "body_mass_scale": 1.0,
+        "thigh_com_scale": 1.0,
+        "shank_com_scale": 1.0,
+        "passive_stiffness_scale": [
+          1.0,
+          1.0
+        ],
+        "passive_damping_scale": [
+          1.0,
+          1.0
+        ],
+        "rest_offset_deg": [
+          0.0,
+          0.0
+        ],
+        "sleeve_center_scale": 1.0,
+        "expected_dominant_torque_effect": "three_percent_longer_thigh_and_shank_with_fixed_total_mass_passive_terms_and_dimensionless_cuff_location",
+        "stage4_canonical_evidence": false
+      }
+    ]
+  },
+  "selected_trajectories": [
+    "registered_high_flexion_23s",
+    "hip_dominant_low_knee_23s",
+    "moderate_rom_23s"
+  ],
+  "excluded_professor_facing_main_trajectory": "two_cycle_moderate_23s",
+  "benchmark_matrix": {
+    "evidence_category": "report_validation_scientific_baseline",
+    "controllers": [
+      "pd_feedback",
+      "pd_nominal_inverse_dynamics_ff",
+      "fixed_mpc_prior_only",
+      "trusted_adaptive_mpc"
+    ],
+    "patients": [
+      "nominal_reference",
+      "mass_mild_plus_05pct",
+      "registered_moderate_anchor",
+      "registered_formal_perturbed_anchor"
+    ],
+    "trajectories": [
+      "registered_high_flexion_23s"
+    ],
+    "measurement_seeds": [
+      44104
+    ],
+    "logical_arm_count": 16,
+    "new_rollout_count": 16,
+    "authoritative_result_reuse_count": 0,
+    "reason_for_clean_runs": "four_controller_runner_and_exogenous_shared_reference_clock_are_new_fingerprints"
+  },
+  "visualization_matrix": {
+    "evidence_category": "visualization_demo_only",
+    "controllers_per_scene": [
+      "pd_feedback",
+      "pd_nominal_inverse_dynamics_ff",
+      "fixed_mpc_prior_only",
+      "trusted_adaptive_mpc"
+    ],
+    "scenes": [
+      {
+        "scene_id": "nominal_high_flexion",
+        "patient_id": "nominal_reference",
+        "trajectory_id": "registered_high_flexion_23s",
+        "source": "reuse_exact_report_validation_benchmark_arms",
+        "new_rollout_count": 0
+      },
+      {
+        "scene_id": "isolated_geometry_hip_dominant",
+        "patient_id": "height_moderate_plus_03pct_report_only",
+        "trajectory_id": "hip_dominant_low_knee_23s",
+        "source": "new_demo_only_rollouts",
+        "new_rollout_count": 4
+      },
+      {
+        "scene_id": "moderate_mixed_moderate_rom",
+        "patient_id": "registered_moderate_anchor",
+        "trajectory_id": "moderate_rom_23s",
+        "source": "new_demo_only_rollouts",
+        "new_rollout_count": 4
+      }
+    ],
+    "logical_arm_count": 12,
+    "benchmark_arm_reuse_count": 4,
+    "new_rollout_count": 8
+  },
+  "metrics": {
+    "task_window": "reference_phase_time_s_less_than_or_equal_to_trajectory_duration",
+    "tracking_combined_rmse_deg": "sqrt(mean(error_deg_squared_over_time_and_both_joints))",
+    "tracking_max_abs_error_deg": "max(abs(error_deg_over_time_and_both_joints))",
+    "reference_completion_time_s": "first_wall_time_with_reference_phase_at_duration",
+    "reference_progress_fraction": "min(1,final_reference_phase_over_duration)",
+    "cuff_force_peak_n": "max(norm(cuff_force_world_n))",
+    "cuff_force_rms_n": "sqrt(mean(norm(cuff_force_world_n)^2))",
+    "cuff_moment_peak_nm": "max(norm(cuff_moment_world_nm))",
+    "cuff_moment_rms_nm": "sqrt(mean(norm(cuff_moment_world_nm)^2))",
+    "robot_torque_peak_abs_nm": "per_joint_max_abs_and_global_max_abs_commanded_robot_torque",
+    "safety_events": "raw_event_counts_and_termination_reason_without_post_hoc_pass_fail_label",
+    "runtime": "rollout_wall_time_and_high_level_compute_mean_p95_max_and_achieved_frequency",
+    "first_promotion_time_s": "first_existing_trust_promotion_applied_to_control_adaptive_only",
+    "prediction_rmse_nm": "god_view_offline_evaluation_only_combined_rmse_of_retained_control_model_generalized_torque_prediction",
+    "remaining_trajectory_after_promotion_s": "max(0,trajectory_duration_minus_reference_phase_at_first_applied_promotion)",
+    "cylindrical_surface_proxy": "secondary_descriptive_minimum_norm_mathematical_proxy_not_pressure_comfort_or_tissue_safety"
+  },
+  "visualization": {
+    "layout": "two_by_two_synchronized_controller_panels",
+    "camera": "single_frozen_oblique_sagittal_camera_showing_human_robot_and_cuff",
+    "playback": "same_wall_time_axis_fps_and_speed_with_final_frame_hold_after_early_termination",
+    "reference_rendering": "translucent_ghost_leg_over_solid_actual_leg",
+    "overlay": [
+      "controller_name",
+      "instantaneous_combined_tracking_error_deg",
+      "cuff_force_norm_n",
+      "cuff_moment_norm_nm",
+      "adaptive_state_active_or_prior_or_not_applicable",
+      "promotion_event_marker_or_termination_marker"
+    ],
+    "planned_outputs_per_scene": [
+      "comparison.gif",
+      "comparison.mp4_if_existing_stack_supports_cleanly",
+      "representative_still.png",
+      "metrics_timeseries.png",
+      "metrics_timeseries.pdf"
+    ],
+    "render_now": false
+  },
+  "planned_output_roots": {
+    "gain_tuning": "results/stage4_report_validation_gain_tuning_formal",
+    "benchmark": "results/stage4_report_validation_baseline_formal",
+    "demo": "results/stage4_report_validation_demo_only",
+    "visualization": "results/stage4_report_validation_visualization"
+  },
+  "counts_and_cost": {
+    "gain_tuning_rollouts": 9,
+    "benchmark_rollouts": 16,
+    "new_demo_rollouts": 8,
+    "unique_control_rollouts_total": 33,
+    "visualization_logical_arms": 12,
+    "optional_oracle_rollouts": 0,
+    "empirical_stage4_wall_seconds_per_mpc_arm_range": [
+      35.3,
+      36.5
+    ],
+    "estimated_serial_control_runtime_minutes": [
+      20,
+      30
+    ],
+    "empirical_npz_megabytes_per_arm": 8.9,
+    "estimated_raw_results_gigabytes": 0.35,
+    "estimated_total_with_later_media_gigabytes": [
+      0.45,
+      0.6
+    ]
+  }
+}

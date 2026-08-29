@@ -1,0 +1,111 @@
+{
+  "end_card_frame_count": 12,
+  "generation_timestamp_utc": "2026-08-29T05:44:41.390647+00:00",
+  "layout": "fixed_mpc_left_adaptive_mpc_right",
+  "media_evidence_category": "professor_report_visualization",
+  "media_set_id": "main_adaptation_comparison",
+  "motion_frame_count": 257,
+  "mp4_dependency_available": false,
+  "output_sha256": {
+    "end_summary_card_png": "7102fc275357e43bb809d424ecf4e225e3a111671aa55fbbba83238d9cfb010c",
+    "gif": "8352ce8849949e9c45fb86a47d8e7b11ff8284910e9f132a6ed7e0c852679775",
+    "representative_still_png": "e7e90e1b023e8b44924c424a4c47994497be0e971f643b27eaac9cbfcb3bc16f",
+    "timeseries_pdf": "f497676e9916b655b762630b8fa898b8ce1900f65007442d93362fd78516a3b8",
+    "timeseries_png": "f6c9ebf0b71da28a0caa368f60260d680094078a0e819c4d0df550ea7413ce56"
+  },
+  "outputs": {
+    "end_summary_card_png": "results/stage4_professor_report_visualization_v1/main_adaptation/end_summary_card.png",
+    "gif": "results/stage4_professor_report_visualization_v1/main_adaptation/comparison.gif",
+    "mp4": null,
+    "representative_still_png": "results/stage4_professor_report_visualization_v1/main_adaptation/representative_still.png",
+    "timeseries_pdf": "results/stage4_professor_report_visualization_v1/main_adaptation/metrics_timeseries.pdf",
+    "timeseries_png": "results/stage4_professor_report_visualization_v1/main_adaptation/metrics_timeseries.png"
+  },
+  "render_classification": "professor_report_visualization",
+  "renderer": {
+    "end_card_duration_s": 1.5,
+    "fixed_camera": true,
+    "fixed_panel_size": [
+      480,
+      320
+    ],
+    "fps": 8,
+    "live_acceleration_processing": "frozen_50_hz_savgol_acceleration_derivative_order_1",
+    "live_overlay_excluded": [
+      "cuff_moment",
+      "jerk",
+      "robot_torque",
+      "prediction_rmse",
+      "static_acceleration_rms"
+    ],
+    "live_overlay_fields": [
+      "panel_label",
+      "patient_label",
+      "instantaneous_tracking_error_deg",
+      "instantaneous_cuff_force_magnitude_n",
+      "frozen_50_hz_acceleration_magnitude_rad_s2",
+      "prior_or_adaptive_model_state",
+      "first_promotion_marker_and_time"
+    ],
+    "renderer_version": "stage4_professor_report_manifest_renderer_v1"
+  },
+  "renderer_backends": [
+    "mujoco_fixed_camera",
+    "mujoco_fixed_camera"
+  ],
+  "renderer_fingerprint_sha256": "17fdc9defae53c874fcc0eadc70d438ab6eb244adabe2e1423293d6b985a87e1",
+  "scene_id": null,
+  "schema_version": "stage4_professor_report_manifest_renderer_output_v1",
+  "scientific_interpretation_permitted": false,
+  "source_artifacts": [
+    {
+      "controller_fingerprint_sha256": "77fc098c6d4d037d3fbd289a2b320977d814455e4cbaf74ffd2761ee00027b85",
+      "controller_id": "fixed_mpc_prior_only",
+      "end_summary": {
+        "adaptive_first_promotion_wall_time_s": null,
+        "combined_acceleration_rms_rad_s2": 0.8624546834856701,
+        "cuff_force_peak_n": 147.55065326260848,
+        "minimum_force_gate_margin_n": 52.44934673739152,
+        "safety_event_count": 0,
+        "tracking_max_error_deg": 2.013537471207397,
+        "tracking_rmse_deg": 0.9700884340349842
+      },
+      "measurement_seed": 64122,
+      "patient_id": "registered_moderate_anchor",
+      "rendered_human_geometry": {
+        "shank_length_m": 0.40076,
+        "thigh_length_m": 0.43688
+      },
+      "source_evidence_category": "report_generalization_statistical",
+      "source_trace_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/results/stage4_report_generalization_statistical_formal_v1/registered_moderate_anchor__registered_high_flexion_23s__seed64122/fixed_mpc_prior_only/fixed_mpc_prior_only_trace.npz",
+      "source_trace_sha256": "25e746955d7332254285cafd081005a9aeb8d73c1398e16d2fd75b6a37f8f530",
+      "trajectory_id": "registered_high_flexion_23s"
+    },
+    {
+      "controller_fingerprint_sha256": "21a29ff738f3c8f36462318ed6cec2ed258d3eea1092016cf3c6ea61acbd6c2b",
+      "controller_id": "trusted_adaptive_mpc",
+      "end_summary": {
+        "adaptive_first_promotion_wall_time_s": 9.999999999999897,
+        "combined_acceleration_rms_rad_s2": 0.8429931265857488,
+        "cuff_force_peak_n": 147.89595568989577,
+        "minimum_force_gate_margin_n": 52.10404431010423,
+        "safety_event_count": 0,
+        "tracking_max_error_deg": 1.937022313969813,
+        "tracking_rmse_deg": 0.8056012707368307
+      },
+      "measurement_seed": 64122,
+      "patient_id": "registered_moderate_anchor",
+      "rendered_human_geometry": {
+        "shank_length_m": 0.40076,
+        "thigh_length_m": 0.43688
+      },
+      "source_evidence_category": "report_generalization_statistical",
+      "source_trace_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/results/stage4_report_generalization_statistical_formal_v1/registered_moderate_anchor__registered_high_flexion_23s__seed64122/trusted_adaptive_mpc/trusted_adaptive_mpc_trace.npz",
+      "source_trace_sha256": "dc2282e10240efc73fd2ed18674a7fa77c06ecc478a24b5c4689f2528be7be12",
+      "trajectory_id": "registered_high_flexion_23s"
+    }
+  ],
+  "source_evidence_relabelled": false,
+  "visualization_source_manifest_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage3_full3d/results/stage4_report_generalization_visualization_sources_v1/visualization_source_manifest.json",
+  "visualization_source_manifest_sha256": "8725f05e80256ac696eb1477ea4a055ca313356fe1f6369a173e1905420fd1ef"
+}

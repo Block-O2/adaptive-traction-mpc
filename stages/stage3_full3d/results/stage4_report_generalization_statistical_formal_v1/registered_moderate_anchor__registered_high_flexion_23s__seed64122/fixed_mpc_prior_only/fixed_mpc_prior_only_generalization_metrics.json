@@ -1,0 +1,177 @@
+{
+  "metrics": {
+    "adaptive_first_promotion_wall_time_s": null,
+    "adaptive_promotion_count": 0,
+    "adaptive_remaining_trajectory_percent_at_first_promotion": null,
+    "combined_acceleration_rms_rad_s2": 0.8624546834856701,
+    "combined_jerk_rms_rad_s3": 11.701743059912557,
+    "completion": true,
+    "cuff_force_p95_n": 127.44241055621026,
+    "cuff_force_peak_n": 147.55065326260848,
+    "cuff_force_rate_included": false,
+    "cuff_force_rms_n": 103.3730423991329,
+    "cuff_moment_peak_nm": 23.89658390549534,
+    "cuff_moment_rms_nm": 15.247743979937276,
+    "cuff_surface_proxy_primary_metric": false,
+    "god_view_prediction_rmse_nm": 2.0561426612130895,
+    "hip_acceleration_peak_rad_s2": 2.707566826092264,
+    "hip_acceleration_rms_rad_s2": 0.5246025229740108,
+    "hip_jerk_peak_rad_s3": 37.379998438091825,
+    "hip_jerk_rms_rad_s3": 7.092018725553283,
+    "interaction_interpretation": "engineering_interaction_not_pressure_tissue_or_clinical_safety",
+    "knee_acceleration_peak_rad_s2": 7.0407552188081635,
+    "knee_acceleration_rms_rad_s2": 0.6845584518181556,
+    "knee_jerk_peak_rad_s3": 110.10657069815389,
+    "knee_jerk_rms_rad_s3": 9.30774199452334,
+    "minimum_force_gate_margin_n": 52.44934673739152,
+    "motion_descriptor_sample_count": 1600,
+    "motion_descriptor_sample_period_s": 0.02,
+    "motion_descriptor_source_indices": "0::4",
+    "motion_quality_interpretation": "offline_motion_smoothness_descriptors_not_comfort_or_safety_truth",
+    "reference_progress_fraction": 1.0,
+    "robot_joint_torque_peak_abs_nm": [
+      78.22352422903326,
+      141.00764698804522,
+      53.54102054426449,
+      16.204122489004884,
+      17.871173506090283,
+      1.2999990703744093
+    ],
+    "robot_joint_torque_rms_nm": [
+      53.08776013596791,
+      113.8297451869713,
+      37.03677536624673,
+      10.977590553332302,
+      10.209454250548724,
+      0.31237442393964
+    ],
+    "robot_torque_global_peak_abs_nm": 141.00764698804522,
+    "robot_torque_global_vector_rms_nm": 131.8031939041914,
+    "safety_and_constraint_events": {
+      "force_gate_events": 0,
+      "mpc_solver_failures": 0,
+      "mujoco_warning_counts": {},
+      "rom_event_samples": 0,
+      "unintended_contact_pairs": []
+    },
+    "schema_version": "stage4_report_generalization_arm_metrics_v1",
+    "scientific_interpretation_from_structural_smoke_permitted": false,
+    "termination_reason": "completed",
+    "tracking_max_error_deg": 2.013537471207397,
+    "tracking_rmse_deg": 0.9700884340349842
+  },
+  "provenance": {
+    "authoritative_stage4_evidence": false,
+    "code_commit": "cc04765761d08ffaf1914f0236f0201d9c7e1475",
+    "common_allocator": {
+      "constraint": "B(q)*[Fx,Fz,My] = tau_h",
+      "cuff_length_m": 0.08,
+      "cylindrical_surface_effort_weight": 1.0,
+      "objective": "lambda_F*||[Fx,Fz]||^2 + lambda_A*||A_dagger*w_cuff||^2",
+      "resultant_force_weight": 1.0,
+      "surface_proxy_interpretation": "minimum-norm equivalent cylindrical patch-force effort; not pressure or comfort",
+      "wrench_continuity_weight": 0.0
+    },
+    "common_low_level_execution": "existing_measured_nominal_cartesian_control",
+    "control_beta_constant_population_prior": true,
+    "controller": "fixed_mpc_prior_only",
+    "controller_fingerprint_payload": {
+      "allocator": {
+        "constraint": "B(q)*[Fx,Fz,My] = tau_h",
+        "cuff_length_m": 0.08,
+        "cylindrical_surface_effort_weight": 1.0,
+        "objective": "lambda_F*||[Fx,Fz]||^2 + lambda_A*||A_dagger*w_cuff||^2",
+        "resultant_force_weight": 1.0,
+        "surface_proxy_interpretation": "minimum-norm equivalent cylindrical patch-force effort; not pressure or comfort",
+        "wrench_continuity_weight": 0.0
+      },
+      "apply_qualified_model_to_control": false,
+      "controller_id": "fixed_mpc_prior_only",
+      "experiment_schema": "stage4_report_validation_matrix_v2_coupled_pd",
+      "external_reference_clock_controller_independent": true,
+      "external_reference_clock_sha256": "2ef8e9b9b34b20bebed9c02f562e39240cb912424c4ebc24edaa48b81ee981b2",
+      "gain_lock_sha256": null,
+      "human_action_boundary": "human_generalized_cuff_action_nm",
+      "low_level_execution": "existing_measured_nominal_cartesian_control",
+      "mpc_config": {
+        "action_rate_scale_nm": [
+          20.0,
+          10.0
+        ],
+        "action_rate_weight": 0.005,
+        "action_scale_nm": [
+          60.0,
+          30.0
+        ],
+        "action_weight": 0.002,
+        "candidate_count": 32,
+        "cem_iterations": 2,
+        "cylindrical_cuff_length_m": 0.08,
+        "cylindrical_surface_effort_weight": 0.0,
+        "dq_error_scale_rad_s": [
+          0.13962634015954636,
+          0.13962634015954636
+        ],
+        "elite_count": 6,
+        "exploration_std_floor_nm": [
+          1.0,
+          0.5
+        ],
+        "exploration_std_nm": [
+          10.0,
+          5.0
+        ],
+        "horizon_steps": 15,
+        "interaction_force_normalization_n": 200.0,
+        "prediction_dt_s": 0.02,
+        "q_error_scale_rad": [
+          0.03490658503988659,
+          0.03490658503988659
+        ],
+        "random_seed": 20260824,
+        "resultant_force_weight": 0.0,
+        "wrench_slew_weight": 0.0
+      },
+      "mpc_implementation": "batched",
+      "report_validation_config_sha256": "46c6e9552a205d73bc8567a6ebf7af8e1887ef53b16c7e81703b0568cd3d635f",
+      "safety_limits_modified": false
+    },
+    "controller_fingerprint_sha256": "77fc098c6d4d037d3fbd289a2b320977d814455e4cbaf74ffd2761ee00027b85",
+    "evidence_category": "report_generalization_statistical",
+    "experiment_gain_lock_sha256": "b83a8ca4c84484fad9f3687263cae6c5c038a25c2512b8e1e182bffe6b0ceea1",
+    "external_reference_clock_controller_independent": true,
+    "formal_execution": true,
+    "fresh_plant_estimator_controller_clock_per_arm": true,
+    "frozen_stage4_base_commit": "cc04765761d08ffaf1914f0236f0201d9c7e1475",
+    "frozen_stage4_base_tag": "stage4-robustness-final-v1",
+    "gain_lock_sha256": null,
+    "generalization_arm_fingerprint_payload": {
+      "controller": "fixed_mpc_prior_only",
+      "controller_fingerprint_sha256": "77fc098c6d4d037d3fbd289a2b320977d814455e4cbaf74ffd2761ee00027b85",
+      "duration_s": 32.0,
+      "evidence_category": "report_generalization_statistical",
+      "external_reference_clock_sha256": "2ef8e9b9b34b20bebed9c02f562e39240cb912424c4ebc24edaa48b81ee981b2",
+      "formal_execution": true,
+      "gain_lock_sha256": "b83a8ca4c84484fad9f3687263cae6c5c038a25c2512b8e1e182bffe6b0ceea1",
+      "generalization_config_sha256": "f424c435572738b62e4f04ca8a708497ebdd7a240bd04d159050dd069eb0f4ae",
+      "measurement_seed": 64122,
+      "metric_config_sha256": "64c4421090b3aa1125b841ad6109f7b3160e5df881668d82eb6bcb46b75827ac",
+      "patient": "registered_moderate_anchor",
+      "trajectory": "registered_high_flexion_23s"
+    },
+    "generalization_arm_fingerprint_sha256": "b9e96175ddb2a98bca54278fca6314078983e161219a28667438a21be0549100",
+    "generalization_config_sha256": "f424c435572738b62e4f04ca8a708497ebdd7a240bd04d159050dd069eb0f4ae",
+    "generalization_metric_config_sha256": "64c4421090b3aa1125b841ad6109f7b3160e5df881668d82eb6bcb46b75827ac",
+    "measurement_seed": 64122,
+    "patient": "registered_moderate_anchor",
+    "patient_definition_source": "existing_stage4_definition_read_only",
+    "reference_clock_sha256": "2ef8e9b9b34b20bebed9c02f562e39240cb912424c4ebc24edaa48b81ee981b2",
+    "report_validation_config_sha256": "46c6e9552a205d73bc8567a6ebf7af8e1887ef53b16c7e81703b0568cd3d635f",
+    "schema_version": "stage4_report_validation_run_manifest_v1",
+    "source_trace_sha256": null,
+    "structural_smoke": false,
+    "trajectory": "registered_high_flexion_23s",
+    "working_tree_dirty": true
+  },
+  "schema_version": "stage4_report_generalization_metric_sidecar_v1"
+}

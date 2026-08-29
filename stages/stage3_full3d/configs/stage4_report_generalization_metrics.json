@@ -1,0 +1,236 @@
+{
+  "schema_version": "stage4_report_generalization_metrics_v1",
+  "design_status": "prospectively_clarified_50hz_extraction_no_generalization_execution",
+  "prospective_clarification": {
+    "original_sha256": "2795b23731832704f3e5414104d42afc4dfc5b4b8f4172b983c309dceb95606b",
+    "reason": "saved_control_estimated_state_is_200hz_while_the_preregistered_metric_contract_requires_the_frozen_50hz_velocity_series",
+    "rule": "select_indices_0_4_8_and_so_on_from_the_5ms_saved_control_series_before_applying_the_unchanged_savitzky_golay_parameters",
+    "defined_before_any_formal_generalization_rollout": true,
+    "metric_set_changed": false,
+    "savgol_parameters_changed": false
+  },
+  "scope": "offline_evaluation_only",
+  "common_window": {
+    "start": "first_saved_high_level_control_sample",
+    "end": "last_saved_high_level_control_sample_or_termination",
+    "incomplete_rollout_rule": "compute_over_realized_samples_and_always_report_completion_reference_progress_and_termination_reason",
+    "finite_sample_requirement": true
+  },
+  "task_performance": {
+    "tracking_rmse_deg": {
+      "source": "tracking_error_deg_god_view",
+      "formula": "sqrt(mean(sum(error_deg**2,axis=joint)))",
+      "unit": "deg",
+      "direction": "lower_is_better"
+    },
+    "tracking_max_error_deg": {
+      "source": "tracking_error_deg_god_view",
+      "formula": "max(abs(error_deg))_over_time_and_joint",
+      "unit": "deg",
+      "direction": "lower_is_better"
+    },
+    "completion": {
+      "source": "termination_reason_and_mechanically_completed_requested_duration",
+      "formula": "termination_reason_is_completed_and_requested_duration_was_reached",
+      "unit": "boolean",
+      "direction": "descriptive"
+    },
+    "reference_progress_fraction": {
+      "source": "reference_phase_time_s_and_trajectory_duration_s",
+      "formula": "clip(final_reference_phase_time_s/trajectory_duration_s,0,1)",
+      "unit": "fraction",
+      "direction": "higher_is_better"
+    }
+  },
+  "motion_quality": {
+    "interpretation": "engineering_motion_smoothness_proxies_only_not_comfort_or_clinical_safety",
+    "state_source": "control_estimated_state[0::4,2:4]_causal_estimated_joint_velocity_rad_s",
+    "sample_time_source": "control_time_s[0::4]",
+    "saved_source_period_s": 0.005,
+    "subsample_stride": 4,
+    "subsample_phase_index": 0,
+    "required_uniform_period_s": 0.02,
+    "uniform_period_tolerance_s": 1e-09,
+    "offline_derivative_method": {
+      "name": "fixed_savitzky_golay_velocity_derivatives",
+      "implementation_contract": "scipy.signal.savgol_filter",
+      "window_length_samples": 11,
+      "window_duration_s": 0.22,
+      "polynomial_order": 3,
+      "boundary_mode": "interp",
+      "acceleration_derivative_order": 1,
+      "jerk_derivative_order": 2,
+      "delta_s": 0.02,
+      "additional_controller_specific_filtering": false,
+      "causal_runtime_use": false,
+      "note": "one frozen offline differentiation method is applied identically to every saved causal velocity estimate"
+    },
+    "hip_acceleration_rms_rad_s2": {
+      "formula": "sqrt(mean(ddq_hat[:,0]**2))",
+      "unit": "rad/s^2",
+      "direction": "lower_is_smoother_proxy"
+    },
+    "hip_acceleration_peak_rad_s2": {
+      "formula": "max(abs(ddq_hat[:,0]))",
+      "unit": "rad/s^2",
+      "direction": "lower_is_smoother_proxy"
+    },
+    "knee_acceleration_rms_rad_s2": {
+      "formula": "sqrt(mean(ddq_hat[:,1]**2))",
+      "unit": "rad/s^2",
+      "direction": "lower_is_smoother_proxy"
+    },
+    "knee_acceleration_peak_rad_s2": {
+      "formula": "max(abs(ddq_hat[:,1]))",
+      "unit": "rad/s^2",
+      "direction": "lower_is_smoother_proxy"
+    },
+    "combined_acceleration_rms_rad_s2": {
+      "formula": "sqrt(mean(sum(ddq_hat**2,axis=joint)))",
+      "unit": "rad/s^2",
+      "direction": "lower_is_smoother_proxy"
+    },
+    "hip_jerk_rms_rad_s3": {
+      "formula": "sqrt(mean(jerk_hat[:,0]**2))",
+      "unit": "rad/s^3",
+      "direction": "lower_is_smoother_proxy"
+    },
+    "hip_jerk_peak_rad_s3": {
+      "formula": "max(abs(jerk_hat[:,0]))",
+      "unit": "rad/s^3",
+      "direction": "lower_is_smoother_proxy"
+    },
+    "knee_jerk_rms_rad_s3": {
+      "formula": "sqrt(mean(jerk_hat[:,1]**2))",
+      "unit": "rad/s^3",
+      "direction": "lower_is_smoother_proxy"
+    },
+    "knee_jerk_peak_rad_s3": {
+      "formula": "max(abs(jerk_hat[:,1]))",
+      "unit": "rad/s^3",
+      "direction": "lower_is_smoother_proxy"
+    },
+    "combined_jerk_rms_rad_s3": {
+      "formula": "sqrt(mean(sum(jerk_hat**2,axis=joint)))",
+      "unit": "rad/s^3",
+      "direction": "lower_is_smoother_proxy"
+    }
+  },
+  "interaction_and_constraints": {
+    "interpretation": "engineering_interaction_and_constraint_metrics_not_pressure_tissue_load_comfort_or_clinical_safety",
+    "cuff_force_norm_n": {
+      "source": "cuff_force_local_n_god_view",
+      "formula": "l2_norm_of_three_translational_components_per_sample",
+      "unit": "N"
+    },
+    "cuff_force_rms_n": {
+      "formula": "sqrt(mean(cuff_force_norm_n**2))",
+      "unit": "N",
+      "direction": "lower_is_lower_load"
+    },
+    "cuff_force_peak_n": {
+      "formula": "max(cuff_force_norm_n)",
+      "unit": "N",
+      "direction": "lower_is_lower_load"
+    },
+    "cuff_force_p95_n": {
+      "formula": "quantile(cuff_force_norm_n,0.95,method=linear)",
+      "unit": "N",
+      "direction": "lower_is_lower_load"
+    },
+    "minimum_force_gate_margin_n": {
+      "formula": "200.0-cuff_force_peak_n",
+      "unit": "N",
+      "direction": "higher_is_more_margin",
+      "negative_value_meaning": "force_gate_was_crossed"
+    },
+    "cuff_moment_norm_nm": {
+      "source": "cuff_moment_local_nm_god_view",
+      "formula": "l2_norm_of_three_moment_components_per_sample",
+      "unit": "Nm"
+    },
+    "cuff_moment_rms_nm": {
+      "formula": "sqrt(mean(cuff_moment_norm_nm**2))",
+      "unit": "Nm",
+      "direction": "lower_is_lower_load"
+    },
+    "cuff_moment_peak_nm": {
+      "formula": "max(cuff_moment_norm_nm)",
+      "unit": "Nm",
+      "direction": "lower_is_lower_load"
+    },
+    "robot_joint_torque_peak_abs_nm": {
+      "source": "robot_torque_nm",
+      "formula": "max(abs(tau_robot),axis=time)_reported_as_six_joint_vector_and_global_max",
+      "unit": "Nm",
+      "direction": "lower_is_lower_actuation"
+    },
+    "robot_joint_torque_rms_nm": {
+      "source": "robot_torque_nm",
+      "formula": "sqrt(mean(tau_robot**2,axis=time))_reported_as_six_joint_vector_and_global_vector_norm_rms",
+      "unit": "Nm",
+      "direction": "lower_is_lower_actuation"
+    },
+    "constraint_and_safety_events": {
+      "source": "saved_events_and_termination_reason",
+      "required_fields": [
+        "force_gate_events",
+        "rom_event_samples",
+        "mpc_solver_failures",
+        "mujoco_warning_counts",
+        "unintended_contact_pairs",
+        "termination_reason"
+      ],
+      "direction": "descriptive"
+    },
+    "cuff_force_rate": {
+      "included": false,
+      "reason": "optional_metric_excluded_prospectively_because_saved_physical_force_rate_is_noise_sensitive_and_no_additional_frozen_method_is_needed_for_the_primary_claim"
+    },
+    "cuff_surface_proxy": {
+      "included_as_primary_metric": false,
+      "interpretation_if_shown": "minimum_norm_equivalent_cylindrical_patch_force_effort_not_pressure_or_tissue_safety"
+    }
+  },
+  "adaptive_diagnostics": {
+    "promotion_count": "len(hierarchical_trust.control_promotions)",
+    "first_promotion_time_s": "minimum_control_promotions.promotion_time_s_or_null",
+    "remaining_trajectory_at_first_promotion_s": "max(trajectory_duration_s-reference_phase_time_at_first_promotion,0)_or_null",
+    "remaining_trajectory_fraction_at_first_promotion": "remaining_trajectory_at_first_promotion_s/trajectory_duration_s_or_null",
+    "prediction_rmse_nm": {
+      "source": "dynamic_identifier.god_view_base_model_torque_prediction_combined_rmse_nm",
+      "availability": "report_when_finite_and_explicitly_label_god_view_offline_evaluation_only",
+      "runtime_controller_access": false
+    }
+  },
+  "generalization": {
+    "matched_nominal_delta": "Delta_E(patient,controller,seed)=E(patient,controller,seed)-E(nominal_reference,controller,seed)",
+    "positive_delta_interpretation_for_error_and_load_metrics": "degradation",
+    "required_metrics": [
+      "tracking_rmse_deg",
+      "tracking_max_error_deg",
+      "combined_acceleration_rms_rad_s2",
+      "combined_jerk_rms_rad_s3",
+      "cuff_force_peak_n",
+      "cuff_force_rms_n"
+    ],
+    "relative_degradation": "Delta_E/E_nominal_for_the_same_controller_and_seed",
+    "relative_degradation_rule": "report_only_when_E_nominal_is_finite_and_abs(E_nominal)>=1e-12_in_the_declared_metric_unit_otherwise_report_not_defined",
+    "composite_generalization_score": false,
+    "adaptive_improvement_over_fixed": "E_fixed_mpc-E_adaptive_mpc_for_error_and_load_metrics_so_positive_means_lower_adaptive_value"
+  },
+  "cell_summary_across_three_seeds": {
+    "statistics": [
+      "arithmetic_mean",
+      "sample_standard_deviation_ddof_1",
+      "minimum",
+      "maximum"
+    ],
+    "inference": "descriptive_only_n_equals_3_no_significance_tests_or_population_level_claims",
+    "matched_seed_comparisons": [
+      "pd_ff_minus_fixed_mpc",
+      "fixed_mpc_minus_adaptive_mpc",
+      "adaptive_improvement_over_fixed_by_patient_and_seed"
+    ]
+  }
+}

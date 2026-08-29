@@ -187,3 +187,14 @@ should validate the CR12 command/feedback contract, timing, sensor calibration,
 cuff/contact mechanics, supervisory safety, and emergency-stop behavior before
 any deployment claim. An optional, separately preregistered model-inadequacy
 study may vary one unsupported mechanism at a time with this controller frozen.
+
+## Professor-report validation closeout
+
+After `stage4-robustness-final-v1`, a separate professor-facing simulation study
+completed the frozen PD/PD+FF/Fixed/Adaptive baseline, three-seed patient
+generalization, and descriptive trajectory demonstrations without changing the
+Stage-4 controller. Audited evidence and five final media sets are indexed in
+[`STAGE4_REPORT_VALIDATION_EVIDENCE_MAP.md`](STAGE4_REPORT_VALIDATION_EVIDENCE_MAP.md).
+The next engineering phase is hardware preparation and robot-only commissioning;
+model-inadequacy and controller-limit studies remain optional, separately
+preregistered scientific extensions.
