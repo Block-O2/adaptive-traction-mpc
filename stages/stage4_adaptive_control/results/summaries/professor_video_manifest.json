@@ -1,0 +1,430 @@
+{
+  "encoding": {
+    "audio": false,
+    "backend": "imageio-ffmpeg",
+    "backend_version": "0.6.0",
+    "codec": "H.264/AVC via libx264",
+    "container": "mp4",
+    "crf": 20,
+    "faststart": true,
+    "ffmpeg_version": "7.1",
+    "fps": 30,
+    "output_resolution": [
+      1920,
+      1080
+    ],
+    "pixel_format": "yuv420p",
+    "preset": "medium"
+  },
+  "generalization_matrix_path": "stages/stage4_adaptive_control/configs/stage4_report_generalization_matrix.json",
+  "generalization_matrix_sha256": "f424c435572738b62e4f04ca8a708497ebdd7a240bd04d159050dd069eb0f4ae",
+  "generation_timestamp_utc": "2026-08-29T17:05:50.406775+00:00",
+  "media_evidence_category": "professor_report_visualization",
+  "renderer": {
+    "camera": {
+      "azimuth_deg": -45.0,
+      "distance": 2.85,
+      "elevation_deg": -21.0,
+      "lookat": [
+        0.48,
+        -0.28,
+        0.42
+      ]
+    },
+    "canvas_resampling": "none for live 3D panel rows",
+    "fixed_camera": true,
+    "frozen_acceleration_processing": "existing frozen 50 Hz Savitzky-Golay acceleration convention",
+    "mjpython_used": true,
+    "mujoco_version": "3.10.0",
+    "new_simulation_executed": false,
+    "output_canvas_size": [
+      1920,
+      1080
+    ],
+    "panel_sizes": {
+      "three_panel": [
+        640,
+        720
+      ],
+      "two_panel": [
+        960,
+        720
+      ]
+    },
+    "real_mujoco_3d_required": true,
+    "rendering_backend": "mujoco.Renderer with macOS CGL",
+    "scene_content": [
+      "UR10e surrogate MuJoCo mesh geometry",
+      "Human V2 MuJoCo capsule geometry",
+      "rigid sleeve/cuff geometry and connection",
+      "bed/support plane",
+      "MuJoCo lighting, shadows, and perspective"
+    ],
+    "schematic_fallback_allowed": false,
+    "scientific_state_interpolation": false,
+    "source_renderer_version": "stage4_professor_report_manifest_renderer_v1",
+    "state_update_pipeline": "frozen qpos -> zero qvel -> mj_forward -> render",
+    "temporal_sampling": "existing renderer convention: linspace from 0 to the maximum frozen trace time with floor(duration*fps)+1 display frames; each display time selects the latest source sample at or before that time via searchsorted(right)-1; no scientific-state interpolation",
+    "video_renderer_version": "stage4_professor_report_video_renderer_v1",
+    "visualization_replay_only": true
+  },
+  "renderer_fingerprint_sha256": "e9e905435905025334fc3b9ba4a96a7c677689a3bdea303ba965c10d1c5084bd",
+  "schema_version": "stage4_professor_report_video_manifest_v1",
+  "scientific_interpretation_permitted": false,
+  "source_evidence_relabelled": false,
+  "statement": "visualization replay only, no new simulation",
+  "videos": {
+    "01_Fixed_vs_Adaptive.mp4": {
+      "duration_s": 34.03333333333333,
+      "file_size_bytes": 1956491,
+      "fps": 30,
+      "frame_count": 1021,
+      "motion_duration_s": 32.03333333333333,
+      "output_filename": "01_Fixed_vs_Adaptive.mp4",
+      "output_resolution": [
+        1920,
+        1080
+      ],
+      "scene": {
+        "layout": "fixed_mpc_left_adaptive_mpc_right",
+        "media_set_id": "main_adaptation_comparison",
+        "renderer_backends": [
+          "mujoco_renderer_fixed_camera_real_3d",
+          "mujoco_renderer_fixed_camera_real_3d"
+        ],
+        "scene_id": null,
+        "source_artifacts": [
+          {
+            "controller_fingerprint_sha256": "77fc098c6d4d037d3fbd289a2b320977d814455e4cbaf74ffd2761ee00027b85",
+            "controller_id": "fixed_mpc_prior_only",
+            "measurement_seed": 64122,
+            "panel_label": "Fixed MPC",
+            "patient_id": "registered_moderate_anchor",
+            "rendered_human_geometry": {
+              "shank_length_m": 0.40076,
+              "thigh_length_m": 0.43688
+            },
+            "source_evidence_category": "report_generalization_statistical",
+            "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed64122/fixed_mpc_prior_only/fixed_mpc_prior_only.json",
+            "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed64122/fixed_mpc_prior_only/fixed_mpc_prior_only_trace.npz",
+            "source_trace_sha256": "25e746955d7332254285cafd081005a9aeb8d73c1398e16d2fd75b6a37f8f530",
+            "trajectory_id": "registered_high_flexion_23s"
+          },
+          {
+            "controller_fingerprint_sha256": "21a29ff738f3c8f36462318ed6cec2ed258d3eea1092016cf3c6ea61acbd6c2b",
+            "controller_id": "trusted_adaptive_mpc",
+            "measurement_seed": 64122,
+            "panel_label": "Adaptive MPC",
+            "patient_id": "registered_moderate_anchor",
+            "rendered_human_geometry": {
+              "shank_length_m": 0.40076,
+              "thigh_length_m": 0.43688
+            },
+            "source_evidence_category": "report_generalization_statistical",
+            "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed64122/trusted_adaptive_mpc/trusted_adaptive_mpc.json",
+            "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed64122/trusted_adaptive_mpc/trusted_adaptive_mpc_trace.npz",
+            "source_trace_sha256": "dc2282e10240efc73fd2ed18674a7fa77c06ecc478a24b5c4689f2528be7be12",
+            "trajectory_id": "registered_high_flexion_23s"
+          }
+        ]
+      },
+      "sha256": "cd7cba26a03d2dd8851598916bcaa4e0db6901e6d9e03427f57cd734723fc6b0",
+      "summary_duration_s": 2.0
+    },
+    "02_Patient_Generalization.mp4": {
+      "chapters": [
+        {
+          "chapter": "Chapter 1",
+          "chapter_duration_s": 35.03333333333333,
+          "motion_duration_s": 32.03333333333333,
+          "scene": {
+            "layout": "three_patient_scenes_each_with_pdff_fixed_adaptive",
+            "media_set_id": "patient_generalization_comparison",
+            "renderer_backends": [
+              "mujoco_renderer_fixed_camera_real_3d",
+              "mujoco_renderer_fixed_camera_real_3d",
+              "mujoco_renderer_fixed_camera_real_3d"
+            ],
+            "scene_id": "nominal_reference",
+            "source_artifacts": [
+              {
+                "controller_fingerprint_sha256": "e2efcaf3ba4a3bb603b7d4c0b9218d715f9b3ac0b36130154ee1e86f4f0ff4fb",
+                "controller_id": "pd_nominal_inverse_dynamics_ff",
+                "measurement_seed": 44104,
+                "panel_label": "PD+FF",
+                "patient_id": "nominal_reference",
+                "rendered_human_geometry": {
+                  "shank_length_m": 0.40076,
+                  "thigh_length_m": 0.43688
+                },
+                "source_evidence_category": "report_generalization_statistical",
+                "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/nominal_reference__registered_high_flexion_23s__seed44104/pd_nominal_inverse_dynamics_ff/pd_nominal_inverse_dynamics_ff.json",
+                "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/nominal_reference__registered_high_flexion_23s__seed44104/pd_nominal_inverse_dynamics_ff/pd_nominal_inverse_dynamics_ff_trace.npz",
+                "source_trace_sha256": "24195e7d5f8a6f90aa9f15d7a6b3900d8d89f3f467e62015e5e84a8ca93c29ed",
+                "trajectory_id": "registered_high_flexion_23s"
+              },
+              {
+                "controller_fingerprint_sha256": "77fc098c6d4d037d3fbd289a2b320977d814455e4cbaf74ffd2761ee00027b85",
+                "controller_id": "fixed_mpc_prior_only",
+                "measurement_seed": 44104,
+                "panel_label": "Fixed MPC",
+                "patient_id": "nominal_reference",
+                "rendered_human_geometry": {
+                  "shank_length_m": 0.40076,
+                  "thigh_length_m": 0.43688
+                },
+                "source_evidence_category": "report_generalization_statistical",
+                "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/nominal_reference__registered_high_flexion_23s__seed44104/fixed_mpc_prior_only/fixed_mpc_prior_only.json",
+                "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/nominal_reference__registered_high_flexion_23s__seed44104/fixed_mpc_prior_only/fixed_mpc_prior_only_trace.npz",
+                "source_trace_sha256": "43c7503830edffa4a77b203a351a30a9f3c087ec452064a01864309fcc4c5eef",
+                "trajectory_id": "registered_high_flexion_23s"
+              },
+              {
+                "controller_fingerprint_sha256": "21a29ff738f3c8f36462318ed6cec2ed258d3eea1092016cf3c6ea61acbd6c2b",
+                "controller_id": "trusted_adaptive_mpc",
+                "measurement_seed": 44104,
+                "panel_label": "Adaptive MPC",
+                "patient_id": "nominal_reference",
+                "rendered_human_geometry": {
+                  "shank_length_m": 0.40076,
+                  "thigh_length_m": 0.43688
+                },
+                "source_evidence_category": "report_generalization_statistical",
+                "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/nominal_reference__registered_high_flexion_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc.json",
+                "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/nominal_reference__registered_high_flexion_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc_trace.npz",
+                "source_trace_sha256": "43c7503830edffa4a77b203a351a30a9f3c087ec452064a01864309fcc4c5eef",
+                "trajectory_id": "registered_high_flexion_23s"
+              }
+            ]
+          },
+          "summary_duration_s": 1.5,
+          "title": "Nominal Patient",
+          "title_duration_s": 1.5
+        },
+        {
+          "chapter": "Chapter 2",
+          "chapter_duration_s": 35.03333333333333,
+          "motion_duration_s": 32.03333333333333,
+          "scene": {
+            "layout": "three_patient_scenes_each_with_pdff_fixed_adaptive",
+            "media_set_id": "patient_generalization_comparison",
+            "renderer_backends": [
+              "mujoco_renderer_fixed_camera_real_3d",
+              "mujoco_renderer_fixed_camera_real_3d",
+              "mujoco_renderer_fixed_camera_real_3d"
+            ],
+            "scene_id": "height_moderate_plus_03pct_report_only",
+            "source_artifacts": [
+              {
+                "controller_fingerprint_sha256": "e2efcaf3ba4a3bb603b7d4c0b9218d715f9b3ac0b36130154ee1e86f4f0ff4fb",
+                "controller_id": "pd_nominal_inverse_dynamics_ff",
+                "measurement_seed": 44104,
+                "panel_label": "PD+FF",
+                "patient_id": "height_moderate_plus_03pct_report_only",
+                "rendered_human_geometry": {
+                  "shank_length_m": 0.41278280000000006,
+                  "thigh_length_m": 0.4499864
+                },
+                "source_evidence_category": "report_generalization_statistical",
+                "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/height_moderate_plus_03pct_report_only__registered_high_flexion_23s__seed44104/pd_nominal_inverse_dynamics_ff/pd_nominal_inverse_dynamics_ff.json",
+                "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/height_moderate_plus_03pct_report_only__registered_high_flexion_23s__seed44104/pd_nominal_inverse_dynamics_ff/pd_nominal_inverse_dynamics_ff_trace.npz",
+                "source_trace_sha256": "11ad97cb33faf4860506008a74d6d000957d07544331896b9a056806ae381b27",
+                "trajectory_id": "registered_high_flexion_23s"
+              },
+              {
+                "controller_fingerprint_sha256": "77fc098c6d4d037d3fbd289a2b320977d814455e4cbaf74ffd2761ee00027b85",
+                "controller_id": "fixed_mpc_prior_only",
+                "measurement_seed": 44104,
+                "panel_label": "Fixed MPC",
+                "patient_id": "height_moderate_plus_03pct_report_only",
+                "rendered_human_geometry": {
+                  "shank_length_m": 0.41278280000000006,
+                  "thigh_length_m": 0.4499864
+                },
+                "source_evidence_category": "report_generalization_statistical",
+                "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/height_moderate_plus_03pct_report_only__registered_high_flexion_23s__seed44104/fixed_mpc_prior_only/fixed_mpc_prior_only.json",
+                "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/height_moderate_plus_03pct_report_only__registered_high_flexion_23s__seed44104/fixed_mpc_prior_only/fixed_mpc_prior_only_trace.npz",
+                "source_trace_sha256": "7b2e79d13b339d5d2a7f2f097d634ea1a8e06b4e40fa4abe916cb9f1ff832a30",
+                "trajectory_id": "registered_high_flexion_23s"
+              },
+              {
+                "controller_fingerprint_sha256": "21a29ff738f3c8f36462318ed6cec2ed258d3eea1092016cf3c6ea61acbd6c2b",
+                "controller_id": "trusted_adaptive_mpc",
+                "measurement_seed": 44104,
+                "panel_label": "Adaptive MPC",
+                "patient_id": "height_moderate_plus_03pct_report_only",
+                "rendered_human_geometry": {
+                  "shank_length_m": 0.41278280000000006,
+                  "thigh_length_m": 0.4499864
+                },
+                "source_evidence_category": "report_generalization_statistical",
+                "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/height_moderate_plus_03pct_report_only__registered_high_flexion_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc.json",
+                "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/height_moderate_plus_03pct_report_only__registered_high_flexion_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc_trace.npz",
+                "source_trace_sha256": "1372d0855d9821c7f31c4f32584f113b67e760f11a2be4f96f056f13a5c97b93",
+                "trajectory_id": "registered_high_flexion_23s"
+              }
+            ]
+          },
+          "summary_duration_s": 1.5,
+          "title": "+3% Segment Geometry",
+          "title_duration_s": 1.5
+        },
+        {
+          "chapter": "Chapter 3",
+          "chapter_duration_s": 35.03333333333333,
+          "motion_duration_s": 32.03333333333333,
+          "scene": {
+            "layout": "three_patient_scenes_each_with_pdff_fixed_adaptive",
+            "media_set_id": "patient_generalization_comparison",
+            "renderer_backends": [
+              "mujoco_renderer_fixed_camera_real_3d",
+              "mujoco_renderer_fixed_camera_real_3d",
+              "mujoco_renderer_fixed_camera_real_3d"
+            ],
+            "scene_id": "registered_moderate_anchor",
+            "source_artifacts": [
+              {
+                "controller_fingerprint_sha256": "e2efcaf3ba4a3bb603b7d4c0b9218d715f9b3ac0b36130154ee1e86f4f0ff4fb",
+                "controller_id": "pd_nominal_inverse_dynamics_ff",
+                "measurement_seed": 44104,
+                "panel_label": "PD+FF",
+                "patient_id": "registered_moderate_anchor",
+                "rendered_human_geometry": {
+                  "shank_length_m": 0.40076,
+                  "thigh_length_m": 0.43688
+                },
+                "source_evidence_category": "report_generalization_statistical",
+                "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed44104/pd_nominal_inverse_dynamics_ff/pd_nominal_inverse_dynamics_ff.json",
+                "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed44104/pd_nominal_inverse_dynamics_ff/pd_nominal_inverse_dynamics_ff_trace.npz",
+                "source_trace_sha256": "9f4897187b2e7df3b2e1c19db3f811794c56d8bc6df0356abf742c9d209badb8",
+                "trajectory_id": "registered_high_flexion_23s"
+              },
+              {
+                "controller_fingerprint_sha256": "77fc098c6d4d037d3fbd289a2b320977d814455e4cbaf74ffd2761ee00027b85",
+                "controller_id": "fixed_mpc_prior_only",
+                "measurement_seed": 44104,
+                "panel_label": "Fixed MPC",
+                "patient_id": "registered_moderate_anchor",
+                "rendered_human_geometry": {
+                  "shank_length_m": 0.40076,
+                  "thigh_length_m": 0.43688
+                },
+                "source_evidence_category": "report_generalization_statistical",
+                "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed44104/fixed_mpc_prior_only/fixed_mpc_prior_only.json",
+                "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed44104/fixed_mpc_prior_only/fixed_mpc_prior_only_trace.npz",
+                "source_trace_sha256": "d500eb1d19267c7dacf6c7e95a154d67d56c3a186cc8020cfced4c85f0bec598",
+                "trajectory_id": "registered_high_flexion_23s"
+              },
+              {
+                "controller_fingerprint_sha256": "21a29ff738f3c8f36462318ed6cec2ed258d3eea1092016cf3c6ea61acbd6c2b",
+                "controller_id": "trusted_adaptive_mpc",
+                "measurement_seed": 44104,
+                "panel_label": "Adaptive MPC",
+                "patient_id": "registered_moderate_anchor",
+                "rendered_human_geometry": {
+                  "shank_length_m": 0.40076,
+                  "thigh_length_m": 0.43688
+                },
+                "source_evidence_category": "report_generalization_statistical",
+                "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc.json",
+                "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc_trace.npz",
+                "source_trace_sha256": "0e5090f4e53b6394239fa915cd1a831955d6a017cd874d66014a218dd344bcc5",
+                "trajectory_id": "registered_high_flexion_23s"
+              }
+            ]
+          },
+          "summary_duration_s": 1.5,
+          "title": "Moderate Mixed Mismatch",
+          "title_duration_s": 1.5
+        }
+      ],
+      "duration_s": 105.63333333333334,
+      "file_size_bytes": 8193835,
+      "fps": 30,
+      "frame_count": 3169,
+      "output_filename": "02_Patient_Generalization.mp4",
+      "output_resolution": [
+        1920,
+        1080
+      ],
+      "sha256": "1b9f9e3f14ac29d5c522b9e830c822d0e28686abb593fa5e467df77196953b0e",
+      "transition_duration_s": 0.26666666666666666
+    },
+    "03_Trajectory_Generalization.mp4": {
+      "duration_s": 34.03333333333333,
+      "file_size_bytes": 2599569,
+      "fps": 30,
+      "frame_count": 1021,
+      "motion_duration_s": 32.03333333333333,
+      "output_filename": "03_Trajectory_Generalization.mp4",
+      "output_resolution": [
+        1920,
+        1080
+      ],
+      "scene": {
+        "layout": "moderate_mixed_three_trajectory_panels",
+        "media_set_id": "trajectory_generalization_comparison",
+        "renderer_backends": [
+          "mujoco_renderer_fixed_camera_real_3d",
+          "mujoco_renderer_fixed_camera_real_3d",
+          "mujoco_renderer_fixed_camera_real_3d"
+        ],
+        "scene_id": null,
+        "source_artifacts": [
+          {
+            "controller_fingerprint_sha256": "21a29ff738f3c8f36462318ed6cec2ed258d3eea1092016cf3c6ea61acbd6c2b",
+            "controller_id": "trusted_adaptive_mpc",
+            "measurement_seed": 44104,
+            "panel_label": "High Flexion",
+            "patient_id": "registered_moderate_anchor",
+            "rendered_human_geometry": {
+              "shank_length_m": 0.40076,
+              "thigh_length_m": 0.43688
+            },
+            "source_evidence_category": "report_generalization_statistical",
+            "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc.json",
+            "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/patient_generalization/study/registered_moderate_anchor__registered_high_flexion_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc_trace.npz",
+            "source_trace_sha256": "0e5090f4e53b6394239fa915cd1a831955d6a017cd874d66014a218dd344bcc5",
+            "trajectory_id": "registered_high_flexion_23s"
+          },
+          {
+            "controller_fingerprint_sha256": "21a29ff738f3c8f36462318ed6cec2ed258d3eea1092016cf3c6ea61acbd6c2b",
+            "controller_id": "trusted_adaptive_mpc",
+            "measurement_seed": 44104,
+            "panel_label": "Moderate ROM",
+            "patient_id": "registered_moderate_anchor",
+            "rendered_human_geometry": {
+              "shank_length_m": 0.40076,
+              "thigh_length_m": 0.43688
+            },
+            "source_evidence_category": "report_trajectory_demo_only",
+            "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/trajectory_generalization/demo_sources/registered_moderate_anchor__moderate_rom_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc.json",
+            "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/trajectory_generalization/demo_sources/registered_moderate_anchor__moderate_rom_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc_trace.npz",
+            "source_trace_sha256": "9e5e8897faf01a96fcf8014e3b50b3c18a9e22d94a6d129634c3e3937351757c",
+            "trajectory_id": "moderate_rom_23s"
+          },
+          {
+            "controller_fingerprint_sha256": "21a29ff738f3c8f36462318ed6cec2ed258d3eea1092016cf3c6ea61acbd6c2b",
+            "controller_id": "trusted_adaptive_mpc",
+            "measurement_seed": 44104,
+            "panel_label": "Hip Dominant",
+            "patient_id": "registered_moderate_anchor",
+            "rendered_human_geometry": {
+              "shank_length_m": 0.40076,
+              "thigh_length_m": 0.43688
+            },
+            "source_evidence_category": "report_trajectory_demo_only",
+            "source_summary_path": "stages/stage4_adaptive_control/results/controller_validation/trajectory_generalization/demo_sources/registered_moderate_anchor__hip_dominant_low_knee_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc.json",
+            "source_trace_path": "stages/stage4_adaptive_control/results/controller_validation/trajectory_generalization/demo_sources/registered_moderate_anchor__hip_dominant_low_knee_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc_trace.npz",
+            "source_trace_sha256": "08bf6dc454aac466c7dcfb89d8a594bffa947a2c2c7d47795d220ccb9c520fa0",
+            "trajectory_id": "hip_dominant_low_knee_23s"
+          }
+        ]
+      },
+      "sha256": "2845ce8115634e3f60cf458ff4a11326f843f11d9585c95625782df904c623c7",
+      "summary_duration_s": 2.0
+    }
+  },
+  "visualization_source_manifest_path": "stages/stage4_adaptive_control/results/controller_validation/visualization_sources/visualization_source_manifest.json",
+  "visualization_source_manifest_sha256": "8725f05e80256ac696eb1477ea4a055ca313356fe1f6369a173e1905420fd1ef"
+}

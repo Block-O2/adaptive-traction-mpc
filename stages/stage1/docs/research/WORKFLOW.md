@@ -40,4 +40,4 @@ Authoritative promotion requires all of the following:
 - user-run formal execution;
 - a reviewed conclusion.
 
-Artifact retention, output placement, and authoritative-result rules are defined in [results/README.md](../../results/README.md). That policy takes precedence over this workflow's brief evidence-level summary.
+Artifact retention, output placement, and authoritative-result rules are defined in the [final-results index](../../results/final/README.md). That policy takes precedence over this workflow's brief evidence-level summary.

@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adaptive-traction-mpc-stage4"
+version = "0.1.0"
+description = "Trust-gated adaptive MPC and report validation for the Stage-3 coupled plant."
+requires-python = ">=3.10"
+dependencies = [
+    "imageio",
+    "mujoco",
+    "numpy",
+    "Pillow",
+    "scipy",
+]
+
+[project.optional-dependencies]
+dev = ["imageio-ffmpeg", "pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

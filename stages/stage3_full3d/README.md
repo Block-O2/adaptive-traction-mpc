@@ -111,53 +111,15 @@ rejects transmission. In particular, the laboratory CR12 torque-control
 capability remains unknown until confirmed by the exact controller and its
 matching manufacturer API documentation.
 
-## Stage 4 one-shot adaptive checkpoint
+## Stage-4 dependency boundary
 
-The `stage4-one-shot-adaptive-high-flexion` tag preserves the approved
-population-prior cold-start implementation and its single 23-second adaptive
-high-flexion execution. Estimator and controller inputs are restricted to
-robot state/FK, measured cuff pose/twist, reconstructed cuff wrench, and the
-nominal Human-V2 population prior. MuJoCo Human truth is evaluation-only.
+Adaptive estimation, trust logic, MPC, report validation, and their curated
+evidence now live in [`../stage4_adaptive_control/`](../stage4_adaptive_control/).
+Stage 4 imports this package as its explicit plant/simulation dependency; no
+Stage-3 implementation is duplicated there. Historical tags retain the former
+co-located layout.
 
-See [`docs/STAGE4_ONE_SHOT_ADAPTIVE_CLOSEOUT.md`](docs/STAGE4_ONE_SHOT_ADAPTIVE_CLOSEOUT.md)
-for the frozen evidence boundary, commands, metrics, and remaining hardware
-blocker.
-
-The post-checkpoint sensor-realism engineering ladder is documented separately
-in [`docs/STAGE4_SENSOR_REALISM_ENGINEERING.md`](docs/STAGE4_SENSOR_REALISM_ENGINEERING.md).
-It does not modify the frozen Stage-4 estimator/controller checkpoint and does
-not claim that its deterministic perturbations are measured CR12 sensor data.
-
-The follow-on comparison replacing instantaneous acceleration regression with
-a causal integral base-parameter identifier is documented in
-[`docs/STAGE4_INTEGRAL_UKF_COMPARISON.md`](docs/STAGE4_INTEGRAL_UKF_COMPARISON.md).
-Its registered engineering evidence selects the minimal architecture without
-a state UKF; no checkpoint or formal evidence is changed.
-
-## Current Stage-4 adaptive baseline
-
-The current baseline extends the earlier one-shot checkpoint with the frozen
-1:1 cuff-aware allocator, integral 11-base estimator, hierarchical statistical
-trust using one incumbent and at most one challenger, confidence pacing, and
-the unchanged 32-candidate / 2-iteration / 15-step CEM MPC definition. The
-batched MPC implementation is the default engineering path; the scalar path is
-retained as a regression and fallback reference.
-
-The registered prior-only versus trusted-adaptive simulation completed in both
-arms. Trusted adaptation improved tracking and generalized-torque prediction,
-but did not materially reduce cuff interaction. The implementation replay
-measured approximately 9.4 ms per MPC call and 16.5 ms per full cycle on the
-audited desktop. This is replay evidence, not a hard-realtime or hardware proof,
-and no clinical or production claim is made.
-
-The authoritative technical state is maintained in
-[`docs/research/CURRENT_STATE.md`](docs/research/CURRENT_STATE.md), with the
-canonical inventory and hashes in
-[`docs/research/STAGE4_EVIDENCE_MAP.md`](docs/research/STAGE4_EVIDENCE_MAP.md).
-Stage 4 now includes reviewed patient, sensor, trajectory, and crossed-
-replication evidence. The follow-on professor-facing baseline/generalization
-study and visualizations are complete and indexed in
-[`docs/research/STAGE4_REPORT_VALIDATION_EVIDENCE_MAP.md`](docs/research/STAGE4_REPORT_VALIDATION_EVIDENCE_MAP.md).
-The project remains simulation-qualified; the next engineering step is
-hardware-preparation and robot-only commissioning planning. Optional
-out-of-family model-inadequacy work remains a separate future question.
+The current adaptive-control state and evidence are documented in the
+[Stage-4 current-state](../stage4_adaptive_control/docs/research/CURRENT_STATE.md)
+and [evidence-map](../stage4_adaptive_control/docs/research/STAGE4_EVIDENCE_MAP.md)
+entry points. This Stage-3 package remains the simulation foundation only.

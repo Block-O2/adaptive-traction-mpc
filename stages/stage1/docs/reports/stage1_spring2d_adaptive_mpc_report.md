@@ -199,7 +199,7 @@ These metrics are from the curated Stage 1 result set in `results/archive/legacy
 
 Stage 10-0 removed the regenerable per-run GIFs and retained the aggregate comparison figure.
 
-![Adaptive conditions comparison](../../results/archive/legacy_stages/stage1_spring2d/figures/adaptive_conditions_comparison.png)
+![Adaptive conditions comparison](../../results/final/archive/legacy_stages/stage1_spring2d/figures/adaptive_conditions_comparison.png)
 
 ## 5. Analysis
 
