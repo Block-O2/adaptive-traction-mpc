@@ -440,43 +440,45 @@ class HumanSpaceMPC:
 
     @staticmethod
     def _batched_soft_limit_torque(
-        q_rad: np.ndarray, dq_rad_s: np.ndarray
+        q_rad: np.ndarray,
+        dq_rad_s: np.ndarray,
+        human: HumanV2Parameters = HUMAN,
     ) -> np.ndarray:
         """Vectorized equivalent of the frozen two-joint soft-limit law."""
 
         q = np.asarray(q_rad, dtype=float)
         dq = np.asarray(dq_rad_s, dtype=float)
         lower = (
-            np.asarray(HUMAN.q_min_rad)
-            + HUMAN.soft_limit_margin_rad
-            - HUMAN.soft_limit_numerical_tolerance_rad
+            np.asarray(human.q_min_rad)
+            + human.soft_limit_margin_rad
+            - human.soft_limit_numerical_tolerance_rad
         )
         upper = (
-            np.asarray(HUMAN.q_max_rad)
-            - HUMAN.soft_limit_margin_rad
-            + HUMAN.soft_limit_numerical_tolerance_rad
+            np.asarray(human.q_max_rad)
+            - human.soft_limit_margin_rad
+            + human.soft_limit_numerical_tolerance_rad
         )
         torque = np.zeros_like(q)
         below = q < lower
         above = q > upper
         lower_z = np.where(
-            below, (lower - q) / HUMAN.soft_limit_margin_rad, 0.0
+            below, (lower - q) / human.soft_limit_margin_rad, 0.0
         )
         upper_z = np.where(
-            above, (q - upper) / HUMAN.soft_limit_margin_rad, 0.0
+            above, (q - upper) / human.soft_limit_margin_rad, 0.0
         )
         torque += np.where(
             below,
-            HUMAN.soft_limit_boundary_torque_nm * lower_z**3
-            + HUMAN.soft_limit_damping_nms_rad
+            human.soft_limit_boundary_torque_nm * lower_z**3
+            + human.soft_limit_damping_nms_rad
             * lower_z**2
             * np.maximum(-dq, 0.0),
             0.0,
         )
         torque += np.where(
             above,
-            -HUMAN.soft_limit_boundary_torque_nm * upper_z**3
-            - HUMAN.soft_limit_damping_nms_rad
+            -human.soft_limit_boundary_torque_nm * upper_z**3
+            - human.soft_limit_damping_nms_rad
             * upper_z**2
             * np.maximum(dq, 0.0),
             0.0,
@@ -517,7 +519,7 @@ class HumanSpaceMPC:
             + beta[10] * dq2
         )
         zero_acceleration -= self._batched_soft_limit_torque(
-            x[..., :2], x[..., 2:]
+            x[..., :2], x[..., 2:], human.rom_human
         )
         mass = np.empty(x.shape[:-1] + (2, 2), dtype=float)
         mass[..., 0, 0] = beta[0] + 2.0 * beta[2] * cosine

@@ -13,6 +13,7 @@ import mujoco
 import numpy as np
 import pytest
 
+from traction_mpc_stage3.cuff_adapter import CUFF_ADAPTER
 from traction_mpc_stage3.frames import ATTACHMENT_FROM_CUFF, WORLD_FROM_BASE
 from traction_mpc_stage3.reference import stage2_cuff_pose_reference
 from traction_mpc_stage3.robot import (
@@ -91,7 +92,12 @@ def test_model_structure_frames_and_inertias(validation_result: dict[str, object
     )
     np.testing.assert_allclose(WORLD_FROM_BASE.translation, [1.10, -0.62, 0.04])
     np.testing.assert_allclose(ATTACHMENT_FROM_CUFF.rotation, np.eye(3))
-    np.testing.assert_allclose(ATTACHMENT_FROM_CUFF.translation, np.zeros(3))
+    np.testing.assert_allclose(
+        ATTACHMENT_FROM_CUFF.translation,
+        [0.0, CUFF_ADAPTER.cuff_center_standoff_m, 0.0],
+    )
+    assert CUFF_ADAPTER.cuff_center_standoff_m == pytest.approx(0.140)
+    assert CUFF_ADAPTER.connector_radius_m == pytest.approx(0.013)
 
 
 def test_actuators_are_explicit_one_to_one_torque_motors(
@@ -118,6 +124,35 @@ def test_fk_and_jacobian_finite_difference(validation_result: dict[str, object])
         atol=1e-9,
     )
     assert validation_result["jacobian"]["max_abs_error"] < 1e-7
+
+
+def test_140mm_cuff_point_jacobian_includes_rotational_offset_velocity() -> None:
+    robot = UR10eTorqueRobot()
+    q = robot.home_q_rad + np.radians([4.0, -3.0, 2.0, 1.0, -2.0, 3.0])
+    dq = np.array([0.17, -0.11, 0.08, -0.05, 0.07, -0.03])
+    offset = ATTACHMENT_FROM_CUFF.translation
+    robot.set_configuration(q)
+    wrist_jacobian = robot.attachment_jacobian()
+    cuff_jacobian = robot.rigid_offset_jacobian(offset)
+    offset_base = robot.attachment_pose().rotation @ offset
+    omega = wrist_jacobian[3:] @ dq
+    expected_linear_velocity = (
+        wrist_jacobian[:3] @ dq + np.cross(omega, offset_base)
+    )
+    np.testing.assert_allclose(
+        cuff_jacobian[:3] @ dq, expected_linear_velocity, atol=1e-12
+    )
+
+    epsilon = 1e-7
+    cuff_positions = []
+    for sign in (1.0, -1.0):
+        robot.set_configuration(q + sign * epsilon * dq)
+        pose = robot.attachment_pose()
+        cuff_positions.append(pose.translation + pose.rotation @ offset)
+    finite_difference = (cuff_positions[0] - cuff_positions[1]) / (2.0 * epsilon)
+    np.testing.assert_allclose(
+        cuff_jacobian[:3] @ dq, finite_difference, atol=1e-7
+    )
 
 
 def test_reference_port_matches_frozen_stage2_source() -> None:
@@ -182,7 +217,10 @@ def test_wrench_mapping_gravity_hold_and_modeled_limits(
     for check in validation_result["wrench_mapping"].values():
         assert check["mj_applyFT_max_abs_error_nm"] < 1e-12
         assert check["gravity_plus_load_peak_limit_fraction"] < 1.0
-    assert validation_result["maximum_synthetic_gravity_plus_load_limit_fraction"] < 0.6
+    assert validation_result["maximum_synthetic_gravity_plus_load_limit_fraction"] < 1.0
+    assert validation_result["maximum_synthetic_gravity_plus_load_limit_fraction"] == pytest.approx(
+        0.603812018490214
+    )
     hold = validation_result["gravity_compensated_hold"]
     assert hold["max_abs_joint_drift_rad"] < 1e-12
     assert hold["max_abs_joint_speed_rad_s"] < 1e-12

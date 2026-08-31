@@ -11,7 +11,9 @@ import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation
 
+from .cuff_adapter import CUFF_ADAPTER
 from .frames import WORLD_FROM_BASE, base_from_attachment_target
+from .frames import ATTACHMENT_FROM_CUFF, RigidTransform
 from .human import (
     CUFF_TRANSLATIONAL_FORCE_GATE_N,
     HUMAN,
@@ -49,7 +51,11 @@ class CuffForceCommandLimitError(RuntimeError):
         )
 
 
-def build_coupled_model_xml(human: HumanV2Parameters = HUMAN) -> str:
+def build_coupled_model_xml(
+    human: HumanV2Parameters = HUMAN,
+    *,
+    world_from_base: RigidTransform = WORLD_FROM_BASE,
+) -> str:
     """Build the coupled MJCF from the committed torque-model structure."""
 
     root = ET.parse(TORQUE_MODEL_PATH).getroot()
@@ -70,7 +76,25 @@ def build_coupled_model_xml(human: HumanV2Parameters = HUMAN) -> str:
     assert worldbody is not None
     base = worldbody.find("body[@name='base']")
     assert base is not None
-    base.set("pos", " ".join(f"{value:.12g}" for value in WORLD_FROM_BASE.translation))
+    original_base_quaternion = np.fromstring(
+        base.get("quat", "1 0 0 0"), sep=" "
+    )
+    original_base_quaternion /= np.linalg.norm(original_base_quaternion)
+    original_base_rotation = Rotation.from_quat(
+        original_base_quaternion[[1, 2, 3, 0]]
+    ).as_matrix()
+    base.set(
+        "pos",
+        " ".join(f"{value:.12g}" for value in world_from_base.translation),
+    )
+    base_quaternion_xyzw = Rotation.from_matrix(
+        world_from_base.rotation @ original_base_rotation
+    ).as_quat()
+    base_quaternion_wxyz = base_quaternion_xyzw[[3, 0, 1, 2]]
+    base.set(
+        "quat",
+        " ".join(f"{value:.12g}" for value in base_quaternion_wxyz),
+    )
     # Collision bit domains preserve the intended mechanics while preventing
     # the newly combined models from adding robot--bed or robot--human contact:
     # robot self=bit 1, Human=bit 2, bed=bit 4. Human and bed cross-affinities
@@ -80,6 +104,67 @@ def build_coupled_model_xml(human: HumanV2Parameters = HUMAN) -> str:
         if geom_class in {"collision", "eef_collision"}:
             geom.set("contype", "1")
             geom.set("conaffinity", "1")
+
+    wrist = base.find(".//body[@name='wrist_3_link']")
+    assert wrist is not None
+    flange_site = wrist.find("site[@name='attachment_site']")
+    assert flange_site is not None
+    flange_position = np.fromstring(flange_site.get("pos", ""), sep=" ")
+    flange_quaternion = np.fromstring(flange_site.get("quat", ""), sep=" ")
+    flange_quaternion /= np.linalg.norm(flange_quaternion)
+    wrist_from_flange = RigidTransform(
+        Rotation.from_quat(
+            [
+                flange_quaternion[1],
+                flange_quaternion[2],
+                flange_quaternion[3],
+                flange_quaternion[0],
+            ]
+        ).as_matrix(),
+        flange_position,
+    )
+    wrist_from_cuff = wrist_from_flange.compose(ATTACHMENT_FROM_CUFF)
+    cuff_quaternion_xyzw = Rotation.from_matrix(
+        wrist_from_cuff.rotation
+    ).as_quat()
+    cuff_quaternion_wxyz = cuff_quaternion_xyzw[[3, 0, 1, 2]]
+    connector_end_attachment = np.array(
+        [0.0, CUFF_ADAPTER.connector_length_to_cuff_surface_m, 0.0]
+    )
+    connector_end_wrist = (
+        wrist_from_flange.rotation @ connector_end_attachment
+        + wrist_from_flange.translation
+    )
+    ET.SubElement(
+        wrist,
+        "geom",
+        {
+            "name": "cuff_adapter_geom",
+            "type": "cylinder",
+            "fromto": " ".join(
+                f"{value:.12g}"
+                for value in np.concatenate(
+                    [wrist_from_flange.translation, connector_end_wrist]
+                )
+            ),
+            "size": f"{CUFF_ADAPTER.connector_radius_m:.12g}",
+            "group": "3",
+            "contype": "1",
+            "conaffinity": "1",
+            "rgba": "0.18 0.72 0.72 1",
+        },
+    )
+    ET.SubElement(
+        wrist,
+        "site",
+        {
+            "name": "adapter_cuff_site",
+            "pos": " ".join(f"{value:.12g}" for value in wrist_from_cuff.translation),
+            "quat": " ".join(f"{value:.12g}" for value in cuff_quaternion_wxyz),
+            "size": "0.006",
+            "rgba": "0.10 0.85 0.85 1",
+        },
+    )
 
     i1_half = 0.51 * human.thigh_inertia_kg_m2
     i2_half = 0.51 * human.shank_inertia_kg_m2
@@ -140,7 +225,7 @@ def build_coupled_model_xml(human: HumanV2Parameters = HUMAN) -> str:
         "weld",
         {
             "name": "sleeve_connection",
-            "site1": "attachment_site",
+            "site1": "adapter_cuff_site",
             "site2": "sleeve_attach_site",
             "solref": f"{SLEEVE_SOLREF[0]:.9g} {SLEEVE_SOLREF[1]:.9g}",
             "solimp": (
@@ -184,9 +269,17 @@ class CoupledObservation:
 class CoupledUR10eHumanV2:
     """Eight-DoF plant: six UR10e joints and frozen planar Human V2."""
 
-    def __init__(self, human: HumanV2Parameters = HUMAN) -> None:
+    def __init__(
+        self,
+        human: HumanV2Parameters = HUMAN,
+        *,
+        world_from_base: RigidTransform = WORLD_FROM_BASE,
+    ) -> None:
         self.human = human
-        self.model = mujoco.MjModel.from_xml_string(build_coupled_model_xml(human))
+        self.world_from_base = world_from_base
+        self.model = mujoco.MjModel.from_xml_string(
+            build_coupled_model_xml(human, world_from_base=world_from_base)
+        )
         self.data = mujoco.MjData(self.model)
         self.human_joint_names = ("hip_joint", "knee_joint")
         self.robot_joint_names = JOINT_NAMES
@@ -197,10 +290,13 @@ class CoupledUR10eHumanV2:
         self.human_dof_indices = self.model.jnt_dofadr[self.human_joint_ids]
         self.robot_dof_indices = self.model.jnt_dofadr[self.robot_joint_ids]
         self.actuator_ids = np.array([self.model.actuator(n).id for n in ACTUATOR_NAMES])
-        self.attachment_site_id = self.model.site("attachment_site").id
+        self.flange_site_id = self.model.site("attachment_site").id
+        self.attachment_site_id = self.model.site("adapter_cuff_site").id
         self.sleeve_site_id = self.model.site("sleeve_attach_site").id
         self.weld_id = self.model.equality("sleeve_connection").id
         self.bed_geom_id = self.model.geom("bed").id
+        self.adapter_geom_id = self.model.geom("cuff_adapter_geom").id
+        self.sleeve_geom_id = self.model.geom("sleeve_geom").id
         self.human_geom_ids = {
             self.model.geom("thigh_geom").id,
             self.model.geom("shank_geom").id,

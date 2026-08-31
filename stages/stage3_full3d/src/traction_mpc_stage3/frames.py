@@ -10,6 +10,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from .cuff_adapter import CUFF_ADAPTER
+
 
 @dataclass(frozen=True)
 class RigidTransform:
@@ -50,10 +52,14 @@ WORLD_FROM_BASE = RigidTransform(
     np.array([1.10, -0.62, 0.04], dtype=float),
 )
 
-# Provisional rigid adapter: the Menagerie attachment_site frame is made
-# coincident with the Stage-2 cuff frame. The site's fixed wrist_3_link offset
-# and quaternion remain explicit in the MJCF and are not corrected in IK code.
-ATTACHMENT_FROM_CUFF = RigidTransform.identity()
+# Parameterized simulation-only side standoff.  Positive attachment-frame Y
+# places the robot attachment site on the negative world-Y side of the planar
+# cuff.  The dimensions are derived in ``cuff_adapter.py`` from committed
+# wrist/cuff/shank collision geometry; this is not CR12 hardware calibration.
+ATTACHMENT_FROM_CUFF = RigidTransform(
+    np.eye(3),
+    np.array([0.0, CUFF_ADAPTER.cuff_center_standoff_m, 0.0]),
+)
 
 
 def base_from_attachment_target(

@@ -1,0 +1,613 @@
+{
+  "design": "3 trajectories x 2 frozen MPC controllers x 1 measurement seed",
+  "dynamic_bed_contact_is_setup_specific_diagnostic": true,
+  "evidence_category": "small_engineering_pilot_not_formal_benchmark",
+  "frozen_mpc_config": {
+    "action_rate_scale_nm": [
+      20.0,
+      10.0
+    ],
+    "action_rate_weight": 0.005,
+    "action_scale_nm": [
+      60.0,
+      30.0
+    ],
+    "action_weight": 0.002,
+    "candidate_count": 32,
+    "cem_iterations": 2,
+    "cylindrical_cuff_length_m": 0.08,
+    "cylindrical_surface_effort_weight": 0.0,
+    "dq_error_scale_rad_s": [
+      0.13962634015954636,
+      0.13962634015954636
+    ],
+    "elite_count": 6,
+    "exploration_std_floor_nm": [
+      1.0,
+      0.5
+    ],
+    "exploration_std_nm": [
+      10.0,
+      5.0
+    ],
+    "horizon_steps": 15,
+    "interaction_force_normalization_n": 200.0,
+    "prediction_dt_s": 0.02,
+    "q_error_scale_rad": [
+      0.03490658503988659,
+      0.03490658503988659
+    ],
+    "random_seed": 20260824,
+    "resultant_force_weight": 0.0,
+    "wrench_slew_weight": 0.0
+  },
+  "frozen_settings_changed": false,
+  "high_rom_variant": {
+    "canonical_human_overwritten": false,
+    "changed_from_canonical": {
+      "q_max_rad": {
+        "canonical": [
+          1.3962634015954636,
+          1.7453292519943295
+        ],
+        "high_rom": [
+          2.181661564992912,
+          2.181661564992912
+        ]
+      }
+    },
+    "explicitly_unchanged": [
+      "height_m",
+      "body_mass_kg",
+      "gravity_m_s2",
+      "q_rest_rad",
+      "passive_stiffness_nm_rad",
+      "passive_damping_nms_rad",
+      "q_min_rad",
+      "soft_limit_margin_rad",
+      "soft_limit_numerical_tolerance_rad",
+      "soft_limit_boundary_torque_nm",
+      "soft_limit_damping_nms_rad"
+    ],
+    "passive_damping_nms_rad": [
+      5.0,
+      5.0
+    ],
+    "passive_stiffness_nm_rad": [
+      10.0,
+      10.0
+    ],
+    "q_max_deg": [
+      125.0,
+      125.0
+    ],
+    "q_min_deg": [
+      0.0,
+      0.0
+    ],
+    "q_rest_deg": [
+      5.0,
+      10.0
+    ],
+    "schema_version": "human_v2_high_rom_engineering_v2_125deg_both_joints",
+    "scope": "simulation engineering assumption pending physical/hardware validation; not a physiological ROM or passive-torque claim",
+    "soft_limit_boundary_torque_nm": 25.0,
+    "soft_limit_damping_nms_rad": 2.0,
+    "soft_limit_margin_deg": 5.0,
+    "trajectory_margins_deg": {
+      "aggressive_both_120_120": {
+        "endpoint_deg": [
+          120.0,
+          120.0
+        ],
+        "to_hard_upper_limit_deg": [
+          5.0,
+          5.0
+        ],
+        "to_upper_soft_zone_start_deg": [
+          0.0,
+          0.0
+        ]
+      },
+      "hip_dominant_100_60": {
+        "endpoint_deg": [
+          100.0,
+          60.0
+        ],
+        "to_hard_upper_limit_deg": [
+          25.0,
+          65.0
+        ],
+        "to_upper_soft_zone_start_deg": [
+          20.0,
+          60.0
+        ]
+      },
+      "knee_high_folding_90_120": {
+        "endpoint_deg": [
+          90.0,
+          120.0
+        ],
+        "to_hard_upper_limit_deg": [
+          35.0,
+          5.0
+        ],
+        "to_upper_soft_zone_start_deg": [
+          30.0,
+          0.0
+        ]
+      }
+    },
+    "upper_soft_zone_start_deg": [
+      120.0,
+      120.0
+    ]
+  },
+  "measurement_case": {
+    "force_bias_drift_n_s": [
+      0.04,
+      -0.03,
+      0.02
+    ],
+    "force_bias_n": [
+      1.5,
+      -1.0,
+      0.8
+    ],
+    "latency_s": 0.0,
+    "moment_bias_drift_nm_s": [
+      0.001,
+      -0.0008,
+      0.0006
+    ],
+    "moment_bias_nm": [
+      0.03,
+      -0.02,
+      0.015
+    ],
+    "name": "noise_bias_drift_200hz",
+    "noise": {
+      "cuff_orientation_std_rad": 0.0008726646259971648,
+      "cuff_position_std_m": 0.0003,
+      "force_std_n": 0.5,
+      "moment_std_nm": 0.02,
+      "robot_position_std_rad": 0.00034906585039886593,
+      "robot_velocity_std_rad_s": 0.0017453292519943296
+    },
+    "preprocessing_enabled": true,
+    "seed": 44104,
+    "update_rate_hz": 200.0
+  },
+  "multiple_seeds_run": false,
+  "paired_comparisons": {
+    "aggressive_both_120_120": {
+      "adaptive_improved_tracking_rmse": false,
+      "adaptive_minus_fixed_peak_cuff_force_n": 0.0,
+      "adaptive_minus_fixed_tracking_combined_rmse_deg": 0.0
+    },
+    "hip_dominant_100_60": {
+      "adaptive_improved_tracking_rmse": false,
+      "adaptive_minus_fixed_peak_cuff_force_n": 0.0,
+      "adaptive_minus_fixed_tracking_combined_rmse_deg": 0.0
+    },
+    "knee_high_folding_90_120": {
+      "adaptive_improved_tracking_rmse": false,
+      "adaptive_minus_fixed_peak_cuff_force_n": 0.0,
+      "adaptive_minus_fixed_tracking_combined_rmse_deg": 0.0
+    }
+  },
+  "patient_mismatch_added": false,
+  "post_run_validation": {
+    "corrected_pilot_rerun": false,
+    "disposition": "diagnostic_only_not_validated_controller_comparison",
+    "issue": "the measurement-side low-level robot Jacobian was evaluated at the pre-adapter attachment site instead of the 140 mm rigid-offset cuff point",
+    "reason_not_rerun": "the requested six-run cap was already consumed; no additional controller rollout was authorized",
+    "regression_after_fix": "ideal measured low-level law matches the coupled Stage-4 law"
+  },
+  "run_count": 6,
+  "soft_limit_interpretation": {
+    "all_recorded_activation_samples_are_lower_hip_zone_startup_or_return_transients": true,
+    "upper_120deg_soft_zone_entered_any_run": false
+  },
+  "runs": [
+    {
+      "acceleration_rms": {
+        "combined_deg_s2": 263.24725149277367,
+        "per_joint_deg_s2": [
+          105.55752762624557,
+          357.0095785807904
+        ]
+      },
+      "bed_contact": {
+        "peak_bed_force_n_god_view": 578.0210609540261,
+        "recorded_not_a_pilot_rejection_criterion": true
+      },
+      "completed_duration_s": 8.090000000000956,
+      "completion": false,
+      "controller": "fixed_mpc_prior_only",
+      "cuff_force_margin_to_200_n": 38.530449872659716,
+      "cuff_force_peak_n": 161.46955012734028,
+      "cuff_force_rms_n": 99.25004917205712,
+      "cuff_moment_peak_nm": 24.588418573816032,
+      "endpoint_deg": [
+        100.0,
+        60.0
+      ],
+      "events": {
+        "force_gate_events": 1,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "minimum_human_angle_deg": [
+        4.956961334710824,
+        9.91903034617186
+      ],
+      "mpc_mean_ms": 9.46835959761369,
+      "peak_human_angle_deg": [
+        68.07009575095816,
+        45.449695817243196
+      ],
+      "promotion_count": 0,
+      "promotion_times_s": [],
+      "robot": {
+        "joint_position_limit_samples": 0,
+        "peak_unclipped_torque_limit_fraction": 0.5782946654398626,
+        "torque_saturation_control_samples": 0
+      },
+      "rollout_wall_time_s": 8.118780124998011,
+      "soft_limit_activation": {
+        "entered": true,
+        "first_time_s": 0.005,
+        "sample_count": 209
+      },
+      "termination_reason": "total_commanded_cuff_force_gate",
+      "trace_sample_count": 8091,
+      "tracking_combined_rmse_deg": 0.6724417443358373,
+      "tracking_max_abs_error_deg": [
+        0.5242924965751856,
+        2.6966664493950376
+      ],
+      "tracking_rmse_deg": [
+        0.18080551940943537,
+        0.9336300997728864
+      ],
+      "trajectory": "hip_dominant_100_60"
+    },
+    {
+      "acceleration_rms": {
+        "combined_deg_s2": 263.24725149277367,
+        "per_joint_deg_s2": [
+          105.55752762624557,
+          357.0095785807904
+        ]
+      },
+      "bed_contact": {
+        "peak_bed_force_n_god_view": 578.0210609540261,
+        "recorded_not_a_pilot_rejection_criterion": true
+      },
+      "completed_duration_s": 8.090000000000956,
+      "completion": false,
+      "controller": "trusted_adaptive_mpc",
+      "cuff_force_margin_to_200_n": 38.530449872659716,
+      "cuff_force_peak_n": 161.46955012734028,
+      "cuff_force_rms_n": 99.25004917205712,
+      "cuff_moment_peak_nm": 24.588418573816032,
+      "endpoint_deg": [
+        100.0,
+        60.0
+      ],
+      "events": {
+        "force_gate_events": 1,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "minimum_human_angle_deg": [
+        4.956961334710824,
+        9.91903034617186
+      ],
+      "mpc_mean_ms": 9.535248488935865,
+      "peak_human_angle_deg": [
+        68.07009575095816,
+        45.449695817243196
+      ],
+      "promotion_count": 0,
+      "promotion_times_s": [],
+      "robot": {
+        "joint_position_limit_samples": 0,
+        "peak_unclipped_torque_limit_fraction": 0.5782946654398626,
+        "torque_saturation_control_samples": 0
+      },
+      "rollout_wall_time_s": 8.169299625002168,
+      "soft_limit_activation": {
+        "entered": true,
+        "first_time_s": 0.005,
+        "sample_count": 209
+      },
+      "termination_reason": "total_commanded_cuff_force_gate",
+      "trace_sample_count": 8091,
+      "tracking_combined_rmse_deg": 0.6724417443358373,
+      "tracking_max_abs_error_deg": [
+        0.5242924965751856,
+        2.6966664493950376
+      ],
+      "tracking_rmse_deg": [
+        0.18080551940943537,
+        0.9336300997728864
+      ],
+      "trajectory": "hip_dominant_100_60"
+    },
+    {
+      "acceleration_rms": {
+        "combined_deg_s2": 129.26808290113206,
+        "per_joint_deg_s2": [
+          124.67589073211141,
+          133.70264314523672
+        ]
+      },
+      "bed_contact": {
+        "peak_bed_force_n_god_view": 809.9225707457779,
+        "recorded_not_a_pilot_rejection_criterion": true
+      },
+      "completed_duration_s": 23.000000000005127,
+      "completion": true,
+      "controller": "fixed_mpc_prior_only",
+      "cuff_force_margin_to_200_n": 49.34949980126453,
+      "cuff_force_peak_n": 150.65050019873547,
+      "cuff_force_rms_n": 112.17167948545094,
+      "cuff_moment_peak_nm": 78.11129581776156,
+      "endpoint_deg": [
+        90.0,
+        120.0
+      ],
+      "events": {
+        "force_gate_events": 0,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "minimum_human_angle_deg": [
+        4.672609226450856,
+        9.91903034617186
+      ],
+      "mpc_mean_ms": 9.58013926955059,
+      "peak_human_angle_deg": [
+        92.83603629848855,
+        115.89148676332289
+      ],
+      "promotion_count": 0,
+      "promotion_times_s": [],
+      "robot": {
+        "joint_position_limit_samples": 0,
+        "peak_unclipped_torque_limit_fraction": 0.5466462413703587,
+        "torque_saturation_control_samples": 0
+      },
+      "rollout_wall_time_s": 24.125086166000983,
+      "soft_limit_activation": {
+        "entered": true,
+        "first_time_s": 0.005,
+        "sample_count": 526
+      },
+      "termination_reason": "completed",
+      "trace_sample_count": 23001,
+      "tracking_combined_rmse_deg": 1.9361058982538748,
+      "tracking_max_abs_error_deg": [
+        2.8360362984885574,
+        4.673395286323664
+      ],
+      "tracking_rmse_deg": [
+        1.2799453129111134,
+        2.4204859211455187
+      ],
+      "trajectory": "knee_high_folding_90_120"
+    },
+    {
+      "acceleration_rms": {
+        "combined_deg_s2": 129.26808290113206,
+        "per_joint_deg_s2": [
+          124.67589073211141,
+          133.70264314523672
+        ]
+      },
+      "bed_contact": {
+        "peak_bed_force_n_god_view": 809.9225707457779,
+        "recorded_not_a_pilot_rejection_criterion": true
+      },
+      "completed_duration_s": 23.000000000005127,
+      "completion": true,
+      "controller": "trusted_adaptive_mpc",
+      "cuff_force_margin_to_200_n": 49.34949980126453,
+      "cuff_force_peak_n": 150.65050019873547,
+      "cuff_force_rms_n": 112.17167948545094,
+      "cuff_moment_peak_nm": 78.11129581776156,
+      "endpoint_deg": [
+        90.0,
+        120.0
+      ],
+      "events": {
+        "force_gate_events": 0,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "minimum_human_angle_deg": [
+        4.672609226450856,
+        9.91903034617186
+      ],
+      "mpc_mean_ms": 9.62621517302266,
+      "peak_human_angle_deg": [
+        92.83603629848855,
+        115.89148676332289
+      ],
+      "promotion_count": 0,
+      "promotion_times_s": [],
+      "robot": {
+        "joint_position_limit_samples": 0,
+        "peak_unclipped_torque_limit_fraction": 0.5466462413703587,
+        "torque_saturation_control_samples": 0
+      },
+      "rollout_wall_time_s": 24.226433208001254,
+      "soft_limit_activation": {
+        "entered": true,
+        "first_time_s": 0.005,
+        "sample_count": 526
+      },
+      "termination_reason": "completed",
+      "trace_sample_count": 23001,
+      "tracking_combined_rmse_deg": 1.9361058982538748,
+      "tracking_max_abs_error_deg": [
+        2.8360362984885574,
+        4.673395286323664
+      ],
+      "tracking_rmse_deg": [
+        1.2799453129111134,
+        2.4204859211455187
+      ],
+      "trajectory": "knee_high_folding_90_120"
+    },
+    {
+      "acceleration_rms": {
+        "combined_deg_s2": 139.0153308373291,
+        "per_joint_deg_s2": [
+          114.64400365222602,
+          159.70997727822922
+        ]
+      },
+      "bed_contact": {
+        "peak_bed_force_n_god_view": 749.3025735978919,
+        "recorded_not_a_pilot_rejection_criterion": true
+      },
+      "completed_duration_s": 7.570000000000863,
+      "completion": false,
+      "controller": "fixed_mpc_prior_only",
+      "cuff_force_margin_to_200_n": 32.45977620453081,
+      "cuff_force_peak_n": 167.5402237954692,
+      "cuff_force_rms_n": 102.34924825060851,
+      "cuff_moment_peak_nm": 29.86876406149263,
+      "endpoint_deg": [
+        120.0,
+        120.0
+      ],
+      "events": {
+        "force_gate_events": 1,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "minimum_human_angle_deg": [
+        4.956961334710824,
+        9.91903034617186
+      ],
+      "mpc_mean_ms": 9.704779018379199,
+      "peak_human_angle_deg": [
+        72.16781217386765,
+        76.53461102316864
+      ],
+      "promotion_count": 0,
+      "promotion_times_s": [],
+      "robot": {
+        "joint_position_limit_samples": 0,
+        "peak_unclipped_torque_limit_fraction": 0.5071164030420782,
+        "torque_saturation_control_samples": 0
+      },
+      "rollout_wall_time_s": 7.802604584001529,
+      "soft_limit_activation": {
+        "entered": true,
+        "first_time_s": 0.005,
+        "sample_count": 205
+      },
+      "termination_reason": "total_commanded_cuff_force_gate",
+      "trace_sample_count": 7571,
+      "tracking_combined_rmse_deg": 0.17274103455754525,
+      "tracking_max_abs_error_deg": [
+        0.9941151980608253,
+        1.7965209620857137
+      ],
+      "tracking_rmse_deg": [
+        0.1670655670557178,
+        0.17823587277642391
+      ],
+      "trajectory": "aggressive_both_120_120"
+    },
+    {
+      "acceleration_rms": {
+        "combined_deg_s2": 139.0153308373291,
+        "per_joint_deg_s2": [
+          114.64400365222602,
+          159.70997727822922
+        ]
+      },
+      "bed_contact": {
+        "peak_bed_force_n_god_view": 749.3025735978919,
+        "recorded_not_a_pilot_rejection_criterion": true
+      },
+      "completed_duration_s": 7.570000000000863,
+      "completion": false,
+      "controller": "trusted_adaptive_mpc",
+      "cuff_force_margin_to_200_n": 32.45977620453081,
+      "cuff_force_peak_n": 167.5402237954692,
+      "cuff_force_rms_n": 102.34924825060851,
+      "cuff_moment_peak_nm": 29.86876406149263,
+      "endpoint_deg": [
+        120.0,
+        120.0
+      ],
+      "events": {
+        "force_gate_events": 1,
+        "mpc_solver_failures": 0,
+        "mujoco_warning_counts": {},
+        "rom_event_samples": 0,
+        "unintended_contact_pairs": []
+      },
+      "minimum_human_angle_deg": [
+        4.956961334710824,
+        9.91903034617186
+      ],
+      "mpc_mean_ms": 9.602895569848219,
+      "peak_human_angle_deg": [
+        72.16781217386765,
+        76.53461102316864
+      ],
+      "promotion_count": 0,
+      "promotion_times_s": [],
+      "robot": {
+        "joint_position_limit_samples": 0,
+        "peak_unclipped_torque_limit_fraction": 0.5071164030420782,
+        "torque_saturation_control_samples": 0
+      },
+      "rollout_wall_time_s": 7.699714042002597,
+      "soft_limit_activation": {
+        "entered": true,
+        "first_time_s": 0.005,
+        "sample_count": 205
+      },
+      "termination_reason": "total_commanded_cuff_force_gate",
+      "trace_sample_count": 7571,
+      "tracking_combined_rmse_deg": 0.17274103455754525,
+      "tracking_max_abs_error_deg": [
+        0.9941151980608253,
+        1.7965209620857137
+      ],
+      "tracking_rmse_deg": [
+        0.1670655670557178,
+        0.17823587277642391
+      ],
+      "trajectory": "aggressive_both_120_120"
+    }
+  ],
+  "schema_version": "high_rom_fixed_vs_trusted_adaptive_small_pilot_v1",
+  "trajectory_profile": {
+    "duration_s": 23.0,
+    "family": "quintic outbound, target hold, quintic return, final hold",
+    "outbound_start_s": 1.0,
+    "return_reached_s": 22.0,
+    "return_start_s": 14.5,
+    "target_reached_s": 13.0
+  }
+}

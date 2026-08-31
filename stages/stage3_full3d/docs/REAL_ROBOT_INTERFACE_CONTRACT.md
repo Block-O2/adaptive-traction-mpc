@@ -64,8 +64,10 @@ BASE_FROM_CUFF
 ```
 
 The Stage-3 simulation explicitly injects its Menagerie flange-to-attachment
-site definition and provisional identity `ATTACHMENT_FROM_CUFF`. No controller
-logic owns or assumes that identity. A CR12 backend requires a supplied
+site definition and parameterized UR10e-surrogate side standoff. Its dimensions
+come from committed simulation collision geometry and are not hardware
+calibration. No controller logic owns or assumes those dimensions. A CR12
+backend requires a supplied
 `FrameCalibration` with provenance and has no implicit default.
 
 Before loaded hardware testing, measure and record:

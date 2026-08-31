@@ -1,0 +1,1411 @@
+{
+  "decision": {
+    "classification": "TOO-LATE / CONTROLLER-INTERNAL",
+    "next_controller_side_questions": [
+      "Make final low-level translational command force a feasibility constraint for the exact final selected MPC action path.",
+      "Instrument whether a force-safe CEM candidate exists and define an explicit HOLD/safe fallback when none exists instead of applying an over-limit fallback.",
+      "Persist 20 ms winner sequence, best/elite costs, candidate rejection counts, and force-component vectors to localize action-switch discontinuity before redesign."
+    ],
+    "observations": [
+      "Selected-sequence force margin does not shrink monotonically before either gate.",
+      "Tracking error, reference acceleration, and saved winner-action norm do not provide a common monotonic precursor.",
+      "For 100/60 the saved winner first-action norm jumps from 20.24 to 58.05 Nm on the gate record, while predicted force jumps from 113.51 to 212.81 N.",
+      "For 120/120 the last saved pre-gate prediction is 98.24 N at 0.09 s lead; the gate action and CEM internals were not persisted."
+    ],
+    "pacing_development_should_continue": false
+  },
+  "evidence_category": "diagnostic_read_only_preserved_evidence",
+  "field_availability": {
+    "allocator_feedforward_contribution": "MISSING",
+    "candidate_rejection_statistics": "MISSING per cycle; aggregate fixed runs recorded zero solver failures",
+    "cartesian_position_feedback_contribution": "MISSING",
+    "cartesian_velocity_feedback_contribution": "MISSING",
+    "cem_best_cost": "MISSING",
+    "cem_winner_action": "PARTIAL: first action only at 100 ms diagnostic states",
+    "dq_tracking_error": "DERIVED CAUSALLY from saved estimated dq and frozen reference at 100 ms states",
+    "elite_cost_spread_or_variance": "MISSING",
+    "final_low_level_command_force": "PARTIAL: exact gate attempt and 100 ms selected-sequence horizon peaks; no per-20 ms executed series",
+    "predicted_winner_force_margin": "PRESENT at 100 ms diagnostic states",
+    "q_tracking_error": "PRESENT at 100 ms diagnostic states",
+    "reference_q_dq_ddq": "DERIVED CAUSALLY from frozen quintic reference and saved wall time",
+    "winner_change": "PARTIAL: first-action change over 100 ms, not 20 ms"
+  },
+  "force_spike_decomposition": {
+    "aggressive_both_120_120": {
+      "cartesian_position_feedback_contribution": {
+        "reason": "not persisted as a separate vector or norm",
+        "status": "MISSING"
+      },
+      "cartesian_velocity_feedback_contribution": {
+        "reason": "not persisted as a separate vector or norm",
+        "status": "MISSING"
+      },
+      "decomposition_identity_verifiable": false,
+      "final_low_level_translational_command_attempt_n": 207.32100598486952,
+      "gate_margin_n": -7.321005984869515,
+      "note": "The preserved total gate attempt is exact; component attribution cannot be reconstructed without the missing per-cycle vectors and current allocation state.",
+      "rigid_cuff_allocator_feedforward_contribution": {
+        "reason": "not persisted in corrected fixed-clock trace or 100 ms diagnostic records",
+        "status": "MISSING"
+      }
+    },
+    "hip_dominant_100_60": {
+      "cartesian_position_feedback_contribution": {
+        "reason": "not persisted as a separate vector or norm",
+        "status": "MISSING"
+      },
+      "cartesian_velocity_feedback_contribution": {
+        "reason": "not persisted as a separate vector or norm",
+        "status": "MISSING"
+      },
+      "decomposition_identity_verifiable": false,
+      "final_low_level_translational_command_attempt_n": 212.81693018250718,
+      "gate_margin_n": -12.816930182507178,
+      "note": "The preserved total gate attempt is exact; component attribution cannot be reconstructed without the missing per-cycle vectors and current allocation state.",
+      "rigid_cuff_allocator_feedforward_contribution": {
+        "reason": "not persisted in corrected fixed-clock trace or 100 ms diagnostic records",
+        "status": "MISSING"
+      }
+    }
+  },
+  "held_out_evaluation": {
+    "held_out_result": {
+      "earliest_warning_lead_s": null,
+      "latest_pre_gate_record_lead_s": 0.09,
+      "record_count": 12,
+      "warning_record_count": 0
+    },
+    "held_out_trajectory": "aggressive_both_120_120",
+    "physically_interpretable_rule": "warn when the final-selected-sequence predicted translational command peak is at least 200 N",
+    "residual_reserve_sensitivity": {
+      "held_out_result": {
+        "earliest_warning_lead_s": 1.19,
+        "latest_pre_gate_record_lead_s": 0.09,
+        "record_count": 12,
+        "warning_record_count": 10
+      },
+      "interpretation": "The reserve warns across most of the gate-selected 1.2 s window, but no unaffected negative window was preserved, so specificity and useful localization cannot be established. It is a conservative alarm, not validated pacing predictability.",
+      "reserve_calibrated_on_training_trajectory_n": 111.0
+    },
+    "rule_fitted": false,
+    "training_result": {
+      "earliest_warning_lead_s": 0.0,
+      "latest_pre_gate_record_lead_s": 0.0,
+      "record_count": 13,
+      "warning_record_count": 1
+    },
+    "training_trajectory": "hip_dominant_100_60",
+    "why_no_small_regression": "Only one positive gate event per trajectory and no 20 ms negative-control window were preserved; fitting would be in-sample event-window leakage rather than held-out evidence."
+  },
+  "lead_time_audit": {
+    "aggressive_both_120_120": [
+      {
+        "available_record_lead_s": 0.09,
+        "causal_inputs_at_t": {
+          "cem_winner_first_action_norm_nm": 21.744374,
+          "dq_tracking_error_norm_deg_s": 42.910544,
+          "predicted_selected_sequence_force_margin_n": 101.760374,
+          "predicted_selected_sequence_force_peak_n": 98.239626,
+          "q_tracking_error_norm_deg": 0.853816,
+          "reference_ddq_norm_deg_s2": 1.801396,
+          "winner_first_action_change_from_previous_100ms_record_nm": 13.565115
+        },
+        "direct_200n_rule_warns": false,
+        "known_later_gate_event_outcome_only": true,
+        "requested_lead_s": 0.1
+      },
+      {
+        "available_record_lead_s": 0.19,
+        "causal_inputs_at_t": {
+          "cem_winner_first_action_norm_nm": 34.494922,
+          "dq_tracking_error_norm_deg_s": 20.145409,
+          "predicted_selected_sequence_force_margin_n": 90.939203,
+          "predicted_selected_sequence_force_peak_n": 109.060797,
+          "q_tracking_error_norm_deg": 0.453578,
+          "reference_ddq_norm_deg_s2": 1.5337,
+          "winner_first_action_change_from_previous_100ms_record_nm": 5.392242
+        },
+        "direct_200n_rule_warns": false,
+        "known_later_gate_event_outcome_only": true,
+        "requested_lead_s": 0.2
+      },
+      {
+        "available_record_lead_s": 0.29,
+        "causal_inputs_at_t": {
+          "cem_winner_first_action_norm_nm": 39.464409,
+          "dq_tracking_error_norm_deg_s": 5.962703,
+          "predicted_selected_sequence_force_margin_n": 77.984564,
+          "predicted_selected_sequence_force_peak_n": 122.015436,
+          "q_tracking_error_norm_deg": 0.908091,
+          "reference_ddq_norm_deg_s2": 1.263426,
+          "winner_first_action_change_from_previous_100ms_record_nm": 13.46995
+        },
+        "direct_200n_rule_warns": false,
+        "known_later_gate_event_outcome_only": true,
+        "requested_lead_s": 0.3
+      },
+      {
+        "available_record_lead_s": 0.49,
+        "causal_inputs_at_t": {
+          "cem_winner_first_action_norm_nm": 42.152665,
+          "dq_tracking_error_norm_deg_s": 14.222821,
+          "predicted_selected_sequence_force_margin_n": 68.762368,
+          "predicted_selected_sequence_force_peak_n": 131.237632,
+          "q_tracking_error_norm_deg": 0.434891,
+          "reference_ddq_norm_deg_s2": 0.716984,
+          "winner_first_action_change_from_previous_100ms_record_nm": 12.251259
+        },
+        "direct_200n_rule_warns": false,
+        "known_later_gate_event_outcome_only": true,
+        "requested_lead_s": 0.5
+      }
+    ],
+    "hip_dominant_100_60": [
+      {
+        "available_record_lead_s": 0.1,
+        "causal_inputs_at_t": {
+          "cem_winner_first_action_norm_nm": 20.242959,
+          "dq_tracking_error_norm_deg_s": 69.775732,
+          "predicted_selected_sequence_force_margin_n": 86.492433,
+          "predicted_selected_sequence_force_peak_n": 113.507567,
+          "q_tracking_error_norm_deg": 1.659223,
+          "reference_ddq_norm_deg_s2": 2.560018,
+          "winner_first_action_change_from_previous_100ms_record_nm": 18.317494
+        },
+        "direct_200n_rule_warns": false,
+        "known_later_gate_event_outcome_only": true,
+        "requested_lead_s": 0.1
+      },
+      {
+        "available_record_lead_s": 0.2,
+        "causal_inputs_at_t": {
+          "cem_winner_first_action_norm_nm": 38.551788,
+          "dq_tracking_error_norm_deg_s": 51.202553,
+          "predicted_selected_sequence_force_margin_n": 65.828507,
+          "predicted_selected_sequence_force_peak_n": 134.171493,
+          "q_tracking_error_norm_deg": 0.363804,
+          "reference_ddq_norm_deg_s2": 2.40453,
+          "winner_first_action_change_from_previous_100ms_record_nm": 4.010197
+        },
+        "direct_200n_rule_warns": false,
+        "known_later_gate_event_outcome_only": true,
+        "requested_lead_s": 0.2
+      },
+      {
+        "available_record_lead_s": 0.3,
+        "causal_inputs_at_t": {
+          "cem_winner_first_action_norm_nm": 35.366374,
+          "dq_tracking_error_norm_deg_s": 27.847622,
+          "predicted_selected_sequence_force_margin_n": 97.621352,
+          "predicted_selected_sequence_force_peak_n": 102.378648,
+          "q_tracking_error_norm_deg": 0.844701,
+          "reference_ddq_norm_deg_s2": 2.244817,
+          "winner_first_action_change_from_previous_100ms_record_nm": 9.441262
+        },
+        "direct_200n_rule_warns": false,
+        "known_later_gate_event_outcome_only": true,
+        "requested_lead_s": 0.3
+      },
+      {
+        "available_record_lead_s": 0.5,
+        "causal_inputs_at_t": {
+          "cem_winner_first_action_norm_nm": 41.306252,
+          "dq_tracking_error_norm_deg_s": 13.876144,
+          "predicted_selected_sequence_force_margin_n": 67.277275,
+          "predicted_selected_sequence_force_peak_n": 132.722725,
+          "q_tracking_error_norm_deg": 0.352739,
+          "reference_ddq_norm_deg_s2": 1.913961,
+          "winner_first_action_change_from_previous_100ms_record_nm": 13.276381
+        },
+        "direct_200n_rule_warns": false,
+        "known_later_gate_event_outcome_only": true,
+        "requested_lead_s": 0.5
+      }
+    ]
+  },
+  "sampling_limit": {
+    "consequence": "Sub-100 ms onset, per-cycle CEM internals, and exact warning time cannot be recovered from preserved evidence.",
+    "finest_preserved_pre_gate_diagnostic_period_s": 0.1,
+    "full_20ms_timeline_available": false,
+    "requested_cycle_period_s": 0.02
+  },
+  "schema_version": "high_rom_action_switch_predictability_audit_v1",
+  "scope": {
+    "controller_or_scientific_parameters_changed": false,
+    "measurement_seed": 44104,
+    "new_controller_rollouts_run": false,
+    "trajectories": [
+      "hip_dominant_100_60",
+      "aggressive_both_120_120"
+    ]
+  },
+  "source_evidence": {
+    "corrected_fixed_clock_pilot": {
+      "path": "stages/stage4_adaptive_control/results/high_rom_feasibility/post_jacobian_corrected_pilot/high_rom_dynamic_pilot_corrected.json",
+      "sha256": "ec93e0d445796e99acff4a516df2ba6779627f6730ccdfdb675fca1322d953cf"
+    },
+    "preserved_final_selected_action_diagnostic": {
+      "path": "stages/stage4_adaptive_control/results/high_rom_feasibility/receding_horizon_force_pacing/f_cmd_alpha_audit.json",
+      "sha256": "0d0ad5cee2579e4e0425946e1e4213f89f19d87b40fe10f312c9ab664f029206"
+    }
+  },
+  "timelines": {
+    "aggressive_both_120_120": {
+      "available_period_s": 0.1,
+      "available_record_count": 12,
+      "endpoint_deg": [
+        120.0,
+        120.0
+      ],
+      "gate_time_s": 7.750000000000923,
+      "records": [
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 113.943849,
+          "cem_winner_first_action_nm": [
+            40.403538,
+            1.511234
+          ],
+          "cem_winner_first_action_norm_nm": 40.43179,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            2.806421,
+            2.283729
+          ],
+          "dq_tracking_error_norm_deg_s": 3.618206,
+          "estimated_dq_deg_s": [
+            14.969585,
+            14.719407
+          ],
+          "estimated_q_deg": [
+            54.467119,
+            57.240472
+          ],
+          "lead_to_gate_s": 1.19,
+          "predicted_selected_sequence_force_margin_n": 85.072662,
+          "predicted_selected_sequence_force_peak_n": 114.927338,
+          "q_tracking_error_deg": [
+            -0.154931,
+            -0.224097
+          ],
+          "q_tracking_error_norm_deg": 0.272439,
+          "reference_ddq_deg_s2": [
+            0.873748,
+            0.835759
+          ],
+          "reference_ddq_norm_deg_s2": 1.209102,
+          "reference_dq_deg_s": [
+            17.776006,
+            17.003136
+          ],
+          "reference_q_deg": [
+            54.62205,
+            57.464569
+          ],
+          "wall_time_s": 6.56,
+          "winner_first_action_change_from_previous_100ms_record_nm": null
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 113.882051,
+          "cem_winner_first_action_nm": [
+            36.877216,
+            2.569235
+          ],
+          "cem_winner_first_action_norm_nm": 36.966607,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -1.124925,
+            0.361792
+          ],
+          "dq_tracking_error_norm_deg_s": 1.181672,
+          "estimated_dq_deg_s": [
+            18.978461,
+            16.715504
+          ],
+          "estimated_q_deg": [
+            56.334589,
+            58.910541
+          ],
+          "lead_to_gate_s": 1.09,
+          "predicted_selected_sequence_force_margin_n": 96.807063,
+          "predicted_selected_sequence_force_peak_n": 103.192937,
+          "q_tracking_error_deg": [
+            -0.069102,
+            -0.258207
+          ],
+          "q_tracking_error_norm_deg": 0.267294,
+          "reference_ddq_deg_s2": [
+            0.67664,
+            0.647221
+          ],
+          "reference_ddq_norm_deg_s2": 0.936342,
+          "reference_dq_deg_s": [
+            17.853536,
+            17.077295
+          ],
+          "reference_q_deg": [
+            56.403691,
+            59.168748
+          ],
+          "wall_time_s": 6.66,
+          "winner_first_action_change_from_previous_100ms_record_nm": 3.681618
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 117.192208,
+          "cem_winner_first_action_nm": [
+            38.706781,
+            2.329759
+          ],
+          "cem_winner_first_action_norm_nm": 38.776831,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            1.545663,
+            1.602877
+          ],
+          "dq_tracking_error_norm_deg_s": 2.226722,
+          "estimated_dq_deg_s": [
+            16.365633,
+            15.529667
+          ],
+          "estimated_q_deg": [
+            58.018955,
+            60.640236
+          ],
+          "lead_to_gate_s": 0.99,
+          "predicted_selected_sequence_force_margin_n": 89.619589,
+          "predicted_selected_sequence_force_peak_n": 110.380411,
+          "q_tracking_error_deg": [
+            -0.173142,
+            -0.239162
+          ],
+          "q_tracking_error_norm_deg": 0.295257,
+          "reference_ddq_deg_s2": [
+            0.4784,
+            0.4576
+          ],
+          "reference_ddq_norm_deg_s2": 0.662015,
+          "reference_dq_deg_s": [
+            17.911296,
+            17.132544
+          ],
+          "reference_q_deg": [
+            58.192098,
+            60.879398
+          ],
+          "wall_time_s": 6.76,
+          "winner_first_action_change_from_previous_100ms_record_nm": 1.845171
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 122.716837,
+          "cem_winner_first_action_nm": [
+            36.981258,
+            2.982992
+          ],
+          "cem_winner_first_action_norm_nm": 37.10137,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            0.331735,
+            -1.921713
+          ],
+          "dq_tracking_error_norm_deg_s": 1.950136,
+          "estimated_dq_deg_s": [
+            17.617454,
+            19.090503
+          ],
+          "estimated_q_deg": [
+            59.877302,
+            62.347244
+          ],
+          "lead_to_gate_s": 0.89,
+          "predicted_selected_sequence_force_margin_n": 95.189587,
+          "predicted_selected_sequence_force_peak_n": 104.810413,
+          "q_tracking_error_deg": [
+            -0.107986,
+            -0.247379
+          ],
+          "q_tracking_error_norm_deg": 0.269921,
+          "reference_ddq_deg_s2": [
+            0.279362,
+            0.267216
+          ],
+          "reference_ddq_norm_deg_s2": 0.386584,
+          "reference_dq_deg_s": [
+            17.949189,
+            17.16879
+          ],
+          "reference_q_deg": [
+            59.985288,
+            62.594623
+          ],
+          "wall_time_s": 6.86,
+          "winner_first_action_change_from_previous_100ms_record_nm": 1.845032
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 131.391782,
+          "cem_winner_first_action_nm": [
+            35.756808,
+            3.280743
+          ],
+          "cem_winner_first_action_norm_nm": 35.907,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -1.235747,
+            4.554053
+          ],
+          "dq_tracking_error_norm_deg_s": 4.718736,
+          "estimated_dq_deg_s": [
+            19.2029,
+            12.631919
+          ],
+          "estimated_q_deg": [
+            61.608641,
+            63.950933
+          ],
+          "lead_to_gate_s": 0.79,
+          "predicted_selected_sequence_force_margin_n": 98.096699,
+          "predicted_selected_sequence_force_peak_n": 101.903301,
+          "q_tracking_error_deg": [
+            -0.17263,
+            -0.361587
+          ],
+          "q_tracking_error_norm_deg": 0.400682,
+          "reference_ddq_deg_s2": [
+            0.079858,
+            0.076385
+          ],
+          "reference_ddq_norm_deg_s2": 0.110508,
+          "reference_dq_deg_s": [
+            17.967153,
+            17.185972
+          ],
+          "reference_q_deg": [
+            61.781271,
+            64.31252
+          ],
+          "wall_time_s": 6.96,
+          "winner_first_action_change_from_previous_100ms_record_nm": 1.260132
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 131.391782,
+          "cem_winner_first_action_nm": [
+            39.542079,
+            2.869838
+          ],
+          "cem_winner_first_action_norm_nm": 39.646084,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            5.705866,
+            -4.339034
+          ],
+          "dq_tracking_error_norm_deg_s": 7.168272,
+          "estimated_dq_deg_s": [
+            12.259291,
+            21.523097
+          ],
+          "estimated_q_deg": [
+            63.350485,
+            65.804794
+          ],
+          "lead_to_gate_s": 0.69,
+          "predicted_selected_sequence_force_margin_n": 82.857149,
+          "predicted_selected_sequence_force_peak_n": 117.142851,
+          "q_tracking_error_deg": [
+            -0.227568,
+            -0.226388
+          ],
+          "q_tracking_error_norm_deg": 0.320996,
+          "reference_ddq_deg_s2": [
+            -0.11978,
+            -0.114572
+          ],
+          "reference_ddq_norm_deg_s2": 0.165752,
+          "reference_dq_deg_s": [
+            17.965156,
+            17.184063
+          ],
+          "reference_q_deg": [
+            63.578053,
+            66.031181
+          ],
+          "wall_time_s": 7.06,
+          "winner_first_action_change_from_previous_100ms_record_nm": 3.807508
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 145.950126,
+          "cem_winner_first_action_nm": [
+            29.946339,
+            4.840024
+          ],
+          "cem_winner_first_action_norm_nm": 30.334948,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -8.006959,
+            6.66271
+          ],
+          "dq_tracking_error_norm_deg_s": 10.416482,
+          "estimated_dq_deg_s": [
+            25.950162,
+            10.500354
+          ],
+          "estimated_q_deg": [
+            65.263303,
+            67.18764
+          ],
+          "lead_to_gate_s": 0.59,
+          "predicted_selected_sequence_force_margin_n": 111.365242,
+          "predicted_selected_sequence_force_peak_n": 88.634758,
+          "q_tracking_error_deg": [
+            -0.110334,
+            -0.561057
+          ],
+          "q_tracking_error_norm_deg": 0.571803,
+          "reference_ddq_deg_s2": [
+            -0.319217,
+            -0.305338
+          ],
+          "reference_ddq_norm_deg_s2": 0.441736,
+          "reference_dq_deg_s": [
+            17.943204,
+            17.163064
+          ],
+          "reference_q_deg": [
+            65.373637,
+            67.748697
+          ],
+          "wall_time_s": 7.16,
+          "winner_first_action_change_from_previous_100ms_record_nm": 9.79591
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 145.950126,
+          "cem_winner_first_action_nm": [
+            42.049813,
+            2.942851
+          ],
+          "cem_winner_first_action_norm_nm": 42.152665,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            9.010676,
+            -11.004379
+          ],
+          "dq_tracking_error_norm_deg_s": 14.222821,
+          "estimated_dq_deg_s": [
+            8.890655,
+            28.127391
+          ],
+          "estimated_q_deg": [
+            66.755307,
+            69.320203
+          ],
+          "lead_to_gate_s": 0.49,
+          "predicted_selected_sequence_force_margin_n": 68.762368,
+          "predicted_selected_sequence_force_peak_n": 131.237632,
+          "q_tracking_error_deg": [
+            -0.410723,
+            -0.142956
+          ],
+          "q_tracking_error_norm_deg": 0.434891,
+          "reference_ddq_deg_s2": [
+            -0.518122,
+            -0.495595
+          ],
+          "reference_ddq_norm_deg_s2": 0.716984,
+          "reference_dq_deg_s": [
+            17.901331,
+            17.123012
+          ],
+          "reference_q_deg": [
+            67.16603,
+            69.463159
+          ],
+          "wall_time_s": 7.26,
+          "winner_first_action_change_from_previous_100ms_record_nm": 12.251259
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 181.810354,
+          "cem_winner_first_action_nm": [
+            25.997858,
+            6.001291
+          ],
+          "cem_winner_first_action_norm_nm": 26.681531,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -10.371023,
+            4.951411
+          ],
+          "dq_tracking_error_norm_deg_s": 11.492372,
+          "estimated_dq_deg_s": [
+            28.210631,
+            12.112561
+          ],
+          "estimated_q_deg": [
+            68.939396,
+            70.457496
+          ],
+          "lead_to_gate_s": 0.39,
+          "predicted_selected_sequence_force_margin_n": 115.326081,
+          "predicted_selected_sequence_force_peak_n": 84.673919,
+          "q_tracking_error_deg": [
+            -0.013846,
+            -0.71517
+          ],
+          "q_tracking_error_norm_deg": 0.715304,
+          "reference_ddq_deg_s2": [
+            -0.716163,
+            -0.685025
+          ],
+          "reference_ddq_norm_deg_s2": 0.991034,
+          "reference_dq_deg_s": [
+            17.839608,
+            17.063973
+          ],
+          "reference_q_deg": [
+            68.953242,
+            71.172666
+          ],
+          "wall_time_s": 7.36,
+          "winner_first_action_change_from_previous_100ms_record_nm": 16.340725
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 207.321006,
+          "cem_winner_first_action_nm": [
+            39.28312,
+            3.77837
+          ],
+          "cem_winner_first_action_norm_nm": 39.464409,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            5.873459,
+            -1.027769
+          ],
+          "dq_tracking_error_norm_deg_s": 5.962703,
+          "estimated_dq_deg_s": [
+            11.884679,
+            18.013814
+          ],
+          "estimated_q_deg": [
+            70.2155,
+            72.129322
+          ],
+          "lead_to_gate_s": 0.29,
+          "predicted_selected_sequence_force_margin_n": 77.984564,
+          "predicted_selected_sequence_force_peak_n": 122.015436,
+          "q_tracking_error_deg": [
+            -0.517794,
+            -0.746002
+          ],
+          "q_tracking_error_norm_deg": 0.908091,
+          "reference_ddq_deg_s2": [
+            -0.913005,
+            -0.873309
+          ],
+          "reference_ddq_norm_deg_s2": 1.263426,
+          "reference_dq_deg_s": [
+            17.758138,
+            16.986045
+          ],
+          "reference_q_deg": [
+            70.733293,
+            72.875324
+          ],
+          "wall_time_s": 7.46,
+          "winner_first_action_change_from_previous_100ms_record_nm": 13.46995
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 207.321006,
+          "cem_winner_first_action_nm": [
+            34.093951,
+            5.244248
+          ],
+          "cem_winner_first_action_norm_nm": 34.494922,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            3.785868,
+            -19.786478
+          ],
+          "dq_tracking_error_norm_deg_s": 20.145409,
+          "estimated_dq_deg_s": [
+            13.87119,
+            36.675837
+          ],
+          "estimated_q_deg": [
+            72.333545,
+            74.149006
+          ],
+          "lead_to_gate_s": 0.19,
+          "predicted_selected_sequence_force_margin_n": 90.939203,
+          "predicted_selected_sequence_force_peak_n": 109.060797,
+          "q_tracking_error_deg": [
+            -0.170671,
+            -0.420244
+          ],
+          "q_tracking_error_norm_deg": 0.453578,
+          "reference_ddq_deg_s2": [
+            -1.108316,
+            -1.060128
+          ],
+          "reference_ddq_norm_deg_s2": 1.5337,
+          "reference_dq_deg_s": [
+            17.657058,
+            16.88936
+          ],
+          "reference_q_deg": [
+            72.504216,
+            74.56925
+          ],
+          "wall_time_s": 7.56,
+          "winner_first_action_change_from_previous_100ms_record_nm": 5.392242
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 207.321006,
+          "cem_winner_first_action_nm": [
+            20.627668,
+            6.878742
+          ],
+          "cem_winner_first_action_norm_nm": 21.744374,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -18.896202,
+            38.525944
+          ],
+          "dq_tracking_error_norm_deg_s": 42.910544,
+          "estimated_dq_deg_s": [
+            36.432739,
+            -21.751865
+          ],
+          "estimated_q_deg": [
+            74.165369,
+            75.404482
+          ],
+          "lead_to_gate_s": 0.09,
+          "predicted_selected_sequence_force_margin_n": 101.760374,
+          "predicted_selected_sequence_force_peak_n": 98.239626,
+          "q_tracking_error_deg": [
+            -0.098688,
+            -0.848094
+          ],
+          "q_tracking_error_norm_deg": 0.853816,
+          "reference_ddq_deg_s2": [
+            -1.301764,
+            -1.245166
+          ],
+          "reference_ddq_norm_deg_s2": 1.801396,
+          "reference_dq_deg_s": [
+            17.536537,
+            16.774079
+          ],
+          "reference_q_deg": [
+            74.264057,
+            76.252576
+          ],
+          "wall_time_s": 7.66,
+          "winner_first_action_change_from_previous_100ms_record_nm": 13.565115
+        }
+      ]
+    },
+    "hip_dominant_100_60": {
+      "available_period_s": 0.1,
+      "available_record_count": 13,
+      "endpoint_deg": [
+        100.0,
+        60.0
+      ],
+      "gate_time_s": 8.560000000000695,
+      "records": [
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 123.427125,
+          "cem_winner_first_action_nm": [
+            40.776893,
+            -2.515177
+          ],
+          "cem_winner_first_action_norm_nm": 40.854389,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            4.050901,
+            -8.850815
+          ],
+          "dq_tracking_error_norm_deg_s": 9.733793,
+          "estimated_dq_deg_s": [
+            10.686167,
+            16.607167
+          ],
+          "estimated_q_deg": [
+            57.745203,
+            38.008783
+          ],
+          "lead_to_gate_s": 1.2,
+          "predicted_selected_sequence_force_margin_n": 75.162077,
+          "predicted_selected_sequence_force_peak_n": 124.837923,
+          "q_tracking_error_deg": [
+            -0.085736,
+            0.203026
+          ],
+          "q_tracking_error_norm_deg": 0.220386,
+          "reference_ddq_deg_s2": [
+            -0.591613,
+            -0.311375
+          ],
+          "reference_ddq_norm_deg_s2": 0.66855,
+          "reference_dq_deg_s": [
+            14.737067,
+            7.756351
+          ],
+          "reference_q_deg": [
+            57.830939,
+            37.805757
+          ],
+          "wall_time_s": 7.36,
+          "winner_first_action_change_from_previous_100ms_record_nm": null
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 119.863623,
+          "cem_winner_first_action_nm": [
+            31.431211,
+            -0.827957
+          ],
+          "cem_winner_first_action_norm_nm": 31.442114,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -5.901142,
+            5.24432
+          ],
+          "dq_tracking_error_norm_deg_s": 7.894705,
+          "estimated_dq_deg_s": [
+            20.570908,
+            2.47661
+          ],
+          "estimated_q_deg": [
+            59.271925,
+            38.752489
+          ],
+          "lead_to_gate_s": 1.1,
+          "predicted_selected_sequence_force_margin_n": 110.478168,
+          "predicted_selected_sequence_force_peak_n": 89.521832,
+          "q_tracking_error_deg": [
+            -0.029491,
+            0.172797
+          ],
+          "q_tracking_error_norm_deg": 0.175295,
+          "reference_ddq_deg_s2": [
+            -0.754221,
+            -0.396959
+          ],
+          "reference_ddq_norm_deg_s2": 0.852306,
+          "reference_dq_deg_s": [
+            14.669766,
+            7.72093
+          ],
+          "reference_q_deg": [
+            59.301416,
+            38.579693
+          ],
+          "wall_time_s": 7.46,
+          "winner_first_action_change_from_previous_100ms_record_nm": 9.496762
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 119.863623,
+          "cem_winner_first_action_nm": [
+            39.347533,
+            -2.760935
+          ],
+          "cem_winner_first_action_norm_nm": 39.444279,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            5.488697,
+            7.599497
+          ],
+          "dq_tracking_error_norm_deg_s": 9.374335,
+          "estimated_dq_deg_s": [
+            9.097568,
+            0.077485
+          ],
+          "estimated_q_deg": [
+            60.568723,
+            39.390437
+          ],
+          "lead_to_gate_s": 1.0,
+          "predicted_selected_sequence_force_margin_n": 85.297217,
+          "predicted_selected_sequence_force_peak_n": 114.702783,
+          "q_tracking_error_deg": [
+            -0.195629,
+            0.040779
+          ],
+          "q_tracking_error_norm_deg": 0.199834,
+          "reference_ddq_deg_s2": [
+            -0.915565,
+            -0.481877
+          ],
+          "reference_ddq_norm_deg_s2": 1.034633,
+          "reference_dq_deg_s": [
+            14.586265,
+            7.676982
+          ],
+          "reference_q_deg": [
+            60.764352,
+            39.349659
+          ],
+          "wall_time_s": 7.56,
+          "winner_first_action_change_from_previous_100ms_record_nm": 8.1489
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 125.546347,
+          "cem_winner_first_action_nm": [
+            34.211452,
+            -0.988261
+          ],
+          "cem_winner_first_action_norm_nm": 34.225722,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -1.967887,
+            -5.382329
+          ],
+          "dq_tracking_error_norm_deg_s": 5.730798,
+          "estimated_dq_deg_s": [
+            16.454592,
+            13.006911
+          ],
+          "estimated_q_deg": [
+            62.091874,
+            39.810423
+          ],
+          "lead_to_gate_s": 0.9,
+          "predicted_selected_sequence_force_margin_n": 101.385457,
+          "predicted_selected_sequence_force_peak_n": 98.614543,
+          "q_tracking_error_deg": [
+            -0.12626,
+            -0.304384
+          ],
+          "q_tracking_error_norm_deg": 0.329531,
+          "reference_ddq_deg_s2": [
+            -1.07537,
+            -0.565984
+          ],
+          "reference_ddq_norm_deg_s2": 1.21522,
+          "reference_dq_deg_s": [
+            14.486705,
+            7.624581
+          ],
+          "reference_q_deg": [
+            62.218134,
+            40.114807
+          ],
+          "wall_time_s": 7.66,
+          "winner_first_action_change_from_previous_100ms_record_nm": 5.433388
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 132.55868,
+          "cem_winner_first_action_nm": [
+            34.355197,
+            -1.530366
+          ],
+          "cem_winner_first_action_norm_nm": 34.389265,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -0.101917,
+            11.48881
+          ],
+          "dq_tracking_error_norm_deg_s": 11.489262,
+          "estimated_dq_deg_s": [
+            14.473169,
+            -3.924993
+          ],
+          "estimated_q_deg": [
+            63.407903,
+            40.423058
+          ],
+          "lead_to_gate_s": 0.8,
+          "predicted_selected_sequence_force_margin_n": 102.616635,
+          "predicted_selected_sequence_force_peak_n": 97.383365,
+          "q_tracking_error_deg": [
+            -0.253261,
+            -0.451239
+          ],
+          "q_tracking_error_norm_deg": 0.517453,
+          "reference_ddq_deg_s2": [
+            -1.233361,
+            -0.649137
+          ],
+          "reference_ddq_norm_deg_s2": 1.393757,
+          "reference_dq_deg_s": [
+            14.371252,
+            7.563817
+          ],
+          "reference_q_deg": [
+            63.661163,
+            40.874296
+          ],
+          "wall_time_s": 7.76,
+          "winner_first_action_change_from_previous_100ms_record_nm": 0.56084
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 132.55868,
+          "cem_winner_first_action_nm": [
+            38.083759,
+            -1.263479
+          ],
+          "cem_winner_first_action_norm_nm": 38.104712,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            2.030418,
+            -18.879659
+          ],
+          "dq_tracking_error_norm_deg_s": 18.988526,
+          "estimated_dq_deg_s": [
+            12.209684,
+            26.37445
+          ],
+          "estimated_q_deg": [
+            64.869132,
+            41.578955
+          ],
+          "lead_to_gate_s": 0.7,
+          "predicted_selected_sequence_force_margin_n": 80.118561,
+          "predicted_selected_sequence_force_peak_n": 119.881439,
+          "q_tracking_error_deg": [
+            -0.222729,
+            -0.04834
+          ],
+          "q_tracking_error_norm_deg": 0.227915,
+          "reference_ddq_deg_s2": [
+            -1.389262,
+            -0.731191
+          ],
+          "reference_ddq_norm_deg_s2": 1.569933,
+          "reference_dq_deg_s": [
+            14.240102,
+            7.494791
+          ],
+          "reference_q_deg": [
+            65.091861,
+            41.627295
+          ],
+          "wall_time_s": 7.86,
+          "winner_first_action_change_from_previous_100ms_record_nm": 3.738101
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 150.805583,
+          "cem_winner_first_action_nm": [
+            28.097093,
+            -0.373075
+          ],
+          "cem_winner_first_action_norm_nm": 28.09957,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -4.598891,
+            20.136656
+          ],
+          "dq_tracking_error_norm_deg_s": 20.655138,
+          "estimated_dq_deg_s": [
+            18.692369,
+            -12.719036
+          ],
+          "estimated_q_deg": [
+            66.358553,
+            41.822967
+          ],
+          "lead_to_gate_s": 0.6,
+          "predicted_selected_sequence_force_margin_n": 114.371903,
+          "predicted_selected_sequence_force_peak_n": 85.628097,
+          "q_tracking_error_deg": [
+            -0.150115,
+            -0.550016
+          ],
+          "q_tracking_error_norm_deg": 0.570133,
+          "reference_ddq_deg_s2": [
+            -1.5428,
+            -0.812
+          ],
+          "reference_ddq_norm_deg_s2": 1.743438,
+          "reference_dq_deg_s": [
+            14.093478,
+            7.41762
+          ],
+          "reference_q_deg": [
+            66.508668,
+            42.372983
+          ],
+          "wall_time_s": 7.96,
+          "winner_first_action_change_from_previous_100ms_record_nm": 10.026281
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 150.805583,
+          "cem_winner_first_action_nm": [
+            41.247903,
+            -2.19475
+          ],
+          "cem_winner_first_action_norm_nm": 41.306252,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            7.779946,
+            -11.489987
+          ],
+          "dq_tracking_error_norm_deg_s": 13.876144,
+          "estimated_dq_deg_s": [
+            6.151684,
+            18.822424
+          ],
+          "estimated_q_deg": [
+            67.58665,
+            43.2514
+          ],
+          "lead_to_gate_s": 0.5,
+          "predicted_selected_sequence_force_margin_n": 67.277275,
+          "predicted_selected_sequence_force_peak_n": 132.722725,
+          "q_tracking_error_deg": [
+            -0.323398,
+            0.140848
+          ],
+          "q_tracking_error_norm_deg": 0.352739,
+          "reference_ddq_deg_s2": [
+            -1.693699,
+            -0.89142
+          ],
+          "reference_ddq_norm_deg_s2": 1.913961,
+          "reference_dq_deg_s": [
+            13.93163,
+            7.332437
+          ],
+          "reference_q_deg": [
+            67.910049,
+            43.110552
+          ],
+          "wall_time_s": 8.06,
+          "winner_first_action_change_from_previous_100ms_record_nm": 13.276381
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 166.348978,
+          "cem_winner_first_action_nm": [
+            26.351088,
+            0.81409
+          ],
+          "cem_winner_first_action_norm_nm": 26.36366,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -7.340439,
+            -0.963526
+          ],
+          "dq_tracking_error_norm_deg_s": 7.403406,
+          "estimated_dq_deg_s": [
+            21.095274,
+            8.202913
+          ],
+          "estimated_q_deg": [
+            69.198361,
+            43.193769
+          ],
+          "lead_to_gate_s": 0.4,
+          "predicted_selected_sequence_force_margin_n": 117.540015,
+          "predicted_selected_sequence_force_peak_n": 82.459985,
+          "q_tracking_error_deg": [
+            -0.096135,
+            -0.645439
+          ],
+          "q_tracking_error_norm_deg": 0.652559,
+          "reference_ddq_deg_s2": [
+            -1.841683,
+            -0.969307
+          ],
+          "reference_ddq_norm_deg_s2": 2.081191,
+          "reference_dq_deg_s": [
+            13.754835,
+            7.239387
+          ],
+          "reference_q_deg": [
+            69.294496,
+            43.839208
+          ],
+          "wall_time_s": 8.16,
+          "winner_first_action_change_from_previous_100ms_record_nm": 15.197639
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 212.81693,
+          "cem_winner_first_action_nm": [
+            35.297785,
+            -2.201541
+          ],
+          "cem_winner_first_action_norm_nm": 35.366374,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            6.008378,
+            27.191716
+          ],
+          "dq_tracking_error_norm_deg_s": 27.847622,
+          "estimated_dq_deg_s": [
+            7.555022,
+            -20.053085
+          ],
+          "estimated_q_deg": [
+            70.171796,
+            43.869215
+          ],
+          "lead_to_gate_s": 0.3,
+          "predicted_selected_sequence_force_margin_n": 97.621352,
+          "predicted_selected_sequence_force_peak_n": 102.378648,
+          "q_tracking_error_deg": [
+            -0.488731,
+            -0.688957
+          ],
+          "q_tracking_error_norm_deg": 0.844701,
+          "reference_ddq_deg_s2": [
+            -1.98648,
+            -1.045516
+          ],
+          "reference_ddq_norm_deg_s2": 2.244817,
+          "reference_dq_deg_s": [
+            13.5634,
+            7.138631
+          ],
+          "reference_q_deg": [
+            70.660528,
+            44.558173
+          ],
+          "wall_time_s": 8.26,
+          "winner_first_action_change_from_previous_100ms_record_nm": 9.441262
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 212.81693,
+          "cem_winner_first_action_nm": [
+            38.551525,
+            0.14257
+          ],
+          "cem_winner_first_action_norm_nm": 38.551788,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            0.427822,
+            -51.200765
+          ],
+          "dq_tracking_error_norm_deg_s": 51.202553,
+          "estimated_dq_deg_s": [
+            12.929833,
+            58.23111
+          ],
+          "estimated_q_deg": [
+            71.873959,
+            45.605407
+          ],
+          "lead_to_gate_s": 0.2,
+          "predicted_selected_sequence_force_margin_n": 65.828507,
+          "predicted_selected_sequence_force_peak_n": 134.171493,
+          "q_tracking_error_deg": [
+            -0.132739,
+            0.338723
+          ],
+          "q_tracking_error_norm_deg": 0.363804,
+          "reference_ddq_deg_s2": [
+            -2.127812,
+            -1.119901
+          ],
+          "reference_ddq_norm_deg_s2": 2.40453,
+          "reference_dq_deg_s": [
+            13.357655,
+            7.030345
+          ],
+          "reference_q_deg": [
+            72.006698,
+            45.266683
+          ],
+          "wall_time_s": 8.36,
+          "winner_first_action_change_from_previous_100ms_record_nm": 4.010197
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 212.81693,
+          "cem_winner_first_action_nm": [
+            20.237195,
+            0.483026
+          ],
+          "cem_winner_first_action_norm_nm": 20.242959,
+          "direct_causal_200n_warning": false,
+          "dq_tracking_error_deg_s": [
+            -5.526811,
+            69.556503
+          ],
+          "dq_tracking_error_norm_deg_s": 69.775732,
+          "estimated_dq_deg_s": [
+            18.664772,
+            -62.641787
+          ],
+          "estimated_q_deg": [
+            73.051745,
+            44.328544
+          ],
+          "lead_to_gate_s": 0.1,
+          "predicted_selected_sequence_force_margin_n": 86.492433,
+          "predicted_selected_sequence_force_peak_n": 113.507567,
+          "q_tracking_error_deg": [
+            -0.279849,
+            -1.635453
+          ],
+          "q_tracking_error_norm_deg": 1.659223,
+          "reference_ddq_deg_s2": [
+            -2.265407,
+            -1.192319
+          ],
+          "reference_ddq_norm_deg_s2": 2.560018,
+          "reference_dq_deg_s": [
+            13.137962,
+            6.914717
+          ],
+          "reference_q_deg": [
+            73.331594,
+            45.963997
+          ],
+          "wall_time_s": 8.46,
+          "winner_first_action_change_from_previous_100ms_record_nm": 18.317494
+        },
+        {
+          "actual_next_0p3s_peak_n_outcome_only": 212.81693,
+          "cem_winner_first_action_nm": [
+            57.795183,
+            -5.472199
+          ],
+          "cem_winner_first_action_norm_nm": 58.053666,
+          "direct_causal_200n_warning": true,
+          "dq_tracking_error_deg_s": [
+            18.813022,
+            -49.091442
+          ],
+          "dq_tracking_error_norm_deg_s": 52.572802,
+          "estimated_dq_deg_s": [
+            -5.908315,
+            55.883394
+          ],
+          "estimated_q_deg": [
+            74.158966,
+            47.703223
+          ],
+          "lead_to_gate_s": 0.0,
+          "predicted_selected_sequence_force_margin_n": -12.806782,
+          "predicted_selected_sequence_force_peak_n": 212.806782,
+          "q_tracking_error_deg": [
+            -0.474872,
+            1.053834
+          ],
+          "q_tracking_error_norm_deg": 1.155885,
+          "reference_ddq_deg_s2": [
+            -2.398988,
+            -1.262625
+          ],
+          "reference_ddq_norm_deg_s2": 2.710971,
+          "reference_dq_deg_s": [
+            12.904707,
+            6.791951
+          ],
+          "reference_q_deg": [
+            74.633839,
+            46.649389
+          ],
+          "wall_time_s": 8.56,
+          "winner_first_action_change_from_previous_100ms_record_nm": 38.02719
+        }
+      ]
+    }
+  },
+  "warning_time": {
+    "comparison": "The supported warning is shorter than even a 10 percent smooth speed reduction and far shorter than reaching alpha=0.5.",
+    "direct_predictor_observed": "100/60 first crosses only on the gate record; 120/120 remains below 200 N at the final saved record 0.09 s before the gate",
+    "maximum_supported_common_warning_s": "less than 0.10 s; exact 20 ms onset is unavailable",
+    "minimum_useful_for_existing_rate_limit_s": {
+      "basis": "preserved common alpha slowdown limit of 1.0 per second",
+      "full_reduction_from_alpha_1_to_0p5": 0.5,
+      "ten_percent_speed_reduction": 0.1
+    }
+  }
+}

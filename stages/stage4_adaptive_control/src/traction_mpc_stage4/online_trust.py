@@ -12,7 +12,7 @@ from typing import Any
 
 import numpy as np
 
-from traction_mpc_stage3.human import HUMAN, soft_limit_torque
+from traction_mpc_stage3.human import HUMAN, HumanV2Parameters, soft_limit_torque
 
 from .dynamics_failure_audit import bound_diagnostics, unconstrained_candidate
 from .estimator_v2 import (
@@ -63,11 +63,13 @@ class OnlineSingleChallengerTrustEstimator:
         hierarchy_config: HierarchicalTrustPrototypeConfig = (
             HierarchicalTrustPrototypeConfig()
         ),
+        rom_human: HumanV2Parameters = HUMAN,
     ) -> None:
         self.measurement_case = measurement_case
         self.apply_qualified_model = bool(apply_qualified_model)
         self.statistical_config = statistical_config
         self.hierarchy_config = hierarchy_config
+        self.rom_human = rom_human
         self.geometry_identifier = AccumulatedCuffGeometryEstimator(
             initial_measurement.attachment_position_m,
             initial_measurement.attachment_rotation_matrix,
@@ -106,7 +108,9 @@ class OnlineSingleChallengerTrustEstimator:
 
     @property
     def model(self) -> BaseParameterHumanModel:
-        return BaseParameterHumanModel(self.geometry, self.control_beta)
+        return BaseParameterHumanModel(
+            self.geometry, self.control_beta, self.rom_human
+        )
 
     def _resolve_challenger(self, now_s: float) -> None:
         record = self.active_challenger
@@ -158,7 +162,9 @@ class OnlineSingleChallengerTrustEstimator:
             record["evidence_history"].append(evidence)
             record["evaluated_look_block_counts"].append(look_count)
             physical = (
-                BaseParameterHumanModel(self.geometry, proposed)
+                BaseParameterHumanModel(
+                    self.geometry, proposed, self.rom_human
+                )
                 .minimum_mass_matrix_eigenvalue()
                 > 1e-6
             )
@@ -351,7 +357,9 @@ class OnlineSingleChallengerTrustEstimator:
         self.previous_ingested_sample_time_s = float(measurement.sample_time_s)
         contaminated = bool(
             np.linalg.norm(
-                soft_limit_torque(measured_state[:2], measured_state[2:], HUMAN)
+                soft_limit_torque(
+                    measured_state[:2], measured_state[2:], self.rom_human
+                )
             )
             > 1e-8
         )

@@ -2,6 +2,7 @@
 
 from .coupled import CoupledUR10eHumanV2
 from .frames import ATTACHMENT_FROM_CUFF, WORLD_FROM_BASE, RigidTransform
+from .cuff_adapter import CUFF_ADAPTER, CuffAdapterGeometry
 from .human import HumanV2Parameters, nominal_tracking_wrench
 from .reference import CuffPoseReference, stage2_cuff_pose_reference
 from .robot_backends import CR12DryRunBackend, Stage3SimulationBackend
@@ -10,6 +11,8 @@ from .robot import UR10eTorqueRobot
 
 __all__ = [
     "ATTACHMENT_FROM_CUFF",
+    "CUFF_ADAPTER",
+    "CuffAdapterGeometry",
     "WORLD_FROM_BASE",
     "CuffPoseReference",
     "CR12DryRunBackend",

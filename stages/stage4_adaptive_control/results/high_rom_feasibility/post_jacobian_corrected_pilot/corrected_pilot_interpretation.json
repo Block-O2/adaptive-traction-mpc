@@ -1,0 +1,56 @@
+{
+  "schema_version": "high_rom_corrected_pilot_interpretation_v1",
+  "main_questions": {
+    "completion": {
+      "100_60": false,
+      "90_120": true,
+      "120_120": false
+    },
+    "command_force_gate_after_jacobian_fix": {
+      "100_60": {
+        "triggered": true,
+        "peak_attempt_n": 212.817,
+        "margin_n": -12.817
+      },
+      "90_120": {
+        "triggered": false,
+        "peak_attempt_n": 178.125,
+        "margin_n": 21.875
+      },
+      "120_120": {
+        "triggered": true,
+        "peak_attempt_n": 207.321,
+        "margin_n": -7.321
+      }
+    },
+    "120_120_endpoint": {
+      "reached": false,
+      "peak_angle_deg": [75.576, 79.759],
+      "termination_time_s": 7.75,
+      "rom_events": 0,
+      "upper_soft_zone_samples": 0,
+      "limitation": "200 N total commanded translational force gate during outbound motion"
+    },
+    "large_rom_triggered_adaptation": false,
+    "adaptive_control_effect": "none; all Adaptive runs retained the same population prior as Fixed MPC because promotion count was zero",
+    "remaining_limitation": "commanded-force constraint under the frozen trajectory/control transient, not IK, ROM, upper soft limit, solver, contact, or joint limits"
+  },
+  "lower_rom_context": {
+    "source": "existing nominal_reference registered_high_flexion_23s seed44104 evidence",
+    "source_peak_reference_deg": [75.0, 90.0],
+    "source_tracking_rmse_deg": 0.4256648233328584,
+    "source_tracking_max_error_deg": 1.5640314521811345,
+    "corrected_completed_90_120_tracking_rmse_deg": 1.9034326900510687,
+    "corrected_completed_90_120_tracking_max_error_deg": 4.3528453797967,
+    "rmse_increase_deg": 1.4777678667182104,
+    "rmse_ratio": 4.471670163269836,
+    "max_error_increase_deg": 2.788813927615566,
+    "max_error_ratio": 2.7830932515624283,
+    "interpretation_limit": "contextual only: the prior lower-ROM artifact predates the 140 mm adapter and does not use the exact same reference path"
+  },
+  "evidence_disposition": {
+    "invalid_pre_fix_pilot": "preserved diagnostic-only",
+    "corrected_post_fix_pilot": "current small engineering pilot",
+    "large_benchmark_or_extra_seed_run": false
+  }
+}

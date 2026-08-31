@@ -59,9 +59,12 @@ Transform names use `PARENT_FROM_CHILD`.
 | `ATTACHMENT` | Vendor `attachment_site`: position `(0, 0.1, 0) m` and normalized quaternion `(-0.7071, 0.7071, 0, 0)` in `wrist_3_link`. |
 | `CUFF` | Frozen Stage-2 cuff pose reference frame. |
 
-The provisional rigid adapter is explicitly
-`ATTACHMENT_FROM_CUFF = identity`. Therefore IK makes `ATTACHMENT` coincident
-with `CUFF`; no orientation correction is hidden in IK or controller code.
+The simulation rigid adapter is a parameterized side standoff. Its 140 mm
+attachment-to-cuff-centre distance is derived from the committed 69 mm wrist
+directional collision envelope, 58 mm cuff radius, and 13 mm cuff-minus-shank
+radial allowance. `ATTACHMENT_FROM_CUFF` retains identity orientation and a
+`[0, 0.140, 0] m` translation. This is an engineering surrogate, not CR12
+hardware geometry or calibration.
 The chain is
 
 ```text
@@ -71,14 +74,14 @@ WORLD_FROM_CUFF
   * ATTACHMENT_FROM_CUFF
 ```
 
-At the Stage 3B tag the adapter is only a robot-side frame definition; no Human
-V2 weld or contact is present there.
+The robot-only Stage-3 model retains only the frame transform. The coupled model
+adds an explicit cylindrical connector ending at the cuff outer surface.
 
 ## Stage 3C coupling contract
 
 The coupled model adds only the frozen planar two-joint Human V2, its unilateral
-bed contact, and an equality weld between `attachment_site` and
-`sleeve_attach_site`. The provisional adapter stays explicitly identity. Robot
+bed contact, and an equality weld between the adapter-side
+`adapter_cuff_site` and `sleeve_attach_site`. Robot
 self-collision remains active. Collision bit domains isolate it from the Human
 and bed so model composition does not introduce robot--Human or robot--bed
 contacts; the Human--bed contact parameters are unchanged from Stage 2.

@@ -768,14 +768,15 @@ class AccumulatedBaseDynamicIdentifier:
 class BaseParameterHumanModel:
     geometry: PlanarCuffGeometry
     beta: np.ndarray
+    rom_human: HumanV2Parameters = HUMAN
 
     @property
     def q_min_rad(self) -> tuple[float, float]:
-        return HUMAN.q_min_rad
+        return self.rom_human.q_min_rad
 
     @property
     def q_max_rad(self) -> tuple[float, float]:
-        return HUMAN.q_max_rad
+        return self.rom_human.q_max_rad
 
     def mass_matrix(self, q_rad: np.ndarray) -> np.ndarray:
         q2 = float(np.asarray(q_rad)[1])
@@ -796,7 +797,7 @@ class BaseParameterHumanModel:
     ) -> np.ndarray:
         regressor = dynamic_regressor_row(q_rad, dq_rad_s, ddq_rad_s2)
         torque = regressor @ np.asarray(self.beta, dtype=float)
-        return torque - soft_limit_torque(q_rad, dq_rad_s, HUMAN)
+        return torque - soft_limit_torque(q_rad, dq_rad_s, self.rom_human)
 
     def continuous_dynamics(self, state: np.ndarray, action_nm: np.ndarray) -> np.ndarray:
         x = np.asarray(state, dtype=float)
@@ -848,7 +849,7 @@ class BaseParameterHumanModel:
 
     def minimum_mass_matrix_eigenvalue(self) -> float:
         values = []
-        for q2 in np.linspace(HUMAN.q_min_rad[1], HUMAN.q_max_rad[1], 21):
+        for q2 in np.linspace(self.q_min_rad[1], self.q_max_rad[1], 21):
             values.append(float(np.min(np.linalg.eigvalsh(self.mass_matrix([0.0, q2])))))
         return min(values)
 

@@ -22,6 +22,7 @@ from traction_mpc_stage3.coupled import (
     CuffForceCommandLimitError,
     HIP_HEIGHT_M,
 )
+from traction_mpc_stage3.frames import ATTACHMENT_FROM_CUFF
 from traction_mpc_stage3.human import (
     CUFF_TRANSLATIONAL_FORCE_GATE_N,
     HumanV2Parameters,
@@ -102,7 +103,7 @@ class SensorBoundaryStage4Plant(Stage4CoupledPlant):
         super().__init__(human)
         self._measured_robot_model = UR10eTorqueRobot()
 
-    def apply_measured_nominal_cartesian_control(
+    def preview_measured_nominal_cartesian_command(
         self,
         measurement: ControllerMeasurement,
         target_position_m: np.ndarray,
@@ -110,14 +111,16 @@ class SensorBoundaryStage4Plant(Stage4CoupledPlant):
         target_rotation_matrix: np.ndarray,
         target_angular_velocity_rad_s: np.ndarray,
         feedforward_wrench_world: np.ndarray,
-    ) -> None:
-        force = 3000.0 * (
+    ) -> dict[str, np.ndarray | float]:
+        position_feedback = 3000.0 * (
             np.asarray(target_position_m) - measurement.attachment_position_m
         )
-        force += 140.0 * (
+        velocity_feedback = 140.0 * (
             np.asarray(target_velocity_m_s) - measurement.attachment_velocity_m_s
         )
-        force = np.clip(force, -200.0, 200.0)
+        feedback_force = np.clip(
+            position_feedback + velocity_feedback, -200.0, 200.0
+        )
         moment = 120.0 * self._rotation_error(
             np.asarray(target_rotation_matrix), measurement.attachment_rotation_matrix
         )
@@ -128,16 +131,47 @@ class SensorBoundaryStage4Plant(Stage4CoupledPlant):
         feedforward = np.asarray(feedforward_wrench_world, dtype=float)
         if feedforward.shape != (6,) or not np.all(np.isfinite(feedforward)):
             raise ValueError("feedforward_wrench_world must be a finite six-vector")
-        force += feedforward[:3]
+        force = feedback_force + feedforward[:3]
         moment += feedforward[3:]
-        force_norm = float(np.linalg.norm(force))
+        return {
+            "force_world_n": force,
+            "moment_world_nm": moment,
+            "position_feedback_world_n": position_feedback,
+            "velocity_feedback_world_n": velocity_feedback,
+            "clipped_feedback_world_n": feedback_force,
+            "feedforward_force_world_n": feedforward[:3].copy(),
+            "force_norm_n": float(np.linalg.norm(force)),
+        }
+
+    def apply_measured_nominal_cartesian_control(
+        self,
+        measurement: ControllerMeasurement,
+        target_position_m: np.ndarray,
+        target_velocity_m_s: np.ndarray,
+        target_rotation_matrix: np.ndarray,
+        target_angular_velocity_rad_s: np.ndarray,
+        feedforward_wrench_world: np.ndarray,
+    ) -> None:
+        command = self.preview_measured_nominal_cartesian_command(
+            measurement,
+            target_position_m,
+            target_velocity_m_s,
+            target_rotation_matrix,
+            target_angular_velocity_rad_s,
+            feedforward_wrench_world,
+        )
+        force = np.asarray(command["force_world_n"], dtype=float)
+        moment = np.asarray(command["moment_world_nm"], dtype=float)
+        force_norm = float(command["force_norm_n"])
         if force_norm > CUFF_TRANSLATIONAL_FORCE_GATE_N + 1e-9:
             raise CuffForceCommandLimitError(force_norm)
 
         self._measured_robot_model.set_configuration(
             measurement.robot_q_rad, measurement.robot_dq_rad_s
         )
-        jacobian = self._measured_robot_model.attachment_jacobian()
+        jacobian = self._measured_robot_model.rigid_offset_jacobian(
+            ATTACHMENT_FROM_CUFF.translation
+        )
         pinv = jacobian.T @ np.linalg.inv(jacobian @ jacobian.T + 1e-4 * np.eye(6))
         nullspace = np.eye(6) - pinv @ jacobian
         posture = (
@@ -192,7 +226,8 @@ def run_sensor_realism_case(
     trajectory_label: str = "stage4_population_prior_cold_start_high_flexion_23s",
     trajectory_waypoints: tuple[Any, ...] = COLD_START_TEACHING_WAYPOINTS,
     plant_factory: Callable[[HumanV2Parameters], SensorBoundaryStage4Plant] | None = None,
-    reference_execution: ReferenceExecutionLayer | None = None,
+    reference_execution: Any | None = None,
+    reference_completion_phase_s: float | None = None,
     mpc_factory: Callable[[], HumanSpaceMPC] | None = None,
     cuff_allocator: Any | None = None,
     estimator_factory: Callable[[ControllerMeasurement, np.ndarray], Any] | None = None,
@@ -373,17 +408,32 @@ def run_sensor_realism_case(
     control_bed_force: list[float] = []
     estimator_compute_s: list[float] = []
     mpc_compute_s: list[float] = []
+    mpc_compute_times_s: list[float] = []
+    high_level_cycle_compute_s: list[float] = []
+    mpc_selection_times: list[float] = []
+    mpc_selected_alphas: list[float] = []
+    mpc_selected_predicted_command_force: list[float] = []
+    mpc_selected_executed_command_force: list[float] = []
+    mpc_path_prediction_times: list[float] = []
+    mpc_path_predicted_command_force: list[float] = []
+    mpc_path_executed_command_force: list[float] = []
+    held_interval_command_prediction: np.ndarray | None = None
     unintended_contacts: set[tuple[str, str]] = set(truth.unintended_contact_pairs)
     rom_event_count = 0
     robot_position_limit_count = 0
     force_gate_event_count = 0
     torque_saturation_count = 0
+    commanded_force_norms: list[float] = []
+    commanded_force_times: list[float] = []
     termination = "completed"
     requested_steps = int(round(duration_s / CONTROL_DT_S))
     robot_ranges = plant.model.jnt_range[plant.robot_joint_ids]
     rollout_wall_start = wall_time.perf_counter()
 
     for control_index in range(requested_steps):
+        new_mpc_diagnostics: dict[str, Any] | None = None
+        deferred_high_level_timing = False
+        high_level_cycle_start: float | None = None
         current_truth = plant.observe()
         estimator_measurement = estimator_layer.update(current_truth)
         mpc_measurement = mpc_layer.update(current_truth)
@@ -404,6 +454,7 @@ def run_sensor_realism_case(
             termination = "nonfinite_controller_measurement"
             break
         if control_index % high_level_steps == 0:
+            high_level_cycle_start = wall_time.perf_counter()
             estimator_start = wall_time.perf_counter()
             if hasattr(estimator, "observe_measurement"):
                 estimator_output_state, diagnostics = estimator.observe_measurement(
@@ -425,7 +476,9 @@ def run_sensor_realism_case(
             current_geometry_diag = diagnostics["geometry"]
             current_dynamic_diag = diagnostics["dynamics"]
             current_model = estimator.model
-            if reference_execution is not None:
+            if reference_execution is not None and hasattr(
+                reference_execution, "update_from_estimator"
+            ):
                 reference_execution.update_from_estimator(
                     float(mpc_measurement.arrival_time_s),
                     estimator,
@@ -441,14 +494,50 @@ def run_sensor_realism_case(
                     mpc_measurement.attachment_velocity_m_s,
                     mpc_measurement.attachment_angular_velocity_rad_s,
                 )
+            if reference_execution is not None and hasattr(
+                reference_execution, "update_from_prediction"
+            ):
+                reference_execution.update_from_prediction(
+                    float(mpc_measurement.arrival_time_s),
+                    estimated_state,
+                    current_model,
+                    mpc,
+                    cuff_allocator,
+                )
             mpc_start = wall_time.perf_counter()
-            current_action, _ = mpc.solve(
+            current_action, new_mpc_diagnostics = mpc.solve(
                 estimated_state,
                 float(mpc_measurement.arrival_time_s),
                 executed_reference,
                 current_model,
             )
             mpc_compute_s.append(wall_time.perf_counter() - mpc_start)
+            mpc_compute_times_s.append(float(mpc_measurement.arrival_time_s))
+            if reference_execution is not None and hasattr(
+                reference_execution, "update_from_mpc_selection"
+            ):
+                reference_execution.update_from_mpc_selection(
+                    float(mpc_measurement.arrival_time_s),
+                    new_mpc_diagnostics,
+                )
+            if (
+                "selected_first_control_interval_predicted_command_force_n"
+                in new_mpc_diagnostics
+            ):
+                held_interval_command_prediction = np.asarray(
+                    new_mpc_diagnostics[
+                        "selected_first_control_interval_predicted_command_force_n"
+                    ],
+                    dtype=float,
+                )
+            deferred_high_level_timing = bool(
+                reference_execution is not None
+                and hasattr(reference_execution, "filter_executable_command")
+            )
+            if not deferred_high_level_timing:
+                high_level_cycle_compute_s.append(
+                    wall_time.perf_counter() - high_level_cycle_start
+                )
         else:
             if estimator_architecture == "integral_state_ukf":
                 estimated_state = estimator.last_state.copy()
@@ -459,15 +548,73 @@ def run_sensor_realism_case(
                     mpc_measurement.attachment_velocity_m_s,
                     mpc_measurement.attachment_angular_velocity_rad_s,
                 )
+        reference = executed_reference(float(low_level_measurement.arrival_time_s))
         current_allocation = cuff_allocator.allocate(
             current_action, estimated_state[:2], current_model
         )
+        if reference_execution is not None and hasattr(
+            reference_execution, "filter_executable_command"
+        ):
+            def evaluate_executable_command(
+                action: np.ndarray, candidate_reference: CuffPoseReference
+            ) -> dict[str, Any]:
+                allocation = cuff_allocator.allocate(
+                    np.asarray(action, dtype=float), estimated_state[:2], current_model
+                )
+                target_pose = current_model.geometry.cuff_pose(
+                    candidate_reference.q_rad
+                )
+                target_linear_velocity, target_angular_velocity = (
+                    current_model.geometry.cuff_velocity(
+                        candidate_reference.q_rad,
+                        candidate_reference.dq_rad_s,
+                    )
+                )
+                preview = plant.preview_measured_nominal_cartesian_command(
+                    low_level_measurement,
+                    target_pose.translation,
+                    target_linear_velocity,
+                    target_pose.rotation,
+                    target_angular_velocity,
+                    np.asarray(allocation["wrench_world"], dtype=float),
+                )
+                return {
+                    "action": np.asarray(action, dtype=float).copy(),
+                    "reference": candidate_reference,
+                    "allocation": allocation,
+                    "preview": preview,
+                }
+
+            proposed_command = evaluate_executable_command(
+                current_action, reference
+            )
+            filtered_command = reference_execution.filter_executable_command(
+                wall_time_s=float(low_level_measurement.arrival_time_s),
+                estimated_state=np.asarray(estimated_state, dtype=float),
+                proposed_command=proposed_command,
+                mpc_diagnostics=new_mpc_diagnostics,
+                mpc=mpc,
+                evaluate_command=evaluate_executable_command,
+            )
+            if deferred_high_level_timing:
+                assert high_level_cycle_start is not None
+                high_level_cycle_compute_s.append(
+                    wall_time.perf_counter() - high_level_cycle_start
+                )
+            requested_termination = filtered_command.get("terminate_reason")
+            if requested_termination is not None:
+                termination = str(requested_termination)
+                break
+            current_action = np.asarray(filtered_command["action"], dtype=float)
+            reference = filtered_command["reference"]
+            current_allocation = filtered_command["allocation"]
         if float(current_allocation["force_norm_n"]) > CUFF_TRANSLATIONAL_FORCE_GATE_N + 1e-9:
+            commanded_force_norms.append(float(current_allocation["force_norm_n"]))
+            commanded_force_times.append(float(current_truth.time_s))
             termination = "allocated_cuff_force_gate"
             force_gate_event_count += 1
             break
 
-        reference = executed_reference(float(low_level_measurement.arrival_time_s))
         target_pose = current_model.geometry.cuff_pose(reference.q_rad)
         target_linear_velocity, target_angular_velocity = current_model.geometry.cuff_velocity(
             reference.q_rad, reference.dq_rad_s
@@ -481,10 +628,62 @@ def run_sensor_realism_case(
                 target_angular_velocity,
                 np.asarray(current_allocation["wrench_world"]),
             )
-        except CuffForceCommandLimitError:
+        except CuffForceCommandLimitError as error:
+            commanded_force_norms.append(error.force_norm_n)
+            commanded_force_times.append(float(current_truth.time_s))
+            if new_mpc_diagnostics is not None and (
+                "selected_first_predicted_command_force_n" in new_mpc_diagnostics
+            ):
+                mpc_selection_times.append(float(current_truth.time_s))
+                mpc_selected_alphas.append(
+                    float(new_mpc_diagnostics["selected_alpha"])
+                )
+                mpc_selected_predicted_command_force.append(
+                    float(
+                        new_mpc_diagnostics[
+                            "selected_first_predicted_command_force_n"
+                        ]
+                    )
+                )
+                mpc_selected_executed_command_force.append(error.force_norm_n)
+            if held_interval_command_prediction is not None:
+                interval_index = control_index % high_level_steps
+                mpc_path_prediction_times.append(float(current_truth.time_s))
+                mpc_path_predicted_command_force.append(
+                    float(held_interval_command_prediction[interval_index])
+                )
+                mpc_path_executed_command_force.append(error.force_norm_n)
             termination = "total_commanded_cuff_force_gate"
             force_gate_event_count += 1
             break
+        commanded_force_norms.append(float(np.linalg.norm(plant.last_force)))
+        commanded_force_times.append(float(current_truth.time_s))
+        if new_mpc_diagnostics is not None and (
+            "selected_first_predicted_command_force_n" in new_mpc_diagnostics
+        ):
+            mpc_selection_times.append(float(current_truth.time_s))
+            mpc_selected_alphas.append(
+                float(new_mpc_diagnostics["selected_alpha"])
+            )
+            mpc_selected_predicted_command_force.append(
+                float(
+                    new_mpc_diagnostics[
+                        "selected_first_predicted_command_force_n"
+                    ]
+                )
+            )
+            mpc_selected_executed_command_force.append(
+                float(np.linalg.norm(plant.last_force))
+            )
+        if held_interval_command_prediction is not None:
+            interval_index = control_index % high_level_steps
+            mpc_path_prediction_times.append(float(current_truth.time_s))
+            mpc_path_predicted_command_force.append(
+                float(held_interval_command_prediction[interval_index])
+            )
+            mpc_path_executed_command_force.append(
+                float(np.linalg.norm(plant.last_force))
+            )
         unclipped_fraction = float(
             np.max(np.abs(plant.last_unclipped_joint_torque) / plant.torque_limits_nm)
         )
@@ -574,6 +773,13 @@ def run_sensor_realism_case(
             if plant.warning_counts():
                 termination = "mujoco_solver_warning"
                 break
+            if (
+                reference_completion_phase_s is not None
+                and execution_statuses[-1]["reference_phase_time_s"]
+                >= float(reference_completion_phase_s) - 1e-12
+            ):
+                termination = "reference_completed"
+                break
         if termination != "completed":
             break
 
@@ -595,7 +801,17 @@ def run_sensor_realism_case(
     tracking_deg = np.degrees(true_q - q_ref)
     estimation_error_deg = np.degrees(q_est - true_q)
     robot_velocity = np.array([item.robot_dq_rad_s for item in observations])
-    completed = bool(termination == "completed" and time[-1] >= duration_s - 0.5 * CONTROL_DT_S)
+    if reference_completion_phase_s is None:
+        completed = bool(
+            termination == "completed"
+            and time[-1] >= duration_s - 0.5 * CONTROL_DT_S
+        )
+    else:
+        completed = bool(
+            execution_statuses[-1]["reference_phase_time_s"]
+            >= float(reference_completion_phase_s) - 1e-12
+            and termination in {"completed", "reference_completed"}
+        )
     rollout_wall_elapsed_s = wall_time.perf_counter() - rollout_wall_start
     execution_phase = np.asarray(
         [item["reference_phase_time_s"] for item in execution_statuses], dtype=float
@@ -694,6 +910,12 @@ def run_sensor_realism_case(
         true_prediction.append(regressor @ true_beta)
         estimated_prediction.append(regressor @ final_beta)
     prediction_error = np.asarray(estimated_prediction) - np.asarray(true_prediction)
+    command_prediction = np.asarray(mpc_selected_predicted_command_force)
+    command_execution = np.asarray(mpc_selected_executed_command_force)
+    command_prediction_error = command_execution - command_prediction
+    path_command_prediction = np.asarray(mpc_path_predicted_command_force)
+    path_command_execution = np.asarray(mpc_path_executed_command_force)
+    path_command_prediction_error = path_command_execution - path_command_prediction
     true_hip_world = np.array([0.0, 0.0, HIP_HEIGHT_M])
     hip_delta = true_hip_world - final_geometry.origin_world_m
     true_hip_plane = np.array(
@@ -806,6 +1028,92 @@ def run_sensor_realism_case(
             "estimator_p95_ms": float(1000.0 * np.percentile(estimator_compute_s, 95.0)),
             "mpc_mean_ms": float(1000.0 * np.mean(mpc_compute_s)),
             "mpc_p95_ms": float(1000.0 * np.percentile(mpc_compute_s, 95.0)),
+            "mpc_max_ms": float(1000.0 * np.max(mpc_compute_s)),
+            "mpc_deadline_misses_over_20ms": int(
+                np.sum(np.asarray(mpc_compute_s) > 0.020)
+            ),
+            "mpc_effective_hz_from_mean": float(
+                1.0 / max(float(np.mean(mpc_compute_s)), 1e-12)
+            ),
+            "high_level_cycle_including_estimator_and_mpc_mean_ms": float(
+                1000.0 * np.mean(high_level_cycle_compute_s)
+            ),
+            "high_level_cycle_including_estimator_and_mpc_p95_ms": float(
+                1000.0 * np.percentile(high_level_cycle_compute_s, 95.0)
+            ),
+            "high_level_cycle_including_estimator_and_mpc_max_ms": float(
+                1000.0 * np.max(high_level_cycle_compute_s)
+            ),
+            "high_level_cycle_deadline_misses_over_20ms": int(
+                np.sum(np.asarray(high_level_cycle_compute_s) > 0.020)
+            ),
+            "high_level_cycle_effective_hz_from_mean": float(
+                1.0 / max(float(np.mean(high_level_cycle_compute_s)), 1e-12)
+            ),
+        },
+        "selected_command_force_prediction": {
+            "sample_count": int(len(command_prediction_error)),
+            "prediction_matches_selected_final_cem_action": bool(
+                len(command_prediction_error) > 0
+            ),
+            "signed_error_executed_minus_predicted_mean_n": float(
+                np.mean(command_prediction_error)
+            )
+            if len(command_prediction_error)
+            else 0.0,
+            "absolute_error_mean_n": float(
+                np.mean(np.abs(command_prediction_error))
+            )
+            if len(command_prediction_error)
+            else 0.0,
+            "absolute_error_p95_n": float(
+                np.percentile(np.abs(command_prediction_error), 95.0)
+            )
+            if len(command_prediction_error)
+            else 0.0,
+            "absolute_error_max_n": float(
+                np.max(np.abs(command_prediction_error))
+            )
+            if len(command_prediction_error)
+            else 0.0,
+            "predicted_peak_n": float(np.max(command_prediction))
+            if len(command_prediction)
+            else 0.0,
+            "executed_peak_n": float(np.max(command_execution))
+            if len(command_execution)
+            else 0.0,
+        },
+        "selected_control_path_command_force_prediction": {
+            "sample_count": int(len(path_command_prediction_error)),
+            "prediction_uses_selected_final_cem_action_at_each_5ms_hold_substep": bool(
+                len(path_command_prediction_error) > 0
+            ),
+            "signed_error_executed_minus_predicted_mean_n": float(
+                np.mean(path_command_prediction_error)
+            )
+            if len(path_command_prediction_error)
+            else 0.0,
+            "absolute_error_mean_n": float(
+                np.mean(np.abs(path_command_prediction_error))
+            )
+            if len(path_command_prediction_error)
+            else 0.0,
+            "absolute_error_p95_n": float(
+                np.percentile(np.abs(path_command_prediction_error), 95.0)
+            )
+            if len(path_command_prediction_error)
+            else 0.0,
+            "absolute_error_max_n": float(
+                np.max(np.abs(path_command_prediction_error))
+            )
+            if len(path_command_prediction_error)
+            else 0.0,
+            "predicted_peak_n": float(np.max(path_command_prediction))
+            if len(path_command_prediction)
+            else 0.0,
+            "executed_peak_n": float(np.max(path_command_execution))
+            if len(path_command_execution)
+            else 0.0,
         },
         "measurement_and_derivative_quality_god_view": {
             "mean_measurement_age_ms": float(1000.0 * np.mean(measurement_ages)),
@@ -871,6 +1179,14 @@ def run_sensor_realism_case(
         },
         "events": {
             "force_gate_events": force_gate_event_count,
+            "peak_commanded_translational_force_n": (
+                max(commanded_force_norms) if commanded_force_norms else 0.0
+            ),
+            "minimum_commanded_force_gate_margin_n": (
+                CUFF_TRANSLATIONAL_FORCE_GATE_N - max(commanded_force_norms)
+                if commanded_force_norms
+                else CUFF_TRANSLATIONAL_FORCE_GATE_N
+            ),
             "rom_event_samples": rom_event_count,
             "unintended_contact_pairs": [list(item) for item in sorted(unintended_contacts)],
             "mujoco_warning_counts": plant.warning_counts(),
@@ -1009,6 +1325,56 @@ def run_sensor_realism_case(
         "geometry_information_confidence": geometry_information_confidence,
         "dynamic_information_confidence": dynamic_information_confidence,
         "combined_information_confidence": combined_information_confidence,
+        "force_speed_scale": np.asarray(
+            [item.get("force_speed_scale", 1.0) for item in execution_statuses],
+            dtype=float,
+        ),
+        "force_speed_target_scale": np.asarray(
+            [
+                item.get("force_speed_target_scale", 1.0)
+                for item in execution_statuses
+            ],
+            dtype=float,
+        ),
+        "force_recovery_mode_code": np.asarray(
+            [item.get("force_recovery_mode_code", 0.0) for item in execution_statuses],
+            dtype=float,
+        ),
+        "force_recovery_hold_active": np.asarray(
+            [item.get("force_recovery_hold_active", 0.0) for item in execution_statuses],
+            dtype=float,
+        ),
+        "governor_predicted_peak_command_force_n": np.asarray(
+            [
+                item.get("governor_predicted_peak_command_force_n", 0.0)
+                for item in execution_statuses
+            ],
+            dtype=float,
+        ),
+        "commanded_force_time_s": np.asarray(commanded_force_times),
+        "commanded_translational_force_norm_n": np.asarray(
+            commanded_force_norms
+        ),
+        "mpc_selection_time_s": np.asarray(mpc_selection_times),
+        "mpc_selected_alpha": np.asarray(mpc_selected_alphas),
+        "mpc_selected_predicted_command_force_n": command_prediction,
+        "mpc_selected_executed_command_force_n": command_execution,
+        "mpc_selected_command_force_prediction_error_n": (
+            command_prediction_error
+        ),
+        "mpc_control_path_prediction_time_s": np.asarray(
+            mpc_path_prediction_times
+        ),
+        "mpc_control_path_predicted_command_force_n": path_command_prediction,
+        "mpc_control_path_executed_command_force_n": path_command_execution,
+        "mpc_control_path_command_force_prediction_error_n": (
+            path_command_prediction_error
+        ),
+        "mpc_cycle_compute_ms": 1000.0 * np.asarray(mpc_compute_s),
+        "mpc_cycle_time_s": np.asarray(mpc_compute_times_s),
+        "high_level_cycle_compute_ms": (
+            1000.0 * np.asarray(high_level_cycle_compute_s)
+        ),
     }
     if distributed_cuff_enabled:
         trace.update(
