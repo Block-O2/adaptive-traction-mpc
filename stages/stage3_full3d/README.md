@@ -76,6 +76,9 @@ V2 weld or contact is present there.
 
 ## Stage 3C coupling contract
 
+The shared low-level preview/execution definition is documented in
+[`docs/EXECUTABLE_COMMAND_CONTRACT.md`](docs/EXECUTABLE_COMMAND_CONTRACT.md).
+
 The coupled model adds only the frozen planar two-joint Human V2, its unilateral
 bed contact, and an equality weld between `attachment_site` and
 `sleeve_attach_site`. The provisional adapter stays explicitly identity. Robot

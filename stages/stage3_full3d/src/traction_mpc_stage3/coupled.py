@@ -11,7 +11,18 @@ import mujoco
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from .frames import WORLD_FROM_BASE, base_from_attachment_target
+from .cuff_adapter import CUFF_ADAPTER
+from .executable_command import (
+    EXECUTION_CONTROL_DT_S,
+    ExecutableCommandPreview,
+    preview_executable_command,
+)
+from .frames import (
+    ATTACHMENT_FROM_CUFF,
+    WORLD_FROM_BASE,
+    RigidTransform,
+    base_from_attachment_target,
+)
 from .human import (
     CUFF_TRANSLATIONAL_FORCE_GATE_N,
     HUMAN,
@@ -25,7 +36,7 @@ from .robot import ACTUATOR_NAMES, JOINT_NAMES, TORQUE_MODEL_PATH, UR10eTorqueRo
 
 
 SIMULATION_DT_S = 0.001
-CONTROL_DT_S = 0.005
+CONTROL_DT_S = EXECUTION_CONTROL_DT_S
 CONTROL_SUBSTEPS = 5
 BED_HEIGHT_M = 0.012
 HIP_HEIGHT_M = 0.062
@@ -49,7 +60,11 @@ class CuffForceCommandLimitError(RuntimeError):
         )
 
 
-def build_coupled_model_xml(human: HumanV2Parameters = HUMAN) -> str:
+def build_coupled_model_xml(
+    human: HumanV2Parameters = HUMAN,
+    *,
+    attachment_from_cuff: RigidTransform = ATTACHMENT_FROM_CUFF,
+) -> str:
     """Build the coupled MJCF from the committed torque-model structure."""
 
     root = ET.parse(TORQUE_MODEL_PATH).getroot()
@@ -80,6 +95,65 @@ def build_coupled_model_xml(human: HumanV2Parameters = HUMAN) -> str:
         if geom_class in {"collision", "eef_collision"}:
             geom.set("contype", "1")
             geom.set("conaffinity", "1")
+
+    wrist = base.find(".//body[@name='wrist_3_link']")
+    assert wrist is not None
+    flange_site = wrist.find("site[@name='attachment_site']")
+    assert flange_site is not None
+    flange_position = np.fromstring(flange_site.get("pos", ""), sep=" ")
+    flange_quaternion = np.fromstring(flange_site.get("quat", ""), sep=" ")
+    flange_quaternion /= np.linalg.norm(flange_quaternion)
+    wrist_from_flange = RigidTransform(
+        Rotation.from_quat(
+            flange_quaternion[[1, 2, 3, 0]]
+        ).as_matrix(),
+        flange_position,
+    )
+    wrist_from_cuff = wrist_from_flange.compose(attachment_from_cuff)
+    cuff_quaternion_xyzw = Rotation.from_matrix(wrist_from_cuff.rotation).as_quat()
+    cuff_quaternion_wxyz = cuff_quaternion_xyzw[[3, 0, 1, 2]]
+    ET.SubElement(
+        wrist,
+        "site",
+        {
+            "name": "adapter_cuff_site",
+            "pos": " ".join(f"{value:.12g}" for value in wrist_from_cuff.translation),
+            "quat": " ".join(f"{value:.12g}" for value in cuff_quaternion_wxyz),
+            "size": "0.006",
+            "rgba": "0.10 0.85 0.85 1",
+        },
+    )
+    adapter_length = float(np.linalg.norm(attachment_from_cuff.translation))
+    if adapter_length > 1.0e-12:
+        connector_length = max(0.0, adapter_length - SLEEVE_OUTER_RADIUS_M)
+        connector_end_attachment = (
+            connector_length
+            * attachment_from_cuff.translation
+            / adapter_length
+        )
+        connector_end_wrist = (
+            wrist_from_flange.rotation @ connector_end_attachment
+            + wrist_from_flange.translation
+        )
+        ET.SubElement(
+            wrist,
+            "geom",
+            {
+                "name": "cuff_adapter_geom",
+                "type": "cylinder",
+                "fromto": " ".join(
+                    f"{value:.12g}"
+                    for value in np.concatenate(
+                        [wrist_from_flange.translation, connector_end_wrist]
+                    )
+                ),
+                "size": f"{CUFF_ADAPTER.connector_radius_m:.12g}",
+                "group": "3",
+                "contype": "1",
+                "conaffinity": "1",
+                "rgba": "0.18 0.72 0.72 1",
+            },
+        )
 
     i1_half = 0.51 * human.thigh_inertia_kg_m2
     i2_half = 0.51 * human.shank_inertia_kg_m2
@@ -140,7 +214,7 @@ def build_coupled_model_xml(human: HumanV2Parameters = HUMAN) -> str:
         "weld",
         {
             "name": "sleeve_connection",
-            "site1": "attachment_site",
+            "site1": "adapter_cuff_site",
             "site2": "sleeve_attach_site",
             "solref": f"{SLEEVE_SOLREF[0]:.9g} {SLEEVE_SOLREF[1]:.9g}",
             "solimp": (
@@ -184,9 +258,20 @@ class CoupledObservation:
 class CoupledUR10eHumanV2:
     """Eight-DoF plant: six UR10e joints and frozen planar Human V2."""
 
-    def __init__(self, human: HumanV2Parameters = HUMAN) -> None:
+    def __init__(
+        self,
+        human: HumanV2Parameters = HUMAN,
+        *,
+        attachment_from_cuff: RigidTransform = ATTACHMENT_FROM_CUFF,
+    ) -> None:
         self.human = human
-        self.model = mujoco.MjModel.from_xml_string(build_coupled_model_xml(human))
+        self.attachment_from_cuff = attachment_from_cuff
+        self.model = mujoco.MjModel.from_xml_string(
+            build_coupled_model_xml(
+                human,
+                attachment_from_cuff=attachment_from_cuff,
+            )
+        )
         self.data = mujoco.MjData(self.model)
         self.human_joint_names = ("hip_joint", "knee_joint")
         self.robot_joint_names = JOINT_NAMES
@@ -197,7 +282,8 @@ class CoupledUR10eHumanV2:
         self.human_dof_indices = self.model.jnt_dofadr[self.human_joint_ids]
         self.robot_dof_indices = self.model.jnt_dofadr[self.robot_joint_ids]
         self.actuator_ids = np.array([self.model.actuator(n).id for n in ACTUATOR_NAMES])
-        self.attachment_site_id = self.model.site("attachment_site").id
+        self.flange_site_id = self.model.site("attachment_site").id
+        self.attachment_site_id = self.model.site("adapter_cuff_site").id
         self.sleeve_site_id = self.model.site("sleeve_attach_site").id
         self.weld_id = self.model.equality("sleeve_connection").id
         self.bed_geom_id = self.model.geom("bed").id
@@ -228,7 +314,10 @@ class CoupledUR10eHumanV2:
         limits = np.column_stack([self.human.q_min_rad, self.human.q_max_rad])
         if np.any(q < limits[:, 0]) or np.any(q > limits[:, 1]):
             raise ValueError("Human V2 reset posture violates ROM")
-        target = base_from_attachment_target(_world_from_cuff(q))
+        target = base_from_attachment_target(
+            _world_from_cuff(q),
+            attachment_from_cuff=self.attachment_from_cuff,
+        )
         robot_q = _initial_solution(self._ik_robot, target)
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[self.human_qpos_indices] = q
@@ -381,41 +470,60 @@ class CoupledUR10eHumanV2:
         target_rotation_matrix: np.ndarray,
         target_angular_velocity_rad_s: np.ndarray,
         feedforward_wrench_world: np.ndarray,
-    ) -> None:
-        observation = self.observe()
-        force = 3000.0 * (np.asarray(target_position_m) - observation.attachment_position_m)
-        force += 140.0 * (np.asarray(target_velocity_m_s) - observation.attachment_velocity_m_s)
-        force = np.clip(force, -200.0, 200.0)
-        moment = 120.0 * self._rotation_error(
-            np.asarray(target_rotation_matrix), observation.attachment_rotation_matrix
+    ) -> ExecutableCommandPreview:
+        preview = self.preview_executable_command(
+            target_position_m,
+            target_velocity_m_s,
+            target_rotation_matrix,
+            target_angular_velocity_rad_s,
+            feedforward_wrench_world,
         )
-        moment += 12.0 * (
-            np.asarray(target_angular_velocity_rad_s)
-            - observation.attachment_angular_velocity_rad_s
-        )
-        feedforward = np.asarray(feedforward_wrench_world, dtype=float)
-        if feedforward.shape != (6,) or not np.all(np.isfinite(feedforward)):
-            raise ValueError("feedforward_wrench_world must be a finite six-vector")
-        force += feedforward[:3]
-        moment += feedforward[3:]
-        force_norm = float(np.linalg.norm(force))
-        if force_norm > CUFF_TRANSLATIONAL_FORCE_GATE_N + 1e-9:
-            raise CuffForceCommandLimitError(force_norm)
+        self.apply_executable_command(preview)
+        return preview
 
-        jacobian = self.robot_attachment_jacobian()
-        pinv = jacobian.T @ np.linalg.inv(jacobian @ jacobian.T + 1e-4 * np.eye(6))
-        nullspace = np.eye(6) - pinv @ jacobian
-        q = observation.robot_q_rad
-        dq = observation.robot_dq_rad_s
-        posture = 12.0 * (self.neutral_robot_q - q) - 3.0 * dq
-        torque = self.data.qfrc_bias[self.robot_dof_indices].copy()
-        torque += jacobian.T @ np.concatenate([force, moment]) + nullspace.T @ posture
-        self.last_unclipped_joint_torque = torque.copy()
-        torque = np.clip(torque, -self.torque_limits_nm, self.torque_limits_nm)
-        self.data.ctrl[self.actuator_ids] = torque
-        self.last_joint_torque = torque.copy()
-        self.last_force = force.copy()
-        self.last_moment = moment.copy()
+    def preview_executable_command(
+        self,
+        target_position_m: np.ndarray,
+        target_velocity_m_s: np.ndarray,
+        target_rotation_matrix: np.ndarray,
+        target_angular_velocity_rad_s: np.ndarray,
+        allocator_wrench_world: np.ndarray,
+    ) -> ExecutableCommandPreview:
+        """Return the exact next command without changing plant state."""
+
+        observation = self.observe()
+        return preview_executable_command(
+            attachment_position_m=observation.attachment_position_m,
+            attachment_rotation_matrix=observation.attachment_rotation_matrix,
+            attachment_velocity_m_s=observation.attachment_velocity_m_s,
+            attachment_angular_velocity_rad_s=(
+                observation.attachment_angular_velocity_rad_s
+            ),
+            robot_q_rad=observation.robot_q_rad,
+            robot_dq_rad_s=observation.robot_dq_rad_s,
+            neutral_robot_q_rad=self.neutral_robot_q,
+            target_position_m=target_position_m,
+            target_velocity_m_s=target_velocity_m_s,
+            target_rotation_matrix=target_rotation_matrix,
+            target_angular_velocity_rad_s=target_angular_velocity_rad_s,
+            allocator_wrench_world=allocator_wrench_world,
+            robot_attachment_jacobian=self.robot_attachment_jacobian(),
+            bias_torque_nm=self.data.qfrc_bias[self.robot_dof_indices],
+            torque_limits_nm=self.torque_limits_nm,
+        )
+
+    def apply_executable_command(
+        self, preview: ExecutableCommandPreview
+    ) -> None:
+        """Apply a preview produced by the shared realization contract."""
+
+        if not preview.feasible:
+            raise CuffForceCommandLimitError(preview.translational_force_norm_n)
+        self.last_unclipped_joint_torque = preview.unclipped_joint_torque_nm.copy()
+        self.data.ctrl[self.actuator_ids] = preview.joint_torque_command_nm
+        self.last_joint_torque = preview.joint_torque_command_nm.copy()
+        self.last_force = preview.force_total_n.copy()
+        self.last_moment = preview.moment_total_nm.copy()
 
     def step(self) -> CoupledObservation:
         self._apply_soft_limit()

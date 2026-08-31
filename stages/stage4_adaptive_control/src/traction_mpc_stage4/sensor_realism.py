@@ -27,6 +27,11 @@ from traction_mpc_stage3.human import (
     HumanV2Parameters,
     soft_limit_torque,
 )
+from traction_mpc_stage3.executable_command import (
+    ExecutableCommandPreview,
+    preview_executable_command,
+)
+from traction_mpc_stage3.frames import ATTACHMENT_FROM_CUFF, RigidTransform
 from traction_mpc_stage3.reference import CuffPoseReference
 from traction_mpc_stage3.robot import UR10eTorqueRobot
 from scipy.spatial.transform import Rotation
@@ -41,6 +46,7 @@ from .estimator_v2 import (
     dynamic_regressor_row,
     nominal_base_parameters,
 )
+from .executable_command import preview_stage4_executable_command
 from .evaluation import BED_CONTACT_CONTAMINATION_FORCE_N, Stage4CoupledPlant
 from .human_model import registered_cold_start_perturbed_human
 from .measurement import (
@@ -98,8 +104,13 @@ def _extrapolate_measurement_to_arrival(
 class SensorBoundaryStage4Plant(Stage4CoupledPlant):
     """Frozen plant with the same low-level law evaluated from measurements."""
 
-    def __init__(self, human: Any) -> None:
-        super().__init__(human)
+    def __init__(
+        self,
+        human: Any,
+        *,
+        attachment_from_cuff: RigidTransform = ATTACHMENT_FROM_CUFF,
+    ) -> None:
+        super().__init__(human, attachment_from_cuff=attachment_from_cuff)
         self._measured_robot_model = UR10eTorqueRobot()
 
     def apply_measured_nominal_cartesian_control(
@@ -110,48 +121,55 @@ class SensorBoundaryStage4Plant(Stage4CoupledPlant):
         target_rotation_matrix: np.ndarray,
         target_angular_velocity_rad_s: np.ndarray,
         feedforward_wrench_world: np.ndarray,
-    ) -> None:
-        force = 3000.0 * (
-            np.asarray(target_position_m) - measurement.attachment_position_m
+    ) -> ExecutableCommandPreview:
+        preview = self.preview_measured_executable_command(
+            measurement,
+            target_position_m,
+            target_velocity_m_s,
+            target_rotation_matrix,
+            target_angular_velocity_rad_s,
+            feedforward_wrench_world,
         )
-        force += 140.0 * (
-            np.asarray(target_velocity_m_s) - measurement.attachment_velocity_m_s
-        )
-        force = np.clip(force, -200.0, 200.0)
-        moment = 120.0 * self._rotation_error(
-            np.asarray(target_rotation_matrix), measurement.attachment_rotation_matrix
-        )
-        moment += 12.0 * (
-            np.asarray(target_angular_velocity_rad_s)
-            - measurement.attachment_angular_velocity_rad_s
-        )
-        feedforward = np.asarray(feedforward_wrench_world, dtype=float)
-        if feedforward.shape != (6,) or not np.all(np.isfinite(feedforward)):
-            raise ValueError("feedforward_wrench_world must be a finite six-vector")
-        force += feedforward[:3]
-        moment += feedforward[3:]
-        force_norm = float(np.linalg.norm(force))
-        if force_norm > CUFF_TRANSLATIONAL_FORCE_GATE_N + 1e-9:
-            raise CuffForceCommandLimitError(force_norm)
+        self.apply_executable_command(preview)
+        return preview
+
+    def preview_measured_executable_command(
+        self,
+        measurement: ControllerMeasurement,
+        target_position_m: np.ndarray,
+        target_velocity_m_s: np.ndarray,
+        target_rotation_matrix: np.ndarray,
+        target_angular_velocity_rad_s: np.ndarray,
+        allocator_wrench_world: np.ndarray,
+    ) -> ExecutableCommandPreview:
+        """Preview the measured-state command through the Stage-3 contract."""
 
         self._measured_robot_model.set_configuration(
             measurement.robot_q_rad, measurement.robot_dq_rad_s
         )
-        jacobian = self._measured_robot_model.attachment_jacobian()
-        pinv = jacobian.T @ np.linalg.inv(jacobian @ jacobian.T + 1e-4 * np.eye(6))
-        nullspace = np.eye(6) - pinv @ jacobian
-        posture = (
-            12.0 * (self.neutral_robot_q - measurement.robot_q_rad)
-            - 3.0 * measurement.robot_dq_rad_s
+        return preview_executable_command(
+            attachment_position_m=measurement.attachment_position_m,
+            attachment_rotation_matrix=measurement.attachment_rotation_matrix,
+            attachment_velocity_m_s=measurement.attachment_velocity_m_s,
+            attachment_angular_velocity_rad_s=(
+                measurement.attachment_angular_velocity_rad_s
+            ),
+            robot_q_rad=measurement.robot_q_rad,
+            robot_dq_rad_s=measurement.robot_dq_rad_s,
+            neutral_robot_q_rad=self.neutral_robot_q,
+            target_position_m=target_position_m,
+            target_velocity_m_s=target_velocity_m_s,
+            target_rotation_matrix=target_rotation_matrix,
+            target_angular_velocity_rad_s=target_angular_velocity_rad_s,
+            allocator_wrench_world=allocator_wrench_world,
+            robot_attachment_jacobian=(
+                self._measured_robot_model.rigid_offset_jacobian(
+                    self.attachment_from_cuff.translation
+                )
+            ),
+            bias_torque_nm=self._measured_robot_model.bias_torque_nm(),
+            torque_limits_nm=self.torque_limits_nm,
         )
-        torque = self._measured_robot_model.bias_torque_nm()
-        torque += jacobian.T @ np.concatenate([force, moment]) + nullspace.T @ posture
-        self.last_unclipped_joint_torque = torque.copy()
-        clipped = np.clip(torque, -self.torque_limits_nm, self.torque_limits_nm)
-        self.data.ctrl[self.actuator_ids] = clipped
-        self.last_joint_torque = clipped.copy()
-        self.last_force = force.copy()
-        self.last_moment = moment.copy()
 
 
 def _finite_measurement(measurement: ControllerMeasurement) -> bool:
@@ -459,28 +477,24 @@ def run_sensor_realism_case(
                     mpc_measurement.attachment_velocity_m_s,
                     mpc_measurement.attachment_angular_velocity_rad_s,
                 )
-        current_allocation = cuff_allocator.allocate(
-            current_action, estimated_state[:2], current_model
+        reference = executed_reference(float(low_level_measurement.arrival_time_s))
+        executable_preview = preview_stage4_executable_command(
+            plant=plant,
+            measurement=low_level_measurement,
+            action_nm=current_action,
+            estimated_state=estimated_state,
+            human_model=current_model,
+            cuff_allocator=cuff_allocator,
+            reference=reference,
         )
+        current_allocation = executable_preview.allocation
         if float(current_allocation["force_norm_n"]) > CUFF_TRANSLATIONAL_FORCE_GATE_N + 1e-9:
             termination = "allocated_cuff_force_gate"
             force_gate_event_count += 1
             break
 
-        reference = executed_reference(float(low_level_measurement.arrival_time_s))
-        target_pose = current_model.geometry.cuff_pose(reference.q_rad)
-        target_linear_velocity, target_angular_velocity = current_model.geometry.cuff_velocity(
-            reference.q_rad, reference.dq_rad_s
-        )
         try:
-            plant.apply_measured_nominal_cartesian_control(
-                low_level_measurement,
-                target_pose.translation,
-                target_linear_velocity,
-                target_pose.rotation,
-                target_angular_velocity,
-                np.asarray(current_allocation["wrench_world"]),
-            )
+            plant.apply_executable_command(executable_preview.command)
         except CuffForceCommandLimitError:
             termination = "total_commanded_cuff_force_gate"
             force_gate_event_count += 1

@@ -52,7 +52,13 @@ class Stage4CoupledPlant(CoupledUR10eHumanV2):
         q = np.asarray(human_q_rad, dtype=float)
         pose = _world_from_cuff(q)
         true_pose = type(pose)(pose.rotation, sleeve_position(q, self.human))
-        robot_q = _initial_solution(self._ik_robot, base_from_attachment_target(true_pose))
+        robot_q = _initial_solution(
+            self._ik_robot,
+            base_from_attachment_target(
+                true_pose,
+                attachment_from_cuff=self.attachment_from_cuff,
+            ),
+        )
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[self.human_qpos_indices] = q
         self.data.qpos[self.robot_qpos_indices] = robot_q

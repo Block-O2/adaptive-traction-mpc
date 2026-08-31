@@ -6,7 +6,11 @@ import numpy as np
 
 from traction_mpc_stage3.human import HUMAN
 from traction_mpc_stage4.evaluation import Stage4CoupledPlant
+from traction_mpc_stage4.cuff_allocator import default_engineering_cuff_allocator
+from traction_mpc_stage4.estimator_v2 import OneShotHumanEstimatorV2
+from traction_mpc_stage4.executable_command import preview_stage4_executable_command
 from traction_mpc_stage4.measurement import CausalMeasurementLayer, sensor_realism_cases
+from traction_mpc_stage4.reference import teaching_reference
 from traction_mpc_stage4.sensor_realism import (
     MeasurementRouting,
     SensorBoundaryStage4Plant,
@@ -92,6 +96,52 @@ def test_ideal_measured_low_level_law_matches_validated_stage4_law() -> None:
         original.last_unclipped_joint_torque,
         atol=1e-10,
         rtol=1e-10,
+    )
+
+
+def test_stage4_allocator_and_execution_share_the_preview_contract() -> None:
+    plant = SensorBoundaryStage4Plant(HUMAN)
+    truth = plant.reset(np.radians([5.0, 10.0]))
+    measurement = CausalMeasurementLayer(sensor_realism_cases()[0], truth).current
+    estimator = OneShotHumanEstimatorV2(
+        measurement.attachment_position_m,
+        measurement.attachment_rotation_matrix,
+        np.radians([5.0, 10.0]),
+    )
+    state = estimator.geometry.estimate_state(
+        measurement.attachment_position_m,
+        measurement.attachment_rotation_matrix,
+        measurement.attachment_velocity_m_s,
+        measurement.attachment_angular_velocity_rad_s,
+    )
+    allocator = default_engineering_cuff_allocator()
+    call_count = 0
+    original_allocate = allocator.allocate
+
+    def recording_allocate(*args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        return original_allocate(*args, **kwargs)
+
+    allocator.allocate = recording_allocate
+    preview = preview_stage4_executable_command(
+        plant=plant,
+        measurement=measurement,
+        action_nm=np.zeros(2),
+        estimated_state=state,
+        human_model=estimator.model,
+        cuff_allocator=allocator,
+        reference=teaching_reference(0.0),
+    )
+    assert call_count == 1
+    np.testing.assert_array_equal(
+        preview.command.force_allocator_n,
+        np.asarray(preview.allocation["wrench_world"])[:3],
+    )
+    plant.apply_executable_command(preview.command)
+    np.testing.assert_array_equal(
+        plant.last_joint_torque,
+        preview.command.joint_torque_command_nm,
     )
 
 

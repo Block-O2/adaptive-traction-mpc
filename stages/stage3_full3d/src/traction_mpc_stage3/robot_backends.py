@@ -6,7 +6,7 @@ import mujoco
 import numpy as np
 
 from .coupled import CoupledUR10eHumanV2
-from .frames import ATTACHMENT_FROM_CUFF, WORLD_FROM_BASE, RigidTransform
+from .frames import WORLD_FROM_BASE, RigidTransform
 from .robot_interface import (
     CapabilityStatus,
     CommandMode,
@@ -27,7 +27,7 @@ from .robot_interface import (
 def stage3_simulation_calibration(plant: CoupledUR10eHumanV2) -> FrameCalibration:
     """Return the explicit Stage-3 simulation-only flange/adapter chain."""
 
-    site_id = plant.attachment_site_id
+    site_id = plant.flange_site_id
     rotation = np.zeros(9)
     mujoco.mju_quat2Mat(rotation, plant.model.site_quat[site_id])
     return FrameCalibration(
@@ -38,10 +38,11 @@ def stage3_simulation_calibration(plant: CoupledUR10eHumanV2) -> FrameCalibratio
         flange_from_adapter=RigidTransform(
             rotation.reshape(3, 3), plant.model.site_pos[site_id]
         ),
-        adapter_from_cuff=ATTACHMENT_FROM_CUFF,
+        adapter_from_cuff=plant.attachment_from_cuff,
         provenance=(
             "Stage-3 simulation: Menagerie attachment_site plus explicit "
-            "provisional identity ATTACHMENT_FROM_CUFF; not hardware calibration"
+            "parameterized simulation attachment-to-cuff transform; not "
+            "hardware calibration"
         ),
     )
 

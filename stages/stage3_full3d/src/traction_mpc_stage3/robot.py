@@ -142,6 +142,27 @@ class UR10eTorqueRobot:
             ]
         )
 
+    def rigid_offset_jacobian(
+        self, offset_in_attachment_m: np.ndarray
+    ) -> np.ndarray:
+        """Return the spatial Jacobian at a rigid attachment-frame offset."""
+
+        offset = np.asarray(offset_in_attachment_m, dtype=float)
+        if offset.shape != (3,) or not np.all(np.isfinite(offset)):
+            raise ValueError("offset_in_attachment_m must be a finite three-vector")
+        jacobian = self.attachment_jacobian()
+        offset_base = self.attachment_pose().rotation @ offset
+        skew = np.array(
+            [
+                [0.0, -offset_base[2], offset_base[1]],
+                [offset_base[2], 0.0, -offset_base[0]],
+                [-offset_base[1], offset_base[0], 0.0],
+            ]
+        )
+        return np.vstack(
+            [jacobian[:3] - skew @ jacobian[3:], jacobian[3:]]
+        )
+
     def finite_difference_jacobian_check(
         self,
         q_rad: np.ndarray,

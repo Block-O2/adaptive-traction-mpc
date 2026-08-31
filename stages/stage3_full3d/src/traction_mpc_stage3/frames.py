@@ -10,6 +10,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from .cuff_adapter import CUFF_ADAPTER
+
 
 @dataclass(frozen=True)
 class RigidTransform:
@@ -54,6 +56,13 @@ WORLD_FROM_BASE = RigidTransform(
 # coincident with the Stage-2 cuff frame. The site's fixed wrist_3_link offset
 # and quaternion remain explicit in the MJCF and are not corrected in IK code.
 ATTACHMENT_FROM_CUFF = RigidTransform.identity()
+
+# Explicit opt-in engineering surrogate used by the High-ROM geometry work.
+# The legacy/default identity above remains unchanged for nominal regressions.
+ENGINEERING_ATTACHMENT_FROM_CUFF = RigidTransform(
+    np.eye(3),
+    np.array([0.0, CUFF_ADAPTER.cuff_center_standoff_m, 0.0]),
+)
 
 
 def base_from_attachment_target(
