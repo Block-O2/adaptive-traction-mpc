@@ -41,6 +41,7 @@ from traction_mpc_stage4.measurement import CausalMeasurementLayer, sensor_reali
 from traction_mpc_stage4.mpc import HumanSpaceMPC
 from traction_mpc_stage4.online_trust import OnlineSingleChallengerTrustEstimator
 from traction_mpc_stage4.reference import continuous_teaching_reference
+from traction_mpc_stage4.separated_runtime import SeparatedEstimatorTrustRuntime
 from traction_mpc_stage4.sensor_realism import SensorBoundaryStage4Plant
 
 
@@ -340,15 +341,11 @@ def _full_cycle_replay(
     repeats: int,
     screening: str,
     attachment_from_cuff: Any,
+    runtime_mode: str,
 ) -> dict[str, Any]:
     case = {item.name: item for item in sensor_realism_cases()}[
         "noise_bias_drift_200hz"
     ]
-    control_time = np.asarray(trace["control_time_s"], dtype=float)
-    control_state = np.asarray(trace["control_estimated_state"], dtype=float)
-    trace_time = np.asarray(trace["time_s"], dtype=float)
-    reference = _reference(trace)
-    stride = int(round(0.02 / CONTROL_DT_S))
     component_names = (
         "sensing_preprocessing",
         "state_reconstruction",
@@ -359,6 +356,10 @@ def _full_cycle_replay(
         "full_cycle",
     )
     samples: dict[str, list[float]] = {name: [] for name in component_names}
+    slow_compute_s: list[float] = []
+    publication_to_activation_s: list[float] = []
+    promotion_activation_delay_s: list[float] = []
+    maximum_backlog = 0
     for _ in range(repeats):
         true_human, _ = registered_cold_start_perturbed_human()
         plant = SensorBoundaryStage4Plant(
@@ -374,6 +375,14 @@ def _full_cycle_replay(
         )
         pacing = ReferenceExecutionLayer(
             continuous_teaching_reference, confidence_aware=True
+        )
+        separated = (
+            SeparatedEstimatorTrustRuntime(
+                estimator,
+                reference_execution=pacing,
+            )
+            if runtime_mode == "separated"
+            else None
         )
         controller = _controller(implementation)
         total_calls = warmup_calls + measured_calls
@@ -391,23 +400,32 @@ def _full_cycle_replay(
             sensing = perf_counter() - start
             assert measurements is not None
 
+            wall_time = float(measurements[1].arrival_time_s)
             start = perf_counter()
-            _, diagnostics = estimator.observe_measurement(measurements[0])
-            pacing.update_from_estimator(
-                measurements[1].arrival_time_s,
-                estimator,
-                diagnostics["geometry"],
-                diagnostics["dynamics"],
-            )
+            if separated is None:
+                _, diagnostics = estimator.observe_measurement(measurements[0])
+                pacing.update_from_estimator(
+                    measurements[1].arrival_time_s,
+                    estimator,
+                    diagnostics["geometry"],
+                    diagnostics["dynamics"],
+                )
+                human = estimator.model
+                active_execution = pacing
+                active_reference = pacing.reference
+            else:
+                snapshot = separated.activate_latest(
+                    control_cycle_index=solve_index,
+                    control_time_s=wall_time,
+                )
+                separated.submit(measurements[0])
+                human = snapshot.model
+                if snapshot.reference_execution is None:
+                    raise RuntimeError("missing published reference execution")
+                active_execution = snapshot.reference_execution
+                active_reference = snapshot.reference_execution.reference
             estimator_time = perf_counter() - start
 
-            control_index = solve_index * stride
-            wall_time = float(control_time[control_index])
-            trace_index = min(
-                int(np.searchsorted(trace_time, wall_time + 0.5e-3)),
-                len(trace_time) - 1,
-            )
-            human = _model(trace, trace_index)
             start = perf_counter()
             reconstructed = human.geometry.estimate_state(
                 measurements[1].attachment_position_m,
@@ -426,7 +444,7 @@ def _full_cycle_replay(
                         estimated_state=reconstructed,
                         human_model=human,
                         cuff_allocator=controller.cuff_allocator,
-                        reference=reference(wall_time),
+                        reference=active_reference(wall_time),
                     )
                 }
                 if screening == "scalar"
@@ -438,15 +456,15 @@ def _full_cycle_replay(
                             estimated_state=reconstructed,
                             human_model=human,
                             cuff_allocator=controller.cuff_allocator,
-                            reference=reference(wall_time),
+                            reference=active_reference(wall_time),
                         )
                     )
                 }
             )
             action, _ = controller.solve(
-                control_state[control_index],
+                reconstructed,
                 wall_time,
-                reference,
+                active_reference,
                 human,
                 **preview_kwargs,
             )
@@ -474,7 +492,9 @@ def _full_cycle_replay(
                 "state": reconstructed.copy(),
                 "action": action.copy(),
                 "wrench": np.asarray(allocation["wrench_world"]).copy(),
-                "speed": pacing.status(measurements[2].arrival_time_s),
+                "speed": active_execution.status(
+                    measurements[2].arrival_time_s
+                ),
             }
             assert _log_record["state"].shape == (4,)
             output_time = perf_counter() - start
@@ -490,6 +510,42 @@ def _full_cycle_replay(
                     ("full_cycle", full_time),
                 ):
                     samples[name].append(value)
+        if separated is not None:
+            separated.drain()
+            separated.activate_latest(
+                control_cycle_index=total_calls,
+                control_time_s=float(measurements[1].arrival_time_s + 0.020),
+            )
+            slow_compute_s.extend(
+                record.compute_s for record in separated.slow_records
+            )
+            publication_to_activation_s.extend(
+                record.publication_to_activation_s
+                for record in separated.activation_records
+                if record.input_index >= 0
+            )
+            maximum_backlog = max(maximum_backlog, separated.maximum_backlog)
+            for epoch, promotion in enumerate(
+                estimator.control_promotions, start=1
+            ):
+                activation = next(
+                    (
+                        record
+                        for record in separated.activation_records
+                        if record.incumbent_epoch >= epoch
+                    ),
+                    None,
+                )
+                if activation is None:
+                    raise RuntimeError("promotion was never activated")
+                promotion_activation_delay_s.append(
+                    max(
+                        0.0,
+                        activation.control_time_s
+                        - float(promotion["promotion_time_s"]),
+                    )
+                )
+            separated.close()
     result = {name: _percentiles(values) for name, values in samples.items()}
     total_mean = result["full_cycle"]["mean_ms"]
     for name in component_names[:-1]:
@@ -514,6 +570,20 @@ def _full_cycle_replay(
         }
         for index in deadline_miss_indices
     ]
+    result["runtime_mode"] = runtime_mode
+    if runtime_mode == "separated":
+        result["slow_worker"] = {
+            **_percentiles(slow_compute_s),
+            "maximum_backlog": maximum_backlog,
+        }
+        result["publication_to_activation"] = (
+            _percentiles(publication_to_activation_s)
+            if publication_to_activation_s
+            else {"count": 0}
+        )
+        result["promotion_activation_delay_ms"] = [
+            1000.0 * value for value in promotion_activation_delay_s
+        ]
     return result
 
 
@@ -533,6 +603,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--geometry", choices=("legacy", "engineering-140mm"), default="legacy"
+    )
+    parser.add_argument(
+        "--runtime", choices=("synchronous", "separated"), default="synchronous"
     )
     args = parser.parse_args()
     if args.output_dir.exists():
@@ -561,6 +634,7 @@ def main() -> None:
         repeats=args.repeats,
         screening=args.screening,
         attachment_from_cuff=attachment_from_cuff,
+        runtime_mode=args.runtime,
     )
     result["geometry"] = args.geometry
     args.output_dir.mkdir(parents=True)

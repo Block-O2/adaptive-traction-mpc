@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -13,7 +15,83 @@ from traction_mpc_stage4.confidence_execution import ReferenceExecutionLayer
 from traction_mpc_stage4.measurement import ControllerMeasurement, sensor_realism_cases
 from traction_mpc_stage4.online_trust import OnlineSingleChallengerTrustEstimator
 from traction_mpc_stage4.reference import cold_start_teaching_reference
+from traction_mpc_stage4.separated_runtime import SeparatedEstimatorTrustRuntime
 from traction_mpc_stage4.sensor_realism import run_sensor_realism_case
+
+
+def test_separated_runtime_preserves_fifo_estimator_semantics() -> None:
+    initial = ControllerMeasurement(
+        arrival_time_s=0.0,
+        sample_time_s=0.0,
+        robot_q_rad=np.zeros(6),
+        robot_dq_rad_s=np.zeros(6),
+        attachment_position_m=np.array([0.3, 0.0, 0.8]),
+        attachment_rotation_matrix=np.eye(3),
+        attachment_velocity_m_s=np.zeros(3),
+        attachment_angular_velocity_rad_s=np.zeros(3),
+        cuff_force_vector_n=np.zeros(3),
+        cuff_moment_vector_nm=np.zeros(3),
+        new_sample=True,
+    )
+    case = sensor_realism_cases()[0]
+    prior = cold_start_teaching_reference(0.0).q_rad
+    synchronous = OnlineSingleChallengerTrustEstimator(
+        initial,
+        prior,
+        measurement_case=case,
+        apply_qualified_model=True,
+    )
+    separated_estimator = OnlineSingleChallengerTrustEstimator(
+        initial,
+        prior,
+        measurement_case=case,
+        apply_qualified_model=True,
+    )
+    runtime = SeparatedEstimatorTrustRuntime(separated_estimator)
+    measurements = [
+        replace(
+            initial,
+            arrival_time_s=0.02 * index,
+            sample_time_s=0.02 * index,
+        )
+        for index in range(20)
+    ]
+    for index, measurement in enumerate(measurements):
+        synchronous.observe_measurement(measurement)
+        runtime.activate_latest(
+            control_cycle_index=index,
+            control_time_s=measurement.arrival_time_s,
+        )
+        runtime.submit(measurement)
+    runtime.drain()
+    final_snapshot = runtime.activate_latest(
+        control_cycle_index=len(measurements),
+        control_time_s=0.02 * len(measurements),
+    )
+    runtime.close()
+
+    assert [record.input_index for record in runtime.slow_records] == list(
+        range(len(measurements))
+    )
+    assert len(synchronous.raw_history) == len(separated_estimator.raw_history)
+    for left, right in zip(
+        synchronous.raw_history,
+        separated_estimator.raw_history,
+        strict=True,
+    ):
+        assert left["source_index"] == right["source_index"]
+        assert left["time_s"] == right["time_s"]
+        np.testing.assert_array_equal(left["state"], right["state"])
+        np.testing.assert_array_equal(
+            left["generalized_input_nm"], right["generalized_input_nm"]
+        )
+    np.testing.assert_array_equal(
+        synchronous.incumbent_beta, separated_estimator.incumbent_beta
+    )
+    np.testing.assert_array_equal(
+        final_snapshot.model.beta, separated_estimator.incumbent_beta
+    )
+    assert synchronous.trust_summary() == separated_estimator.trust_summary()
 
 
 def test_single_challenger_alpha_spending_is_anytime_and_telescoping() -> None:
