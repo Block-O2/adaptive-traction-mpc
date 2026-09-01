@@ -61,6 +61,18 @@ REGISTERED_CUFF_AWARE_ALLOCATOR_CONFIG = CuffAwareAllocatorConfig()
 DEFAULT_ENGINEERING_CUFF_ALLOCATOR_CONFIG = REGISTERED_CUFF_AWARE_ALLOCATOR_CONFIG
 
 
+@dataclass(frozen=True)
+class _CuffAwareAllocationFactors:
+    matrix: np.ndarray
+    world_mapping: np.ndarray
+    surface_mapping: np.ndarray
+    hessian: np.ndarray
+    inverse_hessian_bt: np.ndarray
+    dual_matrix: np.ndarray
+    action_to_sagittal: np.ndarray
+    action_to_wrench_world: np.ndarray
+
+
 def _geometry_axes(human: Any) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     if hasattr(human, "geometry"):
         geometry = human.geometry
@@ -210,10 +222,9 @@ class CuffAwareSagittalAllocator:
             CylindricalSurfaceConfig(config.cuff_length_m)
         )
 
-    def allocate(
-        self, generalized_action_nm: np.ndarray, q_rad: np.ndarray, human: Any
-    ) -> dict[str, Any]:
-        torque = np.asarray(generalized_action_nm, dtype=float)
+    def _prepare_factors(
+        self, q_rad: np.ndarray, human: Any
+    ) -> _CuffAwareAllocationFactors:
         matrix = sagittal_allocation_matrix(q_rad, human)
         world_mapping = _sagittal_wrench_to_world_matrix(q_rad, human)
         surface_mapping = cylindrical_surface_mapping(
@@ -227,8 +238,31 @@ class CuffAwareSagittalAllocator:
         )
         inverse_hessian_bt = np.linalg.solve(hessian, matrix.T)
         dual_matrix = matrix @ inverse_hessian_bt
-        sagittal = inverse_hessian_bt @ np.linalg.solve(dual_matrix, torque)
-        wrench_world = world_mapping @ sagittal
+        action_to_sagittal = inverse_hessian_bt @ np.linalg.solve(
+            dual_matrix, np.eye(2)
+        )
+        return _CuffAwareAllocationFactors(
+            matrix=matrix,
+            world_mapping=world_mapping,
+            surface_mapping=surface_mapping,
+            hessian=hessian,
+            inverse_hessian_bt=inverse_hessian_bt,
+            dual_matrix=dual_matrix,
+            action_to_sagittal=action_to_sagittal,
+            action_to_wrench_world=world_mapping @ action_to_sagittal,
+        )
+
+    def allocate(
+        self, generalized_action_nm: np.ndarray, q_rad: np.ndarray, human: Any
+    ) -> dict[str, Any]:
+        torque = np.asarray(generalized_action_nm, dtype=float)
+        factors = self._prepare_factors(q_rad, human)
+        sagittal = np.einsum(
+            "ij,j->i", factors.action_to_sagittal, torque
+        )
+        wrench_world = np.einsum(
+            "ij,j->i", factors.action_to_wrench_world, torque
+        )
         force_world = wrench_world[:3]
         physical_my = float(sagittal[2])
         result: dict[str, Any] = {
@@ -239,9 +273,11 @@ class CuffAwareSagittalAllocator:
             "my_nm": -physical_my,
             "wrench_world": wrench_world,
             "allocation_residual_nm": float(
-                np.linalg.norm(matrix @ sagittal - torque)
+                np.linalg.norm(factors.matrix @ sagittal - torque)
             ),
-            "objective_value_n2": float(sagittal @ hessian @ sagittal),
+            "objective_value_n2": float(
+                sagittal @ factors.hessian @ sagittal
+            ),
         }
         return _enrich_allocation(
             result,
@@ -250,6 +286,26 @@ class CuffAwareSagittalAllocator:
             human,
             allocation_kind="cuff_aware_force_plus_surface_effort",
             surface_model=self.surface_model,
+        )
+
+    def allocate_wrenches_batch(
+        self,
+        generalized_actions_nm: np.ndarray,
+        q_rad: np.ndarray,
+        human: Any,
+    ) -> np.ndarray:
+        """Allocate an Nx2 action batch after preparing geometry once."""
+
+        torques = np.asarray(generalized_actions_nm, dtype=float)
+        if (
+            torques.ndim != 2
+            or torques.shape[1] != 2
+            or not np.all(np.isfinite(torques))
+        ):
+            raise ValueError("generalized_actions_nm must be a finite Nx2 matrix")
+        factors = self._prepare_factors(q_rad, human)
+        return np.einsum(
+            "ij,kj->ki", factors.action_to_wrench_world, torques
         )
 
 

@@ -846,6 +846,41 @@ class BaseParameterHumanModel:
             "allocation_residual_nm": residual,
         }
 
+    def allocate_generalized_actions_wrench_batch(
+        self,
+        generalized_actions_nm: np.ndarray,
+        q_rad: np.ndarray,
+    ) -> np.ndarray:
+        """Batch the unchanged estimated rigid-cuff allocation."""
+
+        torques = np.asarray(generalized_actions_nm, dtype=float)
+        if (
+            torques.ndim != 2
+            or torques.shape[1] != 2
+            or not np.all(np.isfinite(torques))
+        ):
+            raise ValueError("generalized_actions_nm must be a finite Nx2 matrix")
+        force_map = self.geometry.translational_jacobian_world(q_rad).T
+        moment_map = np.array([1.0, -1.0])
+        moment_orthogonal = np.array([1.0, 1.0]) / math.sqrt(2.0)
+        projected_force_map = force_map.T @ moment_orthogonal
+        denominator = float(projected_force_map @ projected_force_map)
+        if denominator <= 1e-18:
+            raise RuntimeError("estimated rigid-cuff allocation is singular")
+        force_world = np.einsum(
+            "i,k->ki",
+            projected_force_map / denominator,
+            np.einsum("i,ki->k", moment_orthogonal, torques),
+        )
+        residual = torques - force_world @ force_map.T
+        my_nm = np.einsum("i,ki->k", moment_map, residual) / (
+            moment_map @ moment_map
+        )
+        wrenches = np.zeros((len(torques), 6))
+        wrenches[:, :3] = force_world
+        wrenches[:, 3:] = -my_nm[:, np.newaxis] * self.geometry.joint_axis_world
+        return wrenches
+
     def minimum_mass_matrix_eigenvalue(self) -> float:
         values = []
         for q2 in np.linspace(HUMAN.q_min_rad[1], HUMAN.q_max_rad[1], 21):

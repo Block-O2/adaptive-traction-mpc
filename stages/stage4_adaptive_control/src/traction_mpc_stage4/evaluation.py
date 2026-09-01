@@ -18,6 +18,9 @@ from traction_mpc_stage3.coupled import (
     human_cuff_velocity,
 )
 from traction_mpc_stage3.frames import base_from_attachment_target
+from traction_mpc_stage3.executable_command import (
+    preview_executable_commands_batch,
+)
 from traction_mpc_stage3.human import (
     CUFF_TRANSLATIONAL_FORCE_GATE_N,
     HUMAN,
@@ -30,6 +33,7 @@ from traction_mpc_stage3.reference import CuffPoseReference, _world_from_cuff
 
 from .human_model import (
     allocate_generalized_action,
+    allocate_generalized_actions_wrench_batch,
     nominal_parameter_vector,
     registered_moderate_human,
 )
@@ -187,13 +191,39 @@ def run_stage4_case(
         controller_model = estimator.human_model if controller_kind == "adaptive" else fixed_model
         if control_index % high_level_steps == 0:
             state = np.concatenate([current.human_q_rad, current.human_dq_rad_s])
-            current_action, solve_diag = mpc.solve(
+            first_interval_reference = reference_fn(float(plant.data.time))
+            first_interval_linear, first_interval_angular = human_cuff_velocity(
+                first_interval_reference.q_rad,
+                first_interval_reference.dq_rad_s,
+            )
+
+            command_context = plant.prepare_executable_command_context(
+                first_interval_reference.world_from_cuff.translation,
+                first_interval_linear,
+                first_interval_reference.world_from_cuff.rotation,
+                first_interval_angular,
+            )
+
+            def first_action_batch_preview(actions: np.ndarray):
+                wrenches = allocate_generalized_actions_wrench_batch(
+                    actions,
+                    current.human_q_rad,
+                    controller_model,
+                )
+                return preview_executable_commands_batch(command_context, wrenches)
+
+            proposed_action, solve_diag = mpc.solve(
                 state,
                 float(plant.data.time),
                 reference_fn,
                 controller_model,
+                first_action_batch_preview=first_action_batch_preview,
             )
             mpc_diagnostics.append(solve_diag)
+            if proposed_action is None:
+                termination = "no_safe_action"
+                break
+            current_action = proposed_action
         current_allocation = allocate_generalized_action(
             current_action,
             current.human_q_rad,

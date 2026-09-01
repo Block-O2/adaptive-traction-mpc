@@ -20,8 +20,21 @@ from typing import Any, Callable
 import numpy as np
 
 from traction_mpc_stage3.coupled import CONTROL_DT_S, HIP_HEIGHT_M
+from traction_mpc_stage3.executable_command import (
+    prepare_executable_command_context,
+    preview_executable_command,
+    preview_executable_commands_batch,
+)
+from traction_mpc_stage3.frames import (
+    ATTACHMENT_FROM_CUFF,
+    ENGINEERING_ATTACHMENT_FROM_CUFF,
+)
 from traction_mpc_stage3.reference import CuffPoseReference
 from traction_mpc_stage4.estimator_v2 import BaseParameterHumanModel, PlanarCuffGeometry
+from traction_mpc_stage4.executable_command import (
+    make_stage4_first_action_batch_preview,
+    make_stage4_first_action_preview,
+)
 from traction_mpc_stage4.confidence_execution import ReferenceExecutionLayer
 from traction_mpc_stage4.human_model import registered_cold_start_perturbed_human
 from traction_mpc_stage4.measurement import CausalMeasurementLayer, sensor_realism_cases
@@ -88,6 +101,85 @@ def _percentiles(values_s: list[float]) -> dict[str, float]:
         "median_ms": float(np.median(values)),
         "p95_ms": float(np.percentile(values, 95.0)),
         "max_ms": float(np.max(values)),
+        "over_20_ms_count": int(np.count_nonzero(values > 20.0)),
+    }
+
+
+def _replay_first_action_preview(
+    controller: HumanSpaceMPC,
+    state: np.ndarray,
+    human: BaseParameterHumanModel,
+):
+    def preview(action: np.ndarray):
+        allocation = controller.cuff_allocator.allocate(action, state[:2], human)
+        return preview_executable_command(
+            attachment_position_m=np.zeros(3),
+            attachment_rotation_matrix=np.eye(3),
+            attachment_velocity_m_s=np.zeros(3),
+            attachment_angular_velocity_rad_s=np.zeros(3),
+            robot_q_rad=np.zeros(6),
+            robot_dq_rad_s=np.zeros(6),
+            neutral_robot_q_rad=np.zeros(6),
+            target_position_m=np.zeros(3),
+            target_velocity_m_s=np.zeros(3),
+            target_rotation_matrix=np.eye(3),
+            target_angular_velocity_rad_s=np.zeros(3),
+            allocator_wrench_world=np.asarray(allocation["wrench_world"]),
+            robot_attachment_jacobian=np.eye(6),
+            bias_torque_nm=np.zeros(6),
+            torque_limits_nm=np.full(6, 1.0e6),
+        )
+
+    return preview
+
+
+def _replay_first_action_batch_preview(
+    controller: HumanSpaceMPC,
+    state: np.ndarray,
+    human: BaseParameterHumanModel,
+):
+    context = prepare_executable_command_context(
+        attachment_position_m=np.zeros(3),
+        attachment_rotation_matrix=np.eye(3),
+        attachment_velocity_m_s=np.zeros(3),
+        attachment_angular_velocity_rad_s=np.zeros(3),
+        robot_q_rad=np.zeros(6),
+        robot_dq_rad_s=np.zeros(6),
+        neutral_robot_q_rad=np.zeros(6),
+        target_position_m=np.zeros(3),
+        target_velocity_m_s=np.zeros(3),
+        target_rotation_matrix=np.eye(3),
+        target_angular_velocity_rad_s=np.zeros(3),
+        robot_attachment_jacobian=np.eye(6),
+        bias_torque_nm=np.zeros(6),
+        torque_limits_nm=np.full(6, 1.0e6),
+    )
+
+    def preview(actions: np.ndarray):
+        wrenches = controller.cuff_allocator.allocate_wrenches_batch(
+            actions, state[:2], human
+        )
+        return preview_executable_commands_batch(context, wrenches)
+
+    return preview
+
+
+def _screening_kwargs(
+    controller: HumanSpaceMPC,
+    state: np.ndarray,
+    human: BaseParameterHumanModel,
+    screening: str,
+) -> dict[str, Any]:
+    if screening == "scalar":
+        return {
+            "first_action_preview": _replay_first_action_preview(
+                controller, state, human
+            )
+        }
+    return {
+        "first_action_batch_preview": _replay_first_action_batch_preview(
+            controller, state, human
+        )
     }
 
 
@@ -117,6 +209,7 @@ def _replay(
     measured_calls: int,
     repeats: int,
     profile_calls: int,
+    screening: str,
 ) -> tuple[dict[str, Any], str]:
     control_time = np.asarray(trace["control_time_s"], dtype=float)
     control_state = np.asarray(trace["control_estimated_state"], dtype=float)
@@ -142,8 +235,14 @@ def _replay(
             timed = solve_index >= warmup_calls
             start = perf_counter()
             action, diagnostics = controller.solve(
-                state, wall_time, reference, human
+                state,
+                wall_time,
+                reference,
+                human,
+                **_screening_kwargs(controller, state, human, screening),
             )
+            if action is None:
+                raise RuntimeError("timing replay produced NO_SAFE_ACTION")
             elapsed = perf_counter() - start
             if timed:
                 timings.append(elapsed)
@@ -163,11 +262,14 @@ def _replay(
         )
         if solve_index == warmup_calls:
             profiler.enable()
+        state = control_state[control_index]
+        human = _model(trace, trace_index)
         controller.solve(
-            control_state[control_index],
+            state,
             wall_time,
             reference,
-            _model(trace, trace_index),
+            human,
+            **_screening_kwargs(controller, state, human, screening),
         )
     profiler.disable()
     section_samples: dict[str, list[float]] = {}
@@ -179,11 +281,14 @@ def _replay(
             int(np.searchsorted(trace_time, wall_time + 0.5e-3)),
             len(trace_time) - 1,
         )
+        state = control_state[control_index]
+        human = _model(trace, trace_index)
         _, diagnostics = controller.solve(
-            control_state[control_index],
+            state,
             wall_time,
             reference,
-            _model(trace, trace_index),
+            human,
+            **_screening_kwargs(controller, state, human, screening),
         )
         if solve_index >= warmup_calls:
             for key, value_ms in diagnostics["implementation_timing_ms"].items():
@@ -196,6 +301,7 @@ def _replay(
     result = {
         "evidence_category": "engineering_replay_timing_not_scientific",
         "implementation": implementation,
+        "first_action_screening": screening,
         "warmup_calls_per_repeat": warmup_calls,
         "measured_calls_per_repeat": measured_calls,
         "repeats": repeats,
@@ -232,6 +338,8 @@ def _full_cycle_replay(
     warmup_calls: int,
     measured_calls: int,
     repeats: int,
+    screening: str,
+    attachment_from_cuff: Any,
 ) -> dict[str, Any]:
     case = {item.name: item for item in sensor_realism_cases()}[
         "noise_bias_drift_200hz"
@@ -253,7 +361,9 @@ def _full_cycle_replay(
     samples: dict[str, list[float]] = {name: [] for name in component_names}
     for _ in range(repeats):
         true_human, _ = registered_cold_start_perturbed_human()
-        plant = SensorBoundaryStage4Plant(true_human)
+        plant = SensorBoundaryStage4Plant(
+            true_human, attachment_from_cuff=attachment_from_cuff
+        )
         initial = plant.reset(continuous_teaching_reference(0.0).q_rad)
         layers = [CausalMeasurementLayer(case, initial) for _ in range(3)]
         estimator = OnlineSingleChallengerTrustEstimator(
@@ -308,9 +418,40 @@ def _full_cycle_replay(
             state_time = perf_counter() - start
 
             start = perf_counter()
-            action, _ = controller.solve(
-                control_state[control_index], wall_time, reference, human
+            preview_kwargs = (
+                {
+                    "first_action_preview": make_stage4_first_action_preview(
+                        plant=plant,
+                        measurement=measurements[2],
+                        estimated_state=reconstructed,
+                        human_model=human,
+                        cuff_allocator=controller.cuff_allocator,
+                        reference=reference(wall_time),
+                    )
+                }
+                if screening == "scalar"
+                else {
+                    "first_action_batch_preview": (
+                        make_stage4_first_action_batch_preview(
+                            plant=plant,
+                            measurement=measurements[2],
+                            estimated_state=reconstructed,
+                            human_model=human,
+                            cuff_allocator=controller.cuff_allocator,
+                            reference=reference(wall_time),
+                        )
+                    )
+                }
             )
+            action, _ = controller.solve(
+                control_state[control_index],
+                wall_time,
+                reference,
+                human,
+                **preview_kwargs,
+            )
+            if action is None:
+                raise RuntimeError("full-cycle replay produced NO_SAFE_ACTION")
             mpc_time = perf_counter() - start
 
             start = perf_counter()
@@ -356,6 +497,23 @@ def _full_cycle_replay(
             100.0 * result[name]["mean_ms"] / total_mean
         )
     result["effective_hz_from_mean"] = float(1000.0 / total_mean)
+    deadline_miss_indices = [
+        index
+        for index, value in enumerate(samples["full_cycle"])
+        if value > 0.020
+    ]
+    result["deadline_misses"] = [
+        {
+            "sample_index": index,
+            "repeat_index": index // measured_calls,
+            "measured_call_index": index % measured_calls,
+            **{
+                f"{name}_ms": 1000.0 * samples[name][index]
+                for name in component_names
+            },
+        }
+        for index in deadline_miss_indices
+    ]
     return result
 
 
@@ -370,6 +528,12 @@ def main() -> None:
     parser.add_argument("--measured-calls", type=int, default=30)
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--profile-calls", type=int, default=10)
+    parser.add_argument(
+        "--screening", choices=("scalar", "batch"), default="batch"
+    )
+    parser.add_argument(
+        "--geometry", choices=("legacy", "engineering-140mm"), default="legacy"
+    )
     args = parser.parse_args()
     if args.output_dir.exists():
         raise FileExistsError(f"refusing to overwrite {args.output_dir}")
@@ -382,6 +546,12 @@ def main() -> None:
         measured_calls=args.measured_calls,
         repeats=args.repeats,
         profile_calls=args.profile_calls,
+        screening=args.screening,
+    )
+    attachment_from_cuff = (
+        ATTACHMENT_FROM_CUFF
+        if args.geometry == "legacy"
+        else ENGINEERING_ATTACHMENT_FROM_CUFF
     )
     result["full_cycle"] = _full_cycle_replay(
         trace,
@@ -389,7 +559,10 @@ def main() -> None:
         warmup_calls=args.warmup_calls,
         measured_calls=args.measured_calls,
         repeats=args.repeats,
+        screening=args.screening,
+        attachment_from_cuff=attachment_from_cuff,
     )
+    result["geometry"] = args.geometry
     args.output_dir.mkdir(parents=True)
     (args.output_dir / "timing.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"

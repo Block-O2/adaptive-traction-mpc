@@ -256,3 +256,40 @@ def allocate_generalized_action(
         "wrench_world": np.array([force_xz[0], 0.0, force_xz[1], 0.0, -my_nm, 0.0]),
         "allocation_residual_nm": residual,
     }
+
+
+def allocate_generalized_actions_wrench_batch(
+    generalized_actions_nm: np.ndarray,
+    q_rad: np.ndarray,
+    human: HumanV2Parameters,
+) -> np.ndarray:
+    """Batch the unchanged minimum-force rigid-cuff allocation."""
+
+    torques = np.asarray(generalized_actions_nm, dtype=float)
+    if (
+        torques.ndim != 2
+        or torques.shape[1] != 2
+        or not np.all(np.isfinite(torques))
+    ):
+        raise ValueError("generalized_actions_nm must be a finite Nx2 matrix")
+    force_map = sleeve_jacobian(q_rad, human)[[0, 2], :].T
+    moment_map = np.array([1.0, -1.0])
+    moment_orthogonal = np.array([1.0, 1.0]) / math.sqrt(2.0)
+    projected_force_map = force_map.T @ moment_orthogonal
+    denominator = float(projected_force_map @ projected_force_map)
+    if denominator <= 1e-18:
+        raise RuntimeError("rigid cuff allocation is singular")
+    force_xz = np.einsum(
+        "i,k->ki",
+        projected_force_map / denominator,
+        np.einsum("i,ki->k", moment_orthogonal, torques),
+    )
+    residual = torques - force_xz @ force_map.T
+    my_nm = np.einsum("i,ki->k", moment_map, residual) / (
+        moment_map @ moment_map
+    )
+    wrenches = np.zeros((len(torques), 6))
+    wrenches[:, 0] = force_xz[:, 0]
+    wrenches[:, 2] = force_xz[:, 1]
+    wrenches[:, 4] = -my_nm
+    return wrenches

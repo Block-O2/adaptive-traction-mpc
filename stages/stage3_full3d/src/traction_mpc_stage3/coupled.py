@@ -15,7 +15,9 @@ from .cuff_adapter import CUFF_ADAPTER
 from .executable_command import (
     EXECUTION_CONTROL_DT_S,
     ExecutableCommandPreview,
-    preview_executable_command,
+    PreparedExecutableCommandContext,
+    prepare_executable_command_context as prepare_command_context,
+    preview_executable_command_from_context,
 )
 from .frames import (
     ATTACHMENT_FROM_CUFF,
@@ -491,8 +493,27 @@ class CoupledUR10eHumanV2:
     ) -> ExecutableCommandPreview:
         """Return the exact next command without changing plant state."""
 
+        context = self.prepare_executable_command_context(
+            target_position_m,
+            target_velocity_m_s,
+            target_rotation_matrix,
+            target_angular_velocity_rad_s,
+        )
+        return preview_executable_command_from_context(
+            context, allocator_wrench_world
+        )
+
+    def prepare_executable_command_context(
+        self,
+        target_position_m: np.ndarray,
+        target_velocity_m_s: np.ndarray,
+        target_rotation_matrix: np.ndarray,
+        target_angular_velocity_rad_s: np.ndarray,
+    ) -> PreparedExecutableCommandContext:
+        """Prepare one exact command context without changing plant state."""
+
         observation = self.observe()
-        return preview_executable_command(
+        return prepare_command_context(
             attachment_position_m=observation.attachment_position_m,
             attachment_rotation_matrix=observation.attachment_rotation_matrix,
             attachment_velocity_m_s=observation.attachment_velocity_m_s,
@@ -506,7 +527,6 @@ class CoupledUR10eHumanV2:
             target_velocity_m_s=target_velocity_m_s,
             target_rotation_matrix=target_rotation_matrix,
             target_angular_velocity_rad_s=target_angular_velocity_rad_s,
-            allocator_wrench_world=allocator_wrench_world,
             robot_attachment_jacobian=self.robot_attachment_jacobian(),
             bias_torque_nm=self.data.qfrc_bias[self.robot_dof_indices],
             torque_limits_nm=self.torque_limits_nm,

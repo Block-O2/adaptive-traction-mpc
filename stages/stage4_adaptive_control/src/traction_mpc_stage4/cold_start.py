@@ -14,6 +14,9 @@ from traction_mpc_stage3.coupled import (
     CONTROL_SUBSTEPS,
     CuffForceCommandLimitError,
 )
+from traction_mpc_stage3.executable_command import (
+    preview_executable_commands_batch,
+)
 from traction_mpc_stage3.human import CUFF_TRANSLATIONAL_FORCE_GATE_N, HUMAN, HumanV2Parameters
 
 from .estimator_v2 import (
@@ -162,13 +165,44 @@ def run_cold_start_adaptive_case(
             current_geometry_diag = diagnostics["geometry"]
             current_dynamic_diag = diagnostics["dynamics"]
             current_model = estimator.model
-            current_action, solve_diag = mpc.solve(
+            first_interval_reference = cold_start_teaching_reference(
+                float(plant.data.time)
+            )
+            first_interval_pose = current_model.geometry.cuff_pose(
+                first_interval_reference.q_rad
+            )
+            first_interval_linear, first_interval_angular = (
+                current_model.geometry.cuff_velocity(
+                    first_interval_reference.q_rad,
+                    first_interval_reference.dq_rad_s,
+                )
+            )
+
+            command_context = plant.prepare_executable_command_context(
+                first_interval_pose.translation,
+                first_interval_linear,
+                first_interval_pose.rotation,
+                first_interval_angular,
+            )
+
+            def first_action_batch_preview(actions: np.ndarray):
+                wrenches = current_model.allocate_generalized_actions_wrench_batch(
+                    actions, estimated_state[:2]
+                )
+                return preview_executable_commands_batch(command_context, wrenches)
+
+            proposed_action, solve_diag = mpc.solve(
                 estimated_state,
                 float(plant.data.time),
                 cold_start_teaching_reference,
                 current_model,
+                first_action_batch_preview=first_action_batch_preview,
             )
             mpc_diagnostics.append(solve_diag)
+            if proposed_action is None:
+                termination = "no_safe_action"
+                break
+            current_action = proposed_action
         else:
             estimated_state = current_model.geometry.estimate_state(
                 current.attachment_position_m,

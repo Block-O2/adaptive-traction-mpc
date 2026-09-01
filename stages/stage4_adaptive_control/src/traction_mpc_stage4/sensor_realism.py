@@ -46,7 +46,10 @@ from .estimator_v2 import (
     dynamic_regressor_row,
     nominal_base_parameters,
 )
-from .executable_command import preview_stage4_executable_command
+from .executable_command import (
+    make_stage4_first_action_batch_preview,
+    preview_stage4_executable_command,
+)
 from .evaluation import BED_CONTACT_CONTAMINATION_FORCE_N, Stage4CoupledPlant
 from .human_model import registered_cold_start_perturbed_human
 from .measurement import (
@@ -460,13 +463,35 @@ def run_sensor_realism_case(
                     mpc_measurement.attachment_angular_velocity_rad_s,
                 )
             mpc_start = wall_time.perf_counter()
-            current_action, _ = mpc.solve(
-                estimated_state,
-                float(mpc_measurement.arrival_time_s),
-                executed_reference,
-                current_model,
-            )
+            if isinstance(mpc, HumanSpaceMPC):
+                proposed_action, _ = mpc.solve(
+                    estimated_state,
+                    float(mpc_measurement.arrival_time_s),
+                    executed_reference,
+                    current_model,
+                    first_action_batch_preview=make_stage4_first_action_batch_preview(
+                        plant=plant,
+                        measurement=low_level_measurement,
+                        estimated_state=estimated_state,
+                        human_model=current_model,
+                        cuff_allocator=cuff_allocator,
+                        reference=executed_reference(
+                            float(low_level_measurement.arrival_time_s)
+                        ),
+                    ),
+                )
+            else:
+                proposed_action, _ = mpc.solve(
+                    estimated_state,
+                    float(mpc_measurement.arrival_time_s),
+                    executed_reference,
+                    current_model,
+                )
             mpc_compute_s.append(wall_time.perf_counter() - mpc_start)
+            if proposed_action is None:
+                termination = "no_safe_action"
+                break
+            current_action = proposed_action
         else:
             if estimator_architecture == "integral_state_ukf":
                 estimated_state = estimator.last_state.copy()

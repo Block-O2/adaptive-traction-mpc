@@ -8,7 +8,11 @@ from traction_mpc_stage3.coupled import (
     CuffForceCommandLimitError,
     CoupledUR10eHumanV2,
 )
-from traction_mpc_stage3.executable_command import preview_executable_command
+from traction_mpc_stage3.executable_command import (
+    prepare_executable_command_context,
+    preview_executable_command,
+    preview_executable_commands_batch,
+)
 from traction_mpc_stage3.frames import (
     ATTACHMENT_FROM_CUFF,
     ENGINEERING_ATTACHMENT_FROM_CUFF,
@@ -25,6 +29,74 @@ def _targets(plant: CoupledUR10eHumanV2) -> tuple[np.ndarray, ...]:
         observation.attachment_angular_velocity_rad_s + np.array([0.01, 0.0, -0.02]),
         np.array([4.0, -3.0, 2.0, 0.2, -0.1, 0.3]),
     )
+
+
+def _prepared_context():
+    return prepare_executable_command_context(
+        attachment_position_m=np.array([0.1, -0.2, 0.3]),
+        attachment_rotation_matrix=np.eye(3),
+        attachment_velocity_m_s=np.array([0.01, -0.02, 0.03]),
+        attachment_angular_velocity_rad_s=np.array([0.02, -0.01, 0.03]),
+        robot_q_rad=np.linspace(-0.2, 0.3, 6),
+        robot_dq_rad_s=np.linspace(0.03, -0.02, 6),
+        neutral_robot_q_rad=np.zeros(6),
+        target_position_m=np.array([0.12, -0.19, 0.27]),
+        target_velocity_m_s=np.array([0.02, -0.01, 0.01]),
+        target_rotation_matrix=np.eye(3),
+        target_angular_velocity_rad_s=np.zeros(3),
+        robot_attachment_jacobian=np.eye(6),
+        bias_torque_nm=np.linspace(-1.0, 1.0, 6),
+        torque_limits_nm=np.full(6, 1000.0),
+    )
+
+
+def test_batch_preview_matches_scalar_candidate_by_candidate() -> None:
+    context = _prepared_context()
+    wrenches = np.array(
+        [
+            [5.0, -3.0, 2.0, 0.2, -0.1, 0.3],
+            [180.0, 30.0, -40.0, -0.4, 0.5, -0.6],
+            [240.0, 90.0, 80.0, 0.7, -0.8, 0.9],
+        ]
+    )
+    batch = preview_executable_commands_batch(context, wrenches)
+    scalar = [
+        preview_executable_command(
+            attachment_position_m=np.zeros(3),
+            attachment_rotation_matrix=np.eye(3),
+            attachment_velocity_m_s=np.zeros(3),
+            attachment_angular_velocity_rad_s=np.zeros(3),
+            robot_q_rad=np.zeros(6),
+            robot_dq_rad_s=np.zeros(6),
+            neutral_robot_q_rad=np.zeros(6),
+            target_position_m=np.zeros(3),
+            target_velocity_m_s=np.zeros(3),
+            target_rotation_matrix=np.eye(3),
+            target_angular_velocity_rad_s=np.zeros(3),
+            allocator_wrench_world=wrench,
+            robot_attachment_jacobian=np.eye(6),
+            bias_torque_nm=np.zeros(6),
+            torque_limits_nm=np.full(6, 1000.0),
+            prepared_context=context,
+        )
+        for wrench in wrenches
+    ]
+    for index, command in enumerate(scalar):
+        np.testing.assert_array_equal(
+            batch.force_position_n[index], command.force_position_n
+        )
+        np.testing.assert_array_equal(
+            batch.force_velocity_n[index], command.force_velocity_n
+        )
+        np.testing.assert_array_equal(
+            batch.force_allocator_n[index], command.force_allocator_n
+        )
+        np.testing.assert_array_equal(batch.force_total_n[index], command.force_total_n)
+        assert batch.translational_force_norm_n[index] == (
+            command.translational_force_norm_n
+        )
+        assert batch.margin_to_force_gate_n[index] == command.margin_to_force_gate_n
+        assert bool(batch.feasible[index]) is command.feasible
 
 
 def test_preview_is_side_effect_free_and_execution_applies_identical_command() -> None:

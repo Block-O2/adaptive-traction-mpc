@@ -8,6 +8,10 @@ from typing import Any, Callable, Literal
 
 import numpy as np
 
+from traction_mpc_stage3.executable_command import (
+    ExecutableCommandBatchPreview,
+    ExecutableCommandPreview,
+)
 from traction_mpc_stage3.human import (
     CUFF_TRANSLATIONAL_FORCE_GATE_N,
     HUMAN,
@@ -21,6 +25,29 @@ from .cuff_allocator import CuffAwareSagittalAllocator, default_engineering_cuff
 from .estimator_v2 import BaseParameterHumanModel
 from .human_model import allocate_generalized_action, inverse_dynamics, step_dynamics
 from .surface_loads import CylindricalSurfaceConfig, CylindricalSurfaceLoadModel
+
+
+SAFE_ACTION = "SAFE_ACTION"
+NO_SAFE_ACTION = "NO_SAFE_ACTION"
+FirstActionPreview = Callable[[np.ndarray], ExecutableCommandPreview]
+FirstActionBatchPreview = Callable[[np.ndarray], ExecutableCommandBatchPreview]
+
+
+def _executable_preview_metadata(
+    preview: ExecutableCommandPreview | None,
+) -> dict[str, Any] | None:
+    if preview is None:
+        return None
+    return {
+        "force_position_n": preview.force_position_n.tolist(),
+        "force_velocity_n": preview.force_velocity_n.tolist(),
+        "force_allocator_n": preview.force_allocator_n.tolist(),
+        "force_total_n": preview.force_total_n.tolist(),
+        "translational_force_norm_n": preview.translational_force_norm_n,
+        "margin_to_force_gate_n": preview.margin_to_force_gate_n,
+        "feasible": preview.feasible,
+        "control_dt_s": preview.control_dt_s,
+    }
 
 
 def _step_model(state: np.ndarray, action: np.ndarray, dt_s: float, human: Any) -> np.ndarray:
@@ -852,7 +879,20 @@ class HumanSpaceMPC:
         time_s: float,
         reference_fn: Callable[[float], CuffPoseReference],
         human: HumanV2Parameters,
-    ) -> tuple[np.ndarray, dict[str, Any]]:
+        *,
+        first_action_preview: FirstActionPreview | None = None,
+        first_action_batch_preview: FirstActionBatchPreview | None = None,
+    ) -> tuple[np.ndarray | None, dict[str, Any]]:
+        if (first_action_preview is None) == (first_action_batch_preview is None):
+            raise ValueError(
+                "provide exactly one scalar or batch first-action preview"
+            )
+
+        def preview_selected(action: np.ndarray) -> ExecutableCommandPreview:
+            if first_action_batch_preview is not None:
+                return first_action_batch_preview(action[np.newaxis, :]).command(0)
+            assert first_action_preview is not None
+            return first_action_preview(action)
         solve_timing_start = perf_counter() if self.record_timing_breakdown else 0.0
         x0 = np.asarray(state, dtype=float)
         q_ref, dq_ref, ddq_ref = self._reference_arrays(time_s, reference_fn)
@@ -879,12 +919,16 @@ class HumanSpaceMPC:
         best_cost = float("inf")
         best_margin = float("-inf")
         best_states: np.ndarray | None = None
+        best_executable_preview: ExecutableCommandPreview | None = None
         feasible_candidate_count = 0
+        first_action_feasible_candidate_count = 0
+        first_action_feasible_per_iteration: list[int] = []
         audit_this_call = self.solve_count in self.candidate_audit_solve_indices
         call_audit: list[dict[str, Any]] = []
         iteration_audit: list[dict[str, Any]] = []
         global_stage_start = perf_counter()
         sampling_runtime_s = 0.0
+        executable_screening_runtime_s = 0.0
         population_runtime_s = 0.0
         elite_update_runtime_s = 0.0
         population_sections_s = {
@@ -899,9 +943,57 @@ class HumanSpaceMPC:
             if self.record_timing_breakdown:
                 sampling_runtime_s += perf_counter() - section_start
                 section_start = perf_counter()
-            evaluations = self._evaluate_population(
-                x0, candidates, q_ref, dq_ref, human
-            )
+            screening_start = perf_counter()
+            executable_previews: list[ExecutableCommandPreview | None] | None = None
+            executable_batch: ExecutableCommandBatchPreview | None = None
+            if first_action_batch_preview is not None:
+                try:
+                    executable_batch = first_action_batch_preview(candidates[:, 0])
+                except (ValueError, RuntimeError, FloatingPointError, np.linalg.LinAlgError):
+                    executable_batch = None
+                first_action_feasible = (
+                    np.flatnonzero(executable_batch.feasible).tolist()
+                    if executable_batch is not None
+                    else []
+                )
+            else:
+                assert first_action_preview is not None
+                executable_previews = []
+                first_action_feasible = []
+                for index, candidate in enumerate(candidates):
+                    try:
+                        preview = first_action_preview(candidate[0])
+                    except (
+                        ValueError,
+                        RuntimeError,
+                        FloatingPointError,
+                        np.linalg.LinAlgError,
+                    ):
+                        preview = None
+                    executable_previews.append(preview)
+                    if preview is not None and preview.feasible:
+                        first_action_feasible.append(index)
+            executable_screening_runtime_s += perf_counter() - screening_start
+            first_action_feasible_candidate_count += len(first_action_feasible)
+            first_action_feasible_per_iteration.append(len(first_action_feasible))
+            self._last_population_timing_s = {}
+            evaluations: list[tuple[float, float, np.ndarray | None]] = [
+                (1.0e30, -1.0e6, None) for _ in range(self.config.candidate_count)
+            ]
+            if self.record_timing_breakdown:
+                section_start = perf_counter()
+            if first_action_feasible:
+                screened_evaluations = self._evaluate_population(
+                    x0,
+                    candidates[first_action_feasible],
+                    q_ref,
+                    dq_ref,
+                    human,
+                )
+                for index, evaluation in zip(
+                    first_action_feasible, screened_evaluations, strict=True
+                ):
+                    evaluations[index] = evaluation
             if self.record_timing_breakdown:
                 population_runtime_s += perf_counter() - section_start
                 for key in population_sections_s:
@@ -928,7 +1020,12 @@ class HumanSpaceMPC:
                     for index, candidate in enumerate(candidates)
                 )
             section_start = perf_counter() if self.record_timing_breakdown else 0.0
-            feasible = [index for index, (_, margin, states) in enumerate(evaluations) if states is not None and margin >= -1e-9]
+            feasible = [
+                index
+                for index in first_action_feasible
+                if evaluations[index][2] is not None
+                and evaluations[index][1] >= -1e-9
+            ]
             feasible_candidate_count += len(feasible)
             if not feasible:
                 if audit_this_call:
@@ -949,6 +1046,11 @@ class HumanSpaceMPC:
                 selected = ordered[0]
                 best_sequence = candidates[selected].copy()
                 best_cost, best_margin, best_states = evaluations[selected]
+                best_executable_preview = (
+                    executable_batch.command(selected)
+                    if executable_batch is not None
+                    else executable_previews[selected]
+                )
             elites = candidates[ordered[: min(self.config.elite_count, len(ordered))]]
             mean = np.mean(elites, axis=0)
             std = np.maximum(np.std(elites, axis=0), floor)
@@ -968,9 +1070,13 @@ class HumanSpaceMPC:
                 elite_update_runtime_s += perf_counter() - section_start
         global_stage_runtime_s = perf_counter() - global_stage_start
 
-        accepted = best_sequence is not None
+        accepted = best_sequence is not None and best_executable_preview is not None
         if accepted:
-            assert best_sequence is not None and best_states is not None
+            assert (
+                best_sequence is not None
+                and best_states is not None
+                and best_executable_preview is not None
+            )
             global_objective = float(best_cost)
             local_stage_start = perf_counter()
             best_sequence, refined_evaluation, refinement = (
@@ -983,6 +1089,11 @@ class HumanSpaceMPC:
             local_stage_runtime_s = perf_counter() - local_stage_start
             best_cost, best_margin, best_states = refined_evaluation
             assert best_states is not None
+            best_executable_preview = preview_selected(best_sequence[0])
+            if not best_executable_preview.feasible:
+                raise RuntimeError(
+                    "post-CEM refinement produced an executable-force-infeasible action"
+                )
             self.last_sequence = best_sequence.copy()
             self.last_action = best_sequence[0].copy()
         else:
@@ -998,12 +1109,15 @@ class HumanSpaceMPC:
                 "objective_improvement": 0.0,
             }
             self.failure_count += 1
-            best_sequence = seed.copy()
-            best_cost, best_margin, seed_states = evaluate(seed)
-            best_states = seed_states
         self.solve_count += 1
-        predicted = np.vstack([x0, best_states]) if best_states is not None else self._rollout(x0, seed, human)
+        predicted = (
+            np.vstack([x0, best_states])
+            if best_states is not None
+            else x0[np.newaxis, :]
+        )
         try:
+            if best_sequence is None or best_states is None:
+                raise ValueError("no selected sequence")
             interaction_terms, selected_allocations = self._interaction_cost_terms(
                 x0, best_sequence, predicted[1:], human
             )
@@ -1019,6 +1133,7 @@ class HumanSpaceMPC:
                 "wrench_slew_cost": float("nan"),
             }
         self.last_diagnostics = {
+            "status": SAFE_ACTION if accepted else NO_SAFE_ACTION,
             "accepted": accepted,
             "optimizer_success": accepted,
             "optimizer": (
@@ -1029,6 +1144,25 @@ class HumanSpaceMPC:
             "optimizer_iterations": self.config.cem_iterations,
             "implementation": self.implementation,
             "feasible_candidate_evaluations": feasible_candidate_count,
+            "first_action_feasible_candidate_evaluations": (
+                first_action_feasible_candidate_count
+            ),
+            "first_action_feasible_candidates_per_iteration": (
+                first_action_feasible_per_iteration
+            ),
+            "selected_executable_force_norm_n": (
+                best_executable_preview.translational_force_norm_n
+                if best_executable_preview is not None
+                else None
+            ),
+            "selected_executable_force_margin_n": (
+                best_executable_preview.margin_to_force_gate_n
+                if best_executable_preview is not None
+                else None
+            ),
+            "selected_executable_command": _executable_preview_metadata(
+                best_executable_preview
+            ),
             "global_cem_objective": global_objective,
             "global_stage_runtime_ms": 1000.0 * global_stage_runtime_s,
             "local_stage_runtime_ms": 1000.0 * local_stage_runtime_s,
@@ -1041,6 +1175,9 @@ class HumanSpaceMPC:
             "objective_contract": self.config.objective_contract(),
             "implementation_timing_ms": {
                 "candidate_sampling_generation": 1000.0 * sampling_runtime_s,
+                "first_action_executable_screening": (
+                    1000.0 * executable_screening_runtime_s
+                ),
                 "candidate_population_evaluation": 1000.0 * population_runtime_s,
                 "elite_selection_cem_update": 1000.0 * elite_update_runtime_s,
             },
@@ -1054,7 +1191,11 @@ class HumanSpaceMPC:
                 {
                     "solve_index": self.solve_count - 1,
                     "wall_time_s": float(time_s),
-                    "selected_first_generalized_torque_nm": best_sequence[0].tolist(),
+                    "selected_first_generalized_torque_nm": (
+                        best_sequence[0].tolist()
+                        if best_sequence is not None
+                        else None
+                    ),
                     "candidates": call_audit,
                     "cem_iterations": iteration_audit,
                 }
@@ -1073,6 +1214,7 @@ class HumanSpaceMPC:
             )
             accounted_s = (
                 sampling_runtime_s
+                + executable_screening_runtime_s
                 + rollout_overhead_s
                 + population_sections_s["dynamics_propagation"]
                 + cost_evaluation_s
@@ -1082,6 +1224,8 @@ class HumanSpaceMPC:
                 {
                     "candidate_rollout_python_overhead": 1000.0
                     * rollout_overhead_s,
+                    "first_action_executable_screening": 1000.0
+                    * executable_screening_runtime_s,
                     "dynamics_propagation": 1000.0
                     * population_sections_s["dynamics_propagation"],
                     "cost_constraint_evaluation": 1000.0 * cost_evaluation_s,
@@ -1092,4 +1236,7 @@ class HumanSpaceMPC:
                     "solve_total": 1000.0 * solve_total_s,
                 }
             )
-        return best_sequence[0].copy(), dict(self.last_diagnostics)
+        return (
+            best_sequence[0].copy() if best_sequence is not None else None,
+            dict(self.last_diagnostics),
+        )
