@@ -1,0 +1,132 @@
+{
+  "schema_version": "high_rom_feasibility_decomposition_v1",
+  "evidence_category": "engineering_failure_state_audit_not_formal_or_authoritative",
+  "checkpoint_commit": "f776abd",
+  "source_time_scale_spec_sha256": "0075d137feab5787ac949f01901bd0bee9f72915900ba197af1bb51374f41ee3",
+  "source_alpha": 0.125,
+  "trajectories": [
+    "knee_high_folding_90_120",
+    "hip_dominant_100_60",
+    "aggressive_both_120_120"
+  ],
+  "frozen_contract": {
+    "controller": "fixed_mpc_population_prior",
+    "mpc_cem_changed": false,
+    "safety_filter_changed": false,
+    "brake_changed": false,
+    "reference_manager_changed": false,
+    "allocator_changed": false,
+    "gains_changed": false,
+    "human_model": "nominal_high_rom_human_v2_qmax_125deg",
+    "scenario": "suspended_seated_like_high_rom",
+    "measurement_seed": 44104,
+    "command_force_gate_n": 200.0,
+    "physical_force_gate_n": 200.0,
+    "control_period_s": 0.005,
+    "mpc_period_s": 0.02
+  },
+  "snapshot_reconstruction": {
+    "reason": "saved_mjSTATE_INTEGRATION_does_not_include_measurement_delay_estimator_cem_rng_or_warm_start_state",
+    "method": "deterministic_prefix_hydration_then_diagnostic_from_exact_saved_boundary_state",
+    "required_boundary": "first_FILTER_INFEASIBLE_or_NO_SAFE_ACTION_that_enters_BRAKE",
+    "maximum_integration_state_abs_error": 1e-10,
+    "diagnostic_time_origin": "matched_first_BRAKE_entry",
+    "prefix_is_not_counted_as_a_new_full_trajectory_campaign": true,
+    "executed_post_boundary_action": "unchanged_existing_BRAKE_only"
+  },
+  "shadow_reentry": {
+    "evaluation_period_s": 0.02,
+    "candidate_alphas": [
+      0.0,
+      0.125,
+      0.25
+    ],
+    "reference_position_rule": "join_the_original_geometric_path_at_source_alpha_phase_0.125_times_current_wall_time",
+    "reference_derivative_rule": "candidate_velocity_is_alpha_times_phase_derivative_and_acceleration_is_alpha_squared_times_phase_second_derivative",
+    "cem_state_rule": "deep_copy_actual_fixed_mpc_rng_warm_start_and_last_action_at_BRAKE_entry_once_per_candidate_alpha_then_advance_only_on_20ms_shadow_cycles",
+    "path": "actual_HumanSpaceMPC_plus_Safety_Filter_plus_executable_command_preview",
+    "executed_action_affected": false,
+    "physical_replay_s": 0.005,
+    "physical_replay_command_hold": "one_candidate_executable_command_held_for_five_1ms_substeps",
+    "single_cycle_safe_requirements": {
+      "mpc_status": "SAFE_ACTION",
+      "executable_command_force_n_lte": 200.0,
+      "allocator_force_n_lte": 200.0,
+      "physical_force_every_substep_n_lte": 200.0,
+      "human_rom_event": false,
+      "mujoco_solver_warning": false,
+      "robot_joint_limit_event": false,
+      "unintended_structural_contact": false
+    },
+    "reentry_consecutive_cycles": 5,
+    "earliest_warning_definition": "first_single_safe_shadow_cycle",
+    "reentry_time_definition": "time_of_fifth_cycle_in_first_five_cycle_safe_streak",
+    "persistence_definition": "duration_from_first_cycle_of_each_safe_streak_through_last_safe_cycle_plus_one_evaluation_period_capped_at_replay_end",
+    "replay_end": "existing_source_horizon_or_existing_BRAKE_INFEASIBLE_whichever_occurs_first"
+  },
+  "task_retention": {
+    "states": "each_first_FILTER_INFEASIBLE_or_NO_SAFE_ACTION_BRAKE_entry",
+    "equations": [
+      "B_w_equals_gamma_times_tau_des",
+      "w_equals_gamma_times_w_nominal_plus_lambda_times_null_B"
+    ],
+    "gamma_interval": [
+      0.0,
+      1.0
+    ],
+    "lambda_rule": "analytic_minimum_total_translational_command_force_for_each_gamma_along_the_one_dimensional_null_direction",
+    "gamma_search": "endpoint_check_then_60_step_bisection_on_the_upper_feasible_component",
+    "feasibility_tolerance_n": 1e-9,
+    "torque_equality_tolerance_nm": 1e-9,
+    "physical_replay_s": 0.005,
+    "classification_reasonably_positive_gamma_min": 0.5,
+    "classification_threshold_is_diagnostic_not_a_controller_threshold": true
+  },
+  "general_brake_feasible_set": {
+    "state": "aggressive_both_120_120_existing_BRAKE_INFEASIBLE_state",
+    "reference_family": "the_same_six_existing_BRAKE_candidate_references_at_that_state",
+    "decision_variables": "sagittal_wrench_Fx_Fz_M_for_each_existing_candidate_reference",
+    "force_component_search_bounds_n": [
+      -200.0,
+      200.0
+    ],
+    "moment_bound_rule": "derive_a_finite_superset_bound_from_current_robot_unclipped_torque_limits_and_the_200N_force_component_domain",
+    "constraints": {
+      "allocator_translational_force_n_lte": 200.0,
+      "executable_command_force_n_lte": 200.0,
+      "unclipped_robot_joint_torque_within_current_limits": true,
+      "joint_mechanical_power_dq_dot_tau_lte_nm_rad_s": 0.0,
+      "predicted_Human_speed_after_5ms_strictly_lower_by_rad_s": 1e-9
+    },
+    "prediction": "frozen_current_control_model_RK4_dynamics_over_5ms",
+    "optimizer": "deterministic_SLSQP_for_each_of_six_references",
+    "starts": "all_current_candidate_wrenches_plus_zero_and_a_deterministic_5x5_force_grid_cross_three_moment_levels_filtered_by_allocator_force",
+    "slsqp_max_iterations": 1000,
+    "slsqp_ftol": 1e-12,
+    "feasibility_postcheck_tolerance": 1e-7,
+    "selected_candidate": "minimum_predicted_5ms_speed_then_minimum_command_force",
+    "selected_candidate_physical_replay_s": 0.005,
+    "negative_result_scope": "no_safe_braking_action_found_in_the_audited_local_bounded_space_not_global_physical_impossibility"
+  },
+  "classification": {
+    "A_RECOVERY_LOGIC_LIMITED": "a_five_cycle_safe_TRACK_reentry_streak_exists_during_executed_BRAKE",
+    "B_TASK_PRESERVATION_LIMITED": "no_A_and_gamma_star_is_at_least_0.5_with_safe_5ms_physical_replay",
+    "C_BRAKE_FAMILY_LIMITED": "no_A_or_B_and_for_120_120_a_safe_dissipative_action_exists_outside_the_current_six_candidate_family",
+    "D_LOCALLY_CONTROL_INFEASIBLE": "no_A_B_or_C_in_the_audited_local_bounded_space",
+    "priority_order": [
+      "A_RECOVERY_LOGIC_LIMITED",
+      "B_TASK_PRESERVATION_LIMITED",
+      "C_BRAKE_FAMILY_LIMITED",
+      "D_LOCALLY_CONTROL_INFEASIBLE"
+    ]
+  },
+  "prohibited": [
+    "actual_BRAKE_to_TRACK_switch",
+    "controller_source_or_parameter_change",
+    "task_relaxation_integration",
+    "new_BRAKE_controller",
+    "new_full_trajectory_scan",
+    "additional_seed",
+    "global_physical_infeasibility_claim"
+  ]
+}
