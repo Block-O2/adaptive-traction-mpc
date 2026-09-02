@@ -63,3 +63,26 @@ feasibility masks, CEM status, selected action, objective, and selected/actual
 command identity for nominal, partially infeasible, and zero-safe cases. This
 batching changes implementation scheduling only; it adds no controller term,
 threshold, approximation, supervisor, or reference behavior.
+
+## Phase 3: TRACK/BRAKE supervisor
+
+The optional Stage-4 execution supervisor has exactly two active modes. TRACK
+keeps the existing 50 Hz CEM solve and checks its held first action through the
+scalar executable-command contract on every 5 ms execution cycle. A CEM
+`NO_SAFE_ACTION` result or an unsafe scalar preview enters BRAKE; the rejected
+TRACK action is never applied.
+
+BRAKE performs no MPC solve. It advances a continuous internal joint reference
+with bounded deceleration and bounded reference jerk, constructs a small set of
+trajectory-independent braking-rate candidates, and previews every candidate
+through `preview_stage4_executable_command(...)`. Only a preview classified as
+feasible by the shared Stage-3 200 N total-force contract (and by the existing
+independent allocator gate) may be returned as `SAFE_BRAKE`. The exact preview
+object selected by the supervisor is passed to execution without recomputing
+the command.
+
+If no braking candidate is executable-force feasible, the supervisor returns
+`BRAKE_INFEASIBLE` with no action, reference, or preview, and the caller
+terminates. It does not substitute a previous, zero, seed, or least-bad
+command. Phase 3 does not add the former HOLD/recovery state machine, a
+Reference Manager, pacing, a new force cost, or a High-ROM rollout.

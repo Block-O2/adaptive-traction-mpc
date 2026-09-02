@@ -214,6 +214,7 @@ def run_sensor_realism_case(
     trajectory_waypoints: tuple[Any, ...] = COLD_START_TEACHING_WAYPOINTS,
     plant_factory: Callable[[HumanV2Parameters], SensorBoundaryStage4Plant] | None = None,
     reference_execution: ReferenceExecutionLayer | None = None,
+    track_brake_supervisor: Any | None = None,
     mpc_factory: Callable[[], HumanSpaceMPC] | None = None,
     cuff_allocator: Any | None = None,
     estimator_factory: Callable[[ControllerMeasurement, np.ndarray], Any] | None = None,
@@ -405,6 +406,8 @@ def run_sensor_realism_case(
     rollout_wall_start = wall_time.perf_counter()
 
     for control_index in range(requested_steps):
+        mpc_diagnostics: dict[str, Any] | None = None
+        high_level_proposed_action: np.ndarray | None = None
         current_truth = plant.observe()
         estimator_measurement = estimator_layer.update(current_truth)
         mpc_measurement = mpc_layer.update(current_truth)
@@ -462,36 +465,45 @@ def run_sensor_realism_case(
                     mpc_measurement.attachment_velocity_m_s,
                     mpc_measurement.attachment_angular_velocity_rad_s,
                 )
-            mpc_start = wall_time.perf_counter()
-            if isinstance(mpc, HumanSpaceMPC):
-                proposed_action, _ = mpc.solve(
-                    estimated_state,
-                    float(mpc_measurement.arrival_time_s),
-                    executed_reference,
-                    current_model,
-                    first_action_batch_preview=make_stage4_first_action_batch_preview(
-                        plant=plant,
-                        measurement=low_level_measurement,
-                        estimated_state=estimated_state,
-                        human_model=current_model,
-                        cuff_allocator=cuff_allocator,
-                        reference=executed_reference(
-                            float(low_level_measurement.arrival_time_s)
+            should_solve_mpc = bool(
+                track_brake_supervisor is None
+                or track_brake_supervisor.mode == "TRACK"
+            )
+            if should_solve_mpc:
+                if track_brake_supervisor is not None:
+                    track_brake_supervisor.note_track_mpc_solve()
+                mpc_start = wall_time.perf_counter()
+                if isinstance(mpc, HumanSpaceMPC):
+                    high_level_proposed_action, mpc_diagnostics = mpc.solve(
+                        estimated_state,
+                        float(mpc_measurement.arrival_time_s),
+                        executed_reference,
+                        current_model,
+                        first_action_batch_preview=make_stage4_first_action_batch_preview(
+                            plant=plant,
+                            measurement=low_level_measurement,
+                            estimated_state=estimated_state,
+                            human_model=current_model,
+                            cuff_allocator=cuff_allocator,
+                            reference=executed_reference(
+                                float(low_level_measurement.arrival_time_s)
+                            ),
                         ),
-                    ),
-                )
-            else:
-                proposed_action, _ = mpc.solve(
-                    estimated_state,
-                    float(mpc_measurement.arrival_time_s),
-                    executed_reference,
-                    current_model,
-                )
-            mpc_compute_s.append(wall_time.perf_counter() - mpc_start)
-            if proposed_action is None:
-                termination = "no_safe_action"
-                break
-            current_action = proposed_action
+                    )
+                else:
+                    high_level_proposed_action, mpc_diagnostics = mpc.solve(
+                        estimated_state,
+                        float(mpc_measurement.arrival_time_s),
+                        executed_reference,
+                        current_model,
+                    )
+                mpc_compute_s.append(wall_time.perf_counter() - mpc_start)
+                if high_level_proposed_action is None:
+                    if track_brake_supervisor is None:
+                        termination = "no_safe_action"
+                        break
+                else:
+                    current_action = high_level_proposed_action
         else:
             if estimator_architecture == "integral_state_ukf":
                 estimated_state = estimator.last_state.copy()
@@ -503,15 +515,50 @@ def run_sensor_realism_case(
                     mpc_measurement.attachment_angular_velocity_rad_s,
                 )
         reference = executed_reference(float(low_level_measurement.arrival_time_s))
-        executable_preview = preview_stage4_executable_command(
-            plant=plant,
-            measurement=low_level_measurement,
-            action_nm=current_action,
-            estimated_state=estimated_state,
-            human_model=current_model,
-            cuff_allocator=cuff_allocator,
-            reference=reference,
-        )
+        if track_brake_supervisor is None:
+            executable_preview = preview_stage4_executable_command(
+                plant=plant,
+                measurement=low_level_measurement,
+                action_nm=current_action,
+                estimated_state=estimated_state,
+                human_model=current_model,
+                cuff_allocator=cuff_allocator,
+                reference=reference,
+            )
+        else:
+            proposed_for_supervisor = (
+                high_level_proposed_action
+                if mpc_diagnostics is not None
+                else current_action
+            )
+            supervisor_decision = track_brake_supervisor.command(
+                plant=plant,
+                measurement=low_level_measurement,
+                estimated_state=estimated_state,
+                human_model=current_model,
+                cuff_allocator=cuff_allocator,
+                track_reference=reference,
+                proposed_action_nm=proposed_for_supervisor,
+                mpc_status=(
+                    None
+                    if mpc_diagnostics is None
+                    else mpc_diagnostics.get("status")
+                ),
+            )
+            if supervisor_decision.terminate:
+                termination = str(
+                    supervisor_decision.terminate_reason or "brake_infeasible"
+                )
+                break
+            if (
+                supervisor_decision.action_nm is None
+                or supervisor_decision.reference is None
+                or supervisor_decision.executable_preview is None
+            ):
+                raise RuntimeError("safe supervisor decision is incomplete")
+            current_action = supervisor_decision.action_nm.copy()
+            reference = supervisor_decision.reference
+            executable_preview = supervisor_decision.executable_preview
         current_allocation = executable_preview.allocation
         if float(current_allocation["force_norm_n"]) > CUFF_TRANSLATIONAL_FORCE_GATE_N + 1e-9:
             termination = "allocated_cuff_force_gate"
@@ -932,6 +979,11 @@ def run_sensor_realism_case(
             "minimum_observed_speed_scale": float(np.min(execution_speed)),
             "maximum_observed_speed_scale": float(np.max(execution_speed)),
             "final_reference_phase_time_s": float(execution_phase[-1]),
+        }
+    if track_brake_supervisor is not None:
+        summary["track_brake_supervisor"] = {
+            **track_brake_supervisor.summary(),
+            "used_for_control": True,
         }
     if hasattr(estimator, "trust_summary"):
         summary["hierarchical_trust"] = estimator.trust_summary()
