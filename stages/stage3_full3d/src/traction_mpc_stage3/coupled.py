@@ -52,6 +52,13 @@ SLEEVE_OUTER_RADIUS_M = 0.058
 THIGH_RADIUS_M = 0.050
 SHANK_RADIUS_M = 0.045
 
+LYING_BED_SCENARIO = "lying_bed"
+SUSPENDED_SEATED_LIKE_SCENARIO = "suspended_seated_like_high_rom"
+ENGINEERING_SCENARIOS = (
+    LYING_BED_SCENARIO,
+    SUSPENDED_SEATED_LIKE_SCENARIO,
+)
+
 
 class CuffForceCommandLimitError(RuntimeError):
     def __init__(self, force_norm_n: float) -> None:
@@ -66,8 +73,15 @@ def build_coupled_model_xml(
     human: HumanV2Parameters = HUMAN,
     *,
     attachment_from_cuff: RigidTransform = ATTACHMENT_FROM_CUFF,
+    engineering_scenario: str = LYING_BED_SCENARIO,
 ) -> str:
     """Build the coupled MJCF from the committed torque-model structure."""
+
+    if engineering_scenario not in ENGINEERING_SCENARIOS:
+        raise ValueError(
+            "engineering_scenario must be one of "
+            + ", ".join(ENGINEERING_SCENARIOS)
+        )
 
     root = ET.parse(TORQUE_MODEL_PATH).getroot()
     root.set("model", "ur10e_human_v2_rigid_cuff")
@@ -163,10 +177,12 @@ def build_coupled_model_xml(
     friction = f"{BED_FRICTION:.9g} 0.01 0.001"
     solref = f"{BED_SOLREF[0]:.9g} {BED_SOLREF[1]:.9g}"
     solimp = f"{BED_SOLIMP[0]:.9g} {BED_SOLIMP[1]:.9g} {BED_SOLIMP[2]:.9g}"
+    bed_contype = "4" if engineering_scenario == LYING_BED_SCENARIO else "0"
+    bed_conaffinity = "2" if engineering_scenario == LYING_BED_SCENARIO else "0"
     human_xml = f"""
     <geom name="bed" type="plane" pos="0 0 {BED_HEIGHT_M:.9g}"
       size="1.6 1.0 0.05" rgba="0.55 0.70 0.82 1"
-      contype="4" conaffinity="2"
+      contype="{bed_contype}" conaffinity="{bed_conaffinity}"
       friction="{friction}" solref="{solref}" solimp="{solimp}"/>
     <body name="hip" pos="0 0 {HIP_HEIGHT_M:.9g}">
       <joint name="hip_joint" type="hinge" axis="0 -1 0"
@@ -265,13 +281,16 @@ class CoupledUR10eHumanV2:
         human: HumanV2Parameters = HUMAN,
         *,
         attachment_from_cuff: RigidTransform = ATTACHMENT_FROM_CUFF,
+        engineering_scenario: str = LYING_BED_SCENARIO,
     ) -> None:
         self.human = human
         self.attachment_from_cuff = attachment_from_cuff
+        self.engineering_scenario = engineering_scenario
         self.model = mujoco.MjModel.from_xml_string(
             build_coupled_model_xml(
                 human,
                 attachment_from_cuff=attachment_from_cuff,
+                engineering_scenario=engineering_scenario,
             )
         )
         self.data = mujoco.MjData(self.model)

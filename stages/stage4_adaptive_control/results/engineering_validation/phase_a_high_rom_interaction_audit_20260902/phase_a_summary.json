@@ -1,0 +1,322 @@
+{
+  "canonical_plant_changed": false,
+  "controller_or_reference_manager_changed": false,
+  "diagnosis": {
+    "bed_contact_contribution": {
+      "initial_spike_force_difference_lying_minus_suspended_n": 0.0,
+      "interpretation": "no direct bed/contact contribution at spike onset; a later bed contact changes the short-window force but does not create the crossing",
+      "maximum_abs_force_norm_difference_over_5ms_n": 3.2218395863335445,
+      "maximum_abs_moment_norm_difference_over_5ms_nm": 0.5140869390894167
+    },
+    "classification": "C_genuine_closed_loop_interaction_amplification",
+    "classification_qualifier": "primary classification for the observed same-state event; preceding lying-bed contacts and the 140 mm adapter remain setup-specific secondary factors whose full-history effects were not isolated",
+    "command_to_physical_residual": {
+      "event_command_physical_direction_angle_deg": 61.818644009922714,
+      "event_physical_norm_minus_command_norm_n": 18.441035116014035,
+      "event_vector_residual_norm_n": 215.52669008838424,
+      "event_vector_residual_world_n": [
+        -87.44961967314336,
+        41.14110674876001,
+        -192.64404349723387
+      ],
+      "instrumented_last_50ms_physical_norm_minus_command_norm_n": {
+        "count": 51,
+        "maximum": 26.10093904807662,
+        "mean": -13.00543492298761,
+        "minimum": -82.05648254972937,
+        "p95": 25.50966329883697,
+        "rms": 31.500418957028877
+      },
+      "instrumented_last_50ms_vector_residual_norm_n": {
+        "count": 51,
+        "maximum": 215.52669008838424,
+        "mean": 95.48658444200746,
+        "minimum": 18.540699240454757,
+        "p95": 200.58398984017373,
+        "rms": 109.98816798387365
+      },
+      "preserved_norm_statistics": {
+        "definition": "physical cuff force norm minus held executable command force norm",
+        "entire_preserved_trace": {
+          "count": 16047,
+          "maximum": 26.100939048076604,
+          "mean": -1.6215082439766642,
+          "minimum": -112.83430552652435,
+          "p95": 1.9154219919614655,
+          "rms": 6.884685987446674
+        },
+        "last_100ms": {
+          "count": 101,
+          "maximum": 26.100939048076604,
+          "mean": -49.0902068184409,
+          "minimum": -112.83430552652435,
+          "p95": 11.402472206793682,
+          "rms": 64.87394832492353
+        },
+        "last_10ms": {
+          "count": 11,
+          "maximum": 18.441035116013893,
+          "mean": -9.690628174635323,
+          "minimum": -35.026068274702084,
+          "p95": 8.053703883974123,
+          "rms": 15.714408939114307
+        },
+        "last_50ms": {
+          "count": 51,
+          "maximum": 26.100939048076604,
+          "mean": -14.614369798486972,
+          "minimum": -81.7806067832443,
+          "p95": 22.077468145393308,
+          "rms": 30.38504503017726
+        },
+        "reason": "the preserved trace stores physical force in the cuff frame and executable force in the world frame without the exact attachment rotation history",
+        "vector_residual_unavailable_from_preserved_trace": true
+      }
+    },
+    "constraint_and_acceleration": {
+      "equality_multiplier_change": [
+        30.62118533854482,
+        -0.874838798742843,
+        32.24465205052272,
+        3.282316736036158,
+        -33.52211556248889,
+        -0.304802910247981
+      ],
+      "event_bed_force_n": 0.0,
+      "event_has_active_contact": false,
+      "human_qdd_change_deg_s2": [
+        194.15183024868992,
+        -167.4102972849923
+      ],
+      "pre_event_bed_force_n": 0.0,
+      "solver_iterations_used": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "solver_warning_counts": {}
+    },
+    "duration": {
+      "lying_1ms_samples_over_200n": 5,
+      "lying_half_ms_samples_over_200n": 10,
+      "preserved_trace": "one 1 ms sample before the gate terminated the run",
+      "same_command_open_loop_replay": "above 200 N at every saved sample throughout the complete 5 ms command interval"
+    },
+    "force_budget_decision": "fixed evidence-based margin is not supported by this single event; actual measured interaction force must enter the future low-level safety/compliance loop with validated sampling, latency, and moment/load handling",
+    "moment_adapter_surface": {
+      "adapter_force_lever_moment_norm_nm": 27.995248807973223,
+      "command_maximum_patch_force_proxy_n": 109.59582782687382,
+      "command_moment_norm_nm": 43.478830932834015,
+      "physical_maximum_patch_force_proxy_n": 125.9617395848891,
+      "physical_moment_norm_nm": 53.56804799276026,
+      "safety_filter_moment_intervention_norm_nm": 18.131229633300673,
+      "surface_proxy_is_not_pressure_or_tissue_load": true
+    },
+    "new_margin_selected": false,
+    "recommended_next_architecture_step": "in the next separately approved phase, specify measured-wrench feedback at the low-level safety/compliance boundary while retaining the executable command budget as an independent guard; include total force, moment, surface-load proxy, rate/latency, and contact confidence, without yet changing the Reference Manager or MPC objective",
+    "timestep_solver_sensitivity": {
+      "half_timestep_5ms_end_force_n": 215.7865425441839,
+      "half_timestep_end_difference_n": -0.19278027063069203,
+      "more_iterations_end_difference_n": 0.0,
+      "nominal_5ms_end_force_n": 215.9793228148146,
+      "tighter_tolerance_end_difference_n": 0.0
+    }
+  },
+  "evidence_category": "engineering_diagnosis_not_formal_or_authoritative",
+  "force_margin_selected": false,
+  "new_full_high_rom_pilot_run": false,
+  "over_200n_intervals": [
+    {
+      "end_time_s": 16.045999999996628,
+      "represented_duration_s": 0.0009999999999998899,
+      "sample_count": 1,
+      "sample_span_s": 0.0,
+      "start_time_s": 16.045999999996628
+    }
+  ],
+  "preserved_trace_event": {
+    "bed_force_n": 0.0,
+    "command_to_physical_norm_residual_n": 18.441035116013893,
+    "executed_command_force_norm_n": 199.9999999996283,
+    "executed_command_force_world_n": [
+      -123.42214867444108,
+      3.611228950601535,
+      157.3338242143177
+    ],
+    "executed_command_time_s": 16.044999999996627,
+    "finite_difference_note": "derived only because qdd and full-rate Human dq were not saved; the instrumented replay records MuJoCo qacc directly",
+    "human_dq_finite_difference_deg_s": [
+      -19.508902512256313,
+      13.63844566875961
+    ],
+    "human_q_deg": [
+      59.48884231231559,
+      84.11147596173168
+    ],
+    "human_qdd_finite_difference_deg_s2": [
+      1442.107500012394,
+      -2269.780658314295
+    ],
+    "index": 16046,
+    "physical_cuff_force_local_n": [
+      -177.22044007443785,
+      44.67437255188015,
+      -119.63946622796189
+    ],
+    "physical_cuff_force_norm_n": 218.4410351156422,
+    "physical_cuff_moment_local_nm": [
+      20.94122418089359,
+      -49.28847130882486,
+      -1.283546492874208
+    ],
+    "physical_cuff_moment_norm_nm": 53.56804799276023,
+    "reference_manager_alpha": 0.5,
+    "robot_dq_rad_s": [
+      0.010164406798319864,
+      0.2380026588985454,
+      0.011219939572618628,
+      -0.6663835923451051,
+      -0.41947134232089717,
+      -0.14726619096106214
+    ],
+    "robot_q_rad": [
+      -0.9117792035614775,
+      -0.7373975868606535,
+      1.5226761011000594,
+      0.5122783236269967,
+      -1.9049141971903483,
+      -0.7054937510975227
+    ],
+    "robot_qdd_finite_difference_rad_s2": [
+      -6.634709742614088,
+      -26.279163789131758,
+      8.33194833874993,
+      68.07301809854118,
+      48.57162086562721,
+      21.6880943880125
+    ],
+    "safety_filter_force_intervention_norm_n": 50.06458643043907,
+    "safety_filter_lambda": -50.06458643043904,
+    "safety_filter_moment_intervention_norm_nm": 18.131229633300673,
+    "safety_filter_status": "SAFE_FILTERED",
+    "time_s": 16.045999999996628
+  },
+  "reconstruction_check": {
+    "common_sample_count": 16047,
+    "maximum_abs_force_norm_difference_n": 0.0,
+    "replay_peak_force_n": 218.4410351156422,
+    "replay_peak_time_s": 16.045999999996628,
+    "replay_sample_count": 16047,
+    "solver_warning_counts": {},
+    "source_peak_force_n": 218.4410351156422,
+    "source_peak_time_s": 16.045999999996628,
+    "source_sample_count": 16047,
+    "termination_reason": "physical_cuff_force_gate"
+  },
+  "schema_version": "phase_a_high_rom_interaction_audit_v1",
+  "sensitivity": {
+    "lying_half_timestep": {
+      "end_physical_force_n": 215.7865425441839,
+      "end_physical_moment_nm": 53.142494866819106,
+      "end_vector_residual_norm_n": 212.49971705304003,
+      "iterations": 100,
+      "over_200n_sample_count": 10,
+      "peak_physical_force_n": 218.44103511564234,
+      "peak_physical_moment_nm": 54.0936533220517,
+      "peak_vector_residual_norm_n": 216.6453674415059,
+      "same_already_issued_joint_torque_command": true,
+      "same_pre_spike_integration_state": true,
+      "scenario": "lying_bed",
+      "timestep_s": 0.0005,
+      "tolerance": 1e-08,
+      "window_duration_s": 0.005
+    },
+    "lying_more_iterations": {
+      "end_physical_force_n": 215.9793228148146,
+      "end_physical_moment_nm": 53.16829626586642,
+      "end_vector_residual_norm_n": 212.7153921599811,
+      "iterations": 200,
+      "over_200n_sample_count": 5,
+      "peak_physical_force_n": 218.44103511564234,
+      "peak_physical_moment_nm": 53.987198089253916,
+      "peak_vector_residual_norm_n": 216.12993554772697,
+      "same_already_issued_joint_torque_command": true,
+      "same_pre_spike_integration_state": true,
+      "scenario": "lying_bed",
+      "timestep_s": 0.001,
+      "tolerance": 1e-08,
+      "window_duration_s": 0.005
+    },
+    "lying_nominal": {
+      "end_physical_force_n": 215.9793228148146,
+      "end_physical_moment_nm": 53.16829626586642,
+      "end_vector_residual_norm_n": 212.7153921599811,
+      "iterations": 100,
+      "over_200n_sample_count": 5,
+      "peak_physical_force_n": 218.44103511564234,
+      "peak_physical_moment_nm": 53.987198089253916,
+      "peak_vector_residual_norm_n": 216.12993554772697,
+      "same_already_issued_joint_torque_command": true,
+      "same_pre_spike_integration_state": true,
+      "scenario": "lying_bed",
+      "timestep_s": 0.001,
+      "tolerance": 1e-08,
+      "window_duration_s": 0.005
+    },
+    "lying_tighter_tolerance": {
+      "end_physical_force_n": 215.9793228148146,
+      "end_physical_moment_nm": 53.16829626586642,
+      "end_vector_residual_norm_n": 212.7153921599811,
+      "iterations": 100,
+      "over_200n_sample_count": 5,
+      "peak_physical_force_n": 218.44103511564234,
+      "peak_physical_moment_nm": 53.987198089253916,
+      "peak_vector_residual_norm_n": 216.12993554772697,
+      "same_already_issued_joint_torque_command": true,
+      "same_pre_spike_integration_state": true,
+      "scenario": "lying_bed",
+      "timestep_s": 0.001,
+      "tolerance": 1e-10,
+      "window_duration_s": 0.005
+    },
+    "suspended_seated_like_nominal": {
+      "end_physical_force_n": 215.9704644144079,
+      "end_physical_moment_nm": 53.16663767889655,
+      "end_vector_residual_norm_n": 212.69595898754818,
+      "iterations": 100,
+      "over_200n_sample_count": 5,
+      "peak_physical_force_n": 218.44103511564234,
+      "peak_physical_moment_nm": 53.56804799276026,
+      "peak_vector_residual_norm_n": 215.52669008838424,
+      "same_already_issued_joint_torque_command": true,
+      "same_pre_spike_integration_state": true,
+      "scenario": "suspended_seated_like_high_rom",
+      "timestep_s": 0.001,
+      "tolerance": 1e-08,
+      "window_duration_s": 0.005
+    }
+  },
+  "snapshot": {
+    "manifest": "pre_spike_replay_snapshot.json",
+    "npz": "pre_spike_replay_snapshot.npz",
+    "scope": "exact physical replay of the already-issued 16.045-16.046 s command interval; controller/reference state is preserved for audit, but the snapshot does not serialize measurement-layer filter/RNG histories needed to continue a new closed-loop control cycle after 16.050 s",
+    "status": "physical_event_exact_replay_snapshot_saved"
+  }
+}

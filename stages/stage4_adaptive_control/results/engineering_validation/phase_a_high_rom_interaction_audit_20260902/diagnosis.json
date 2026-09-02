@@ -1,0 +1,138 @@
+{
+  "bed_contact_contribution": {
+    "initial_spike_force_difference_lying_minus_suspended_n": 0.0,
+    "interpretation": "no direct bed/contact contribution at spike onset; a later bed contact changes the short-window force but does not create the crossing",
+    "maximum_abs_force_norm_difference_over_5ms_n": 3.2218395863335445,
+    "maximum_abs_moment_norm_difference_over_5ms_nm": 0.5140869390894167
+  },
+  "classification": "C_genuine_closed_loop_interaction_amplification",
+  "classification_qualifier": "primary classification for the observed same-state event; preceding lying-bed contacts and the 140 mm adapter remain setup-specific secondary factors whose full-history effects were not isolated",
+  "command_to_physical_residual": {
+    "event_command_physical_direction_angle_deg": 61.818644009922714,
+    "event_physical_norm_minus_command_norm_n": 18.441035116014035,
+    "event_vector_residual_norm_n": 215.52669008838424,
+    "event_vector_residual_world_n": [
+      -87.44961967314336,
+      41.14110674876001,
+      -192.64404349723387
+    ],
+    "instrumented_last_50ms_physical_norm_minus_command_norm_n": {
+      "count": 51,
+      "maximum": 26.10093904807662,
+      "mean": -13.00543492298761,
+      "minimum": -82.05648254972937,
+      "p95": 25.50966329883697,
+      "rms": 31.500418957028877
+    },
+    "instrumented_last_50ms_vector_residual_norm_n": {
+      "count": 51,
+      "maximum": 215.52669008838424,
+      "mean": 95.48658444200746,
+      "minimum": 18.540699240454757,
+      "p95": 200.58398984017373,
+      "rms": 109.98816798387365
+    },
+    "preserved_norm_statistics": {
+      "definition": "physical cuff force norm minus held executable command force norm",
+      "entire_preserved_trace": {
+        "count": 16047,
+        "maximum": 26.100939048076604,
+        "mean": -1.6215082439766642,
+        "minimum": -112.83430552652435,
+        "p95": 1.9154219919614655,
+        "rms": 6.884685987446674
+      },
+      "last_100ms": {
+        "count": 101,
+        "maximum": 26.100939048076604,
+        "mean": -49.0902068184409,
+        "minimum": -112.83430552652435,
+        "p95": 11.402472206793682,
+        "rms": 64.87394832492353
+      },
+      "last_10ms": {
+        "count": 11,
+        "maximum": 18.441035116013893,
+        "mean": -9.690628174635323,
+        "minimum": -35.026068274702084,
+        "p95": 8.053703883974123,
+        "rms": 15.714408939114307
+      },
+      "last_50ms": {
+        "count": 51,
+        "maximum": 26.100939048076604,
+        "mean": -14.614369798486972,
+        "minimum": -81.7806067832443,
+        "p95": 22.077468145393308,
+        "rms": 30.38504503017726
+      },
+      "reason": "the preserved trace stores physical force in the cuff frame and executable force in the world frame without the exact attachment rotation history",
+      "vector_residual_unavailable_from_preserved_trace": true
+    }
+  },
+  "constraint_and_acceleration": {
+    "equality_multiplier_change": [
+      30.62118533854482,
+      -0.874838798742843,
+      32.24465205052272,
+      3.282316736036158,
+      -33.52211556248889,
+      -0.304802910247981
+    ],
+    "event_bed_force_n": 0.0,
+    "event_has_active_contact": false,
+    "human_qdd_change_deg_s2": [
+      194.15183024868992,
+      -167.4102972849923
+    ],
+    "pre_event_bed_force_n": 0.0,
+    "solver_iterations_used": [
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "solver_warning_counts": {}
+  },
+  "duration": {
+    "lying_1ms_samples_over_200n": 5,
+    "lying_half_ms_samples_over_200n": 10,
+    "preserved_trace": "one 1 ms sample before the gate terminated the run",
+    "same_command_open_loop_replay": "above 200 N at every saved sample throughout the complete 5 ms command interval"
+  },
+  "force_budget_decision": "fixed evidence-based margin is not supported by this single event; actual measured interaction force must enter the future low-level safety/compliance loop with validated sampling, latency, and moment/load handling",
+  "moment_adapter_surface": {
+    "adapter_force_lever_moment_norm_nm": 27.995248807973223,
+    "command_maximum_patch_force_proxy_n": 109.59582782687382,
+    "command_moment_norm_nm": 43.478830932834015,
+    "physical_maximum_patch_force_proxy_n": 125.9617395848891,
+    "physical_moment_norm_nm": 53.56804799276026,
+    "safety_filter_moment_intervention_norm_nm": 18.131229633300673,
+    "surface_proxy_is_not_pressure_or_tissue_load": true
+  },
+  "new_margin_selected": false,
+  "recommended_next_architecture_step": "in the next separately approved phase, specify measured-wrench feedback at the low-level safety/compliance boundary while retaining the executable command budget as an independent guard; include total force, moment, surface-load proxy, rate/latency, and contact confidence, without yet changing the Reference Manager or MPC objective",
+  "timestep_solver_sensitivity": {
+    "half_timestep_5ms_end_force_n": 215.7865425441839,
+    "half_timestep_end_difference_n": -0.19278027063069203,
+    "more_iterations_end_difference_n": 0.0,
+    "nominal_5ms_end_force_n": 215.9793228148146,
+    "tighter_tolerance_end_difference_n": 0.0
+  }
+}

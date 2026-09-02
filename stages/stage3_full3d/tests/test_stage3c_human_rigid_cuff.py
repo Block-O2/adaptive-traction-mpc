@@ -15,6 +15,7 @@ from traction_mpc_stage3.coupled import (
     CUFF_TRANSLATIONAL_FORCE_GATE_N,
     CuffForceCommandLimitError,
     CoupledUR10eHumanV2,
+    SUSPENDED_SEATED_LIKE_SCENARIO,
     human_cuff_velocity,
 )
 from traction_mpc_stage3.human import (
@@ -198,6 +199,22 @@ def test_collision_domains_retain_only_intended_cross_model_contact() -> None:
         <= plant.robot_collision_geom_ids
         for i in range(plant.data.ncon)
     )
+
+
+def test_suspended_seated_like_scenario_only_disables_bed_contact() -> None:
+    lying = CoupledUR10eHumanV2()
+    suspended = CoupledUR10eHumanV2(
+        engineering_scenario=SUSPENDED_SEATED_LIKE_SCENARIO
+    )
+    assert lying.model.geom_contype[lying.bed_geom_id] == 4
+    assert lying.model.geom_conaffinity[lying.bed_geom_id] == 2
+    assert suspended.model.geom_contype[suspended.bed_geom_id] == 0
+    assert suspended.model.geom_conaffinity[suspended.bed_geom_id] == 0
+    np.testing.assert_allclose(lying.model.body_mass, suspended.model.body_mass)
+    np.testing.assert_allclose(lying.model.body_inertia, suspended.model.body_inertia)
+    np.testing.assert_allclose(lying.model.jnt_range, suspended.model.jnt_range)
+    np.testing.assert_allclose(lying.model.eq_data, suspended.model.eq_data)
+    np.testing.assert_allclose(lying.model.actuator_ctrlrange, suspended.model.actuator_ctrlrange)
 
 
 def test_short_coupled_dynamics_remain_finite() -> None:

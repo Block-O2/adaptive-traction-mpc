@@ -21,6 +21,7 @@ from traction_mpc_stage3.coupled import (
     CONTROL_SUBSTEPS,
     CuffForceCommandLimitError,
     HIP_HEIGHT_M,
+    LYING_BED_SCENARIO,
 )
 from traction_mpc_stage3.human import (
     CUFF_TRANSLATIONAL_FORCE_GATE_N,
@@ -116,8 +117,13 @@ class SensorBoundaryStage4Plant(Stage4CoupledPlant):
         human: Any,
         *,
         attachment_from_cuff: RigidTransform = ATTACHMENT_FROM_CUFF,
+        engineering_scenario: str = LYING_BED_SCENARIO,
     ) -> None:
-        super().__init__(human, attachment_from_cuff=attachment_from_cuff)
+        super().__init__(
+            human,
+            attachment_from_cuff=attachment_from_cuff,
+            engineering_scenario=engineering_scenario,
+        )
         self._measured_robot_model = UR10eTorqueRobot()
 
     def apply_measured_nominal_cartesian_control(
