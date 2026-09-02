@@ -1,0 +1,1437 @@
+{
+  "boundaries": {
+    "aggressive_both_120_120": {
+      "boundary_alphas": [
+        0.125
+      ],
+      "classification": "C_NOT_SPEED_RESOLVABLE",
+      "run_directories": [
+        "alpha_0p125"
+      ],
+      "snapshot_rule": "passing boundary runs retain final_safe; failed boundary runs retain last_safe and first_failure",
+      "trajectory": "aggressive_both_120_120"
+    },
+    "hip_dominant_100_60": {
+      "boundary_alphas": [
+        0.125
+      ],
+      "classification": "C_NOT_SPEED_RESOLVABLE",
+      "run_directories": [
+        "alpha_0p125"
+      ],
+      "snapshot_rule": "passing boundary runs retain final_safe; failed boundary runs retain last_safe and first_failure",
+      "trajectory": "hip_dominant_100_60"
+    },
+    "knee_high_folding_90_120": {
+      "boundary_alphas": [
+        0.125
+      ],
+      "classification": "C_NOT_SPEED_RESOLVABLE",
+      "run_directories": [
+        "alpha_0p125"
+      ],
+      "snapshot_rule": "passing boundary runs retain final_safe; failed boundary runs retain last_safe and first_failure",
+      "trajectory": "knee_high_folding_90_120"
+    }
+  },
+  "branch": "codex/high-rom-time-scale-audit",
+  "checkpoint_commit": "bb012f0ac9afabd90b037eb38edbc3edf6e1fcd5",
+  "classifications": {
+    "aggressive_both_120_120": {
+      "classification": "C_NOT_SPEED_RESOLVABLE",
+      "limitation": "persists_at_alpha_0.125_near_quasi_static_test",
+      "maximum_safe_alpha": null,
+      "minimum_safe_completion_time_s": null,
+      "monotone_with_speed": true
+    },
+    "hip_dominant_100_60": {
+      "classification": "C_NOT_SPEED_RESOLVABLE",
+      "limitation": "persists_at_alpha_0.125_near_quasi_static_test",
+      "maximum_safe_alpha": null,
+      "minimum_safe_completion_time_s": null,
+      "monotone_with_speed": true
+    },
+    "knee_high_folding_90_120": {
+      "classification": "C_NOT_SPEED_RESOLVABLE",
+      "limitation": "persists_at_alpha_0.125_near_quasi_static_test",
+      "maximum_safe_alpha": null,
+      "minimum_safe_completion_time_s": null,
+      "monotone_with_speed": true
+    }
+  },
+  "controller_patched_based_on_results": false,
+  "evidence_category": "engineering_feasibility_audit_not_formal",
+  "formal_scientific_run": false,
+  "measurement_case": {
+    "actual_cr12_sensor_specification": false,
+    "force_bias_drift_n_s": [
+      0.04,
+      -0.03,
+      0.02
+    ],
+    "force_bias_n": [
+      1.5,
+      -1.0,
+      0.8
+    ],
+    "latency_s": 0.0,
+    "moment_bias_drift_nm_s": [
+      0.001,
+      -0.0008,
+      0.0006
+    ],
+    "moment_bias_nm": [
+      0.03,
+      -0.02,
+      0.015
+    ],
+    "name": "noise_bias_drift_200hz",
+    "noise_std": {
+      "cuff_orientation_deg": 0.05,
+      "cuff_position_mm": 0.3,
+      "force_n": 0.5,
+      "moment_nm": 0.02,
+      "robot_position_deg": 0.02,
+      "robot_velocity_deg_s": 0.1
+    },
+    "preprocessing_enabled": true,
+    "random_seed": 44104,
+    "update_rate_hz": 200.0
+  },
+  "mpc_config": {
+    "action_rate_scale_nm": [
+      20.0,
+      10.0
+    ],
+    "action_rate_weight": 0.005,
+    "action_scale_nm": [
+      60.0,
+      30.0
+    ],
+    "action_weight": 0.002,
+    "candidate_count": 32,
+    "cem_iterations": 2,
+    "cylindrical_cuff_length_m": 0.08,
+    "cylindrical_surface_effort_weight": 0.0,
+    "dq_error_scale_rad_s": [
+      0.13962634015954636,
+      0.13962634015954636
+    ],
+    "elite_count": 6,
+    "exploration_std_floor_nm": [
+      1.0,
+      0.5
+    ],
+    "exploration_std_nm": [
+      10.0,
+      5.0
+    ],
+    "horizon_steps": 15,
+    "interaction_force_normalization_n": 200.0,
+    "prediction_dt_s": 0.02,
+    "q_error_scale_rad": [
+      0.03490658503988659,
+      0.03490658503988659
+    ],
+    "random_seed": 20260824,
+    "resultant_force_weight": 0.0,
+    "wrench_slew_weight": 0.0
+  },
+  "results": {
+    "aggressive_both_120_120": [
+      {
+        "alpha_scan": 0.125,
+        "angles_deg": {
+          "final_hip_knee": [
+            53.96199424775155,
+            60.10874130005257
+          ],
+          "peak_hip_knee": [
+            55.69376571538023,
+            60.11322793916273
+          ]
+        },
+        "brake": {
+          "active_mode": "BRAKE",
+          "cycle_count": 3,
+          "duration_s": 0.015,
+          "terminal_status": "BRAKE_INFEASIBLE",
+          "transition_count": 1,
+          "trigger": "FILTER_INFEASIBLE"
+        },
+        "command_force_norm_n": {
+          "count": 10545,
+          "p95": 111.59364560154545,
+          "peak": 197.9869534568204,
+          "rms": 97.69358345240681
+        },
+        "completion": {
+          "endpoint_completed": false,
+          "final_reference_phase_s": 6.590624999995978,
+          "full_reference_progress": false,
+          "permanent_brake": true,
+          "termination_reason": "BRAKE_INFEASIBLE",
+          "timeout": false
+        },
+        "endpoint_deg": [
+          120.0,
+          120.0
+        ],
+        "events": {
+          "force_gate_events": 0,
+          "mpc_solver_failures": 0,
+          "mujoco_warning_counts": {},
+          "robot_joint_position_limit_samples": 0,
+          "rom_event_samples": 0,
+          "structural_event_count": 0,
+          "unintended_contact_pairs": []
+        },
+        "evidence_category": "engineering_feasibility_audit_not_formal",
+        "frozen_contract_checks": {
+          "adaptive_model_applied": false,
+          "all_executed_command_force_at_or_below_200n": true,
+          "controller_parameters_changed": false,
+          "fixed_external_alpha_exact_throughout": true,
+          "population_prior_exact_throughout": true,
+          "suspended_bed_force_zero": true
+        },
+        "ideal_scaled_duration_s": 184.0,
+        "motion": {
+          "acceleration_combined_rms_deg_s2": 66.41743764036127,
+          "acceleration_rms_per_joint_deg_s2": [
+            57.223693582739365,
+            74.48490409587238
+          ],
+          "jerk_combined_rms_deg_s3": 2732.9122718006065,
+          "jerk_rms_per_joint_deg_s3": [
+            2272.4426572269604,
+            3126.2794725251256
+          ]
+        },
+        "observed_duration_s": 52.72499999996782,
+        "pass": false,
+        "physical_cuff_moment_norm_nm": {
+          "count": 52726,
+          "p95": 16.79051354379162,
+          "peak": 25.651256580446418,
+          "rms": 13.699515170487997
+        },
+        "physical_force_norm_n": {
+          "count": 52726,
+          "over_limit_duration_s": 0.0,
+          "p95": 110.53517885894166,
+          "peak": 171.9474984648491,
+          "rms": 97.23616048644202
+        },
+        "runtime": {
+          "estimator_mean_ms": 1.5458185008963994,
+          "estimator_p95_ms": 0.22017440060153604,
+          "fast_path_timing_note": "instrumented in the synchronous deterministic simulator with measured estimator/trust compute subtracted; this is desktop engineering timing, not hardware hard realtime",
+          "filter_or_brake_plus_reference_manager": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 5.0,
+            "max_ms": 2.524499985156581,
+            "mean_ms": 0.32742264869306026,
+            "p95_ms": 0.4662507417378947,
+            "sample_count": 10546
+          },
+          "full_high_level_fast_path_excluding_slow_estimator_trust": {
+            "deadline_miss_count": 5,
+            "deadline_ms": 20.0,
+            "max_ms": 33.081957953982055,
+            "mean_ms": 12.335083548482073,
+            "p95_ms": 12.614799983566627,
+            "sample_count": 2637
+          },
+          "mpc": {
+            "deadline_miss_count": 3,
+            "deadline_ms": 20.0,
+            "max_ms": 29.050542012555525,
+            "mean_ms": 10.654012706344142,
+            "p95_ms": 10.901614994509146,
+            "sample_count": 2636
+          },
+          "mpc_mean_ms": 10.654012706344142,
+          "mpc_p95_ms": 10.901614994509146,
+          "reference_manager_fast_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 1.0,
+            "max_ms": 0.056374992709606886,
+            "mean_ms": 0.0034379375672908725,
+            "p95_ms": 0.0051670067477971315,
+            "sample_count": 10544
+          },
+          "reference_manager_slow_trust_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 20.0,
+            "max_ms": 0.009541981853544712,
+            "mean_ms": 0.0009149979966154741,
+            "p95_ms": 0.001334003172814846,
+            "sample_count": 2637
+          },
+          "rollout_wall_time_s": 67.12298508398817,
+          "safety_filter": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 5.0,
+            "max_ms": 0.7837500015739352,
+            "mean_ms": 0.16394062479973395,
+            "p95_ms": 0.17907685250975194,
+            "sample_count": 10544
+          },
+          "wall_time_per_simulated_second": 1.2730770049128333
+        },
+        "safety_filter": {
+          "abs_lambda": {
+            "count": 10544,
+            "p95": 0.0,
+            "peak": 0.0,
+            "rms": 0.0
+          },
+          "force_intervention_norm_n": {
+            "count": 10544,
+            "p95": 0.0,
+            "peak": 4.6204489227285734e-14,
+            "rms": 4.499678399351947e-16
+          },
+          "intervention_coordinate_norm": {
+            "count": 10544,
+            "p95": 0.0,
+            "peak": 4.620662333454662e-14,
+            "rms": 4.499886231891691e-16
+          },
+          "maximum_torque_preservation_residual_nm": 2.7252463467501027e-13,
+          "moment_intervention_norm_nm": {
+            "count": 10544,
+            "p95": 0.0,
+            "peak": 4.440892098500626e-16,
+            "rms": 4.3248148791731325e-18
+          },
+          "status_counts": {
+            "FILTER_INFEASIBLE": 1,
+            "SAFE_FILTERED": 0,
+            "SAFE_UNCHANGED": 10543
+          }
+        },
+        "scheduled_grid_aligned_duration_s": 184.0,
+        "schema_version": "high_rom_time_scale_run_v1",
+        "tracking": {
+          "combined_rmse_deg": 0.06808624101110967,
+          "max_abs_hip_knee_deg": [
+            1.2048459001671434,
+            2.1348900052064455
+          ],
+          "rmse_hip_knee_deg": [
+            0.054027610801863704,
+            0.07970250749561252
+          ]
+        },
+        "trajectory": "aggressive_both_120_120",
+        "wrench_slew": {
+          "allocator_force_n_per_s": {
+            "count": 10544,
+            "p95": 215.15835283030788,
+            "peak": 6266.889311185583,
+            "rms": 209.3608744364557
+          },
+          "allocator_moment_nm_per_s": {
+            "count": 10544,
+            "p95": 19.57431179380772,
+            "peak": 185.26141113436762,
+            "rms": 8.763194815088017
+          },
+          "total_command_force_n_per_s": {
+            "count": 10544,
+            "p95": 396.288148391902,
+            "peak": 14452.157567689965,
+            "rms": 400.8797615620227
+          },
+          "total_command_moment_nm_per_s": {
+            "count": 10544,
+            "p95": 44.281088857945754,
+            "peak": 1031.4901924318483,
+            "rms": 41.08401436508507
+          }
+        }
+      },
+      {
+        "alpha_scan": 0.25,
+        "angles_deg": {
+          "final_hip_knee": [
+            58.07689052571698,
+            62.667102680151466
+          ],
+          "peak_hip_knee": [
+            58.628420016035506,
+            65.27392447046412
+          ]
+        },
+        "brake": {
+          "active_mode": "BRAKE",
+          "cycle_count": 13019,
+          "duration_s": 65.095,
+          "terminal_status": null,
+          "transition_count": 1,
+          "trigger": "FILTER_INFEASIBLE"
+        },
+        "command_force_norm_n": {
+          "count": 18400,
+          "p95": 110.19611118984427,
+          "peak": 193.29435197689475,
+          "rms": 94.46617111603804
+        },
+        "completion": {
+          "endpoint_completed": true,
+          "final_reference_phase_s": 23.000000000018808,
+          "full_reference_progress": true,
+          "permanent_brake": true,
+          "termination_reason": "reference_completed",
+          "timeout": false
+        },
+        "endpoint_deg": [
+          120.0,
+          120.0
+        ],
+        "events": {
+          "force_gate_events": 0,
+          "mpc_solver_failures": 0,
+          "mujoco_warning_counts": {},
+          "robot_joint_position_limit_samples": 0,
+          "rom_event_samples": 0,
+          "structural_event_count": 0,
+          "unintended_contact_pairs": []
+        },
+        "evidence_category": "engineering_feasibility_audit_not_formal",
+        "frozen_contract_checks": {
+          "adaptive_model_applied": false,
+          "all_executed_command_force_at_or_below_200n": true,
+          "controller_parameters_changed": false,
+          "fixed_external_alpha_exact_throughout": true,
+          "population_prior_exact_throughout": true,
+          "suspended_bed_force_zero": true
+        },
+        "ideal_scaled_duration_s": 92.0,
+        "motion": {
+          "acceleration_combined_rms_deg_s2": 62.761805238724904,
+          "acceleration_rms_per_joint_deg_s2": [
+            43.56160856545779,
+            77.33352864597038
+          ],
+          "jerk_combined_rms_deg_s3": 2420.2322164257876,
+          "jerk_rms_per_joint_deg_s3": [
+            1656.7503609975392,
+            2995.033589825842
+          ]
+        },
+        "observed_duration_s": 92.00000000007523,
+        "pass": false,
+        "physical_cuff_moment_norm_nm": {
+          "count": 92001,
+          "p95": 16.649492811753955,
+          "peak": 20.242795221294838,
+          "rms": 7.907470437242217
+        },
+        "physical_force_norm_n": {
+          "count": 92001,
+          "over_limit_duration_s": 0.0,
+          "p95": 109.39196793929598,
+          "peak": 167.57339229516333,
+          "rms": 94.15731337762871
+        },
+        "runtime": {
+          "estimator_mean_ms": 3.198177835387785,
+          "estimator_p95_ms": 0.23004521208349618,
+          "fast_path_timing_note": "instrumented in the synchronous deterministic simulator with measured estimator/trust compute subtracted; this is desktop engineering timing, not hardware hard realtime",
+          "filter_or_brake_plus_reference_manager": {
+            "deadline_miss_count": 5,
+            "deadline_ms": 5.0,
+            "max_ms": 7.492875010939315,
+            "mean_ms": 1.5449717515477221,
+            "p95_ms": 2.13821011420805,
+            "sample_count": 18400
+          },
+          "full_high_level_fast_path_excluding_slow_estimator_trust": {
+            "deadline_miss_count": 3,
+            "deadline_ms": 20.0,
+            "max_ms": 34.81675000512041,
+            "mean_ms": 6.244008441084905,
+            "p95_ms": 12.414253018505406,
+            "sample_count": 4600
+          },
+          "mpc": {
+            "deadline_miss_count": 1,
+            "deadline_ms": 20.0,
+            "max_ms": 21.020166983362287,
+            "mean_ms": 10.63956708850043,
+            "p95_ms": 10.80087450100109,
+            "sample_count": 1346
+          },
+          "mpc_mean_ms": 10.639567088500428,
+          "mpc_p95_ms": 10.80087450100109,
+          "reference_manager_fast_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 1.0,
+            "max_ms": 0.020832987502217293,
+            "mean_ms": 0.003314915138502013,
+            "p95_ms": 0.004542001988738775,
+            "sample_count": 5382
+          },
+          "reference_manager_slow_trust_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 20.0,
+            "max_ms": 0.00566698145121336,
+            "mean_ms": 0.0007594363579182359,
+            "p95_ms": 0.0012500095181167126,
+            "sample_count": 4600
+          },
+          "rollout_wall_time_s": 112.12758149998263,
+          "safety_filter": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 5.0,
+            "max_ms": 0.6232080049812794,
+            "mean_ms": 0.16351921565486177,
+            "p95_ms": 0.176413961162325,
+            "sample_count": 5382
+          },
+          "wall_time_per_simulated_second": 1.2187780597814233
+        },
+        "safety_filter": {
+          "abs_lambda": {
+            "count": 5382,
+            "p95": 0.0,
+            "peak": 0.0,
+            "rms": 0.0
+          },
+          "force_intervention_norm_n": {
+            "count": 5382,
+            "p95": 0.0,
+            "peak": 3.552713678800501e-15,
+            "rms": 4.842708871596876e-17
+          },
+          "intervention_coordinate_norm": {
+            "count": 5382,
+            "p95": 0.0,
+            "peak": 3.6621602638056554e-15,
+            "rms": 4.991895661214381e-17
+          },
+          "maximum_torque_preservation_residual_nm": 2.6126338512498016e-13,
+          "moment_intervention_norm_nm": {
+            "count": 5382,
+            "p95": 0.0,
+            "peak": 8.88618767673134e-16,
+            "rms": 1.2112774568231164e-17
+          },
+          "status_counts": {
+            "FILTER_INFEASIBLE": 1,
+            "SAFE_FILTERED": 0,
+            "SAFE_UNCHANGED": 5381
+          }
+        },
+        "scheduled_grid_aligned_duration_s": 92.0,
+        "schema_version": "high_rom_time_scale_run_v1",
+        "tracking": {
+          "combined_rmse_deg": 38.09971901548949,
+          "max_abs_hip_knee_deg": [
+            62.16242024153013,
+            55.68351966686847
+          ],
+          "rmse_hip_knee_deg": [
+            39.80509877122858,
+            36.314340004070296
+          ]
+        },
+        "trajectory": "aggressive_both_120_120",
+        "wrench_slew": {
+          "allocator_force_n_per_s": {
+            "count": 18399,
+            "p95": 114.03601892273875,
+            "peak": 7171.613576132357,
+            "rms": 127.44758214561949
+          },
+          "allocator_moment_nm_per_s": {
+            "count": 18399,
+            "p95": 8.190126709756544,
+            "peak": 94.37298175446772,
+            "rms": 5.090744286729692
+          },
+          "total_command_force_n_per_s": {
+            "count": 18399,
+            "p95": 304.29746269381945,
+            "peak": 11058.50599851051,
+            "rms": 305.6530524268458
+          },
+          "total_command_moment_nm_per_s": {
+            "count": 18399,
+            "p95": 44.24141760822428,
+            "peak": 932.0681089386396,
+            "rms": 40.54347523926577
+          }
+        }
+      }
+    ],
+    "hip_dominant_100_60": [
+      {
+        "alpha_scan": 0.125,
+        "angles_deg": {
+          "final_hip_knee": [
+            52.88137828290864,
+            35.34058151965884
+          ],
+          "peak_hip_knee": [
+            53.368919497031875,
+            37.49925209141364
+          ]
+        },
+        "brake": {
+          "active_mode": "BRAKE",
+          "cycle_count": 25581,
+          "duration_s": 127.905,
+          "terminal_status": null,
+          "transition_count": 1,
+          "trigger": "FILTER_INFEASIBLE"
+        },
+        "command_force_norm_n": {
+          "count": 36800,
+          "p95": 106.21086015188006,
+          "peak": 199.29946019790358,
+          "rms": 95.42463793565358
+        },
+        "completion": {
+          "endpoint_completed": true,
+          "final_reference_phase_s": 23.000000000064315,
+          "full_reference_progress": true,
+          "permanent_brake": true,
+          "termination_reason": "reference_completed",
+          "timeout": false
+        },
+        "endpoint_deg": [
+          100.0,
+          60.0
+        ],
+        "events": {
+          "force_gate_events": 0,
+          "mpc_solver_failures": 0,
+          "mujoco_warning_counts": {},
+          "robot_joint_position_limit_samples": 0,
+          "rom_event_samples": 0,
+          "structural_event_count": 0,
+          "unintended_contact_pairs": []
+        },
+        "evidence_category": "engineering_feasibility_audit_not_formal",
+        "frozen_contract_checks": {
+          "adaptive_model_applied": false,
+          "all_executed_command_force_at_or_below_200n": true,
+          "controller_parameters_changed": false,
+          "fixed_external_alpha_exact_throughout": true,
+          "population_prior_exact_throughout": true,
+          "suspended_bed_force_zero": true
+        },
+        "ideal_scaled_duration_s": 184.0,
+        "motion": {
+          "acceleration_combined_rms_deg_s2": 85.22438344526788,
+          "acceleration_rms_per_joint_deg_s2": [
+            37.39317692325848,
+            114.57810168979914
+          ],
+          "jerk_combined_rms_deg_s3": 3177.1651315935337,
+          "jerk_rms_per_joint_deg_s3": [
+            1489.4838881584112,
+            4239.126595626026
+          ]
+        },
+        "observed_duration_s": 184.00000000051452,
+        "pass": false,
+        "physical_cuff_moment_norm_nm": {
+          "count": 184001,
+          "p95": 16.682533138160288,
+          "peak": 25.47610943073984,
+          "rms": 10.1135158608044
+        },
+        "physical_force_norm_n": {
+          "count": 184001,
+          "over_limit_duration_s": 0.0,
+          "p95": 105.74182946011126,
+          "peak": 180.2295690911728,
+          "rms": 95.16139089393145
+        },
+        "runtime": {
+          "estimator_mean_ms": 6.8536270404033335,
+          "estimator_p95_ms": 6.241168745327739,
+          "fast_path_timing_note": "instrumented in the synchronous deterministic simulator with measured estimator/trust compute subtracted; this is desktop engineering timing, not hardware hard realtime",
+          "filter_or_brake_plus_reference_manager": {
+            "deadline_miss_count": 4,
+            "deadline_ms": 5.0,
+            "max_ms": 6.970666989218444,
+            "mean_ms": 1.5321194395279314,
+            "p95_ms": 2.1811249913298525,
+            "sample_count": 36800
+          },
+          "full_high_level_fast_path_excluding_slow_estimator_trust": {
+            "deadline_miss_count": 6,
+            "deadline_ms": 20.0,
+            "max_ms": 56.81795903365128,
+            "mean_ms": 6.4011289949627574,
+            "p95_ms": 12.518408385221846,
+            "sample_count": 9200
+          },
+          "mpc": {
+            "deadline_miss_count": 2,
+            "deadline_ms": 20.0,
+            "max_ms": 24.57037501153536,
+            "mean_ms": 10.708795460270977,
+            "p95_ms": 10.960675013484433,
+            "sample_count": 2805
+          },
+          "mpc_mean_ms": 10.708795460270975,
+          "mpc_p95_ms": 10.960675013484433,
+          "reference_manager_fast_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 1.0,
+            "max_ms": 0.0525419891346246,
+            "mean_ms": 0.003453733843797735,
+            "p95_ms": 0.005207984941080213,
+            "sample_count": 11220
+          },
+          "reference_manager_slow_trust_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 20.0,
+            "max_ms": 0.03937500878237188,
+            "mean_ms": 0.0009146507332131833,
+            "p95_ms": 0.0014580145943909883,
+            "sample_count": 9200
+          },
+          "rollout_wall_time_s": 259.30783712500124,
+          "safety_filter": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 5.0,
+            "max_ms": 0.8798750059213489,
+            "mean_ms": 0.16494048837158967,
+            "p95_ms": 0.17900414532050485,
+            "sample_count": 11220
+          },
+          "wall_time_per_simulated_second": 1.4092817235015007
+        },
+        "safety_filter": {
+          "abs_lambda": {
+            "count": 11220,
+            "p95": 0.0,
+            "peak": 0.0,
+            "rms": 0.0
+          },
+          "force_intervention_norm_n": {
+            "count": 11220,
+            "p95": 0.0,
+            "peak": 2.847716647714797e-14,
+            "rms": 2.6884399828891757e-16
+          },
+          "intervention_coordinate_norm": {
+            "count": 11220,
+            "p95": 0.0,
+            "peak": 2.8601552545935895e-14,
+            "rms": 2.700182881569499e-16
+          },
+          "maximum_torque_preservation_residual_nm": 2.7050975292807147e-13,
+          "moment_intervention_norm_nm": {
+            "count": 11220,
+            "p95": 0.0,
+            "peak": 2.664544514683901e-15,
+            "rms": 2.5155129163614965e-17
+          },
+          "status_counts": {
+            "FILTER_INFEASIBLE": 1,
+            "SAFE_FILTERED": 0,
+            "SAFE_UNCHANGED": 11219
+          }
+        },
+        "scheduled_grid_aligned_duration_s": 184.0,
+        "schema_version": "high_rom_time_scale_run_v1",
+        "tracking": {
+          "combined_rmse_deg": 25.0757587629971,
+          "max_abs_hip_knee_deg": [
+            47.936812545538096,
+            25.463281264735254
+          ],
+          "rmse_hip_knee_deg": [
+            31.445765329592344,
+            16.393632846817813
+          ]
+        },
+        "trajectory": "hip_dominant_100_60",
+        "wrench_slew": {
+          "allocator_force_n_per_s": {
+            "count": 36799,
+            "p95": 132.49233832285833,
+            "peak": 9470.777719789055,
+            "rms": 173.02404396653174
+          },
+          "allocator_moment_nm_per_s": {
+            "count": 36799,
+            "p95": 13.572385337849495,
+            "peak": 681.669841711378,
+            "rms": 13.888717027678233
+          },
+          "total_command_force_n_per_s": {
+            "count": 36799,
+            "p95": 298.0972870995618,
+            "peak": 11949.94480791747,
+            "rms": 334.5210334830576
+          },
+          "total_command_moment_nm_per_s": {
+            "count": 36799,
+            "p95": 42.19221718936071,
+            "peak": 1032.31748312393,
+            "rms": 42.02914963114386
+          }
+        }
+      },
+      {
+        "alpha_scan": 0.25,
+        "angles_deg": {
+          "final_hip_knee": [
+            54.563374019071865,
+            35.92633516105114
+          ],
+          "peak_hip_knee": [
+            54.83235851194723,
+            37.604319217165965
+          ]
+        },
+        "brake": {
+          "active_mode": "BRAKE",
+          "cycle_count": 12714,
+          "duration_s": 63.57,
+          "terminal_status": null,
+          "transition_count": 1,
+          "trigger": "FILTER_INFEASIBLE"
+        },
+        "command_force_norm_n": {
+          "count": 18400,
+          "p95": 108.82849019389887,
+          "peak": 199.99999999991837,
+          "rms": 94.77236124713654
+        },
+        "completion": {
+          "endpoint_completed": true,
+          "final_reference_phase_s": 23.000000000018808,
+          "full_reference_progress": true,
+          "permanent_brake": true,
+          "termination_reason": "reference_completed",
+          "timeout": false
+        },
+        "endpoint_deg": [
+          100.0,
+          60.0
+        ],
+        "events": {
+          "force_gate_events": 0,
+          "mpc_solver_failures": 0,
+          "mujoco_warning_counts": {},
+          "robot_joint_position_limit_samples": 0,
+          "rom_event_samples": 0,
+          "structural_event_count": 0,
+          "unintended_contact_pairs": []
+        },
+        "evidence_category": "engineering_feasibility_audit_not_formal",
+        "frozen_contract_checks": {
+          "adaptive_model_applied": false,
+          "all_executed_command_force_at_or_below_200n": true,
+          "controller_parameters_changed": false,
+          "fixed_external_alpha_exact_throughout": true,
+          "population_prior_exact_throughout": true,
+          "suspended_bed_force_zero": true
+        },
+        "ideal_scaled_duration_s": 92.0,
+        "motion": {
+          "acceleration_combined_rms_deg_s2": 98.93740523991588,
+          "acceleration_rms_per_joint_deg_s2": [
+            42.562993927886765,
+            133.28770333046228
+          ],
+          "jerk_combined_rms_deg_s3": 3677.345412545737,
+          "jerk_rms_per_joint_deg_s3": [
+            1700.570212526445,
+            4914.651515480038
+          ]
+        },
+        "observed_duration_s": 92.00000000007523,
+        "pass": false,
+        "physical_cuff_moment_norm_nm": {
+          "count": 92001,
+          "p95": 16.696316393853674,
+          "peak": 21.279192727970635,
+          "rms": 10.014276801842442
+        },
+        "physical_force_norm_n": {
+          "count": 92001,
+          "over_limit_duration_s": 0.0,
+          "p95": 107.52354302719668,
+          "peak": 167.2208738051053,
+          "rms": 94.3745872562904
+        },
+        "runtime": {
+          "estimator_mean_ms": 3.4734607051675837,
+          "estimator_p95_ms": 3.154520808311645,
+          "fast_path_timing_note": "instrumented in the synchronous deterministic simulator with measured estimator/trust compute subtracted; this is desktop engineering timing, not hardware hard realtime",
+          "filter_or_brake_plus_reference_manager": {
+            "deadline_miss_count": 6,
+            "deadline_ms": 5.0,
+            "max_ms": 7.580915989819914,
+            "mean_ms": 1.5271641604546027,
+            "p95_ms": 2.196879143593833,
+            "sample_count": 18400
+          },
+          "full_high_level_fast_path_excluding_slow_estimator_trust": {
+            "deadline_miss_count": 3,
+            "deadline_ms": 20.0,
+            "max_ms": 37.08704098244198,
+            "mean_ms": 6.4296608768737595,
+            "p95_ms": 12.5208265017136,
+            "sample_count": 4600
+          },
+          "mpc": {
+            "deadline_miss_count": 2,
+            "deadline_ms": 20.0,
+            "max_ms": 22.113374987384304,
+            "mean_ms": 10.706212860110488,
+            "p95_ms": 10.980526455387007,
+            "sample_count": 1422
+          },
+          "mpc_mean_ms": 10.706212860110488,
+          "mpc_p95_ms": 10.98052645538701,
+          "reference_manager_fast_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 1.0,
+            "max_ms": 0.07037498289719224,
+            "mean_ms": 0.003514503956364125,
+            "p95_ms": 0.005417008651420474,
+            "sample_count": 5687
+          },
+          "reference_manager_slow_trust_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 20.0,
+            "max_ms": 0.012957985745742917,
+            "mean_ms": 0.0008452062004083848,
+            "p95_ms": 0.001374981366097927,
+            "sample_count": 4600
+          },
+          "rollout_wall_time_s": 114.33206141702249,
+          "safety_filter": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 5.0,
+            "max_ms": 0.5525839806068689,
+            "mean_ms": 0.1649477678600516,
+            "p95_ms": 0.17983369762077928,
+            "sample_count": 5687
+          },
+          "wall_time_per_simulated_second": 1.2427397980100978
+        },
+        "safety_filter": {
+          "abs_lambda": {
+            "count": 5687,
+            "p95": 0.0,
+            "peak": 20.033736689508515,
+            "rms": 0.26565643926238347
+          },
+          "force_intervention_norm_n": {
+            "count": 5687,
+            "p95": 0.0,
+            "peak": 20.03373668950853,
+            "rms": 0.26565643926238364
+          },
+          "intervention_coordinate_norm": {
+            "count": 5687,
+            "p95": 0.0,
+            "peak": 20.506397099734013,
+            "rms": 0.2719241307822865
+          },
+          "maximum_torque_preservation_residual_nm": 2.5768809743153427e-13,
+          "moment_intervention_norm_nm": {
+            "count": 5687,
+            "p95": 0.0,
+            "peak": 4.3774097669077445,
+            "rms": 0.05804643985752716
+          },
+          "status_counts": {
+            "FILTER_INFEASIBLE": 1,
+            "SAFE_FILTERED": 1,
+            "SAFE_UNCHANGED": 5685
+          }
+        },
+        "scheduled_grid_aligned_duration_s": 92.0,
+        "schema_version": "high_rom_time_scale_run_v1",
+        "tracking": {
+          "combined_rmse_deg": 24.76300787920721,
+          "max_abs_hip_knee_deg": [
+            49.585539263986675,
+            26.08108625819349
+          ],
+          "rmse_hip_knee_deg": [
+            31.002724729517926,
+            16.28631873067401
+          ]
+        },
+        "trajectory": "hip_dominant_100_60",
+        "wrench_slew": {
+          "allocator_force_n_per_s": {
+            "count": 18399,
+            "p95": 169.5289424740106,
+            "peak": 7115.454785034053,
+            "rms": 197.78196503062094
+          },
+          "allocator_moment_nm_per_s": {
+            "count": 18399,
+            "p95": 17.85977875115523,
+            "peak": 1200.9528393025464,
+            "rms": 18.328091287388194
+          },
+          "total_command_force_n_per_s": {
+            "count": 18399,
+            "p95": 400.4441264654092,
+            "peak": 8102.436612537079,
+            "rms": 381.9074149239029
+          },
+          "total_command_moment_nm_per_s": {
+            "count": 18399,
+            "p95": 52.56403868706022,
+            "peak": 1241.9309020946748,
+            "rms": 48.69256380274685
+          }
+        }
+      }
+    ],
+    "knee_high_folding_90_120": [
+      {
+        "alpha_scan": 0.125,
+        "angles_deg": {
+          "final_hip_knee": [
+            50.596022990428935,
+            68.96337022922384
+          ],
+          "peak_hip_knee": [
+            51.07471700151982,
+            69.93046287875788
+          ]
+        },
+        "brake": {
+          "active_mode": "BRAKE",
+          "cycle_count": 25238,
+          "duration_s": 126.19,
+          "terminal_status": null,
+          "transition_count": 1,
+          "trigger": "FILTER_INFEASIBLE"
+        },
+        "command_force_norm_n": {
+          "count": 36800,
+          "p95": 110.18468800562151,
+          "peak": 199.9999999999237,
+          "rms": 97.51314314893825
+        },
+        "completion": {
+          "endpoint_completed": true,
+          "final_reference_phase_s": 23.000000000064315,
+          "full_reference_progress": true,
+          "permanent_brake": true,
+          "termination_reason": "reference_completed",
+          "timeout": false
+        },
+        "endpoint_deg": [
+          90.0,
+          120.0
+        ],
+        "events": {
+          "force_gate_events": 0,
+          "mpc_solver_failures": 0,
+          "mujoco_warning_counts": {},
+          "robot_joint_position_limit_samples": 0,
+          "rom_event_samples": 0,
+          "structural_event_count": 0,
+          "unintended_contact_pairs": []
+        },
+        "evidence_category": "engineering_feasibility_audit_not_formal",
+        "frozen_contract_checks": {
+          "adaptive_model_applied": false,
+          "all_executed_command_force_at_or_below_200n": true,
+          "controller_parameters_changed": false,
+          "fixed_external_alpha_exact_throughout": true,
+          "population_prior_exact_throughout": true,
+          "suspended_bed_force_zero": true
+        },
+        "ideal_scaled_duration_s": 184.0,
+        "motion": {
+          "acceleration_combined_rms_deg_s2": 43.9244043019039,
+          "acceleration_rms_per_joint_deg_s2": [
+            38.514902070578245,
+            48.737140919918474
+          ],
+          "jerk_combined_rms_deg_s3": 1734.1198790232868,
+          "jerk_rms_per_joint_deg_s3": [
+            1453.0037421650075,
+            1975.6324645292568
+          ]
+        },
+        "observed_duration_s": 184.00000000051452,
+        "pass": false,
+        "physical_cuff_moment_norm_nm": {
+          "count": 184001,
+          "p95": 16.626247613138034,
+          "peak": 21.677779705202983,
+          "rms": 7.776338287066684
+        },
+        "physical_force_norm_n": {
+          "count": 184001,
+          "over_limit_duration_s": 0.0,
+          "p95": 109.78712330646034,
+          "peak": 172.62168863733584,
+          "rms": 97.32691211859321
+        },
+        "runtime": {
+          "estimator_mean_ms": 6.406610235916679,
+          "estimator_p95_ms": 2.247555668873214,
+          "fast_path_timing_note": "instrumented in the synchronous deterministic simulator with measured estimator/trust compute subtracted; this is desktop engineering timing, not hardware hard realtime",
+          "filter_or_brake_plus_reference_manager": {
+            "deadline_miss_count": 7,
+            "deadline_ms": 5.0,
+            "max_ms": 6.614749989239499,
+            "mean_ms": 1.5172351755822804,
+            "p95_ms": 2.193377095682081,
+            "sample_count": 36800
+          },
+          "full_high_level_fast_path_excluding_slow_estimator_trust": {
+            "deadline_miss_count": 3,
+            "deadline_ms": 20.0,
+            "max_ms": 57.181958021828905,
+            "mean_ms": 6.466579379120958,
+            "p95_ms": 12.512333042104729,
+            "sample_count": 9200
+          },
+          "mpc": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 20.0,
+            "max_ms": 17.287958005908877,
+            "mean_ms": 10.689194278051176,
+            "p95_ms": 10.957250007777475,
+            "sample_count": 2891
+          },
+          "mpc_mean_ms": 10.689194278051177,
+          "mpc_p95_ms": 10.957250007777475,
+          "reference_manager_fast_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 1.0,
+            "max_ms": 0.04629199975170195,
+            "mean_ms": 0.003441655504463535,
+            "p95_ms": 0.005125009920448065,
+            "sample_count": 11563
+          },
+          "reference_manager_slow_trust_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 20.0,
+            "max_ms": 0.015416997484862804,
+            "mean_ms": 0.0008050223360718835,
+            "p95_ms": 0.0012920063454657793,
+            "sample_count": 9200
+          },
+          "rollout_wall_time_s": 255.65132499998435,
+          "safety_filter": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 5.0,
+            "max_ms": 0.9181250061374158,
+            "mean_ms": 0.16442463632133708,
+            "p95_ms": 0.17712500994093716,
+            "sample_count": 11563
+          },
+          "wall_time_per_simulated_second": 1.3894093749960297
+        },
+        "safety_filter": {
+          "abs_lambda": {
+            "count": 11563,
+            "p95": 0.0,
+            "peak": 10.094796102540645,
+            "rms": 0.09387766707619971
+          },
+          "force_intervention_norm_n": {
+            "count": 11563,
+            "p95": 0.0,
+            "peak": 10.094796102540663,
+            "rms": 0.09387766707619988
+          },
+          "intervention_coordinate_norm": {
+            "count": 11563,
+            "p95": 0.0,
+            "peak": 10.65801621349005,
+            "rms": 0.09911539446853618
+          },
+          "maximum_torque_preservation_residual_nm": 2.6068301405990923e-13,
+          "moment_intervention_norm_nm": {
+            "count": 11563,
+            "p95": 0.0,
+            "peak": 3.4188303928604964,
+            "rms": 0.03179378940899797
+          },
+          "status_counts": {
+            "FILTER_INFEASIBLE": 1,
+            "SAFE_FILTERED": 1,
+            "SAFE_UNCHANGED": 11561
+          }
+        },
+        "scheduled_grid_aligned_duration_s": 184.0,
+        "schema_version": "high_rom_time_scale_run_v1",
+        "tracking": {
+          "combined_rmse_deg": 31.610991937953877,
+          "max_abs_hip_knee_deg": [
+            45.64841373502411,
+            59.04768836775971
+          ],
+          "rmse_hip_knee_deg": [
+            27.375282412526758,
+            35.34265886202078
+          ]
+        },
+        "trajectory": "knee_high_folding_90_120",
+        "wrench_slew": {
+          "allocator_force_n_per_s": {
+            "count": 36799,
+            "p95": 99.25029498516979,
+            "peak": 8674.119090289381,
+            "rms": 131.68229088537976
+          },
+          "allocator_moment_nm_per_s": {
+            "count": 36799,
+            "p95": 6.592613781650164,
+            "peak": 696.8195784351648,
+            "rms": 7.364039298541919
+          },
+          "total_command_force_n_per_s": {
+            "count": 36799,
+            "p95": 267.38626835900084,
+            "peak": 9426.58383939478,
+            "rms": 268.7321893336158
+          },
+          "total_command_moment_nm_per_s": {
+            "count": 36799,
+            "p95": 39.87411417185314,
+            "peak": 767.5505244024777,
+            "rms": 32.428405055608785
+          }
+        }
+      },
+      {
+        "alpha_scan": 0.25,
+        "angles_deg": {
+          "final_hip_knee": [
+            52.01780357553878,
+            72.8774710609896
+          ],
+          "peak_hip_knee": [
+            53.38416516492486,
+            72.89766329173234
+          ]
+        },
+        "brake": {
+          "active_mode": "TRACK",
+          "cycle_count": 0,
+          "duration_s": 0.0,
+          "terminal_status": null,
+          "transition_count": 0,
+          "trigger": null
+        },
+        "command_force_norm_n": {
+          "count": 5954,
+          "p95": 118.93327308823558,
+          "peak": 199.9999999998282,
+          "rms": 101.1194843451841
+        },
+        "completion": {
+          "endpoint_completed": false,
+          "final_reference_phase_s": 7.441500000003349,
+          "full_reference_progress": false,
+          "permanent_brake": false,
+          "termination_reason": "physical_cuff_force_gate",
+          "timeout": false
+        },
+        "endpoint_deg": [
+          90.0,
+          120.0
+        ],
+        "events": {
+          "force_gate_events": 1,
+          "mpc_solver_failures": 0,
+          "mujoco_warning_counts": {},
+          "robot_joint_position_limit_samples": 0,
+          "rom_event_samples": 0,
+          "structural_event_count": 0,
+          "unintended_contact_pairs": []
+        },
+        "evidence_category": "engineering_feasibility_audit_not_formal",
+        "frozen_contract_checks": {
+          "adaptive_model_applied": false,
+          "all_executed_command_force_at_or_below_200n": true,
+          "controller_parameters_changed": false,
+          "fixed_external_alpha_exact_throughout": true,
+          "population_prior_exact_throughout": true,
+          "suspended_bed_force_zero": true
+        },
+        "ideal_scaled_duration_s": 92.0,
+        "motion": {
+          "acceleration_combined_rms_deg_s2": 108.88644784621532,
+          "acceleration_rms_per_joint_deg_s2": [
+            99.97858374756933,
+            117.11874248370076
+          ],
+          "jerk_combined_rms_deg_s3": 4242.616118409854,
+          "jerk_rms_per_joint_deg_s3": [
+            3802.165679535945,
+            4641.456581908436
+          ]
+        },
+        "observed_duration_s": 29.766000000013396,
+        "pass": false,
+        "physical_cuff_moment_norm_nm": {
+          "count": 29767,
+          "p95": 16.78324192269943,
+          "peak": 39.66169735640961,
+          "rms": 13.11192907778125
+        },
+        "physical_force_norm_n": {
+          "count": 29767,
+          "over_limit_duration_s": 0.001,
+          "p95": 117.3855169647762,
+          "peak": 200.35246182969115,
+          "rms": 100.072763241588
+        },
+        "runtime": {
+          "estimator_mean_ms": 1.1995189012329441,
+          "estimator_p95_ms": 0.2503495838027441,
+          "fast_path_timing_note": "instrumented in the synchronous deterministic simulator with measured estimator/trust compute subtracted; this is desktop engineering timing, not hardware hard realtime",
+          "filter_or_brake_plus_reference_manager": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 5.0,
+            "max_ms": 2.0060839888174087,
+            "mean_ms": 0.32191981650660706,
+            "p95_ms": 0.4476813424844295,
+            "sample_count": 5954
+          },
+          "full_high_level_fast_path_excluding_slow_estimator_trust": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 20.0,
+            "max_ms": 19.070541980909184,
+            "mean_ms": 12.259042016709788,
+            "p95_ms": 12.544934212928638,
+            "sample_count": 1489
+          },
+          "mpc": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 20.0,
+            "max_ms": 14.58195797749795,
+            "mean_ms": 10.59331776681131,
+            "p95_ms": 10.856716812122613,
+            "sample_count": 1489
+          },
+          "mpc_mean_ms": 10.59331776681131,
+          "mpc_p95_ms": 10.856716812122613,
+          "reference_manager_fast_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 1.0,
+            "max_ms": 0.025291985366493464,
+            "mean_ms": 0.0033507025758803097,
+            "p95_ms": 0.004708010237663984,
+            "sample_count": 5954
+          },
+          "reference_manager_slow_trust_update": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 20.0,
+            "max_ms": 0.0026249908842146397,
+            "mean_ms": 0.0006745240567883763,
+            "p95_ms": 0.0009835872333496772,
+            "sample_count": 1489
+          },
+          "rollout_wall_time_s": 37.021922124986304,
+          "safety_filter": {
+            "deadline_miss_count": 0,
+            "deadline_ms": 5.0,
+            "max_ms": 0.5927500023972243,
+            "mean_ms": 0.16180278648436822,
+            "p95_ms": 0.17329200636595488,
+            "sample_count": 5954
+          },
+          "wall_time_per_simulated_second": 1.2437654412742607
+        },
+        "safety_filter": {
+          "abs_lambda": {
+            "count": 5954,
+            "p95": 0.0,
+            "peak": 40.289031769634065,
+            "rms": 0.6583747804454682
+          },
+          "force_intervention_norm_n": {
+            "count": 5954,
+            "p95": 0.0,
+            "peak": 40.28903176963406,
+            "rms": 0.6583747804454683
+          },
+          "intervention_coordinate_norm": {
+            "count": 5954,
+            "p95": 0.0,
+            "peak": 42.59845099291186,
+            "rms": 0.6960946720963059
+          },
+          "maximum_torque_preservation_residual_nm": 2.474752618702291e-13,
+          "moment_intervention_norm_nm": {
+            "count": 5954,
+            "p95": 0.0,
+            "peak": 13.83553201221156,
+            "rms": 0.22603194684434538
+          },
+          "status_counts": {
+            "FILTER_INFEASIBLE": 0,
+            "SAFE_FILTERED": 3,
+            "SAFE_UNCHANGED": 5951
+          }
+        },
+        "scheduled_grid_aligned_duration_s": 92.0,
+        "schema_version": "high_rom_time_scale_run_v1",
+        "tracking": {
+          "combined_rmse_deg": 0.509027989081887,
+          "max_abs_hip_knee_deg": [
+            1.3247367523664753,
+            2.240943189599558
+          ],
+          "rmse_hip_knee_deg": [
+            0.12460103333597199,
+            0.709008864422095
+          ]
+        },
+        "trajectory": "knee_high_folding_90_120",
+        "wrench_slew": {
+          "allocator_force_n_per_s": {
+            "count": 5953,
+            "p95": 263.08698889489165,
+            "peak": 7740.384591997108,
+            "rms": 356.5942781915929
+          },
+          "allocator_moment_nm_per_s": {
+            "count": 5953,
+            "p95": 19.17627891555416,
+            "peak": 1773.278658863787,
+            "rms": 32.838463947662746
+          },
+          "total_command_force_n_per_s": {
+            "count": 5953,
+            "p95": 664.2983396121575,
+            "peak": 11217.000954471256,
+            "rms": 618.4456369648528
+          },
+          "total_command_moment_nm_per_s": {
+            "count": 5953,
+            "p95": 67.84922275470451,
+            "peak": 2033.4619030303777,
+            "rms": 69.87275714243904
+          }
+        }
+      }
+    ]
+  },
+  "run_count": 6,
+  "schema_version": "high_rom_time_scale_audit_summary_v1",
+  "single_changed_variable": "alpha_scan",
+  "spec": "/Users/hankli/Desktop/coding/adaptive-traction-mpc/stages/stage4_adaptive_control/configs/high_rom_time_scale_scan_v1.json",
+  "spec_sha256": "0075d137feab5787ac949f01901bd0bee9f72915900ba197af1bb51374f41ee3"
+}
