@@ -307,6 +307,14 @@ class DiagnosticPlant(SensorBoundaryStage4Plant):
             "robot_q_rad": observation.robot_q_rad.tolist(),
             "robot_dq_rad_s": observation.robot_dq_rad_s.tolist(),
             "robot_qdd_rad_s2": self.data.qacc[self.robot_dof_indices].tolist(),
+            "cuff_position_world_m": observation.attachment_position_m.tolist(),
+            "cuff_rotation_world": observation.attachment_rotation_matrix.tolist(),
+            "cuff_linear_velocity_world_m_s": (
+                observation.attachment_velocity_m_s.tolist()
+            ),
+            "cuff_angular_velocity_world_rad_s": (
+                observation.attachment_angular_velocity_rad_s.tolist()
+            ),
             "physical_cuff_force_world_n": observation.cuff_force_vector_n.tolist(),
             "physical_cuff_force_local_n": physical_wrench_local[:3].tolist(),
             "physical_cuff_force_norm_n": float(
