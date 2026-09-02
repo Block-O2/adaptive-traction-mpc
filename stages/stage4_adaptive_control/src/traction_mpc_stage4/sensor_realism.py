@@ -61,6 +61,10 @@ from .measurement import (
 )
 from .mpc import HumanSpaceMPC
 from .reference import COLD_START_TEACHING_DURATION_S, COLD_START_TEACHING_WAYPOINTS, cold_start_teaching_reference
+from .safety_filter import (
+    ExecutableForceFilterResult,
+    make_stage4_executable_force_filter,
+)
 from .state_ukf import StateUKFConfig
 
 
@@ -408,6 +412,7 @@ def run_sensor_realism_case(
     for control_index in range(requested_steps):
         mpc_diagnostics: dict[str, Any] | None = None
         high_level_proposed_action: np.ndarray | None = None
+        high_level_filter_result: ExecutableForceFilterResult | None = None
         current_truth = plant.observe()
         estimator_measurement = estimator_layer.update(current_truth)
         mpc_measurement = mpc_layer.update(current_truth)
@@ -474,22 +479,50 @@ def run_sensor_realism_case(
                     track_brake_supervisor.note_track_mpc_solve()
                 mpc_start = wall_time.perf_counter()
                 if isinstance(mpc, HumanSpaceMPC):
+                    if track_brake_supervisor is None:
+                        first_action_batch_preview = (
+                            make_stage4_first_action_batch_preview(
+                                plant=plant,
+                                measurement=low_level_measurement,
+                                estimated_state=estimated_state,
+                                human_model=current_model,
+                                cuff_allocator=cuff_allocator,
+                                reference=executed_reference(
+                                    float(low_level_measurement.arrival_time_s)
+                                ),
+                            )
+                        )
+                        executable_force_filter = None
+                    else:
+                        executable_force_filter = (
+                            make_stage4_executable_force_filter(
+                                plant=plant,
+                                measurement=low_level_measurement,
+                                estimated_state=estimated_state,
+                                human_model=current_model,
+                                cuff_allocator=cuff_allocator,
+                                reference=executed_reference(
+                                    float(low_level_measurement.arrival_time_s)
+                                ),
+                            )
+                        )
+                        first_action_batch_preview = executable_force_filter
                     high_level_proposed_action, mpc_diagnostics = mpc.solve(
                         estimated_state,
                         float(mpc_measurement.arrival_time_s),
                         executed_reference,
                         current_model,
-                        first_action_batch_preview=make_stage4_first_action_batch_preview(
-                            plant=plant,
-                            measurement=low_level_measurement,
-                            estimated_state=estimated_state,
-                            human_model=current_model,
-                            cuff_allocator=cuff_allocator,
-                            reference=executed_reference(
-                                float(low_level_measurement.arrival_time_s)
-                            ),
-                        ),
+                        first_action_batch_preview=first_action_batch_preview,
                     )
+                    if (
+                        high_level_proposed_action is not None
+                        and executable_force_filter is not None
+                    ):
+                        high_level_filter_result = (
+                            executable_force_filter.selected_result(
+                                high_level_proposed_action
+                            )
+                        )
                 else:
                     high_level_proposed_action, mpc_diagnostics = mpc.solve(
                         estimated_state,
@@ -544,6 +577,7 @@ def run_sensor_realism_case(
                     if mpc_diagnostics is None
                     else mpc_diagnostics.get("status")
                 ),
+                proposed_filter_result=high_level_filter_result,
             )
             if supervisor_decision.terminate:
                 termination = str(

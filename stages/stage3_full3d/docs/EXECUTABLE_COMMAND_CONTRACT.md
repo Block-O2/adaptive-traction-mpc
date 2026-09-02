@@ -86,3 +86,29 @@ If no braking candidate is executable-force feasible, the supervisor returns
 terminates. It does not substitute a previous, zero, seed, or least-bad
 command. Phase 3 does not add the former HOLD/recovery state machine, a
 Reference Manager, pacing, a new force cost, or a High-ROM rollout.
+
+## Phase 4: torque-preserving executable-force Safety Filter
+
+For each Stage-4 first action, the Safety Filter keeps the requested Human
+torque exactly fixed while using the rigid cuff's one-dimensional sagittal
+wrench redundancy. With the existing rank-two allocation matrix `B(q)`, it
+forms `w(lambda) = w_nominal + lambda*n(q)`, where `B(q)*n(q) = 0`, and projects
+zero onto the analytic interval satisfying the shared Stage-3 constraint
+`||F_position + F_velocity + F_allocator(w(lambda))|| <= 200 N`. No optimizer,
+rollout, cost term, or torque relaxation is introduced.
+
+An already feasible nominal command returns `SAFE_UNCHANGED`, `lambda=0`, and
+the original wrench and executable command bit for bit. A successful nonzero
+projection returns `SAFE_FILTERED`; an empty feasible interval returns
+`FILTER_INFEASIBLE`. CEM evaluates all 32 first actions through the batched
+filter and may roll out only the first two statuses. Its final singleton
+preview is retained and passed directly to TRACK execution. If no candidate is
+recoverable, the existing `NO_SAFE_ACTION` contract enters BRAKE without an
+action substitution.
+
+During TRACK, the held action is filtered again against each new 5 ms measured
+state. A successful result is executed through the same Stage-3 command object;
+`FILTER_INFEASIBLE` enters the existing BRAKE path. The plant's independent
+total-force gate remains the last check. This phase adds no Reference Manager,
+pacing, recovery-to-TRACK policy, task-torque relaxation, force cost, or
+High-ROM rollout.

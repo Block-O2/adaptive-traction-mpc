@@ -55,7 +55,7 @@ def preview_stage4_executable_command(
     return Stage4ExecutableCommandPreview(allocation=allocation, command=command)
 
 
-def _prepare_stage4_first_action_context(
+def prepare_stage4_executable_command_context(
     *,
     plant: Any,
     measurement: Any,
@@ -113,7 +113,7 @@ def make_stage4_first_action_preview(
 ) -> Callable[[np.ndarray], ExecutableCommandPreview]:
     """Bind one control instant for scalar equivalence/reference checks."""
 
-    state, context = _prepare_stage4_first_action_context(
+    state, context = prepare_stage4_executable_command_context(
         plant=plant,
         measurement=measurement,
         estimated_state=estimated_state,
@@ -142,7 +142,7 @@ def make_stage4_first_action_batch_preview(
 ) -> Callable[[np.ndarray], ExecutableCommandBatchPreview]:
     """Bind one control instant and batch all candidate-dependent work."""
 
-    state, context = _prepare_stage4_first_action_context(
+    state, context = prepare_stage4_executable_command_context(
         plant=plant,
         measurement=measurement,
         estimated_state=estimated_state,

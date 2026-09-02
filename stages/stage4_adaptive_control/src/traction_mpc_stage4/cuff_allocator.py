@@ -119,6 +119,15 @@ def _sagittal_wrench_to_world_matrix(q_rad: np.ndarray, human: Any) -> np.ndarra
     return matrix
 
 
+def sagittal_wrench_to_world_matrix(
+    q_rad: np.ndarray,
+    human: Any,
+) -> np.ndarray:
+    """Return the physical sagittal-to-world wrench mapping."""
+
+    return _sagittal_wrench_to_world_matrix(q_rad, human)
+
+
 def _world_from_cuff_rotation(q_rad: np.ndarray, human: Any) -> np.ndarray:
     if hasattr(human, "geometry"):
         return np.asarray(human.geometry.cuff_pose(q_rad).rotation, dtype=float)

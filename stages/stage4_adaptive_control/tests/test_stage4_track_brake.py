@@ -22,6 +22,7 @@ from traction_mpc_stage4.sensor_realism import (
     SensorBoundaryStage4Plant,
     run_sensor_realism_case,
 )
+from traction_mpc_stage4.safety_filter import FILTER_INFEASIBLE, SAFE_UNCHANGED
 from traction_mpc_stage4.track_brake import (
     BRAKE,
     BRAKE_INFEASIBLE,
@@ -82,6 +83,8 @@ def test_track_safe_action_is_executed_without_changing_normal_mode() -> None:
     assert decision.status == SAFE_ACTION
     assert decision.executable_preview is not None
     assert decision.executable_preview.command.feasible
+    assert decision.safety_filter["status"] == SAFE_UNCHANGED
+    assert decision.safety_filter["lambda"] == 0.0
     np.testing.assert_array_equal(decision.action_nm, action)
 
 
@@ -104,6 +107,7 @@ def test_unsafe_track_preview_enters_brake_and_preview_equals_execution() -> Non
     )
     assert decision.mode == BRAKE
     assert decision.status == SAFE_BRAKE
+    assert decision.trigger == FILTER_INFEASIBLE
     assert decision.executable_preview is not None
     assert decision.executable_preview.command.feasible
     plant.apply_executable_command(decision.executable_preview.command)

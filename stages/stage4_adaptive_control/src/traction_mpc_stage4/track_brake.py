@@ -23,6 +23,14 @@ from .executable_command import (
     preview_stage4_executable_command,
 )
 from .mpc import NO_SAFE_ACTION, SAFE_ACTION
+from .safety_filter import (
+    FILTER_INFEASIBLE,
+    SAFE_FILTERED,
+    SAFE_UNCHANGED,
+    ExecutableForceFilterResult,
+    filter_executable_command,
+    prepare_executable_force_filter_context,
+)
 
 
 TRACK = "TRACK"
@@ -70,6 +78,7 @@ class SupervisorDecision:
     reference_speed_norm_rad_s: float | None
     terminate_reason: str | None
     computation_ms: float
+    safety_filter: dict[str, Any] | None = None
 
     @property
     def terminate(self) -> bool:
@@ -101,6 +110,12 @@ class TrackBrakeSupervisor:
         self.brake_cycle_count = 0
         self.rejected_track_command_count = 0
         self.computation_ms: list[float] = []
+        self.safety_filter_status_counts = {
+            SAFE_UNCHANGED: 0,
+            SAFE_FILTERED: 0,
+            FILTER_INFEASIBLE: 0,
+        }
+        self.last_safety_filter: dict[str, Any] | None = None
         self._reference_q_rad: np.ndarray | None = None
         self._reference_dq_rad_s: np.ndarray | None = None
         self._reference_ddq_rad_s2: np.ndarray | None = None
@@ -315,6 +330,7 @@ class TrackBrakeSupervisor:
         track_reference: CuffPoseReference,
         proposed_action_nm: np.ndarray | None,
         mpc_status: str | None,
+        proposed_filter_result: ExecutableForceFilterResult | None = None,
     ) -> SupervisorDecision:
         """Return the only command eligible for this exact 5 ms cycle."""
 
@@ -323,16 +339,32 @@ class TrackBrakeSupervisor:
             raise ValueError("unexpected MPC executable-action status")
         if self.mode == TRACK:
             track_preview: Stage4ExecutableCommandPreview | None = None
+            filter_result: ExecutableForceFilterResult | None = None
             if proposed_action_nm is not None and mpc_status != NO_SAFE_ACTION:
-                track_preview = self._preview(
-                    plant=plant,
-                    measurement=measurement,
-                    estimated_state=estimated_state,
-                    human_model=human_model,
-                    cuff_allocator=cuff_allocator,
-                    action_nm=np.asarray(proposed_action_nm, dtype=float),
-                    reference=track_reference,
-                )
+                proposed = np.asarray(proposed_action_nm, dtype=float)
+                if proposed_filter_result is not None:
+                    if not np.array_equal(proposed_filter_result.action_nm, proposed):
+                        raise ValueError(
+                            "carried safety-filter result does not match action"
+                        )
+                    filter_result = proposed_filter_result
+                else:
+                    filter_context = prepare_executable_force_filter_context(
+                        plant=plant,
+                        measurement=measurement,
+                        estimated_state=estimated_state,
+                        human_model=human_model,
+                        cuff_allocator=cuff_allocator,
+                        reference=track_reference,
+                    )
+                    filter_result = filter_executable_command(
+                        filter_context,
+                        proposed,
+                    )
+                self.safety_filter_status_counts[filter_result.status] += 1
+                self.last_safety_filter = filter_result.metadata()
+                if filter_result.feasible:
+                    track_preview = filter_result.filtered_preview
             if track_preview is not None and self._command_is_safe(track_preview):
                 decision = SupervisorDecision(
                     mode=TRACK,
@@ -348,13 +380,22 @@ class TrackBrakeSupervisor:
                     ),
                     terminate_reason=None,
                     computation_ms=0.0,
+                    safety_filter=(
+                        filter_result.metadata()
+                        if filter_result is not None
+                        else None
+                    ),
                 )
             else:
-                trigger = (
-                    NO_SAFE_ACTION
-                    if proposed_action_nm is None or mpc_status == NO_SAFE_ACTION
-                    else "EXECUTABLE_PREVIEW_UNSAFE"
-                )
+                if proposed_action_nm is None or mpc_status == NO_SAFE_ACTION:
+                    trigger = NO_SAFE_ACTION
+                elif (
+                    filter_result is not None
+                    and filter_result.status == FILTER_INFEASIBLE
+                ):
+                    trigger = FILTER_INFEASIBLE
+                else:
+                    trigger = "EXECUTABLE_PREVIEW_UNSAFE"
                 self._enter_brake(track_reference, trigger)
                 decision = self._brake(
                     plant=plant,
@@ -400,6 +441,10 @@ class TrackBrakeSupervisor:
             "track_mpc_solve_count": self.track_mpc_solve_count,
             "brake_cycle_count": self.brake_cycle_count,
             "rejected_track_command_count": self.rejected_track_command_count,
+            "safety_filter_status_counts": dict(
+                self.safety_filter_status_counts
+            ),
+            "last_safety_filter": self.last_safety_filter,
             "latency": self.latency_summary(),
             "normal_track_mpc_solves_per_50hz_cycle": 1,
             "brake_mpc_solves_per_cycle": 0,

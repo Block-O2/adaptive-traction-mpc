@@ -4,14 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from time import perf_counter
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Literal, Protocol
 
 import numpy as np
 
-from traction_mpc_stage3.executable_command import (
-    ExecutableCommandBatchPreview,
-    ExecutableCommandPreview,
-)
+from traction_mpc_stage3.executable_command import ExecutableCommandPreview
 from traction_mpc_stage3.human import (
     CUFF_TRANSLATIONAL_FORCE_GATE_N,
     HUMAN,
@@ -30,7 +27,15 @@ from .surface_loads import CylindricalSurfaceConfig, CylindricalSurfaceLoadModel
 SAFE_ACTION = "SAFE_ACTION"
 NO_SAFE_ACTION = "NO_SAFE_ACTION"
 FirstActionPreview = Callable[[np.ndarray], ExecutableCommandPreview]
-FirstActionBatchPreview = Callable[[np.ndarray], ExecutableCommandBatchPreview]
+
+
+class FirstActionBatchResult(Protocol):
+    feasible: np.ndarray
+
+    def command(self, index: int) -> ExecutableCommandPreview: ...
+
+
+FirstActionBatchPreview = Callable[[np.ndarray], FirstActionBatchResult]
 
 
 def _executable_preview_metadata(
@@ -888,11 +893,16 @@ class HumanSpaceMPC:
                 "provide exactly one scalar or batch first-action preview"
             )
 
-        def preview_selected(action: np.ndarray) -> ExecutableCommandPreview:
+        def preview_selected(
+            action: np.ndarray,
+        ) -> tuple[ExecutableCommandPreview, dict[str, Any] | None]:
             if first_action_batch_preview is not None:
-                return first_action_batch_preview(action[np.newaxis, :]).command(0)
+                batch = first_action_batch_preview(action[np.newaxis, :])
+                metadata_fn = getattr(batch, "filter_metadata", None)
+                metadata = metadata_fn(0) if metadata_fn is not None else None
+                return batch.command(0), metadata
             assert first_action_preview is not None
-            return first_action_preview(action)
+            return first_action_preview(action), None
         solve_timing_start = perf_counter() if self.record_timing_breakdown else 0.0
         x0 = np.asarray(state, dtype=float)
         q_ref, dq_ref, ddq_ref = self._reference_arrays(time_s, reference_fn)
@@ -920,9 +930,11 @@ class HumanSpaceMPC:
         best_margin = float("-inf")
         best_states: np.ndarray | None = None
         best_executable_preview: ExecutableCommandPreview | None = None
+        best_safety_filter_metadata: dict[str, Any] | None = None
         feasible_candidate_count = 0
         first_action_feasible_candidate_count = 0
         first_action_feasible_per_iteration: list[int] = []
+        first_action_filter_statuses_per_iteration: list[dict[str, int]] = []
         audit_this_call = self.solve_count in self.candidate_audit_solve_indices
         call_audit: list[dict[str, Any]] = []
         iteration_audit: list[dict[str, Any]] = []
@@ -945,7 +957,7 @@ class HumanSpaceMPC:
                 section_start = perf_counter()
             screening_start = perf_counter()
             executable_previews: list[ExecutableCommandPreview | None] | None = None
-            executable_batch: ExecutableCommandBatchPreview | None = None
+            executable_batch: FirstActionBatchResult | None = None
             if first_action_batch_preview is not None:
                 try:
                     executable_batch = first_action_batch_preview(candidates[:, 0])
@@ -956,6 +968,21 @@ class HumanSpaceMPC:
                     if executable_batch is not None
                     else []
                 )
+                filter_status = (
+                    None
+                    if executable_batch is None
+                    else getattr(executable_batch, "filter_status", None)
+                )
+                if filter_status is None:
+                    first_action_filter_statuses_per_iteration.append({})
+                else:
+                    values, counts = np.unique(filter_status, return_counts=True)
+                    first_action_filter_statuses_per_iteration.append(
+                        {
+                            str(value): int(count)
+                            for value, count in zip(values, counts, strict=True)
+                        }
+                    )
             else:
                 assert first_action_preview is not None
                 executable_previews = []
@@ -973,6 +1000,7 @@ class HumanSpaceMPC:
                     executable_previews.append(preview)
                     if preview is not None and preview.feasible:
                         first_action_feasible.append(index)
+                first_action_filter_statuses_per_iteration.append({})
             executable_screening_runtime_s += perf_counter() - screening_start
             first_action_feasible_candidate_count += len(first_action_feasible)
             first_action_feasible_per_iteration.append(len(first_action_feasible))
@@ -1051,6 +1079,14 @@ class HumanSpaceMPC:
                     if executable_batch is not None
                     else executable_previews[selected]
                 )
+                metadata_fn = (
+                    None
+                    if executable_batch is None
+                    else getattr(executable_batch, "filter_metadata", None)
+                )
+                best_safety_filter_metadata = (
+                    metadata_fn(selected) if metadata_fn is not None else None
+                )
             elites = candidates[ordered[: min(self.config.elite_count, len(ordered))]]
             mean = np.mean(elites, axis=0)
             std = np.maximum(np.std(elites, axis=0), floor)
@@ -1089,7 +1125,9 @@ class HumanSpaceMPC:
             local_stage_runtime_s = perf_counter() - local_stage_start
             best_cost, best_margin, best_states = refined_evaluation
             assert best_states is not None
-            best_executable_preview = preview_selected(best_sequence[0])
+            best_executable_preview, best_safety_filter_metadata = preview_selected(
+                best_sequence[0]
+            )
             if not best_executable_preview.feasible:
                 raise RuntimeError(
                     "post-CEM refinement produced an executable-force-infeasible action"
@@ -1150,6 +1188,9 @@ class HumanSpaceMPC:
             "first_action_feasible_candidates_per_iteration": (
                 first_action_feasible_per_iteration
             ),
+            "first_action_filter_statuses_per_iteration": (
+                first_action_filter_statuses_per_iteration
+            ),
             "selected_executable_force_norm_n": (
                 best_executable_preview.translational_force_norm_n
                 if best_executable_preview is not None
@@ -1163,6 +1204,7 @@ class HumanSpaceMPC:
             "selected_executable_command": _executable_preview_metadata(
                 best_executable_preview
             ),
+            "selected_safety_filter": best_safety_filter_metadata,
             "global_cem_objective": global_objective,
             "global_stage_runtime_ms": 1000.0 * global_stage_runtime_s,
             "local_stage_runtime_ms": 1000.0 * local_stage_runtime_s,
