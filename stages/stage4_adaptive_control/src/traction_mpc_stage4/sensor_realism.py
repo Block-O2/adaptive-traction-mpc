@@ -258,6 +258,14 @@ def run_sensor_realism_case(
                 "reference_phase_time_s": float(time_s),
                 "speed_scale": 1.0,
                 "speed_scale_rate_per_s": 0.0,
+                "alpha_cmd": 1.0,
+                "alpha_trust": 1.0,
+                "alpha_force": 1.0,
+                "force_severity": 0.0,
+                "force_margin_n": CUFF_TRANSLATIONAL_FORCE_GATE_N,
+                "force_intervention_norm_n": 0.0,
+                "moment_intervention_norm_nm": 0.0,
+                "wrench_intervention_coordinate_norm": 0.0,
                 "geometry_confidence": 0.0,
                 "dynamic_confidence": 0.0,
                 "combined_confidence": 0.0,
@@ -579,6 +587,21 @@ def run_sensor_realism_case(
                 ),
                 proposed_filter_result=high_level_filter_result,
             )
+            if (
+                reference_execution is not None
+                and supervisor_decision.safety_filter is not None
+            ):
+                force_decision = reference_execution.update_from_safety_filter(
+                    float(low_level_measurement.arrival_time_s),
+                    supervisor_decision.safety_filter,
+                )
+                if (
+                    force_decision.brake_required
+                    and supervisor_decision.mode != "BRAKE"
+                ):
+                    raise RuntimeError(
+                        "FILTER_INFEASIBLE did not enter the BRAKE supervisor"
+                    )
             if supervisor_decision.terminate:
                 termination = str(
                     supervisor_decision.terminate_reason or "brake_infeasible"
@@ -725,6 +748,50 @@ def run_sensor_realism_case(
     )
     execution_speed_rate = np.asarray(
         [item["speed_scale_rate_per_s"] for item in execution_statuses],
+        dtype=float,
+    )
+    execution_alpha_cmd = np.asarray(
+        [item.get("alpha_cmd", item["speed_scale"]) for item in execution_statuses],
+        dtype=float,
+    )
+    execution_alpha_trust = np.asarray(
+        [
+            item.get("alpha_trust", item["speed_scale"])
+            for item in execution_statuses
+        ],
+        dtype=float,
+    )
+    execution_alpha_force = np.asarray(
+        [item.get("alpha_force", 1.0) for item in execution_statuses],
+        dtype=float,
+    )
+    execution_force_severity = np.asarray(
+        [item.get("force_severity", 0.0) for item in execution_statuses],
+        dtype=float,
+    )
+    execution_force_margin = np.asarray(
+        [
+            item.get("force_margin_n", CUFF_TRANSLATIONAL_FORCE_GATE_N)
+            for item in execution_statuses
+        ],
+        dtype=float,
+    )
+    execution_force_intervention = np.asarray(
+        [item.get("force_intervention_norm_n", 0.0) for item in execution_statuses],
+        dtype=float,
+    )
+    execution_moment_intervention = np.asarray(
+        [
+            item.get("moment_intervention_norm_nm", 0.0)
+            for item in execution_statuses
+        ],
+        dtype=float,
+    )
+    execution_wrench_intervention = np.asarray(
+        [
+            item.get("wrench_intervention_coordinate_norm", 0.0)
+            for item in execution_statuses
+        ],
         dtype=float,
     )
     geometry_confidence = np.asarray(
@@ -1123,6 +1190,16 @@ def run_sensor_realism_case(
         "reference_phase_time_s": execution_phase,
         "reference_speed_scale": execution_speed,
         "reference_speed_scale_rate_per_s": execution_speed_rate,
+        "reference_alpha_cmd": execution_alpha_cmd,
+        "reference_alpha_trust": execution_alpha_trust,
+        "reference_alpha_force": execution_alpha_force,
+        "reference_force_severity": execution_force_severity,
+        "reference_force_margin_n": execution_force_margin,
+        "reference_force_intervention_norm_n": execution_force_intervention,
+        "reference_moment_intervention_norm_nm": execution_moment_intervention,
+        "reference_wrench_intervention_coordinate_norm": (
+            execution_wrench_intervention
+        ),
         "geometry_confidence_level": geometry_confidence,
         "dynamic_confidence_level": dynamic_confidence,
         "combined_confidence_level": combined_confidence,

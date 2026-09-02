@@ -337,9 +337,9 @@ class TrackBrakeSupervisor:
         started = perf_counter()
         if mpc_status not in {None, SAFE_ACTION, NO_SAFE_ACTION}:
             raise ValueError("unexpected MPC executable-action status")
+        filter_result: ExecutableForceFilterResult | None = None
         if self.mode == TRACK:
             track_preview: Stage4ExecutableCommandPreview | None = None
-            filter_result: ExecutableForceFilterResult | None = None
             if proposed_action_nm is not None and mpc_status != NO_SAFE_ACTION:
                 proposed = np.asarray(proposed_action_nm, dtype=float)
                 if proposed_filter_result is not None:
@@ -413,11 +413,15 @@ class TrackBrakeSupervisor:
                 cuff_allocator=cuff_allocator,
             )
         elapsed_ms = 1000.0 * (perf_counter() - started)
+        safety_filter = decision.safety_filter
+        if safety_filter is None and filter_result is not None:
+            safety_filter = filter_result.metadata()
         self.computation_ms.append(elapsed_ms)
         return SupervisorDecision(
             **{
                 **decision.__dict__,
                 "computation_ms": elapsed_ms,
+                "safety_filter": safety_filter,
             }
         )
 

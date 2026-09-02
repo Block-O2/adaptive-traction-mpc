@@ -87,7 +87,7 @@ terminates. It does not substitute a previous, zero, seed, or least-bad
 command. Phase 3 does not add the former HOLD/recovery state machine, a
 Reference Manager, pacing, a new force cost, or a High-ROM rollout.
 
-## Phase 4: torque-preserving executable-force Safety Filter
+## Executable-force Safety Filter checkpoint
 
 For each Stage-4 first action, the Safety Filter keeps the requested Human
 torque exactly fixed while using the rigid cuff's one-dimensional sagittal
@@ -112,3 +112,33 @@ state. A successful result is executed through the same Stage-3 command object;
 total-force gate remains the last check. This phase adds no Reference Manager,
 pacing, recovery-to-TRACK policy, task-torque relaxation, force cost, or
 High-ROM rollout.
+
+## Phase 4: unified Reference Manager
+
+Stage 4 has one active reference-timing owner.  The manager retains the path
+phase and phase rate, evaluates `q_ref = q_path(s)`, and applies the exact time
+warp
+
+`dq_ref = q_path'(s) * s_dot`
+
+`ddq_ref = q_path''(s) * s_dot^2 + q_path'(s) * s_ddot`.
+
+Its target cap is `min(1, alpha_trust, alpha_force)`.  `alpha_trust` keeps the
+existing filtered-confidence hysteresis, thresholds, and pacing rates.  Its
+filter clock is independent of the 200 Hz reference anchor so interleaved
+Safety-Filter observations cannot change the trust mathematics.
+
+The force cap is purely causal.  `SAFE_UNCHANGED` sets `alpha_force=1`.
+`SAFE_FILTERED` uses the continuous severity
+`clip(||delta F_allocator|| / 200 N, 0, 1)` and sets
+`alpha_force=1-severity`.  The existing common slowdown/recovery rate limiter
+turns the target cap into continuous `s_dot`; there is no second force governor
+or reference state machine.  `FILTER_INFEASIBLE` produces no force cap and
+requires the existing BRAKE supervisor.
+
+With trust and force caps both one, the original reference clock is exact.
+With no force intervention, the confidence-only clock is unchanged to floating
+point regression tolerance.  The manager exposes only a read-only BRAKE
+endpoint checkpoint for a future re-anchor; it implements no return-to-TRACK,
+HOLD, or recovery scan.  It adds no CEM solve, future-force predictor, MPC
+term, Safety-Filter change, or full High-ROM rollout.

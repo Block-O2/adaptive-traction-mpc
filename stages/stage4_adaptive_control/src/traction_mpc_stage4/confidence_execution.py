@@ -1,16 +1,18 @@
-"""Confidence-aware reference timing without estimator or MPC modification."""
+"""Unified trust/force reference timing without estimator or MPC modification."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any, Callable, Mapping
 
 import numpy as np
 
+from traction_mpc_stage3.human import CUFF_TRANSLATIONAL_FORCE_GATE_N
 from traction_mpc_stage3.reference import CuffPoseReference
 
 from .estimator_v2 import DYNAMIC_BASE_PARAMETER_NAMES
 from .minimal_adaptation import EstimatorConfidence, regression_confidence
+from .safety_filter import FILTER_INFEASIBLE, SAFE_FILTERED, SAFE_UNCHANGED
 
 
 GEOMETRY_PARAMETER_NAMES = (
@@ -63,6 +65,16 @@ class ConfidenceAwareExecutionConfig:
             "high_confidence_enter_threshold": self.high_confidence_enter_threshold,
             "high_confidence_exit_threshold": self.high_confidence_exit_threshold,
         }
+
+
+@dataclass(frozen=True)
+class ReferenceManagerForceDecision:
+    """Result of one causal Safety-Filter input to the shared reference clock."""
+
+    filter_status: str
+    alpha_force: float | None
+    force_severity: float | None
+    brake_required: bool
 
 
 def _unavailable_confidence(parameter_names: tuple[str, ...]) -> EstimatorConfidence:
@@ -193,8 +205,8 @@ def _current_model_valid(estimator: Any) -> tuple[bool, bool]:
     return geometry_valid, dynamic_valid
 
 
-class ReferenceExecutionLayer:
-    """Time-warp a reference using estimator confidence, never above nominal."""
+class UnifiedReferenceManager:
+    """Own the single path phase/rate controlled by trust and force caps."""
 
     def __init__(
         self,
@@ -209,6 +221,7 @@ class ReferenceExecutionLayer:
         self.config = config
         self.monitor = ExistingEstimatorConfidenceMonitor()
         self.wall_anchor_s = float(initial_wall_time_s)
+        self.last_confidence_update_wall_time_s = float(initial_wall_time_s)
         self.phase_anchor_s = 0.0
         initial_speed_scale = (
             config.minimum_speed_scale
@@ -218,6 +231,17 @@ class ReferenceExecutionLayer:
         self.speed_anchor_scale = initial_speed_scale
         self.speed_target_scale = initial_speed_scale
         self.speed_scale_rate_per_s = 0.0
+        self.alpha_trust = initial_speed_scale
+        self.alpha_force = config.nominal_speed_scale
+        self.force_severity = 0.0
+        self.last_force_filter_status = SAFE_UNCHANGED
+        self.last_force_margin_n = CUFF_TRANSLATIONAL_FORCE_GATE_N
+        self.last_force_intervention_norm_n = 0.0
+        self.last_moment_intervention_norm_nm = 0.0
+        self.last_wrench_intervention_coordinate_norm = 0.0
+        self.force_update_count = 0
+        self.force_filtered_count = 0
+        self.force_infeasible_count = 0
         self.geometry_model_confidence = 0.0
         self.dynamic_model_confidence = 0.0
         self.combined_model_confidence_raw = 0.0
@@ -237,6 +261,14 @@ class ReferenceExecutionLayer:
         """Speed at the most recent causal clock anchor."""
 
         return self.speed_anchor_scale
+
+    @property
+    def alpha_cmd(self) -> float:
+        return min(
+            self.config.nominal_speed_scale,
+            self.alpha_trust,
+            self.alpha_force,
+        )
 
     def _clock_state(self, wall_time_s: float) -> tuple[float, float, float]:
         """Return phase, phase rate, and phase acceleration at wall time."""
@@ -275,7 +307,7 @@ class ReferenceExecutionLayer:
         target = float(
             np.clip(
                 target,
-                self.config.minimum_speed_scale,
+                0.0,
                 self.config.nominal_speed_scale,
             )
         )
@@ -320,7 +352,10 @@ class ReferenceExecutionLayer:
             self.dynamic_information_confidence,
         )
 
-        elapsed = max(0.0, float(wall_time_s) - self.wall_anchor_s)
+        elapsed = max(
+            0.0,
+            float(wall_time_s) - self.last_confidence_update_wall_time_s,
+        )
         alpha = -np.expm1(
             -elapsed / self.config.model_confidence_filter_time_constant_s
         )
@@ -339,15 +374,82 @@ class ReferenceExecutionLayer:
             <= self.config.high_confidence_exit_threshold
         ):
             self.execution_confidence_high = 0.0
-        target = (
+        self.alpha_trust = (
             self.config.nominal_speed_scale
             if self.execution_confidence_high >= 1.0
             else self.config.minimum_speed_scale
         )
         if not self.confidence_aware:
-            target = self.config.nominal_speed_scale
-        self._set_speed_target(wall_time_s, target)
+            self.alpha_trust = self.config.nominal_speed_scale
+        self._set_speed_target(wall_time_s, self.alpha_cmd)
+        self.last_confidence_update_wall_time_s = float(wall_time_s)
         self.update_count += 1
+
+    def update_from_safety_filter(
+        self,
+        wall_time_s: float,
+        filter_result: Mapping[str, Any] | Any,
+    ) -> ReferenceManagerForceDecision:
+        """Update the force cap from one causal executable-force result.
+
+        ``SAFE_UNCHANGED`` is the exact nominal identity.  For
+        ``SAFE_FILTERED``, the force part of the null-space intervention is
+        normalized only by the unchanged 200 N executable-force limit.  This
+        adds no trajectory-specific threshold or future-force prediction.
+        """
+
+        metadata = (
+            filter_result
+            if isinstance(filter_result, Mapping)
+            else filter_result.metadata()
+        )
+        status = str(metadata["status"])
+        if status not in {SAFE_UNCHANGED, SAFE_FILTERED, FILTER_INFEASIBLE}:
+            raise ValueError("unexpected executable-force filter status")
+        self.last_force_filter_status = status
+        self.force_update_count += 1
+        self.last_force_margin_n = float(
+            metadata.get("executable_force_margin_n", float("nan"))
+        )
+        self.last_force_intervention_norm_n = float(
+            metadata.get("force_intervention_norm_n", 0.0)
+        )
+        self.last_moment_intervention_norm_nm = float(
+            metadata.get("moment_intervention_norm_nm", 0.0)
+        )
+        self.last_wrench_intervention_coordinate_norm = float(
+            metadata.get("intervention_coordinate_norm", 0.0)
+        )
+        if status == FILTER_INFEASIBLE:
+            self.force_infeasible_count += 1
+            return ReferenceManagerForceDecision(
+                filter_status=status,
+                alpha_force=None,
+                force_severity=None,
+                brake_required=True,
+            )
+
+        if status == SAFE_UNCHANGED:
+            severity = 0.0
+        else:
+            self.force_filtered_count += 1
+            severity = float(
+                np.clip(
+                    self.last_force_intervention_norm_n
+                    / CUFF_TRANSLATIONAL_FORCE_GATE_N,
+                    0.0,
+                    1.0,
+                )
+            )
+        self.force_severity = severity
+        self.alpha_force = 1.0 - severity
+        self._set_speed_target(wall_time_s, self.alpha_cmd)
+        return ReferenceManagerForceDecision(
+            filter_status=status,
+            alpha_force=self.alpha_force,
+            force_severity=severity,
+            brake_required=False,
+        )
 
     def update_from_estimator(
         self,
@@ -390,6 +492,20 @@ class ReferenceExecutionLayer:
             "reference_phase_time_s": phase,
             "speed_scale": scale,
             "speed_scale_rate_per_s": scale_rate,
+            "alpha_cmd": self.alpha_cmd,
+            "alpha_trust": self.alpha_trust,
+            "alpha_force": self.alpha_force,
+            "force_severity": self.force_severity,
+            "force_margin_n": self.last_force_margin_n,
+            "force_intervention_norm_n": (
+                self.last_force_intervention_norm_n
+            ),
+            "moment_intervention_norm_nm": (
+                self.last_moment_intervention_norm_nm
+            ),
+            "wrench_intervention_coordinate_norm": (
+                self.last_wrench_intervention_coordinate_norm
+            ),
             "geometry_model_confidence": self.geometry_model_confidence,
             "dynamic_model_confidence": self.dynamic_model_confidence,
             "combined_model_confidence_raw": self.combined_model_confidence_raw,
@@ -417,9 +533,24 @@ class ReferenceExecutionLayer:
             "confidence_update_count": self.update_count,
             "latest_geometry_confidence": self.monitor.geometry.to_dict(),
             "latest_dynamic_confidence": self.monitor.dynamics.to_dict(),
-            "speed_signal": "filtered_hysteretic_current_model_confidence",
+            "speed_signal": "min(1, alpha_trust, alpha_force)",
+            "rate_limited_speed_output": "s_dot=speed_scale",
+            "single_reference_manager": True,
+            "path_state": "s=reference_phase_time_s, s_dot=speed_scale",
+            "alpha_trust_semantics": (
+                "unchanged_filtered_hysteretic_current_model_confidence"
+            ),
+            "alpha_force_rule": (
+                "SAFE_UNCHANGED:1; SAFE_FILTERED:"
+                "1-clip(force_intervention_norm_n/force_gate_n,0,1); "
+                "FILTER_INFEASIBLE:BRAKE_REQUIRED_without_alpha_update"
+            ),
+            "last_force_filter_status": self.last_force_filter_status,
+            "force_update_count": self.force_update_count,
+            "force_filtered_count": self.force_filtered_count,
+            "force_infeasible_count": self.force_infeasible_count,
             "time_warp_kinematics": (
-                "qdot=q_prime*s; qddot=q_double_prime*s^2+q_prime*sdot"
+                "qdot=q_s*s_dot; qddot=q_ss*s_dot^2+q_s*s_ddot"
             ),
             "information_confidence_affects_speed": False,
             "rejected_candidate_invalidates_current_model": False,
@@ -428,3 +559,21 @@ class ReferenceExecutionLayer:
             "safety_limits_modified": False,
             "tube_mpc": False,
         }
+
+    def brake_reentry_checkpoint(self, wall_time_s: float) -> dict[str, Any]:
+        """Expose the minimal future re-entry boundary without recovering."""
+
+        phase, speed, acceleration = self._clock_state(wall_time_s)
+        return {
+            "reference_phase_time_s": phase,
+            "reference_phase_rate": speed,
+            "reference_phase_acceleration": acceleration,
+            "automatic_return_to_track_implemented": False,
+            "required_future_boundary": (
+                "re-anchor s and s_dot to the stable BRAKE endpoint before TRACK"
+            ),
+        }
+
+
+# Backward-compatible import name.  This is an alias, not a second manager.
+ReferenceExecutionLayer = UnifiedReferenceManager
