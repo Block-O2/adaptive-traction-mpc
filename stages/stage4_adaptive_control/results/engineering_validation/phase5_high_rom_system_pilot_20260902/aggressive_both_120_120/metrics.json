@@ -1,0 +1,223 @@
+{
+  "architecture": {
+    "adaptive_model_applied": false,
+    "controller": "fixed_mpc_prior_only",
+    "cuff_adapter_translation_m": [
+      0.0,
+      0.14,
+      0.0
+    ],
+    "new_recovery_mechanism": false,
+    "reference_manager": "UnifiedReferenceManager",
+    "supervisor_modes": [
+      "TRACK",
+      "BRAKE"
+    ]
+  },
+  "classification": "PARTIAL",
+  "endpoint_deg": [
+    120.0,
+    120.0
+  ],
+  "motion": {
+    "acceleration_combined_rms_deg_s2": 227.90239116652003,
+    "acceleration_rms_per_joint_deg_s2": [
+      144.38952554804862,
+      288.1504202857327
+    ],
+    "jerk_combined_rms_deg_s3": 8212.735135004357,
+    "jerk_rms_per_joint_deg_s3": [
+      5322.7612655025305,
+      10323.09301062121
+    ]
+  },
+  "reference_manager": {
+    "decreased_during_filter_intervention": false,
+    "final": 1.0,
+    "final_phase_s": 21.75000000001567,
+    "first_safe_filtered_time_s": null,
+    "last_safe_filtered_time_s": null,
+    "maximum": 1.0,
+    "maximum_abs_rate_per_s": 0.25,
+    "mean": 0.6796896971969817,
+    "minimum": 0.5,
+    "phase_delay_s": 10.250000000000451,
+    "recovered_toward_one_after_intervention": false,
+    "time_below_one_s": 21.500000000003293
+  },
+  "runtime": {
+    "estimator_mean_ms": 1.287481928611669,
+    "estimator_p95_ms": 0.2269916440127414,
+    "fast_path_timing_note": "instrumented in the synchronous deterministic simulator with measured estimator/trust compute subtracted; this is desktop engineering timing, not hardware hard realtime",
+    "filter_or_brake_plus_reference_manager": {
+      "deadline_miss_count": 0,
+      "deadline_ms": 5.0,
+      "max_ms": 3.413124999497086,
+      "mean_ms": 1.2902761245845795,
+      "p95_ms": 2.159468452737201,
+      "sample_count": 6400
+    },
+    "full_high_level_fast_path_excluding_slow_estimator_trust": {
+      "deadline_miss_count": 1,
+      "deadline_ms": 20.0,
+      "max_ms": 20.485708009800874,
+      "mean_ms": 7.539618934979444,
+      "p95_ms": 12.59748821539688,
+      "sample_count": 1600
+    },
+    "mpc": {
+      "deadline_miss_count": 0,
+      "deadline_ms": 20.0,
+      "max_ms": 16.104084003018215,
+      "mean_ms": 10.695223632983755,
+      "p95_ms": 11.074770998675376,
+      "sample_count": 706
+    },
+    "mpc_mean_ms": 10.695223632983755,
+    "mpc_p95_ms": 11.074770998675376,
+    "reference_manager_fast_update": {
+      "deadline_miss_count": 0,
+      "deadline_ms": 1.0,
+      "max_ms": 0.09983399650081992,
+      "mean_ms": 0.007906994353374663,
+      "p95_ms": 0.00999383992166258,
+      "sample_count": 2824
+    },
+    "reference_manager_slow_trust_update": {
+      "deadline_miss_count": 28,
+      "deadline_ms": 20.0,
+      "max_ms": 100.46033299295232,
+      "mean_ms": 0.9529762702459266,
+      "p95_ms": 0.20045625351485685,
+      "sample_count": 1600
+    },
+    "rollout_wall_time_s": 34.660733249998884,
+    "safety_filter": {
+      "deadline_miss_count": 0,
+      "deadline_ms": 5.0,
+      "max_ms": 0.3192080039298162,
+      "mean_ms": 0.16221332461030682,
+      "p95_ms": 0.17482140101492405,
+      "sample_count": 2824
+    },
+    "wall_time_per_simulated_second": 1.0831479140619193
+  },
+  "safety": {
+    "actual_cuff_force_n": {
+      "count": 32001,
+      "p95": 115.07804194895188,
+      "peak": 173.83910126789354,
+      "rms": 94.79139992506587
+    },
+    "actual_cuff_moment_nm": {
+      "count": 32001,
+      "p95": 16.784297478794016,
+      "peak": 25.336947345749117,
+      "rms": 10.185139817974456
+    },
+    "all_executed_commands_at_or_below_200_n": true,
+    "brake_count": 1,
+    "brake_duration_s": 17.885,
+    "brake_terminal_status": null,
+    "brake_trigger": "FILTER_INFEASIBLE",
+    "executed_command_force_n": {
+      "count": 6400,
+      "p95": 117.93480157292439,
+      "peak": 199.8653068649049,
+      "rms": 96.7949102428962
+    },
+    "independent_200n_gate_events": 0,
+    "measured_cuff_force_n": {
+      "count": 6400,
+      "p95": 112.65918817024209,
+      "peak": 142.5145769893405,
+      "rms": 93.00870461548975
+    },
+    "mpc_solver_failures": 0,
+    "mujoco_warning_counts": {},
+    "robot_joint_limit_samples": 0,
+    "rom_event_samples": 0,
+    "unintended_contact_pairs": []
+  },
+  "safety_filter": {
+    "filtered_executable_force_norm_n": {
+      "count": 2824,
+      "p95": 117.38564464480075,
+      "peak": 205.25419040817266,
+      "rms": 100.92570929203134
+    },
+    "maximum_human_torque_preservation_residual_nm": 2.2839832298082896e-13,
+    "nominal_executable_force_norm_n": {
+      "count": 2824,
+      "p95": 117.38564464480075,
+      "peak": 205.25419040817266,
+      "rms": 100.92570929203134
+    },
+    "safe_filtered_abs_lambda": {
+      "count": 0,
+      "p95": null,
+      "peak": null,
+      "rms": null
+    },
+    "safe_filtered_force_intervention_norm_n": {
+      "count": 0,
+      "p95": null,
+      "peak": null,
+      "rms": null
+    },
+    "safe_filtered_intervention_coordinate_norm": {
+      "count": 0,
+      "p95": null,
+      "peak": null,
+      "rms": null
+    },
+    "safe_filtered_moment_intervention_norm_nm": {
+      "count": 0,
+      "p95": null,
+      "peak": null,
+      "rms": null
+    },
+    "safe_filtered_nominal_executable_force_norm_n": {
+      "count": 0,
+      "p95": null,
+      "peak": null,
+      "rms": null
+    },
+    "safe_filtered_output_executable_force_norm_n": {
+      "count": 0,
+      "p95": null,
+      "peak": null,
+      "rms": null
+    },
+    "status_counts": {
+      "FILTER_INFEASIBLE": 1,
+      "SAFE_FILTERED": 0,
+      "SAFE_UNCHANGED": 2823
+    },
+    "supervisor_status_counts_match": true
+  },
+  "task": {
+    "completed": false,
+    "completion_time_s": null,
+    "elapsed_time_s": 32.00000000001612,
+    "final_hip_knee_deg": [
+      64.53907632446914,
+      69.68634408652402
+    ],
+    "peak_hip_knee_deg": [
+      65.29321911587921,
+      70.73841145767103
+    ],
+    "termination_reason": "completed",
+    "tracking_combined_rmse_deg": 29.813866298010048,
+    "tracking_max_hip_knee_deg": [
+      59.49858496645206,
+      59.649911546748335
+    ],
+    "tracking_rmse_hip_knee_deg": [
+      31.019867125059157,
+      28.556979721513265
+    ]
+  },
+  "trajectory": "aggressive_both_120_120"
+}

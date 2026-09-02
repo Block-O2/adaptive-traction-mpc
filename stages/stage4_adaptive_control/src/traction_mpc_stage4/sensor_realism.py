@@ -204,6 +204,29 @@ def _relative_parameter_metrics(estimate: np.ndarray, truth: np.ndarray) -> dict
     }
 
 
+def _latency_summary_ms(
+    values_s: list[float], *, deadline_ms: float
+) -> dict[str, float | int]:
+    values_ms = 1000.0 * np.asarray(values_s, dtype=float)
+    if not len(values_ms):
+        return {
+            "sample_count": 0,
+            "mean_ms": 0.0,
+            "p95_ms": 0.0,
+            "max_ms": 0.0,
+            "deadline_ms": float(deadline_ms),
+            "deadline_miss_count": 0,
+        }
+    return {
+        "sample_count": int(len(values_ms)),
+        "mean_ms": float(np.mean(values_ms)),
+        "p95_ms": float(np.percentile(values_ms, 95.0)),
+        "max_ms": float(np.max(values_ms)),
+        "deadline_ms": float(deadline_ms),
+        "deadline_miss_count": int(np.count_nonzero(values_ms > deadline_ms)),
+    }
+
+
 def run_sensor_realism_case(
     case: MeasurementCase,
     *,
@@ -218,6 +241,8 @@ def run_sensor_realism_case(
     trajectory_waypoints: tuple[Any, ...] = COLD_START_TEACHING_WAYPOINTS,
     plant_factory: Callable[[HumanV2Parameters], SensorBoundaryStage4Plant] | None = None,
     reference_execution: ReferenceExecutionLayer | None = None,
+    reference_completion_phase_s: float | None = None,
+    capture_system_pilot_diagnostics: bool = False,
     track_brake_supervisor: Any | None = None,
     mpc_factory: Callable[[], HumanSpaceMPC] | None = None,
     cuff_allocator: Any | None = None,
@@ -407,6 +432,23 @@ def run_sensor_realism_case(
     control_bed_force: list[float] = []
     estimator_compute_s: list[float] = []
     mpc_compute_s: list[float] = []
+    mpc_compute_times_s: list[float] = []
+    reference_trust_compute_s: list[float] = []
+    reference_force_compute_s: list[float] = []
+    safety_filter_compute_ms: list[float] = []
+    safety_layer_compute_s: list[float] = []
+    high_level_fast_path_compute_s: list[float] = []
+    executed_command_times_s: list[float] = []
+    executed_command_force_total_n: list[np.ndarray] = []
+    safety_filter_times_s: list[float] = []
+    safety_filter_statuses: list[str] = []
+    safety_filter_lambda: list[float] = []
+    safety_filter_intervention_norm: list[float] = []
+    safety_filter_force_intervention_n: list[float] = []
+    safety_filter_moment_intervention_nm: list[float] = []
+    safety_filter_torque_residual_nm: list[float] = []
+    safety_filter_nominal_force_n: list[float] = []
+    safety_filter_filtered_force_n: list[float] = []
     unintended_contacts: set[tuple[str, str]] = set(truth.unintended_contact_pairs)
     rom_event_count = 0
     robot_position_limit_count = 0
@@ -418,6 +460,9 @@ def run_sensor_realism_case(
     rollout_wall_start = wall_time.perf_counter()
 
     for control_index in range(requested_steps):
+        fast_path_started = wall_time.perf_counter()
+        slow_path_compute_this_cycle_s = 0.0
+        high_level_cycle = control_index % high_level_steps == 0
         mpc_diagnostics: dict[str, Any] | None = None
         high_level_proposed_action: np.ndarray | None = None
         high_level_filter_result: ExecutableForceFilterResult | None = None
@@ -459,16 +504,22 @@ def run_sensor_realism_case(
                     bed_contaminated=False,
                 )
             estimator_compute_s.append(wall_time.perf_counter() - estimator_start)
+            slow_path_compute_this_cycle_s += estimator_compute_s[-1]
             current_geometry_diag = diagnostics["geometry"]
             current_dynamic_diag = diagnostics["dynamics"]
             current_model = estimator.model
             if reference_execution is not None:
+                reference_trust_start = wall_time.perf_counter()
                 reference_execution.update_from_estimator(
                     float(mpc_measurement.arrival_time_s),
                     estimator,
                     current_geometry_diag,
                     current_dynamic_diag,
                 )
+                reference_trust_compute_s.append(
+                    wall_time.perf_counter() - reference_trust_start
+                )
+                slow_path_compute_this_cycle_s += reference_trust_compute_s[-1]
             if estimator_architecture == "integral_state_ukf":
                 estimated_state = estimator_output_state
             else:
@@ -539,6 +590,9 @@ def run_sensor_realism_case(
                         current_model,
                     )
                 mpc_compute_s.append(wall_time.perf_counter() - mpc_start)
+                mpc_compute_times_s.append(
+                    float(mpc_measurement.arrival_time_s)
+                )
                 if high_level_proposed_action is None:
                     if track_brake_supervisor is None:
                         termination = "no_safe_action"
@@ -591,9 +645,13 @@ def run_sensor_realism_case(
                 reference_execution is not None
                 and supervisor_decision.safety_filter is not None
             ):
+                reference_force_start = wall_time.perf_counter()
                 force_decision = reference_execution.update_from_safety_filter(
                     float(low_level_measurement.arrival_time_s),
                     supervisor_decision.safety_filter,
+                )
+                reference_force_compute_s.append(
+                    wall_time.perf_counter() - reference_force_start
                 )
                 if (
                     force_decision.brake_required
@@ -602,6 +660,43 @@ def run_sensor_realism_case(
                     raise RuntimeError(
                         "FILTER_INFEASIBLE did not enter the BRAKE supervisor"
                     )
+            safety_layer_compute_s.append(
+                float(supervisor_decision.computation_ms) / 1000.0
+                + (
+                    reference_force_compute_s[-1]
+                    if supervisor_decision.safety_filter is not None
+                    and reference_execution is not None
+                    else 0.0
+                )
+            )
+            if supervisor_decision.safety_filter is not None:
+                filter_metadata = supervisor_decision.safety_filter
+                safety_filter_times_s.append(
+                    float(low_level_measurement.arrival_time_s)
+                )
+                safety_filter_statuses.append(str(filter_metadata["status"]))
+                safety_filter_lambda.append(float(filter_metadata["lambda"]))
+                safety_filter_intervention_norm.append(
+                    float(filter_metadata["intervention_coordinate_norm"])
+                )
+                safety_filter_force_intervention_n.append(
+                    float(filter_metadata["force_intervention_norm_n"])
+                )
+                safety_filter_moment_intervention_nm.append(
+                    float(filter_metadata["moment_intervention_norm_nm"])
+                )
+                safety_filter_torque_residual_nm.append(
+                    float(filter_metadata["torque_residual_nm"])
+                )
+                safety_filter_nominal_force_n.append(
+                    float(filter_metadata["nominal_executable_force_norm_n"])
+                )
+                safety_filter_filtered_force_n.append(
+                    float(filter_metadata["filtered_executable_force_norm_n"])
+                )
+                safety_filter_compute_ms.append(
+                    float(filter_metadata["computation_ms"])
+                )
             if supervisor_decision.terminate:
                 termination = str(
                     supervisor_decision.terminate_reason or "brake_infeasible"
@@ -628,6 +723,19 @@ def run_sensor_realism_case(
             termination = "total_commanded_cuff_force_gate"
             force_gate_event_count += 1
             break
+        executed_command_times_s.append(float(current_truth.time_s))
+        executed_command_force_total_n.append(
+            executable_preview.command.force_total_n.copy()
+        )
+        if high_level_cycle:
+            high_level_fast_path_compute_s.append(
+                max(
+                    0.0,
+                    wall_time.perf_counter()
+                    - fast_path_started
+                    - slow_path_compute_this_cycle_s,
+                )
+            )
         unclipped_fraction = float(
             np.max(np.abs(plant.last_unclipped_joint_torque) / plant.torque_limits_nm)
         )
@@ -717,6 +825,13 @@ def run_sensor_realism_case(
             if plant.warning_counts():
                 termination = "mujoco_solver_warning"
                 break
+            if (
+                reference_completion_phase_s is not None
+                and execution_statuses[-1]["reference_phase_time_s"]
+                >= float(reference_completion_phase_s) - 1e-12
+            ):
+                termination = "reference_completed"
+                break
         if termination != "completed":
             break
 
@@ -738,7 +853,17 @@ def run_sensor_realism_case(
     tracking_deg = np.degrees(true_q - q_ref)
     estimation_error_deg = np.degrees(q_est - true_q)
     robot_velocity = np.array([item.robot_dq_rad_s for item in observations])
-    completed = bool(termination == "completed" and time[-1] >= duration_s - 0.5 * CONTROL_DT_S)
+    if reference_completion_phase_s is None:
+        completed = bool(
+            termination == "completed"
+            and time[-1] >= duration_s - 0.5 * CONTROL_DT_S
+        )
+    else:
+        completed = bool(
+            execution_statuses[-1]["reference_phase_time_s"]
+            >= float(reference_completion_phase_s) - 1e-12
+            and termination in {"completed", "reference_completed"}
+        )
     rollout_wall_elapsed_s = wall_time.perf_counter() - rollout_wall_start
     execution_phase = np.asarray(
         [item["reference_phase_time_s"] for item in execution_statuses], dtype=float
@@ -993,6 +1118,30 @@ def run_sensor_realism_case(
             "estimator_p95_ms": float(1000.0 * np.percentile(estimator_compute_s, 95.0)),
             "mpc_mean_ms": float(1000.0 * np.mean(mpc_compute_s)),
             "mpc_p95_ms": float(1000.0 * np.percentile(mpc_compute_s, 95.0)),
+            "mpc": _latency_summary_ms(mpc_compute_s, deadline_ms=20.0),
+            "reference_manager_fast_update": _latency_summary_ms(
+                reference_force_compute_s, deadline_ms=1.0
+            ),
+            "reference_manager_slow_trust_update": _latency_summary_ms(
+                reference_trust_compute_s, deadline_ms=20.0
+            ),
+            "safety_filter": _latency_summary_ms(
+                [value / 1000.0 for value in safety_filter_compute_ms],
+                deadline_ms=5.0,
+            ),
+            "filter_or_brake_plus_reference_manager": _latency_summary_ms(
+                safety_layer_compute_s, deadline_ms=5.0
+            ),
+            "full_high_level_fast_path_excluding_slow_estimator_trust": (
+                _latency_summary_ms(
+                    high_level_fast_path_compute_s, deadline_ms=20.0
+                )
+            ),
+            "fast_path_timing_note": (
+                "instrumented in the synchronous deterministic simulator with "
+                "measured estimator/trust compute subtracted; this is desktop "
+                "engineering timing, not hardware hard realtime"
+            ),
         },
         "measurement_and_derivative_quality_god_view": {
             "mean_measurement_age_ms": float(1000.0 * np.mean(measurement_ages)),
@@ -1212,6 +1361,44 @@ def run_sensor_realism_case(
         "dynamic_information_confidence": dynamic_information_confidence,
         "combined_information_confidence": combined_information_confidence,
     }
+    if capture_system_pilot_diagnostics:
+        trace.update(
+            {
+                "mpc_cycle_time_s": np.asarray(mpc_compute_times_s),
+                "executed_command_time_s": np.asarray(executed_command_times_s),
+                "executed_command_force_total_n": np.asarray(
+                    executed_command_force_total_n
+                ),
+                "safety_filter_time_s": np.asarray(safety_filter_times_s),
+                "safety_filter_status": np.asarray(safety_filter_statuses),
+                "safety_filter_lambda": np.asarray(safety_filter_lambda),
+                "safety_filter_intervention_coordinate_norm": np.asarray(
+                    safety_filter_intervention_norm
+                ),
+                "safety_filter_force_intervention_norm_n": np.asarray(
+                    safety_filter_force_intervention_n
+                ),
+                "safety_filter_moment_intervention_norm_nm": np.asarray(
+                    safety_filter_moment_intervention_nm
+                ),
+                "safety_filter_torque_residual_nm": np.asarray(
+                    safety_filter_torque_residual_nm
+                ),
+                "safety_filter_nominal_executable_force_norm_n": np.asarray(
+                    safety_filter_nominal_force_n
+                ),
+                "safety_filter_filtered_executable_force_norm_n": np.asarray(
+                    safety_filter_filtered_force_n
+                ),
+                "safety_filter_compute_ms": np.asarray(safety_filter_compute_ms),
+                "safety_layer_compute_ms": (
+                    1000.0 * np.asarray(safety_layer_compute_s)
+                ),
+                "high_level_fast_path_compute_ms": (
+                    1000.0 * np.asarray(high_level_fast_path_compute_s)
+                ),
+            }
+        )
     if distributed_cuff_enabled:
         trace.update(
             {

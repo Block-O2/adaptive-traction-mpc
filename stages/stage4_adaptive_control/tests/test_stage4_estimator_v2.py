@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 
 from traction_mpc_stage3.human import HUMAN
@@ -35,6 +37,34 @@ def test_nominal_base_parameters_reproduce_human_v2_inverse_dynamics() -> None:
     np.testing.assert_allclose(
         dynamic_regressor_row(q, dq, ddq) @ nominal_base_parameters(),
         inverse_dynamics(q, dq, ddq, HUMAN),
+        atol=1e-11,
+    )
+
+
+def test_base_parameter_model_accepts_rom_only_human_variant() -> None:
+    initial = cold_start_teaching_reference(0.0)
+    geometry_identifier = AccumulatedCuffGeometryEstimator(
+        initial.world_from_cuff.translation,
+        initial.world_from_cuff.rotation,
+        initial.q_rad,
+    )
+    high_rom = replace(
+        HUMAN,
+        q_max_rad=tuple(np.radians([125.0, 125.0])),
+    )
+    model = BaseParameterHumanModel(
+        geometry_identifier.geometry,
+        nominal_base_parameters(HUMAN),
+        high_rom,
+    )
+    q = np.radians([100.0, 110.0])
+    dq = np.radians([3.0, -2.0])
+    ddq = np.radians([4.0, 5.0])
+    assert model.q_min_rad == HUMAN.q_min_rad
+    assert model.q_max_rad == high_rom.q_max_rad
+    np.testing.assert_allclose(
+        model.inverse_dynamics(q, dq, ddq),
+        inverse_dynamics(q, dq, ddq, high_rom),
         atol=1e-11,
     )
 

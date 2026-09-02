@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -562,6 +564,35 @@ def test_batched_rk4_and_cuff_allocation_match_scalar_reference() -> None:
     )
     batched_force = controller._batched_cuff_force_norm(action, state[:, :2], human)
     np.testing.assert_allclose(batched_force, scalar_force, rtol=1e-12, atol=1e-12)
+
+
+def test_batched_rk4_matches_scalar_for_high_rom_variant() -> None:
+    controller = HumanSpaceMPC(implementation="batched")
+    high_rom = replace(
+        HUMAN,
+        q_max_rad=tuple(np.radians([125.0, 125.0])),
+    )
+    nominal = _base_parameter_model()
+    human = BaseParameterHumanModel(
+        nominal.geometry,
+        nominal.beta,
+        high_rom,
+    )
+    state = np.array(
+        [
+            np.radians([90.0, 110.0, 5.0, -3.0]),
+            np.radians([118.0, 121.0, -2.0, 4.0]),
+        ]
+    )
+    action = np.array([[20.0, -8.0], [-15.0, 12.0]])
+    scalar_next = np.asarray(
+        [
+            human.step_dynamics(item, torque, controller.config.prediction_dt_s)
+            for item, torque in zip(state, action, strict=True)
+        ]
+    )
+    batched_next = controller._batched_base_step(state, action, human)
+    np.testing.assert_allclose(batched_next, scalar_next, rtol=1e-13, atol=1e-13)
 
 
 def test_batched_is_default_and_scalar_remains_available() -> None:
