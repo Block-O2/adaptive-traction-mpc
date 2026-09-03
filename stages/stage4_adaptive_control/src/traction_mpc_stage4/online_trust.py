@@ -64,7 +64,12 @@ class OnlineSingleChallengerTrustEstimator:
             HierarchicalTrustPrototypeConfig()
         ),
         rom_human: HumanV2Parameters = HUMAN,
+        freeze_control_geometry: bool = False,
     ) -> None:
+        if freeze_control_geometry and apply_qualified_model:
+            raise ValueError(
+                "freeze_control_geometry requires the population-prior control model"
+            )
         self.measurement_case = measurement_case
         self.apply_qualified_model = bool(apply_qualified_model)
         self.statistical_config = statistical_config
@@ -74,6 +79,21 @@ class OnlineSingleChallengerTrustEstimator:
             initial_measurement.attachment_position_m,
             initial_measurement.attachment_rotation_matrix,
             initial_q_prior_rad,
+        )
+        self.freeze_control_geometry = bool(freeze_control_geometry)
+        geometry = self.geometry_identifier.geometry
+        self._frozen_control_geometry = (
+            PlanarCuffGeometry(
+                origin_world_m=geometry.origin_world_m.copy(),
+                plane_x_world=geometry.plane_x_world.copy(),
+                joint_axis_world=geometry.joint_axis_world.copy(),
+                plane_z_world=geometry.plane_z_world.copy(),
+                hip_plane_m=geometry.hip_plane_m.copy(),
+                thigh_length_m=float(geometry.thigh_length_m),
+                knee_to_cuff_in_cuff_m=geometry.knee_to_cuff_in_cuff_m.copy(),
+            )
+            if self.freeze_control_geometry
+            else None
         )
         self.dynamic_identifier = AccumulatedIntegralBaseDynamicIdentifier()
         self.incumbent_beta = self.dynamic_identifier.population_prior.copy()
@@ -107,9 +127,15 @@ class OnlineSingleChallengerTrustEstimator:
         return self.incumbent_beta.copy()
 
     @property
+    def control_geometry(self) -> PlanarCuffGeometry:
+        if self._frozen_control_geometry is not None:
+            return self._frozen_control_geometry
+        return self.geometry
+
+    @property
     def model(self) -> BaseParameterHumanModel:
         return BaseParameterHumanModel(
-            self.geometry, self.control_beta, self.rom_human
+            self.control_geometry, self.control_beta, self.rom_human
         )
 
     def _resolve_challenger(self, now_s: float) -> None:
@@ -447,6 +473,7 @@ class OnlineSingleChallengerTrustEstimator:
         return {
             "production_default": False,
             "apply_qualified_model_to_control": self.apply_qualified_model,
+            "freeze_control_geometry": self.freeze_control_geometry,
             "lifecycle": "single_incumbent_single_challenger",
             "maximum_concurrent_challengers": 1 if self.challengers else 0,
             "superseded_count": 0,

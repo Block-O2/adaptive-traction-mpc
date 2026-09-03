@@ -1,0 +1,57 @@
+{
+  "evidence_category": "commissioning_diagnostic_only_not_capability_evidence",
+  "full_model_freeze_contract_satisfied": false,
+  "dynamic_beta_population_prior_exact": true,
+  "alpha_trust_exactly_one": true,
+  "active_geometry_changed": true,
+  "active_geometry_max_component_changes": [
+    0.009845417202435723,
+    0.010526429136329691,
+    0.003925945219737714,
+    0.013738045284397815,
+    0.013229357905644166,
+    0.013881454936479309,
+    0.00009656997012952306,
+    0.0017747734455057789
+  ],
+  "mechanism_evidence": {
+    "estimator_model": "OnlineSingleChallengerTrustEstimator.model returns BaseParameterHumanModel(self.geometry, self.control_beta, self.rom_human)",
+    "geometry_update": "observe_measurement continues geometry_identifier.add_pose updates",
+    "runner": "run_sensor_realism_case assigns current_model = estimator.model after each estimator update",
+    "scope_error": "apply_qualified_model=False freezes dynamic beta but does not make geometry estimation shadow-only",
+    "causal_claim_limit": "Observed geometry/state error is a plausible proximal explanation, not an ablation-proven causal attribution."
+  },
+  "observed_task_status": "SAFE_INCOMPLETE",
+  "observed_force_status": "STRICT_PASS",
+  "termination_reason": "reference_completed",
+  "endpoint_error_deg": 1.6817939615472,
+  "return_error_deg": 0.6127286350697361,
+  "preregistered_endpoint_tolerance_deg": 0.06896926724078867,
+  "best_endpoint_time_s": 7.6950000000009044,
+  "best_endpoint_true_q_deg": [40.03254173539949, 41.6817939615472],
+  "best_endpoint_estimated_q_deg": [40.06846090462864, 40.1947253741289],
+  "target_hold_mean_estimation_error_deg": [0.0421830421905895, -1.7550766093510095],
+  "target_hold_true_q_min_deg": [40.00925935698367, 41.6817939615472],
+  "target_hold_true_q_max_deg": [40.11230640295292, 42.322247188592414],
+  "strict_and_engineering_maps_are_diagnostic_only": true,
+  "remaining_trajectory_runs": 0,
+  "full_engineering_trajectory_runs": 1,
+  "fine_replay_required": false,
+  "fine_replay_reason": "Physical peak 122.9612622231222 N is below 198 N; no event snapshot/replay was triggered.",
+  "geometry_precheck_qualified_points": 24,
+  "geometry_precheck_unverified_points": [[120, 40], [120, 60], [120, 80]],
+  "geometry_precheck_limit": "Failure to verify a single continuous IK branch is not a proof of global structural impossibility.",
+  "no_retuning_or_repeat_run": true,
+  "decision": "Stop as required by commissioning gate; seek approval before changing model-freeze wiring or running commissioning again.",
+  "unsupported_conclusions": [
+    "largest verified ROM region",
+    "hip-versus-knee dynamic capability limitation",
+    "engineering transient policy envelope enlargement",
+    "speed-boundary trajectory recommendations"
+  ],
+  "raw_metadata_caveats": [
+    "manifest.metrics.population_prior_verified means dynamic beta only, not the complete geometry-plus-dynamics model",
+    "raw_summary.track_brake_supervisor.runtime_force_gate_modified is legacy supervisor metadata; the evaluator used an explicit transient physical-force hook",
+    "Existing 200 Hz safety-path latency excludes the separately reported physics-rate force-supervision cost"
+  ]
+}

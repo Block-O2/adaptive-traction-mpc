@@ -253,6 +253,10 @@ def run_sensor_realism_case(
     mpc_factory: Callable[[], HumanSpaceMPC] | None = None,
     cuff_allocator: Any | None = None,
     estimator_factory: Callable[[ControllerMeasurement, np.ndarray], Any] | None = None,
+    physical_force_supervisor: Any | None = None,
+    terminate_on_structural_events: bool = False,
+    control_model_cycle_assertion: Callable[[Any, Any, np.ndarray], None]
+    | None = None,
 ) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     """Run the registered perturbed Human through one fixed sensor case."""
 
@@ -313,6 +317,9 @@ def run_sensor_realism_case(
 
     initial_reference = executed_reference(0.0)
     truth = plant.reset(initial_reference.q_rad)
+    if physical_force_supervisor is not None:
+        if physical_force_supervisor.update(truth.time_s, truth.cuff_force_vector_n):
+            raise RuntimeError("initial physical-force policy rejected reset")
     estimator_layer = CausalMeasurementLayer(
         _measurement_with_delay(case, routing.estimator_delay_s, "estimator_channel"),
         truth,
@@ -357,14 +364,16 @@ def run_sensor_realism_case(
     if high_level_steps * CONTROL_DT_S != mpc.config.prediction_dt_s:
         raise RuntimeError("MPC period must be an integer number of control periods")
 
-    estimated_state = estimator.geometry.estimate_state(
+    current_model = estimator.model
+    estimated_state = current_model.geometry.estimate_state(
         mpc_measurement.attachment_position_m,
         mpc_measurement.attachment_rotation_matrix,
         mpc_measurement.attachment_velocity_m_s,
         mpc_measurement.attachment_angular_velocity_rad_s,
     )
     current_action = np.zeros(2)
-    current_model = estimator.model
+    if control_model_cycle_assertion is not None:
+        control_model_cycle_assertion(estimator, current_model, estimated_state)
     current_allocation = cuff_allocator.allocate(
         current_action, estimated_state[:2], current_model
     )
@@ -444,6 +453,7 @@ def run_sensor_realism_case(
     safety_filter_compute_ms: list[float] = []
     safety_layer_compute_s: list[float] = []
     high_level_fast_path_compute_s: list[float] = []
+    control_model_assertion_compute_s: list[float] = []
     executed_command_times_s: list[float] = []
     executed_command_force_total_n: list[np.ndarray] = []
     safety_filter_times_s: list[float] = []
@@ -615,6 +625,12 @@ def run_sensor_realism_case(
                     mpc_measurement.attachment_velocity_m_s,
                     mpc_measurement.attachment_angular_velocity_rad_s,
                 )
+        if control_model_cycle_assertion is not None:
+            model_lock_start = wall_time.perf_counter()
+            control_model_cycle_assertion(estimator, current_model, estimated_state)
+            control_model_assertion_compute_s.append(
+                wall_time.perf_counter() - model_lock_start
+            )
         reference = executed_reference(float(low_level_measurement.arrival_time_s))
         if track_brake_supervisor is None:
             executable_preview = preview_stage4_executable_command(
@@ -824,9 +840,23 @@ def run_sensor_realism_case(
                 np.any(truth.robot_q_rad < robot_ranges[:, 0] - 1e-9)
                 or np.any(truth.robot_q_rad > robot_ranges[:, 1] + 1e-9)
             )
-            if np.linalg.norm(truth.cuff_force_vector_n) > CUFF_TRANSLATIONAL_FORCE_GATE_N + 1e-9:
+            physical_stop = (
+                np.linalg.norm(truth.cuff_force_vector_n) > CUFF_TRANSLATIONAL_FORCE_GATE_N + 1e-9
+                if physical_force_supervisor is None
+                else physical_force_supervisor.update(truth.time_s, truth.cuff_force_vector_n)
+            )
+            if physical_stop:
                 force_gate_event_count += 1
-                termination = "physical_cuff_force_gate"
+                termination = (
+                    "physical_cuff_force_gate" if physical_force_supervisor is None
+                    else "physical_force_policy_hard_violation"
+                )
+                break
+            if terminate_on_structural_events and (
+                rom_event_count or robot_position_limit_count or unintended_contacts
+                or not np.all(np.isfinite(truth.human_q_rad))
+            ):
+                termination = "rom_robot_limit_or_structural_event"
                 break
             if plant.warning_counts():
                 termination = "mujoco_solver_warning"
@@ -1143,6 +1173,9 @@ def run_sensor_realism_case(
                     high_level_fast_path_compute_s, deadline_ms=20.0
                 )
             ),
+            "model_lock_assertion": _latency_summary_ms(
+                control_model_assertion_compute_s, deadline_ms=1.0
+            ),
             "fast_path_timing_note": (
                 "instrumented in the synchronous deterministic simulator with "
                 "measured estimator/trust compute subtracted; this is desktop "
@@ -1367,6 +1400,10 @@ def run_sensor_realism_case(
         "dynamic_information_confidence": dynamic_information_confidence,
         "combined_information_confidence": combined_information_confidence,
     }
+    if control_model_cycle_assertion is not None:
+        trace["model_lock_assertion_compute_ms"] = (
+            1000.0 * np.asarray(control_model_assertion_compute_s)
+        )
     if capture_system_pilot_diagnostics:
         trace.update(
             {

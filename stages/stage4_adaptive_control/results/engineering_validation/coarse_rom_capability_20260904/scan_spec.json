@@ -1,0 +1,496 @@
+{
+  "adapter_translation_m": [
+    0.0,
+    0.14,
+    0.0
+  ],
+  "alpha_force_behavior": "unchanged",
+  "alpha_trust": 1.0,
+  "checkpoint": "ee684697228ad39cb734bdf7ba73229bdb088982",
+  "command_limit_n": 200.0,
+  "commissioning": "hip40_knee40 must be engineering-complete before remaining 26",
+  "contract_sha256": "33eec4204928d6fce9163441266e78bdced5cc732740b6a21e2347974d9b6118",
+  "controller": "fixed_population_prior_pre_gamma_rigid",
+  "controller_hashes": {
+    "stages/stage3_full3d/src/traction_mpc_stage3/coupled.py": "a1620883c8ba74941f8315ccc610a7cf76ad19d477b7298efa74da38c4e62272",
+    "stages/stage3_full3d/src/traction_mpc_stage3/executable_command.py": "16b6922715240c8dcff791d17de114345e98ebfb66a0e4b1ccd481d3891fb214",
+    "stages/stage3_full3d/src/traction_mpc_stage3/human.py": "0f82749aeda1208bcd79ecf336bbb39df88308c51f465596f7a8b2923946aec4",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/confidence_execution.py": "021593515bdca870d3adb908bf716cd00d0d95de7baa733b0746176b29c70efc",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/cuff_allocator.py": "f6ca86a087d2675df72ab8b6f8961d029b3e071a9ea95e0d6bf6e2a54c371a5e",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/executable_command.py": "49b305f3db85ddb61d445b93b8d22405c770a53fd3f9e9c297da803685c88dd4",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/mpc.py": "a907600ec9dd06a10cffee4b9207c4a4fb4b060a729824d26b3c2dd9918d954c",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/online_trust.py": "541b0ec9199bb46a40c62f1d11774cef59e2ae8937a822faae63c4744ab76444",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/safety_filter.py": "e5e9493ec2a6b2b5e391d2dd4d212cae7463d0ee886785343441565d9306f375",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/track_brake.py": "aeb89ae1b0f2b93c58692e0f460efc0f921692d7098cf257b73889e08f68e949"
+  },
+  "endpoint_rule": {
+    "derivation": "maximum absolute joint error during nominal moderate reference target hold",
+    "source": "stages/stage4_adaptive_control/results/controller_validation/trajectory_generalization/demo_sources/nominal_reference__moderate_rom_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc_trace.npz",
+    "source_sha256": "793f6d605e1018c87875424a80ec7c208ce8dbf82c7b26659dd465849adc005f",
+    "test": "minimum max-absolute endpoint error in target hold and final return error <= retained tolerance",
+    "tolerance_deg": 0.06896926724078867
+  },
+  "evidence_category": "user_authorized_engineering_not_formal_not_clinical",
+  "human_rom_deg": [
+    0.0,
+    125.0
+  ],
+  "measurement_seed": 44104,
+  "mpc_config": {
+    "action_rate_scale_nm": [
+      20.0,
+      10.0
+    ],
+    "action_rate_weight": 0.005,
+    "action_scale_nm": [
+      60.0,
+      30.0
+    ],
+    "action_weight": 0.002,
+    "candidate_count": 32,
+    "cem_iterations": 2,
+    "cylindrical_cuff_length_m": 0.08,
+    "cylindrical_surface_effort_weight": 0.0,
+    "dq_error_scale_rad_s": [
+      0.13962634015954636,
+      0.13962634015954636
+    ],
+    "elite_count": 6,
+    "exploration_std_floor_nm": [
+      1.0,
+      0.5
+    ],
+    "exploration_std_nm": [
+      10.0,
+      5.0
+    ],
+    "horizon_steps": 15,
+    "interaction_force_normalization_n": 200.0,
+    "prediction_dt_s": 0.02,
+    "q_error_scale_rad": [
+      0.03490658503988659,
+      0.03490658503988659
+    ],
+    "random_seed": 20260824,
+    "resultant_force_weight": 0.0,
+    "wrench_slew_weight": 0.0
+  },
+  "physical_policy": "simulation_engineering_transient_v1",
+  "points": [
+    {
+      "endpoint_deg": [
+        40,
+        40
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip40_knee40",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 28.215,
+      "outbound_duration_s": 5.303030303030302,
+      "phase_duration_s": 14.106060606060604,
+      "return_duration_s": 5.303030303030302,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        40,
+        60
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip40_knee60",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 29.225,
+      "outbound_duration_s": 5.555555555555555,
+      "phase_duration_s": 14.61111111111111,
+      "return_duration_s": 5.555555555555555,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        40,
+        80
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip40_knee80",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 38.115,
+      "outbound_duration_s": 7.777777777777778,
+      "phase_duration_s": 19.055555555555557,
+      "return_duration_s": 7.777777777777778,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        40,
+        100
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip40_knee100",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 47.0,
+      "outbound_duration_s": 10.0,
+      "phase_duration_s": 23.5,
+      "return_duration_s": 10.0,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        40,
+        120
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip40_knee120",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 55.89,
+      "outbound_duration_s": 12.222222222222221,
+      "phase_duration_s": 27.944444444444443,
+      "return_duration_s": 12.222222222222221,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        60,
+        40
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip60_knee40",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 40.335,
+      "outbound_duration_s": 8.33333333333333,
+      "phase_duration_s": 20.16666666666666,
+      "return_duration_s": 8.33333333333333,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        60,
+        60
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip60_knee60",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 40.335,
+      "outbound_duration_s": 8.33333333333333,
+      "phase_duration_s": 20.16666666666666,
+      "return_duration_s": 8.33333333333333,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        60,
+        80
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip60_knee80",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 40.335,
+      "outbound_duration_s": 8.33333333333333,
+      "phase_duration_s": 20.16666666666666,
+      "return_duration_s": 8.33333333333333,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        60,
+        100
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip60_knee100",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 47.0,
+      "outbound_duration_s": 10.0,
+      "phase_duration_s": 23.5,
+      "return_duration_s": 10.0,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        60,
+        120
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip60_knee120",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 55.89,
+      "outbound_duration_s": 12.222222222222221,
+      "phase_duration_s": 27.944444444444443,
+      "return_duration_s": 12.222222222222221,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        80,
+        40
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip80_knee40",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 52.455,
+      "outbound_duration_s": 11.36363636363636,
+      "phase_duration_s": 26.22727272727272,
+      "return_duration_s": 11.36363636363636,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        80,
+        60
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip80_knee60",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 52.455,
+      "outbound_duration_s": 11.36363636363636,
+      "phase_duration_s": 26.22727272727272,
+      "return_duration_s": 11.36363636363636,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        80,
+        80
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip80_knee80",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 52.455,
+      "outbound_duration_s": 11.36363636363636,
+      "phase_duration_s": 26.22727272727272,
+      "return_duration_s": 11.36363636363636,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        80,
+        100
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip80_knee100",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 52.455,
+      "outbound_duration_s": 11.36363636363636,
+      "phase_duration_s": 26.22727272727272,
+      "return_duration_s": 11.36363636363636,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        80,
+        120
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip80_knee120",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 55.89,
+      "outbound_duration_s": 12.222222222222221,
+      "phase_duration_s": 27.944444444444443,
+      "return_duration_s": 12.222222222222221,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        100,
+        40
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip100_knee40",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 64.58,
+      "outbound_duration_s": 14.39393939393939,
+      "phase_duration_s": 32.28787878787878,
+      "return_duration_s": 14.39393939393939,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        100,
+        60
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip100_knee60",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 64.58,
+      "outbound_duration_s": 14.39393939393939,
+      "phase_duration_s": 32.28787878787878,
+      "return_duration_s": 14.39393939393939,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        100,
+        80
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip100_knee80",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 64.58,
+      "outbound_duration_s": 14.39393939393939,
+      "phase_duration_s": 32.28787878787878,
+      "return_duration_s": 14.39393939393939,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        100,
+        100
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip100_knee100",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 64.58,
+      "outbound_duration_s": 14.39393939393939,
+      "phase_duration_s": 32.28787878787878,
+      "return_duration_s": 14.39393939393939,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        100,
+        120
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip100_knee120",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 64.58,
+      "outbound_duration_s": 14.39393939393939,
+      "phase_duration_s": 32.28787878787878,
+      "return_duration_s": 14.39393939393939,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        120,
+        40
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip120_knee40",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 76.7,
+      "outbound_duration_s": 17.42424242424242,
+      "phase_duration_s": 38.34848484848484,
+      "return_duration_s": 17.42424242424242,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        120,
+        60
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip120_knee60",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 76.7,
+      "outbound_duration_s": 17.42424242424242,
+      "phase_duration_s": 38.34848484848484,
+      "return_duration_s": 17.42424242424242,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        120,
+        80
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip120_knee80",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 76.7,
+      "outbound_duration_s": 17.42424242424242,
+      "phase_duration_s": 38.34848484848484,
+      "return_duration_s": 17.42424242424242,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        120,
+        100
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip120_knee100",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 76.7,
+      "outbound_duration_s": 17.42424242424242,
+      "phase_duration_s": 38.34848484848484,
+      "return_duration_s": 17.42424242424242,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        120,
+        120
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip120_knee120",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 76.7,
+      "outbound_duration_s": 17.42424242424242,
+      "phase_duration_s": 38.34848484848484,
+      "return_duration_s": 17.42424242424242,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        75,
+        90
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip75_knee90",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 49.425000000000004,
+      "outbound_duration_s": 10.606060606060604,
+      "phase_duration_s": 24.712121212121207,
+      "return_duration_s": 10.606060606060604,
+      "target_hold_s": 1.5
+    },
+    {
+      "endpoint_deg": [
+        90,
+        120
+      ],
+      "final_hold_s": 1.0,
+      "id": "hip90_knee120",
+      "initial_hold_s": 1.0,
+      "maximum_simulation_duration_s": 58.52,
+      "outbound_duration_s": 12.878787878787875,
+      "phase_duration_s": 29.25757575757575,
+      "return_duration_s": 12.878787878787875,
+      "target_hold_s": 1.5
+    }
+  ],
+  "precheck": {
+    "ik_residual_limit": 1e-08,
+    "note": "deterministic continuous IK branch check; sampled feasibility, not proof over all configurations",
+    "path_samples_per_outbound": 101
+  },
+  "replay": {
+    "command_semantics": "exact saved integration state and recorded issued torque schedule, not a new controller rollout",
+    "maximum_local_duration_s": 0.25,
+    "prehistory_s": 0.1,
+    "timestep_s": 0.00025,
+    "unavailable_or_open_result": "NUMERICALLY_UNRESOLVED"
+  },
+  "scenario": "suspended_high_rom",
+  "scenario_implementation": "suspended_seated_like_high_rom",
+  "schema": "coarse_rom_capability_v1",
+  "strict_policy": "strict_physical_force_v1",
+  "tracking_quality_band": null,
+  "tracking_quality_note": "continuous metrics only; no nominal/degraded band",
+  "trajectory": {
+    "acceleration_limit_deg_s2": [
+      19.052558883257657,
+      25.98076211353316
+    ],
+    "equation": "q=q0+(qgoal-q0)*(10u^3-15u^4+6u^5); return reversed",
+    "shortest_leg_formula": "max_i(1.875*abs(delta_i)/v_i, sqrt((10/sqrt(3))*abs(delta_i)/a_i))",
+    "source": "moderate_rom_23s analytic maxima across all quintic segments",
+    "source_suite_sha256": "3024919e822297af06f01afa0a775f1453fe08abc0ed12cc313339811706ac14",
+    "start_deg": [
+      5.0,
+      10.0
+    ],
+    "timeout_formula": "ceil((phase_duration/minimum_existing_alpha_0.5)/0.005)*0.005",
+    "velocity_limit_deg_s": [
+      12.375000000000004,
+      16.875
+    ]
+  }
+}

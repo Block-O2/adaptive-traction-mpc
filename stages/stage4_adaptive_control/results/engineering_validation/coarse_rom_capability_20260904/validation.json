@@ -1,0 +1,29 @@
+{
+  "mechanical_validation_only_not_scientific_success": true,
+  "pytest_passed": 53,
+  "pytest_failed": 0,
+  "py_compile": "passed",
+  "strict_json": "passed",
+  "csv_rows": 27,
+  "executed_rows": 1,
+  "not_run_commissioning_gate_rows": 26,
+  "npz_numeric_arrays_finite": true,
+  "npz_time_s_strictly_increasing": true,
+  "controller_source_hashes_unchanged": true,
+  "scan_spec_hash_verified": true,
+  "scan_spec_sha256": "02114e3217eb0f993531951e51e946c5ca1087a37661f6aa68f36ba75adeec79",
+  "git_diff_check": "passed",
+  "untracked_text_diff_check": "passed",
+  "maps_written": 6,
+  "full_model_freeze_contract_satisfied": false,
+  "capability_scan_completed": false,
+  "commands": [
+    "PYTHONPATH=stages/stage3_full3d/src:stages/stage4_adaptive_control/src:stages/stage4_adaptive_control/scripts /opt/homebrew/Caskroom/miniconda/base/envs/mpc_learn/bin/python stages/stage4_adaptive_control/scripts/run_stage4_coarse_rom_capability.py --freeze",
+    "PYTHONPATH=stages/stage3_full3d/src:stages/stage4_adaptive_control/src:stages/stage4_adaptive_control/scripts /opt/homebrew/Caskroom/miniconda/base/envs/mpc_learn/bin/python -u stages/stage4_adaptive_control/scripts/run_stage4_coarse_rom_capability.py --run",
+    "python -m pytest -q: test_stage4_sensor_realism.py test_coarse_rom_capability.py test_physical_force_contract.py test_stage4_track_brake.py test_stage4_safety_filter.py test_executable_command_contract.py test_stage3c_human_rigid_cuff.py",
+    "python -m py_compile: run_stage4_coarse_rom_capability.py sensor_realism.py test_coarse_rom_capability.py",
+    "read-only strict JSON/CSV/NPZ and SHA validation",
+    "git diff --check and git diff --no-index --check for untracked text"
+  ],
+  "next_scientific_execution_reserved": "No further run authorized after failed commissioning. Review full-model-freeze wiring before considering another 40/40 run."
+}
