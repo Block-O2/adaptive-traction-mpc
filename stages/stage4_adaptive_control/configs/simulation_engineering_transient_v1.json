@@ -1,0 +1,58 @@
+{
+  "contract_id": "simulation_engineering_transient_v1",
+  "evidence_scope": "simulation_engineering_only_not_clinical_safety",
+  "command_force_contract": {
+    "hard_limit_n": 200.0,
+    "over_limit_action": "immediate_rejection",
+    "unchanged_from_canonical": true
+  },
+  "physical_force_contract": {
+    "absolute_transient_ceiling_n": 220.0,
+    "continuous_force_reference_n": 200.0,
+    "maximum_causal_trailing_20ms_mean_n": 200.0,
+    "maximum_contiguous_duration_above_reference_s": 0.005,
+    "maximum_excess_impulse_in_rolling_100ms_ns": 0.1,
+    "maximum_total_time_above_reference_in_rolling_100ms_s": 0.005,
+    "rolling_window_s": 0.1,
+    "trailing_mean_window_s": 0.02
+  },
+  "classification": {
+    "HARD_PHYSICAL_VIOLATION": "one_or_more_physical_transient_rules_exceeded",
+    "NUMERICALLY_UNRESOLVED": "confirmation_required_but_exact_fine_replay_unavailable_or_boundary_not_reliable",
+    "STRICT_PASS": "physical_force_never_exceeds_200_n",
+    "TRANSIENT_ENGINEERING_QUALIFIED": "physical_force_exceeds_200_n_and_every_transient_rule_is_satisfied"
+  },
+  "diagnostics_without_hard_thresholds": [
+    "physical_cuff_moment",
+    "physical_cuff_moment_rate",
+    "physical_cuff_force_rate",
+    "surface_proxy",
+    "causal_trailing_5ms_mean_force"
+  ],
+  "numerical_confirmation": {
+    "fine_replay_timestep_s": 0.00025,
+    "provisional_if_any_sample_above_n": 200.0,
+    "provisional_if_peak_at_or_above_n": 198.0,
+    "replay_scope": "local_short_window_only_not_full_trajectory",
+    "unavailable_replay_result": "NUMERICALLY_UNRESOLVED"
+  },
+  "runtime_semantics": {
+    "canonical_default_policy": "strict_physical_force_v1",
+    "opt_in_policy": "simulation_engineering_transient_v1",
+    "opt_in_qualifying_transient_action": "continue_and_record",
+    "opt_in_violation_action": "immediate_stop_at_first_observed_hard_rule_violation"
+  },
+  "sample_time_semantics": {
+    "boundary_rule": "equality_with_a_limit_is_allowed_only_a_strict_exceedance_violates",
+    "event_boundaries": "linear_threshold_crossings_between_samples",
+    "integration": "piecewise_linear_in_actual_strictly_increasing_sample_timestamps",
+    "rolling_extrema": "all_continuous_window_positions_not_only_sample_aligned_windows",
+    "trailing_mean_startup": "evaluate_only_after_a_complete_window_is_observed"
+  },
+  "strict_historical_contract": {
+    "classification": "strict_physical_force_violation",
+    "existing_runtime_roundoff_tolerance_n": 1e-09,
+    "physical_force_rule": "any_sample_strictly_above_200_n",
+    "preserved_unchanged": true
+  }
+}
