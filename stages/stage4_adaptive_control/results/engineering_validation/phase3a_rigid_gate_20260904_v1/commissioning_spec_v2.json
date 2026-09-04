@@ -1,0 +1,99 @@
+{
+  "additive_to_base_scan_spec": "stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_capability_20260904/scan_spec.json",
+  "base_scan_spec_scientific_contents_unchanged": true,
+  "base_scan_spec_sha256": "02114e3217eb0f993531951e51e946c5ca1087a37661f6aa68f36ba75adeec79",
+  "deterministic_tolerance": {
+    "atol": 1e-12,
+    "rtol": 0.0
+  },
+  "endpoint": {
+    "endpoint_deg": [
+      40,
+      40
+    ],
+    "final_hold_s": 1.0,
+    "id": "hip40_knee40",
+    "initial_hold_s": 1.0,
+    "maximum_simulation_duration_s": 28.215,
+    "outbound_duration_s": 5.303030303030302,
+    "phase_duration_s": 14.106060606060604,
+    "return_duration_s": 5.303030303030302,
+    "target_hold_s": 1.5
+  },
+  "evidence_category": "user_authorized_engineering_commissioning_not_formal_not_clinical",
+  "model_lock": {
+    "allocator_cuff_geometry": "fixed control geometry, registered allocator config, and 140 mm adapter",
+    "alpha_trust": 1.0,
+    "beta": "population_prior_constant",
+    "control_model": "fixed geometry plus population-prior beta plus High-ROM limits",
+    "fingerprint_algorithm": "sha256 of canonical float64 arrays and sorted machine-readable metadata",
+    "human_geometry": "initial nominal High-ROM geometry constant",
+    "incumbent_source": "population_prior_no_control_promotions",
+    "live_quantities": [
+      "robot state and FK",
+      "cuff pose twist and wrench",
+      "q and dq reconstructed every cycle with fixed control geometry",
+      "tracking feedback",
+      "Safety Filter",
+      "force-related Reference Manager",
+      "physical-force supervisor"
+    ],
+    "per_cycle_assertions": true,
+    "shadow_estimator": "online geometry, dynamics, and trust remain diagnostic-only"
+  },
+  "prohibited_endpoints": "all endpoints other than hip40_knee40",
+  "repeat_count": 2,
+  "schema": "coarse_rom_commissioning_complete_model_lock_v2",
+  "unchanged_mpc_config": {
+    "action_rate_scale_nm": [
+      20.0,
+      10.0
+    ],
+    "action_rate_weight": 0.005,
+    "action_scale_nm": [
+      60.0,
+      30.0
+    ],
+    "action_weight": 0.002,
+    "candidate_count": 32,
+    "cem_iterations": 2,
+    "cylindrical_cuff_length_m": 0.08,
+    "cylindrical_surface_effort_weight": 0.0,
+    "dq_error_scale_rad_s": [
+      0.13962634015954636,
+      0.13962634015954636
+    ],
+    "elite_count": 6,
+    "exploration_std_floor_nm": [
+      1.0,
+      0.5
+    ],
+    "exploration_std_nm": [
+      10.0,
+      5.0
+    ],
+    "horizon_steps": 15,
+    "interaction_force_normalization_n": 200.0,
+    "prediction_dt_s": 0.02,
+    "q_error_scale_rad": [
+      0.03490658503988659,
+      0.03490658503988659
+    ],
+    "random_seed": 20260824,
+    "resultant_force_weight": 0.0,
+    "wrench_slew_weight": 0.0
+  },
+  "wiring_source_hashes": {
+    "stages/stage3_full3d/src/traction_mpc_stage3/coupled.py": "a1620883c8ba74941f8315ccc610a7cf76ad19d477b7298efa74da38c4e62272",
+    "stages/stage3_full3d/src/traction_mpc_stage3/executable_command.py": "16b6922715240c8dcff791d17de114345e98ebfb66a0e4b1ccd481d3891fb214",
+    "stages/stage3_full3d/src/traction_mpc_stage3/human.py": "0f82749aeda1208bcd79ecf336bbb39df88308c51f465596f7a8b2923946aec4",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/confidence_execution.py": "021593515bdca870d3adb908bf716cd00d0d95de7baa733b0746176b29c70efc",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/cuff_allocator.py": "f6ca86a087d2675df72ab8b6f8961d029b3e071a9ea95e0d6bf6e2a54c371a5e",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/executable_command.py": "49b305f3db85ddb61d445b93b8d22405c770a53fd3f9e9c297da803685c88dd4",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/mpc.py": "a907600ec9dd06a10cffee4b9207c4a4fb4b060a729824d26b3c2dd9918d954c",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/online_trust.py": "35675b5812d51eb5bcc90e6f5cb393be557eec94e8005183650d723bff06c929",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/safety_filter.py": "e5e9493ec2a6b2b5e391d2dd4d212cae7463d0ee886785343441565d9306f375",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/sensor_realism.py": "e10603e87b137a2ad9b0e32248ac589981c6298094230c196247a5a1c05b2974",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/track_brake.py": "aeb89ae1b0f2b93c58692e0f460efc0f921692d7098cf257b73889e08f68e949"
+  }
+}
