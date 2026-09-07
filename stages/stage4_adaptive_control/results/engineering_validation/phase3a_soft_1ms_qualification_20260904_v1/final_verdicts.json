@@ -1,0 +1,160 @@
+{
+  "additional_trajectories": 0,
+  "approved_spec_sha256": {
+    ".json": "4450bade85e12859cf25174fc7663bec639d26118f2539c8d033bdac4021d89b",
+    ".md": "a7a0cb502f6ab3e0a4199fa1478130e42f898f33233f3bbc8ddaf97ef8c2c387"
+  },
+  "deterministic_repeat": "NOT_EVALUATED",
+  "diagnostics": {
+    "command_force_peak_n": 85.62502584461988,
+    "control_samples": 24,
+    "damping_energy_final_j": 0.9187996149345967,
+    "excess_impulse_above_200_n_ns": 0.0,
+    "final_rotation_H_deg": [
+      0.15031336270934387,
+      1.9948507984485881,
+      1.2643400702483252
+    ],
+    "final_translation_H_mm": [
+      -14.352574816530035,
+      -1.5041343897673198,
+      47.609012987513836
+    ],
+    "first_human_rom_violation_time_s": 0.11800000000000009,
+    "human_port_work_j": -1.2787077403790548,
+    "interval_s": [
+      0.0,
+      0.11800000000000009
+    ],
+    "note": "Endpoint and return were not reached. Inherited result.json return_error_deg is only early-stop distance from start, not a completed return error.",
+    "physical_force_peak_n": 40.608929215947185,
+    "physics_samples": 119,
+    "previous_sample_q_deg": [
+      0.013736407039006686,
+      5.839457836471967
+    ],
+    "previous_sample_time_s": 0.11700000000000009,
+    "proxy_diagnostics_offline_only": {
+      "dq": {
+        "final_control_sample_error": [
+          42.97396927501802,
+          9.401135210885515
+        ],
+        "final_control_sample_time_s": 0.11500000000000009,
+        "peak_abs_per_joint": [
+          95.90803466684092,
+          133.95080510035325
+        ],
+        "peak_time_s_per_joint": [
+          0.05000000000000004,
+          0.04500000000000003
+        ],
+        "rmse_per_joint": [
+          71.00347993033269,
+          89.09083797708584
+        ]
+      },
+      "q": {
+        "final_control_sample_error": [
+          7.195523652254721,
+          8.23562655390329
+        ],
+        "final_control_sample_time_s": 0.11500000000000009,
+        "peak_abs_per_joint": [
+          7.195523652254721,
+          8.23562655390329
+        ],
+        "peak_time_s_per_joint": [
+          0.11500000000000009,
+          0.11500000000000009
+        ],
+        "rmse_per_joint": [
+          4.083586652259267,
+          4.972507794794967
+        ]
+      }
+    },
+    "relative_angular_velocity_peak_rad_s": 1.7388815422957078,
+    "relative_velocity_peak_m_s": 0.5163539178059565,
+    "return_endpoint_error_deg": null,
+    "robot_port_work_j": -0.27648801075222074,
+    "rotation_peak_deg": 2.366554378905226,
+    "rotation_rms_deg": 1.4357311876437822,
+    "stored_energy_peak_j": 0.6357795765998332,
+    "target_endpoint_error_deg": null,
+    "time_above_200_n_s": 0.0,
+    "translation_peak_mm": 49.74813505822941,
+    "translation_rms_mm": 26.943142974585236,
+    "true_dq_deg_s_at_stop": [
+      -38.666130202153326,
+      -9.336779080578793
+    ],
+    "true_q_deg_at_stop": [
+      -0.024929723163146643,
+      5.830121057391388
+    ]
+  },
+  "exact_cause": "FAIL_EVIDENCE_INCOMPLETE: existing Human ROM guard terminated first 1 ms run at 0.118 s before reference motion began",
+  "executed_runs": [
+    "soft_40_40_1ms_repeat1"
+  ],
+  "independent_2n_force_peak_gate": "NOT_EVALUATED",
+  "not_run": [
+    "soft_40_40_1ms_repeat2",
+    "soft_40_40_025ms_reference"
+  ],
+  "overall_numerical_qualification": "FAIL",
+  "rigid_vs_compliant_ab_authorized_next": false,
+  "threshold_changes_after_execution": false,
+  "timestep_comparison": "NOT_EVALUATED",
+  "unsupported_claims": [
+    "interface integration is unstable",
+    "CEM or reference manager is timestep-sensitive",
+    "fine timestep would fix the ROM event",
+    "global or clinical safety",
+    "full 40/40 mechanics or energy qualification"
+  ],
+  "verdicts": {
+    "CLOSED_LOOP_TIMESTEP_AGREEMENT": {
+      "reason": "Repeat 2 and matched 0.25 ms reference not run after mandatory coverage stop",
+      "verdict": "NOT_EVALUATED"
+    },
+    "DISCRETE_ENERGY": {
+      "max_abs_residual_ratio": 0.00039645144117480245,
+      "max_positive_residual_ratio": 7.943205777203825e-05,
+      "scope": "Recorded 0-0.118 s prefix only",
+      "verdict": "PASS"
+    },
+    "FORCE_CONTRACT": {
+      "command_force_peak_n": 85.62502584461988,
+      "physical_force_peak_n": 40.608929215947185,
+      "scope": "Recorded prefix only; no force violation",
+      "verdict": "STRICT_PASS"
+    },
+    "MECHANICS_CONSISTENCY": {
+      "evidence": {
+        "DISCRETE_ENERGY": "PASS",
+        "MECHANICS_CONSISTENCY": "PASS",
+        "energy_scale_j": 1.5551957511312748,
+        "finite": true,
+        "max_abs_energy_residual_j": 0.0006165595968449233,
+        "max_force_balance_residual_n": 0.0,
+        "max_moment_balance_residual_nm": 1.1102230246251565e-16,
+        "max_positive_energy_residual_j": 0.00012353239875068783,
+        "max_power_identity_residual_w": 5.329070518200751e-15,
+        "minimum_damping_power_w": 0.0,
+        "normalized_max_abs_energy_residual": 0.00039645144117480245,
+        "normalized_max_positive_energy_residual": 7.943205777203825e-05,
+        "warning_count": 0
+      },
+      "scope": "Recorded 0-0.118 s prefix only; not the full registered trajectory",
+      "verdict": "PASS"
+    },
+    "TASK_RESULT": {
+      "specific_trigger": "Human hip below frozen 0 degree ROM bound during initial hold",
+      "termination_reason": "rom_robot_limit_or_structural_event",
+      "time_s": 0.11800000000000009,
+      "verdict": "UNSAFE_TERMINATION"
+    }
+  }
+}
