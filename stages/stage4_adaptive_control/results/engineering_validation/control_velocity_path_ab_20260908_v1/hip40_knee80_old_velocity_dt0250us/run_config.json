@@ -1,0 +1,129 @@
+{
+  "allocator": {
+    "cuff_length_m": 0.08,
+    "cylindrical_surface_effort_weight": 1.0,
+    "resultant_force_weight": 1.0,
+    "wrench_continuity_weight": 0.0
+  },
+  "control_substeps": 20,
+  "human": {
+    "body_mass_kg": 75.0,
+    "gravity_m_s2": 9.81,
+    "height_m": 1.72,
+    "passive_damping_nms_rad": [
+      5.0,
+      5.0
+    ],
+    "passive_stiffness_nm_rad": [
+      10.0,
+      10.0
+    ],
+    "q_max_rad": [
+      2.181661564992912,
+      2.181661564992912
+    ],
+    "q_min_rad": [
+      0.0,
+      0.0
+    ],
+    "q_rest_rad": [
+      0.08726646259971647,
+      0.17453292519943295
+    ],
+    "soft_limit_boundary_torque_nm": 25.0,
+    "soft_limit_damping_nms_rad": 2.0,
+    "soft_limit_margin_rad": 0.08726646259971647,
+    "soft_limit_numerical_tolerance_rad": 1e-09
+  },
+  "measurement_case": {
+    "force_bias_drift_n_s": [
+      0.04,
+      -0.03,
+      0.02
+    ],
+    "force_bias_n": [
+      1.5,
+      -1.0,
+      0.8
+    ],
+    "latency_s": 0.0,
+    "moment_bias_drift_nm_s": [
+      0.001,
+      -0.0008,
+      0.0006
+    ],
+    "moment_bias_nm": [
+      0.03,
+      -0.02,
+      0.015
+    ],
+    "name": "noise_bias_drift_200hz",
+    "noise": {
+      "cuff_orientation_std_rad": 0.0008726646259971648,
+      "cuff_position_std_m": 0.0003,
+      "force_std_n": 0.5,
+      "moment_std_nm": 0.02,
+      "robot_position_std_rad": 0.00034906585039886593,
+      "robot_velocity_std_rad_s": 0.0017453292519943296
+    },
+    "preprocessing_enabled": true,
+    "seed": 44104,
+    "update_rate_hz": 200.0
+  },
+  "mpc_config": {
+    "action_rate_scale_nm": [
+      20.0,
+      10.0
+    ],
+    "action_rate_weight": 0.005,
+    "action_scale_nm": [
+      60.0,
+      30.0
+    ],
+    "action_weight": 0.002,
+    "candidate_count": 32,
+    "cem_iterations": 2,
+    "cylindrical_cuff_length_m": 0.08,
+    "cylindrical_surface_effort_weight": 0.0,
+    "dq_error_scale_rad_s": [
+      0.13962634015954636,
+      0.13962634015954636
+    ],
+    "elite_count": 6,
+    "exploration_std_floor_nm": [
+      1.0,
+      0.5
+    ],
+    "exploration_std_nm": [
+      10.0,
+      5.0
+    ],
+    "horizon_steps": 15,
+    "interaction_force_normalization_n": 200.0,
+    "prediction_dt_s": 0.02,
+    "q_error_scale_rad": [
+      0.03490658503988659,
+      0.03490658503988659
+    ],
+    "random_seed": 20260824,
+    "resultant_force_weight": 0.0,
+    "wrench_slew_weight": 0.0
+  },
+  "physics_dt_s": 0.00025,
+  "point": {
+    "endpoint_deg": [
+      40,
+      80
+    ],
+    "final_hold_s": 1.0,
+    "id": "hip40_knee80",
+    "initial_hold_s": 1.0,
+    "maximum_simulation_duration_s": 38.115,
+    "outbound_duration_s": 7.777777777777778,
+    "phase_duration_s": 19.055555555555557,
+    "return_duration_s": 7.777777777777778,
+    "target_hold_s": 1.5
+  },
+  "single_scientific_variable": "robot low-level translational velocity-feedback measurement source: OLD processed pose history vs NEW robot joint cuff Jacobian",
+  "velocity_path": "OLD"
+}
