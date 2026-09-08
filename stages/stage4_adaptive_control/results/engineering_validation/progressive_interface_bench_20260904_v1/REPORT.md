@@ -1,5 +1,15 @@
 # Progressive global cuff interface engineering bench
 
+> [!IMPORTANT]
+> **PRE-CORRECTION / RETIRED DIAGNOSTIC EVIDENCE**
+>
+> This report predates the corrected low-latency robot velocity-feedback
+> measurement path and is retained only as diagnostic provenance. Current
+> authoritative conclusions are in [CURRENT_STATE](../../../docs/research/CURRENT_STATE.md)
+> and the [corrected High-ROM evidence](../../summaries/phase3a_corrected_high_rom/README.md).
+> Commands and paths below are frozen historical provenance; they are retired,
+> non-current, and must not be treated as executable reproduction instructions.
+
 
 
 **Overall numerical qualification: FAIL. Neither candidate selected. The 40/40 gate is closed; no new closed-loop trajectory was executed.**
@@ -70,7 +80,9 @@ Bench: one free rigid body against a fixed cuff frame, no gravity/contact/contro
 
 Both candidates pass the registered static targets, positive-stiffness and axis-alignment checks. The additional 300 N point is a static extreme-load point, not a trajectory or capability scan.
 
-![Static curves](load_deflection_curves.png)
+Historical media note: `load_deflection_curves.png` was externalized during
+repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 
 
@@ -127,7 +139,9 @@ Translation energy residuals are negative (excess discrete loss relative to the 
 
 These failures occur in a controller-free mechanics bench under explicit load stepping. They establish failure of this implemented model/numerical contract combination. They cannot be attributed to CEM, actions or Reference Manager divergence, and do not establish failure of the continuous conservative spring law.
 
-![Saved ringdowns](ringdown_convergence.png)
+Historical media note: `ringdown_convergence.png` was externalized during
+repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 
 
@@ -182,4 +196,3 @@ Verified 61 original frozen source/config files, 21 old evidence files, 6 old im
 Only the opt-in interface law/coefficients and isolated bench were introduced. No MPC, Reference Manager, Safety Filter, BRAKE, force limits, Human/robot model, trajectory law, seed or closed-loop numerical settings changed. Bench timestep variation was preregistered. No 40/80, 90/120, 120/120, capability scan, new 40/40 or other A/B rollout was run. No post-result parameter or threshold changes. Everything remains uncommitted; no push or merge.
 
 Formal command reserved for user: none at present; the numerical gate is closed. Do not run the conditional 40/40.
-

@@ -1,5 +1,15 @@
 # Rigid vs P1 90/120 exploratory matched A/B
 
+> [!IMPORTANT]
+> **PRE-CORRECTION / RETIRED DIAGNOSTIC EVIDENCE**
+>
+> This report predates the corrected low-latency robot velocity-feedback
+> measurement path and is retained only as diagnostic provenance. Current
+> authoritative conclusions are in [CURRENT_STATE](../../../docs/research/CURRENT_STATE.md)
+> and the [corrected High-ROM evidence](../../summaries/phase3a_corrected_high_rom/README.md).
+> Commands and paths below are frozen historical provenance; they are retired,
+> non-current, and must not be treated as executable reproduction instructions.
+
 
 
 **Both arms executed 100% of the registered outbound and return reference and retained formal SAFE_INCOMPLETE. Neither arm entered BRAKE or required Safety Filter intervention. Rigid returned within the strict tolerance but missed the target-hold endpoint criterion; P1 missed both endpoint and return precision.**
@@ -112,11 +122,15 @@ P1 global peak is the recurring startup transient, 9.035075 m/s^2 at 0.000125 s.
 
 
 
-![Aligned diagnostics](aligned_90_120_diagnostics.png)
+Historical media note: `aligned_90_120_diagnostics.png` was externalized during
+repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 
 
-![Target-arrival alignment](target_arrival_alignment.png)
+Historical media note: `target_arrival_alignment.png` was externalized during
+repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 
 

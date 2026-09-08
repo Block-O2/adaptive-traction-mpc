@@ -1,5 +1,15 @@
 # Exploratory progressive-interface A/B at 0.25 ms
 
+> [!IMPORTANT]
+> **PRE-CORRECTION / RETIRED DIAGNOSTIC EVIDENCE**
+>
+> This report predates the corrected low-latency robot velocity-feedback
+> measurement path and is retained only as diagnostic provenance. Current
+> authoritative conclusions are in [CURRENT_STATE](../../../docs/research/CURRENT_STATE.md)
+> and the [corrected High-ROM evidence](../../summaries/phase3a_corrected_high_rom/README.md).
+> Commands and paths below are frozen historical provenance; they are retired,
+> non-current, and must not be treated as executable reproduction instructions.
+
 
 
 **Executed 2/6 scheduled runs. Campaign stopped: positive_interface_energy_residual, compliant_40_40_loses_rigid_completion.**
@@ -62,7 +72,9 @@ Full rigid and truncated compliant peaks are not a matched whole-task comparison
 | [40, 40] | 0.0005 | rigid | 71.2268 | 62.0165 | 251692 | 6.50359e-05 | 3.25565e-05 | 7.33761e-05 |
 | [40, 40] | 0.0005 | P1 | 4.30863 | 2.64814 | 8711.51 | 0.000224217 | 0.00317482 | 0.00143959 |
 
-![Matched prefix](hip40_knee40_matched_prefix.png)
+Historical media note: `hip40_knee40_matched_prefix.png` was externalized
+during repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 ## Per-run diagnostics
 

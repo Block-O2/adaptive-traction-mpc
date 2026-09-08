@@ -1,5 +1,15 @@
 # Phase 3A rigid reproduction gate and timestep contract stop
 
+> [!IMPORTANT]
+> **PRE-CORRECTION / RETIRED DIAGNOSTIC EVIDENCE**
+>
+> This report predates the corrected low-latency robot velocity-feedback
+> measurement path and is retained only as diagnostic provenance. Current
+> authoritative conclusions are in [CURRENT_STATE](../../../docs/research/CURRENT_STATE.md)
+> and the [corrected High-ROM evidence](../../summaries/phase3a_corrected_high_rom/README.md).
+> Commands and paths below are frozen historical provenance; they are retired,
+> non-current, and must not be treated as executable reproduction instructions.
+
 Experiment baseline: `de23ea3cdf9f0fb078496ba5ba4abb6a205ad955`. Interface donor (not imported): `3ce0129587bae3b9d13c0f581e0e4d8af5779e3a`.
 Branch: `codex/interface-phase3a-de23ea3`. This worktree was created directly from the baseline; the donor and original worktrees were preserved.
 Evidence: user-authorized engineering reproduction, not formal scientific evidence or clinical validation.
@@ -29,7 +39,9 @@ Completion tolerance remains 0.06896926724078867 deg; endpoint and return both m
 Reference duration remains 14.106060606060604 s; simulation finished at 14.10699999999762 s on the historical time grid.
 Physical force never exceeded 200 N: exceedance time, contiguous duration and excess impulse are zero. No MuJoCo warning, nonfinite trajectory, ROM event or unintended contact was observed. All 2823 model-lock assertions passed; Safety Filter left all 2822 commands unchanged.
 
-![Rigid reproduction](rigid_reproduction.png)
+Historical media note: `rigid_reproduction.png` was externalized during
+repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 ## Required stop before compliant execution
 

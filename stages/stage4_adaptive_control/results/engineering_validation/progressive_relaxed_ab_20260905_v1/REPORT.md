@@ -1,5 +1,15 @@
 # Exploratory progressive-interface A/B at 0.25 ms
 
+> [!IMPORTANT]
+> **PRE-CORRECTION / RETIRED DIAGNOSTIC EVIDENCE**
+>
+> This report predates the corrected low-latency robot velocity-feedback
+> measurement path and is retained only as diagnostic provenance. Current
+> authoritative conclusions are in [CURRENT_STATE](../../../docs/research/CURRENT_STATE.md)
+> and the [corrected High-ROM evidence](../../summaries/phase3a_corrected_high_rom/README.md).
+> Commands and paths below are frozen historical provenance; they are retired,
+> non-current, and must not be treated as executable reproduction instructions.
+
 
 
 **Executed 2/6 scheduled runs. Campaign stopped: P1_40_40_not_COMPLETE.**
@@ -62,7 +72,9 @@ The 40/40 pair has identical full physical-time coverage (14.10625 s); both reac
 | [40, 40] | 14.1062 | rigid | 117.448 | 98.9913 | 251692 | 0.157621 | 0.0475381 | 0.0683494 |
 | [40, 40] | 14.1062 | P1 | 118.682 | 99.2824 | 8711.51 | 0.55642 | 1.03979 | 0.509747 |
 
-![Matched prefix](hip40_knee40_matched_prefix.png)
+Historical media note: `hip40_knee40_matched_prefix.png` was externalized
+during repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 ## Energy residual policy and trend
 
@@ -94,7 +106,9 @@ Runtime: {"controller_cost": {"estimator_mean_ms": 0.9411101415984217, "estimato
 
 Energy trend: {"complete_50ms_windows": 282, "damping_loss_j": 0.11656218238205944, "duration_s": 14.1062499999898, "final_normalized_residual": -0.008175959474250328, "final_signed_residual_j": -0.0017492458118600895, "initial_residual_j": 0.0, "maximum_abs_running_normalized_residual": 0.010523375426236905, "maximum_absolute_residual_j": 0.0021405170403464707, "maximum_positive_residual_j": 0.00012040369363197634, "minimum_damping_power_w": 0.0, "spring_energy_peak_j": 0.11624062208247858, "tail_200ms_slope_j_s": -9.889248404348089e-05, "watchdog_triggers": []}
 
-![Energy trend](hip40_knee40_P1_dt0250us_energy.png)
+Historical media note: `hip40_knee40_P1_dt0250us_energy.png` was externalized
+during repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 ### hip40_knee40_P1_dt0250us
 

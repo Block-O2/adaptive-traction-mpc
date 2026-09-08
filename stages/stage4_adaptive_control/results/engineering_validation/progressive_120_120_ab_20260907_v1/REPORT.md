@@ -1,5 +1,15 @@
 # Rigid vs P1 120/120 exploratory matched A/B
 
+> [!IMPORTANT]
+> **PRE-CORRECTION / RETIRED DIAGNOSTIC EVIDENCE**
+>
+> This report predates the corrected low-latency robot velocity-feedback
+> measurement path and is retained only as diagnostic provenance. Current
+> authoritative conclusions are in [CURRENT_STATE](../../../docs/research/CURRENT_STATE.md)
+> and the [corrected High-ROM evidence](../../summaries/phase3a_corrected_high_rom/README.md).
+> Commands and paths below are frozen historical provenance; they are retired,
+> non-current, and must not be treated as executable reproduction instructions.
+
 
 
 Checkpoint `0435070a46f23140d08c94e4dab1b9a01244e9c9`; Spec SHA256 `00091ce23ae27b009b99390837e310a47239535493e2da74df85df3041a57f1c`. Exactly two fresh processes were run: rigid then registered P1. Both ended during outbound; no additional trajectory was run. The prior strict compliant numerical-qualification FAIL remains unchanged.
@@ -126,15 +136,21 @@ P1 benefits are trajectory-specific. At 40/80 it prevents rigid BRAKE and restor
 
 
 
-![Aligned diagnostics](aligned_120_120_diagnostics.png)
+Historical media note: `aligned_120_120_diagnostics.png` was externalized
+during repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 
 
-![Rigid mechanism](rigid_120_120_brake_mechanism.png)
+Historical media note: `rigid_120_120_brake_mechanism.png` was externalized
+during repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 
 
-![Cross trajectory paths](cross_trajectory_state_paths.png)
+Historical media note: `cross_trajectory_state_paths.png` was externalized
+during repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 
 

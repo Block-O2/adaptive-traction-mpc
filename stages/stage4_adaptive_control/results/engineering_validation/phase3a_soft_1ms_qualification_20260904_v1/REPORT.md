@@ -1,5 +1,15 @@
 # Phase 3A compliant 40/40 numerical qualification: stopped on coverage
 
+> [!IMPORTANT]
+> **PRE-CORRECTION / RETIRED DIAGNOSTIC EVIDENCE**
+>
+> This report predates the corrected low-latency robot velocity-feedback
+> measurement path and is retained only as diagnostic provenance. Current
+> authoritative conclusions are in [CURRENT_STATE](../../../docs/research/CURRENT_STATE.md)
+> and the [corrected High-ROM evidence](../../summaries/phase3a_corrected_high_rom/README.md).
+> Commands and paths below are frozen historical provenance; they are retired,
+> non-current, and must not be treated as executable reproduction instructions.
+
 **Overall: FAIL_EVIDENCE_INCOMPLETE.** Only 1 ms repeat 1 ran. The frozen Human ROM guard terminated it at 0.118 s when hip q1=-0.0249297231631465 deg crossed the existing 0 deg lower bound. Initial hold lasts 1 s, so outbound motion had not begun.
 This is neither a demonstrated interface/mechanics numerical failure nor a measured closed-loop timestep disagreement. Repeat 2 and the 0.25 ms matched reference were not admitted after the first run stopped.
 
@@ -56,7 +66,9 @@ Offline proxy dq RMSE: [71.00347993033269, 89.09083797708584] deg/s; peak absolu
 Translation RMS 26.943143 mm; rotation RMS 1.435731 deg; relative velocity peak 0.516354 m/s.
 Robot-facing proxy and Human truth move apart while deformation grows in the initial hold. This supports reporting an observation/model mismatch in the compliant closed loop. No matched fine trace is available to distinguish physical behavior from timestep sensitivity, and correlation does not establish a unique controller-failure cause.
 
-![Saved prefix diagnostics](early_stop_diagnostics.png)
+Historical media note: `early_stop_diagnostics.png` was externalized during
+repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 ## Evidence interpretation
 

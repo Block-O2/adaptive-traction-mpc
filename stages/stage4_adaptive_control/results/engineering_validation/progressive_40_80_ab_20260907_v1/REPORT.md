@@ -1,5 +1,15 @@
 # Rigid vs P1 40/80 exploratory matched A/B
 
+> [!IMPORTANT]
+> **PRE-CORRECTION / RETIRED DIAGNOSTIC EVIDENCE**
+>
+> This report predates the corrected low-latency robot velocity-feedback
+> measurement path and is retained only as diagnostic provenance. Current
+> authoritative conclusions are in [CURRENT_STATE](../../../docs/research/CURRENT_STATE.md)
+> and the [corrected High-ROM evidence](../../summaries/phase3a_corrected_high_rom/README.md).
+> Commands and paths below are frozen historical provenance; they are retired,
+> non-current, and must not be treated as executable reproduction instructions.
+
 
 
 **Both arms executed their complete registered reference phase. Both retain formal SAFE_INCOMPLETE. Rigid entered BRAKE during return and did not physically return; P1 remained TRACK and completed the practical outbound/return, with precision outside the unchanged 0.0689692672 deg criterion.**
@@ -100,11 +110,15 @@ These are time associations from saved traces. They do not identify causality. S
 
 
 
-![Aligned diagnostics](aligned_40_80_diagnostics.png)
+Historical media note: `aligned_40_80_diagnostics.png` was externalized during
+repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 
 
-![Rigid boundary zoom](rigid_boundary_event_alignment.png)
+Historical media note: `rigid_boundary_event_alignment.png` was externalized
+during repository closeout. Its archived path and SHA-256 remain in
+[`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`](../../summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS).
 
 
 
