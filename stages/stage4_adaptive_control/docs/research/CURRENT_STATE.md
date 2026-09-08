@@ -11,7 +11,9 @@ contract is the current repository interpretation for High-ROM engineering
 stress tests**. The source campaign retains its registered
 `exploratory_diagnostic_only` category; the user-reviewed interpretation is
 authoritative for current repository documentation. Earlier High-ROM BRAKE and
-P1 222 N results remain diagnostic history and are not rewritten or deleted.
+P1 222 N results remain diagnostic history. Their compact provenance and Git
+history are retained; their superseded binary/raw campaign products are
+external to the final repository tree.
 
 Baseline ancestry: `stage4-baseline-v1` at
 `ef1fe90e61c5981df8e934585780ce188d104ea4`. The final checkpoint extends that
@@ -257,7 +259,13 @@ diagnostic summaries, and provenance are in
 The professor-facing corrected comparison is a single offline file:
 [`PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html`](../../results/engineering_validation/PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html).
 The final HTML and force-landscape builders consume only tracked clean-clone
-inputs; historical raw campaigns are not runtime dependencies of either tool.
+inputs. The professor renderer uses the neutral
+`traction_mpc_stage4.phase3a_rendering` helper; no final report or analysis
+tool imports a historical experiment runner. Historical raw campaigns are not
+present in, or runtime dependencies of, either tool.
+
+The retired pre-correction tools and frozen-spec tests are recorded in
+[`PHASE3A_PRE_CORRECTION_RETIREMENT.md`](PHASE3A_PRE_CORRECTION_RETIREMENT.md).
 
 Stage 4 and its professor-facing report validation are now closed for this
 repository checkpoint. The next phase is hardware preparation: validate the

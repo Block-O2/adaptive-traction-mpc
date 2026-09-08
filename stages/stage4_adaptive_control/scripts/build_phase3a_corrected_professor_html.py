@@ -470,14 +470,16 @@ def main() -> None:
         SUMMARY / "dense_force_maps.npz",
         SUMMARY / "corrected_baseline_comparison.json",
         SUMMARY / "PROVENANCE.json",
+        STAGE / "src/traction_mpc_stage4/phase3a_rendering.py",
     ):
         source_hashes[str(path.relative_to(REPO))] = sha256(path)
-    sys.path.insert(0, str(STAGE / "scripts"))
-    import run_progressive_120_120_ab as runner
-    spec = json.loads((STAGE / "docs/PROGRESSIVE_120_120_AB_SPEC.json").read_text())
-    trajectory = runner.base.NormalizedTrajectory(spec["runs"][0]["point"])
-    manager = runner.base.UnifiedReferenceManager(trajectory.reference, confidence_aware=False)
-    plant = runner.RigidPlant(runner.base.HIGH_ROM_HUMAN, spec, manager)
+    sys.path.insert(0, str(REPO / "stages/stage3_full3d/src"))
+    sys.path.insert(0, str(STAGE / "src"))
+    from traction_mpc_stage4.phase3a_rendering import (
+        create_phase3a_rigid_render_plant,
+    )
+
+    plant = create_phase3a_rigid_render_plant()
     plant.reset(np.radians(INITIAL_Q_DEG))
     videos = {}
     with tempfile.TemporaryDirectory(prefix="phase3a_corrected_media_", dir="/tmp") as temp:

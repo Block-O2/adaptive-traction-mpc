@@ -17,8 +17,9 @@ checksums rather than committed raw traces.
   pre-correction execution-stack, twist, velocity-path, temporal, and P1-event
   audits; bulky windows and figures are intentionally omitted.
 - `CLEAN_CLONE_SHA256SUMS` covers files expected in Git.
-- `EXTERNAL_RAW_ARCHIVE_SHA256SUMS` identifies intentionally external raw
-  corrected evidence and reused corrected 40/80 raw inputs.
+- `EXTERNAL_RAW_ARCHIVE_SHA256SUMS` identifies the intentionally external
+  corrected campaign and all 232 tracked historical raw/media artifacts
+  removed during Phase 2.
 - `PROVENANCE.json` records the scientific invariants and migration boundary.
 
 The corrected campaign keeps the Human MPC, 140 Ns/m gain, estimator, Safety
@@ -42,7 +43,10 @@ limit.
 From the repository root:
 
 ```bash
-conda run -n mpc_learn python +  stages/stage4_adaptive_control/scripts/build_phase3a_corrected_professor_html.py
+conda run -n mpc_learn python \
+  stages/stage4_adaptive_control/scripts/build_phase3a_corrected_professor_html.py
 
-MPLCONFIGDIR=/tmp/phase3a-mpl conda run -n mpc_learn python +  stages/stage4_adaptive_control/scripts/build_phase3a_force_landscape.py +  --output-dir /tmp/phase3a-force-landscape
+MPLCONFIGDIR=/tmp/phase3a-mpl conda run -n mpc_learn python \
+  stages/stage4_adaptive_control/scripts/build_phase3a_force_landscape.py \
+  --output-dir /tmp/phase3a-force-landscape
 ```

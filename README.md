@@ -68,7 +68,9 @@ professor report from a compact render-source package, and
 `build_phase3a_force_landscape.py` regenerates the dense analytic map,
 200/220/250 N margins, conditioning and acceleration-sensitivity views, plus
 corrected dynamic overlays. Neither tool requires historical progressive
-campaign directories or the local corrected raw campaign.
+campaign directories or the local corrected raw campaign. Historical binary
+campaign products are intentionally external to the final tree and remain
+identifiable through the Phase-3A external-archive checksum manifest.
 
 ## Demos
 

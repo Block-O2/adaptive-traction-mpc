@@ -21,3 +21,8 @@ state remains recoverable from Git history or the external raw archive hashes.
 The corrected 40/80, 90/120, and 120/120 baseline is authoritative: it no
 longer shows the old BRAKE/200 N limitation, and P1's remaining benefit is
 trajectory-dependent transient smoothing rather than feasibility.
+
+Phase-2 closeout removed superseded binary traces, XML snapshots, and generated
+figures from the tracked tree. Their paths and hashes remain in
+`../EXTERNAL_RAW_ARCHIVE_SHA256SUMS`, and the original bytes remain
+recoverable from Git history or an external archive.

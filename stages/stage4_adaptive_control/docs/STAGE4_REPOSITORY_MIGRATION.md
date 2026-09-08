@@ -98,3 +98,17 @@ now lives under `results/summaries/`; the full delivery MP4s are not tracked.
 No formal experiment, benchmark, controller rollout, parameter tuning, or new
 simulation result was produced by this migration. The README GIF and PNGs are
 media conversions from the accepted real MuJoCo MP4s.
+
+## Phase-3A High-ROM closeout addendum
+
+The later two-phase closeout retained the corrected High-ROM report package and
+removed 232 tracked historical NPZ/XML/PNG artifacts totaling 715,500,528
+bytes. Their exact paths and SHA-256 values remain in
+`results/summaries/phase3a_corrected_high_rom/EXTERNAL_RAW_ARCHIVE_SHA256SUMS`.
+Final professor-report rendering now uses a neutral Stage-4 module and compact
+tracked state samples; final force-landscape generation uses compact model and
+overlay inputs. Neither imports a retired historical experiment runner.
+
+The corresponding one-off High-ROM runners, summarizers, audits, and frozen
+pre-correction tests were retired without changing their locked hashes. See
+`docs/research/PHASE3A_PRE_CORRECTION_RETIREMENT.md`.

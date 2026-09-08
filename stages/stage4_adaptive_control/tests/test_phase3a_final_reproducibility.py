@@ -67,6 +67,18 @@ def test_final_tools_do_not_name_raw_campaign_directories() -> None:
         assert "progressive_40_80_ab_20260907_v1" not in content
         assert "progressive_90_120_ab_20260907_v1" not in content
         assert "progressive_120_120_ab_20260907_v1" not in content
+        assert "import run_progressive" not in content
+
+
+def test_professor_builder_uses_neutral_rendering_module() -> None:
+    builder = (SCRIPTS / "build_phase3a_corrected_professor_html.py").read_text()
+    support = (
+        STAGE / "src/traction_mpc_stage4/phase3a_rendering.py"
+    ).read_text()
+    assert "create_phase3a_rigid_render_plant" in builder
+    assert "run_progressive" not in builder
+    assert "run_stage4_" not in support
+    assert "run_progressive" not in support
 
 
 def test_force_landscape_matches_tracked_reference() -> None:

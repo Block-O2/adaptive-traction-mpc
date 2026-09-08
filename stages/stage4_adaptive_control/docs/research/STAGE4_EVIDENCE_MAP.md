@@ -92,9 +92,12 @@ offline regeneration tasks, not scientific trajectories. From the repository
 root they use only tracked compact inputs:
 
 ```bash
-conda run -n mpc_learn python +  stages/stage4_adaptive_control/scripts/build_phase3a_corrected_professor_html.py
+conda run -n mpc_learn python \
+  stages/stage4_adaptive_control/scripts/build_phase3a_corrected_professor_html.py
 
-MPLCONFIGDIR=/tmp/phase3a-mpl conda run -n mpc_learn python +  stages/stage4_adaptive_control/scripts/build_phase3a_force_landscape.py +  --output-dir /tmp/phase3a-force-landscape
+MPLCONFIGDIR=/tmp/phase3a-mpl conda run -n mpc_learn python \
+  stages/stage4_adaptive_control/scripts/build_phase3a_force_landscape.py \
+  --output-dir /tmp/phase3a-force-landscape
 ```
 
 Corrected 40/80, 90/120, and 120/120 no longer show the old BRAKE/200 N
@@ -103,6 +106,11 @@ remaining benefit is trajectory-dependent transient smoothing. The old Rigid
 BRAKE events and P1 approximately 222 N event are retained only as
 pre-correction diagnostic provenance. The registered 200 N value remains an
 engineering stress-test target, not a clinical threshold.
+
+Tracked binary/raw products and their one-off pre-correction runners/tests were
+retired during repository closeout. Exact raw paths and hashes remain in
+`EXTERNAL_RAW_ARCHIVE_SHA256SUMS`; the retirement boundary is documented in
+[`PHASE3A_PRE_CORRECTION_RETIREMENT.md`](PHASE3A_PRE_CORRECTION_RETIREMENT.md).
 
 ```bash
 # Original paired A/B
