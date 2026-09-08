@@ -362,6 +362,14 @@ def _brake_count(row: dict) -> int:
 def _pair_rows(spec: dict) -> list[dict]:
     reused = read(REUSED_RIGID_40_80 / "result.json")
     reused["evidence_role"] = "REUSED_HASH_LOCKED_RIGID_NEW_BASELINE"
+    with np.load(REUSED_RIGID_40_80 / "trace.npz") as source:
+        reused_trace = {
+            "human_q_deg_god_view": source["human_q_deg_god_view"],
+            "reference_phase_time_s": source["reference_phase_time_s"],
+        }
+    reused["physical_trajectory_completion"] = _physical_progress(
+        reused_trace, spec["runs"][0]["point"]
+    )
     rows = [reused]
     for run in spec["runs"]:
         row = read(ROOT / run["id"] / "result.json")
@@ -435,6 +443,62 @@ def build_report(spec: dict) -> None:
                 nsa=row["no_safe_action_count"],
                 deform=row["deformation_peak_mm"],
                 rotation=row["rotation_peak_deg"],
+            )
+        )
+    lines.extend(
+        [
+            "",
+            "## Matched differences (P1 NEW minus Rigid NEW)",
+            "",
+            "| case | tracking RMSE delta deg | command peak delta N | physical peak delta N | physical slew RMS delta N/s | BRAKE transition delta | FILTER_INFEASIBLE sample delta |",
+            "|---|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
+    for case, pair in pairs.items():
+        rigid = pair["rigid"]
+        p1 = pair["P1"]
+        lines.append(
+            "| {case} | {tracking:.6f} | {command:.3f} | {physical:.3f} | {slew:.3f} | {brake:+d} | {fi:+d} |".format(
+                case=case,
+                tracking=p1["tracking_rmse_deg"] - rigid["tracking_rmse_deg"],
+                command=p1["command_force_n"]["peak"] - rigid["command_force_n"]["peak"],
+                physical=p1["physical_force_n"]["peak"] - rigid["physical_force_n"]["peak"],
+                slew=(
+                    p1["rates"]["physical_force_n_s"]["rms"]
+                    - rigid["rates"]["physical_force_n_s"]["rms"]
+                ),
+                brake=_brake_count(p1) - _brake_count(rigid),
+                fi=(
+                    p1["safety_filter_interventions"]["filter_infeasible_count"]
+                    - rigid["safety_filter_interventions"]["filter_infeasible_count"]
+                ),
+            )
+        )
+    lines.extend(
+        [
+            "",
+            "Force-norm differences are comparisons, not additive component decompositions.",
+            "",
+            "## P1 deformation and exploratory energy diagnostics",
+            "",
+            "| case | translation peak mm | rotation peak deg | stored energy peak J | damping loss J | max absolute residual J | max positive residual J | max absolute residual ratio |",
+            "|---|---:|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
+    for row in rows:
+        if row["arm"] != "P1":
+            continue
+        energy = row["energy"]
+        lines.append(
+            "| {case} | {translation:.6f} | {rotation:.6f} | {stored:.9g} | {loss:.9g} | {absolute:.9g} | {positive:.9g} | {ratio:.9g} |".format(
+                case=f"{row['endpoint_deg'][0]}/{row['endpoint_deg'][1]}",
+                translation=row["deformation_peak_mm"],
+                rotation=row["rotation_peak_deg"],
+                stored=energy["stored_peak_j"],
+                loss=energy["damping_loss_j"],
+                absolute=energy["max_abs_residual_j"],
+                positive=energy["max_positive_residual_j"],
+                ratio=energy["max_abs_residual_ratio"],
             )
         )
     lines.extend(
