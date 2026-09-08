@@ -1,0 +1,184 @@
+{
+  "adapter_translation_m": [
+    0,
+    0.14,
+    0
+  ],
+  "baseline": "de23ea3cdf9f0fb078496ba5ba4abb6a205ad955",
+  "control_substeps": 20,
+  "endpoint_rule": {
+    "derivation": "maximum absolute joint error during nominal moderate reference target hold",
+    "source": "stages/stage4_adaptive_control/results/controller_validation/trajectory_generalization/demo_sources/nominal_reference__moderate_rom_23s__seed44104/trusted_adaptive_mpc/trusted_adaptive_mpc_trace.npz",
+    "source_sha256": "793f6d605e1018c87875424a80ec7c208ce8dbf82c7b26659dd465849adc005f",
+    "test": "minimum max-absolute endpoint error in target hold and final return error <= retained tolerance",
+    "tolerance_deg": 0.06896926724078867
+  },
+  "evidence": "exploratory_diagnostic_only_not_authoritative_not_clinical",
+  "frozen_source_hashes": {
+    "stages/stage3_full3d/models/ur10e_torque.xml": "43b242bfe140c8a57ea54a7b18fc773303e16ea415e081a5efbcf3cdc5ac3f42",
+    "stages/stage3_full3d/src/traction_mpc_stage3/coupled.py": "a1620883c8ba74941f8315ccc610a7cf76ad19d477b7298efa74da38c4e62272",
+    "stages/stage3_full3d/src/traction_mpc_stage3/executable_command.py": "16b6922715240c8dcff791d17de114345e98ebfb66a0e4b1ccd481d3891fb214",
+    "stages/stage3_full3d/src/traction_mpc_stage3/frames.py": "7449358883224860ddf9d09c802789de9be093abe91a897c2452479ba2675bf9",
+    "stages/stage3_full3d/src/traction_mpc_stage3/human.py": "0f82749aeda1208bcd79ecf336bbb39df88308c51f465596f7a8b2923946aec4",
+    "stages/stage3_full3d/src/traction_mpc_stage3/robot.py": "7a6677f36e481fb14670c29546df840826f1e8e0b95e554eba5e078835b898bc",
+    "stages/stage4_adaptive_control/configs/simulation_engineering_transient_v1.json": "33eec4204928d6fce9163441266e78bdced5cc732740b6a21e2347974d9b6118",
+    "stages/stage4_adaptive_control/configs/stage4_report_validation_matrix.json": "128fbadbedb5d204f767eeb126c26d13f2d81c410646689d5a1f2be4594886c2",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/cuff_allocator.py": "f6ca86a087d2675df72ab8b6f8961d029b3e071a9ea95e0d6bf6e2a54c371a5e",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/estimator_v2.py": "6a262c6f922dd66116eaba3fef6a62a1e9bfc812137266c2f5aad0cf14b5a211",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/executable_command.py": "6fcaf0a4ff40810d0c6d94c2c9e1d143498f6a1e23892400a08b1c86d55337d2",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/measurement.py": "1c8dd08e7bb94988eba36ad59fca0ad33e1566d1734c108efaee53a4777a70ab",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/mpc.py": "a907600ec9dd06a10cffee4b9207c4a4fb4b060a729824d26b3c2dd9918d954c",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/reference.py": "95446adb18548d8261d9d946d578c35303cf84edb8fdf00f5a5e75f0d10796e4",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/safety_filter.py": "e5e9493ec2a6b2b5e391d2dd4d212cae7463d0ee886785343441565d9306f375",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/sensor_realism.py": "ace0dfd69a9ee747d48a07039c78cbeaf25be0ff68cbad81dd040f52c77bafa5",
+    "stages/stage4_adaptive_control/src/traction_mpc_stage4/track_brake.py": "aeb89ae1b0f2b93c58692e0f460efc0f921692d7098cf257b73889e08f68e949"
+  },
+  "growth_policy": {
+    "acceleration_floor_m_s2": 100.0,
+    "amplitude_step_factor": 1.5,
+    "amplitude_total_factor": 4.0,
+    "energy_min_increment_j": 0.0001,
+    "energy_total_growth_absolute_j": 0.01,
+    "energy_total_growth_fraction": 0.1,
+    "force_oscillation_floor_n": 50.0,
+    "force_peak_floor_n": 100.0,
+    "rotation_oscillation_floor_rad": 0.008726646259971648,
+    "translation_oscillation_floor_m": 0.001,
+    "window_count": 4,
+    "window_s": 0.05
+  },
+  "human": "nominal High-ROM",
+  "implementation_commit": "ce72ddfc8867f6fc021bdcdf6bbc22aa8c6d5dd0",
+  "implementation_commit_requirement": "must be an ancestor of execution HEAD",
+  "low_level_period_s": 0.005,
+  "max_runs": 4,
+  "measurement_contract": {
+    "human_state_estimator_mpc": "existing 8 Hz pose low-pass plus 120 ms causal quadratic derivative",
+    "invalid_policy": "raise; no fallback to processed history velocity",
+    "robot_translational_control_feedback": "raw measured robot joint q/dq at the 200 Hz control boundary mapped once through registered 140 mm cuff-center geometric Jacobian in WORLD",
+    "snapshot_consistency": "same immutable 5 ms measurement snapshot for first-action screening, Safety Filter, BRAKE candidates, and final command",
+    "timestamp": "explicit encoder sample time; age must be <= one 5 ms control period"
+  },
+  "measurement_seed": 44104,
+  "measurement_update_rate_hz": 200.0,
+  "new_velocity_contract": "140*(v_target_world_at_cuff_center - J_cuff_center_world(q_robot_raw)*dq_robot_raw)",
+  "old_velocity_contract": "140*(v_target_world_at_cuff_center - v_processed_pose_history_world)",
+  "output_root": "stages/stage4_adaptive_control/results/engineering_validation/control_velocity_path_ab_20260908_v1",
+  "physics_dt_s": 0.00025,
+  "rotational_velocity_contract": "unchanged processed pose-history angular velocity",
+  "run_order": "OLD 40/40, NEW 40/40, OLD 40/80, NEW 40/80; one fresh process per invocation",
+  "runs": [
+    {
+      "arm": "rigid",
+      "id": "hip40_knee40_old_velocity_dt0250us",
+      "point": {
+        "endpoint_deg": [
+          40,
+          40
+        ],
+        "final_hold_s": 1.0,
+        "id": "hip40_knee40",
+        "initial_hold_s": 1.0,
+        "maximum_simulation_duration_s": 28.215,
+        "outbound_duration_s": 5.303030303030302,
+        "phase_duration_s": 14.106060606060604,
+        "return_duration_s": 5.303030303030302,
+        "target_hold_s": 1.5
+      },
+      "velocity_path": "OLD"
+    },
+    {
+      "arm": "rigid",
+      "id": "hip40_knee40_new_velocity_dt0250us",
+      "point": {
+        "endpoint_deg": [
+          40,
+          40
+        ],
+        "final_hold_s": 1.0,
+        "id": "hip40_knee40",
+        "initial_hold_s": 1.0,
+        "maximum_simulation_duration_s": 28.215,
+        "outbound_duration_s": 5.303030303030302,
+        "phase_duration_s": 14.106060606060604,
+        "return_duration_s": 5.303030303030302,
+        "target_hold_s": 1.5
+      },
+      "velocity_path": "NEW"
+    },
+    {
+      "arm": "rigid",
+      "id": "hip40_knee80_old_velocity_dt0250us",
+      "point": {
+        "endpoint_deg": [
+          40,
+          80
+        ],
+        "final_hold_s": 1.0,
+        "id": "hip40_knee80",
+        "initial_hold_s": 1.0,
+        "maximum_simulation_duration_s": 38.115,
+        "outbound_duration_s": 7.777777777777778,
+        "phase_duration_s": 19.055555555555557,
+        "return_duration_s": 7.777777777777778,
+        "target_hold_s": 1.5
+      },
+      "velocity_path": "OLD"
+    },
+    {
+      "arm": "rigid",
+      "id": "hip40_knee80_new_velocity_dt0250us",
+      "point": {
+        "endpoint_deg": [
+          40,
+          80
+        ],
+        "final_hold_s": 1.0,
+        "id": "hip40_knee80",
+        "initial_hold_s": 1.0,
+        "maximum_simulation_duration_s": 38.115,
+        "outbound_duration_s": 7.777777777777778,
+        "phase_duration_s": 19.055555555555557,
+        "return_duration_s": 7.777777777777778,
+        "target_hold_s": 1.5
+      },
+      "velocity_path": "NEW"
+    }
+  ],
+  "scenario": "suspended_high_rom",
+  "schema": "phase3a_robot_control_velocity_path_ab_v1",
+  "single_variable": "robot low-level translational velocity-feedback measurement source: OLD processed pose history vs NEW robot joint cuff Jacobian",
+  "status": "FROZEN_USER_AUTHORIZED_EXPLORATORY_40_40_40_80_ONLY",
+  "stop": {
+    "emergency_rotation_rad": 0.17453292519943295,
+    "emergency_translation_m": 0.01,
+    "negative_damping_roundoff_w": 1e-10,
+    "rotation_rad": 0.017453292519943295,
+    "spring_energy_roundoff_j": 1e-12,
+    "translation_m": 0.003
+  },
+  "stopping_rule": [
+    "No 90/120 or 120/120.",
+    "No gain/threshold/controller/model tuning.",
+    "Stop campaign for warning, nonfinite state, structural/ROM/hard physical termination, or corrupt/incomplete evidence.",
+    "Formal completion classification retains the existing 0.06896926724078867 deg tolerance; precision-only incomplete does not by itself stop the exploratory comparison."
+  ],
+  "unchanged": [
+    "Human MPC",
+    "Human state reconstruction",
+    "estimator/identification",
+    "Reference Manager",
+    "Safety Filter",
+    "BRAKE",
+    "P1 (unused)",
+    "140 Ns/m gain",
+    "force thresholds",
+    "trajectory timing",
+    "physics dt",
+    "solver/integrator",
+    "seed",
+    "Human/robot models",
+    "completion tolerance",
+    "140 mm geometry"
+  ]
+}
