@@ -32,15 +32,26 @@ Until a challenger passes causal future-block validation, the population prior
 remains in control. The retained allocator and safety/actuator gates are shared
 across fixed and adaptive MPC.
 
+## Technical contributions
+
+- A coupled rehabilitation-robot simulation with explicit Human-V2 dynamics,
+  cuff mechanics, robot-side measurements, and reconstructed interaction wrench.
+- A causal, trust-gated adaptive MPC pipeline that keeps the population prior in
+  control until a challenger passes embargoed future-block validation.
+- A separated measurement architecture for estimation and low-latency robot
+  velocity feedback, with matched controller and safety contracts across A/B runs.
+- Model-based force decomposition and clean-clone reporting tools that connect
+  Human mechanics, feedback demand, execution effects, and High-ROM force margins.
+
 ## Key results
 
-- All 36 preregistered patient-generalization arms completed with finite
-  artifacts, full reference progress, and no recorded safety-gate event.
-- Fixed MPC had lower measured acceleration and jerk than PD+feedforward in
-  all 12 matched comparisons.
-- Adaptive MPC improved or tied Fixed MPC tracking RMSE in all 12 matched
-  comparisons; load and effort changes were mixed, so this is not a universal
-  superiority claim.
+- All 36 preregistered patient-generalization arms completed with full reference
+  progress and no recorded safety-gate event. Across 12 matched comparisons,
+  Fixed MPC was smoother than PD+feedforward, while Adaptive MPC improved or
+  tied Fixed MPC tracking RMSE; load and effort changes remained mixed.
+- The authoritative crossed patient × trajectory × seed replication achieved
+  18/18 promotion, completion, tracking-RMSE improvement, and prediction-RMSE
+  improvement, with two cases still worsening maximum tracking error.
 - Peak cuff force in the 36-arm study remained below the 200 N engineering
   gate. This is not a comfort, tissue-load, or clinical-safety result.
 - Saved-trace desktop replay measured 9.42 ms mean MPC time and 16.52 ms mean
@@ -48,11 +59,15 @@ across fixed and adaptive MPC.
 - The corrected High-ROM baseline separates low-latency robot control velocity
   from the history-derived estimation velocity. With the Human MPC, 140 Ns/m
   gain, Safety Filter, BRAKE, 200 N target, models, and trajectories unchanged,
-  Rigid NEW completes 40/80 and executes 120/120 to 99.33% outbound / 99.99%
-  return progress without BRAKE.
+  Rigid NEW completes 40/80, executes 90/120 to 96.18% outbound / 100.00%
+  return progress, and executes 120/120 to 99.33% / 99.99%, without the old
+  BRAKE/200 N bottleneck.
 - In the corrected Rigid NEW versus P1 NEW comparison, P1 is not required for
   High-ROM feasibility. Its repeatable independent effect is lower force slew;
   force-peak and tracking changes remain trajectory-dependent.
+- The dense registered quasistatic force map spans 0.06–182.30 N over
+  q1,q2 = 0–125°, below the registered 200 N engineering stress-test target;
+  it is an analytic mechanics map, not a clinical or dynamic safety boundary.
 
 Detailed claims, hashes, and limitations are in the
 [Stage-4 evidence map](stages/stage4_adaptive_control/docs/research/STAGE4_EVIDENCE_MAP.md)
