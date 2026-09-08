@@ -12,6 +12,7 @@ by scientific meaning.
 - [Patient generalization report](../controller_validation/patient_generalization/summary/research_report.md)
 - [Failed PD-v1 gain selection](../negative_evidence/pd_gain_selection_v1/gain_selection_status.json)
 - [External professor-video provenance](professor_video_manifest.json)
+- [Phase-3A corrected High-ROM baseline](phase3a_corrected_high_rom/README.md)
 
 The full professor-delivery MP4s are intentionally stored outside Git. The
 repository retains the real MuJoCo renderer, frozen source traces, provenance

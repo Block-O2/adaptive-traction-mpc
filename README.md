@@ -1,11 +1,11 @@
 # Adaptive Traction MPC for Lower-Limb Rehabilitation
 
 Adaptive Traction MPC is a simulation research platform for robot-assisted
-lower-limb motion under uncertain Human dynamics. It combines a rigid-cuff
-human–robot model, causal effective-dynamics estimation, trust-gated model
-promotion, and constrained model-predictive control. The current system is a
-simulation-qualified prototype preparing for robot-side commissioning—not a
-clinical or production system.
+lower-limb motion under uncertain Human dynamics. It combines explicit
+human–robot cuff mechanics, causal effective-dynamics estimation, trust-gated
+model promotion, and constrained model-predictive control. The current system
+is a simulation-qualified prototype preparing for robot-side commissioning—not
+a clinical or production system.
 
 ## Overview
 
@@ -18,11 +18,13 @@ state, cuff pose/twist, and reconstructed wrench measurements.
 ## Method
 
 ```text
-Rigid cuff mechanics
-  → 11-term effective-dynamics estimator
-  → embargoed incumbent/challenger trust checks
+Robot-facing measurements
+  ├─ smoothed pose-history velocity → Human reconstruction / estimator / MPC
+  └─ cuff-center Jacobian velocity  → robot translational control feedback
+                                      (200 Hz, 5 ms ZOH, 140 Ns/m)
   → constrained Human-space MPC
-  → robot torque interface
+  → Safety Filter / BRAKE
+  → rigid or registered P1 cuff interface
 ```
 
 The online model is control-effective, not an anatomical parameter estimate.
@@ -43,10 +45,22 @@ across fixed and adaptive MPC.
   gate. This is not a comfort, tissue-load, or clinical-safety result.
 - Saved-trace desktop replay measured 9.42 ms mean MPC time and 16.52 ms mean
   full-cycle time (about 60.5 Hz); this is not a hard-realtime guarantee.
+- The corrected High-ROM baseline separates low-latency robot control velocity
+  from the history-derived estimation velocity. With the Human MPC, 140 Ns/m
+  gain, Safety Filter, BRAKE, 200 N target, models, and trajectories unchanged,
+  Rigid NEW completes 40/80 and executes 120/120 to 99.33% outbound / 99.99%
+  return progress without BRAKE.
+- In the corrected Rigid NEW versus P1 NEW comparison, P1 is not required for
+  High-ROM feasibility. Its repeatable independent effect is lower force slew;
+  force-peak and tracking changes remain trajectory-dependent.
 
 Detailed claims, hashes, and limitations are in the
 [Stage-4 evidence map](stages/stage4_adaptive_control/docs/research/STAGE4_EVIDENCE_MAP.md)
 and [report-validation evidence map](stages/stage4_adaptive_control/docs/research/STAGE4_REPORT_VALIDATION_EVIDENCE_MAP.md).
+The compact corrected High-ROM evidence is indexed in the
+[Phase-3A corrected baseline package](stages/stage4_adaptive_control/results/summaries/phase3a_corrected_high_rom/README.md),
+and the [single-file professor report](stages/stage4_adaptive_control/results/engineering_validation/PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html)
+opens offline with all media embedded.
 
 ## Demos
 
@@ -109,8 +123,13 @@ Exact experiment commands live in the approved specs under
   behavior remain unvalidated.
 - The cuff surface-load quantity is a mathematical proxy, not pressure,
   comfort, tissue loading, injury risk, or clinical safety.
+- The 200 N High-ROM target is a registered simulation engineering stress-test
+  target. It is not a clinical threshold or a validated hardware limit.
 - Desktop replay timing is not target-hardware or worst-case real-time proof.
 - No clinical efficacy, certification, or production claim is made.
 
-Stage 4 is scientifically closed for this checkpoint. The next phase is
-robot-only commissioning and hardware safety-interface validation.
+Stage 4 adaptive-estimation science remains closed for its checkpoint. The
+corrected Phase-3A High-ROM engineering baseline is now the current repository
+interpretation; historical history-derived-velocity BRAKE results remain
+diagnostic evidence. The next phase is robot-only commissioning and hardware
+safety-interface validation.
