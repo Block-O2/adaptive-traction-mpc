@@ -20,8 +20,8 @@ Archived results are closed historical baselines. Active results remain at their
 | Stage 9D | Stress and initial-offset validation | `stage9d_nmpc_stress_validation/stage9d_report.md`, `stage9d_summary.csv` |
 | Stage 9G | Crossing–alpha feasibility frontier | `stage9g_crossing_alpha_frontier/stage9g_report.md`, `stage9g_summary.csv` |
 | Stage 9H | Long-horizon planner plus short-horizon tracker | `stage9h_planner_tracker/stage9h_report.md`, `stage9h_summary.csv`, `stage9h_boundary_summary.csv` |
-| Stage 9J | Mode audit and adaptive–oracle gap decomposition | `stage9j_gap_decomposition/stage9j_report.md`, `stage9j_summary.csv`, `stage9j_per_run.csv`, `stage9j_mode_audit.csv` |
-| Stage 9K | Identifier diagnosis and robust offline ablation | `stage9k_identifier_ablation/stage9k_report.md`, `stage9k_offline_summary.csv`, `stage9k_offline_per_run.csv`, `stage9k_conditioning.csv`, `stage9k_uncertainty_calibration.csv` |
+| Stage 9J | Mode audit and adaptive–oracle gap decomposition | `stage9j_gap_decomposition/stage9j_report.md`, `stage9j_summary.csv`, `stage9j_replay.csv` |
+| Stage 9K | Identifier diagnosis and robust offline ablation | `stage9k_identifier_ablation/stage9k_report.md`, `stage9k_offline_summary.csv`, `stage9k_offline_per_run.csv`, `stage9k_uncertainty_calibration.csv` |
 
 The authoritative replay input for Stage 10 offline estimator comparison is:
 
@@ -36,10 +36,10 @@ Do not rename, filter, or regenerate this file implicitly. Stage 10 comparisons 
 | Stage | Role | Authoritative files |
 |---|---|---|
 | Stage 10A | Dynamics, sensitivity, and parameterization audit | `stage10a_dynamics_audit/stage10a_dynamics_parameterization_audit.md`, `sensitivity_summary.csv`, `conditioning_summary.csv` |
-| Stage 10B | Matched single-shooting MHE and weighted-TLS benchmark | `stage10b_estimator_benchmark/stage10b_report.md`, `offline_summary.csv`, `offline_gate.json`, `offline_per_run.csv` |
-| Stage 10C | Multiple-shooting MHE benchmark before the arrival-index correction | `stage10c_multiple_shooting_mhe/stage10c_report.md`, `offline_summary.csv`, `offline_gate.json`, `offline_per_run.csv` |
+| Stage 10B | Matched single-shooting MHE and weighted-TLS benchmark | `stage10b_estimator_benchmark/stage10b_report.md`, `offline_summary.csv`, `offline_gate.json` |
+| Stage 10C | Multiple-shooting MHE benchmark before the arrival-index correction | `stage10c_multiple_shooting_mhe/stage10c_report.md`, `offline_summary.csv`, `offline_gate.json` |
 | Stage 10D | MHE formulation and alignment sanity audit | `stage10d_mhe_sanity_audit/stage10d_report.md`, `equivalence_summary.csv`, `oracle_sanity_summary.csv` |
-| Stage 10E | Corrected multiple-shooting MHE benchmark | `stage10e_corrected_mhe_benchmark/stage10e_report.md`, `offline_summary.csv`, `offline_gate.json`, `offline_per_run.csv` |
+| Stage 10E | Corrected multiple-shooting MHE benchmark | `stage10e_corrected_mhe_benchmark/stage10e_report.md`, `offline_summary.csv`, `offline_gate.json` |
 | Stage 10F | Rolling MHE divergence and branch-closeout audit | `stage10f_mhe_divergence_audit/stage10f_report.md`, `update_trace.csv`, `first_divergence_events.csv`, `consistency_checks.csv` |
 | Stage 11A | Task-relevant information-metric validation | `stage11a_information_metric_validation/stage11a_report.md`, `metric_summary.csv`, `gate_validation.csv`, `window_metrics.csv` |
 | Stage 11B | Passive parameter-subspace audit | `stage11b_parameter_subspace_audit/stage11b_report.md`, `condition_summary.csv`, `subspace_summary.csv`, `profile_summary.csv`, `window_metrics.csv` |
@@ -82,6 +82,13 @@ designates one as irreplaceable evidence. Stage 9J/9K retain more than three
 plots because those named diagnostic figures jointly support the decomposition
 and identifier conclusions. The local Stage 9J GIF is for visual inspection and
 is not an authoritative metric source.
+
+During final repository evidence minimization, the large Stage 9J mode/per-run,
+Stage 9K conditioning, and Stage 10B/10C/10E per-run matrices were removed from
+the checkout after their conclusions had been frozen in the retained reports,
+aggregate summaries, gates, and figures. They remain recoverable from
+provenance Git history. The Stage 9J replay and Stage 9K offline per-run baseline
+remain tracked because retained estimator runners consume them directly.
 
 Adaptive profile grids such as `profile_grid.csv` are recomputable raw artifacts and are intentionally ignored. Compact profile, window, condition, and subspace summaries are the retained evidence.
 

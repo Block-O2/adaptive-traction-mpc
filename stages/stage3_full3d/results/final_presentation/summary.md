@@ -7,3 +7,5 @@
 - Peak robot torque-limit fraction: `0.4720`.
 - No force-gate violation, torque saturation, solver failure, or unintended collision occurred.
 - The UR10e is a simulation surrogate, not the real CR12.
+- The generated presentation GIF was removed from the final checkout during
+  evidence minimization; it remains recoverable from provenance Git history.

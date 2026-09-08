@@ -48,6 +48,17 @@ Per-artifact hashes for the large formal matrices are embedded in their
 aggregate summaries. The final crossed summary re-verifies both read-only
 bridge pairs against their preregistered hashes.
 
+Final repository evidence minimization retains the aggregate summaries,
+research reports, compact per-case comparisons, preregistration/configuration,
+and reproduction runners. Run-level `prior_only`/`trusted_adaptive` JSON and
+non-bridge trajectory-excitation NPZ products were removed from the checkout
+and remain recoverable from provenance Git history. Two preregistered read-only
+bridge pairs remain tracked because active crossed-replication tests verify
+them. Re-running another historical summarizer therefore first requires
+regenerating its formal run directory. The registered adaptive A/B traces
+remain tracked because the realtime replay and the frozen
+artifact-path compatibility contract still use them.
+
 ## Negative and mixed findings that must remain visible
 
 - Adaptation did not consistently reduce force, cuff moment, or the cylindrical
