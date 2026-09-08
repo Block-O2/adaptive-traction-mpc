@@ -190,4 +190,9 @@ def test_independent_measurement_routing_is_reported() -> None:
         "mpc_state_delay_ms": 0.0,
         "low_level_delay_ms": 0.0,
         "low_level_timestamp_extrapolation": False,
+        "translational_velocity_feedback_source": "processed_pose_history",
+        "translational_velocity_feedback_gain_ns_per_m": 140.0,
+        "rotational_velocity_feedback_source": "processed_pose_history",
+        "control_velocity_frame": "WORLD",
+        "control_velocity_reference_point": "registered_cuff_center",
     }

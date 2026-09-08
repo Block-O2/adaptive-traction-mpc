@@ -118,6 +118,11 @@ class ControllerMeasurement:
     cuff_force_vector_n: np.ndarray
     cuff_moment_vector_nm: np.ndarray
     new_sample: bool
+    # Raw robot encoder snapshot reserved for low-latency robot control.  The
+    # processed robot/cuff fields above remain the estimator/MPC contract.
+    control_robot_q_rad: np.ndarray | None = None
+    control_robot_dq_rad_s: np.ndarray | None = None
+    control_velocity_sample_time_s: float | None = None
 
     @property
     def age_s(self) -> float:
@@ -135,6 +140,9 @@ class _ProcessedSample:
     attachment_angular_velocity_rad_s: np.ndarray
     cuff_force_vector_n: np.ndarray
     cuff_moment_vector_nm: np.ndarray
+    control_robot_q_rad: np.ndarray
+    control_robot_dq_rad_s: np.ndarray
+    control_velocity_sample_time_s: float
 
 
 class CausalMeasurementLayer:
@@ -239,6 +247,9 @@ class CausalMeasurementLayer:
                 angular_velocity,
                 force,
                 moment,
+                q.copy(),
+                dq.copy(),
+                t,
             )
             self._processed.append(processed)
             return
@@ -283,6 +294,9 @@ class CausalMeasurementLayer:
                 angular_velocity,
                 self._filtered_force.copy(),
                 self._filtered_moment.copy(),
+                q.copy(),
+                dq.copy(),
+                t,
             )
         )
 
@@ -317,6 +331,11 @@ class CausalMeasurementLayer:
             cuff_force_vector_n=sample.cuff_force_vector_n.copy(),
             cuff_moment_vector_nm=sample.cuff_moment_vector_nm.copy(),
             new_sample=bool(new_sample),
+            control_robot_q_rad=sample.control_robot_q_rad.copy(),
+            control_robot_dq_rad_s=sample.control_robot_dq_rad_s.copy(),
+            control_velocity_sample_time_s=float(
+                sample.control_velocity_sample_time_s
+            ),
         )
 
 

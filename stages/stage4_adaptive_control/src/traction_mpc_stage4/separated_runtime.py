@@ -80,6 +80,17 @@ def _copy_measurement(measurement: ControllerMeasurement) -> ControllerMeasureme
         cuff_force_vector_n=measurement.cuff_force_vector_n.copy(),
         cuff_moment_vector_nm=measurement.cuff_moment_vector_nm.copy(),
         new_sample=bool(measurement.new_sample),
+        control_robot_q_rad=(
+            None
+            if measurement.control_robot_q_rad is None
+            else measurement.control_robot_q_rad.copy()
+        ),
+        control_robot_dq_rad_s=(
+            None
+            if measurement.control_robot_dq_rad_s is None
+            else measurement.control_robot_dq_rad_s.copy()
+        ),
+        control_velocity_sample_time_s=measurement.control_velocity_sample_time_s,
     )
 
 

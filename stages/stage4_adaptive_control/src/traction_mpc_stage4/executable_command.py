@@ -72,6 +72,7 @@ def prepare_stage4_executable_command_context(
     target_linear_velocity, target_angular_velocity = (
         human_model.geometry.cuff_velocity(reference.q_rad, reference.dq_rad_s)
     )
+    control_velocity = plant.control_feedback_velocity_snapshot(measurement)
     measured_robot = plant._measured_robot_model
     measured_robot.set_configuration(
         measurement.robot_q_rad,
@@ -84,7 +85,7 @@ def prepare_stage4_executable_command_context(
     context = prepare_executable_command_context(
         attachment_position_m=measurement.attachment_position_m,
         attachment_rotation_matrix=measurement.attachment_rotation_matrix,
-        attachment_velocity_m_s=measurement.attachment_velocity_m_s,
+        attachment_velocity_m_s=control_velocity.linear_velocity_world_m_s,
         attachment_angular_velocity_rad_s=(
             measurement.attachment_angular_velocity_rad_s
         ),

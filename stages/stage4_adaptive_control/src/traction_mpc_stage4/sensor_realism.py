@@ -29,6 +29,7 @@ from traction_mpc_stage3.human import (
     soft_limit_torque,
 )
 from traction_mpc_stage3.executable_command import (
+    DEFAULT_LOW_LEVEL_COMMAND_GAINS,
     ExecutableCommandPreview,
     preview_executable_command,
 )
@@ -69,6 +70,24 @@ from .safety_filter import (
 from .state_ukf import StateUKFConfig
 
 
+PROCESSED_POSE_HISTORY_VELOCITY = "processed_pose_history"
+ROBOT_JOINT_CUFF_JACOBIAN_VELOCITY = "robot_joint_cuff_jacobian"
+CONTROL_VELOCITY_SOURCES = (
+    PROCESSED_POSE_HISTORY_VELOCITY,
+    ROBOT_JOINT_CUFF_JACOBIAN_VELOCITY,
+)
+
+
+@dataclass(frozen=True)
+class RobotControlVelocitySnapshot:
+    """One WORLD-frame cuff-center twist derived from robot joint state."""
+
+    sample_time_s: float
+    linear_velocity_world_m_s: np.ndarray
+    angular_velocity_world_rad_s: np.ndarray
+    source: str
+
+
 @dataclass(frozen=True)
 class MeasurementRouting:
     """Independent timestamp delays for the three controller-facing loops."""
@@ -106,6 +125,19 @@ def _extrapolate_measurement_to_arrival(
         cuff_force_vector_n=measurement.cuff_force_vector_n.copy(),
         cuff_moment_vector_nm=measurement.cuff_moment_vector_nm.copy(),
         new_sample=measurement.new_sample,
+        control_robot_q_rad=(
+            None
+            if measurement.control_robot_q_rad is None
+            else measurement.control_robot_q_rad.copy()
+        ),
+        control_robot_dq_rad_s=(
+            None
+            if measurement.control_robot_dq_rad_s is None
+            else measurement.control_robot_dq_rad_s.copy()
+        ),
+        # This timestamp deliberately remains the encoder sample time.  Pose
+        # extrapolation must not make an old control-velocity sample look fresh.
+        control_velocity_sample_time_s=measurement.control_velocity_sample_time_s,
     )
 
 
@@ -118,13 +150,91 @@ class SensorBoundaryStage4Plant(Stage4CoupledPlant):
         *,
         attachment_from_cuff: RigidTransform = ATTACHMENT_FROM_CUFF,
         engineering_scenario: str = LYING_BED_SCENARIO,
+        translational_velocity_feedback_source: str = (
+            PROCESSED_POSE_HISTORY_VELOCITY
+        ),
     ) -> None:
         super().__init__(
             human,
             attachment_from_cuff=attachment_from_cuff,
             engineering_scenario=engineering_scenario,
         )
+        if translational_velocity_feedback_source not in CONTROL_VELOCITY_SOURCES:
+            raise ValueError(
+                "translational_velocity_feedback_source must be one of "
+                + ", ".join(CONTROL_VELOCITY_SOURCES)
+            )
+        self.translational_velocity_feedback_source = (
+            translational_velocity_feedback_source
+        )
         self._measured_robot_model = UR10eTorqueRobot()
+        self._control_velocity_robot_model = UR10eTorqueRobot()
+        self.last_robot_control_velocity_snapshot: (
+            RobotControlVelocitySnapshot | None
+        ) = None
+
+    def robot_joint_control_velocity_snapshot(
+        self, measurement: ControllerMeasurement
+    ) -> RobotControlVelocitySnapshot:
+        """Return the fresh encoder/Jacobian cuff-center twist without fallback."""
+
+        q = measurement.control_robot_q_rad
+        dq = measurement.control_robot_dq_rad_s
+        sample_time = measurement.control_velocity_sample_time_s
+        if q is None or dq is None or sample_time is None:
+            raise ValueError("robot joint control-velocity snapshot is unavailable")
+        q = np.asarray(q, dtype=float)
+        dq = np.asarray(dq, dtype=float)
+        if (
+            q.shape != (6,)
+            or dq.shape != (6,)
+            or not np.all(np.isfinite(q))
+            or not np.all(np.isfinite(dq))
+            or not np.isfinite(sample_time)
+        ):
+            raise ValueError("robot joint control-velocity snapshot is nonfinite")
+        age_s = float(measurement.arrival_time_s - sample_time)
+        if age_s < -1.0e-9 or age_s > CONTROL_DT_S + 1.0e-9:
+            raise ValueError(
+                f"robot joint control-velocity snapshot is stale: age={age_s:.9g}s"
+            )
+        self._control_velocity_robot_model.set_configuration(q, dq)
+        jacobian = self._control_velocity_robot_model.rigid_offset_jacobian(
+            self.attachment_from_cuff.translation
+        )
+        twist = jacobian @ dq
+        snapshot = RobotControlVelocitySnapshot(
+            sample_time_s=float(sample_time),
+            linear_velocity_world_m_s=twist[:3].copy(),
+            angular_velocity_world_rad_s=twist[3:].copy(),
+            source=ROBOT_JOINT_CUFF_JACOBIAN_VELOCITY,
+        )
+        self.last_robot_control_velocity_snapshot = snapshot
+        return snapshot
+
+    def control_feedback_velocity_snapshot(
+        self, measurement: ControllerMeasurement
+    ) -> RobotControlVelocitySnapshot:
+        """Select the registered translational feedback measurement contract."""
+
+        if (
+            self.translational_velocity_feedback_source
+            == ROBOT_JOINT_CUFF_JACOBIAN_VELOCITY
+        ):
+            return self.robot_joint_control_velocity_snapshot(measurement)
+        snapshot = RobotControlVelocitySnapshot(
+            sample_time_s=float(measurement.sample_time_s),
+            linear_velocity_world_m_s=np.asarray(
+                measurement.attachment_velocity_m_s, dtype=float
+            ).copy(),
+            # Rotation remains on the existing processed path in both modes.
+            angular_velocity_world_rad_s=np.asarray(
+                measurement.attachment_angular_velocity_rad_s, dtype=float
+            ).copy(),
+            source=PROCESSED_POSE_HISTORY_VELOCITY,
+        )
+        self.last_robot_control_velocity_snapshot = snapshot
+        return snapshot
 
     def apply_measured_nominal_cartesian_control(
         self,
@@ -157,13 +267,16 @@ class SensorBoundaryStage4Plant(Stage4CoupledPlant):
     ) -> ExecutableCommandPreview:
         """Preview the measured-state command through the Stage-3 contract."""
 
+        control_velocity = self.control_feedback_velocity_snapshot(measurement)
         self._measured_robot_model.set_configuration(
             measurement.robot_q_rad, measurement.robot_dq_rad_s
         )
         return preview_executable_command(
             attachment_position_m=measurement.attachment_position_m,
             attachment_rotation_matrix=measurement.attachment_rotation_matrix,
-            attachment_velocity_m_s=measurement.attachment_velocity_m_s,
+            attachment_velocity_m_s=(
+                control_velocity.linear_velocity_world_m_s
+            ),
             attachment_angular_velocity_rad_s=(
                 measurement.attachment_angular_velocity_rad_s
             ),
@@ -186,7 +299,7 @@ class SensorBoundaryStage4Plant(Stage4CoupledPlant):
 
 
 def _finite_measurement(measurement: ControllerMeasurement) -> bool:
-    return all(
+    base_finite = all(
         np.all(np.isfinite(value))
         for value in (
             measurement.robot_q_rad,
@@ -198,6 +311,19 @@ def _finite_measurement(measurement: ControllerMeasurement) -> bool:
             measurement.cuff_force_vector_n,
             measurement.cuff_moment_vector_nm,
         )
+    )
+    control_values = (
+        measurement.control_robot_q_rad,
+        measurement.control_robot_dq_rad_s,
+    )
+    control_finite = all(
+        value is None or np.all(np.isfinite(value)) for value in control_values
+    )
+    timestamp = measurement.control_velocity_sample_time_s
+    return bool(
+        base_finite
+        and control_finite
+        and (timestamp is None or np.isfinite(timestamp))
     )
 
 
@@ -456,6 +582,17 @@ def run_sensor_realism_case(
     control_model_assertion_compute_s: list[float] = []
     executed_command_times_s: list[float] = []
     executed_command_force_total_n: list[np.ndarray] = []
+    control_target_velocity_world_m_s: list[np.ndarray] = []
+    control_processed_velocity_world_m_s: list[np.ndarray] = []
+    control_jacobian_velocity_world_m_s: list[np.ndarray] = []
+    control_selected_velocity_world_m_s: list[np.ndarray] = []
+    control_velocity_sample_times_s: list[float] = []
+    control_force_position_n: list[np.ndarray] = []
+    control_force_velocity_n: list[np.ndarray] = []
+    control_raw_force_position_n: list[np.ndarray] = []
+    control_raw_force_velocity_n: list[np.ndarray] = []
+    control_force_allocator_n: list[np.ndarray] = []
+    control_equivalent_history_force_delta_n: list[np.ndarray] = []
     safety_filter_times_s: list[float] = []
     safety_filter_statuses: list[str] = []
     safety_filter_lambda: list[float] = []
@@ -748,6 +885,50 @@ def run_sensor_realism_case(
         executed_command_times_s.append(float(current_truth.time_s))
         executed_command_force_total_n.append(
             executable_preview.command.force_total_n.copy()
+        )
+        target_velocity, _ = current_model.geometry.cuff_velocity(
+            reference.q_rad, reference.dq_rad_s
+        )
+        selected_velocity = plant.control_feedback_velocity_snapshot(
+            low_level_measurement
+        )
+        if (
+            low_level_measurement.control_robot_q_rad is not None
+            and low_level_measurement.control_robot_dq_rad_s is not None
+            and low_level_measurement.control_velocity_sample_time_s is not None
+        ):
+            jacobian_velocity = plant.robot_joint_control_velocity_snapshot(
+                low_level_measurement
+            ).linear_velocity_world_m_s
+        else:
+            jacobian_velocity = np.full(3, np.nan)
+        processed_velocity = low_level_measurement.attachment_velocity_m_s.copy()
+        control_target_velocity_world_m_s.append(target_velocity.copy())
+        control_processed_velocity_world_m_s.append(processed_velocity)
+        control_jacobian_velocity_world_m_s.append(jacobian_velocity.copy())
+        control_selected_velocity_world_m_s.append(
+            selected_velocity.linear_velocity_world_m_s.copy()
+        )
+        control_velocity_sample_times_s.append(selected_velocity.sample_time_s)
+        control_force_position_n.append(
+            executable_preview.command.force_position_n.copy()
+        )
+        control_force_velocity_n.append(
+            executable_preview.command.force_velocity_n.copy()
+        )
+        control_raw_force_position_n.append(
+            executable_preview.command.raw_force_position_n.copy()
+        )
+        control_raw_force_velocity_n.append(
+            executable_preview.command.raw_force_velocity_n.copy()
+        )
+        control_force_allocator_n.append(
+            executable_preview.command.force_allocator_n.copy()
+        )
+        # Exact OLD minus NEW raw velocity-feedback force at this snapshot.
+        control_equivalent_history_force_delta_n.append(
+            DEFAULT_LOW_LEVEL_COMMAND_GAINS.velocity_ns_per_m
+            * (jacobian_velocity - processed_velocity)
         )
         if high_level_cycle:
             high_level_fast_path_compute_s.append(
@@ -1087,6 +1268,15 @@ def run_sensor_realism_case(
             "mpc_state_delay_ms": 1000.0 * routing.mpc_state_delay_s,
             "low_level_delay_ms": 1000.0 * routing.low_level_delay_s,
             "low_level_timestamp_extrapolation": routing.extrapolate_low_level_to_arrival,
+            "translational_velocity_feedback_source": (
+                plant.translational_velocity_feedback_source
+            ),
+            "translational_velocity_feedback_gain_ns_per_m": (
+                DEFAULT_LOW_LEVEL_COMMAND_GAINS.velocity_ns_per_m
+            ),
+            "rotational_velocity_feedback_source": "processed_pose_history",
+            "control_velocity_frame": "WORLD",
+            "control_velocity_reference_point": "registered_cuff_center",
         },
         "preprocessing": {
             "shared_across_all_nonideal_cases": True,
@@ -1369,6 +1559,39 @@ def run_sensor_realism_case(
         "estimator_measurement_age_s": np.asarray(estimator_measurement_ages),
         "mpc_state_measurement_age_s": np.asarray(mpc_measurement_ages),
         "low_level_measurement_age_s": np.asarray(low_level_measurement_ages),
+        "control_velocity_target_world_m_s": np.asarray(
+            control_target_velocity_world_m_s
+        ),
+        "control_velocity_processed_world_m_s": np.asarray(
+            control_processed_velocity_world_m_s
+        ),
+        "control_velocity_joint_jacobian_world_m_s": np.asarray(
+            control_jacobian_velocity_world_m_s
+        ),
+        "control_velocity_selected_world_m_s": np.asarray(
+            control_selected_velocity_world_m_s
+        ),
+        "control_velocity_sample_time_s": np.asarray(
+            control_velocity_sample_times_s
+        ),
+        "executable_force_position_world_n": np.asarray(
+            control_force_position_n
+        ),
+        "executable_force_velocity_world_n": np.asarray(
+            control_force_velocity_n
+        ),
+        "executable_raw_force_position_world_n": np.asarray(
+            control_raw_force_position_n
+        ),
+        "executable_raw_force_velocity_world_n": np.asarray(
+            control_raw_force_velocity_n
+        ),
+        "executable_force_allocator_world_n": np.asarray(
+            control_force_allocator_n
+        ),
+        "equivalent_history_velocity_force_delta_world_n": np.asarray(
+            control_equivalent_history_force_delta_n
+        ),
         "measurement_new_sample": np.asarray(measurement_new, dtype=bool),
         "measured_cuff_force_world_n": measured_force_array,
         "measured_cuff_moment_world_nm": measured_moment_array,
