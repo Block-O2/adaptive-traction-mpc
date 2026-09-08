@@ -97,7 +97,7 @@ At the end of each task, report:
 
 ## Research Workflow Guardrails
 
-`docs/research/CURRENT_STATE.md` is the entry point for the current research state. Read it before beginning a research-workflow task.
+`stages/stage4_adaptive_control/docs/research/CURRENT_STATE.md` is the entry point for the current research state. Read it before beginning a research-workflow task.
 
 An approved Experiment Spec is the direct contract for implementation. If it conflicts with general suggestions or informal discussion, follow the approved spec.
 

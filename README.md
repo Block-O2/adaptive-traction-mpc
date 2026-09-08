@@ -62,6 +62,14 @@ The compact corrected High-ROM evidence is indexed in the
 and the [single-file professor report](stages/stage4_adaptive_control/results/engineering_validation/PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html)
 opens offline with all media embedded.
 
+Both final Phase-3A reporting tools work from tracked clean-clone inputs:
+`build_phase3a_corrected_professor_html.py` regenerates the self-contained
+professor report from a compact render-source package, and
+`build_phase3a_force_landscape.py` regenerates the dense analytic map,
+200/220/250 N margins, conditioning and acceleration-sensitivity views, plus
+corrected dynamic overlays. Neither tool requires historical progressive
+campaign directories or the local corrected raw campaign.
+
 ## Demos
 
 ### Fixed MPC vs Adaptive MPC

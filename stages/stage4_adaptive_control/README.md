@@ -62,6 +62,7 @@ result directory.
 - [Current research state](docs/research/CURRENT_STATE.md)
 - [Stage-4 robustness evidence](docs/research/STAGE4_EVIDENCE_MAP.md)
 - [Controller/report evidence](docs/research/STAGE4_REPORT_VALIDATION_EVIDENCE_MAP.md)
+- [Corrected High-ROM compact package](results/summaries/phase3a_corrected_high_rom/README.md)
 - [Repository migration record](docs/STAGE4_REPOSITORY_MIGRATION.md)
 
 The simulation is not a clinical safety, comfort, efficacy, certification, or

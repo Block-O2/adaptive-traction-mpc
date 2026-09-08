@@ -30,27 +30,26 @@ REPO = Path(__file__).resolve().parents[3]
 STAGE = REPO / "stages/stage4_adaptive_control"
 EVIDENCE = STAGE / "results/engineering_validation"
 SUMMARY = STAGE / "results/summaries/phase3a_corrected_high_rom"
+REPORT_SOURCES = SUMMARY / "report_sources"
 OUTPUT = EVIDENCE / "PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html"
 EVIDENCE_CHECKPOINT = "57633f4c6e3bd518f56964e7807e9d54dadb2058"
 INITIAL_Q_DEG = np.array([5.0, 10.0])
-CORRECTED = EVIDENCE / "corrected_baseline_p1_new_ab_20260908_v1"
-CONTROL_AB = EVIDENCE / "control_velocity_path_ab_20260908_v1"
 CASES = {
     "40/80": {
-        "rigid": CONTROL_AB / "hip40_knee80_new_velocity_dt0250us",
-        "P1": CORRECTED / "hip40_knee80_P1_new_velocity_dt0250us",
+        "rigid": REPORT_SOURCES / "40_80_rigid.npz",
+        "P1": REPORT_SOURCES / "40_80_p1.npz",
         "endpoint": [40.0, 80.0],
         "primary": True,
     },
     "90/120": {
-        "rigid": CORRECTED / "hip90_knee120_rigid_new_velocity_dt0250us",
-        "P1": CORRECTED / "hip90_knee120_P1_new_velocity_dt0250us",
+        "rigid": REPORT_SOURCES / "90_120_rigid.npz",
+        "P1": REPORT_SOURCES / "90_120_p1.npz",
         "endpoint": [90.0, 120.0],
         "primary": False,
     },
     "120/120": {
-        "rigid": CORRECTED / "hip120_knee120_rigid_new_velocity_dt0250us",
-        "P1": CORRECTED / "hip120_knee120_P1_new_velocity_dt0250us",
+        "rigid": REPORT_SOURCES / "120_120_rigid.npz",
+        "P1": REPORT_SOURCES / "120_120_p1.npz",
         "endpoint": [120.0, 120.0],
         "primary": False,
     },
@@ -72,16 +71,41 @@ def load_cases() -> dict[str, dict[str, Any]]:
     for label, config in CASES.items():
         arms = {}
         for arm_name in ("rigid", "P1"):
-            root = config[arm_name]
+            source = config[arm_name]
+            compact = load_npz(source)
             arms[arm_name] = {
-                "root": root,
-                "trace": load_npz(root / "trace.npz"),
-                "mechanics": load_npz(root / "mechanics.npz"),
-                "modes": load_npz(root / "modes.npz"),
+                "source": source,
+                "trace": {
+                    "time_s": compact["video_time_s"],
+                    "human_q_deg_god_view": compact["video_human_q_deg"],
+                    "human_q_ref_deg": compact["video_human_q_ref_deg"],
+                    "reference_phase_time_s": compact["video_reference_phase_time_s"],
+                    "executed_command_time_s": compact["video_time_s"],
+                    "executed_command_force_total_n": compact["video_command_force_n"],
+                    "robot_q_rad": compact["video_robot_q_rad"],
+                },
+                "mechanics": {
+                    "time_s": compact["video_time_s"],
+                    "force_R_world": compact["video_physical_force_n"],
+                    "deformation_H": compact["video_deformation_H"],
+                },
+                "modes": {
+                    "time_s": compact["video_time_s"],
+                    "mode": compact["video_mode"],
+                    "safety_filter_status": compact["video_safety_filter_status"],
+                },
+                "tracking": {
+                    "time_s": compact["tracking_time_s"],
+                    "q_deg": compact["tracking_q_deg"],
+                    "ref_deg": compact["tracking_ref_deg"],
+                },
+                "force_overlay": {
+                    "q_deg": compact["force_overlay_q_deg"],
+                    "force_n": compact["force_overlay_force_n"],
+                },
                 # The reviewed aggregate adds postprocessed physical progress
                 # to the hash-locked reused 40/80 Rigid result.
                 "result": reviewed[label][arm_name],
-                "run_config": json.loads((root / "run_config.json").read_text()),
             }
         cases[label] = {
             "label": label,
@@ -275,12 +299,11 @@ def tracking_payload(cases: dict[str, dict[str, Any]]) -> dict[str, Any]:
     for label, case in cases.items():
         output[label] = {"endpoint": case["endpoint"].tolist(), "arms": {}}
         for name in ("rigid", "P1"):
-            trace = case["arms"][name]["trace"]
-            idx = downsample_indices(len(trace["time_s"]), 700)
+            tracking = case["arms"][name]["tracking"]
             output[label]["arms"][name] = {
-                "t": np.round(trace["time_s"][idx], 4).tolist(),
-                "q": np.round(trace["human_q_deg_god_view"][idx], 3).tolist(),
-                "ref": np.round(trace["human_q_ref_deg"][idx], 3).tolist(),
+                "t": np.round(tracking["time_s"], 4).tolist(),
+                "q": np.round(tracking["q_deg"], 3).tolist(),
+                "ref": np.round(tracking["ref_deg"], 3).tolist(),
             }
     return output
 
@@ -307,9 +330,8 @@ def dynamic_force_payload(cases: dict[str, dict[str, Any]]) -> list[dict[str, An
     for label, case in cases.items():
         for arm_index, name in enumerate(("rigid", "P1")):
             arm = case["arms"][name]
-            idx = downsample_indices(len(arm["trace"]["time_s"]), 420)
-            q = arm["trace"]["human_q_deg_god_view"][idx]
-            force = np.linalg.norm(arm["mechanics"]["force_R_world"], axis=1)[idx]
+            q = arm["force_overlay"]["q_deg"]
+            force = arm["force_overlay"]["force_n"]
             curves.append({
                 "name": f"{label} {'Rigid NEW' if name == 'rigid' else 'P1 NEW'}",
                 "color": colors[label][arm_index],
@@ -441,11 +463,14 @@ def main() -> None:
     source_hashes = {}
     for config in CASES.values():
         for name in ("rigid", "P1"):
-            root = config[name]
-            for filename in ("trace.npz", "mechanics.npz", "modes.npz", "result.json", "run_config.json"):
-                path = root / filename
-                source_hashes[str(path.relative_to(REPO))] = sha256(path)
-    for path in (SUMMARY / "dense_force_maps.npz", SUMMARY / "corrected_baseline_comparison.json", SUMMARY / "PROVENANCE.json"):
+            path = config[name]
+            source_hashes[str(path.relative_to(REPO))] = sha256(path)
+    for path in (
+        REPORT_SOURCES / "manifest.json",
+        SUMMARY / "dense_force_maps.npz",
+        SUMMARY / "corrected_baseline_comparison.json",
+        SUMMARY / "PROVENANCE.json",
+    ):
         source_hashes[str(path.relative_to(REPO))] = sha256(path)
     sys.path.insert(0, str(STAGE / "scripts"))
     import run_progressive_120_120_ab as runner

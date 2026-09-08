@@ -250,11 +250,14 @@ reproduction commands are in
 [`STAGE4_EVIDENCE_MAP.md`](STAGE4_EVIDENCE_MAP.md). Cleanup decisions are in
 [`STAGE4_REPOSITORY_MIGRATION.md`](../STAGE4_REPOSITORY_MIGRATION.md).
 
-The corrected High-ROM compact report, comparison JSON, source hashes, dense
-force map, and provenance are in
+The corrected High-ROM compact report, comparison JSON, clean-clone/external
+archive checksum split, dense force map, compact render sources, pre-correction
+diagnostic summaries, and provenance are in
 [`phase3a_corrected_high_rom`](../../results/summaries/phase3a_corrected_high_rom/README.md).
 The professor-facing corrected comparison is a single offline file:
 [`PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html`](../../results/engineering_validation/PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html).
+The final HTML and force-landscape builders consume only tracked clean-clone
+inputs; historical raw campaigns are not runtime dependencies of either tool.
 
 Stage 4 and its professor-facing report validation are now closed for this
 repository checkpoint. The next phase is hardware preparation: validate the
