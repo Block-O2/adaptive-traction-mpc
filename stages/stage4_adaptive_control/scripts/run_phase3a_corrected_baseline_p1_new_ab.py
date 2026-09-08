@@ -272,10 +272,11 @@ def run_one(spec: dict, index: int) -> None:
             terminate_on_structural_events=True,
             control_model_cycle_assertion=model_lock,
         )
-    except Exception:
+    except (Exception, KeyboardInterrupt):
         exception = traceback.format_exc()
     elapsed = time.perf_counter() - started
     if not plants:
+        (output / "exception.txt").write_text(exception or "plant_not_created\n")
         raise RuntimeError(exception or "plant_not_created")
     plant = plants[0]
     np.savez_compressed(output / "initial_state.npz", **plant.initial_state)
@@ -512,6 +513,25 @@ def build_report(spec: dict) -> None:
     (ROOT / "REPORT.md").write_text("\n".join(lines) + "\n")
 
 
+def completed_run_count(spec: dict, root: Path = ROOT) -> int:
+    """Count complete ordered results and reject ambiguous partial directories."""
+
+    completed = 0
+    while completed < len(spec["runs"]):
+        output = root / spec["runs"][completed]["id"]
+        if not output.exists():
+            break
+        result = output / "result.json"
+        if not result.is_file():
+            raise RuntimeError(
+                "incomplete run directory has no result.json: "
+                f"{output}. Do not delete or rerun automatically; preserve it as "
+                "an incomplete attempt and resolve provenance first."
+            )
+        completed += 1
+    return completed
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--freeze", action="store_true")
@@ -551,13 +571,10 @@ def main() -> None:
     assert sha(Path(__file__)) == registration["runner_sha256"]
     for relative, expected in registration["implementation_hashes"].items():
         assert sha(REPO / relative) == expected, relative
-    completed = 0
-    while completed < len(spec["runs"]) and (
-        ROOT / spec["runs"][completed]["id"]
-    ).exists():
-        prior = read(ROOT / spec["runs"][completed]["id"] / "result.json")
-        completed += 1
-        if completed < len(spec["runs"]):
+    completed = completed_run_count(spec)
+    for prior_index in range(completed):
+        prior = read(ROOT / spec["runs"][prior_index]["id"] / "result.json")
+        if prior_index + 1 < len(spec["runs"]):
             assert prior["admit_next"], "campaign stopped; no further run admitted"
     if args.report:
         assert completed == len(spec["runs"]), "all five new registered runs required"

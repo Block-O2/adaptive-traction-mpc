@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 
 REPO = Path(__file__).resolve().parents[3]
@@ -125,3 +126,13 @@ def test_physical_progress_is_separate_from_formal_classification() -> None:
     assert result["return_percent"] > 99.0
     assert result["target_reached_within_retained_tolerance"]
     assert not result["return_reached_within_retained_tolerance"]
+
+
+def test_partial_run_directory_is_not_mistaken_for_completion(tmp_path) -> None:
+    runner = _load_runner()
+    spec = json.loads(SPEC.read_text())
+    partial = tmp_path / spec["runs"][0]["id"]
+    partial.mkdir()
+    (partial / "started.json").write_text("{}\n")
+    with pytest.raises(RuntimeError, match="incomplete run directory"):
+        runner.completed_run_count(spec, tmp_path)
