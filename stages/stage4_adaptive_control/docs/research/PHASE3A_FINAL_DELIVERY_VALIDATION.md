@@ -1,6 +1,6 @@
 # Phase-3A final repository delivery validation
 
-Date: 2026-09-08
+Date: 2026-09-09
 
 Phase-2 provenance source commit: `5b91ea37a07fd84f5ff5c07e117ed3ebb6b6688e`
 
@@ -16,10 +16,12 @@ or scientific result.
 |---|---|
 | Active Stage-4 regression | **PASS** — 252 passed in 58.52 s; 0 failed; 0 errors |
 | Isolated temporary-worktree regression | **PASS** — 252 passed in 66.84 s; 0 failed; 0 errors |
+| Report-only reproducibility regression | **PASS** — 4 passed in 17.83 s after adding the matched interaction-force plots |
 | Clean-worktree input boundary | **PASS** — detached Phase-2 source tree plus only the reviewed tracked REPORT patch; no local untracked evidence used |
 | `CLEAN_CLONE_SHA256SUMS` | **PASS** — 54/54 expected Git files verified after this record was added |
-| Professor HTML regeneration | **PASS** — tracked compact inputs only; deterministic SHA-256 `0404b455b13375bb07d530c41b96f22142d3984fe85fd98fbb76c5b4b12f8763` |
-| Professor HTML offline checks | **PASS** — 1,822,292 bytes; 3 embedded videos; 3 decoded videos; 3 posters; 3 canvases; 0 external URLs |
+| Professor HTML regeneration | **PASS** — tracked compact inputs only; deterministic SHA-256 `d480e25ae692de1d3d27303c8bf3ab5e6bb58c8ca73d2698dbe898118fae4bce` |
+| Professor HTML offline checks | **PASS** — 1,853,683 bytes; 3 embedded videos; 3 decoded videos; 3 posters; 3 canvases; 3 matched physical-force plots; 0 external URLs |
+| Interaction-force plots | **PASS** — corrected 40/80, 90/120, and 120/120 only; Rigid NEW and P1 NEW physical translational cuff-force norms; common 0–150 N axis; no reference lines |
 | Professor HTML browser visual inspection | **NOT_RUN** — the available browser surface rejected local `file://` URLs under its security policy; no workaround was attempted |
 | Force-landscape regeneration | **PASS** — 126 x 126 grid; 0.0611068745–182.2979845 N; no 200/220/250 N crossing; reference array match PASS |
 | Markdown link/image audit | **PASS** — 198 Markdown files; 110 local links/images checked; 0 broken candidates |

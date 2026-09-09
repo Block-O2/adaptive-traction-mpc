@@ -342,11 +342,119 @@ def dynamic_force_payload(cases: dict[str, dict[str, Any]]) -> list[dict[str, An
     return curves
 
 
+def physical_force_time_payload(
+    cases: dict[str, dict[str, Any]],
+) -> tuple[dict[str, dict[str, Any]], float]:
+    payload: dict[str, dict[str, Any]] = {}
+    maximum = 0.0
+    for label, case in cases.items():
+        arms = {}
+        for name in ("rigid", "P1"):
+            mechanics = case["arms"][name]["mechanics"]
+            time_s = np.asarray(mechanics["time_s"], dtype=float)
+            force_n = np.linalg.norm(
+                np.asarray(mechanics["force_R_world"], dtype=float), axis=1
+            )
+            assert time_s.ndim == 1 and force_n.shape == time_s.shape
+            assert np.all(np.isfinite(time_s)) and np.all(np.isfinite(force_n))
+            assert np.all(np.diff(time_s) >= 0.0) and np.all(force_n >= 0.0)
+            maximum = max(maximum, float(np.max(force_n)))
+            arms[name] = {"time_s": time_s, "force_n": force_n}
+        payload[label] = {"arms": arms}
+    common_y_max_n = max(10.0, 10.0 * float(np.ceil(maximum / 10.0)))
+    return payload, common_y_max_n
+
+
+def physical_force_time_svg(
+    label: str,
+    payload: dict[str, Any],
+    common_y_max_n: float,
+) -> str:
+    width, height = 1080.0, 360.0
+    left, right, top, bottom = 88.0, 28.0, 30.0, 66.0
+    plot_width = width - left - right
+    plot_height = height - top - bottom
+    duration_s = max(
+        float(payload["arms"][name]["time_s"][-1]) for name in ("rigid", "P1")
+    )
+
+    def x_position(value: float) -> float:
+        return left + plot_width * value / duration_s
+
+    def y_position(value: float) -> float:
+        return top + plot_height * (1.0 - value / common_y_max_n)
+
+    elements = [
+        f'<svg class="force-time-svg" viewBox="0 0 {width:.0f} {height:.0f}" '
+        f'role="img" aria-label="{label} physical translational cuff-force norm over time">',
+        '<rect width="100%" height="100%" fill="#fff"/>',
+    ]
+    for value in np.linspace(0.0, common_y_max_n, 6):
+        y = y_position(float(value))
+        elements.append(
+            f'<line x1="{left:.2f}" y1="{y:.2f}" x2="{left + plot_width:.2f}" '
+            f'y2="{y:.2f}" stroke="#e3e7ea" stroke-width="1"/>'
+        )
+        elements.append(
+            f'<text x="{left - 12:.2f}" y="{y + 4:.2f}" text-anchor="end" '
+            f'class="axis-label">{value:.0f}</text>'
+        )
+    for value in np.linspace(0.0, duration_s, 6):
+        x = x_position(float(value))
+        elements.append(
+            f'<line x1="{x:.2f}" y1="{top:.2f}" x2="{x:.2f}" '
+            f'y2="{top + plot_height:.2f}" stroke="#eef1f3" stroke-width="1"/>'
+        )
+        elements.append(
+            f'<text x="{x:.2f}" y="{top + plot_height + 24:.2f}" '
+            f'text-anchor="middle" class="axis-label">{value:.1f}</text>'
+        )
+    for name, color in (("rigid", "#1f5f99"), ("P1", "#c53f4b")):
+        arm = payload["arms"][name]
+        points = " ".join(
+            f"{x_position(float(t)):.2f},{y_position(float(f)):.2f}"
+            for t, f in zip(arm["time_s"], arm["force_n"], strict=True)
+        )
+        elements.append(
+            f'<polyline data-force-series="physical-translational-norm" '
+            f'points="{points}" fill="none" stroke="{color}" stroke-width="2.6" '
+            f'stroke-linejoin="round" stroke-linecap="round"/>'
+        )
+    elements.extend(
+        [
+            f'<rect x="{left:.2f}" y="{top:.2f}" width="{plot_width:.2f}" '
+            f'height="{plot_height:.2f}" fill="none" stroke="#89949b" stroke-width="1"/>',
+            f'<text x="{left + plot_width / 2:.2f}" y="{height - 14:.2f}" '
+            'text-anchor="middle" class="axis-title">Time [s]</text>',
+            f'<text x="20" y="{top + plot_height / 2:.2f}" text-anchor="middle" '
+            'class="axis-title" transform="rotate(-90 20 '
+            f'{top + plot_height / 2:.2f})">Physical translational cuff-force norm [N]</text>',
+            f'<line x1="{left + 20:.2f}" y1="16" x2="{left + 48:.2f}" y2="16" '
+            'stroke="#1f5f99" stroke-width="3"/>',
+            f'<text x="{left + 56:.2f}" y="20" class="legend-label">Rigid NEW</text>',
+            f'<line x1="{left + 170:.2f}" y1="16" x2="{left + 198:.2f}" y2="16" '
+            'stroke="#c53f4b" stroke-width="3"/>',
+            f'<text x="{left + 206:.2f}" y="20" class="legend-label">P1 NEW</text>',
+            "</svg>",
+        ]
+    )
+    return (
+        f'<figure class="force-time-card"><figcaption><b>{label}</b> · matched corrected baseline</figcaption>'
+        + "".join(elements)
+        + "</figure>"
+    )
+
+
 def build_html(cases: dict[str, dict[str, Any]], videos: dict[str, dict[str, Any]], source_hashes: dict[str, str]) -> str:
     summary = summary_data(cases)
     tracking = tracking_payload(cases)
     force_map = force_map_payload()
     curves = dynamic_force_payload(cases)
+    force_time, force_time_y_max_n = physical_force_time_payload(cases)
+    force_time_blocks = [
+        physical_force_time_svg(label, force_time[label], force_time_y_max_n)
+        for label in CASES
+    ]
     video_blocks = []
     captions = {
         "40/80": "Rigid NEW 已消除旧路径下的 BRAKE；P1 NEW 没有额外可行性优势，主要降低 force slew，但跟踪与稳定残差更大。",
@@ -372,29 +480,37 @@ def build_html(cases: dict[str, dict[str, Any]], videos: dict[str, dict[str, Any
         "source_hashes": source_hashes,
         "videos": {key: {k: v for k, v in value.items() if not k.endswith("uri")} for key, value in videos.items()},
         "force_map": {"min_n": force_map["minimum_n"], "max_n": force_map["maximum_n"], "source": force_map["source"]},
+        "interaction_force_over_time": {
+            "cases": list(CASES),
+            "quantity": "physical translational cuff-force norm",
+            "common_y_axis_n": [0.0, force_time_y_max_n],
+            "source": "tracked corrected compact report sources",
+        },
     }, separators=(",", ":"))
     template = r'''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Phase 3A｜Corrected High-ROM Baseline</title>
-<style>:root{--ink:#15181b;--muted:#56616a;--line:#d9dee2;--paper:#fff;--wash:#f5f7f8;--blue:#1f5f99;--red:#c53f4b;--green:#287651;--amber:#a4650b}*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font:16px/1.68 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif}nav{position:sticky;top:0;z-index:5;display:flex;gap:18px;overflow:auto;padding:11px 22px;background:#fffffff2;border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}nav a{color:var(--muted);text-decoration:none;font-size:13px;white-space:nowrap}main{max-width:1180px;margin:auto;padding:30px 24px 80px}header{padding:50px 0 36px;border-bottom:1px solid var(--line)}h1{font-size:clamp(38px,6vw,68px);line-height:1.07;margin:10px 0 18px;max-width:1050px}h2{font-size:clamp(27px,4vw,42px);line-height:1.18;margin:0 0 12px}h3{font-size:20px;margin:0 0 8px}.kicker{color:var(--green);font-size:12px;font-weight:760;letter-spacing:.08em}.lead{font-size:20px;color:#344049;max-width:900px}.scope{display:inline-block;padding:8px 11px;background:var(--wash);border:1px solid var(--line);font-size:13px}.section{padding:52px 0;border-bottom:1px solid var(--line)}.intro{max-width:900px;color:var(--muted);margin:0 0 26px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.flow,.card{border:1px solid var(--line);background:#fff;padding:20px;box-shadow:0 7px 20px #24313a0c}.flow-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:16px 0}.node{padding:7px 9px;background:var(--wash);border:1px solid var(--line);font-size:13px}.arrow{color:#75828a}.good{border-left:4px solid var(--green)}.history{border-left:4px solid var(--amber)}.video-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.video-card{padding:15px;border:1px solid var(--line);background:var(--wash)}.video-card.primary{grid-column:1/-1;border-color:#98a7b1}.video-card video{display:block;width:100%;margin:9px 0 11px;background:#111}.video-card p{margin:0;color:var(--muted)}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.toolbar button{border:1px solid var(--line);background:#fff;padding:8px 11px;color:var(--muted);font:inherit;cursor:pointer}.toolbar button.active,.toolbar button:hover{border-color:#75838c;color:#111;background:#f0f3f5}.canvas{border:1px solid var(--line);padding:10px;background:#fff;overflow:hidden}canvas{display:block;width:100%;height:auto}.landscape{display:grid;grid-template-columns:minmax(0,1fr) 255px;gap:18px}.controls{border:1px solid var(--line);padding:15px;background:var(--wash)}.controls label{display:block;font-size:13px;margin:7px 0}.note{padding:12px 14px;background:#fff8e8;border-left:4px solid var(--amber)}.table-wrap{overflow:auto;border:1px solid var(--line);margin:18px 0}table{border-collapse:collapse;width:100%;min-width:980px}th,td{padding:12px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}thead th{font-size:12px;color:var(--muted);background:var(--wash)}tbody th{white-space:nowrap}td small{display:block;color:var(--muted);margin-top:4px}.case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.case{background:var(--wash);padding:15px;border-top:3px solid var(--line)}.case:nth-child(2){border-color:var(--green)}.bars{display:grid;gap:11px}.bar-row{display:grid;grid-template-columns:230px 1fr 95px;align-items:center;gap:12px}.track{height:14px;background:#e7ebee}.fill{height:100%;background:var(--blue)}.fill.tiny{min-width:2px}.fine{font-size:12px;color:#68747c}.diagnostic{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch}.diagnostic .card{box-shadow:none}.big-arrow{align-self:center;font-size:32px;color:#78848b}.conclusion{font-size:21px;max-width:920px}.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:9px}.swatch{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px}details{margin-top:16px;color:var(--muted)}code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}@media(max-width:820px){.grid2,.video-grid,.landscape,.case-grid,.diagnostic{grid-template-columns:1fr}.video-card.primary{grid-column:auto}.big-arrow{transform:rotate(90deg);justify-self:center}.bar-row{grid-template-columns:1fr}.scope{display:block}main{padding:20px 14px 60px}.section{padding:42px 0}}</style></head><body>
-<nav><a href="#correction">测量契约修正</a><a href="#motion">同步运动</a><a href="#tracking">跟踪</a><a href="#force">力图谱</a><a href="#results">匹配结果</a><a href="#interpret">力分解</a><a href="#history">诊断历史</a><a href="#conclusion">结论</a></nav><main>
+<style>:root{--ink:#15181b;--muted:#56616a;--line:#d9dee2;--paper:#fff;--wash:#f5f7f8;--blue:#1f5f99;--red:#c53f4b;--green:#287651;--amber:#a4650b}*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font:16px/1.68 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif}nav{position:sticky;top:0;z-index:5;display:flex;gap:18px;overflow:auto;padding:11px 22px;background:#fffffff2;border-bottom:1px solid var(--line);backdrop-filter:blur(10px)}nav a{color:var(--muted);text-decoration:none;font-size:13px;white-space:nowrap}main{max-width:1180px;margin:auto;padding:30px 24px 80px}header{padding:50px 0 36px;border-bottom:1px solid var(--line)}h1{font-size:clamp(38px,6vw,68px);line-height:1.07;margin:10px 0 18px;max-width:1050px}h2{font-size:clamp(27px,4vw,42px);line-height:1.18;margin:0 0 12px}h3{font-size:20px;margin:0 0 8px}.kicker{color:var(--green);font-size:12px;font-weight:760;letter-spacing:.08em}.lead{font-size:20px;color:#344049;max-width:900px}.scope{display:inline-block;padding:8px 11px;background:var(--wash);border:1px solid var(--line);font-size:13px}.section{padding:52px 0;border-bottom:1px solid var(--line)}.intro{max-width:900px;color:var(--muted);margin:0 0 26px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.flow,.card{border:1px solid var(--line);background:#fff;padding:20px;box-shadow:0 7px 20px #24313a0c}.flow-line{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:16px 0}.node{padding:7px 9px;background:var(--wash);border:1px solid var(--line);font-size:13px}.arrow{color:#75828a}.good{border-left:4px solid var(--green)}.history{border-left:4px solid var(--amber)}.video-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.video-card{padding:15px;border:1px solid var(--line);background:var(--wash)}.video-card.primary{grid-column:1/-1;border-color:#98a7b1}.video-card video{display:block;width:100%;margin:9px 0 11px;background:#111}.video-card p{margin:0;color:var(--muted)}.force-time-grid{display:grid;gap:18px}.force-time-card{margin:0;padding:16px;border:1px solid var(--line);background:var(--wash)}.force-time-card figcaption{margin-bottom:9px;color:var(--muted)}.force-time-svg{display:block;width:100%;height:auto;background:#fff;border:1px solid var(--line)}.force-time-svg text{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Segoe UI",Arial,sans-serif;fill:var(--muted)}.force-time-svg .axis-label{font-size:12px}.force-time-svg .axis-title{font-size:13px;font-weight:650;fill:var(--ink)}.force-time-svg .legend-label{font-size:12px;fill:var(--ink)}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.toolbar button{border:1px solid var(--line);background:#fff;padding:8px 11px;color:var(--muted);font:inherit;cursor:pointer}.toolbar button.active,.toolbar button:hover{border-color:#75838c;color:#111;background:#f0f3f5}.canvas{border:1px solid var(--line);padding:10px;background:#fff;overflow:hidden}canvas{display:block;width:100%;height:auto}.landscape{display:grid;grid-template-columns:minmax(0,1fr) 255px;gap:18px}.controls{border:1px solid var(--line);padding:15px;background:var(--wash)}.controls label{display:block;font-size:13px;margin:7px 0}.note{padding:12px 14px;background:#fff8e8;border-left:4px solid var(--amber)}.table-wrap{overflow:auto;border:1px solid var(--line);margin:18px 0}table{border-collapse:collapse;width:100%;min-width:980px}th,td{padding:12px 11px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}thead th{font-size:12px;color:var(--muted);background:var(--wash)}tbody th{white-space:nowrap}td small{display:block;color:var(--muted);margin-top:4px}.case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.case{background:var(--wash);padding:15px;border-top:3px solid var(--line)}.case:nth-child(2){border-color:var(--green)}.bars{display:grid;gap:11px}.bar-row{display:grid;grid-template-columns:230px 1fr 95px;align-items:center;gap:12px}.track{height:14px;background:#e7ebee}.fill{height:100%;background:var(--blue)}.fill.tiny{min-width:2px}.fine{font-size:12px;color:#68747c}.diagnostic{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch}.diagnostic .card{box-shadow:none}.big-arrow{align-self:center;font-size:32px;color:#78848b}.conclusion{font-size:21px;max-width:920px}.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:9px}.swatch{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px}details{margin-top:16px;color:var(--muted)}code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}@media(max-width:820px){.grid2,.video-grid,.landscape,.case-grid,.diagnostic{grid-template-columns:1fr}.video-card.primary{grid-column:auto}.big-arrow{transform:rotate(90deg);justify-self:center}.bar-row{grid-template-columns:1fr}.scope{display:block}main{padding:20px 14px 60px}.section{padding:42px 0}}</style></head><body>
+<nav><a href="#correction">测量契约修正</a><a href="#motion">同步运动</a><a href="#force-time">交互力时序</a><a href="#tracking">跟踪</a><a href="#force">力图谱</a><a href="#results">匹配结果</a><a href="#interpret">力分解</a><a href="#history">诊断历史</a><a href="#conclusion">结论</a></nav><main>
 <header><div class="kicker">Phase 3A · Corrected High-ROM Baseline</div><h1>分离控制速度与估计速度后的 High-ROM 结果</h1><p class="lead">新的当前解释基于同一 Fixed MPC、同一 140 Ns/m 增益、同一 Safety Filter / BRAKE 和同一 200 N 工程目标。修正只改变 robot 低层平移速度反馈的测量来源；Human reconstruction、estimator 与 MPC measurement 仍保留原有平滑历史路径。</p><div class="scope">0.25 ms physics dt · 200 Hz control update · seed 44104 · 相同 Human/robot/geometry/trajectory · 仿真证据</div></header>
 
 <section class="section" id="correction"><div class="kicker">A · 测量契约修正</div><h2>同一增益，改用 cuff-center 的低延迟 robot twist</h2><div class="grid2"><article class="flow history"><h3>旧执行路径｜诊断历史</h3><div class="flow-line"><span class="node">robot cuff pose</span><span class="arrow">→</span><span class="node">8 Hz low-pass</span><span class="arrow">→</span><span class="node">120 ms causal fit</span><span class="arrow">→</span><span class="node">140 Ns/m</span></div><p>该 history-derived velocity 进入 robot 低层 damping feedback，在旧 40/80 与 120/120 边界分别形成 83.14 N 与 135.49 N 的 velocity-feedback force，并参与触发 200 N executable boundary。</p></article><article class="flow good"><h3>NEW 执行路径｜当前基线</h3><div class="flow-line"><span class="node">RobotState q,dq</span><span class="arrow">→</span><span class="node">cuff-center Jacobian</span><span class="arrow">→</span><span class="node">WORLD twist</span><span class="arrow">→</span><span class="node">同一 140 Ns/m</span></div><p>控制反馈在既有 200 Hz 边界采样并 ZOH 5 ms；screening、Safety Filter、BRAKE 与最终执行共享同一 snapshot。旧平滑路径继续服务 Human state reconstruction、identification 与 MPC。</p></article></div><p class="note">Human MPC、140 Ns/m 增益、Safety Filter、BRAKE、200 N 工程目标、P1 参数、模型与轨迹均未改变。该结果支持测量契约修正后的仿真解释，不外推到临床或硬件能力。</p></section>
 
 <section class="section" id="motion"><div class="kicker">B · 代表性运动</div><h2>Rigid NEW 与 P1 NEW 同步回放</h2><p class="intro">视频直接从冻结的 Human/robot state 渲染，没有推进 dynamics、调用 MPC 或生成新轨迹。每组共用时间轴，叠加 q、reference、tracking error、物理力、指令力、mode、reference progress 与 P1 deformation。</p><div class="video-grid">@@VIDEOS@@</div></section>
 
-<section class="section" id="tracking"><div class="kicker">C · 跟踪行为</div><h2>q1-q2 路径与同步时间序列</h2><p class="intro">正式 COMPLETE / SAFE_INCOMPLETE 分类完整保留；物理去程、回程比例与残差同时显示，避免把严格 0.068969° 容差误读为“Human 没有完成运动”。</p><div class="toolbar" id="trackButtons"></div><div class="toolbar"><button id="trackPlay">暂停</button><button id="trackRestart">重新开始</button><span class="scope" id="trackTime"></span></div><div class="canvas"><canvas id="trackingCanvas" width="1120" height="570"></canvas></div><div class="legend"><span><i class="swatch" style="background:#272b2e"></i>reference</span><span><i class="swatch" style="background:#1f5f99"></i>Rigid NEW</span><span><i class="swatch" style="background:#c53f4b"></i>P1 NEW</span></div></section>
+<section class="section" id="force-time"><div class="kicker">C · Interaction Force Over Time</div><h2>Physical translational cuff-force norm</h2><p class="intro">每张图仅显示 strictly matched corrected baseline 中的物理平移 cuff-force norm：Rigid NEW 与 P1 NEW 共用时间轴。三张图采用相同的 <b>0–@@FORCE_TIME_Y_MAX@@ N</b> 纵轴范围；不绘制 command force，也不加入 200 N 或 220 N 参考线。</p><div class="force-time-grid">@@FORCE_TIME_PLOTS@@</div><div class="legend"><span><i class="swatch" style="background:#1f5f99"></i>Rigid NEW</span><span><i class="swatch" style="background:#c53f4b"></i>P1 NEW</span></div></section>
 
-<section class="section" id="force"><div class="kicker">D · Engineering force landscape</div><h2>解析准静态曲面与观测动态轨迹</h2><p class="intro">曲面是 nominal Human V2 与注册 1:1 cuff-aware allocator 在 dq=0、ddq=0 下的 model-derived mechanics。动态曲线是 corrected closed-loop 轨迹中观测到的物理力，依赖速度、历史与执行状态；它们不是 q1、q2 的唯一函数。</p><p class="note"><b>200 N registered simulation engineering target — not a clinical safety threshold.</b> 该目标也不是已验证硬件极限。</p><div class="landscape"><div><div class="canvas"><canvas id="forceCanvas" width="900" height="620"></canvas></div><div class="canvas" style="margin-top:14px"><canvas id="marginCanvas" width="900" height="430"></canvas></div></div><aside class="controls"><h3>动态轨迹</h3><div id="curveControls"></div><p class="fine">拖动上图旋转，滚轮缩放。下图按 q1-q2 显示准静态 force map，并实际计算 200/220/250 N contour crossing。冻结 domain 内最大值 182.30 N，因此三条零余量 contour 均不存在。</p></aside></div></section>
+<section class="section" id="tracking"><div class="kicker">D · 跟踪行为</div><h2>q1-q2 路径与同步时间序列</h2><p class="intro">正式 COMPLETE / SAFE_INCOMPLETE 分类完整保留；物理去程、回程比例与残差同时显示，避免把严格 0.068969° 容差误读为“Human 没有完成运动”。</p><div class="toolbar" id="trackButtons"></div><div class="toolbar"><button id="trackPlay">暂停</button><button id="trackRestart">重新开始</button><span class="scope" id="trackTime"></span></div><div class="canvas"><canvas id="trackingCanvas" width="1120" height="570"></canvas></div><div class="legend"><span><i class="swatch" style="background:#272b2e"></i>reference</span><span><i class="swatch" style="background:#1f5f99"></i>Rigid NEW</span><span><i class="swatch" style="background:#c53f4b"></i>P1 NEW</span></div></section>
 
-<section class="section" id="results"><div class="kicker">E · Corrected matched comparison</div><h2>可行性边界消失后，P1 的独立作用</h2><div class="table-wrap"><table><thead><tr><th>轨迹</th><th>Rigid NEW</th><th>P1 NEW</th><th>tracking RMSE<br>R/P</th><th>physical peak<br>R/P</th><th>slew RMS<br>R/P N/s</th><th>moment peak<br>R/P Nm</th><th>SF/FI/BRAKE/NSA<br>Rigid / P1</th></tr></thead><tbody>@@ROWS@@</tbody></table></div><div class="case-grid"><article class="case"><h3>40/80</h3><p>Rigid NEW 已 COMPLETE。P1 NEW 没有新的 feasibility 优势；其 force slew 更低，但 tracking RMSE 与 settling residual 更大。</p></article><article class="case"><h3>90/120</h3><p>两侧均执行近完整往返且无 BRAKE。P1 NEW 将 physical peak 降低 11.40 N、moment peak 降低 7.67 Nm，并将 tracking RMSE 改善 0.185°。</p></article><article class="case"><h3>120/120</h3><p>两侧都执行接近完整轨迹且无 BRAKE。旧 rigid BRAKE 与旧 P1 约 222 N transient 均未持续到 corrected baseline；P1 NEW 主要降低 slew，并略微增加 tracking/settling 误差。</p></article></div><h3 style="margin-top:28px">执行层力链（RMS/peak 或 peak，N）</h3><div class="table-wrap"><table><thead><tr><th>case</th><th>Human demand<br>RMS/peak</th><th>position F<br>peak</th><th>velocity F<br>peak</th><th>nominal executable<br>peak</th><th>command<br>peak</th><th>physical<br>RMS/peak</th><th>P1 deformation<br>translation/rotation</th></tr></thead><tbody>@@DETAIL@@</tbody></table></div></section>
+<section class="section" id="force"><div class="kicker">E · Engineering force landscape</div><h2>解析准静态曲面与观测动态轨迹</h2><p class="intro">曲面是 nominal Human V2 与注册 1:1 cuff-aware allocator 在 dq=0、ddq=0 下的 model-derived mechanics。动态曲线是 corrected closed-loop 轨迹中观测到的物理力，依赖速度、历史与执行状态；它们不是 q1、q2 的唯一函数。</p><p class="note"><b>200 N registered simulation engineering target — not a clinical safety threshold.</b> 该目标也不是已验证硬件极限。</p><div class="landscape"><div><div class="canvas"><canvas id="forceCanvas" width="900" height="620"></canvas></div><div class="canvas" style="margin-top:14px"><canvas id="marginCanvas" width="900" height="430"></canvas></div></div><aside class="controls"><h3>动态轨迹</h3><div id="curveControls"></div><p class="fine">拖动上图旋转，滚轮缩放。下图按 q1-q2 显示准静态 force map，并实际计算 200/220/250 N contour crossing。冻结 domain 内最大值 182.30 N，因此三条零余量 contour 均不存在。</p></aside></div></section>
 
-<section class="section" id="interpret"><div class="kicker">F · Model-based interpretability</div><h2>平均负担来自静态 Human mechanics，旧边界超额来自执行速度反馈</h2><p class="intro">以下是冻结四条旧 Rigid 轨迹的 Human-level vector decomposition 跨轨迹 RMS 中位数。分量保留向量方向，norm 比值不可当作可相加百分比。</p><div class="bars"><div class="bar-row"><b>static Human mechanics</b><div class="track"><div class="fill" style="width:69.5%"></div></div><span>97.26 N</span></div><div class="bar-row"><b>nominal reference dynamics</b><div class="track"><div class="fill tiny" style="width:.1%"></div></div><span>0.10 N</span></div><div class="bar-row"><b>tracking feedback / correction</b><div class="track"><div class="fill" style="width:5.8%"></div></div><span>8.12 N</span></div></div><div class="grid2" style="margin-top:24px"><article class="card"><h3>解析力图</h3><p>0–125° 的 q1-q2 稠密图中，注册 allocator 的 quasistatic translational force 为 0.06–182.30 N；整个有效 domain 都低于 200 N。nominal reference-dynamic increment 在冻结慢轨迹中可忽略。</p></article><article class="card"><h3>旧边界机制</h3><p>旧 40/80 与 120/120 在 FILTER_INFEASIBLE 前的 robot velocity-feedback force 分别为 83.14 N 和 135.49 N。corrected 测量路径下，对应新轨迹的 velocity-feedback peak 仅为 1.39 N 与 2.04 N，且不再发生 BRAKE。</p></article></div></section>
+<section class="section" id="results"><div class="kicker">F · Corrected matched comparison</div><h2>可行性边界消失后，P1 的独立作用</h2><div class="table-wrap"><table><thead><tr><th>轨迹</th><th>Rigid NEW</th><th>P1 NEW</th><th>tracking RMSE<br>R/P</th><th>physical peak<br>R/P</th><th>slew RMS<br>R/P N/s</th><th>moment peak<br>R/P Nm</th><th>SF/FI/BRAKE/NSA<br>Rigid / P1</th></tr></thead><tbody>@@ROWS@@</tbody></table></div><div class="case-grid"><article class="case"><h3>40/80</h3><p>Rigid NEW 已 COMPLETE。P1 NEW 没有新的 feasibility 优势；其 force slew 更低，但 tracking RMSE 与 settling residual 更大。</p></article><article class="case"><h3>90/120</h3><p>两侧均执行近完整往返且无 BRAKE。P1 NEW 将 physical peak 降低 11.40 N、moment peak 降低 7.67 Nm，并将 tracking RMSE 改善 0.185°。</p></article><article class="case"><h3>120/120</h3><p>两侧都执行接近完整轨迹且无 BRAKE。旧 rigid BRAKE 与旧 P1 约 222 N transient 均未持续到 corrected baseline；P1 NEW 主要降低 slew，并略微增加 tracking/settling 误差。</p></article></div><h3 style="margin-top:28px">执行层力链（RMS/peak 或 peak，N）</h3><div class="table-wrap"><table><thead><tr><th>case</th><th>Human demand<br>RMS/peak</th><th>position F<br>peak</th><th>velocity F<br>peak</th><th>nominal executable<br>peak</th><th>command<br>peak</th><th>physical<br>RMS/peak</th><th>P1 deformation<br>translation/rotation</th></tr></thead><tbody>@@DETAIL@@</tbody></table></div></section>
 
-<section class="section" id="history"><div class="kicker">G · Diagnostic history</div><h2>旧结果保留，但不再作为当前 High-ROM 基线</h2><div class="diagnostic"><article class="card history"><h3>旧路径观察</h3><p>history-derived robot velocity → 大 velocity-feedback force → 200 N executable boundary → FILTER_INFEASIBLE / BRAKE。旧 P1 120/120 随后还出现约 222 N 物理接口 transient。</p></article><div class="big-arrow">→</div><article class="card good"><h3>corrected baseline</h3><p>separated low-latency robot velocity feedback → 相同 MPC / gain / safety target → 40/80 BRAKE 消失，120/120 可执行接近完整往返；旧 P1 222 N 事件也未复现。</p></article></div><p class="fine">旧 evidence 不被删除、重命名或重新判定。P1 早先的严格 numerical-qualification FAIL 继续保留；本报告不声称 P1 已取得数值资格。</p></section>
+<section class="section" id="interpret"><div class="kicker">G · Model-based interpretability</div><h2>平均负担来自静态 Human mechanics，旧边界超额来自执行速度反馈</h2><p class="intro">以下是冻结四条旧 Rigid 轨迹的 Human-level vector decomposition 跨轨迹 RMS 中位数。分量保留向量方向，norm 比值不可当作可相加百分比。</p><div class="bars"><div class="bar-row"><b>static Human mechanics</b><div class="track"><div class="fill" style="width:69.5%"></div></div><span>97.26 N</span></div><div class="bar-row"><b>nominal reference dynamics</b><div class="track"><div class="fill tiny" style="width:.1%"></div></div><span>0.10 N</span></div><div class="bar-row"><b>tracking feedback / correction</b><div class="track"><div class="fill" style="width:5.8%"></div></div><span>8.12 N</span></div></div><div class="grid2" style="margin-top:24px"><article class="card"><h3>解析力图</h3><p>0–125° 的 q1-q2 稠密图中，注册 allocator 的 quasistatic translational force 为 0.06–182.30 N；整个有效 domain 都低于 200 N。nominal reference-dynamic increment 在冻结慢轨迹中可忽略。</p></article><article class="card"><h3>旧边界机制</h3><p>旧 40/80 与 120/120 在 FILTER_INFEASIBLE 前的 robot velocity-feedback force 分别为 83.14 N 和 135.49 N。corrected 测量路径下，对应新轨迹的 velocity-feedback peak 仅为 1.39 N 与 2.04 N，且不再发生 BRAKE。</p></article></div></section>
 
-<section class="section" id="target"><div class="kicker">H · 200 N 的解释边界</div><h2>注册工程 stress-test target</h2><div class="grid2"><article class="card"><h3>它是什么</h3><p>为了跨历史实验保持一致而冻结的 simulation engineering target，用于观察 controller/execution stack 与 force budget 的相互作用。</p></article><article class="card"><h3>它不是什么</h3><p>不是临床 tissue-safety threshold，不是舒适度结论，也不是经过 hardware validation 的 actuator/cuff capability limit。</p></article></div></section>
+<section class="section" id="history"><div class="kicker">H · Diagnostic history</div><h2>旧结果保留，但不再作为当前 High-ROM 基线</h2><div class="diagnostic"><article class="card history"><h3>旧路径观察</h3><p>history-derived robot velocity → 大 velocity-feedback force → 200 N executable boundary → FILTER_INFEASIBLE / BRAKE。旧 P1 120/120 随后还出现约 222 N 物理接口 transient。</p></article><div class="big-arrow">→</div><article class="card good"><h3>corrected baseline</h3><p>separated low-latency robot velocity feedback → 相同 MPC / gain / safety target → 40/80 BRAKE 消失，120/120 可执行接近完整往返；旧 P1 222 N 事件也未复现。</p></article></div><p class="fine">旧 evidence 不被删除、重命名或重新判定。P1 早先的严格 numerical-qualification FAIL 继续保留；本报告不声称 P1 已取得数值资格。</p></section>
 
-<section class="section" id="conclusion"><div class="kicker">I · 当前结论</div><h2>corrected High-ROM baseline</h2><p class="conclusion">分离 robot 控制速度与估计速度后，旧 High-ROM command-feasibility boundary 不再是 corrected cases 的主要限制。P1 compliance 不是 High-ROM feasibility 的必要条件；其独立收益主要是稳定降低 force slew，并在 90/120 降低物理力峰值、moment 且略微改善 tracking。其他轨迹上，它会增加 deformation、settling 或 tracking 代价，因此收益仍然依赖 trajectory 与 history。</p><p>当前 simulation evidence 不能定义临床安全边界或硬件能力边界。</p><details><summary>离线与 provenance 信息</summary><p>证据检查点：<code>@@CHECKPOINT@@</code>。视频由冻结 state 可视化生成，没有运行 trajectory。所有数据、CSS、JavaScript、视频与 poster 均内嵌；文件不发起网络请求。</p><script type="application/json" id="provenance">@@PROVENANCE@@</script></details></section>
+<section class="section" id="target"><div class="kicker">I · 200 N 的解释边界</div><h2>注册工程 stress-test target</h2><div class="grid2"><article class="card"><h3>它是什么</h3><p>为了跨历史实验保持一致而冻结的 simulation engineering target，用于观察 controller/execution stack 与 force budget 的相互作用。</p></article><article class="card"><h3>它不是什么</h3><p>不是临床 tissue-safety threshold，不是舒适度结论，也不是经过 hardware validation 的 actuator/cuff capability limit。</p></article></div></section>
+
+<section class="section" id="conclusion"><div class="kicker">J · 当前结论</div><h2>corrected High-ROM baseline</h2><p class="conclusion">分离 robot 控制速度与估计速度后，旧 High-ROM command-feasibility boundary 不再是 corrected cases 的主要限制。P1 compliance 不是 High-ROM feasibility 的必要条件；其独立收益主要是稳定降低 force slew，并在 90/120 降低物理力峰值、moment 且略微改善 tracking。其他轨迹上，它会增加 deformation、settling 或 tracking 代价，因此收益仍然依赖 trajectory 与 history。</p><p>当前 simulation evidence 不能定义临床安全边界或硬件能力边界。</p><details><summary>离线与 provenance 信息</summary><p>证据检查点：<code>@@CHECKPOINT@@</code>。视频由冻结 state 可视化生成，没有运行 trajectory。所有数据、CSS、JavaScript、视频与 poster 均内嵌；文件不发起网络请求。</p><script type="application/json" id="provenance">@@PROVENANCE@@</script></details></section>
 </main><script>(()=>{const tracking=@@TRACKING@@,atlas=@@ATLAS@@,curves=@@CURVES@@;
 const tc=document.getElementById('trackingCanvas'),tx=tc.getContext('2d');let active='40/80',playing=true,offset=0,start=performance.now();const buttons=document.getElementById('trackButtons');Object.keys(tracking).forEach(k=>{const b=document.createElement('button');b.textContent=k;b.className=k===active?'active':'';b.onclick=()=>{active=k;offset=0;start=performance.now();[...buttons.children].forEach(x=>x.classList.toggle('active',x===b))};buttons.appendChild(b)});document.getElementById('trackPlay').onclick=e=>{playing=!playing;e.target.textContent=playing?'暂停':'播放';start=performance.now()};document.getElementById('trackRestart').onclick=()=>{offset=0;start=performance.now()};
 function pick(a,t){let lo=0,hi=a.t.length-1;while(lo<hi){const m=Math.ceil((lo+hi)/2);if(a.t[m]<=t)lo=m;else hi=m-1}return lo}function line(ctx,pts,map,color,width=2,dash=[]){ctx.beginPath();ctx.setLineDash(dash);pts.forEach((p,i)=>{const v=map(p);i?ctx.lineTo(v[0],v[1]):ctx.moveTo(v[0],v[1])});ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();ctx.setLineDash([])}
@@ -405,6 +521,8 @@ function drawForce(){fx.fillStyle='#fff';fx.fillRect(0,0,fc.width,fc.height);for
 function heatColor(v){const t=Math.max(0,Math.min(1,v/190));return`rgb(${Math.round(244-100*t)},${Math.round(248-82*t)},${Math.round(250-58*t)})`}function drawMargin(){mx.fillStyle='#fff';mx.fillRect(0,0,mc.width,mc.height);const l=65,t=45,w=700,h=330,s=2;for(let j=1;j<atlas.q2.length;j+=s)for(let i=0;i<atlas.q1.length;i+=s){const z=atlas.force[j][i];if(z==null)continue;mx.fillStyle=heatColor(z);mx.fillRect(l+atlas.q1[i]/125*w,t+h-atlas.q2[j]/125*h,w*s/126+1,h*s/126+1)}for(const threshold of atlas.thresholds_n){mx.strokeStyle=threshold===200?'#a4650b':threshold===220?'#7d568b':'#455c70';mx.lineWidth=2;for(let j=1;j<atlas.q2.length-1;j++)for(let i=0;i<atlas.q1.length-1;i++){const vals=[atlas.force[j][i],atlas.force[j][i+1],atlas.force[j+1][i],atlas.force[j+1][i+1]].filter(v=>v!=null);if(vals.length===4&&Math.min(...vals)<=threshold&&Math.max(...vals)>=threshold){mx.strokeRect(l+i/125*w,t+h-(j+1)/125*h,w/125+1,h/125+1)}}}controls.querySelectorAll('input').forEach(cb=>{if(!cb.checked)return;const c=curves[+cb.dataset.i];mx.beginPath();c.q1.forEach((q,i)=>{const x=l+q/125*w,y=t+h-c.q2[i]/125*h;i?mx.lineTo(x,y):mx.moveTo(x,y)});mx.strokeStyle=c.color;mx.lineWidth=1.7;mx.stroke()});mx.strokeStyle='#6f7b83';mx.strokeRect(l,t,w,h);mx.fillStyle='#15181b';mx.font='bold 18px system-ui';mx.fillText('准静态 force map 与 200 / 220 / 250 N contour 检查',22,27);mx.font='13px system-ui';mx.fillStyle='#56616a';mx.fillText('q1 (deg)',l+w/2-20,t+h+34);mx.save();mx.translate(19,t+h/2+30);mx.rotate(-Math.PI/2);mx.fillText('q2 (deg)',0,0);mx.restore();mx.fillStyle='#875508';mx.fillText(`max=${atlas.maximum_n.toFixed(2)} N；三条 threshold 均无 crossing`,780,75);for(let k=0;k<5;k++){mx.fillStyle=heatColor(k*47.5);mx.fillRect(790,105+k*35,18,18);mx.fillStyle='#56616a';mx.fillText(`${(k*47.5).toFixed(0)} N`,815,120+k*35)}}drawForce();drawMargin();
 document.querySelectorAll('video').forEach(v=>v.addEventListener('error',()=>v.insertAdjacentHTML('afterend','<p style="color:#b4232d">当前浏览器无法解码内嵌 H.264 视频。</p>')));})();</script></body></html>'''
     return (template.replace("@@VIDEOS@@", "".join(video_blocks))
+            .replace("@@FORCE_TIME_PLOTS@@", "".join(force_time_blocks))
+            .replace("@@FORCE_TIME_Y_MAX@@", f"{force_time_y_max_n:.0f}")
             .replace("@@ROWS@@", "".join(rows))
             .replace("@@DETAIL@@", "".join(detailed))
             .replace("@@CHECKPOINT@@", EVIDENCE_CHECKPOINT)
@@ -419,6 +537,11 @@ def verify_html(path: Path, videos: dict[str, dict[str, Any]], source_hashes: di
     assert content.count("<video ") == 3
     assert content.count("data:video/mp4;base64,") == 3
     assert content.count("data:image/jpeg;base64,") == 3
+    assert content.count('class="force-time-svg"') == 3
+    assert content.count('data-force-series="physical-translational-norm"') == 6
+    for label in CASES:
+        assert f"{label} physical translational cuff-force norm over time" in content
+    assert "40/40 physical translational cuff-force norm over time" not in content
     for forbidden in ("https://", "http://", "fetch(", "XMLHttpRequest", "WebSocket", "src=\"/", "href=\"/"):
         assert forbidden not in content, forbidden
     for required in (
@@ -432,6 +555,8 @@ def verify_html(path: Path, videos: dict[str, dict[str, Any]], source_hashes: di
     assert "刚性侧在回程进入 BRAKE，未能物理返回" not in content
     assert "@@" not in content
     assert force_map_payload()["maximum_n"] == 182.298
+    _, force_time_y_max_n = physical_force_time_payload(load_cases())
+    assert force_time_y_max_n == 150.0
     embedded = re.findall(r"data:video/mp4;base64,([A-Za-z0-9+/=]+)", content)
     assert len(embedded) == 3
     with tempfile.TemporaryDirectory(prefix="phase3a_html_verify_", dir="/tmp") as temp:
@@ -450,6 +575,9 @@ def verify_html(path: Path, videos: dict[str, dict[str, Any]], source_hashes: di
         "embedded_poster_count": 3,
         "decoded_video_count": 3,
         "interactive_canvas_count": 3,
+        "interaction_force_plot_count": 3,
+        "interaction_force_common_y_axis_n": [0.0, force_time_y_max_n],
+        "interaction_force_quantity": "physical translational cuff-force norm",
         "external_url_count": 0,
         "source_hash_count": len(source_hashes),
         "offline_static_checks": "PASS",
