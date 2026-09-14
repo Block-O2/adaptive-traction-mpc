@@ -1,0 +1,26 @@
+{
+  "schema": "stage5_goal_task_v1",
+  "name": "provisional_low_moderate_outbound_hold_return",
+  "provisional_not_hardware_or_clinically_calibrated": true,
+  "source_fixture": "Stage-5 low/moderate cold-start prefix endpoints",
+  "start_return_target_deg": [5.0, 10.0],
+  "outbound_goal_target_deg": [20.0, 35.0],
+  "q_bounds_deg": [[0.0, 80.0], [0.0, 100.0]],
+  "joint_angle_completion_tolerance_deg": [1.0, 1.0],
+  "joint_velocity_completion_tolerance_deg_s": [2.0, 2.0],
+  "hold_duration_s": 0.5,
+  "phase_timeout_s": 10.0,
+  "task_joint_velocity_limit_deg_s": [45.0, 75.0],
+  "task_joint_acceleration_limit_deg_s2": [300.0, 600.0],
+  "controller_completion_margin": {
+    "joint_angle_margin_deg": [0.05, 0.10],
+    "joint_velocity_margin_deg_s": [0.75, 1.50],
+    "source_evidence": "goal_mpc_complete_v1/attempt_05_final exact phase-transition estimator-minus-truth errors plus a small deterministic guard"
+  },
+  "trajectory_contract": {
+    "full_joint_trajectory_provided": false,
+    "fixed_joint_coordination_ratio": false,
+    "path_corridor_active": false
+  },
+  "status_note": "Provisional Stage-5 engineering limits only; not hardware- or clinically calibrated. They constrain each joint independently and do not define a trajectory, coordination ratio, or path corridor. The controller completion margin only tightens online decisions; the original 1 deg and 2 deg/s tolerances remain the actual task definition."
+}
