@@ -1,0 +1,76 @@
+{
+  "schema": "stage5_interface_identification_v1",
+  "evidence_category": "offline_saved_trace_architecture_and_identifiability_probe",
+  "active_in_control": false,
+  "truth_available_to_service": false,
+  "parameterization": {
+    "names": ["alpha_t", "alpha_r", "alpha_d"],
+    "translation_stiffness": "alpha_t * controller_nominal_Kt",
+    "rotation_stiffness": "alpha_r * controller_nominal_Kr",
+    "translation_damping": "alpha_d * controller_nominal_Dt",
+    "rotation_damping": "alpha_d * controller_nominal_Dr"
+  },
+  "parameter_bounds": {
+    "lower": [0.5, 0.5, 0.5],
+    "upper": [1.5, 1.5, 1.5]
+  },
+  "parameter_prior_scale": [0.3, 0.3, 0.3],
+  "parameter_prior_weight": 0.1,
+  "initial_state_prior_weight": 0.3,
+  "initial_state_prior_scale": [
+    0.008726646259971648,
+    0.008726646259971648,
+    0.08726646259971647,
+    0.08726646259971647,
+    0.002,
+    0.002,
+    0.002,
+    0.05,
+    0.05,
+    0.05,
+    0.03,
+    0.03,
+    0.03,
+    0.5,
+    0.5,
+    0.5
+  ],
+  "measurement_residual_scale": {
+    "robot_position_m": [0.002, 0.002, 0.002],
+    "robot_rotation_rad": [0.017453292519943295, 0.017453292519943295, 0.017453292519943295],
+    "robot_linear_velocity_m_s": [0.05, 0.05, 0.05],
+    "robot_angular_velocity_rad_s": [0.2, 0.2, 0.2],
+    "cuff_force_n": [5.0, 5.0, 5.0],
+    "cuff_moment_nm": [0.5, 0.5, 0.5]
+  },
+  "fit_window_s": 0.2,
+  "validation_embargo_s": 0.05,
+  "validation_window_s": 0.1,
+  "window_length_audit_s": [0.1, 0.2, 0.4],
+  "maximum_function_evaluations": 60,
+  "finite_difference_relative_step": 1e-5,
+  "data_rank_relative_tolerance": 1e-6,
+  "multistart_parameter_scales": [
+    [1.0, 1.0, 1.0],
+    [0.75, 1.25, 0.75],
+    [1.25, 0.75, 1.25]
+  ],
+  "multistart_initial_state_offsets_in_prior_scales": [
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    [0.5, -0.5, 0.5, -0.5, 0.5, 0.0, -0.5, 0.5, 0.0, -0.5, 0.0, 0.5, 0.5, 0.0, -0.5, -0.5],
+    [-0.5, 0.5, -0.5, 0.5, -0.5, 0.0, 0.5, -0.5, 0.0, 0.5, 0.0, -0.5, -0.5, 0.0, 0.5, 0.5]
+  ],
+  "inactive_trust": {
+    "minimum_future_validation_samples": 20,
+    "minimum_relative_prediction_improvement": 0.05,
+    "maximum_data_condition_number": 10000.0,
+    "publication_smoothing_alpha": 0.1,
+    "maximum_publication_step_fraction_of_parameter_span": 0.05,
+    "control_publication_enabled": false
+  },
+  "notes": [
+    "All residual scales and gates are provisional interface-specific engineering choices, not copied Stage-4 Human-ID thresholds.",
+    "Regularization rows are excluded from data-rank, condition, and correlation diagnostics.",
+    "The saved legacy mismatch traces omit raw robot pose/twist; the offline adapter reconstructs those deployable measurements once from the stored nominal observer outputs and checks algebraic closure. Candidate parameters never reconstruct validation targets."
+  ]
+}

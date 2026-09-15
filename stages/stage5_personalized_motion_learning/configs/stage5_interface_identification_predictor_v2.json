@@ -1,0 +1,21 @@
+{
+  "schema": "stage5_interface_identification_predictor_v2",
+  "model_version": "stage5_identification_physical_predictor_v2",
+  "connected_to_control": false,
+  "integration_substep_s": 0.00025,
+  "robot_effective_mass_world_kg": [1.65879917, 1.97072401, 1.63691911],
+  "robot_effective_inertia_world_kg_m2": [0.1087423433337209, 0.1087423433337209, 0.1087423433337209],
+  "provenance": {
+    "robot_reduced_order_constants": "fixed numeric snapshot of the existing provisional operational response scales; they are identification-side robot nuisance constants, not fitted interface parameters",
+    "interface_parameters": "candidate physical Kelvin-Voigt Kt/Kr/D scales from the frozen nominal interface",
+    "command_input": "recorded executable robot cuff wrench at the robot cuff reference point"
+  },
+  "approximations": [
+    "diagonal constant robot operational-space mass and inertia",
+    "bias/posture terms are assumed handled by the inherited loaded low-level execution command",
+    "recorded executable wrench is zero-order held over each 5 ms measurement interval",
+    "robot joint configuration, Jacobian variation, torque saturation dynamics, and bed reaction are not propagated",
+    "Human dynamics use the fixed Stage-5 Human model",
+    "interface displacement and twist are recomputed from robot/Human relative kinematics every 0.25 ms substep"
+  ]
+}

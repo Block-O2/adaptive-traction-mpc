@@ -7,7 +7,7 @@ from dataclasses import replace
 import json
 from pathlib import Path
 from time import perf_counter
-from typing import Any
+from typing import Any, Callable
 
 import matplotlib
 
@@ -19,7 +19,7 @@ from traction_mpc_stage3.human import CUFF_TRANSLATIONAL_FORCE_GATE_N
 from traction_mpc_stage3.spring_damper_interface import InterfaceParameters
 from traction_mpc_stage4.cuff_allocator import default_engineering_cuff_allocator
 from traction_mpc_stage4.measurement import CausalMeasurementLayer, MeasurementCase
-from traction_mpc_stage4.mpc import SAFE_ACTION
+from traction_mpc_stage4.mpc import SAFE_ACTION, HumanMPCConfig
 from traction_mpc_stage4.track_brake import BRAKE
 
 from .acceleration import (
@@ -49,6 +49,12 @@ from .hold_stabilizer import (
     solve_loaded_hold_equilibrium,
 )
 from .human import STAGE5_HUMAN
+from .interface_uncertainty import (
+    InterfaceUncertaintyMonitor,
+    InterfaceUncertaintySpec,
+    start_episode_uncertainty_aware,
+    transition_phase_uncertainty_aware,
+)
 from .loaded_execution import (
     build_stage5_loaded_execution_context,
     loaded_execution_target_from_equilibrium,
@@ -73,6 +79,14 @@ from .task import (
 CONTROL_DT_S = 0.005
 MPC_DT_S = 0.020
 FIXED_HUMAN_MODEL_VERSION = "stage5_fixed_registered_human_v1"
+
+
+class InitialConditionValidationError(ValueError):
+    """Structured t=0 rejection for engineering sweep aggregation."""
+
+    def __init__(self, message: str, diagnostics: dict[str, Any]) -> None:
+        super().__init__(message)
+        self.diagnostics = diagnostics
 
 
 def _estimator_observe(estimator: FixedStage5Estimator, measurement: Any) -> None:
@@ -239,6 +253,14 @@ def run_goal_mpc_smoke(
     use_bumpless_return_handoff: bool = False,
     diagnose_feasibility_loss: bool = False,
     feasibility_checkpoint_time_s: float | None = None,
+    initialize_loaded_equilibrium_with_plant_truth: bool = False,
+    interface_uncertainty_spec: InterfaceUncertaintySpec | None = None,
+    planning_physical_force_ceiling_n: float = CUFF_TRANSLATIONAL_FORCE_GATE_N,
+    planning_joint_velocity_ceiling_rad_s: tuple[float, float] | None = None,
+    mpc_config: HumanMPCConfig | None = None,
+    plant_factory: Callable[[InterfaceParameters], Stage5SensorBoundaryPlant]
+    | None = None,
+    session_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run one explicitly engineering-only low/moderate Goal-MPC v1.1 episode."""
 
@@ -249,59 +271,158 @@ def run_goal_mpc_smoke(
     if maximum_duration_s <= 0.0 or not np.isfinite(maximum_duration_s):
         raise ValueError("maximum_duration_s must be finite and positive")
 
-    plant = Stage5SensorBoundaryPlant(
-        STAGE5_HUMAN, interface_parameters=plant_interface_parameters
-    )
-    truth = plant.reset(np.asarray(spec.start_return_target_rad, dtype=float))
-    ideal = MeasurementCase(
-        name="stage5_goal_mpc_ideal_200hz",
-        update_rate_hz=200.0,
-        latency_s=0.0,
-    )
-    estimator_layer = CausalMeasurementLayer(ideal, truth)
-    mpc_layer = CausalMeasurementLayer(ideal, truth)
-    low_level_layer = CausalMeasurementLayer(ideal, truth)
-    estimator_measurement = estimator_layer.current
-    estimator = FixedStage5Estimator(
-        estimator_measurement.attachment_position_m,
-        estimator_measurement.attachment_rotation_matrix,
-        np.asarray(spec.start_return_target_rad, dtype=float),
-    )
-    _estimator_observe(estimator, estimator_measurement)
-    current_model = estimator.model
-    cuff_allocator = default_engineering_cuff_allocator()
-    start_loaded_equilibrium = solve_loaded_hold_equilibrium(
-        spec,
-        current_model,
-        cuff_allocator,
-        target_q_rad=np.asarray(spec.start_return_target_rad, dtype=float),
-    )
-    truth = initialize_plant_at_loaded_equilibrium(
-        plant, current_model, start_loaded_equilibrium
-    )
-    # Rebase only the causal sensor buffers after changing the time-zero
-    # engineering initial condition.  The fixed Human model was calibrated
-    # from the undeformed reset measurement and remains controller-side.
-    estimator_layer = CausalMeasurementLayer(ideal, truth)
-    mpc_layer = CausalMeasurementLayer(ideal, truth)
-    low_level_layer = CausalMeasurementLayer(ideal, truth)
-    estimator_measurement = estimator_layer.current
-    _estimator_observe(estimator, estimator_measurement)
-    current_model = estimator.model
-    interface_observer = InterfaceAwareHumanStateObserver()
-    acceleration_monitor = CausalModelAccelerationMonitor(interval_s=MPC_DT_S)
-    # The selected Human-space action is held for the 20 ms MPC interval even
-    # though its executable robot command is refreshed every 5 ms.  Screen the
-    # full action hold; keep a separate 5 ms predictor for time-aligned error.
-    screening_interface_predictor = NominalInterfaceHoldPredictor(
-        control_dt_s=MPC_DT_S
-    )
-    diagnostic_interface_predictor = NominalInterfaceHoldPredictor(
-        control_dt_s=CONTROL_DT_S
-    )
-    plant.neutral_robot_q = low_level_layer.current.robot_q_rad.copy()
-    mpc = GoalDirectedHumanSpaceMPC(cuff_allocator=cuff_allocator)
-    supervisor = Stage5LoadedTrackBrakeSupervisor()
+    reusing_session = session_context is not None and bool(session_context)
+    if reusing_session:
+        if interface_uncertainty_spec is not None:
+            raise ValueError("repeatability session forbids uncertainty-bank authority")
+        if plant_factory is not None:
+            raise ValueError("plant_factory is valid only when starting a session")
+        plant = session_context["plant"]
+        truth = plant.observe()
+        estimator_layer = session_context["estimator_layer"]
+        mpc_layer = session_context["mpc_layer"]
+        low_level_layer = session_context["low_level_layer"]
+        estimator = session_context["estimator"]
+        current_model = estimator.model
+        cuff_allocator = session_context["cuff_allocator"]
+        interface_observer = session_context["interface_observer"]
+        acceleration_monitor = session_context["acceleration_monitor"]
+        interface_uncertainty_monitor = None
+        screening_interface_predictor = session_context[
+            "screening_interface_predictor"
+        ]
+        diagnostic_interface_predictor = session_context[
+            "diagnostic_interface_predictor"
+        ]
+        mpc = session_context["mpc"]
+        supervisor = session_context["supervisor"]
+        start_loaded_equilibrium = session_context["start_loaded_equilibrium"]
+        if not np.isclose(
+            mpc.planning_physical_force_ceiling_n,
+            planning_physical_force_ceiling_n,
+        ):
+            raise ValueError("session planning-force ceiling changed")
+        if mpc.planning_joint_velocity_ceiling_rad_s != (
+            None
+            if planning_joint_velocity_ceiling_rad_s is None
+            else tuple(float(value) for value in planning_joint_velocity_ceiling_rad_s)
+        ):
+            raise ValueError("session planning-velocity ceiling changed")
+    else:
+        plant = (
+            Stage5SensorBoundaryPlant(
+                STAGE5_HUMAN, interface_parameters=plant_interface_parameters
+            )
+            if plant_factory is None
+            else plant_factory(plant_interface_parameters)
+        )
+        truth = plant.reset(np.asarray(spec.start_return_target_rad, dtype=float))
+        ideal = MeasurementCase(
+            name="stage5_goal_mpc_ideal_200hz",
+            update_rate_hz=200.0,
+            latency_s=0.0,
+        )
+        estimator_layer = CausalMeasurementLayer(ideal, truth)
+        mpc_layer = CausalMeasurementLayer(ideal, truth)
+        low_level_layer = CausalMeasurementLayer(ideal, truth)
+        estimator_measurement = estimator_layer.current
+        estimator = FixedStage5Estimator(
+            estimator_measurement.attachment_position_m,
+            estimator_measurement.attachment_rotation_matrix,
+            np.asarray(spec.start_return_target_rad, dtype=float),
+        )
+        _estimator_observe(estimator, estimator_measurement)
+        current_model = estimator.model
+        cuff_allocator = default_engineering_cuff_allocator()
+    initialization_interface = CONTROLLER_NOMINAL_INTERFACE
+    if not reusing_session and initialize_loaded_equilibrium_with_plant_truth:
+        # Evaluation-fixture setup only: hold Human q/dq and the required static
+        # support wrench fixed while allowing the plant's robot-side cuff pose
+        # to reflect its actual K/D.  This record is never passed to the
+        # observer, MPC, screening, supervisor, or HOLD controller.
+        initialization_interface = replace(
+            CONTROLLER_NOMINAL_INTERFACE,
+            model_version=f"evaluation_fixture__{plant_case_name}",
+            translation_stiffness_n_m=tuple(
+                float(value)
+                for value in plant_interface_parameters.translation_stiffness_n_m
+            ),
+            translation_damping_ns_m=tuple(
+                float(value)
+                for value in plant_interface_parameters.translation_damping_ns_m
+            ),
+            rotation_stiffness_nm_rad=float(
+                plant_interface_parameters.rotation_stiffness_nm_rad
+            ),
+            rotation_damping_nms_rad=float(
+                plant_interface_parameters.rotation_damping_nms_rad
+            ),
+        )
+        evaluation_initializer = getattr(
+            plant, "evaluation_loaded_initialization_interface", None
+        )
+        if evaluation_initializer is not None:
+            initialization_interface = evaluation_initializer(
+                initialization_interface,
+                spec,
+                current_model,
+                cuff_allocator,
+            )
+    if not reusing_session:
+        start_loaded_equilibrium = solve_loaded_hold_equilibrium(
+            spec,
+            current_model,
+            cuff_allocator,
+            interface=initialization_interface,
+            target_q_rad=np.asarray(spec.start_return_target_rad, dtype=float),
+        )
+        truth = initialize_plant_at_loaded_equilibrium(
+            plant, current_model, start_loaded_equilibrium
+        )
+        # Rebase only the causal sensor buffers after changing the time-zero
+        # engineering initial condition.  The fixed Human model was calibrated
+        # from the undeformed reset measurement and remains controller-side.
+        estimator_layer = CausalMeasurementLayer(ideal, truth)
+        mpc_layer = CausalMeasurementLayer(ideal, truth)
+        low_level_layer = CausalMeasurementLayer(ideal, truth)
+        estimator_measurement = estimator_layer.current
+        _estimator_observe(estimator, estimator_measurement)
+        current_model = estimator.model
+        interface_observer = (
+            InterfaceAwareHumanStateObserver()
+            if interface_uncertainty_spec is None
+            else None
+        )
+        acceleration_monitor = (
+            CausalModelAccelerationMonitor(interval_s=MPC_DT_S)
+            if interface_uncertainty_spec is None
+            else None
+        )
+        interface_uncertainty_monitor = (
+            None
+            if interface_uncertainty_spec is None
+            else InterfaceUncertaintyMonitor(interface_uncertainty_spec)
+        )
+        # The selected Human-space action is held for the 20 ms MPC interval even
+        # though its executable robot command is refreshed every 5 ms.  Screen the
+        # full action hold; keep a separate 5 ms predictor for time-aligned error.
+        screening_interface_predictor = NominalInterfaceHoldPredictor(
+            control_dt_s=MPC_DT_S,
+            planning_force_ceiling_n=planning_physical_force_ceiling_n,
+        )
+        diagnostic_interface_predictor = NominalInterfaceHoldPredictor(
+            control_dt_s=CONTROL_DT_S
+        )
+        plant.neutral_robot_q = low_level_layer.current.robot_q_rad.copy()
+        mpc = GoalDirectedHumanSpaceMPC(
+            HumanMPCConfig() if mpc_config is None else mpc_config,
+            cuff_allocator=cuff_allocator,
+            planning_physical_force_ceiling_n=planning_physical_force_ceiling_n,
+            planning_joint_velocity_ceiling_rad_s=(
+                planning_joint_velocity_ceiling_rad_s
+            ),
+        )
+        supervisor = Stage5LoadedTrackBrakeSupervisor()
     loaded_equilibrium = None
     hold_stabilizer = None
     hold_handoff = None
@@ -322,20 +443,118 @@ def run_goal_mpc_smoke(
         return_handoff = BumplessExecutableReferenceHandoff(
             config=LoadedHoldHandoffConfig()
         )
-    initial_task_observation, initial_interface_state = interface_observer.update(
-        mpc_layer.current,
-        current_model,
-        human_model_version=FIXED_HUMAN_MODEL_VERSION,
-    )
-    initial_realized_acceleration = acceleration_monitor.update(
-        initial_task_observation, initial_interface_state, current_model
-    )
-    task_state = start_episode(
-        spec,
-        initial_task_observation.as_array()[:2],
-        initial_task_observation.as_array()[2:],
-        initial_realized_acceleration.acceleration_rad_s2,
-    )
+    initial_uncertainty_estimate = None
+    if interface_uncertainty_monitor is None:
+        initial_task_observation, initial_interface_state = interface_observer.update(
+            mpc_layer.current,
+            current_model,
+            human_model_version=FIXED_HUMAN_MODEL_VERSION,
+        )
+        initial_realized_acceleration = (
+            session_context["last_realized_acceleration"]
+            if reusing_session
+            else acceleration_monitor.update(
+                initial_task_observation, initial_interface_state, current_model
+            )
+        )
+    else:
+        initial_uncertainty_estimate = interface_uncertainty_monitor.update(
+            mpc_layer.current,
+            current_model,
+            human_model_version=FIXED_HUMAN_MODEL_VERSION,
+        )
+        initial_nominal = initial_uncertainty_estimate.nominal
+        initial_task_observation = initial_nominal.observation
+        initial_interface_state = initial_nominal.interface_state
+        initial_realized_acceleration = initial_nominal.model_acceleration
+    latest_realized_acceleration = initial_realized_acceleration
+    try:
+        if initial_uncertainty_estimate is None:
+            task_state = start_episode(
+                spec,
+                initial_task_observation.as_array()[:2],
+                initial_task_observation.as_array()[2:],
+                initial_realized_acceleration.acceleration_rad_s2,
+            )
+        else:
+            task_state = start_episode_uncertainty_aware(
+                spec, initial_uncertainty_estimate
+            )
+    except ValueError as error:
+        initial_state = initial_task_observation.as_array()
+        truth_interface = plant._evaluate_current_interface()
+        message = str(error)
+        if "INTERFACE_UNCERTAINTY" in message:
+            abort_reason = message.rsplit(": ", 1)[-1]
+        elif "TASK_ACCELERATION_LIMIT" in message:
+            abort_reason = "TASK_ACCELERATION_LIMIT"
+        elif "settled start/return target" in message:
+            abort_reason = "INITIAL_CONDITION_OUTSIDE_SETTLED_START_SET"
+        else:
+            abort_reason = "INITIAL_CONDITION_VALIDATION_ERROR"
+        raise InitialConditionValidationError(
+            message,
+            {
+                "task_status": "ABORTED",
+                "abort_reason": abort_reason,
+                "validation_error": message,
+                "time_s": float(truth.time_s),
+                "estimated_q_rad": initial_state[:2].tolist(),
+                "estimated_dq_rad_s": initial_state[2:].tolist(),
+                "truth_q_rad": np.asarray(truth.human_q_rad, dtype=float).tolist(),
+                "truth_dq_rad_s": np.asarray(
+                    truth.human_dq_rad_s, dtype=float
+                ).tolist(),
+                "deployable_acceleration_rad_s2": (
+                    initial_realized_acceleration.acceleration_rad_s2.tolist()
+                ),
+                "truth_acceleration_rad_s2": np.asarray(
+                    plant.data.qacc[plant.human_dof_indices], dtype=float
+                ).tolist(),
+                "physical_force_world_n": np.asarray(
+                    truth.cuff_force_vector_n, dtype=float
+                ).tolist(),
+                "physical_moment_world_nm": np.asarray(
+                    truth.cuff_moment_vector_nm, dtype=float
+                ).tolist(),
+                "truth_interface_translation_human_m": (
+                    truth_interface.displacement_human_m.tolist()
+                ),
+                "truth_interface_rotation_human_rad": (
+                    truth_interface.rotation_error_human_rad.tolist()
+                ),
+                "estimated_interface_translation_human_m": (
+                    initial_interface_state.displacement_human_m.tolist()
+                ),
+                "estimated_interface_rotation_human_rad": (
+                    initial_interface_state.rotation_error_human_rad.tolist()
+                ),
+                "task_velocity_limit_rad_s": (
+                    None
+                    if spec.task_joint_velocity_limit_rad_s is None
+                    else list(spec.task_joint_velocity_limit_rad_s)
+                ),
+                "task_acceleration_limit_rad_s2": (
+                    None
+                    if spec.task_joint_acceleration_limit_rad_s2 is None
+                    else list(spec.task_joint_acceleration_limit_rad_s2)
+                ),
+                "mujoco_warning_counts": plant.warning_counts(),
+                "controller_truth_parameter_separation_preserved": True,
+                "interface_uncertainty_state_range_rad_rad_s": (
+                    None
+                    if initial_uncertainty_estimate is None
+                    else {
+                        "minimum": np.min(
+                            initial_uncertainty_estimate.state_matrix, axis=0
+                        ).tolist(),
+                        "maximum": np.max(
+                            initial_uncertainty_estimate.state_matrix, axis=0
+                        ).tolist(),
+                    }
+                ),
+            },
+        ) from error
 
     initial_support_action = support_action(
         initial_task_observation.as_array(), current_model
@@ -362,17 +581,23 @@ def run_goal_mpc_smoke(
     )
     if not initial_support_filter.feasible:
         raise RuntimeError("time-zero loaded support command is not executable-safe")
-    current_action = initial_support_filter.action_nm.copy()
-    initial_support_command = initial_support_filter.filtered_preview.command
-    plant.apply_executable_command(initial_support_command)
-    screening_interface_predictor.synchronize(
-        initial_interface_state,
-        initial_support_command.wrench_total_world,
-    )
-    diagnostic_interface_predictor.synchronize(
-        initial_interface_state,
-        initial_support_command.wrench_total_world,
-    )
+    if reusing_session:
+        current_action = np.asarray(session_context["current_action_nm"], dtype=float).copy()
+        initial_support_command = session_context["last_executable_command"]
+    else:
+        current_action = initial_support_filter.action_nm.copy()
+        initial_support_command = initial_support_filter.filtered_preview.command
+        plant.apply_executable_command(initial_support_command)
+        screening_interface_predictor.synchronize(
+            initial_interface_state,
+            initial_support_command.wrench_total_world,
+        )
+        diagnostic_interface_predictor.synchronize(
+            initial_interface_state,
+            initial_support_command.wrench_total_world,
+        )
+    last_executable_command = initial_support_command
+    episode_origin_time_s = float(truth.time_s)
 
     physics_substeps = int(round(CONTROL_DT_S / NOMINAL_PHYSICS_DT_S))
     if physics_substeps * NOMINAL_PHYSICS_DT_S != CONTROL_DT_S:
@@ -390,6 +615,8 @@ def run_goal_mpc_smoke(
     solver_runtimes_ms: list[float] = []
     solver_statuses: list[str] = []
     solver_timing_breakdowns: list[dict[str, float]] = []
+    solver_feasible_candidate_evaluations: list[int] = []
+    solver_first_action_feasible_candidate_evaluations: list[int] = []
     safety_filter_statuses: list[str] = []
     safety_filter_interventions: list[float] = []
     mpc_failure_count = 0
@@ -400,6 +627,8 @@ def run_goal_mpc_smoke(
     selected_prediction_first_state: list[np.ndarray] = []
     selected_prediction_terminal_state: list[np.ndarray] = []
     selected_prediction_first_wrench: list[np.ndarray] = []
+    selected_prediction_first_hold_peak_force: list[float] = []
+    selected_prediction_first_hold_peak_moment: list[float] = []
     selected_prediction_first_interface_translation: list[np.ndarray] = []
     selected_prediction_first_interface_velocity: list[np.ndarray] = []
     selected_prediction_first_interface_rotation: list[np.ndarray] = []
@@ -409,6 +638,12 @@ def run_goal_mpc_smoke(
     selected_prediction_first_base_drive_world: list[np.ndarray] = []
     selected_prediction_first_base_angular_drive_world: list[np.ndarray] = []
     selected_prediction_first_executable_wrench_world: list[np.ndarray] = []
+    selected_prefix_prediction_time: list[float] = []
+    selected_prefix_prediction_acceleration: list[np.ndarray] = []
+    selected_prefix_prediction_state: list[np.ndarray] = []
+    selected_prefix_prediction_margin: list[np.ndarray] = []
+    selected_prefix_prediction_feasible: list[bool] = []
+    selected_prefix_executable_wrench_increment: list[np.ndarray] = []
     brake_event_count = 0
     force_gate_event_count = 0
     structural_event_count = 0
@@ -470,6 +705,17 @@ def run_goal_mpc_smoke(
     trace_prediction_base_drive_world: list[np.ndarray] = []
     trace_prediction_base_angular_drive_world: list[np.ndarray] = []
     trace_prediction_previous_executable_wrench: list[np.ndarray] = []
+    trace_robot_cuff_position_world: list[np.ndarray] = []
+    trace_robot_cuff_rotation_world: list[np.ndarray] = []
+    trace_robot_cuff_linear_velocity_world: list[np.ndarray] = []
+    trace_robot_cuff_angular_velocity_world: list[np.ndarray] = []
+    trace_measured_cuff_force_world: list[np.ndarray] = []
+    trace_measured_cuff_moment_world: list[np.ndarray] = []
+    trace_uncertainty_state_min: list[np.ndarray] = []
+    trace_uncertainty_state_max: list[np.ndarray] = []
+    trace_uncertainty_acceleration_min: list[np.ndarray] = []
+    trace_uncertainty_acceleration_max: list[np.ndarray] = []
+    trace_uncertainty_causal_acceleration_available: list[bool] = []
     pending_predicted_force = np.full(3, np.nan)
     pending_predicted_peak_force = float("nan")
 
@@ -485,20 +731,40 @@ def run_goal_mpc_smoke(
         if high_level_cycle:
             _estimator_observe(estimator, estimator_measurement)
             current_model = estimator.model
-        task_observation, interface_state = interface_observer.update(
-            mpc_measurement,
-            current_model,
-            human_model_version=FIXED_HUMAN_MODEL_VERSION,
-        )
+        uncertainty_estimate = None
+        if interface_uncertainty_monitor is None:
+            task_observation, interface_state = interface_observer.update(
+                mpc_measurement,
+                current_model,
+                human_model_version=FIXED_HUMAN_MODEL_VERSION,
+            )
+        else:
+            uncertainty_estimate = interface_uncertainty_monitor.update(
+                mpc_measurement,
+                current_model,
+                human_model_version=FIXED_HUMAN_MODEL_VERSION,
+            )
+            nominal_uncertainty_estimate = uncertainty_estimate.nominal
+            task_observation = nominal_uncertainty_estimate.observation
+            interface_state = nominal_uncertainty_estimate.interface_state
         screening_interface_predictor.update_from_measurement(interface_state)
         diagnostic_interface_predictor.update_from_measurement(interface_state)
         estimated_state = task_observation.as_array()
-        if not trace_time and abs(task_observation.sample_timestamp_s) <= 1.0e-12:
-            realized_acceleration = initial_realized_acceleration
+        if uncertainty_estimate is not None:
+            realized_acceleration = uncertainty_estimate.nominal.model_acceleration
+        elif (
+            task_observation.sample_timestamp_s
+            <= latest_realized_acceleration.sample_timestamp_s + 1.0e-12
+        ):
+            # A 200 Hz causal measurement can be read more than once at a
+            # floating-point scheduler boundary.  Duplicate reads reuse the
+            # already-published causal record; they are not new samples.
+            realized_acceleration = latest_realized_acceleration
         else:
             realized_acceleration = acceleration_monitor.update(
                 task_observation, interface_state, current_model
             )
+            latest_realized_acceleration = realized_acceleration
         evaluation_acceleration = np.asarray(
             plant.data.qacc[plant.human_dof_indices], dtype=float
         ).copy()
@@ -520,15 +786,24 @@ def run_goal_mpc_smoke(
             if pending_abort_reason is not None:
                 task_state = abort_episode(task_state, pending_abort_reason)
             else:
-                task_state = transition_phase(
-                    spec,
-                    task_state,
-                    estimated_state[:2],
-                    estimated_state[2:],
-                    dt_task,
-                    ddq_rad_s2=realized_acceleration.acceleration_rad_s2,
-                    completion_margin=completion_margin,
-                )
+                if uncertainty_estimate is None:
+                    task_state = transition_phase(
+                        spec,
+                        task_state,
+                        estimated_state[:2],
+                        estimated_state[2:],
+                        dt_task,
+                        ddq_rad_s2=realized_acceleration.acceleration_rad_s2,
+                        completion_margin=completion_margin,
+                    )
+                else:
+                    task_state = transition_phase_uncertainty_aware(
+                        spec,
+                        task_state,
+                        uncertainty_estimate,
+                        dt_task,
+                        completion_margin=completion_margin,
+                    )
             previous_task_time_s = current_time_s
             if task_state.phase is not previous_phase:
                 phase_changed = True
@@ -602,6 +877,45 @@ def run_goal_mpc_smoke(
         trace_prediction_previous_executable_wrench.append(
             explicit_prediction_state.previous_executable_wrench_world.copy()
         )
+        # Deployable identification boundary for future shadow-online work.
+        # These are diagnostic copies only and do not enter Goal-MPC or task
+        # decisions.
+        trace_robot_cuff_position_world.append(
+            np.asarray(mpc_measurement.attachment_position_m, dtype=float).copy()
+        )
+        trace_robot_cuff_rotation_world.append(
+            np.asarray(mpc_measurement.attachment_rotation_matrix, dtype=float).copy()
+        )
+        trace_robot_cuff_linear_velocity_world.append(
+            np.asarray(mpc_measurement.attachment_velocity_m_s, dtype=float).copy()
+        )
+        trace_robot_cuff_angular_velocity_world.append(
+            np.asarray(
+                mpc_measurement.attachment_angular_velocity_rad_s, dtype=float
+            ).copy()
+        )
+        trace_measured_cuff_force_world.append(
+            np.asarray(mpc_measurement.cuff_force_vector_n, dtype=float).copy()
+        )
+        trace_measured_cuff_moment_world.append(
+            np.asarray(mpc_measurement.cuff_moment_vector_nm, dtype=float).copy()
+        )
+        if uncertainty_estimate is not None:
+            uncertainty_states = uncertainty_estimate.state_matrix
+            uncertainty_accelerations = (
+                uncertainty_estimate.decision_acceleration_matrix
+            )
+            trace_uncertainty_state_min.append(np.min(uncertainty_states, axis=0))
+            trace_uncertainty_state_max.append(np.max(uncertainty_states, axis=0))
+            trace_uncertainty_acceleration_min.append(
+                np.min(uncertainty_accelerations, axis=0)
+            )
+            trace_uncertainty_acceleration_max.append(
+                np.max(uncertainty_accelerations, axis=0)
+            )
+            trace_uncertainty_causal_acceleration_available.append(
+                bool(len(uncertainty_estimate.available_causal_acceleration_matrix))
+            )
 
         if task_state.phase in (TaskPhase.COMPLETE, TaskPhase.ABORTED):
             trace_local_reference_q.append(estimated_state[:2].copy())
@@ -609,7 +923,10 @@ def run_goal_mpc_smoke(
         if stop_on_return_entry and task_state.phase is TaskPhase.RETURN:
             trace_local_reference_q.append(estimated_state[:2].copy())
             break
-        if current_time_s >= maximum_duration_s - 1.0e-12:
+        if (
+            current_time_s - episode_origin_time_s
+            >= maximum_duration_s - 1.0e-12
+        ):
             task_state = abort_episode(task_state, "SMOKE_MAXIMUM_DURATION")
             task_events.append(
                 {
@@ -703,6 +1020,14 @@ def run_goal_mpc_smoke(
                 q_rad=estimated_state[:2],
                 human_model=current_model,
                 cuff_allocator=cuff_allocator,
+                state_rad_rad_s=estimated_state,
+                acceleration_limits_rad_s2=(
+                    None
+                    if spec.task_joint_acceleration_limit_rad_s2 is None
+                    else np.asarray(
+                        spec.task_joint_acceleration_limit_rad_s2, dtype=float
+                    )
+                ),
             )
             solve_initial_drive, solve_initial_angular_drive = (
                 screening_interface_predictor.inferred_base_drive_human(
@@ -831,6 +1156,63 @@ def run_goal_mpc_smoke(
             )
             solver_runtimes_ms.append(1000.0 * (perf_counter() - started))
             solver_statuses.append(str(mpc_diagnostics["status"]))
+            solver_feasible_candidate_evaluations.append(
+                int(mpc_diagnostics["feasible_candidate_evaluations"])
+            )
+            solver_first_action_feasible_candidate_evaluations.append(
+                int(mpc_diagnostics["first_action_feasible_candidate_evaluations"])
+            )
+            selected_prefix_prediction = candidate_batch_preview.last_prediction
+            if (
+                proposed_action is not None
+                and selected_prefix_prediction is not None
+                and selected_prefix_prediction.predicted_prefix_acceleration_rad_s2
+                is not None
+            ):
+                if selected_prefix_prediction.prefix_times_s is None or not np.allclose(
+                    selected_prefix_prediction.prefix_times_s,
+                    np.asarray([0.005, 0.010, 0.015, 0.020]),
+                    atol=1.0e-12,
+                    rtol=0.0,
+                ):
+                    raise RuntimeError("selected V2 prefix timestamps are invalid")
+                prefix_executable = np.concatenate(
+                    [
+                        selected_prefix_prediction.executable_batch.force_total_n[0],
+                        selected_prefix_prediction.executable_batch.moment_total_nm[0],
+                    ]
+                )
+                selected_prefix_prediction_time.append(current_time_s)
+                selected_prefix_prediction_acceleration.append(
+                    selected_prefix_prediction.predicted_prefix_acceleration_rad_s2[
+                        0
+                    ].copy()
+                )
+                assert (
+                    selected_prefix_prediction.predicted_prefix_states_rad_rad_s
+                    is not None
+                    and selected_prefix_prediction.prefix_acceleration_margin_rad_s2
+                    is not None
+                    and selected_prefix_prediction.prefix_acceleration_feasible
+                    is not None
+                )
+                selected_prefix_prediction_state.append(
+                    selected_prefix_prediction.predicted_prefix_states_rad_rad_s[
+                        0
+                    ].copy()
+                )
+                selected_prefix_prediction_margin.append(
+                    selected_prefix_prediction.prefix_acceleration_margin_rad_s2[
+                        0
+                    ].copy()
+                )
+                selected_prefix_prediction_feasible.append(
+                    bool(selected_prefix_prediction.prefix_acceleration_feasible[0])
+                )
+                selected_prefix_executable_wrench_increment.append(
+                    prefix_executable
+                    - screening_interface_predictor.previous_executable_wrench_world
+                )
             if (
                 feasibility_loss_audit is not None
                 and feasibility_loss_audit.get("checkpoint_time_s")
@@ -1050,6 +1432,12 @@ def run_goal_mpc_smoke(
                     )
                     selected_prediction_first_wrench.append(
                         selected.transmitted_mean_wrench_world[0, 0].copy()
+                    )
+                    selected_prediction_first_hold_peak_force.append(
+                        float(selected.predicted_peak_force_n[0, 0])
+                    )
+                    selected_prediction_first_hold_peak_moment.append(
+                        float(selected.predicted_peak_moment_nm[0, 0])
                     )
                     selected_prediction_first_interface_translation.append(
                         selected.interface_displacement_human_m[0, 0].copy()
@@ -1325,6 +1713,7 @@ def run_goal_mpc_smoke(
                 )
             previous_command_wrench = command_wrench.copy()
         plant.apply_executable_command(decision.executable_preview.command)
+        last_executable_command = decision.executable_preview.command
         screening_interface_predictor.synchronize(
             interface_state,
             decision.executable_preview.command.wrench_total_world,
@@ -1419,6 +1808,39 @@ def run_goal_mpc_smoke(
         "prediction_previous_executable_wrench_world": np.asarray(
             trace_prediction_previous_executable_wrench, dtype=float
         ),
+        "deployable_robot_cuff_position_world_m": np.asarray(
+            trace_robot_cuff_position_world, dtype=float
+        ),
+        "deployable_robot_cuff_rotation_world": np.asarray(
+            trace_robot_cuff_rotation_world, dtype=float
+        ),
+        "deployable_robot_cuff_linear_velocity_world_m_s": np.asarray(
+            trace_robot_cuff_linear_velocity_world, dtype=float
+        ),
+        "deployable_robot_cuff_angular_velocity_world_rad_s": np.asarray(
+            trace_robot_cuff_angular_velocity_world, dtype=float
+        ),
+        "deployable_measured_cuff_force_world_n": np.asarray(
+            trace_measured_cuff_force_world, dtype=float
+        ),
+        "deployable_measured_cuff_moment_world_nm": np.asarray(
+            trace_measured_cuff_moment_world, dtype=float
+        ),
+        "interface_uncertainty_state_min_rad_rad_s": np.asarray(
+            trace_uncertainty_state_min, dtype=float
+        ).reshape(-1, 4),
+        "interface_uncertainty_state_max_rad_rad_s": np.asarray(
+            trace_uncertainty_state_max, dtype=float
+        ).reshape(-1, 4),
+        "interface_uncertainty_acceleration_min_rad_s2": np.asarray(
+            trace_uncertainty_acceleration_min, dtype=float
+        ).reshape(-1, 2),
+        "interface_uncertainty_acceleration_max_rad_s2": np.asarray(
+            trace_uncertainty_acceleration_max, dtype=float
+        ).reshape(-1, 2),
+        "interface_uncertainty_causal_acceleration_available": np.asarray(
+            trace_uncertainty_causal_acceleration_available, dtype=bool
+        ),
         "selected_prediction_time_s": np.asarray(
             selected_prediction_time, dtype=float
         ),
@@ -1431,6 +1853,12 @@ def run_goal_mpc_smoke(
         "selected_prediction_first_transmitted_wrench_world": np.asarray(
             selected_prediction_first_wrench, dtype=float
         ).reshape(-1, 6),
+        "selected_prediction_first_hold_peak_force_n": np.asarray(
+            selected_prediction_first_hold_peak_force, dtype=float
+        ),
+        "selected_prediction_first_hold_peak_moment_nm": np.asarray(
+            selected_prediction_first_hold_peak_moment, dtype=float
+        ),
         "selected_prediction_first_interface_translation_human_m": np.asarray(
             selected_prediction_first_interface_translation, dtype=float
         ).reshape(-1, 3),
@@ -1458,7 +1886,52 @@ def run_goal_mpc_smoke(
         "selected_prediction_first_executable_wrench_world": np.asarray(
             selected_prediction_first_executable_wrench_world, dtype=float
         ).reshape(-1, 6),
+        "selected_v2_prefix_prediction_time_s": np.asarray(
+            selected_prefix_prediction_time, dtype=float
+        ),
+        "selected_v2_prefix_acceleration_rad_s2": np.asarray(
+            selected_prefix_prediction_acceleration, dtype=float
+        ).reshape(-1, 4, 2),
+        "selected_v2_prefix_state_rad_rad_s": np.asarray(
+            selected_prefix_prediction_state, dtype=float
+        ).reshape(-1, 4, 4),
+        "selected_v2_prefix_acceleration_margin_rad_s2": np.asarray(
+            selected_prefix_prediction_margin, dtype=float
+        ).reshape(-1, 4, 2),
+        "selected_v2_prefix_acceleration_feasible": np.asarray(
+            selected_prefix_prediction_feasible, dtype=bool
+        ),
+        "selected_v2_prefix_executable_wrench_increment_world": np.asarray(
+            selected_prefix_executable_wrench_increment, dtype=float
+        ).reshape(-1, 6),
+        "mpc_feasible_candidate_evaluations": np.asarray(
+            solver_feasible_candidate_evaluations, dtype=int
+        ),
+        "mpc_first_action_feasible_candidate_evaluations": np.asarray(
+            solver_first_action_feasible_candidate_evaluations, dtype=int
+        ),
     }
+    # A repeatability session keeps plant/controller clocks and causal history
+    # continuous, while each saved episode uses a local zero-based time axis.
+    # This is a reporting transform only; all online transitions above used the
+    # unchanged absolute causal timestamps.
+    for key in (
+        "time_s",
+        "deployable_acceleration_interval_start_s",
+        "selected_prediction_time_s",
+        "selected_v2_prefix_prediction_time_s",
+    ):
+        values = trace[key]
+        finite = np.isfinite(values)
+        values[finite] -= episode_origin_time_s
+    for event in task_events:
+        event["time_s"] = float(event["time_s"] - episode_origin_time_s)
+    if handoff_entry_time_s is not None:
+        handoff_entry_time_s -= episode_origin_time_s
+    if return_handoff_entry_time_s is not None:
+        return_handoff_entry_time_s -= episode_origin_time_s
+    if return_handoff_completed_time_s is not None:
+        return_handoff_completed_time_s -= episode_origin_time_s
     time = trace["time_s"]
     force_norm = np.linalg.norm(trace["physical_cuff_force_world_n"], axis=1)
     moment_norm = np.linalg.norm(trace["physical_cuff_moment_world_nm"], axis=1)
@@ -1752,6 +2225,27 @@ def run_goal_mpc_smoke(
             )
         ),
         "plant_case_name": plant_case_name,
+        "repeatability_session": {
+            "session_reused": bool(reusing_session),
+            "episode_index": (
+                1
+                if session_context is None
+                else int(session_context.get("episode_count", 0)) + 1
+            ),
+            "continuous_plant_clock_and_rng": session_context is not None,
+            "plant_estimator_interface_history_reconstructed": False,
+            "episode_local_task_state_created": True,
+        },
+        "loaded_initialization": {
+            "human_q_dq_and_required_support_wrench_shared_with_checkpoint": True,
+            "robot_side_pose_uses_plant_truth_interface": bool(
+                initialize_loaded_equilibrium_with_plant_truth
+            ),
+            "plant_truth_use_is_evaluation_fixture_only": bool(
+                initialize_loaded_equilibrium_with_plant_truth
+            ),
+            "plant_truth_passed_to_online_controller": False,
+        },
         "fixed_human_control_model": True,
         "human_model_version": FIXED_HUMAN_MODEL_VERSION,
         "online_identification_or_learning": False,
@@ -1879,6 +2373,87 @@ def run_goal_mpc_smoke(
             },
         },
         "task_observation_source": INTERFACE_AWARE_ESTIMATOR_Q_DQ,
+        "interface_uncertainty_monitor": {
+            "enabled": interface_uncertainty_spec is not None,
+            "method": (
+                None
+                if interface_uncertainty_spec is None
+                else interface_uncertainty_spec.method
+            ),
+            "hypothesis_count": (
+                0
+                if initial_uncertainty_estimate is None
+                else len(initial_uncertainty_estimate.hypotheses)
+            ),
+            "translation_stiffness_scale_range": (
+                None
+                if interface_uncertainty_spec is None
+                else list(
+                    interface_uncertainty_spec.translation_stiffness_scale_range
+                )
+            ),
+            "rotation_stiffness_scale_range": (
+                None
+                if interface_uncertainty_spec is None
+                else list(
+                    interface_uncertainty_spec.rotation_stiffness_scale_range
+                )
+            ),
+            "joint_damping_scale_range": (
+                None
+                if interface_uncertainty_spec is None
+                else list(interface_uncertainty_spec.joint_damping_scale_range)
+            ),
+            "completion_requires_all_hypotheses": interface_uncertainty_spec
+            is not None,
+            "motion_envelope_requires_all_hypotheses": interface_uncertainty_spec
+            is not None,
+            "causal_dq_derivative_requires_full_window": True,
+            "truth_used_online": False,
+            "empirical_range_not_guaranteed_bound": True,
+            "maximum_state_range_width_deg_deg_s": (
+                None
+                if not trace_uncertainty_state_min
+                else np.degrees(
+                    np.max(
+                        np.asarray(trace_uncertainty_state_max)
+                        - np.asarray(trace_uncertainty_state_min),
+                        axis=0,
+                    )
+                ).tolist()
+            ),
+            "maximum_abs_acceleration_range_deg_s2": (
+                None
+                if not trace_uncertainty_acceleration_min
+                else np.degrees(
+                    np.max(
+                        np.maximum(
+                            np.abs(np.asarray(trace_uncertainty_acceleration_min)),
+                            np.abs(np.asarray(trace_uncertainty_acceleration_max)),
+                        ),
+                        axis=0,
+                    )
+                ).tolist()
+            ),
+        },
+        "interface_robustness_planning": {
+            "physical_force_ceiling_n": float(
+                planning_physical_force_ceiling_n
+            ),
+            "physical_force_reserve_to_200n_gate_n": float(
+                CUFF_TRANSLATIONAL_FORCE_GATE_N
+                - planning_physical_force_ceiling_n
+            ),
+            "joint_velocity_ceiling_deg_s": (
+                None
+                if planning_joint_velocity_ceiling_rad_s is None
+                else np.degrees(
+                    planning_joint_velocity_ceiling_rad_s
+                ).tolist()
+            ),
+            "registered_velocity_and_force_limits_unchanged": True,
+            "truth_used_online": False,
+        },
         "human_state_estimation_error": {
             "q_rmse_deg": np.degrees(
                 np.sqrt(np.mean(q_error * q_error, axis=0))
@@ -2349,12 +2924,23 @@ def run_goal_mpc_smoke(
             },
         },
         "controller_parameter_change": (
-            "The nominal interface predictor now carries an explicit versioned "
-            "base-drive/history state across solves using zero-order hold plus "
-            "known executable-wrench increments. CEM/action space, objective "
-            "weights, horizon, candidate count, iterations, constraints, Safety "
-            "Filter, BRAKE, Plant v1, support+motion coordinates, and HOLD gains "
-            "are unchanged"
+            "Interface Robustness v1 adds only a controller-side predicted-force "
+            "ceiling and independent-joint planning-velocity ceiling; the 200 N "
+            "physical gate and registered motion envelope remain unchanged. "
+            "Architecture, action space, objective weights, horizon, candidate "
+            "count, iterations, Safety Filter, BRAKE, Plant v1, support+motion "
+            "coordinates, and HOLD gains are unchanged"
+            if planning_physical_force_ceiling_n
+            < CUFF_TRANSLATIONAL_FORCE_GATE_N - 1.0e-12
+            or planning_joint_velocity_ceiling_rad_s is not None
+            else (
+                "The nominal interface predictor carries an explicit versioned "
+                "base-drive/history state across solves using zero-order hold plus "
+                "known executable-wrench increments. CEM/action space, objective "
+                "weights, horizon, candidate count, iterations, constraints, Safety "
+                "Filter, BRAKE, Plant v1, support+motion coordinates, and HOLD gains "
+                "are unchanged"
+            )
         ),
     }
     np.savez_compressed(output_dir / "trace.npz", **trace)
@@ -2367,6 +2953,28 @@ def run_goal_mpc_smoke(
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     _write_plots(output_dir, trace)
+    if session_context is not None:
+        session_context.update(
+            {
+                "plant": plant,
+                "estimator_layer": estimator_layer,
+                "mpc_layer": mpc_layer,
+                "low_level_layer": low_level_layer,
+                "estimator": estimator,
+                "cuff_allocator": cuff_allocator,
+                "interface_observer": interface_observer,
+                "acceleration_monitor": acceleration_monitor,
+                "screening_interface_predictor": screening_interface_predictor,
+                "diagnostic_interface_predictor": diagnostic_interface_predictor,
+                "mpc": mpc,
+                "supervisor": supervisor,
+                "start_loaded_equilibrium": start_loaded_equilibrium,
+                "current_action_nm": current_action.copy(),
+                "last_executable_command": last_executable_command,
+                "last_realized_acceleration": realized_acceleration,
+                "episode_count": int(session_context.get("episode_count", 0)) + 1,
+            }
+        )
     return summary
 
 

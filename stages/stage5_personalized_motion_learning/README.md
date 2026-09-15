@@ -1,5 +1,23 @@
 # Stage 5: Personalized Motion Learning
 
+Interface-study status: **closed as a limited negative result**. The final
+campaign remains `EXIT C`, Acceleration-Semantics V2 did not resolve the 5 ms
+physical-transient underprediction, and runtime telemetry remains `B6 —
+unresolved`. See `docs/INTERFACE_STUDY_CLOSEOUT.md` and its compact manifest.
+Further interface identification/predictor work is paused pending CR-12/cuff
+hardware evidence. Subsequent Human-ID work uses a fixed nominal Plant-v1
+interface and fixed nominal controller interface model.
+
+Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
+implemented, but targeted validation stopped at the first historical-failure
+case because the nominal loaded-interface predictor still underpredicted the
+5 ms q2 transient. V2 is not ready for a new robustness campaign. The separate
+long-session runtime audit remains B6 (unresolved). See
+`docs/ACCELERATION_SEMANTICS_V2_DESIGN.md`,
+`docs/ACCELERATION_SEMANTICS_V2_TARGETED_RESULTS.md`, and
+`docs/RUNTIME_TELEMETRY_AUDIT_V2.md`. The historical Interface Robustness V1
+result remains frozen as `EXIT C — STOP THIS IMPLEMENTATION`.
+
 Stage 5 is a new workspace for repeated rehabilitation-motion research. It
 does not modify or reinterpret the frozen Stage-4 scientific evidence.
 
@@ -27,8 +45,13 @@ now completes `OUTBOUND -> HOLD -> RETURN -> COMPLETE`. The runtime checkpoint
 removes duplicated candidate-specific loaded/interface work without changing
 control semantics: the final engineering run is 18.18 ms mean and 19.16 ms p95
 for the 20 ms Goal-MPC period, with 2/202 isolated deadline misses. Its 37.43 ms
-wall-clock maximum prevents a hard worst-case claim. Interface mismatch and
-learning have not started.
+wall-clock maximum prevents a hard worst-case claim. The small Interface
+Mismatch v1 sweep and subsequent negative identification evidence are retained.
+The active branch now targets bounded engineering robustness with a fixed
+low-order interface prior, not physical K/D recovery. Interface Robustness v1
+passed its six-episode development gate except for a conservative Kr x0.7
+settled-start boundary rejection; the final campaign is preregistered but not
+authorized. No interface/Human adaptation, value learning, or RL is active.
 
 - `configs/stage5_geometry_mechanics_v1.json`: single provisional parameter
   record and preserved geometry checkpoint.
@@ -52,6 +75,12 @@ learning have not started.
   controller nominal interface model, causal Human-side state observer, and
   batched spring-damper action-hold predictor. The controller module never
   imports or reads plant-truth interface parameters/state.
+- `configs/stage5_interface_mismatch_v1.json`,
+  `src/traction_mpc_stage5/interface_mismatch.py`, and
+  `scripts/run_stage5_interface_mismatch_v1.py`: frozen controller-nominal
+  record, evaluation-only plant-truth OFAT matrix, compact aggregation, and
+  structured t=0 rejection evidence. No controller retuning or learning is
+  introduced.
 - `src/traction_mpc_stage5/goal_mpc.py`: first reference-free Human-space CEM
   adapter with phase target, goal/terminal cost, inherited action/slew and
   optional cuff terms, candidate-dependent execution screening, and terminal
@@ -128,6 +157,52 @@ learning have not started.
 - `docs/DETERMINISTIC_BASELINE_CHECKPOINT.md`: frozen pre-mismatch controller
   contract, compact evidence checksum, explicit non-learning boundary, and
   local evidence-retention policy.
+- `docs/INTERFACE_MISMATCH_V1.md`: seven-run/nine-cell small parameter sweep,
+  nominal checkpoint reproduction, state/force/motion/runtime degradation
+  chain, and a bounded recommendation for a later structural-mismatch probe.
+- `configs/stage5_interface_uncertainty_v1.json`,
+  `src/traction_mpc_stage5/interface_uncertainty.py`, and
+  `scripts/audit_stage5_interface_uncertainty_v1.py`: limited Kt/Kr/D
+  operating-set proposal, nominal-plus-corner causal monitor, conservative
+  task/motion decision semantics, and read-only saved-trace replay.
+- `docs/INTERFACE_UNCERTAINTY_V1.md`: Mismatch v1 classification, false-
+  negative/false-positive tradeoff, nominal counterfactual stopping result,
+  and endpoint-B recommendation. No interface identifier or learner is added.
+- `configs/stage5_interface_identification_v1.json`,
+  `src/traction_mpc_stage5/interface_identification.py`, and
+  `scripts/audit_stage5_interface_identification_v1.py`: truth-free service
+  contract, bounded joint initial-state/parameter prediction-error MHE,
+  data-only projected identifiability diagnostics, future-validation split,
+  last-valid fallback, and an inactive one-challenger shadow-publication shell.
+- `docs/INTERFACE_IDENTIFICATION_V1.md`: Stage-1/4 reuse audit, six dynamic
+  saved-trace fits plus the retained `Kr x0.7` startup failure, phase/window/
+  latent-state sensitivity, held-out prediction comparison, and endpoint-C
+  decision. Raw robot pose/twist are now included in future trace diagnostics;
+  the Goal-MPC and safety paths are unchanged.
+- `scripts/audit_stage5_interface_model_form_v1.py` and
+  `docs/INTERFACE_INFORMATION_VS_MODEL_FORM_V1.md`: exact-model synthetic
+  recovery, true-parameter saved-plant closure, small local parameter
+  landscapes, and the decision to correct the identification-side
+  relative-kinematics predictor before designing new excitation. This audit is
+  offline only; publication and every control path remain unchanged.
+- `configs/stage5_interface_identification_predictor_v2.json`,
+  `src/traction_mpc_stage5/interface_identification_v2.py`,
+  `scripts/audit_stage5_interface_physical_predictor_v2.py`, and
+  `docs/INTERFACE_IDENTIFICATION_PHYSICAL_PREDICTOR_V2.md`: identification-only
+  coupled robot/Human relative-kinematics predictor, old-vs-v2 true-parameter
+  closure, and pre-estimator parameter landscapes. Gate 1 improves, Gate 2
+  rejects physical publication, so the existing estimator is not rerun and
+  control remains frozen.
+- `configs/stage5_interface_robustness_v1.json`,
+  `src/traction_mpc_stage5/interface_robustness.py`, and
+  `docs/INTERFACE_ROBUSTNESS_CLOSEOUT_V1.md`: engineering acceptance contract,
+  read-only Mismatch-v1 re-score, fixed-model V1 with a 180 N planning reserve
+  and path-free 15/25 deg/s MPC pacing, six-episode development result, and an
+  explicit Kr-low boundary limitation. Interface ID and the former uncertainty
+  bank have no online authority.
+- `configs/stage5_interface_robustness_final_campaign_v1.json`: frozen core-box,
+  boundary, and 30-episode repeatability protocol. Its status is
+  `PREREGISTERED_NOT_AUTHORIZED`; no final campaign was run.
 - `scripts/run_stage5_geometry_validation.py`: engineering/smoke validation;
   it is not a formal scientific experiment.
 - `tests/`: geometry, frame, mechanics, visualization, and regression checks.
@@ -201,6 +276,38 @@ PYTHONPATH=stages/stage3_full3d/src:stages/stage4_adaptive_control/src:stages/st
   stages/stage5_personalized_motion_learning/scripts/audit_stage5_feasibility_loss.py \
   --output-dir stages/stage5_personalized_motion_learning/results/feasibility_retention_v1/new_reconstruction
 ```
+
+Reproduce the offline Interface-ID information/model-form audit from saved
+Mismatch-v1 traces (no MuJoCo run and no parameter publication):
+
+```bash
+PYTHONPATH=stages/stage3_full3d/src:stages/stage4_adaptive_control/src:stages/stage5_personalized_motion_learning/src \
+  conda run --no-capture-output -n mpc_learn python \
+  stages/stage5_personalized_motion_learning/scripts/audit_stage5_interface_model_form_v1.py
+```
+
+Run the identification-only physical Predictor-v2 gates on the same saved
+traces (Gate 3 stops automatically when the physical landscape gate fails):
+
+```bash
+PYTHONPATH=stages/stage3_full3d/src:stages/stage4_adaptive_control/src:stages/stage5_personalized_motion_learning/src \
+  conda run --no-capture-output -n mpc_learn python \
+  stages/stage5_personalized_motion_learning/scripts/audit_stage5_interface_physical_predictor_v2.py
+```
+
+Re-score the saved deterministic/Mismatch-v1 traces under the interface
+robustness contract without running MuJoCo:
+
+```bash
+PYTHONPATH=stages/stage3_full3d/src:stages/stage4_adaptive_control/src:stages/stage5_personalized_motion_learning/src \
+  conda run --no-capture-output -n mpc_learn python \
+  stages/stage5_personalized_motion_learning/scripts/audit_stage5_interface_robustness_closeout.py \
+  --output-dir stages/stage5_personalized_motion_learning/results/interface_robustness_closeout_v1/new_rescore
+```
+
+The six-episode V1 development command is retained for provenance, but its
+budget has been exhausted and it must not be rerun as tuning. The separately
+preregistered final campaign remains unauthorized.
 
 Run the Stage-5 checks from the repository root:
 

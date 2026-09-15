@@ -22,6 +22,7 @@ from traction_mpc_stage3.executable_command import (
     ExecutableCommandPreview,
 )
 
+from .acceleration_semantics import screen_cumulative_prefix_acceleration
 from .config import STAGE5_ROOT
 from .task_observation import ControllerTaskObservation, make_task_observation
 
@@ -268,6 +269,12 @@ class InterfaceHoldPredictionBatch:
     predicted_endpoint_moment_world_nm: np.ndarray
     predicted_mean_moment_world_nm: np.ndarray
     margin_to_physical_force_gate_n: np.ndarray
+    acceleration_semantics_version: str = "v1_full_20ms_only"
+    prefix_times_s: np.ndarray | None = None
+    predicted_prefix_states_rad_rad_s: np.ndarray | None = None
+    predicted_prefix_acceleration_rad_s2: np.ndarray | None = None
+    prefix_acceleration_margin_rad_s2: np.ndarray | None = None
+    prefix_acceleration_feasible: np.ndarray | None = None
 
     def command(self, index: int) -> ExecutableCommandPreview:
         return self.executable_batch.command(index)
@@ -318,9 +325,24 @@ class NominalInterfaceHoldPredictor:
         parameters: ControllerNominalInterfaceParameters = CONTROLLER_NOMINAL_INTERFACE,
         *,
         control_dt_s: float = 0.005,
+        planning_force_ceiling_n: float | None = None,
     ) -> None:
         self.parameters = parameters
         self.control_dt_s = float(control_dt_s)
+        self.planning_force_ceiling_n = (
+            parameters.engineering_force_gate_n
+            if planning_force_ceiling_n is None
+            else float(planning_force_ceiling_n)
+        )
+        if (
+            not math.isfinite(self.planning_force_ceiling_n)
+            or self.planning_force_ceiling_n <= 0.0
+            or self.planning_force_ceiling_n > parameters.engineering_force_gate_n
+        ):
+            raise ValueError(
+                "planning force ceiling must be positive and no greater than the "
+                "unchanged engineering force gate"
+            )
         ratio = self.control_dt_s / parameters.prediction_substep_s
         self.substeps = int(round(ratio))
         if self.substeps < 1 or not np.isclose(ratio, self.substeps, atol=1.0e-12):
@@ -641,7 +663,10 @@ class NominalInterfaceHoldPredictor:
         endpoint_moment_world = endpoint_moment_human @ rotation.T
         mean_force_world = (force_sum_human / self.substeps) @ rotation.T
         mean_moment_world = (moment_sum_human / self.substeps) @ rotation.T
-        margin = p.engineering_force_gate_n - peak_force
+        # This predictor is used by MPC screening.  A caller may request a
+        # conservative planning reserve below the unchanged 200 N physical
+        # engineering gate; execution and plant supervision retain the latter.
+        margin = self.planning_force_ceiling_n - peak_force
         feasible = np.asarray(executable_batch.feasible, dtype=bool) & (margin >= -1.0e-9)
         return InterfaceHoldPredictionBatch(
             executable_batch=executable_batch,
@@ -667,11 +692,38 @@ class InterfaceAwareFirstActionBatchPreview:
         q_rad: np.ndarray,
         human_model: Any,
         cuff_allocator: Any,
+        *,
+        state_rad_rad_s: np.ndarray | None = None,
+        acceleration_limits_rad_s2: np.ndarray | None = None,
     ) -> None:
         self.executable_preview = executable_preview
         self.predictor = predictor
         self.interface_state = interface_state
         self.q_rad = np.asarray(q_rad, dtype=float).copy()
+        self.state_rad_rad_s = (
+            None
+            if state_rad_rad_s is None
+            else np.asarray(state_rad_rad_s, dtype=float).copy()
+        )
+        self.acceleration_limits_rad_s2 = (
+            None
+            if acceleration_limits_rad_s2 is None
+            else np.asarray(acceleration_limits_rad_s2, dtype=float).copy()
+        )
+        if self.state_rad_rad_s is not None:
+            if self.state_rad_rad_s.shape != (4,) or not np.all(
+                np.isfinite(self.state_rad_rad_s)
+            ):
+                raise ValueError("prefix screening state must be one finite state[4]")
+            if not np.array_equal(self.state_rad_rad_s[:2], self.q_rad):
+                raise ValueError("prefix screening state q must match q_rad")
+        if self.acceleration_limits_rad_s2 is not None:
+            if self.acceleration_limits_rad_s2.shape != (2,) or np.any(
+                self.acceleration_limits_rad_s2 <= 0.0
+            ) or not np.all(np.isfinite(self.acceleration_limits_rad_s2)):
+                raise ValueError("prefix acceleration limits must be a positive pair")
+            if self.state_rad_rad_s is None:
+                raise ValueError("prefix acceleration limits require the full Human state")
         self.human_model = human_model
         self.cuff_allocator = cuff_allocator
         geometry = human_model.geometry
@@ -698,6 +750,37 @@ class InterfaceAwareFirstActionBatchPreview:
         self._screen_cache: list[
             tuple[np.ndarray, InterfaceHoldPredictionBatch]
         ] = []
+        self._prefix_support_provider: Callable[[np.ndarray], np.ndarray] | None = None
+        self._prefix_human_continuous_dynamics: Callable[
+            [np.ndarray, np.ndarray, Any], np.ndarray
+        ] | None = None
+        self._prefix_future_command_resolver: Callable[..., np.ndarray] | None = None
+
+    @property
+    def last_prediction(self) -> InterfaceHoldPredictionBatch | None:
+        """Expose the selected cached screen for Stage-5 diagnostics only."""
+
+        return self._last_prediction
+
+    def configure_prefix_screening(
+        self,
+        *,
+        support_provider: Callable[[np.ndarray], np.ndarray],
+        human_continuous_dynamics: Callable[
+            [np.ndarray, np.ndarray, Any], np.ndarray
+        ],
+        future_command_resolver: Callable[..., np.ndarray],
+    ) -> None:
+        """Bind the same support, Human, and loaded-execution laws as Goal-MPC.
+
+        The bindings are installed by the Stage-5 support-centered wrapper while
+        a solve is active.  They are controller-model functions only; neither
+        MuJoCo state nor plant-truth interface parameters cross this boundary.
+        """
+
+        self._prefix_support_provider = support_provider
+        self._prefix_human_continuous_dynamics = human_continuous_dynamics
+        self._prefix_future_command_resolver = future_command_resolver
 
     @staticmethod
     def _slice_executable_batch(
@@ -763,6 +846,241 @@ class InterfaceAwareFirstActionBatchPreview:
             margin_to_physical_force_gate_n=(
                 prediction.margin_to_physical_force_gate_n[index : index + 1].copy()
             ),
+            acceleration_semantics_version=prediction.acceleration_semantics_version,
+            prefix_times_s=(
+                None
+                if prediction.prefix_times_s is None
+                else prediction.prefix_times_s.copy()
+            ),
+            predicted_prefix_states_rad_rad_s=(
+                None
+                if prediction.predicted_prefix_states_rad_rad_s is None
+                else prediction.predicted_prefix_states_rad_rad_s[
+                    index : index + 1
+                ].copy()
+            ),
+            predicted_prefix_acceleration_rad_s2=(
+                None
+                if prediction.predicted_prefix_acceleration_rad_s2 is None
+                else prediction.predicted_prefix_acceleration_rad_s2[
+                    index : index + 1
+                ].copy()
+            ),
+            prefix_acceleration_margin_rad_s2=(
+                None
+                if prediction.prefix_acceleration_margin_rad_s2 is None
+                else prediction.prefix_acceleration_margin_rad_s2[
+                    index : index + 1
+                ].copy()
+            ),
+            prefix_acceleration_feasible=(
+                None
+                if prediction.prefix_acceleration_feasible is None
+                else prediction.prefix_acceleration_feasible[
+                    index : index + 1
+                ].copy()
+            ),
+        )
+
+    def _batched_human_step_at_dt(
+        self, states: np.ndarray, actions_nm: np.ndarray, dt_s: float
+    ) -> np.ndarray:
+        dynamics = self._prefix_human_continuous_dynamics
+        if dynamics is None:
+            raise RuntimeError("V2 prefix screen has no Human dynamics binding")
+        dt = float(dt_s)
+        k1 = dynamics(states, actions_nm, self.human_model)
+        k2 = dynamics(states + 0.5 * dt * k1, actions_nm, self.human_model)
+        k3 = dynamics(states + 0.5 * dt * k2, actions_nm, self.human_model)
+        k4 = dynamics(states + dt * k3, actions_nm, self.human_model)
+        return states + dt * (k1 + 2.0 * k2 + 2.0 * k3 + k4) / 6.0
+
+    def _apply_v2_prefix_acceleration_screen(
+        self,
+        actions_nm: np.ndarray,
+        prediction: InterfaceHoldPredictionBatch,
+    ) -> InterfaceHoldPredictionBatch:
+        """Check cumulative 5/10/15/20 ms acceleration under loaded execution.
+
+        Each 5 ms segment refreshes the loaded low-level command.  Within a
+        segment, the existing 0.25 ms semi-implicit interface recurrence and
+        fixed Human model are coupled at every physical substep. Prefix states
+        are therefore propagated, not interpolated from the 20 ms endpoint.
+        """
+
+        if self.acceleration_limits_rad_s2 is None:
+            return prediction
+        if (
+            self._prefix_support_provider is None
+            or self._prefix_human_continuous_dynamics is None
+            or self._prefix_future_command_resolver is None
+        ):
+            raise RuntimeError("V2 prefix screen bindings were not configured")
+        assert self.state_rad_rad_s is not None
+        count = len(actions_nm)
+        prefix_dt_s = 0.005
+        prefix_count = 4
+        p = self.predictor.parameters
+        substeps_float = prefix_dt_s / p.prediction_substep_s
+        substeps = int(round(substeps_float))
+        if substeps < 1 or not np.isclose(
+            substeps_float, substeps, atol=1.0e-12, rtol=0.0
+        ):
+            raise ValueError("0.25 ms interface substep must divide 5 ms prefixes")
+        if substeps > len(self.predictor._translation_step_powers):
+            raise ValueError("predictor hold is shorter than one 5 ms prefix")
+        prediction_state = self.predictor._require_current_state(self.interface_state)
+        states = np.broadcast_to(self.state_rad_rad_s, (count, 4)).copy()
+        initial_dq = states[:, 2:].copy()
+        x = np.broadcast_to(
+            self.interface_state.displacement_human_m, (count, 3)
+        ).copy()
+        u = np.broadcast_to(
+            self.interface_state.velocity_human_m_s, (count, 3)
+        ).copy()
+        theta = np.broadcast_to(
+            self.interface_state.rotation_error_human_rad, (count, 3)
+        ).copy()
+        omega = np.broadcast_to(
+            self.interface_state.angular_velocity_human_rad_s, (count, 3)
+        ).copy()
+        rotation = np.broadcast_to(
+            self.interface_state.human_rotation_world, (count, 3, 3)
+        ).copy()
+        drive_world = np.broadcast_to(
+            prediction_state.base_drive_world_n, (count, 3)
+        ).copy()
+        angular_drive_world = np.broadcast_to(
+            prediction_state.base_angular_drive_world_nm, (count, 3)
+        ).copy()
+        previous_command = np.broadcast_to(
+            prediction_state.previous_executable_wrench_world, (count, 6)
+        ).copy()
+        command = np.column_stack(
+            [
+                prediction.executable_batch.force_total_n,
+                prediction.executable_batch.moment_total_nm,
+            ]
+        )
+        k = np.asarray(p.translation_stiffness_n_m)
+        d = np.asarray(p.translation_damping_ns_m)
+        mass = np.asarray(p.translation_effective_mass_kg)
+        kr = np.full(3, p.rotation_stiffness_nm_rad)
+        dr = np.full(3, p.rotation_damping_nms_rad)
+        inertia = np.full(3, p.rotation_effective_inertia_kg_m2)
+        rest_x = np.asarray(p.rest_translation_human_m)
+        rest_theta = np.asarray(p.rest_rotation_rotvec_human_rad)
+        prefix_states = np.empty((count, prefix_count, 4), dtype=float)
+        jacobian, rotation_from_q = self._geometry_batch(
+            states[:, :2], self.human_model.geometry
+        )
+        # At the observation boundary the interface observer's Human frame and
+        # the deployable q/dq geometry are the same controller estimate.  Keep
+        # the observed frame for the first segment and q-propagated frames after.
+        del rotation_from_q
+        for segment in range(prefix_count):
+            drive_world += command[:, :3] - previous_command[:, :3]
+            angular_drive_world += command[:, 3:] - previous_command[:, 3:]
+            # Couple the existing 0.25 ms semi-implicit interface recurrence to
+            # the fixed Human model.  This avoids compressing a fast startup
+            # transient into one 5 ms mean-wrench Human step.
+            physical_dt_s = p.prediction_substep_s
+            for _ in range(substeps):
+                drive_human = np.einsum("nji,nj->ni", rotation, drive_world)
+                angular_drive_human = np.einsum(
+                    "nji,nj->ni", rotation, angular_drive_world
+                )
+                translation_acceleration = (
+                    drive_human - k * (x - rest_x) - d * u
+                ) / mass
+                u = u + physical_dt_s * translation_acceleration
+                x = x + physical_dt_s * u
+                rotation_acceleration = (
+                    angular_drive_human
+                    - kr * (theta - rest_theta)
+                    - dr * omega
+                ) / inertia
+                omega = omega + physical_dt_s * rotation_acceleration
+                theta = theta + physical_dt_s * omega
+                force_human = k * (x - rest_x) + d * u
+                couple_human = kr * (theta - rest_theta) + dr * omega
+                moment_human = couple_human + np.cross(x + rest_x, force_human)
+                force_world = np.einsum("nij,nj->ni", rotation, force_human)
+                moment_world = np.einsum("nij,nj->ni", rotation, moment_human)
+                force_tau = np.einsum("nki,nk->ni", jacobian, force_world)
+                moment_axis = moment_world @ np.asarray(
+                    self.human_model.geometry.joint_axis_world
+                )
+                transmitted_action = force_tau + np.column_stack(
+                    [-moment_axis, moment_axis]
+                )
+                states = self._batched_human_step_at_dt(
+                    states, transmitted_action, physical_dt_s
+                )
+                next_jacobian, next_rotation = self._geometry_batch(
+                    states[:, :2], self.human_model.geometry
+                )
+                frame_change = np.einsum("nji,njk->nik", next_rotation, rotation)
+                x = np.einsum("nij,nj->ni", frame_change, x + rest_x) - rest_x
+                u = np.einsum("nij,nj->ni", frame_change, u)
+                theta = (
+                    np.einsum("nij,nj->ni", frame_change, theta + rest_theta)
+                    - rest_theta
+                )
+                omega = np.einsum("nij,nj->ni", frame_change, omega)
+                rotation = next_rotation
+                jacobian = next_jacobian
+            prefix_states[:, segment] = states
+            previous_command = command
+            if segment + 1 == prefix_count:
+                continue
+            support_action = np.asarray(
+                self._prefix_support_provider(states), dtype=float
+            )
+            allocation_map = self._allocation_map_with_jacobian_batch(jacobian)
+            requested_wrench = np.einsum(
+                "nij,nj->ni", allocation_map, actions_nm
+            )
+            support_wrench = np.einsum(
+                "nij,nj->ni", allocation_map, support_action
+            )
+            command = np.asarray(
+                self._prefix_future_command_resolver(
+                    states,
+                    actions_nm,
+                    requested_wrench,
+                    interface_displacement_human_m=x,
+                    interface_velocity_human_m_s=u,
+                    interface_rotation_human_rad=theta,
+                    interface_angular_velocity_human_rad_s=omega,
+                    human_rotation_world=rotation,
+                    support_human_wrenches_world=support_wrench,
+                ),
+                dtype=float,
+            )
+        prefix_times = prefix_dt_s * np.arange(1, prefix_count + 1, dtype=float)
+        screen = screen_cumulative_prefix_acceleration(
+            initial_dq,
+            prefix_states[..., 2:],
+            prefix_times,
+            self.acceleration_limits_rad_s2,
+        )
+        return InterfaceHoldPredictionBatch(
+            executable_batch=prediction.executable_batch,
+            feasible=np.asarray(prediction.feasible, dtype=bool) & screen.feasible,
+            predicted_peak_force_n=prediction.predicted_peak_force_n,
+            predicted_endpoint_force_world_n=prediction.predicted_endpoint_force_world_n,
+            predicted_mean_force_world_n=prediction.predicted_mean_force_world_n,
+            predicted_peak_moment_nm=prediction.predicted_peak_moment_nm,
+            predicted_endpoint_moment_world_nm=prediction.predicted_endpoint_moment_world_nm,
+            predicted_mean_moment_world_nm=prediction.predicted_mean_moment_world_nm,
+            margin_to_physical_force_gate_n=prediction.margin_to_physical_force_gate_n,
+            acceleration_semantics_version="v2_cumulative_prefix_5_10_15_20ms",
+            prefix_times_s=prefix_times,
+            predicted_prefix_states_rad_rad_s=prefix_states,
+            predicted_prefix_acceleration_rad_s2=screen.acceleration_rad_s2,
+            prefix_acceleration_margin_rad_s2=screen.margin_rad_s2,
+            prefix_acceleration_feasible=screen.feasible,
         )
 
     def __call__(self, actions_nm: np.ndarray) -> InterfaceHoldPredictionBatch:
@@ -783,6 +1101,7 @@ class InterfaceAwareFirstActionBatchPreview:
         prediction = self.predictor.predict_batch(
             self.interface_state, self.executable_preview(actions)
         )
+        prediction = self._apply_v2_prefix_acceleration_screen(actions, prediction)
         self._last_actions = actions.copy()
         self._last_prediction = prediction
         self._screen_cache.append((actions.copy(), prediction))
@@ -1249,6 +1568,8 @@ def make_interface_aware_first_action_batch_preview(
     q_rad: np.ndarray,
     human_model: Any,
     cuff_allocator: Any,
+    state_rad_rad_s: np.ndarray | None = None,
+    acceleration_limits_rad_s2: np.ndarray | None = None,
 ) -> InterfaceAwareFirstActionBatchPreview:
     """Compose one batched executable-command and physical-interface screen."""
 
@@ -1259,6 +1580,8 @@ def make_interface_aware_first_action_batch_preview(
         q_rad,
         human_model,
         cuff_allocator,
+        state_rad_rad_s=state_rad_rad_s,
+        acceleration_limits_rad_s2=acceleration_limits_rad_s2,
     )
 
 

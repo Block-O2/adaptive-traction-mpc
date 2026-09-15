@@ -1,0 +1,24 @@
+{
+  "schema": "stage5_interface_uncertainty_v1",
+  "method": "finite_kelvin_voigt_corner_hypotheses_plus_causal_20ms_dq_derivative",
+  "controller_nominal_model_unchanged": true,
+  "empirical_range_not_guaranteed_bound": true,
+  "hardware_calibrated_confidence_interval": false,
+  "truth_available_online": false,
+  "translation_stiffness_scale_range": [0.9, 1.1],
+  "rotation_stiffness_scale_range": [0.9, 1.1],
+  "joint_damping_scale_range": [0.8, 1.2],
+  "hypotheses": "nominal_plus_all_eight_box_corners",
+  "causal_derivative_window_s": 0.02,
+  "decision_semantics": {
+    "settled_start": "all hypotheses satisfy the original GoalTaskSpec start set",
+    "completion": "all hypotheses satisfy the controller-tightened phase goal set",
+    "velocity": "all hypothesis velocities satisfy the registered physical limits",
+    "acceleration": "all hypothesis model-based and available full-window causal-dq accelerations satisfy the registered physical limits"
+  },
+  "predeclared_holdout_plants": {
+    "low_corner": {"Kt_scale": 0.9, "Kr_scale": 0.9, "D_scale": 0.8},
+    "high_corner": {"Kt_scale": 1.1, "Kr_scale": 1.1, "D_scale": 1.2}
+  },
+  "note": "Limited engineering operating set for post-installation verification research; not selected as a hardware uncertainty claim and not a continuous robustness certificate."
+}

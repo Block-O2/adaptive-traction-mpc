@@ -141,6 +141,19 @@ class _SupportCenteredBatchPreview:
         self.preview = preview
         self.support_nm = np.asarray(support_nm, dtype=float).copy()
         self.support_provider = support_provider
+        configure_prefix = getattr(preview, "configure_prefix_screening", None)
+        if configure_prefix is not None:
+            owner = getattr(support_provider, "__self__", None)
+            continuous_dynamics = getattr(
+                owner, "_batched_base_continuous_dynamics", None
+            )
+            if continuous_dynamics is None:
+                raise AttributeError("Goal-MPC has no batched Human dynamics")
+            configure_prefix(
+                support_provider=support_provider,
+                human_continuous_dynamics=continuous_dynamics,
+                future_command_resolver=self._future_command_wrench,
+            )
 
     def __call__(self, increments_nm: np.ndarray):
         increments = np.asarray(increments_nm, dtype=float)
@@ -349,6 +362,8 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
         cuff_allocator: Any | None = None,
         implementation: str = "batched",
         record_timing_breakdown: bool = True,
+        planning_physical_force_ceiling_n: float = CUFF_TRANSLATIONAL_FORCE_GATE_N,
+        planning_joint_velocity_ceiling_rad_s: tuple[float, float] | None = None,
     ) -> None:
         super().__init__(
             config,
@@ -360,6 +375,30 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
         self.goal_objective = objective
         self.seed_pacing = seed_pacing
         self.motion_config = motion_config
+        self.planning_physical_force_ceiling_n = float(
+            planning_physical_force_ceiling_n
+        )
+        if (
+            not np.isfinite(self.planning_physical_force_ceiling_n)
+            or self.planning_physical_force_ceiling_n <= 0.0
+            or self.planning_physical_force_ceiling_n
+            > CUFF_TRANSLATIONAL_FORCE_GATE_N
+        ):
+            raise ValueError(
+                "planning physical-force ceiling must be positive and no greater "
+                "than the unchanged engineering gate"
+            )
+        if planning_joint_velocity_ceiling_rad_s is None:
+            self.planning_joint_velocity_ceiling_rad_s = None
+        else:
+            pacing = np.asarray(planning_joint_velocity_ceiling_rad_s, dtype=float)
+            if pacing.shape != (2,) or np.any(pacing <= 0.0) or not np.all(
+                np.isfinite(pacing)
+            ):
+                raise ValueError("planning velocity ceiling must be a positive pair")
+            self.planning_joint_velocity_ceiling_rad_s = tuple(
+                float(value) for value in pacing
+            )
         self._active_spec: GoalTaskSpec | None = None
         self._active_task_state: GoalTaskState | None = None
         self._active_target_rad: np.ndarray | None = None
@@ -715,11 +754,16 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
             (np.asarray(human.q_max_rad) - q).reshape(-1),
             (q - np.asarray([item[0] for item in spec.q_bounds_rad])).reshape(-1),
             (np.asarray([item[1] for item in spec.q_bounds_rad]) - q).reshape(-1),
-            CUFF_TRANSLATIONAL_FORCE_GATE_N - force_norm_n,
+            self.planning_physical_force_ceiling_n - force_norm_n,
         ]
         if spec.task_joint_velocity_limit_rad_s is not None:
             velocity_limit = np.asarray(spec.task_joint_velocity_limit_rad_s)
             margins.append((velocity_limit - np.abs(predicted_states[:, 2:])).reshape(-1))
+        if self.planning_joint_velocity_ceiling_rad_s is not None:
+            pacing_limit = np.asarray(self.planning_joint_velocity_ceiling_rad_s)
+            margins.append(
+                (pacing_limit - np.abs(predicted_states[:, 2:])).reshape(-1)
+            )
         if spec.task_joint_acceleration_limit_rad_s2 is not None:
             velocity = np.vstack([state[2:], predicted_states[:, 2:]])
             acceleration = np.diff(velocity, axis=0) / self.config.prediction_dt_s
@@ -961,7 +1005,7 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
                 axis=(1, 2),
             ),
             "physical_force_n": np.min(
-                CUFF_TRANSLATIONAL_FORCE_GATE_N - force_norm, axis=1
+                self.planning_physical_force_ceiling_n - force_norm, axis=1
             ),
             "allocated_force_n": np.min(
                 CUFF_TRANSLATIONAL_FORCE_GATE_N - allocated_force_norm, axis=1
@@ -977,6 +1021,13 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
             )
             component_margins["task_velocity_rad_s"] = velocity_margin
             safety_margin_parts.append(velocity_margin[:, None])
+        if self.planning_joint_velocity_ceiling_rad_s is not None:
+            pacing_limit = np.asarray(self.planning_joint_velocity_ceiling_rad_s)
+            pacing_margin = np.min(
+                pacing_limit - np.abs(predicted[..., 2:]), axis=(1, 2)
+            )
+            component_margins["planning_velocity_rad_s"] = pacing_margin
+            safety_margin_parts.append(pacing_margin[:, None])
         if spec.task_joint_acceleration_limit_rad_s2 is not None:
             velocity = np.concatenate(
                 [
@@ -1490,6 +1541,23 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
                     ).tolist(),
                     "constraint": False,
                 },
+                "interface_robustness_planning": {
+                    "physical_force_ceiling_n": (
+                        self.planning_physical_force_ceiling_n
+                    ),
+                    "physical_force_reserve_to_200n_gate_n": (
+                        CUFF_TRANSLATIONAL_FORCE_GATE_N
+                        - self.planning_physical_force_ceiling_n
+                    ),
+                    "joint_velocity_ceiling_deg_s": (
+                        None
+                        if self.planning_joint_velocity_ceiling_rad_s is None
+                        else np.degrees(
+                            self.planning_joint_velocity_ceiling_rad_s
+                        ).tolist()
+                    ),
+                    "registered_physical_velocity_limits_unchanged": True,
+                },
                 "selected_goal_cost_terms": {
                     "status": "not_recomputed_in_hot_loop_v1.1"
                 },
@@ -1501,6 +1569,18 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
                         "effective_generalized_action_nm",
                     )
                     else "requested Human generalized action"
+                ),
+                "first_action_acceleration_semantics": (
+                    "cumulative deployable-model dq change at 5/10/15/20 ms; "
+                    "all registered joint limits hard"
+                    if first_action_batch_preview is not None
+                    and getattr(
+                        first_action_batch_preview,
+                        "acceleration_limits_rad_s2",
+                        None,
+                    )
+                    is not None
+                    else "legacy full 20 ms horizon-grid acceleration only"
                 ),
                 "objective_contract": {
                     "stage_target_distance": (
