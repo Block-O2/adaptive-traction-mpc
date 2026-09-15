@@ -8,6 +8,14 @@ Further interface identification/predictor work is paused pending CR-12/cuff
 hardware evidence. Subsequent Human-ID work uses a fixed nominal Plant-v1
 interface and fixed nominal controller interface model.
 
+Human-ID shadow v1 now concludes **H-B — reparameterize/reduce**. The full
+Stage-4 beta11 model is numerically full-rank on complete Stage-5 episodes but
+practically almost perfectly correlated; a three-scale control-effective
+projection is materially better conditioned. No Human model is applied to
+control and no closed-loop A/B is preregistered. See
+`docs/HUMAN_ID_ARCHITECTURE_AUDIT.md` and
+`docs/HUMAN_ID_SHADOW_V1_RESULTS.md`.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the
@@ -47,11 +55,9 @@ control semantics: the final engineering run is 18.18 ms mean and 19.16 ms p95
 for the 20 ms Goal-MPC period, with 2/202 isolated deadline misses. Its 37.43 ms
 wall-clock maximum prevents a hard worst-case claim. The small Interface
 Mismatch v1 sweep and subsequent negative identification evidence are retained.
-The active branch now targets bounded engineering robustness with a fixed
-low-order interface prior, not physical K/D recovery. Interface Robustness v1
-passed its six-episode development gate except for a conservative Kr x0.7
-settled-start boundary rejection; the final campaign is preregistered but not
-authorized. No interface/Human adaptation, value learning, or RL is active.
+The interface branch is closed with the final campaign fixed at EXIT C; new
+work isolates shadow Human identification under the nominal interface. No
+interface/Human adaptation in control, value learning, or RL is active.
 
 - `configs/stage5_geometry_mechanics_v1.json`: single provisional parameter
   record and preserved geometry checkpoint.
@@ -202,7 +208,22 @@ authorized. No interface/Human adaptation, value learning, or RL is active.
   bank have no online authority.
 - `configs/stage5_interface_robustness_final_campaign_v1.json`: frozen core-box,
   boundary, and 30-episode repeatability protocol. Its status is
-  `PREREGISTERED_NOT_AUTHORIZED`; no final campaign was run.
+  `PREREGISTERED_NOT_AUTHORIZED` as a historical spec; the subsequently run
+  frozen campaign and EXIT-C result are documented separately and are not
+  rewritten by the config.
+- `docs/INTERFACE_STUDY_CLOSEOUT.md` and
+  `docs/INTERFACE_STUDY_CLOSEOUT_MANIFEST.json`: durable closeout of the full
+  interface evidence chain as a limited negative result.
+- `configs/stage5_human_id_shadow_v1.json`,
+  `src/traction_mpc_stage5/human_identification.py`, and
+  `scripts/run_stage5_human_id_shadow_v1.py`: fixed-interface, deployable-input,
+  beta11 shadow service and the four-case diagnostic runner. Publication is
+  versioned shadow-only and cannot affect Goal-MPC.
+- `docs/HUMAN_ID_ARCHITECTURE_AUDIT.md`,
+  `docs/HUMAN_ID_SHADOW_V1_RESULTS.md`, and its compact JSON summary: Stage-4
+  reuse classification, task-local embargo/trust contract, phase-wise evidence,
+  and the H-B decision to validate a reduced control-effective block before
+  any closed-loop adaptation.
 - `scripts/run_stage5_geometry_validation.py`: engineering/smoke validation;
   it is not a formal scientific experiment.
 - `tests/`: geometry, frame, mechanics, visualization, and regression checks.

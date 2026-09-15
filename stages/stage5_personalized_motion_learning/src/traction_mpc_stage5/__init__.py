@@ -25,6 +25,12 @@ from .controller_interface import (
 )
 from .geometry import STAGE5_GEOMETRY, Stage5Geometry
 from .human import STAGE5_HUMAN, Stage5HumanParameters
+from .human_identification import (
+    HumanModelPublication,
+    ShadowHumanIdentificationService,
+    Stage5HumanIDConfig,
+    Stage5HumanIDMeasurement,
+)
 from .interface_identification import (
     InactiveInterfaceIdentificationTrust,
     InterfaceChallengerDecision,
@@ -142,6 +148,7 @@ __all__ = [
     "SupportCenteredMotionConfig",
     "GoalTaskSpec",
     "GoalTaskState",
+    "HumanModelPublication",
     "InterfaceAwareFirstActionBatchPreview",
     "InterfaceAwareHumanStateObserver",
     "InterfaceHoldPredictionBatch",
@@ -162,6 +169,7 @@ __all__ = [
     "IdentificationPhysicalRolloutV2",
     "PhysicalInterfaceIdentifierV2",
     "ShadowInterfaceIdentificationService",
+    "ShadowHumanIdentificationService",
     "InterfaceUncertaintyEstimate",
     "InterfaceUncertaintyMonitor",
     "InterfaceUncertaintySpec",
@@ -186,6 +194,8 @@ __all__ = [
     "STAGE5_STIFF_INTERFACE",
     "Stage5Geometry",
     "Stage5HumanParameters",
+    "Stage5HumanIDConfig",
+    "Stage5HumanIDMeasurement",
     "Stage5LoadedExecutionContext",
     "Stage5LoadedExecutionTarget",
     "Stage5LoadedTrackBrakeSupervisor",

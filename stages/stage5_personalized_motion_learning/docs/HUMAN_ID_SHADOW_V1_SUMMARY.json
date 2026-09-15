@@ -1,0 +1,15 @@
+{
+  "schema": "stage5_human_id_shadow_v1_compact_summary",
+  "evidence_category": "small_diagnostic_shadow_validation",
+  "fixed_interface_model_version": "stage5_controller_nominal_interface_plant_v1_matched_seed",
+  "case_count": 4,
+  "cases": [
+    {"name":"nominal","task_status":"COMPLETE","duration_s":4.935,"attempts":2,"future_qualified":0,"future_rejected":1,"pending":1,"beta11_condition":994.1424,"beta11_max_correlation":0.9999192,"scale3_condition":1.3326,"scale3_max_correlation":0.2793},
+    {"name":"mass_plus_8pct","task_status":"ABORTED","abort_reason":"TASK_ACCELERATION_LIMIT","duration_s":0.27,"attempts":0,"information_reason":"no_complete_integral_block_before_termination"},
+    {"name":"stiffness_plus_15pct_rest_shift","task_status":"COMPLETE","duration_s":5.08,"attempts":3,"future_qualified":2,"future_rejected":0,"pending":1,"first_trustworthy_candidate_time_s":3.045,"beta11_condition":1228.1878,"beta11_max_correlation":0.9998144,"scale3_condition":1.3374,"scale3_max_correlation":0.2827,"phase_prediction_improvement_fraction":{"OUTBOUND":0.1878,"HOLD":0.1881,"RETURN":0.1791},"nominal_beta_relative_error_l2_evaluation_only":0.5343,"shadow_beta_relative_error_l2_evaluation_only":0.4899},
+    {"name":"damping_plus_20pct","task_status":"COMPLETE","duration_s":5.06,"attempts":2,"future_qualified":0,"future_rejected":1,"pending":1,"beta11_condition":1325.4177,"beta11_max_correlation":0.9999601,"scale3_condition":1.3529,"scale3_max_correlation":0.2932}
+  ],
+  "totals": {"complete":3,"aborted":1,"attempted_fits":7,"future_qualified_shadow_publications":2,"future_rejections":2,"pending_at_episode_end":3,"bound_hits":0,"safety_filter_interventions":0,"brake_events":0,"force_gate_events":0,"mujoco_warnings":0},
+  "decision": {"classification":"H-B","reason":"beta11 is numerically full-rank but practically correlated; the three-scale control-effective projection is materially better conditioned","closed_loop_human_adaptation_started":false,"closed_loop_AB_preregistered":false},
+  "scope": {"fixed_nominal_interface":true,"truth_available_to_online_service":false,"anatomical_recovery_claim":false,"formal_or_authoritative":false,"value_or_RL_learning":false}
+}
