@@ -41,6 +41,16 @@ current-model-trust persistence edge case is classified
 **P-TRUST-WIRING-GAP**. No monitor or pacing behavior is changed. See
 `docs/ACCELERATION_PACING_SIGNAL_AUTHORITY_AUDIT.md`.
 
+The isolated current-model trust persistence gap is now corrected and validated
+as **T-A — TRUST PERSISTENCE FIX VALIDATED**.  Trust is binary and explicitly
+owned by the Human model version used by Goal-MPC: neutral/inconclusive later
+challenger evidence preserves already-earned support, explicit negative
+current-model evidence may revoke it, and a new control-model version cannot
+inherit it.  A nominal two-repetition A/B kept all controller and safety
+settings fixed; the persistent arm retained support and ended Rep 2 at gamma
+1.0, while shadow Human parameters remained excluded from control.  See
+`docs/TRUST_PERSISTENCE_V1.md`.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the

@@ -3,9 +3,235 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from enum import Enum
 from typing import Any
 
 import numpy as np
+
+
+class CurrentModelTrustOutcome(str, Enum):
+    """Causal evidence classification for one explicit control-model version."""
+
+    SUPPORT = "support"
+    NEGATIVE = "negative"
+    NEUTRAL = "neutral"
+
+
+@dataclass(frozen=True)
+class CurrentModelTrustEvidence:
+    """One version-targeted trust event; this is not an accumulating score."""
+
+    session_time_s: float
+    current_model_version: str
+    outcome: CurrentModelTrustOutcome
+    evidence_version: str
+    reason: str
+
+
+class Stage5CurrentModelTrust:
+    """Persistent binary trust owned by the model currently used for control.
+
+    Neutral evidence cannot erase support.  Explicit negative evidence can.
+    Changing the control-model identity always starts a new unsupported state.
+    """
+
+    def __init__(
+        self,
+        current_model_version: str,
+        *,
+        population_prior_model_version: str | None = None,
+    ) -> None:
+        if not current_model_version:
+            raise ValueError("current_model_version must be non-empty")
+        self.current_model_version = str(current_model_version)
+        self.population_prior_model_version = str(
+            population_prior_model_version or current_model_version
+        )
+        self.supported = False
+        self.support_evidence_time_s: float | None = None
+        self.support_evidence_version: str | None = None
+        self.revocation_evidence_time_s: float | None = None
+        self.revocation_evidence_version: str | None = None
+        self.last_evidence_time_s: float | None = None
+        self.state_reason = "no_valid_current_model_evidence"
+        self.history: list[dict[str, Any]] = []
+        self._processed_evidence_versions: set[str] = set()
+
+    def set_current_model(self, version: str, *, session_time_s: float) -> None:
+        version = str(version)
+        if not version:
+            raise ValueError("control-model version must be non-empty")
+        now = float(session_time_s)
+        self._check_time(now)
+        if version == self.current_model_version:
+            return
+        previous = self.current_model_version
+        self.current_model_version = version
+        self.supported = False
+        self.support_evidence_time_s = None
+        self.support_evidence_version = None
+        self.revocation_evidence_time_s = None
+        self.revocation_evidence_version = None
+        self.last_evidence_time_s = now
+        self.state_reason = "control_model_version_changed_support_not_transferred"
+        self.history.append(
+            {
+                "session_time_s": now,
+                "event": "control_model_version_changed",
+                "previous_model_version": previous,
+                "current_model_version": version,
+                "support_state": "UNSUPPORTED",
+                "state_reason": self.state_reason,
+            }
+        )
+
+    def _check_time(self, session_time_s: float) -> None:
+        if (
+            self.last_evidence_time_s is not None
+            and session_time_s < self.last_evidence_time_s - 1.0e-12
+        ):
+            raise ValueError("current-model trust evidence time must be monotonic")
+
+    def observe(self, evidence: CurrentModelTrustEvidence) -> dict[str, Any]:
+        now = float(evidence.session_time_s)
+        self._check_time(now)
+        if evidence.evidence_version in self._processed_evidence_versions:
+            return self.status()
+        self._processed_evidence_versions.add(evidence.evidence_version)
+        applies = evidence.current_model_version == self.current_model_version
+        if applies and evidence.outcome is CurrentModelTrustOutcome.SUPPORT:
+            self.supported = True
+            self.support_evidence_time_s = now
+            self.support_evidence_version = evidence.evidence_version
+            self.state_reason = evidence.reason
+        elif applies and evidence.outcome is CurrentModelTrustOutcome.NEGATIVE:
+            self.supported = False
+            self.revocation_evidence_time_s = now
+            self.revocation_evidence_version = evidence.evidence_version
+            self.state_reason = evidence.reason
+        elif applies:
+            # Neutral/pending/inconclusive evidence is deliberately non-mutating.
+            if not self.supported:
+                self.state_reason = evidence.reason
+        self.last_evidence_time_s = now
+        self.history.append(
+            {
+                "session_time_s": now,
+                "event": "trust_evidence",
+                "target_model_version": evidence.current_model_version,
+                "current_model_version": self.current_model_version,
+                "outcome": evidence.outcome.value,
+                "evidence_version": evidence.evidence_version,
+                "reason": evidence.reason,
+                "applies_to_current_model": applies,
+                "support_state": "SUPPORTED" if self.supported else "UNSUPPORTED",
+            }
+        )
+        return self.status()
+
+    @staticmethod
+    def _reference_interval(evidence: dict[str, Any]) -> tuple[float, float] | None:
+        comparison = evidence.get("against_population_prior")
+        if not isinstance(comparison, dict):
+            return None
+        lower = comparison.get("lower_bound_nms2")
+        upper = comparison.get("upper_bound_nms2")
+        if lower is None or upper is None:
+            return None
+        return float(lower), float(upper)
+
+    def _classify_attempt(
+        self, attempt: dict[str, Any], *, session_time_s: float
+    ) -> CurrentModelTrustEvidence:
+        status = str(attempt.get("status", "unavailable"))
+        index = int(attempt.get("challenger_index", -1))
+        evidence_history = list(attempt.get("evidence_history", []))
+        latest = evidence_history[-1] if evidence_history else {}
+        look_index = int(latest.get("look_index", len(evidence_history) - 1))
+        evidence_version = f"challenger-{index}:look-{look_index}:status-{status}"
+        interval = self._reference_interval(latest)
+        target_version = self.population_prior_model_version
+        if status == "published_to_shadow_incumbent":
+            if interval is not None and interval[1] < 0.0:
+                return CurrentModelTrustEvidence(
+                    session_time_s=session_time_s,
+                    current_model_version=target_version,
+                    outcome=CurrentModelTrustOutcome.NEGATIVE,
+                    evidence_version=evidence_version,
+                    reason="validated_challenger_outperformed_current_population_prior",
+                )
+            return CurrentModelTrustEvidence(
+                session_time_s=session_time_s,
+                current_model_version=target_version,
+                outcome=CurrentModelTrustOutcome.NEUTRAL,
+                evidence_version=evidence_version,
+                reason="shadow_publication_not_explicitly_about_current_model",
+            )
+        if status == "rejected_no_future_support":
+            supports_current = interval is not None and interval[0] > 0.0
+            return CurrentModelTrustEvidence(
+                session_time_s=session_time_s,
+                current_model_version=target_version,
+                outcome=(
+                    CurrentModelTrustOutcome.SUPPORT
+                    if supports_current
+                    else CurrentModelTrustOutcome.NEUTRAL
+                ),
+                evidence_version=evidence_version,
+                reason=(
+                    "future_validation_supports_current_model"
+                    if supports_current
+                    else "future_validation_inconclusive_for_current_model"
+                ),
+            )
+        return CurrentModelTrustEvidence(
+            session_time_s=session_time_s,
+            current_model_version=target_version,
+            outcome=CurrentModelTrustOutcome.NEUTRAL,
+            evidence_version=evidence_version,
+            reason=(
+                "challenger_pending_or_insufficient_future_evidence"
+                if status == "pending_future_validation"
+                else "challenger_unavailable_or_training_only"
+            ),
+        )
+
+    def observe_shadow_service(
+        self, service_summary: dict[str, Any], *, session_time_s: float
+    ) -> dict[str, Any]:
+        attempts = list(service_summary.get("attempts", []))
+        if not attempts:
+            evidence = CurrentModelTrustEvidence(
+                session_time_s=float(session_time_s),
+                current_model_version=self.population_prior_model_version,
+                outcome=CurrentModelTrustOutcome.NEUTRAL,
+                evidence_version="shadow-service:no-attempts",
+                reason="no_future_comparison",
+            )
+            return self.observe(evidence)
+        for attempt in attempts:
+            evidence = self._classify_attempt(
+                attempt, session_time_s=float(session_time_s)
+            )
+            if evidence.evidence_version not in self._processed_evidence_versions:
+                self.observe(evidence)
+        return self.status()
+
+    def status(self) -> dict[str, Any]:
+        return {
+            "current_model_version": self.current_model_version,
+            "support_state": "SUPPORTED" if self.supported else "UNSUPPORTED",
+            "supported": bool(self.supported),
+            "support_evidence_time_s": self.support_evidence_time_s,
+            "support_evidence_version": self.support_evidence_version,
+            "revocation_evidence_time_s": self.revocation_evidence_time_s,
+            "revocation_evidence_version": self.revocation_evidence_version,
+            "last_evidence_time_s": self.last_evidence_time_s,
+            "state_reason": self.state_reason,
+        }
+
+    def summary(self) -> dict[str, Any]:
+        return {"final_status": self.status(), "history": list(self.history)}
 
 
 @dataclass(frozen=True)
@@ -225,8 +451,11 @@ def current_nominal_model_trust_from_shadow_service(
 
 
 __all__ = [
+    "CurrentModelTrustEvidence",
+    "CurrentModelTrustOutcome",
     "Stage5ConfidencePacing",
     "Stage5ConfidencePacingConfig",
+    "Stage5CurrentModelTrust",
     "Stage5PacingEvidence",
     "current_nominal_model_trust_from_shadow_service",
 ]

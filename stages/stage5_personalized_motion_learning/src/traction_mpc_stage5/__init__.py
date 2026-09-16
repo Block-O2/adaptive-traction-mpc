@@ -11,8 +11,11 @@ from .acceleration import (
 
 from .config import STAGE5_CONFIG, load_stage5_config
 from .confidence_pacing import (
+    CurrentModelTrustEvidence,
+    CurrentModelTrustOutcome,
     Stage5ConfidencePacing,
     Stage5ConfidencePacingConfig,
+    Stage5CurrentModelTrust,
     Stage5PacingEvidence,
     current_nominal_model_trust_from_shadow_service,
 )
@@ -210,9 +213,12 @@ __all__ = [
     "STAGE5_HUMAN",
     "STAGE5_RIGID_INTERFACE",
     "STAGE5_STIFF_INTERFACE",
+    "CurrentModelTrustEvidence",
+    "CurrentModelTrustOutcome",
     "Stage5Geometry",
     "Stage5ConfidencePacing",
     "Stage5ConfidencePacingConfig",
+    "Stage5CurrentModelTrust",
     "Stage5PacingEvidence",
     "Stage5HumanParameters",
     "Stage5HumanIDConfig",
