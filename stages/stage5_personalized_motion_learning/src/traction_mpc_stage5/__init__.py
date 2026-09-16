@@ -48,6 +48,12 @@ from .human_identification_reduced import (
     Stage5ReducedHumanIDConfig,
     reduced_information,
 )
+from .human_model_update import (
+    BoundedHumanModelTransition,
+    PostUpdateEvidenceOutcome,
+    build_bounded_human_model_transition,
+    classify_post_update_evidence,
+)
 from .interface_identification import (
     InactiveInterfaceIdentificationTrust,
     InterfaceChallengerDecision,
@@ -215,6 +221,8 @@ __all__ = [
     "STAGE5_STIFF_INTERFACE",
     "CurrentModelTrustEvidence",
     "CurrentModelTrustOutcome",
+    "BoundedHumanModelTransition",
+    "PostUpdateEvidenceOutcome",
     "Stage5Geometry",
     "Stage5ConfidencePacing",
     "Stage5ConfidencePacingConfig",
@@ -233,8 +241,10 @@ __all__ = [
     "at_goal",
     "at_goal_for_online_completion",
     "build_stage5_loaded_execution_context",
+    "build_bounded_human_model_transition",
     "build_interface_hypotheses",
     "current_nominal_model_trust_from_shadow_service",
+    "classify_post_update_evidence",
     "diagnostic_normalized_progress",
     "estimate_deployable_realized_acceleration",
     "fixed_stage5_human_model",

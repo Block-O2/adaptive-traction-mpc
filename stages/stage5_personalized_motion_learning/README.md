@@ -51,6 +51,17 @@ settings fixed; the persistent arm retained support and ended Rep 2 at gamma
 1.0, while shadow Human parameters remained excluded from control.  See
 `docs/TRUST_PERSISTENCE_V1.md`.
 
+The subsequent saved-trace-only Human-model update audit reuses the already
+implemented Stage-4-style bounded step (`eta=0.10`, 3% of parameter span per
+component) and explicitly separates current model, raw challenger, and
+provisional bounded successor.  The actual bounded successor was already the
+model evaluated by historical future validation.  Later saved data preserve a
+useful mean direction for damping/stiffness, while the unchanged HAC rule keeps
+all post-decision classifications NEUTRAL; no arbitrary threshold was added.
+Decision: **U-A — BOUNDED UPDATE READY FOR ONE-STEP CLOSED-LOOP A/B**, design
+only.  No Human model is applied to control in this checkpoint.  See
+`docs/HUMAN_MODEL_BOUNDED_UPDATE_V1.md`.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the
