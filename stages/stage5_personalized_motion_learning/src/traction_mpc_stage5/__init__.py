@@ -58,6 +58,15 @@ from .human_model_update import (
     classify_post_update_evidence,
     fixed_one_step_pacing_status,
 )
+from .human_model_replication import (
+    FROZEN_THETA_0,
+    FROZEN_THETA_1,
+    FROZEN_THETA_1_VERSION,
+    FrozenSuccessorArm,
+    FrozenSuccessorReplicationAuthority,
+    FrozenSuccessorReplicationSpec,
+    aggregate_replication_units,
+)
 from .interface_identification import (
     InactiveInterfaceIdentificationTrust,
     InterfaceChallengerDecision,
@@ -227,6 +236,12 @@ __all__ = [
     "CurrentModelTrustOutcome",
     "BoundedHumanModelTransition",
     "FIXED_ONE_STEP_GAMMA",
+    "FROZEN_THETA_0",
+    "FROZEN_THETA_1",
+    "FROZEN_THETA_1_VERSION",
+    "FrozenSuccessorArm",
+    "FrozenSuccessorReplicationAuthority",
+    "FrozenSuccessorReplicationSpec",
     "OneStepHumanModelArm",
     "OneStepHumanModelControlAuthority",
     "PostUpdateEvidenceOutcome",
@@ -245,6 +260,7 @@ __all__ = [
     "TaskPhase",
     "TaskObservationContract",
     "abort_episode",
+    "aggregate_replication_units",
     "at_goal",
     "at_goal_for_online_completion",
     "build_stage5_loaded_execution_context",

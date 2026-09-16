@@ -71,6 +71,18 @@ the successor, the unchanged HAC scheduled looks remained NEUTRAL.  Decision:
 trust-driven pacing remain disabled.  See
 `docs/HUMAN_MODEL_ONE_STEP_AB_V1.md`.
 
+The frozen successor was then tested without refitting in three preregistered
+paired controller-search realizations (`20260825`--`20260827`).  Exact reruns
+of the original deterministic seed were explicitly excluded as new evidence.
+All three rollout-level mean prediction differences favored the successor, as
+did OUTBOUND and RETURN separately, while all unchanged within-run HAC tests
+remained NEUTRAL.  All six arms completed without a registered safety-chain
+event or motion-envelope violation.  Decision: **RPL-A — FROZEN SUCCESSOR
+REPLICATED**, limited to this fixed damping +20% simulation condition.  This
+does not authorize a second update in the present study; the first progressive
+experiment is design-only.  See
+`docs/HUMAN_MODEL_FROZEN_SUCCESSOR_REPLICATION_V1.md`.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the
