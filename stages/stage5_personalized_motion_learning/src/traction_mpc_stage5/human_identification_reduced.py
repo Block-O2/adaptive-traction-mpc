@@ -397,6 +397,46 @@ def _reduced_block_losses(
     )
 
 
+def progressive_transition_evidence(
+    candidate_losses: np.ndarray,
+    population_prior_losses: np.ndarray,
+    active_predecessor_losses: np.ndarray,
+    *,
+    config: StatisticalL4Config,
+    challenger_index: int = 0,
+    seed_offset: int = 0,
+) -> dict[str, Any]:
+    """Keep prior diagnostics while giving authority to the active predecessor.
+
+    The same one-sided intervals and frozen alpha-spending configuration are
+    used for both references.  Only the interval against the immediately active
+    predecessor authorizes a progressive transition.  The population-prior
+    comparison remains visible but cannot silently regain control authority.
+    """
+
+    evidence = paired_promotion_evidence(
+        candidate_losses,
+        population_prior_losses,
+        active_predecessor_losses,
+        config=config,
+        challenger_index=challenger_index,
+        seed_offset=seed_offset,
+    )
+    predecessor = evidence["against_last_valid"]
+    predecessor_supported = bool(predecessor["upper_bound_nms2"] < 0.0)
+    predecessor_negative = bool(predecessor["lower_bound_nms2"] > 0.0)
+    return {
+        **evidence,
+        "legacy_dual_reference_supported_diagnostic": bool(
+            evidence["promotion_supported"]
+        ),
+        "transition_authority_reference": "active_immediate_predecessor",
+        "transition_authority_supported": predecessor_supported,
+        "transition_authority_negative": predecessor_negative,
+        "population_prior_authoritative": False,
+    }
+
+
 class ReducedShadowHumanIdentificationService:
     """One-challenger reduced Human-ID lifecycle with shadow-only publication."""
 
@@ -404,17 +444,49 @@ class ReducedShadowHumanIdentificationService:
         self,
         geometry: PlanarCuffGeometry,
         config: Stage5ReducedHumanIDConfig = Stage5ReducedHumanIDConfig(),
+        *,
+        initial_incumbent_scales: np.ndarray | tuple[float, float, float] = (
+            1.0,
+            1.0,
+            1.0,
+        ),
+        initial_model_version: str = f"{REDUCED_HUMAN_MODEL_VERSION_PREFIX}0",
+        population_prior_scales: np.ndarray | tuple[float, float, float] = (
+            1.0,
+            1.0,
+            1.0,
+        ),
+        defer_qualified_publication: bool = False,
     ) -> None:
         self.geometry = geometry
         self.config = config
         self.identifier = ReducedIntegralScaleIdentifier(config.identifier)
         self.prior_beta = nominal_base_parameters(STAGE5_HUMAN)
         self.projection = dynamic_scale_projection(self.prior_beta)
-        self.retained_scales = np.ones(3)
+        self.population_prior_scales = self._validated_scales(
+            population_prior_scales, "population prior"
+        )
+        if not np.allclose(
+            self.population_prior_scales,
+            self.identifier.prior,
+            atol=0.0,
+            rtol=0.0,
+        ):
+            raise ValueError(
+                "population prior must match the frozen identifier regularization prior"
+            )
+        self.retained_scales = self._validated_scales(
+            initial_incumbent_scales, "initial incumbent"
+        )
+        self.retained_model_version = str(initial_model_version)
+        if not self.retained_model_version:
+            raise ValueError("initial Human-model version must be explicit")
+        self.defer_qualified_publication = bool(defer_qualified_publication)
+        self.queued_publication: dict[str, Any] | None = None
         self.publication = ReducedHumanModelPublication(
             scales=self.retained_scales.copy(),
             beta=effective_base_parameters(self.retained_scales, self.prior_beta),
-            version=f"{REDUCED_HUMAN_MODEL_VERSION_PREFIX}0",
+            version=self.retained_model_version,
             timestamp_s=0.0,
         )
         self.raw_history: list[dict[str, Any]] = []
@@ -429,6 +501,63 @@ class ReducedShadowHumanIdentificationService:
         self.episode_boundaries: list[dict[str, Any]] = [
             {"episode_index": 0, "session_start_time_s": 0.0}
         ]
+
+    def _validated_scales(
+        self,
+        values: np.ndarray | tuple[float, float, float],
+        label: str,
+    ) -> np.ndarray:
+        scales = np.asarray(values, dtype=float)
+        if scales.shape != (3,) or not np.all(np.isfinite(scales)):
+            raise ValueError(f"{label} must be a finite three-scale vector")
+        if np.any(scales < self.identifier.lower) or np.any(
+            scales > self.identifier.upper
+        ):
+            raise ValueError(f"{label} lies outside frozen identifier bounds")
+        return scales.copy()
+
+    def activate_incumbent(
+        self,
+        *,
+        scales: np.ndarray | tuple[float, float, float],
+        model_version: str,
+        expected_predecessor_version: str,
+        activation_time_s: float,
+        qualification_evidence_id: str,
+    ) -> ReducedHumanModelPublication:
+        """Atomically align the retained ID incumbent at a repetition boundary."""
+
+        if str(expected_predecessor_version) != self.retained_model_version:
+            raise RuntimeError("active incumbent predecessor version changed")
+        if not model_version or model_version == self.retained_model_version:
+            raise ValueError("activated Human-model version must be new and explicit")
+        if not qualification_evidence_id:
+            raise ValueError("incumbent activation requires qualification provenance")
+        if self.active_challenger is not None:
+            raise RuntimeError("cannot activate incumbent with a pending challenger")
+        activated = self._validated_scales(scales, "activated incumbent")
+        if self.queued_publication is not None:
+            queued = self.queued_publication
+            if queued["predecessor_model_version"] != self.retained_model_version:
+                raise RuntimeError("queued publication predecessor became stale")
+            if not np.allclose(
+                activated,
+                np.asarray(queued["proposed_model_scales"], dtype=float),
+                atol=1.0e-12,
+                rtol=0.0,
+            ):
+                raise RuntimeError("activated scales differ from queued publication")
+            self.queued_publication = None
+        self.retained_scales = activated
+        self.retained_model_version = str(model_version)
+        self.publication = ReducedHumanModelPublication(
+            scales=activated.copy(),
+            beta=effective_base_parameters(activated, self.prior_beta),
+            version=self.retained_model_version,
+            timestamp_s=float(activation_time_s),
+        )
+        self.publication_history.append(self.publication.to_dict())
+        return self.publication
 
     def begin_episode(self, episode_index: int, session_start_time_s: float) -> None:
         """Declare a physical reset without resetting session-level trust.
@@ -545,7 +674,7 @@ class ReducedShadowHumanIdentificationService:
         )
         validation = self._resolve_challenger(float(measurement.sample_time_s))
         proposal = None
-        if self.active_challenger is None:
+        if self.active_challenger is None and self.queued_publication is None:
             proposal = self._launch_challenger(float(measurement.sample_time_s))
         return self.status(
             update_diagnostics={
@@ -589,6 +718,8 @@ class ReducedShadowHumanIdentificationService:
                     )
                 ),
                 "reference_incumbent_scales": self.retained_scales.tolist(),
+                "reference_incumbent_model_version": self.retained_model_version,
+                "population_prior_scales": self.population_prior_scales.tolist(),
                 "candidate_scales": candidate.tolist(),
                 "proposed_model_scales": proposed.tolist(),
                 "proposed_model_beta": effective_base_parameters(
@@ -624,9 +755,11 @@ class ReducedShadowHumanIdentificationService:
             if len(blocks) < look_count:
                 break
             selected = blocks[:look_count]
-            evidence = paired_promotion_evidence(
+            evidence = progressive_transition_evidence(
                 _reduced_block_losses(proposed, selected, self.projection),
-                _reduced_block_losses(np.ones(3), selected, self.projection),
+                _reduced_block_losses(
+                    self.population_prior_scales, selected, self.projection
+                ),
                 _reduced_block_losses(reference, selected, self.projection),
                 config=self.config.trust,
                 challenger_index=int(record["challenger_index"]),
@@ -654,27 +787,55 @@ class ReducedShadowHumanIdentificationService:
                 .minimum_mass_matrix_eigenvalue()
                 > 1.0e-6
             )
-            if evidence["promotion_supported"] and positive_definite:
-                self.retained_scales = proposed.copy()
-                version_index = len(self.publication_history)
-                self.publication = ReducedHumanModelPublication(
-                    scales=proposed.copy(),
-                    beta=beta,
-                    version=f"{REDUCED_HUMAN_MODEL_VERSION_PREFIX}{version_index}",
-                    timestamp_s=now_s,
-                )
-                self.publication_history.append(self.publication.to_dict())
+            if evidence["transition_authority_supported"] and positive_definite:
                 if self.first_trustworthy_candidate_time_s is None:
                     self.first_trustworthy_candidate_time_s = now_s
-                record.update(
-                    {
-                        "status": "published_to_shadow_incumbent",
-                        "qualified": True,
-                        "decision_time_s": now_s,
-                        "decision_block_count": look_count,
-                        "positive_definite_proposed_model": True,
+                if self.defer_qualified_publication:
+                    self.queued_publication = {
+                        "predecessor_model_version": self.retained_model_version,
+                        "predecessor_scales": self.retained_scales.tolist(),
+                        "proposed_model_scales": proposed.tolist(),
+                        "candidate_scales": record["candidate_scales"],
+                        "challenger_index": int(record["challenger_index"]),
+                        "qualification_evidence_id": (
+                            f"human-id-challenger-{int(record['challenger_index'])}"
+                            f":look-{look_index}"
+                        ),
+                        "qualification_time_s": float(now_s),
                     }
-                )
+                    record.update(
+                        {
+                            "status": "qualified_for_next_repetition",
+                            "qualified": True,
+                            "decision_time_s": now_s,
+                            "decision_block_count": look_count,
+                            "positive_definite_proposed_model": True,
+                            "publication_deferred_until_repetition_boundary": True,
+                        }
+                    )
+                else:
+                    self.retained_scales = proposed.copy()
+                    version_index = len(self.publication_history)
+                    self.retained_model_version = (
+                        f"{REDUCED_HUMAN_MODEL_VERSION_PREFIX}{version_index}"
+                    )
+                    self.publication = ReducedHumanModelPublication(
+                        scales=proposed.copy(),
+                        beta=beta,
+                        version=self.retained_model_version,
+                        timestamp_s=now_s,
+                    )
+                    self.publication_history.append(self.publication.to_dict())
+                    record.update(
+                        {
+                            "status": "published_to_shadow_incumbent",
+                            "qualified": True,
+                            "decision_time_s": now_s,
+                            "decision_block_count": look_count,
+                            "positive_definite_proposed_model": True,
+                            "publication_deferred_until_repetition_boundary": False,
+                        }
+                    )
                 self.active_challenger = None
                 return evidence
             if look_count == self.config.trust.maximum_clean_blocks:
@@ -698,9 +859,22 @@ class ReducedShadowHumanIdentificationService:
             "CHALLENGER_PENDING"
             if self.active_challenger is not None
             else (
-                "SHADOW_INCUMBENT_VALIDATED"
-                if len(self.publication_history) > 1
-                else "PRIOR_ONLY"
+                "QUALIFIED_FOR_NEXT_REPETITION"
+                if self.queued_publication is not None
+                else (
+                    "ACTIVE_INCUMBENT"
+                    if not np.allclose(
+                        self.retained_scales,
+                        self.population_prior_scales,
+                        atol=0.0,
+                        rtol=0.0,
+                    )
+                    else (
+                        "SHADOW_INCUMBENT_VALIDATED"
+                        if len(self.publication_history) > 1
+                        else "PRIOR_ONLY"
+                    )
+                )
             )
         )
         return {
@@ -713,6 +887,12 @@ class ReducedShadowHumanIdentificationService:
             "shadow_only": True,
             "applied_to_control": False,
             "accepted_interface_model_version": self.config.accepted_interface_model_version,
+            "model_roles": {
+                "population_prior_scales": self.population_prior_scales.tolist(),
+                "active_incumbent_scales": self.retained_scales.tolist(),
+                "active_incumbent_model_version": self.retained_model_version,
+                "queued_successor": self.queued_publication,
+            },
         }
 
     def summary(self) -> dict[str, Any]:
@@ -735,6 +915,10 @@ class ReducedShadowHumanIdentificationService:
             "first_trustworthy_candidate_time_s": self.first_trustworthy_candidate_time_s,
             "retained_model": self.publication.to_dict(),
             "publication_history": list(self.publication_history),
+            "population_prior_scales": self.population_prior_scales.tolist(),
+            "active_incumbent_model_version": self.retained_model_version,
+            "queued_publication": self.queued_publication,
+            "defer_qualified_publication": self.defer_qualified_publication,
             "attempts": list(self.attempts),
             "episode_boundaries": list(self.episode_boundaries),
             "episode_count": len(self.episode_boundaries),
@@ -820,5 +1004,6 @@ __all__ = [
     "ReducedScaleIdentifierConfig",
     "ReducedShadowHumanIdentificationService",
     "Stage5ReducedHumanIDConfig",
+    "progressive_transition_evidence",
     "reduced_information",
 ]

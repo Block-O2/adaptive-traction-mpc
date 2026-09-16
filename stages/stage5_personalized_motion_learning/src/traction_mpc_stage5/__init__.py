@@ -46,6 +46,7 @@ from .human_identification_reduced import (
     ReducedScaleIdentifierConfig,
     ReducedShadowHumanIdentificationService,
     Stage5ReducedHumanIDConfig,
+    progressive_transition_evidence,
     reduced_information,
 )
 from .human_model_update import (
@@ -129,6 +130,15 @@ from .mechanics import (
     STAGE5_RIGID_INTERFACE,
     STAGE5_STIFF_INTERFACE,
 )
+from .progressive_human_model import (
+    ActiveHumanModel,
+    POPULATION_PRIOR_THETA,
+    PROGRESSIVE_FIXED_GAMMA,
+    PostUpdateSupport,
+    ProgressiveHumanModelAuthority,
+    QueuedHumanModelUpdate,
+    human_model_id,
+)
 from .goal_mpc import (
     GoalDirectedHumanSpaceMPC,
     GoalMPCObjective,
@@ -170,6 +180,7 @@ from .task_observation import (
 
 __all__ = [
     "CausalModelAccelerationMonitor",
+    "ActiveHumanModel",
     "DeployableRealizedAcceleration",
     "ExplorationSafetyObservation",
     "ControllerTaskObservation",
@@ -245,6 +256,11 @@ __all__ = [
     "OneStepHumanModelArm",
     "OneStepHumanModelControlAuthority",
     "PostUpdateEvidenceOutcome",
+    "PostUpdateSupport",
+    "POPULATION_PRIOR_THETA",
+    "PROGRESSIVE_FIXED_GAMMA",
+    "ProgressiveHumanModelAuthority",
+    "QueuedHumanModelUpdate",
     "Stage5Geometry",
     "Stage5ConfidencePacing",
     "Stage5ConfidencePacingConfig",
@@ -274,6 +290,7 @@ __all__ = [
     "fixed_stage5_human_model",
     "goal_error",
     "hold_complete",
+    "human_model_id",
     "load_goal_task_spec",
     "load_controller_completion_margin",
     "load_controller_nominal_interface",
@@ -289,6 +306,7 @@ __all__ = [
     "phase_timed_out",
     "phase_target",
     "reduced_information",
+    "progressive_transition_evidence",
     "support_action",
     "start_episode",
     "start_episode_uncertainty_aware",

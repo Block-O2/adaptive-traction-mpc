@@ -83,6 +83,17 @@ does not authorize a second update in the present study; the first progressive
 experiment is design-only.  See
 `docs/HUMAN_MODEL_FROZEN_SUCCESSOR_REPLICATION_V1.md`.
 
+The following progressive attempt stopped before any longitudinal execution
+because the one-step authority could label a model `theta_1` while retaining
+nominal theta internally.  That implementation stop is now addressed by an
+immutable theta-bound model identity, explicit prior/current/candidate roles,
+immediate-predecessor transition authority, repetition-boundary queuing,
+versioned lineage and a post-update POSITIVE/NEUTRAL/NEGATIVE gate.  Decision:
+**PA-A — PROGRESSIVE AUTHORITY READY** at the state-machine level only.  No
+progressive MuJoCo session has run, gamma remains 0.5, and this is not evidence
+of progressive personalization.  See
+`docs/PROGRESSIVE_HUMAN_MODEL_AUTHORITY_V1.md`.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the

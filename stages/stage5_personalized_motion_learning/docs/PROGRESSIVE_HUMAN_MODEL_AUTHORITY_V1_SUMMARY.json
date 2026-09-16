@@ -1,0 +1,71 @@
+{
+  "schema": "stage5_progressive_human_model_authority_v1",
+  "evidence_category": "implementation_state_machine_only",
+  "previous_stop": {
+    "longitudinal_ab_run": false,
+    "scientific_progressive_result": null,
+    "root_cause": "model_version could claim theta_1 while control and reduced-ID incumbent scales remained theta_0"
+  },
+  "active_model": {
+    "immutable": true,
+    "identity_binds_theta": true,
+    "deterministic_id_fields": ["session_id", "update_index", "theta_sha256_prefix"],
+    "lineage_fields": [
+      "predecessor_model_id",
+      "rollback_predecessor_id",
+      "candidate_evidence_id",
+      "bounded_transition_delta",
+      "qualification_repetition",
+      "qualification_time_s",
+      "activation_repetition",
+      "activation_time_s",
+      "post_update_support"
+    ]
+  },
+  "model_roles": {
+    "population_prior": "regularization_and_secondary_diagnostic_only",
+    "active_current": "control_authorized_and_immediate_transition_predecessor",
+    "candidate": "absolute_three_scale_fit",
+    "bounded_successor": "theta_k_relative_qualified_next_repetition_queue"
+  },
+  "queue": {
+    "mid_repetition_activation": false,
+    "maximum_transitions_per_repetition": 1,
+    "stale_predecessor_rejected": true,
+    "reset_crossing_blocks_forbidden": true
+  },
+  "post_update_gate": {
+    "positive": "may_authorize_one_later_correction",
+    "neutral": "hold_active_and_block_next_correction",
+    "negative": "hold_active_preserve_rollback_and_block_session_progression",
+    "automatic_rollback": false
+  },
+  "regularization": {
+    "population_prior": [1.0, 1.0, 1.0],
+    "weight_changed": false,
+    "bounded_step_uses_active_predecessor": true,
+    "validation_thresholds_changed": false
+  },
+  "synthetic_rule_check": {
+    "theta_1": [1.0000584390985465, 1.0010424686528112, 1.0193479803467633],
+    "candidate": [1.0, 1.0, 1.2],
+    "expected_theta_2": [1.0000525951886918, 1.00093822178753, 1.037413182312087],
+    "online_evidence": false
+  },
+  "dry_run": {
+    "saved_trace_progressive_replay_available": false,
+    "reason": "saved traces contain no deployed theta_2 and genuinely later post-update evidence",
+    "synthetic_test_harness_only": true,
+    "new_mujoco_episode_run": false
+  },
+  "frozen_authorities": {
+    "gamma": 0.5,
+    "acceleration_monitor_changed": false,
+    "task_or_limits_changed": false,
+    "interface_changed": false,
+    "value_or_rl_learning": false,
+    "runtime_optimized": false
+  },
+  "decision": "PA-A — PROGRESSIVE AUTHORITY READY",
+  "longitudinal_experiment_executed": false
+}
