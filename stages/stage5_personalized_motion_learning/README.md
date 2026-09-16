@@ -118,6 +118,17 @@ dominates elapsed activation time, while alpha=0.10 limits per-update movement;
 an offline alpha=0.25 comparison improves saved-future prediction but is not
 closed-loop evidence.  See `docs/RUNTIME_AND_PP2_LATENCY_AUDIT_V1.md`.
 
+The follow-on same-semantics prefix implementation audit retains all four
+5/10/15/20 ms checks and the 0.25 ms recurrence.  A Stage-5-only batched
+two-joint dynamics fast path plus cached Human/geometry invariants reduced the
+matched fixed-snapshot solve from 53.43 to 42.90 ms mean and prefix screening
+from 38.19 to 27.50 ms mean.  Candidate masks, costs, elites, selected actions,
+commands and the complete paired episode remained equivalent.  The p95 is
+still 43.43 ms on the nominal fixed snapshot and the paired episode missed
+every 20 ms deadline, so the
+decision is **IMP-B — MAJOR IMPROVEMENT, STILL ABOVE 20 MS**, not real-time
+readiness.  See `docs/PREFIX_SCREEN_RUNTIME_FLOOR_V1.md`.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the

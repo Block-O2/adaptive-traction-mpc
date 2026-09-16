@@ -275,6 +275,11 @@ class InterfaceHoldPredictionBatch:
     predicted_prefix_acceleration_rad_s2: np.ndarray | None = None
     prefix_acceleration_margin_rad_s2: np.ndarray | None = None
     prefix_acceleration_feasible: np.ndarray | None = None
+    predicted_prefix_interface_displacement_human_m: np.ndarray | None = None
+    predicted_prefix_interface_velocity_human_m_s: np.ndarray | None = None
+    predicted_prefix_interface_rotation_human_rad: np.ndarray | None = None
+    predicted_prefix_interface_angular_velocity_human_rad_s: np.ndarray | None = None
+    predicted_prefix_executable_wrench_world: np.ndarray | None = None
 
     def command(self, index: int) -> ExecutableCommandPreview:
         return self.executable_batch.command(index)
@@ -695,6 +700,8 @@ class InterfaceAwareFirstActionBatchPreview:
         *,
         state_rad_rad_s: np.ndarray | None = None,
         acceleration_limits_rad_s2: np.ndarray | None = None,
+        use_optimized_prefix_numpy: bool = True,
+        capture_prefix_diagnostics: bool = False,
     ) -> None:
         self.executable_preview = executable_preview
         self.predictor = predictor
@@ -727,6 +734,12 @@ class InterfaceAwareFirstActionBatchPreview:
         self.human_model = human_model
         self.cuff_allocator = cuff_allocator
         geometry = human_model.geometry
+        self._prefix_plane_x_world = np.asarray(geometry.plane_x_world)
+        self._prefix_plane_z_world = np.asarray(geometry.plane_z_world)
+        self._prefix_joint_axis_world = np.asarray(geometry.joint_axis_world)
+        self._prefix_thigh_length_m = float(geometry.thigh_length_m)
+        self._prefix_cuff_distance_m = float(geometry.cuff_distance_m)
+        self._prefix_cuff_offset_rad = float(geometry.cuff_offset_rad)
         self._world_mapping = np.zeros((6, 3))
         self._world_mapping[:3, 0] = np.asarray(geometry.plane_x_world)
         self._world_mapping[:3, 1] = np.asarray(geometry.plane_z_world)
@@ -759,6 +772,34 @@ class InterfaceAwareFirstActionBatchPreview:
             [np.ndarray, np.ndarray, Any], np.ndarray
         ] | None = None
         self._prefix_future_command_resolver: Callable[..., np.ndarray] | None = None
+        # Disabled in production.  The runtime-floor audit enables this only on
+        # frozen snapshots to time exact regions of the unchanged recurrence.
+        self._profile_prefix_regions = False
+        self.prefix_region_profiles_s: list[dict[str, float]] = []
+        # Diagnostic switch retains the checkpoint implementation for strict
+        # equivalence tests. Production uses the batched NumPy refactor.
+        self._use_optimized_prefix_numpy = bool(use_optimized_prefix_numpy)
+        self._capture_prefix_diagnostics = bool(capture_prefix_diagnostics)
+        self._prefix_numpy_dynamics_available = bool(
+            hasattr(human_model, "beta") and hasattr(human_model, "rom_human")
+        )
+        if self._prefix_numpy_dynamics_available:
+            self._prefix_beta = np.asarray(human_model.beta, dtype=float)
+            rom = human_model.rom_human
+            self._prefix_soft_lower_rad = (
+                np.asarray(rom.q_min_rad)
+                + rom.soft_limit_margin_rad
+                - rom.soft_limit_numerical_tolerance_rad
+            )
+            self._prefix_soft_upper_rad = (
+                np.asarray(rom.q_max_rad)
+                - rom.soft_limit_margin_rad
+                + rom.soft_limit_numerical_tolerance_rad
+            )
+        else:
+            self._prefix_beta = None
+            self._prefix_soft_lower_rad = None
+            self._prefix_soft_upper_rad = None
 
     @property
     def last_prediction(self) -> InterfaceHoldPredictionBatch | None:
@@ -875,6 +916,40 @@ class InterfaceAwareFirstActionBatchPreview:
                 if prediction.prefix_acceleration_feasible is None
                 else prediction.prefix_acceleration_feasible[selected].copy()
             ),
+            predicted_prefix_interface_displacement_human_m=(
+                None
+                if prediction.predicted_prefix_interface_displacement_human_m is None
+                else prediction.predicted_prefix_interface_displacement_human_m[
+                    selected
+                ].copy()
+            ),
+            predicted_prefix_interface_velocity_human_m_s=(
+                None
+                if prediction.predicted_prefix_interface_velocity_human_m_s is None
+                else prediction.predicted_prefix_interface_velocity_human_m_s[
+                    selected
+                ].copy()
+            ),
+            predicted_prefix_interface_rotation_human_rad=(
+                None
+                if prediction.predicted_prefix_interface_rotation_human_rad is None
+                else prediction.predicted_prefix_interface_rotation_human_rad[
+                    selected
+                ].copy()
+            ),
+            predicted_prefix_interface_angular_velocity_human_rad_s=(
+                None
+                if prediction.predicted_prefix_interface_angular_velocity_human_rad_s
+                is None
+                else prediction.predicted_prefix_interface_angular_velocity_human_rad_s[
+                    selected
+                ].copy()
+            ),
+            predicted_prefix_executable_wrench_world=(
+                None
+                if prediction.predicted_prefix_executable_wrench_world is None
+                else prediction.predicted_prefix_executable_wrench_world[selected].copy()
+            ),
         )
 
     def _cached_prediction_for_actions(
@@ -900,11 +975,124 @@ class InterfaceAwareFirstActionBatchPreview:
         if dynamics is None:
             raise RuntimeError("V2 prefix screen has no Human dynamics binding")
         dt = float(dt_s)
-        k1 = dynamics(states, actions_nm, self.human_model)
-        k2 = dynamics(states + 0.5 * dt * k1, actions_nm, self.human_model)
-        k3 = dynamics(states + 0.5 * dt * k2, actions_nm, self.human_model)
-        k4 = dynamics(states + dt * k3, actions_nm, self.human_model)
+        optimized = (
+            self._use_optimized_prefix_numpy
+            and self._prefix_numpy_dynamics_available
+        )
+        if optimized:
+            evaluate = self._prefix_continuous_dynamics_numpy
+        else:
+            evaluate = lambda state, action: dynamics(
+                state, action, self.human_model
+            )
+        k1 = evaluate(states, actions_nm)
+        k2 = evaluate(states + 0.5 * dt * k1, actions_nm)
+        k3 = evaluate(states + 0.5 * dt * k2, actions_nm)
+        k4 = evaluate(states + dt * k3, actions_nm)
         return states + dt * (k1 + 2.0 * k2 + 2.0 * k3 + k4) / 6.0
+
+    def _prefix_continuous_dynamics_numpy(
+        self, state: np.ndarray, action: np.ndarray
+    ) -> np.ndarray:
+        """Stage-5 NumPy equivalent of the inherited two-joint dynamics."""
+
+        human = self.human_model
+        x = np.asarray(state, dtype=float)
+        q1 = x[..., 0]
+        q2 = x[..., 1]
+        dq1 = x[..., 2]
+        dq2 = x[..., 3]
+        phi = q1 - q2
+        cosine = np.cos(q2)
+        sine = np.sin(q2)
+        assert self._prefix_beta is not None
+        beta = self._prefix_beta
+        zero_acceleration = np.empty(x.shape[:-1] + (2,), dtype=float)
+        zero_acceleration[..., 0] = (
+            beta[2] * sine * (-2.0 * dq1 * dq2 + dq2**2)
+            + beta[3] * np.cos(q1)
+            + beta[4] * np.cos(phi)
+            + beta[5] * q1
+            - beta[7]
+            + beta[9] * dq1
+        )
+        zero_acceleration[..., 1] = (
+            beta[2] * sine * dq1**2
+            - beta[4] * np.cos(phi)
+            + beta[6] * q2
+            - beta[8]
+            + beta[10] * dq2
+        )
+        rom = human.rom_human
+        assert self._prefix_soft_lower_rad is not None
+        assert self._prefix_soft_upper_rad is not None
+        lower = self._prefix_soft_lower_rad
+        upper = self._prefix_soft_upper_rad
+        outside_soft_region = np.any(
+            (x[..., :2] < lower) | (x[..., :2] > upper)
+        )
+        if outside_soft_region:
+            dynamics_owner = getattr(
+                self._prefix_human_continuous_dynamics, "__self__", None
+            )
+            if dynamics_owner is None:
+                raise RuntimeError("prefix Human dynamics has no bound owner")
+            soft_limit = dynamics_owner._batched_soft_limit_torque(
+                x[..., :2], x[..., 2:], rom
+            )
+        else:
+            soft_limit = np.zeros_like(x[..., :2])
+        zero_acceleration -= soft_limit
+        mass_00 = beta[0] + 2.0 * beta[2] * cosine
+        mass_01 = -(beta[1] + beta[2] * cosine)
+        mass_11 = beta[1]
+        right_hand_side = np.asarray(action, dtype=float) - zero_acceleration
+        determinant = mass_00 * mass_11 - mass_01 * mass_01
+        acceleration = np.empty_like(right_hand_side)
+        acceleration[..., 0] = (
+            mass_11 * right_hand_side[..., 0]
+            - mass_01 * right_hand_side[..., 1]
+        ) / determinant
+        acceleration[..., 1] = (
+            mass_00 * right_hand_side[..., 1]
+            - mass_01 * right_hand_side[..., 0]
+        ) / determinant
+        return np.concatenate([x[..., 2:], acceleration], axis=-1)
+
+    def _prefix_geometry_batch(
+        self, q_rad: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Cached-invariant equivalent of ``_geometry_batch`` for the hot loop."""
+
+        q = np.asarray(q_rad, dtype=float)
+        q1 = q[:, 0]
+        phi = q[:, 0] - q[:, 1]
+        plane_x = self._prefix_plane_x_world
+        plane_z = self._prefix_plane_z_world
+        axis = self._prefix_joint_axis_world
+        e1_perp = -np.sin(q1)[:, None] * plane_x + np.cos(q1)[:, None] * plane_z
+        shank_perp = (
+            -np.sin(phi)[:, None] * plane_x + np.cos(phi)[:, None] * plane_z
+        )
+        first = (
+            self._prefix_thigh_length_m * e1_perp
+            + self._prefix_cuff_distance_m * shank_perp
+        )
+        second = -self._prefix_cuff_distance_m * shank_perp
+        jacobian = np.stack([first, second], axis=2)
+        cuff_angle = phi - self._prefix_cuff_offset_rad
+        cuff_x = (
+            np.cos(cuff_angle)[:, None] * plane_x
+            + np.sin(cuff_angle)[:, None] * plane_z
+        )
+        cuff_z = (
+            -np.sin(cuff_angle)[:, None] * plane_x
+            + np.cos(cuff_angle)[:, None] * plane_z
+        )
+        rotation = np.stack(
+            [cuff_x, np.broadcast_to(axis, cuff_x.shape), cuff_z], axis=2
+        )
+        return jacobian, rotation
 
     def _apply_v2_prefix_acceleration_screen(
         self,
@@ -921,6 +1109,19 @@ class InterfaceAwareFirstActionBatchPreview:
 
         if self.acceleration_limits_rad_s2 is None:
             return prediction
+        profile = self._profile_prefix_regions
+        region_timing = {
+            "state_copy_and_setup": 0.0,
+            "candidate_command_construction": 0.0,
+            "drive_frame_transforms": 0.0,
+            "interface_state_and_wrench": 0.0,
+            "human_forward_dynamics": 0.0,
+            "geometry_and_frame_update": 0.0,
+            "support_and_allocation_refresh": 0.0,
+            "loaded_command_refresh": 0.0,
+            "acceleration_and_feasibility": 0.0,
+        }
+        setup_start = perf_counter() if profile else 0.0
         if (
             self._prefix_support_provider is None
             or self._prefix_human_continuous_dynamics is None
@@ -967,12 +1168,20 @@ class InterfaceAwareFirstActionBatchPreview:
         previous_command = np.broadcast_to(
             prediction_state.previous_executable_wrench_world, (count, 6)
         ).copy()
+        if profile:
+            region_timing["state_copy_and_setup"] += perf_counter() - setup_start
+            section_start = perf_counter()
         command = np.column_stack(
             [
                 prediction.executable_batch.force_total_n,
                 prediction.executable_batch.moment_total_nm,
             ]
         )
+        if profile:
+            region_timing["candidate_command_construction"] += (
+                perf_counter() - section_start
+            )
+            setup_start = perf_counter()
         k = np.asarray(p.translation_stiffness_n_m)
         d = np.asarray(p.translation_damping_ns_m)
         mass = np.asarray(p.translation_effective_mass_kg)
@@ -982,13 +1191,31 @@ class InterfaceAwareFirstActionBatchPreview:
         rest_x = np.asarray(p.rest_translation_human_m)
         rest_theta = np.asarray(p.rest_rotation_rotvec_human_rad)
         prefix_states = np.empty((count, prefix_count, 4), dtype=float)
-        jacobian, rotation_from_q = self._geometry_batch(
-            states[:, :2], self.human_model.geometry
+        prefix_x = (
+            np.empty((count, prefix_count, 3), dtype=float)
+            if self._capture_prefix_diagnostics
+            else None
         )
+        prefix_u = None if prefix_x is None else np.empty_like(prefix_x)
+        prefix_theta = None if prefix_x is None else np.empty_like(prefix_x)
+        prefix_omega = None if prefix_x is None else np.empty_like(prefix_x)
+        prefix_command = (
+            np.empty((count, prefix_count, 6), dtype=float)
+            if self._capture_prefix_diagnostics
+            else None
+        )
+        geometry_batch = (
+            self._prefix_geometry_batch
+            if self._use_optimized_prefix_numpy
+            else lambda q: self._geometry_batch(q, self.human_model.geometry)
+        )
+        jacobian, rotation_from_q = geometry_batch(states[:, :2])
         # At the observation boundary the interface observer's Human frame and
         # the deployable q/dq geometry are the same controller estimate.  Keep
         # the observed frame for the first segment and q-propagated frames after.
         del rotation_from_q
+        if profile:
+            region_timing["state_copy_and_setup"] += perf_counter() - setup_start
         for segment in range(prefix_count):
             drive_world += command[:, :3] - previous_command[:, :3]
             angular_drive_world += command[:, 3:] - previous_command[:, 3:]
@@ -997,10 +1224,16 @@ class InterfaceAwareFirstActionBatchPreview:
             # transient into one 5 ms mean-wrench Human step.
             physical_dt_s = p.prediction_substep_s
             for _ in range(substeps):
+                section_start = perf_counter() if profile else 0.0
                 drive_human = np.einsum("nji,nj->ni", rotation, drive_world)
                 angular_drive_human = np.einsum(
                     "nji,nj->ni", rotation, angular_drive_world
                 )
+                if profile:
+                    region_timing["drive_frame_transforms"] += (
+                        perf_counter() - section_start
+                    )
+                    section_start = perf_counter()
                 translation_acceleration = (
                     drive_human - k * (x - rest_x) - d * u
                 ) / mass
@@ -1019,18 +1252,29 @@ class InterfaceAwareFirstActionBatchPreview:
                 force_world = np.einsum("nij,nj->ni", rotation, force_human)
                 moment_world = np.einsum("nij,nj->ni", rotation, moment_human)
                 force_tau = np.einsum("nki,nk->ni", jacobian, force_world)
-                moment_axis = moment_world @ np.asarray(
-                    self.human_model.geometry.joint_axis_world
-                )
-                transmitted_action = force_tau + np.column_stack(
-                    [-moment_axis, moment_axis]
-                )
+                moment_axis = moment_world @ self._prefix_joint_axis_world
+                if self._use_optimized_prefix_numpy:
+                    transmitted_action = force_tau.copy()
+                    transmitted_action[:, 0] -= moment_axis
+                    transmitted_action[:, 1] += moment_axis
+                else:
+                    transmitted_action = force_tau + np.column_stack(
+                        [-moment_axis, moment_axis]
+                    )
+                if profile:
+                    region_timing["interface_state_and_wrench"] += (
+                        perf_counter() - section_start
+                    )
+                    section_start = perf_counter()
                 states = self._batched_human_step_at_dt(
                     states, transmitted_action, physical_dt_s
                 )
-                next_jacobian, next_rotation = self._geometry_batch(
-                    states[:, :2], self.human_model.geometry
-                )
+                if profile:
+                    region_timing["human_forward_dynamics"] += (
+                        perf_counter() - section_start
+                    )
+                    section_start = perf_counter()
+                next_jacobian, next_rotation = geometry_batch(states[:, :2])
                 frame_change = np.einsum("nji,njk->nik", next_rotation, rotation)
                 x = np.einsum("nij,nj->ni", frame_change, x + rest_x) - rest_x
                 u = np.einsum("nij,nj->ni", frame_change, u)
@@ -1041,10 +1285,25 @@ class InterfaceAwareFirstActionBatchPreview:
                 omega = np.einsum("nij,nj->ni", frame_change, omega)
                 rotation = next_rotation
                 jacobian = next_jacobian
+                if profile:
+                    region_timing["geometry_and_frame_update"] += (
+                        perf_counter() - section_start
+                    )
             prefix_states[:, segment] = states
+            if prefix_x is not None:
+                assert prefix_u is not None
+                assert prefix_theta is not None
+                assert prefix_omega is not None
+                assert prefix_command is not None
+                prefix_x[:, segment] = x
+                prefix_u[:, segment] = u
+                prefix_theta[:, segment] = theta
+                prefix_omega[:, segment] = omega
+                prefix_command[:, segment] = command
             previous_command = command
             if segment + 1 == prefix_count:
                 continue
+            section_start = perf_counter() if profile else 0.0
             support_action = np.asarray(
                 self._prefix_support_provider(states), dtype=float
             )
@@ -1055,6 +1314,11 @@ class InterfaceAwareFirstActionBatchPreview:
             support_wrench = np.einsum(
                 "nij,nj->ni", allocation_map, support_action
             )
+            if profile:
+                region_timing["support_and_allocation_refresh"] += (
+                    perf_counter() - section_start
+                )
+                section_start = perf_counter()
             command = np.asarray(
                 self._prefix_future_command_resolver(
                     states,
@@ -1069,6 +1333,11 @@ class InterfaceAwareFirstActionBatchPreview:
                 ),
                 dtype=float,
             )
+            if profile:
+                region_timing["loaded_command_refresh"] += (
+                    perf_counter() - section_start
+                )
+        section_start = perf_counter() if profile else 0.0
         prefix_times = prefix_dt_s * np.arange(1, prefix_count + 1, dtype=float)
         screen = screen_cumulative_prefix_acceleration(
             initial_dq,
@@ -1076,6 +1345,11 @@ class InterfaceAwareFirstActionBatchPreview:
             prefix_times,
             self.acceleration_limits_rad_s2,
         )
+        if profile:
+            region_timing["acceleration_and_feasibility"] += (
+                perf_counter() - section_start
+            )
+            self.prefix_region_profiles_s.append(region_timing)
         return InterfaceHoldPredictionBatch(
             executable_batch=prediction.executable_batch,
             feasible=np.asarray(prediction.feasible, dtype=bool) & screen.feasible,
@@ -1092,6 +1366,11 @@ class InterfaceAwareFirstActionBatchPreview:
             predicted_prefix_acceleration_rad_s2=screen.acceleration_rad_s2,
             prefix_acceleration_margin_rad_s2=screen.margin_rad_s2,
             prefix_acceleration_feasible=screen.feasible,
+            predicted_prefix_interface_displacement_human_m=prefix_x,
+            predicted_prefix_interface_velocity_human_m_s=prefix_u,
+            predicted_prefix_interface_rotation_human_rad=prefix_theta,
+            predicted_prefix_interface_angular_velocity_human_rad_s=prefix_omega,
+            predicted_prefix_executable_wrench_world=prefix_command,
         )
 
     def __call__(self, actions_nm: np.ndarray) -> InterfaceHoldPredictionBatch:
@@ -1589,6 +1868,8 @@ def make_interface_aware_first_action_batch_preview(
     cuff_allocator: Any,
     state_rad_rad_s: np.ndarray | None = None,
     acceleration_limits_rad_s2: np.ndarray | None = None,
+    use_optimized_prefix_numpy: bool = True,
+    capture_prefix_diagnostics: bool = False,
 ) -> InterfaceAwareFirstActionBatchPreview:
     """Compose one batched executable-command and physical-interface screen."""
 
@@ -1601,6 +1882,8 @@ def make_interface_aware_first_action_batch_preview(
         cuff_allocator,
         state_rad_rad_s=state_rad_rad_s,
         acceleration_limits_rad_s2=acceleration_limits_rad_s2,
+        use_optimized_prefix_numpy=use_optimized_prefix_numpy,
+        capture_prefix_diagnostics=capture_prefix_diagnostics,
     )
 
 

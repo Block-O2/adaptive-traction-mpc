@@ -82,13 +82,15 @@ def environment_record() -> dict[str, Any]:
     }
 
 
-def build_preview(snapshot: dict[str, Any], mode: str) -> Any:
+def build_preview(
+    snapshot: dict[str, Any], mode: str, *, capture_prefix_diagnostics: bool = False
+) -> Any:
     common = {
         "q_rad": snapshot["observation"].as_array()[:2],
         "human_model": snapshot["human_model"],
         "cuff_allocator": snapshot["mpc"].cuff_allocator,
     }
-    if mode in ("v2_prefix", "v2_prefix_uncached"):
+    if mode in ("v2_prefix", "v2_prefix_uncached", "v2_prefix_reference"):
         common.update(
             {
                 "state_rad_rad_s": snapshot["observation"].as_array(),
@@ -105,17 +107,28 @@ def build_preview(snapshot: dict[str, Any], mode: str) -> Any:
         snapshot["predictor"],
         snapshot["interface_state"],
         **common,
+        capture_prefix_diagnostics=capture_prefix_diagnostics,
     )
     if mode == "v2_prefix_uncached":
         preview._reuse_cached_subsets = False
+    if mode == "v2_prefix_reference":
+        preview._use_optimized_prefix_numpy = False
     return preview
 
 
-def one_solve(snapshot: dict[str, Any], mpc_snapshot: dict[str, Any], mode: str):
+def one_solve(
+    snapshot: dict[str, Any],
+    mpc_snapshot: dict[str, Any],
+    mode: str,
+    *,
+    capture_prefix_diagnostics: bool = False,
+):
     mpc = snapshot["mpc"]
     mpc.__dict__.clear()
     mpc.__dict__.update(deepcopy(mpc_snapshot))
-    preview = build_preview(snapshot, mode)
+    preview = build_preview(
+        snapshot, mode, capture_prefix_diagnostics=capture_prefix_diagnostics
+    )
     process_start = time.process_time_ns()
     wall_start = time.perf_counter_ns()
     action, diagnostics = mpc.solve_goal(
@@ -261,10 +274,27 @@ def equivalence_gate() -> dict[str, Any]:
     }
 
 
-def run_benchmark(*, mode: str, warmup: int, solves: int) -> dict[str, Any]:
+def build_benchmark_snapshot(label: str = "nominal") -> dict[str, Any]:
+    snapshot = _build_fixed_snapshot()
+    if label == "nominal":
+        return snapshot
+    if label == "progressive_theta5":
+        from traction_mpc_stage5.human_model_replication import _model
+
+        snapshot["human_model"] = _model(
+            snapshot["human_model"].geometry,
+            (0.999984460611625, 1.000264489157326, 1.087992468652811),
+        )
+        return snapshot
+    raise ValueError(f"unknown fixed snapshot label: {label}")
+
+
+def run_benchmark(
+    *, mode: str, warmup: int, solves: int, snapshot_label: str = "nominal"
+) -> dict[str, Any]:
     if warmup < 1 or solves < 20:
         raise ValueError("benchmark requires at least one warmup and 20 solves")
-    snapshot = _build_fixed_snapshot()
+    snapshot = build_benchmark_snapshot(snapshot_label)
     mpc_snapshot = deepcopy(snapshot["mpc_snapshot"])
     for _ in range(warmup):
         one_solve(snapshot, mpc_snapshot, mode)
@@ -302,6 +332,7 @@ def run_benchmark(*, mode: str, warmup: int, solves: int) -> dict[str, Any]:
             "plotting/reporting",
         ],
         "fixed_snapshot": {
+            "label": snapshot_label,
             "phase": "OUTBOUND",
             "horizon_candidates_iterations": [
                 snapshot["mpc"].config.horizon_steps,
@@ -337,11 +368,19 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--mode",
-        choices=("v2_prefix", "v2_prefix_uncached", "legacy_full20"),
+        choices=(
+            "v2_prefix",
+            "v2_prefix_reference",
+            "v2_prefix_uncached",
+            "legacy_full20",
+        ),
         required=True,
     )
     parser.add_argument("--warmup", type=int, default=20)
     parser.add_argument("--solves", type=int, default=300)
+    parser.add_argument(
+        "--snapshot", choices=("nominal", "progressive_theta5"), default="nominal"
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--equivalence-only", action="store_true")
     args = parser.parse_args()
@@ -353,7 +392,12 @@ def main() -> None:
             "equivalence": equivalence_gate(),
         }
         if args.equivalence_only
-        else run_benchmark(mode=args.mode, warmup=args.warmup, solves=args.solves)
+        else run_benchmark(
+            mode=args.mode,
+            warmup=args.warmup,
+            solves=args.solves,
+            snapshot_label=args.snapshot,
+        )
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")

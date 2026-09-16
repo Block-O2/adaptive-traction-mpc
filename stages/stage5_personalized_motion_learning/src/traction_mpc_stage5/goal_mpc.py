@@ -420,6 +420,10 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
         self._solve_safest_feasible_sequence: np.ndarray | None = None
         self._solve_safest_feasible_margin = float("-inf")
         self._solve_horizon_timing_s: dict[str, float] = {}
+        # Disabled in production; the prefix-runtime audit enables this on
+        # frozen snapshots to compare every evaluated population quantity.
+        self._runtime_equivalence_population_audit = False
+        self._runtime_equivalence_population_records: list[dict[str, Any]] = []
 
     def reset(self) -> None:
         super().reset()
@@ -440,6 +444,7 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
         self._solve_safest_feasible_sequence = None
         self._solve_safest_feasible_margin = float("-inf")
         self._solve_horizon_timing_s = {}
+        self._runtime_equivalence_population_records = []
 
     def _support_action_batch(self, states: np.ndarray) -> np.ndarray:
         """Vectorized qdd=0 inverse dynamics for the fixed Stage-5 model."""
@@ -1171,6 +1176,21 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
             )
             for index in range(count)
         ]
+        if self._runtime_equivalence_population_audit:
+            self._runtime_equivalence_population_records.append(
+                {
+                    "candidates_nm": candidate.copy(),
+                    "cost": np.asarray(
+                        [evaluation[0] for evaluation in results], dtype=float
+                    ),
+                    "margin": np.asarray(
+                        [evaluation[1] for evaluation in results], dtype=float
+                    ),
+                    "predicted_states": predicted.copy(),
+                    "force_norm_n": force_norm.copy(),
+                    "allocated_force_norm_n": allocated_force_norm.copy(),
+                }
+            )
         for index, evaluation in enumerate(results):
             candidate_margin = float(evaluation[1])
             if (
@@ -1200,6 +1220,8 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
 
         self._set_problem(spec, task_state)
         self._population_constraint_audit = []
+        if self._runtime_equivalence_population_audit:
+            self._runtime_equivalence_population_records = []
         state = observation.as_array()
         self._active_human_model = human_model
         self._current_support_nm = support_action(state, human_model)
