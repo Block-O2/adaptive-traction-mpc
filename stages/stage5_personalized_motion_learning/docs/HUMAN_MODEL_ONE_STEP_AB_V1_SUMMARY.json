@@ -1,0 +1,83 @@
+{
+  "schema": "stage5_human_model_one_step_ab_summary_v1",
+  "evidence_category": "bounded_engineering_closed_loop_ab",
+  "condition": {
+    "name": "damping_plus_20pct",
+    "truth_scales_evaluation_only": [1.0, 1.0, 1.2],
+    "truth_used_online": false,
+    "gamma_both_arms": 0.5
+  },
+  "transition": {
+    "time_s": 3.044999999999672,
+    "predecessor_version": "stage5_fixed_registered_human_v1",
+    "successor_version": "stage5_control_human_scale3_v1",
+    "predecessor_scales": [1.0, 1.0, 1.0],
+    "candidate_scales": [1.0005843909854664, 1.010424686528112, 1.1934798034676337],
+    "successor_scales": [1.0000584390985465, 1.0010424686528112, 1.0193479803467633],
+    "application_count": 1,
+    "total_action_jump_nm": 0.0,
+    "support_action_change_norm_nm": 0.014062069056029147,
+    "executable_force_step_n": 0.8660834652981609,
+    "executable_moment_step_nm": 0.2800667938695423,
+    "artificial_zero_command": false,
+    "estimator_interface_or_task_reset": false,
+    "predecessor_warm_start_reused": false
+  },
+  "post_update_prediction": {
+    "block_count": 29,
+    "successor_favorable_block_count": 26,
+    "predecessor_mean_loss_nms2": 0.0003697195456742101,
+    "successor_mean_loss_nms2": 0.00032177872465422735,
+    "descriptive_mean_improvement_percent": 12.966807295123989,
+    "formal_outcome": "neutral",
+    "formal_reason": "paired_future_improvement_inconclusive",
+    "scheduled_look_12_mean_difference_nms2": -0.00004175478904358057,
+    "scheduled_look_12_lower_bound_nms2": -0.00010309795995367923,
+    "scheduled_look_12_upper_bound_nms2": 0.000019588381866518098,
+    "training_or_qualification_overlap": false,
+    "full_block_table": "HUMAN_MODEL_ONE_STEP_AB_V1.md"
+  },
+  "arms": {
+    "fixed_model": {
+      "status": "COMPLETE",
+      "completion_time_s": 8.860000000002026,
+      "peak_force_n": 111.43747073224529,
+      "cumulative_force_n_s": 838.3732185163356,
+      "peak_moment_nm": 15.027396146933667,
+      "mpc_safe_action_count": 407,
+      "mpc_failure_count": 0,
+      "runtime_mean_ms": 77.03896518939699,
+      "runtime_p95_ms": 91.0065918113105,
+      "runtime_max_ms": 105.06987501867115,
+      "deadline_miss_count": 407
+    },
+    "one_step_adaptive_model": {
+      "status": "COMPLETE",
+      "completion_time_s": 8.955000000001805,
+      "peak_force_n": 111.75403971633494,
+      "cumulative_force_n_s": 841.3466192346027,
+      "peak_moment_nm": 15.027396146933667,
+      "mpc_safe_action_count": 411,
+      "mpc_failure_count": 0,
+      "runtime_mean_ms": 74.32562225116439,
+      "runtime_p95_ms": 90.84547904785722,
+      "runtime_max_ms": 101.42816591542214,
+      "deadline_miss_count": 411
+    }
+  },
+  "both_arms": {
+    "motion_envelope_satisfied_online_and_truth": true,
+    "force_gate_events": 0,
+    "brake_events": 0,
+    "safety_filter_interventions": 0,
+    "mujoco_warnings": 0,
+    "path_free": true,
+    "acceleration_monitor_changed": false,
+    "interface_model_changed": false,
+    "value_or_rl_learning": false
+  },
+  "model_feedback_axis": "neutral",
+  "closed_loop_consequence_axis": "approximately_unchanged",
+  "decision": "C-B — MECHANISM WORKS, EVIDENCE INSUFFICIENT",
+  "raw_result_directory_ignored": "results/human_model_one_step_ab_v1_attempt_01"
+}

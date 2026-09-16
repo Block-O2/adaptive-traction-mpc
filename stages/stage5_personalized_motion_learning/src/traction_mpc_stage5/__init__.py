@@ -50,9 +50,13 @@ from .human_identification_reduced import (
 )
 from .human_model_update import (
     BoundedHumanModelTransition,
+    FIXED_ONE_STEP_GAMMA,
+    OneStepHumanModelArm,
+    OneStepHumanModelControlAuthority,
     PostUpdateEvidenceOutcome,
     build_bounded_human_model_transition,
     classify_post_update_evidence,
+    fixed_one_step_pacing_status,
 )
 from .interface_identification import (
     InactiveInterfaceIdentificationTrust,
@@ -222,6 +226,9 @@ __all__ = [
     "CurrentModelTrustEvidence",
     "CurrentModelTrustOutcome",
     "BoundedHumanModelTransition",
+    "FIXED_ONE_STEP_GAMMA",
+    "OneStepHumanModelArm",
+    "OneStepHumanModelControlAuthority",
     "PostUpdateEvidenceOutcome",
     "Stage5Geometry",
     "Stage5ConfidencePacing",
@@ -245,6 +252,7 @@ __all__ = [
     "build_interface_hypotheses",
     "current_nominal_model_trust_from_shadow_service",
     "classify_post_update_evidence",
+    "fixed_one_step_pacing_status",
     "diagnostic_normalized_progress",
     "estimate_deployable_realized_acceleration",
     "fixed_stage5_human_model",

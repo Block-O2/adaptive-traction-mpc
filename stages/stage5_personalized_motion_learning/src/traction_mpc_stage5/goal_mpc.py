@@ -500,6 +500,23 @@ class GoalDirectedHumanSpaceMPC(HumanSpaceMPC):
         self.last_motion_increment_nm = self.last_action.copy()
         self.last_sequence = None
 
+    def synchronize_control_model_transition(
+        self,
+        total_action_nm: np.ndarray,
+        observation: ControllerTaskObservation,
+        successor_human_model: Any,
+    ) -> None:
+        """Keep the executed command while invalidating model-specific plans."""
+
+        self.synchronize_executed_total_action(
+            total_action_nm, observation, successor_human_model
+        )
+        self.last_predicted_states = None
+        self.last_safest_feasible_sequence = None
+        self.last_safest_feasible_margin = float("-inf")
+        self._solve_safest_feasible_sequence = None
+        self._solve_safest_feasible_margin = float("-inf")
+
     def _dynamics_sequence(self, sequence: np.ndarray) -> np.ndarray:
         """Convert scalar-path increments to total actions about local support."""
 

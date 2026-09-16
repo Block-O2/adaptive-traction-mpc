@@ -1,0 +1,48 @@
+{
+  "schema": "stage5_human_model_one_step_ab_v1",
+  "evidence_category": "bounded_engineering_closed_loop_ab",
+  "status": "AUTHORIZED_FOR_THIS_TASK",
+  "human_truth_evaluation_only": {
+    "condition": "damping_plus_20pct",
+    "scales": [1.0, 1.0, 1.2],
+    "available_to_fit_validation_update_or_control": false
+  },
+  "controller": {
+    "initial_human_model_scales": [1.0, 1.0, 1.0],
+    "base_planning_joint_velocity_ceiling_deg_s": [15.0, 25.0],
+    "planning_physical_force_ceiling_n": 180.0,
+    "cem_random_seed": 20260824,
+    "gamma": 0.5,
+    "gamma_dynamic": false,
+    "terminal_value": 0.0,
+    "runtime_optimization": false
+  },
+  "bounded_update": {
+    "parameterization": ["alpha_M", "alpha_K", "alpha_D"],
+    "smoothing_alpha": 0.1,
+    "maximum_step_fraction_of_span": 0.03,
+    "lower_scales": [0.5, 0.5, 0.5],
+    "upper_scales": [1.5, 1.5, 1.5],
+    "maximum_control_updates": 1,
+    "candidate_and_qualification": "unchanged reduced shadow Human-ID lifecycle",
+    "post_update_classification": "unchanged HAC scheduled-look rule"
+  },
+  "arms": [
+    {
+      "name": "fixed_model",
+      "qualified_successor_applied_to_goal_mpc": false
+    },
+    {
+      "name": "one_step_adaptive_model",
+      "qualified_successor_applied_to_goal_mpc": true
+    }
+  ],
+  "fixed_authorities": {
+    "interface": "stage5_controller_nominal_kelvin_voigt_v1",
+    "acceleration_monitor": "unchanged model-wrench causal 20ms mean",
+    "task_and_limits": "unchanged",
+    "safety_filter_brake_200n_gate": "unchanged",
+    "hold_and_support_semantics": "unchanged except active Human model after qualified transition",
+    "value_or_rl_learning": false
+  }
+}

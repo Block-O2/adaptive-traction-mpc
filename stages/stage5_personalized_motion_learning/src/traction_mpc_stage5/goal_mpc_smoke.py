@@ -263,6 +263,8 @@ def run_goal_mpc_smoke(
     session_context: dict[str, Any] | None = None,
     progress_pacing_callback: Callable[[dict[str, Any]], dict[str, Any]]
     | None = None,
+    control_human_model_callback: Callable[[dict[str, Any]], dict[str, Any]]
+    | None = None,
 ) -> dict[str, Any]:
     """Run one explicitly engineering-only low/moderate Goal-MPC v1.1 episode."""
 
@@ -274,6 +276,8 @@ def run_goal_mpc_smoke(
         raise ValueError("maximum_duration_s must be finite and positive")
 
     reusing_session = session_context is not None and bool(session_context)
+    if reusing_session and control_human_model_callback is not None:
+        raise ValueError("one-step Human-model transition forbids session reuse")
     if reusing_session:
         if interface_uncertainty_spec is not None:
             raise ValueError("repeatability session forbids uncertainty-bank authority")
@@ -285,7 +289,8 @@ def run_goal_mpc_smoke(
         mpc_layer = session_context["mpc_layer"]
         low_level_layer = session_context["low_level_layer"]
         estimator = session_context["estimator"]
-        current_model = estimator.model
+        estimation_model = estimator.model
+        current_model = estimation_model
         cuff_allocator = session_context["cuff_allocator"]
         interface_observer = session_context["interface_observer"]
         acceleration_monitor = session_context["acceleration_monitor"]
@@ -341,7 +346,8 @@ def run_goal_mpc_smoke(
             np.asarray(spec.start_return_target_rad, dtype=float),
         )
         _estimator_observe(estimator, estimator_measurement)
-        current_model = estimator.model
+        estimation_model = estimator.model
+        current_model = estimation_model
         cuff_allocator = default_engineering_cuff_allocator()
     initialization_interface = CONTROLLER_NOMINAL_INTERFACE
     if not reusing_session and initialize_loaded_equilibrium_with_plant_truth:
@@ -396,7 +402,8 @@ def run_goal_mpc_smoke(
         low_level_layer = CausalMeasurementLayer(ideal, truth)
         estimator_measurement = estimator_layer.current
         _estimator_observe(estimator, estimator_measurement)
-        current_model = estimator.model
+        estimation_model = estimator.model
+        current_model = estimation_model
         interface_observer = (
             InterfaceAwareHumanStateObserver()
             if interface_uncertainty_spec is None
@@ -456,20 +463,20 @@ def run_goal_mpc_smoke(
     if interface_uncertainty_monitor is None:
         initial_task_observation, initial_interface_state = interface_observer.update(
             mpc_layer.current,
-            current_model,
+            estimation_model,
             human_model_version=FIXED_HUMAN_MODEL_VERSION,
         )
         initial_realized_acceleration = (
             session_context["last_realized_acceleration"]
             if reusing_session
             else acceleration_monitor.update(
-                initial_task_observation, initial_interface_state, current_model
+                initial_task_observation, initial_interface_state, estimation_model
             )
         )
     else:
         initial_uncertainty_estimate = interface_uncertainty_monitor.update(
             mpc_layer.current,
-            current_model,
+            estimation_model,
             human_model_version=FIXED_HUMAN_MODEL_VERSION,
         )
         initial_nominal = initial_uncertainty_estimate.nominal
@@ -607,6 +614,9 @@ def run_goal_mpc_smoke(
         )
     last_executable_command = initial_support_command
     episode_origin_time_s = float(truth.time_s)
+    current_control_model_version = FIXED_HUMAN_MODEL_VERSION
+    model_transition_events: list[dict[str, Any]] = []
+    pending_model_transition_event: dict[str, Any] | None = None
 
     physics_substeps = int(round(CONTROL_DT_S / NOMINAL_PHYSICS_DT_S))
     if physics_substeps * NOMINAL_PHYSICS_DT_S != CONTROL_DT_S:
@@ -728,6 +738,7 @@ def run_goal_mpc_smoke(
     trace_progress_pacing_gamma: list[float] = []
     trace_progress_pacing_gamma_rate: list[float] = []
     trace_progress_pacing_velocity_ceiling: list[np.ndarray] = []
+    trace_control_human_model_version: list[str] = []
     pending_predicted_force = np.full(3, np.nan)
     pending_predicted_peak_force = float("nan")
     base_planning_velocity_ceiling = (
@@ -749,18 +760,20 @@ def run_goal_mpc_smoke(
         high_level_cycle = control_index % high_level_steps == 0
         if high_level_cycle:
             _estimator_observe(estimator, estimator_measurement)
-            current_model = estimator.model
+            estimation_model = estimator.model
+            if control_human_model_callback is None:
+                current_model = estimation_model
         uncertainty_estimate = None
         if interface_uncertainty_monitor is None:
             task_observation, interface_state = interface_observer.update(
                 mpc_measurement,
-                current_model,
+                estimation_model,
                 human_model_version=FIXED_HUMAN_MODEL_VERSION,
             )
         else:
             uncertainty_estimate = interface_uncertainty_monitor.update(
                 mpc_measurement,
-                current_model,
+                estimation_model,
                 human_model_version=FIXED_HUMAN_MODEL_VERSION,
             )
             nominal_uncertainty_estimate = uncertainty_estimate.nominal
@@ -781,24 +794,12 @@ def run_goal_mpc_smoke(
             realized_acceleration = latest_realized_acceleration
         else:
             realized_acceleration = acceleration_monitor.update(
-                task_observation, interface_state, current_model
+                task_observation, interface_state, estimation_model
             )
             latest_realized_acceleration = realized_acceleration
         evaluation_acceleration = np.asarray(
             plant.data.qacc[plant.human_dof_indices], dtype=float
         ).copy()
-        support_operating_point = solve_loaded_hold_equilibrium(
-            spec,
-            current_model,
-            cuff_allocator,
-            target_q_rad=estimated_state[:2],
-            target_dq_rad_s=estimated_state[2:],
-        )
-        support_reference = support_operating_point.low_level_reference
-        support_execution_target = loaded_execution_target_from_equilibrium(
-            support_operating_point, current_model
-        )
-
         current_time_s = float(truth.time_s)
         dt_task = current_time_s - previous_task_time_s
         if dt_task > 1.0e-12:
@@ -835,30 +836,145 @@ def run_goal_mpc_smoke(
                 )
                 previous_phase = task_state.phase
 
+        deployable_callback_payload = {
+            "episode_time_s": current_time_s - episode_origin_time_s,
+            "estimated_human_state_rad_rad_s": estimated_state.copy(),
+            "measured_human_cuff_force_world_n": np.asarray(
+                mpc_measurement.cuff_force_vector_n, dtype=float
+            ).copy(),
+            "measured_human_cuff_moment_world_nm": np.asarray(
+                mpc_measurement.cuff_moment_vector_nm, dtype=float
+            ).copy(),
+            "measured_generalized_human_input_nm": (
+                realized_acceleration.generalized_human_input_nm.copy()
+            ),
+            "task_phase": task_state.phase.value,
+            "interface_model_version": CONTROLLER_NOMINAL_INTERFACE.model_version,
+            "current_control_model_version": current_control_model_version,
+        }
+        if control_human_model_callback is not None:
+            update = control_human_model_callback(deployable_callback_payload)
+            if not isinstance(update, dict):
+                raise TypeError("control Human-model callback must return a dict")
+            if bool(update.get("apply_update", False)):
+                if model_transition_events:
+                    raise RuntimeError("one-step Human-model transition attempted twice")
+                if task_state.phase in (TaskPhase.COMPLETE, TaskPhase.ABORTED):
+                    raise RuntimeError("cannot apply a Human-model update after termination")
+                successor_model = update.get("human_model")
+                successor_version = str(update.get("model_version", ""))
+                if successor_model is None or not successor_version:
+                    raise ValueError("qualified update requires model and version")
+                if successor_version == current_control_model_version:
+                    raise ValueError("successor Human-model version must be new")
+                minimum_eigenvalue = float(
+                    successor_model.minimum_mass_matrix_eigenvalue()
+                )
+                if not np.isfinite(minimum_eigenvalue) or minimum_eigenvalue <= 1.0e-6:
+                    raise ValueError("successor Human model is not positive definite")
+
+                predecessor_version = current_control_model_version
+                predecessor_support = support_action(estimated_state, current_model)
+                warm_sequence = (
+                    None if mpc.last_sequence is None else mpc.last_sequence.copy()
+                )
+                warm_safest = (
+                    None
+                    if mpc.last_safest_feasible_sequence is None
+                    else mpc.last_safest_feasible_sequence.copy()
+                )
+                event = {
+                    "time_s": current_time_s,
+                    "predecessor_model_version": predecessor_version,
+                    "successor_model_version": successor_version,
+                    "transition": dict(update.get("transition", {})),
+                    "estimated_human_state_rad_rad_s": estimated_state.tolist(),
+                    "interface_state_before": {
+                        "translation_human_m": (
+                            interface_state.displacement_human_m.tolist()
+                        ),
+                        "velocity_human_m_s": (
+                            interface_state.velocity_human_m_s.tolist()
+                        ),
+                        "rotation_human_rad": (
+                            interface_state.rotation_error_human_rad.tolist()
+                        ),
+                        "angular_velocity_human_rad_s": (
+                            interface_state.angular_velocity_human_rad_s.tolist()
+                        ),
+                    },
+                    "task_phase_before": task_state.phase.value,
+                    "support_action_before_nm": predecessor_support.tolist(),
+                    "executed_action_before_nm": current_action.tolist(),
+                    "executable_wrench_before_world": previous_command_wrench.tolist(),
+                    "physical_wrench_before_world": np.concatenate(
+                        [
+                            np.asarray(truth.cuff_force_vector_n, dtype=float),
+                            np.asarray(truth.cuff_moment_vector_nm, dtype=float),
+                        ]
+                    ).tolist(),
+                    "warm_start_before": {
+                        "model_version": predecessor_version,
+                        "last_sequence_nm": (
+                            None if warm_sequence is None else warm_sequence.tolist()
+                        ),
+                        "safest_sequence_nm": (
+                            None if warm_safest is None else warm_safest.tolist()
+                        ),
+                    },
+                    "estimator_reset": False,
+                    "interface_history_reset": False,
+                    "task_state_reset": False,
+                    "loaded_support_removed": False,
+                }
+                current_model = successor_model
+                current_control_model_version = successor_version
+                mpc.synchronize_control_model_transition(
+                    current_action, task_observation, current_model
+                )
+                if hold_stabilizer is not None:
+                    loaded_equilibrium = solve_loaded_hold_equilibrium(
+                        spec, current_model, cuff_allocator
+                    )
+                    hold_stabilizer.equilibrium = loaded_equilibrium
+                    hold_stabilizer.human_model = current_model
+                event.update(
+                    {
+                        "support_action_after_nm": support_action(
+                            estimated_state, current_model
+                        ).tolist(),
+                        "warm_start_after": {
+                            "model_version": current_control_model_version,
+                            "last_sequence_nm": None,
+                            "safest_sequence_nm": None,
+                            "last_motion_increment_nm": (
+                                mpc.last_motion_increment_nm.tolist()
+                            ),
+                        },
+                        "minimum_mass_matrix_eigenvalue": minimum_eigenvalue,
+                    }
+                )
+                model_transition_events.append(event)
+                pending_model_transition_event = event
+
+        support_operating_point = solve_loaded_hold_equilibrium(
+            spec,
+            current_model,
+            cuff_allocator,
+            target_q_rad=estimated_state[:2],
+            target_dq_rad_s=estimated_state[2:],
+        )
+        support_reference = support_operating_point.low_level_reference
+        support_execution_target = loaded_execution_target_from_equilibrium(
+            support_operating_point, current_model
+        )
+
         pacing_status = {
             "gamma": 1.0,
             "gamma_rate_per_s": 0.0,
         }
         if progress_pacing_callback is not None:
-            pacing_status = progress_pacing_callback(
-                {
-                    "episode_time_s": current_time_s - episode_origin_time_s,
-                    "estimated_human_state_rad_rad_s": estimated_state.copy(),
-                    "measured_human_cuff_force_world_n": np.asarray(
-                        mpc_measurement.cuff_force_vector_n, dtype=float
-                    ).copy(),
-                    "measured_human_cuff_moment_world_nm": np.asarray(
-                        mpc_measurement.cuff_moment_vector_nm, dtype=float
-                    ).copy(),
-                    "measured_generalized_human_input_nm": (
-                        realized_acceleration.generalized_human_input_nm.copy()
-                    ),
-                    "task_phase": task_state.phase.value,
-                    "interface_model_version": (
-                        CONTROLLER_NOMINAL_INTERFACE.model_version
-                    ),
-                }
-            )
+            pacing_status = progress_pacing_callback(deployable_callback_payload)
             gamma = float(pacing_status["gamma"])
             if not np.isfinite(gamma) or not 0.0 < gamma <= 1.0:
                 raise ValueError("progress pacing callback returned invalid gamma")
@@ -877,6 +993,7 @@ def run_goal_mpc_smoke(
                 mpc.planning_joint_velocity_ceiling_rad_s, dtype=float
             ).copy()
         )
+        trace_control_human_model_version.append(current_control_model_version)
 
         progress = diagnostic_normalized_progress(spec, task_state.phase, estimated_state[:2])
         trace_time.append(current_time_s)
@@ -1649,6 +1766,49 @@ def run_goal_mpc_smoke(
             action_nm=current_action,
             command=decision.executable_preview.command,
         )
+        if pending_model_transition_event is not None:
+            before_action = np.asarray(
+                pending_model_transition_event["executed_action_before_nm"],
+                dtype=float,
+            )
+            before_wrench = np.asarray(
+                pending_model_transition_event["executable_wrench_before_world"],
+                dtype=float,
+            )
+            pending_model_transition_event.update(
+                {
+                    "task_phase_after": task_state.phase.value,
+                    "interface_state_after": {
+                        "translation_human_m": (
+                            interface_state.displacement_human_m.tolist()
+                        ),
+                        "velocity_human_m_s": (
+                            interface_state.velocity_human_m_s.tolist()
+                        ),
+                        "rotation_human_rad": (
+                            interface_state.rotation_error_human_rad.tolist()
+                        ),
+                        "angular_velocity_human_rad_s": (
+                            interface_state.angular_velocity_human_rad_s.tolist()
+                        ),
+                    },
+                    "executed_action_after_nm": current_action.tolist(),
+                    "executable_wrench_after_world": command_wrench.tolist(),
+                    "action_jump_norm_nm": float(
+                        np.linalg.norm(current_action - before_action)
+                    ),
+                    "executable_force_jump_norm_n": float(
+                        np.linalg.norm(command_wrench[:3] - before_wrench[:3])
+                    ),
+                    "executable_moment_jump_norm_nm": float(
+                        np.linalg.norm(command_wrench[3:] - before_wrench[3:])
+                    ),
+                    "artificial_zero_command": bool(
+                        np.linalg.norm(current_action) <= 1.0e-12
+                        and np.linalg.norm(before_action) > 1.0e-12
+                    ),
+                }
+            )
         if local_hold_cycle:
             pending_predicted_force = np.full(3, np.nan)
             pending_predicted_peak_force = float("nan")
@@ -1787,6 +1947,16 @@ def run_goal_mpc_smoke(
 
         for _ in range(physics_substeps):
             truth = plant.step()
+        if pending_model_transition_event is not None:
+            pending_model_transition_event["physical_wrench_after_first_control_step_world"] = (
+                np.concatenate(
+                    [
+                        np.asarray(truth.cuff_force_vector_n, dtype=float),
+                        np.asarray(truth.cuff_moment_vector_nm, dtype=float),
+                    ]
+                ).tolist()
+            )
+            pending_model_transition_event = None
         force_norm = float(np.linalg.norm(truth.cuff_force_vector_n))
         if force_norm > CUFF_TRANSLATIONAL_FORCE_GATE_N + 1.0e-9:
             force_gate_event_count += 1
@@ -1981,6 +2151,9 @@ def run_goal_mpc_smoke(
         "progress_pacing_velocity_ceiling_rad_s": np.asarray(
             trace_progress_pacing_velocity_ceiling, dtype=float
         ).reshape(-1, 2),
+        "control_human_model_version": np.asarray(
+            trace_control_human_model_version, dtype=str
+        ),
     }
     # A repeatability session keeps plant/controller clocks and causal history
     # continuous, while each saved episode uses a local zero-based time axis.
@@ -1996,6 +2169,8 @@ def run_goal_mpc_smoke(
         finite = np.isfinite(values)
         values[finite] -= episode_origin_time_s
     for event in task_events:
+        event["time_s"] = float(event["time_s"] - episode_origin_time_s)
+    for event in model_transition_events:
         event["time_s"] = float(event["time_s"] - episode_origin_time_s)
     if handoff_entry_time_s is not None:
         handoff_entry_time_s -= episode_origin_time_s
@@ -2317,9 +2492,20 @@ def run_goal_mpc_smoke(
             ),
             "plant_truth_passed_to_online_controller": False,
         },
-        "fixed_human_control_model": True,
-        "human_model_version": FIXED_HUMAN_MODEL_VERSION,
-        "online_identification_or_learning": False,
+        "fixed_human_control_model": not bool(model_transition_events),
+        "human_model_version": current_control_model_version,
+        "online_identification_or_learning": (
+            control_human_model_callback is not None
+        ),
+        "human_model_control_transition": {
+            "callback_enabled": control_human_model_callback is not None,
+            "transition_count": len(model_transition_events),
+            "at_most_one_transition_enforced": True,
+            "events": model_transition_events,
+            "estimator_model_version": FIXED_HUMAN_MODEL_VERSION,
+            "acceleration_monitor_model_version": FIXED_HUMAN_MODEL_VERSION,
+            "truth_available_to_callback": False,
+        },
         "learned_terminal_value": 0.0,
         "prescribed_full_q_reference_used": False,
         "fixed_q1_q2_coordination_ratio": False,
@@ -2327,7 +2513,7 @@ def run_goal_mpc_smoke(
         "support_centered_goal_mpc": {
             "decomposition": "u_total = u_support + delta_u_motion",
             "support_definition": (
-                "inverse_dynamics(q_hat,dq_hat,qdd=0,fixed_human_model)"
+                "inverse_dynamics(q_hat,dq_hat,qdd=0,active_control_human_model)"
             ),
             "cem_optimized_variable": "delta_u_motion",
             "initialization_anchors": [

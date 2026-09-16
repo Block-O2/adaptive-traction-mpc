@@ -62,6 +62,15 @@ Decision: **U-A — BOUNDED UPDATE READY FOR ONE-STEP CLOSED-LOOP A/B**, design
 only.  No Human model is applied to control in this checkpoint.  See
 `docs/HUMAN_MODEL_BOUNDED_UPDATE_V1.md`.
 
+The authorized damping +20% closed-loop A/B then applied exactly one causally
+qualified bounded successor with gamma fixed at 0.5.  The transition was
+versioned and command-continuous; both fixed and one-step arms completed with
+no safety-chain event.  Although 26/29 genuinely later prediction blocks favored
+the successor, the unchanged HAC scheduled looks remained NEUTRAL.  Decision:
+**C-B — MECHANISM WORKS, EVIDENCE INSUFFICIENT**.  Progressive updates and
+trust-driven pacing remain disabled.  See
+`docs/HUMAN_MODEL_ONE_STEP_AB_V1.md`.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the
