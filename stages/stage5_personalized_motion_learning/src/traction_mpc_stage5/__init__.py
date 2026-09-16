@@ -31,6 +31,14 @@ from .human_identification import (
     Stage5HumanIDConfig,
     Stage5HumanIDMeasurement,
 )
+from .human_identification_reduced import (
+    ReducedHumanModelPublication,
+    ReducedIntegralScaleIdentifier,
+    ReducedScaleIdentifierConfig,
+    ReducedShadowHumanIdentificationService,
+    Stage5ReducedHumanIDConfig,
+    reduced_information,
+)
 from .interface_identification import (
     InactiveInterfaceIdentificationTrust,
     InterfaceChallengerDecision,
@@ -149,6 +157,10 @@ __all__ = [
     "GoalTaskSpec",
     "GoalTaskState",
     "HumanModelPublication",
+    "ReducedHumanModelPublication",
+    "ReducedIntegralScaleIdentifier",
+    "ReducedScaleIdentifierConfig",
+    "ReducedShadowHumanIdentificationService",
     "InterfaceAwareFirstActionBatchPreview",
     "InterfaceAwareHumanStateObserver",
     "InterfaceHoldPredictionBatch",
@@ -196,6 +208,7 @@ __all__ = [
     "Stage5HumanParameters",
     "Stage5HumanIDConfig",
     "Stage5HumanIDMeasurement",
+    "Stage5ReducedHumanIDConfig",
     "Stage5LoadedExecutionContext",
     "Stage5LoadedExecutionTarget",
     "Stage5LoadedTrackBrakeSupervisor",
@@ -225,6 +238,7 @@ __all__ = [
     "measured_transmitted_human_input",
     "phase_timed_out",
     "phase_target",
+    "reduced_information",
     "support_action",
     "start_episode",
     "start_episode_uncertainty_aware",

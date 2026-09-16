@@ -16,6 +16,13 @@ control and no closed-loop A/B is preregistered. See
 `docs/HUMAN_ID_ARCHITECTURE_AUDIT.md` and
 `docs/HUMAN_ID_SHADOW_V1_RESULTS.md`.
 
+The preregistered reduced three-scale shadow validation subsequently concludes
+**R-C — Human ID not useful enough**. Complete episodes are well conditioned
+in the reduced coordinates, but no challenger established embargoed future
+publication support; three mismatch cases also hit the unchanged acceleration
+envelope before useful qualification. Control remains nominal and frozen. See
+`docs/HUMAN_ID_REDUCED_SHADOW_V1_RESULTS.md` and its compact JSON summary.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the
@@ -224,6 +231,13 @@ interface/Human adaptation in control, value learning, or RL is active.
   reuse classification, task-local embargo/trust contract, phase-wise evidence,
   and the H-B decision to validate a reduced control-effective block before
   any closed-loop adaptation.
+- `configs/stage5_human_id_reduced_shadow_v1.json`,
+  `src/traction_mpc_stage5/human_identification_reduced.py`, and
+  `scripts/run_stage5_human_id_reduced_shadow_v1.py`: frozen Stage-4
+  beta11-to-scale3 mapping, bounded reduced shadow lifecycle, and the small
+  fixed-interface matrix. `docs/HUMAN_ID_REDUCED_SHADOW_V1_RESULTS.md` records
+  the R-C endpoint; no reduced publication entered control and no closed-loop
+  A/B was preregistered.
 - `scripts/run_stage5_geometry_validation.py`: engineering/smoke validation;
   it is not a formal scientific experiment.
 - `tests/`: geometry, frame, mechanics, visualization, and regression checks.
