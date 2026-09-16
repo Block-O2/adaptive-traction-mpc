@@ -261,6 +261,8 @@ def run_goal_mpc_smoke(
     plant_factory: Callable[[InterfaceParameters], Stage5SensorBoundaryPlant]
     | None = None,
     session_context: dict[str, Any] | None = None,
+    progress_pacing_callback: Callable[[dict[str, Any]], dict[str, Any]]
+    | None = None,
 ) -> dict[str, Any]:
     """Run one explicitly engineering-only low/moderate Goal-MPC v1.1 episode."""
 
@@ -302,10 +304,17 @@ def run_goal_mpc_smoke(
             planning_physical_force_ceiling_n,
         ):
             raise ValueError("session planning-force ceiling changed")
-        if mpc.planning_joint_velocity_ceiling_rad_s != (
-            None
-            if planning_joint_velocity_ceiling_rad_s is None
-            else tuple(float(value) for value in planning_joint_velocity_ceiling_rad_s)
+        if (
+            progress_pacing_callback is None
+            and mpc.planning_joint_velocity_ceiling_rad_s
+            != (
+                None
+                if planning_joint_velocity_ceiling_rad_s is None
+                else tuple(
+                    float(value)
+                    for value in planning_joint_velocity_ceiling_rad_s
+                )
+            )
         ):
             raise ValueError("session planning-velocity ceiling changed")
     else:
@@ -716,8 +725,18 @@ def run_goal_mpc_smoke(
     trace_uncertainty_acceleration_min: list[np.ndarray] = []
     trace_uncertainty_acceleration_max: list[np.ndarray] = []
     trace_uncertainty_causal_acceleration_available: list[bool] = []
+    trace_progress_pacing_gamma: list[float] = []
+    trace_progress_pacing_gamma_rate: list[float] = []
+    trace_progress_pacing_velocity_ceiling: list[np.ndarray] = []
     pending_predicted_force = np.full(3, np.nan)
     pending_predicted_peak_force = float("nan")
+    base_planning_velocity_ceiling = (
+        None
+        if planning_joint_velocity_ceiling_rad_s is None
+        else np.asarray(planning_joint_velocity_ceiling_rad_s, dtype=float)
+    )
+    if progress_pacing_callback is not None and base_planning_velocity_ceiling is None:
+        raise ValueError("progress pacing requires a declared base planning ceiling")
 
     maximum_steps = int(np.ceil(maximum_duration_s / CONTROL_DT_S)) + 1
     for control_index in range(maximum_steps):
@@ -815,6 +834,49 @@ def run_goal_mpc_smoke(
                     }
                 )
                 previous_phase = task_state.phase
+
+        pacing_status = {
+            "gamma": 1.0,
+            "gamma_rate_per_s": 0.0,
+        }
+        if progress_pacing_callback is not None:
+            pacing_status = progress_pacing_callback(
+                {
+                    "episode_time_s": current_time_s - episode_origin_time_s,
+                    "estimated_human_state_rad_rad_s": estimated_state.copy(),
+                    "measured_human_cuff_force_world_n": np.asarray(
+                        mpc_measurement.cuff_force_vector_n, dtype=float
+                    ).copy(),
+                    "measured_human_cuff_moment_world_nm": np.asarray(
+                        mpc_measurement.cuff_moment_vector_nm, dtype=float
+                    ).copy(),
+                    "measured_generalized_human_input_nm": (
+                        realized_acceleration.generalized_human_input_nm.copy()
+                    ),
+                    "task_phase": task_state.phase.value,
+                    "interface_model_version": (
+                        CONTROLLER_NOMINAL_INTERFACE.model_version
+                    ),
+                }
+            )
+            gamma = float(pacing_status["gamma"])
+            if not np.isfinite(gamma) or not 0.0 < gamma <= 1.0:
+                raise ValueError("progress pacing callback returned invalid gamma")
+            assert base_planning_velocity_ceiling is not None
+            mpc.planning_joint_velocity_ceiling_rad_s = tuple(
+                float(value) for value in gamma * base_planning_velocity_ceiling
+            )
+        trace_progress_pacing_gamma.append(float(pacing_status["gamma"]))
+        trace_progress_pacing_gamma_rate.append(
+            float(pacing_status.get("gamma_rate_per_s", 0.0))
+        )
+        trace_progress_pacing_velocity_ceiling.append(
+            np.full(2, np.nan)
+            if mpc.planning_joint_velocity_ceiling_rad_s is None
+            else np.asarray(
+                mpc.planning_joint_velocity_ceiling_rad_s, dtype=float
+            ).copy()
+        )
 
         progress = diagnostic_normalized_progress(spec, task_state.phase, estimated_state[:2])
         trace_time.append(current_time_s)
@@ -1910,6 +1972,15 @@ def run_goal_mpc_smoke(
         "mpc_first_action_feasible_candidate_evaluations": np.asarray(
             solver_first_action_feasible_candidate_evaluations, dtype=int
         ),
+        "progress_pacing_gamma": np.asarray(
+            trace_progress_pacing_gamma, dtype=float
+        ),
+        "progress_pacing_gamma_rate_per_s": np.asarray(
+            trace_progress_pacing_gamma_rate, dtype=float
+        ),
+        "progress_pacing_velocity_ceiling_rad_s": np.asarray(
+            trace_progress_pacing_velocity_ceiling, dtype=float
+        ).reshape(-1, 2),
     }
     # A repeatability session keeps plant/controller clocks and causal history
     # continuous, while each saved episode uses a local zero-based time axis.
@@ -2453,6 +2524,34 @@ def run_goal_mpc_smoke(
             ),
             "registered_velocity_and_force_limits_unchanged": True,
             "truth_used_online": False,
+        },
+        "confidence_progress_pacing": {
+            "active": progress_pacing_callback is not None,
+            "semantics": "planning_velocity_ceiling=gamma*base_ceiling",
+            "base_joint_velocity_ceiling_deg_s": (
+                None
+                if base_planning_velocity_ceiling is None
+                else np.degrees(base_planning_velocity_ceiling).tolist()
+            ),
+            "minimum_gamma": float(np.min(trace["progress_pacing_gamma"])),
+            "mean_gamma": float(np.mean(trace["progress_pacing_gamma"])),
+            "final_gamma": float(trace["progress_pacing_gamma"][-1]),
+            "time_at_minimum_observed_gamma_s": float(
+                CONTROL_DT_S
+                * np.count_nonzero(
+                    np.isclose(
+                        trace["progress_pacing_gamma"],
+                        np.min(trace["progress_pacing_gamma"]),
+                        atol=1.0e-12,
+                        rtol=0.0,
+                    )
+                )
+            ),
+            "support_action_scaled": False,
+            "hold_equilibrium_scaled": False,
+            "registered_hard_motion_limits_scaled": False,
+            "prescribed_reference_added": False,
+            "coordination_ratio_or_path_corridor_added": False,
         },
         "human_state_estimation_error": {
             "q_rmse_deg": np.degrees(

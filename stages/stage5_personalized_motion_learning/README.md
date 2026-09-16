@@ -23,6 +23,15 @@ publication support; three mismatch cases also hit the unchanged acceleration
 envelope before useful qualification. Control remains nominal and frozen. See
 `docs/HUMAN_ID_REDUCED_SHADOW_V1_RESULTS.md` and its compact JSON summary.
 
+The separate multi-repetition confidence-pacing feasibility study concludes
+**P-B — pacing helps, trust still too slow**. Historical Stage-4 confidence
+defaults map only to a scalar Goal-MPC planning-velocity ceiling; they do not
+create a reference clock or scale support, HOLD, or registered motion limits.
+Stiffness+15% survives long enough for a shadow publication, but mass+8% and
+the mixed mismatch still repeatedly abort at minimum pacing before collecting
+clean fit blocks. All Goal-MPC episodes continue to use the fixed nominal Human
+model. See `docs/HUMAN_ID_CONFIDENCE_PACING_V1.md` and its compact JSON summary.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the
@@ -102,6 +111,12 @@ interface/Human adaptation in control, value learning, or RL is active.
   full batched horizon. HOLD uses the `GoalTaskSpec` angle/velocity set with a
   safety-hard minimum-violation recovery fallback when the sampled set is
   temporarily unreachable; OUTBOUND/RETURN remain path-free.
+- `configs/stage5_human_id_confidence_pacing_v1.json`,
+  `src/traction_mpc_stage5/confidence_pacing.py`, and
+  `scripts/run_stage5_human_id_confidence_pacing_v1.py`: frozen historical-V1
+  confidence defaults, scalar path-free planning pacing, and session-persistent
+  reduced shadow Human-ID lifecycle. Identification information, current-model
+  trust, and challenger publication remain distinct; publication is shadow-only.
 - `src/traction_mpc_stage5/hold_stabilizer.py`: Stage-5-only loaded-equilibrium
   solver, deterministic local computed-torque HOLD controller, explicit loaded
   robot-pose execution adapter, and command-continuous MPC-to-HOLD handoff. It

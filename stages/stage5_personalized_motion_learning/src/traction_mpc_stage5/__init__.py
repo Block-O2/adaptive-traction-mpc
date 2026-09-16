@@ -10,6 +10,12 @@ from .acceleration import (
 )
 
 from .config import STAGE5_CONFIG, load_stage5_config
+from .confidence_pacing import (
+    Stage5ConfidencePacing,
+    Stage5ConfidencePacingConfig,
+    Stage5PacingEvidence,
+    current_nominal_model_trust_from_shadow_service,
+)
 from .controller_interface import (
     CONTROLLER_NOMINAL_INTERFACE,
     ControllerNominalInterfaceParameters,
@@ -205,6 +211,9 @@ __all__ = [
     "STAGE5_RIGID_INTERFACE",
     "STAGE5_STIFF_INTERFACE",
     "Stage5Geometry",
+    "Stage5ConfidencePacing",
+    "Stage5ConfidencePacingConfig",
+    "Stage5PacingEvidence",
     "Stage5HumanParameters",
     "Stage5HumanIDConfig",
     "Stage5HumanIDMeasurement",
@@ -219,6 +228,7 @@ __all__ = [
     "at_goal_for_online_completion",
     "build_stage5_loaded_execution_context",
     "build_interface_hypotheses",
+    "current_nominal_model_trust_from_shadow_service",
     "diagnostic_normalized_progress",
     "estimate_deployable_realized_acceleration",
     "fixed_stage5_human_model",

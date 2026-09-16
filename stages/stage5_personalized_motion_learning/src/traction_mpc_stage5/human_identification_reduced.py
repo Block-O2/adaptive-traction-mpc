@@ -20,7 +20,6 @@ from traction_mpc_stage4.estimator_v2 import (
     PlanarCuffGeometry,
     nominal_base_parameters,
 )
-from traction_mpc_stage4.hierarchical_trust import _validation_blocks
 from traction_mpc_stage4.integral_identifier import integral_regression_block
 from traction_mpc_stage4.minimal_adaptation import (
     CONTROL_RELEVANT_DYNAMIC_PARAMETER_NAMES,
@@ -195,45 +194,59 @@ class ReducedIntegralScaleIdentifier:
     def integral_blocks(
         self, raw_history: list[dict[str, Any]], geometry: PlanarCuffGeometry
     ) -> tuple[np.ndarray, np.ndarray, int]:
-        times = np.asarray([item["time_s"] for item in raw_history], dtype=float)
         regressors: list[np.ndarray] = []
         targets: list[np.ndarray] = []
         contaminated_windows = 0
         projection = dynamic_scale_projection(nominal_base_parameters(STAGE5_HUMAN))
-        for end in range(
-            self.config.block_stride_measurements,
-            len(raw_history),
-            self.config.block_stride_measurements,
-        ):
-            start = int(
-                np.searchsorted(
-                    times,
-                    times[end] - self.config.integration_window_s,
-                    side="left",
-                )
-            )
-            if times[end] - times[start] < 0.90 * self.config.integration_window_s:
-                continue
-            segment = raw_history[start : end + 1]
-            if any(bool(item["contaminated"]) for item in segment):
-                contaminated_windows += 1
-                continue
-            time = times[start : end + 1]
-            state = np.asarray([item["state"] for item in segment], dtype=float)
-            torque = np.asarray(
-                [
-                    geometry.generalized_input_from_wrench(
-                        item["state"][:2],
-                        item["force_world_n"],
-                        item["moment_world_nm"],
+        episode_indices = sorted(
+            {int(item.get("episode_index", 0)) for item in raw_history}
+        )
+        for episode_index in episode_indices:
+            episode = [
+                item
+                for item in raw_history
+                if int(item.get("episode_index", 0)) == episode_index
+            ]
+            times = np.asarray([item["time_s"] for item in episode], dtype=float)
+            for end in range(
+                self.config.block_stride_measurements,
+                len(episode),
+                self.config.block_stride_measurements,
+            ):
+                start = int(
+                    np.searchsorted(
+                        times,
+                        times[end] - self.config.integration_window_s,
+                        side="left",
                     )
-                    for item in segment
-                ],
-                dtype=float,
-            )
-            full_regressor, target = integral_regression_block(time, state, torque)
-            regressors.append(full_regressor @ projection)
-            targets.append(target)
+                )
+                if (
+                    times[end] - times[start]
+                    < 0.90 * self.config.integration_window_s
+                ):
+                    continue
+                segment = episode[start : end + 1]
+                if any(bool(item["contaminated"]) for item in segment):
+                    contaminated_windows += 1
+                    continue
+                time = times[start : end + 1]
+                state = np.asarray([item["state"] for item in segment], dtype=float)
+                torque = np.asarray(
+                    [
+                        geometry.generalized_input_from_wrench(
+                            item["state"][:2],
+                            item["force_world_n"],
+                            item["moment_world_nm"],
+                        )
+                        for item in segment
+                    ],
+                    dtype=float,
+                )
+                full_regressor, target = integral_regression_block(
+                    time, state, torque
+                )
+                regressors.append(full_regressor @ projection)
+                targets.append(target)
         if not regressors:
             return np.empty((0, 3)), np.empty(0), contaminated_windows
         return np.vstack(regressors), np.concatenate(targets), contaminated_windows
@@ -412,6 +425,43 @@ class ReducedShadowHumanIdentificationService:
         self.last_sample_time_s: float | None = None
         self.rejected_measurements = 0
         self.first_trustworthy_candidate_time_s: float | None = None
+        self.current_episode_index = 0
+        self.episode_boundaries: list[dict[str, Any]] = [
+            {"episode_index": 0, "session_start_time_s": 0.0}
+        ]
+
+    def begin_episode(self, episode_index: int, session_start_time_s: float) -> None:
+        """Declare a physical reset without resetting session-level trust.
+
+        Measurement timestamps remain globally monotonic.  The episode label is
+        carried into every regression record so no integration or dynamics
+        window can bridge the physical reset.
+        """
+
+        index = int(episode_index)
+        start = float(session_start_time_s)
+        if index < 0 or not np.isfinite(start):
+            raise ValueError("episode index/time must be finite and nonnegative")
+        if self.episode_boundaries and index <= int(
+            self.episode_boundaries[-1]["episode_index"]
+        ):
+            if not (
+                len(self.episode_boundaries) == 1
+                and index == 0
+                and not self.raw_history
+            ):
+                raise ValueError("episode indices must increase strictly")
+            self.episode_boundaries[0] = {
+                "episode_index": 0,
+                "session_start_time_s": start,
+            }
+        else:
+            self.episode_boundaries.append(
+                {"episode_index": index, "session_start_time_s": start}
+            )
+        if self.last_sample_time_s is not None and start <= self.last_sample_time_s:
+            raise ValueError("new episode session time must follow prior samples")
+        self.current_episode_index = index
 
     @property
     def retained_model(self) -> BaseParameterHumanModel:
@@ -490,6 +540,7 @@ class ReducedShadowHumanIdentificationService:
                 ),
                 "source_index": len(self.raw_history),
                 "task_phase": str(measurement.task_phase),
+                "episode_index": self.current_episode_index,
             }
         )
         validation = self._resolve_challenger(float(measurement.sample_time_s))
@@ -558,7 +609,7 @@ class ReducedShadowHumanIdentificationService:
         record = self.active_challenger
         if record is None or now_s < record["minimum_validation_ready_time_s"] - 1.0e-12:
             return None
-        blocks = _validation_blocks(
+        blocks = _session_validation_blocks(
             self.raw_history,
             fit_end_time_s=float(record["fit_end_time_s"]),
             window_s=self.config.identifier.integration_window_s,
@@ -589,6 +640,9 @@ class ReducedShadowHumanIdentificationService:
                     "validation_windows": [
                         [float(block["start_time_s"]), float(block["end_time_s"])]
                         for block in selected
+                    ],
+                    "validation_episode_indices": [
+                        int(block.get("episode_index", 0)) for block in selected
                     ],
                 }
             )
@@ -682,10 +736,81 @@ class ReducedShadowHumanIdentificationService:
             "retained_model": self.publication.to_dict(),
             "publication_history": list(self.publication_history),
             "attempts": list(self.attempts),
+            "episode_boundaries": list(self.episode_boundaries),
+            "episode_count": len(self.episode_boundaries),
+            "reset_boundary_windows_forbidden": True,
             "shadow_only": True,
             "control_model_changed": False,
             "truth_available_to_service": False,
         }
+
+
+def _session_validation_blocks(
+    raw_history: list[dict[str, Any]],
+    *,
+    fit_end_time_s: float,
+    window_s: float,
+    embargo_windows: int,
+    count: int,
+) -> list[dict[str, Any]]:
+    """Build causal future blocks wholly inside individual episodes."""
+
+    earliest = float(fit_end_time_s + embargo_windows * window_s)
+    blocks: list[dict[str, Any]] = []
+    episode_indices = sorted(
+        {int(item.get("episode_index", 0)) for item in raw_history}
+    )
+    for episode_index in episode_indices:
+        episode = [
+            item
+            for item in raw_history
+            if int(item.get("episode_index", 0)) == episode_index
+            and float(item["time_s"]) >= earliest - 1.0e-12
+        ]
+        if not episode:
+            continue
+        episode_start = float(episode[0]["time_s"])
+        episode_end = float(episode[-1]["time_s"])
+        block_start = max(earliest, episode_start)
+        while block_start + window_s <= episode_end + 1.0e-12:
+            block_end = block_start + window_s
+            segment = [
+                item
+                for item in episode
+                if float(item["time_s"]) >= block_start - 1.0e-12
+                and float(item["time_s"]) <= block_end + 1.0e-12
+            ]
+            block_start = block_end
+            if (
+                len(segment) < 3
+                or float(segment[-1]["time_s"])
+                - float(segment[0]["time_s"])
+                < 0.90 * window_s
+                or any(bool(item["contaminated"]) for item in segment)
+            ):
+                continue
+            time = np.asarray([item["time_s"] for item in segment], dtype=float)
+            state = np.asarray([item["state"] for item in segment], dtype=float)
+            torque = np.asarray(
+                [item["generalized_input_nm"] for item in segment], dtype=float
+            )
+            regressor, target = integral_regression_block(time, state, torque)
+            blocks.append(
+                {
+                    "index": len(blocks),
+                    "episode_index": episode_index,
+                    "start_time_s": float(time[0]),
+                    "end_time_s": float(time[-1]),
+                    "regressor": regressor,
+                    "target": target,
+                    "source_indices": [
+                        int(item["source_index"]) for item in segment
+                    ],
+                }
+            )
+            if len(blocks) >= count:
+                return blocks
+    return blocks
 
 
 __all__ = [

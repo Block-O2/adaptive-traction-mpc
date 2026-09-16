@@ -1,0 +1,86 @@
+{
+  "schema": "stage5_human_id_confidence_pacing_v1_compact_summary",
+  "evidence_category": "small_multi_repetition_feasibility_study",
+  "decision": "P-B",
+  "decision_label": "PACING HELPS, TRUST STILL TOO SLOW",
+  "old_single_episode_decision_preserved": "R-C",
+  "checkpoint_commit": "b621e0c",
+  "controller_human_model": "fixed_nominal",
+  "shadow_model_applied_to_control": false,
+  "truth_used_online": false,
+  "gamma": {
+    "minimum": 0.5,
+    "nominal": 1.0,
+    "observed_all_cases": 0.5,
+    "planning_velocity_ceiling_deg_s": [7.5, 12.5],
+    "base_planning_velocity_ceiling_deg_s": [15.0, 25.0],
+    "support_scaled": false,
+    "hold_scaled": false,
+    "hard_limits_scaled": false
+  },
+  "cases": [
+    {
+      "name": "nominal",
+      "episode_statuses": ["COMPLETE"],
+      "episode_durations_s": [8.3],
+      "clean_blocks_per_episode": [162],
+      "first_fit_session_time_s": 1.245,
+      "first_publication_repetition": 1,
+      "retained_shadow_scales": [1.00008852, 0.99996303, 1.00078938],
+      "attempt_status_counts": {"published": 1, "rejected": 2, "pending": 1},
+      "wall_time_s": 48.764
+    },
+    {
+      "name": "mass_plus_8pct",
+      "episode_statuses": ["ABORTED", "ABORTED"],
+      "abort_reason": "TASK_ACCELERATION_LIMIT",
+      "episode_durations_s": [0.32, 0.32],
+      "clean_blocks_per_episode": [0, 0],
+      "first_fit_session_time_s": null,
+      "first_publication_repetition": null,
+      "retained_shadow_scales": [1.0, 1.0, 1.0],
+      "wall_time_s": 4.077
+    },
+    {
+      "name": "stiffness_plus_15pct",
+      "episode_statuses": ["ABORTED"],
+      "abort_reason": "TASK_ACCELERATION_LIMIT",
+      "episode_durations_s": [4.1],
+      "clean_blocks_per_episode": [78],
+      "first_fit_session_time_s": 1.245,
+      "first_publication_repetition": 1,
+      "first_raw_candidate_scales": [1.000758, 1.146591, 1.012167],
+      "retained_shadow_scales": [1.00007579, 1.01465914, 1.00121666],
+      "attempt_status_counts": {"published": 1, "pending": 1},
+      "wall_time_s": 25.385
+    },
+    {
+      "name": "damping_plus_20pct",
+      "episode_statuses": ["COMPLETE"],
+      "episode_durations_s": [8.86],
+      "clean_blocks_per_episode": [173],
+      "first_fit_session_time_s": 1.245,
+      "first_publication_repetition": 1,
+      "first_raw_candidate_scales": [1.000584, 1.010425, 1.19348],
+      "retained_shadow_scales": [1.00010038, 1.00086415, 1.03939828],
+      "attempt_status_counts": {"published": 2, "rejected": 1, "pending": 1},
+      "wall_time_s": 52.442
+    },
+    {
+      "name": "mixed_effective_scales",
+      "episode_statuses": ["ABORTED", "ABORTED"],
+      "abort_reason": "TASK_ACCELERATION_LIMIT",
+      "episode_durations_s": [0.505, 0.505],
+      "clean_blocks_per_episode": [0, 0],
+      "first_fit_session_time_s": null,
+      "first_publication_repetition": null,
+      "retained_shadow_scales": [1.0, 1.0, 1.0],
+      "wall_time_s": 6.621
+    }
+  ],
+  "cross_episode_publication_observed": false,
+  "closed_loop_ab_preregistered": false,
+  "closed_loop_ab_run": false,
+  "interface_identification_active": false,
+  "value_or_rl_learning_active": false
+}
