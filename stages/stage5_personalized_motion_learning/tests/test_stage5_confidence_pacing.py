@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from traction_mpc_stage4.confidence_execution import ConfidenceAwareExecutionConfig
 from traction_mpc_stage5.confidence_pacing import (
@@ -118,3 +119,80 @@ def test_gamma_semantics_do_not_scale_support_hold_or_hard_limits() -> None:
     assert status["support_scaled"] is False
     assert status["hold_equilibrium_scaled"] is False
     assert status["hard_motion_limits_scaled"] is False
+
+
+def test_explicit_current_model_support_can_recover_gamma_after_filter_and_ramp() -> None:
+    pacing = Stage5ConfidencePacing()
+    rejected_status = Stage5PacingEvidence(
+        session_time_s=1.0,
+        identification_informative=True,
+        information_rank=3,
+        information_condition_number=1.5,
+        current_nominal_model_adequate=True,
+        current_model_evidence_reason="independent_future_support",
+        challenger_status="rejected_no_future_support",
+        shadow_publication_count=0,
+    )
+    pacing.update(rejected_status)
+    pacing.update(
+        Stage5PacingEvidence(
+            **{
+                **rejected_status.__dict__,
+                "session_time_s": 2.0,
+            }
+        )
+    )
+    assert pacing.status(2.0)["execution_confidence_high"] is True
+    assert pacing.status(2.4)["gamma"] == 0.6
+    assert pacing.status(4.0)["gamma"] == 1.0
+
+
+def test_information_quality_remains_separate_from_current_model_trust() -> None:
+    pacing = Stage5ConfidencePacing()
+    pacing.update(
+        Stage5PacingEvidence(
+            session_time_s=3.0,
+            identification_informative=False,
+            information_rank=0,
+            information_condition_number=float("inf"),
+            current_nominal_model_adequate=True,
+            current_model_evidence_reason="independent_future_support",
+            challenger_status="none",
+            shadow_publication_count=0,
+        )
+    )
+    assert pacing.filtered_current_model_confidence > 0.0
+    assert pacing.evidence_history[-1]["information_affects_gamma"] is False
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "diagnostic wiring gap: the stateless shadow-service adapter does not "
+        "persist prior current-model support through a later inconclusive rejection"
+    ),
+)
+def test_inconclusive_rejection_does_not_erase_prior_current_model_support() -> None:
+    supported, _ = current_nominal_model_trust_from_shadow_service(
+        {
+            "attempts": [
+                {
+                    "status": "rejected_no_future_support",
+                    "evidence_history": [
+                        {
+                            "statistically_worse_than_at_least_one_reference": True
+                        }
+                    ],
+                },
+                {
+                    "status": "rejected_no_future_support",
+                    "evidence_history": [
+                        {
+                            "statistically_worse_than_at_least_one_reference": False
+                        }
+                    ],
+                },
+            ]
+        }
+    )
+    assert supported is True

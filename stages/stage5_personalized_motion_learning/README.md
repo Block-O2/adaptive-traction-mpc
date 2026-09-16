@@ -32,6 +32,15 @@ the mixed mismatch still repeatedly abort at minimum pacing before collecting
 clean fit blocks. All Goal-MPC episodes continue to use the fixed nominal Human
 model. See `docs/HUMAN_ID_CONFIDENCE_PACING_V1.md` and its compact JSON summary.
 
+A subsequent saved-trace-only signal-authority audit leaves the acceleration
+monitor **A-MONITOR-UNRESOLVED**: 20 ms estimated-velocity history removes the
+known Human-ID conservative aborts and detects the retained `Kt x0.7` event,
+but misses the separate early 5 ms physical-transient stress event. The gamma
+outcomes themselves are evidence-consistent, while a non-exercised
+current-model-trust persistence edge case is classified
+**P-TRUST-WIRING-GAP**. No monitor or pacing behavior is changed. See
+`docs/ACCELERATION_PACING_SIGNAL_AUTHORITY_AUDIT.md`.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the
