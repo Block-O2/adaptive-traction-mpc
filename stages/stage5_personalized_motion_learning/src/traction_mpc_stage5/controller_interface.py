@@ -27,6 +27,12 @@ from .config import STAGE5_ROOT
 from .task_observation import ControllerTaskObservation, make_task_observation
 
 
+try:  # Optional exact compiled backend; the NumPy reference remains complete.
+    from . import _prefix_native
+except ImportError:  # pragma: no cover - exercised by source-only fallback tests
+    _prefix_native = None
+
+
 CONTROLLER_INTERFACE_CONFIG_PATH = (
     STAGE5_ROOT / "configs" / "stage5_controller_nominal_interface_v1.json"
 )
@@ -702,6 +708,8 @@ class InterfaceAwareFirstActionBatchPreview:
         acceleration_limits_rad_s2: np.ndarray | None = None,
         use_optimized_prefix_numpy: bool = True,
         capture_prefix_diagnostics: bool = False,
+        prefix_backend: str = "numpy",
+        capture_prefix_substeps: bool = False,
     ) -> None:
         self.executable_preview = executable_preview
         self.predictor = predictor
@@ -780,9 +788,32 @@ class InterfaceAwareFirstActionBatchPreview:
         # equivalence tests. Production uses the batched NumPy refactor.
         self._use_optimized_prefix_numpy = bool(use_optimized_prefix_numpy)
         self._capture_prefix_diagnostics = bool(capture_prefix_diagnostics)
+        if prefix_backend not in {"numpy", "native", "auto"}:
+            raise ValueError("prefix_backend must be numpy, native, or auto")
+        self.prefix_backend_requested = prefix_backend
+        self.prefix_backend_resolved = (
+            "native"
+            if prefix_backend == "native"
+            or (prefix_backend == "auto" and _prefix_native is not None)
+            else "numpy"
+        )
+        if self.prefix_backend_resolved == "native" and _prefix_native is None:
+            raise RuntimeError(
+                "native prefix backend requested but the extension is unavailable"
+            )
+        self._capture_prefix_substeps = bool(capture_prefix_substeps)
+        self.last_prefix_substep_traces: list[np.ndarray] = []
         self._prefix_numpy_dynamics_available = bool(
             hasattr(human_model, "beta") and hasattr(human_model, "rom_human")
         )
+        if self.prefix_backend_resolved == "native" and (
+            not self._prefix_numpy_dynamics_available
+            or not self._use_optimized_prefix_numpy
+        ):
+            raise RuntimeError(
+                "native prefix backend requires the Stage-5 beta/ROM model and "
+                "optimized NumPy semantics"
+            )
         if self._prefix_numpy_dynamics_available:
             self._prefix_beta = np.asarray(human_model.beta, dtype=float)
             rom = human_model.rom_human
@@ -796,10 +827,47 @@ class InterfaceAwareFirstActionBatchPreview:
                 - rom.soft_limit_margin_rad
                 + rom.soft_limit_numerical_tolerance_rad
             )
+            interface = predictor.parameters
+            geometry = human_model.geometry
+            self._prefix_native_constants = np.ascontiguousarray(
+                np.concatenate(
+                    [
+                        np.asarray(interface.translation_stiffness_n_m),
+                        np.asarray(interface.translation_damping_ns_m),
+                        np.asarray(interface.translation_effective_mass_kg),
+                        np.asarray(interface.rest_translation_human_m),
+                        np.asarray(interface.rest_rotation_rotvec_human_rad),
+                        self._prefix_beta,
+                        self._prefix_soft_lower_rad,
+                        self._prefix_soft_upper_rad,
+                        np.asarray(geometry.plane_x_world),
+                        np.asarray(geometry.plane_z_world),
+                        np.asarray(geometry.joint_axis_world),
+                        np.asarray(
+                            [
+                                interface.rotation_stiffness_nm_rad,
+                                interface.rotation_damping_nms_rad,
+                                interface.rotation_effective_inertia_kg_m2,
+                                rom.soft_limit_margin_rad,
+                                rom.soft_limit_boundary_torque_nm,
+                                rom.soft_limit_damping_nms_rad,
+                                geometry.thigh_length_m,
+                                geometry.cuff_distance_m,
+                                geometry.cuff_offset_rad,
+                                interface.prediction_substep_s,
+                            ]
+                        ),
+                    ]
+                ),
+                dtype=np.float64,
+            )
+            if self._prefix_native_constants.shape != (49,):
+                raise RuntimeError("native prefix constant layout is inconsistent")
         else:
             self._prefix_beta = None
             self._prefix_soft_lower_rad = None
             self._prefix_soft_upper_rad = None
+            self._prefix_native_constants = None
 
     @property
     def last_prediction(self) -> InterfaceHoldPredictionBatch | None:
@@ -1094,6 +1162,185 @@ class InterfaceAwareFirstActionBatchPreview:
         )
         return jacobian, rotation
 
+    def _propagate_prefix_segment_numpy(
+        self,
+        *,
+        states: np.ndarray,
+        x: np.ndarray,
+        u: np.ndarray,
+        theta: np.ndarray,
+        omega: np.ndarray,
+        rotation: np.ndarray,
+        jacobian: np.ndarray,
+        drive_world: np.ndarray,
+        angular_drive_world: np.ndarray,
+        substeps: int,
+        region_timing: dict[str, float],
+        profile: bool,
+    ) -> tuple[
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray | None,
+    ]:
+        """Readable exact reference for one 5 ms physical prefix segment."""
+
+        p = self.predictor.parameters
+        k = np.asarray(p.translation_stiffness_n_m)
+        d = np.asarray(p.translation_damping_ns_m)
+        mass = np.asarray(p.translation_effective_mass_kg)
+        kr = np.full(3, p.rotation_stiffness_nm_rad)
+        dr = np.full(3, p.rotation_damping_nms_rad)
+        inertia = np.full(3, p.rotation_effective_inertia_kg_m2)
+        rest_x = np.asarray(p.rest_translation_human_m)
+        rest_theta = np.asarray(p.rest_rotation_rotvec_human_rad)
+        dt = p.prediction_substep_s
+        geometry_batch = (
+            self._prefix_geometry_batch
+            if self._use_optimized_prefix_numpy
+            else lambda q: self._geometry_batch(q, self.human_model.geometry)
+        )
+        trace = (
+            np.empty((substeps, len(states), 22), dtype=float)
+            if self._capture_prefix_substeps
+            else None
+        )
+        for substep in range(substeps):
+            section_start = perf_counter() if profile else 0.0
+            drive_human = np.einsum("nji,nj->ni", rotation, drive_world)
+            angular_drive_human = np.einsum(
+                "nji,nj->ni", rotation, angular_drive_world
+            )
+            if profile:
+                region_timing["drive_frame_transforms"] += (
+                    perf_counter() - section_start
+                )
+                section_start = perf_counter()
+            translation_acceleration = (
+                drive_human - k * (x - rest_x) - d * u
+            ) / mass
+            u = u + dt * translation_acceleration
+            x = x + dt * u
+            rotation_acceleration = (
+                angular_drive_human
+                - kr * (theta - rest_theta)
+                - dr * omega
+            ) / inertia
+            omega = omega + dt * rotation_acceleration
+            theta = theta + dt * omega
+            force_human = k * (x - rest_x) + d * u
+            couple_human = kr * (theta - rest_theta) + dr * omega
+            moment_human = couple_human + np.cross(x + rest_x, force_human)
+            force_world = np.einsum("nij,nj->ni", rotation, force_human)
+            moment_world = np.einsum("nij,nj->ni", rotation, moment_human)
+            force_tau = np.einsum("nki,nk->ni", jacobian, force_world)
+            moment_axis = moment_world @ self._prefix_joint_axis_world
+            if self._use_optimized_prefix_numpy:
+                transmitted_action = force_tau.copy()
+                transmitted_action[:, 0] -= moment_axis
+                transmitted_action[:, 1] += moment_axis
+            else:
+                transmitted_action = force_tau + np.column_stack(
+                    [-moment_axis, moment_axis]
+                )
+            if profile:
+                region_timing["interface_state_and_wrench"] += (
+                    perf_counter() - section_start
+                )
+                section_start = perf_counter()
+            states = self._batched_human_step_at_dt(states, transmitted_action, dt)
+            if profile:
+                region_timing["human_forward_dynamics"] += (
+                    perf_counter() - section_start
+                )
+                section_start = perf_counter()
+            next_jacobian, next_rotation = geometry_batch(states[:, :2])
+            frame_change = np.einsum("nji,njk->nik", next_rotation, rotation)
+            x = np.einsum("nij,nj->ni", frame_change, x + rest_x) - rest_x
+            u = np.einsum("nij,nj->ni", frame_change, u)
+            theta = (
+                np.einsum("nij,nj->ni", frame_change, theta + rest_theta)
+                - rest_theta
+            )
+            omega = np.einsum("nij,nj->ni", frame_change, omega)
+            rotation = next_rotation
+            jacobian = next_jacobian
+            if trace is not None:
+                trace[substep, :, 0:4] = states
+                trace[substep, :, 4:7] = x
+                trace[substep, :, 7:10] = u
+                trace[substep, :, 10:13] = theta
+                trace[substep, :, 13:16] = omega
+                trace[substep, :, 16:19] = force_world
+                trace[substep, :, 19:22] = moment_world
+            if profile:
+                region_timing["geometry_and_frame_update"] += (
+                    perf_counter() - section_start
+                )
+        return states, x, u, theta, omega, rotation, jacobian, trace
+
+    def _propagate_prefix_segment_native(
+        self,
+        *,
+        states: np.ndarray,
+        x: np.ndarray,
+        u: np.ndarray,
+        theta: np.ndarray,
+        omega: np.ndarray,
+        rotation: np.ndarray,
+        jacobian: np.ndarray,
+        drive_world: np.ndarray,
+        angular_drive_world: np.ndarray,
+        substeps: int,
+    ) -> tuple[
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray | None,
+    ]:
+        """Run the same segment recurrence in one compiled batch call."""
+
+        if _prefix_native is None or self._prefix_native_constants is None:
+            raise RuntimeError("native prefix backend is unavailable")
+        arrays = (states, x, u, theta, omega, rotation, jacobian)
+        if not all(
+            value.dtype == np.float64 and value.flags.c_contiguous
+            for value in arrays
+        ):
+            raise ValueError("native prefix state arrays must be C-contiguous float64")
+        drive = np.ascontiguousarray(drive_world, dtype=np.float64)
+        angular_drive = np.ascontiguousarray(
+            angular_drive_world, dtype=np.float64
+        )
+        trace = (
+            np.empty((substeps, len(states), 22), dtype=np.float64)
+            if self._capture_prefix_substeps
+            else None
+        )
+        _prefix_native.propagate_segment(
+            states,
+            x,
+            u,
+            theta,
+            omega,
+            rotation,
+            jacobian,
+            drive,
+            angular_drive,
+            self._prefix_native_constants,
+            substeps,
+            trace,
+        )
+        return states, x, u, theta, omega, rotation, jacobian, trace
+
     def _apply_v2_prefix_acceleration_screen(
         self,
         actions_nm: np.ndarray,
@@ -1117,6 +1364,7 @@ class InterfaceAwareFirstActionBatchPreview:
             "interface_state_and_wrench": 0.0,
             "human_forward_dynamics": 0.0,
             "geometry_and_frame_update": 0.0,
+            "native_prefix_recurrence": 0.0,
             "support_and_allocation_refresh": 0.0,
             "loaded_command_refresh": 0.0,
             "acceleration_and_feasibility": 0.0,
@@ -1182,14 +1430,6 @@ class InterfaceAwareFirstActionBatchPreview:
                 perf_counter() - section_start
             )
             setup_start = perf_counter()
-        k = np.asarray(p.translation_stiffness_n_m)
-        d = np.asarray(p.translation_damping_ns_m)
-        mass = np.asarray(p.translation_effective_mass_kg)
-        kr = np.full(3, p.rotation_stiffness_nm_rad)
-        dr = np.full(3, p.rotation_damping_nms_rad)
-        inertia = np.full(3, p.rotation_effective_inertia_kg_m2)
-        rest_x = np.asarray(p.rest_translation_human_m)
-        rest_theta = np.asarray(p.rest_rotation_rotvec_human_rad)
         prefix_states = np.empty((count, prefix_count, 4), dtype=float)
         prefix_x = (
             np.empty((count, prefix_count, 3), dtype=float)
@@ -1216,79 +1456,45 @@ class InterfaceAwareFirstActionBatchPreview:
         del rotation_from_q
         if profile:
             region_timing["state_copy_and_setup"] += perf_counter() - setup_start
+        self.last_prefix_substep_traces = []
         for segment in range(prefix_count):
             drive_world += command[:, :3] - previous_command[:, :3]
             angular_drive_world += command[:, 3:] - previous_command[:, 3:]
             # Couple the existing 0.25 ms semi-implicit interface recurrence to
             # the fixed Human model.  This avoids compressing a fast startup
             # transient into one 5 ms mean-wrench Human step.
-            physical_dt_s = p.prediction_substep_s
-            for _ in range(substeps):
-                section_start = perf_counter() if profile else 0.0
-                drive_human = np.einsum("nji,nj->ni", rotation, drive_world)
-                angular_drive_human = np.einsum(
-                    "nji,nj->ni", rotation, angular_drive_world
+            section_start = perf_counter() if profile else 0.0
+            propagate = (
+                self._propagate_prefix_segment_native
+                if self.prefix_backend_resolved == "native"
+                else self._propagate_prefix_segment_numpy
+            )
+            propagated = propagate(
+                states=states,
+                x=x,
+                u=u,
+                theta=theta,
+                omega=omega,
+                rotation=rotation,
+                jacobian=jacobian,
+                drive_world=drive_world,
+                angular_drive_world=angular_drive_world,
+                substeps=substeps,
+                **(
+                    {}
+                    if self.prefix_backend_resolved == "native"
+                    else {"region_timing": region_timing, "profile": profile}
+                ),
+            )
+            states, x, u, theta, omega, rotation, jacobian, substep_trace = (
+                propagated
+            )
+            if substep_trace is not None:
+                self.last_prefix_substep_traces.append(substep_trace)
+            if profile and self.prefix_backend_resolved == "native":
+                region_timing["native_prefix_recurrence"] += (
+                    perf_counter() - section_start
                 )
-                if profile:
-                    region_timing["drive_frame_transforms"] += (
-                        perf_counter() - section_start
-                    )
-                    section_start = perf_counter()
-                translation_acceleration = (
-                    drive_human - k * (x - rest_x) - d * u
-                ) / mass
-                u = u + physical_dt_s * translation_acceleration
-                x = x + physical_dt_s * u
-                rotation_acceleration = (
-                    angular_drive_human
-                    - kr * (theta - rest_theta)
-                    - dr * omega
-                ) / inertia
-                omega = omega + physical_dt_s * rotation_acceleration
-                theta = theta + physical_dt_s * omega
-                force_human = k * (x - rest_x) + d * u
-                couple_human = kr * (theta - rest_theta) + dr * omega
-                moment_human = couple_human + np.cross(x + rest_x, force_human)
-                force_world = np.einsum("nij,nj->ni", rotation, force_human)
-                moment_world = np.einsum("nij,nj->ni", rotation, moment_human)
-                force_tau = np.einsum("nki,nk->ni", jacobian, force_world)
-                moment_axis = moment_world @ self._prefix_joint_axis_world
-                if self._use_optimized_prefix_numpy:
-                    transmitted_action = force_tau.copy()
-                    transmitted_action[:, 0] -= moment_axis
-                    transmitted_action[:, 1] += moment_axis
-                else:
-                    transmitted_action = force_tau + np.column_stack(
-                        [-moment_axis, moment_axis]
-                    )
-                if profile:
-                    region_timing["interface_state_and_wrench"] += (
-                        perf_counter() - section_start
-                    )
-                    section_start = perf_counter()
-                states = self._batched_human_step_at_dt(
-                    states, transmitted_action, physical_dt_s
-                )
-                if profile:
-                    region_timing["human_forward_dynamics"] += (
-                        perf_counter() - section_start
-                    )
-                    section_start = perf_counter()
-                next_jacobian, next_rotation = geometry_batch(states[:, :2])
-                frame_change = np.einsum("nji,njk->nik", next_rotation, rotation)
-                x = np.einsum("nij,nj->ni", frame_change, x + rest_x) - rest_x
-                u = np.einsum("nij,nj->ni", frame_change, u)
-                theta = (
-                    np.einsum("nij,nj->ni", frame_change, theta + rest_theta)
-                    - rest_theta
-                )
-                omega = np.einsum("nij,nj->ni", frame_change, omega)
-                rotation = next_rotation
-                jacobian = next_jacobian
-                if profile:
-                    region_timing["geometry_and_frame_update"] += (
-                        perf_counter() - section_start
-                    )
             prefix_states[:, segment] = states
             if prefix_x is not None:
                 assert prefix_u is not None
@@ -1870,6 +2076,8 @@ def make_interface_aware_first_action_batch_preview(
     acceleration_limits_rad_s2: np.ndarray | None = None,
     use_optimized_prefix_numpy: bool = True,
     capture_prefix_diagnostics: bool = False,
+    prefix_backend: str = "numpy",
+    capture_prefix_substeps: bool = False,
 ) -> InterfaceAwareFirstActionBatchPreview:
     """Compose one batched executable-command and physical-interface screen."""
 
@@ -1884,6 +2092,8 @@ def make_interface_aware_first_action_batch_preview(
         acceleration_limits_rad_s2=acceleration_limits_rad_s2,
         use_optimized_prefix_numpy=use_optimized_prefix_numpy,
         capture_prefix_diagnostics=capture_prefix_diagnostics,
+        prefix_backend=prefix_backend,
+        capture_prefix_substeps=capture_prefix_substeps,
     )
 
 

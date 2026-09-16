@@ -83,14 +83,23 @@ def environment_record() -> dict[str, Any]:
 
 
 def build_preview(
-    snapshot: dict[str, Any], mode: str, *, capture_prefix_diagnostics: bool = False
+    snapshot: dict[str, Any],
+    mode: str,
+    *,
+    capture_prefix_diagnostics: bool = False,
+    capture_prefix_substeps: bool = False,
 ) -> Any:
     common = {
         "q_rad": snapshot["observation"].as_array()[:2],
         "human_model": snapshot["human_model"],
         "cuff_allocator": snapshot["mpc"].cuff_allocator,
     }
-    if mode in ("v2_prefix", "v2_prefix_uncached", "v2_prefix_reference"):
+    if mode in (
+        "v2_prefix",
+        "v2_prefix_native",
+        "v2_prefix_uncached",
+        "v2_prefix_reference",
+    ):
         common.update(
             {
                 "state_rad_rad_s": snapshot["observation"].as_array(),
@@ -108,6 +117,8 @@ def build_preview(
         snapshot["interface_state"],
         **common,
         capture_prefix_diagnostics=capture_prefix_diagnostics,
+        capture_prefix_substeps=capture_prefix_substeps,
+        prefix_backend="native" if mode == "v2_prefix_native" else "numpy",
     )
     if mode == "v2_prefix_uncached":
         preview._reuse_cached_subsets = False
@@ -122,12 +133,16 @@ def one_solve(
     mode: str,
     *,
     capture_prefix_diagnostics: bool = False,
+    capture_prefix_substeps: bool = False,
 ):
     mpc = snapshot["mpc"]
     mpc.__dict__.clear()
     mpc.__dict__.update(deepcopy(mpc_snapshot))
     preview = build_preview(
-        snapshot, mode, capture_prefix_diagnostics=capture_prefix_diagnostics
+        snapshot,
+        mode,
+        capture_prefix_diagnostics=capture_prefix_diagnostics,
+        capture_prefix_substeps=capture_prefix_substeps,
     )
     process_start = time.process_time_ns()
     wall_start = time.perf_counter_ns()
@@ -370,6 +385,7 @@ def main() -> None:
         "--mode",
         choices=(
             "v2_prefix",
+            "v2_prefix_native",
             "v2_prefix_reference",
             "v2_prefix_uncached",
             "legacy_full20",

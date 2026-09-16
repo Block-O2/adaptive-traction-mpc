@@ -129,6 +129,17 @@ every 20 ms deadline, so the
 decision is **IMP-B — MAJOR IMPROVEMENT, STILL ABOVE 20 MS**, not real-time
 readiness.  See `docs/PREFIX_SCREEN_RUNTIME_FLOOR_V1.md`.
 
+The final implementation-level runtime feasibility check adds an optional
+setuptools-built C backend for only the exact 0.25 ms prefix recurrence; the
+NumPy implementation remains the readable default/reference backend.  With
+unchanged equations and decisions, the native path measured about 3.32--3.37
+ms prefix mean and 18.93--19.02 ms total mean, with 19.29/19.34 ms fixed-snapshot
+p95 on nominal/theta5.  A paired complete episode remained trace-equivalent and
+measured 19.57 ms p95, but had 3/219 deadline misses and therefore is not a WCET
+claim.  Decision: **NAT-A — SAME SEMANTICS REAL-TIME BUDGET MET** under the
+registered representative-p95 criterion.  See
+`docs/NATIVE_PREFIX_RUNTIME_V1.md`.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the

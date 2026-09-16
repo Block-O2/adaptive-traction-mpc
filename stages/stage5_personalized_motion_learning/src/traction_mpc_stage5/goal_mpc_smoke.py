@@ -268,6 +268,7 @@ def run_goal_mpc_smoke(
     initial_control_human_model: Any | None = None,
     initial_control_human_model_version: str | None = None,
     use_optimized_prefix_numpy: bool = True,
+    prefix_backend: str = "numpy",
 ) -> dict[str, Any]:
     """Run one explicitly engineering-only low/moderate Goal-MPC v1.1 episode."""
 
@@ -1239,6 +1240,7 @@ def run_goal_mpc_smoke(
                     )
                 ),
                 use_optimized_prefix_numpy=use_optimized_prefix_numpy,
+                prefix_backend=prefix_backend,
             )
             solve_initial_drive, solve_initial_angular_drive = (
                 screening_interface_predictor.inferred_base_drive_human(
