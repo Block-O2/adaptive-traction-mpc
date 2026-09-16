@@ -265,6 +265,8 @@ def run_goal_mpc_smoke(
     | None = None,
     control_human_model_callback: Callable[[dict[str, Any]], dict[str, Any]]
     | None = None,
+    initial_control_human_model: Any | None = None,
+    initial_control_human_model_version: str | None = None,
 ) -> dict[str, Any]:
     """Run one explicitly engineering-only low/moderate Goal-MPC v1.1 episode."""
 
@@ -274,10 +276,26 @@ def run_goal_mpc_smoke(
     output_dir.mkdir(parents=True, exist_ok=True)
     if maximum_duration_s <= 0.0 or not np.isfinite(maximum_duration_s):
         raise ValueError("maximum_duration_s must be finite and positive")
+    if (initial_control_human_model is None) != (
+        initial_control_human_model_version is None
+    ):
+        raise ValueError(
+            "initial control Human model and version must be provided together"
+        )
+    if initial_control_human_model_version is not None:
+        if not str(initial_control_human_model_version):
+            raise ValueError("initial control Human-model version must be explicit")
+        minimum_eigenvalue = float(
+            initial_control_human_model.minimum_mass_matrix_eigenvalue()
+        )
+        if not np.isfinite(minimum_eigenvalue) or minimum_eigenvalue <= 1.0e-6:
+            raise ValueError("initial control Human model is not positive definite")
 
     reusing_session = session_context is not None and bool(session_context)
     if reusing_session and control_human_model_callback is not None:
         raise ValueError("one-step Human-model transition forbids session reuse")
+    if reusing_session and initial_control_human_model is not None:
+        raise ValueError("explicit initial Human model forbids session reuse")
     if reusing_session:
         if interface_uncertainty_spec is not None:
             raise ValueError("repeatability session forbids uncertainty-bank authority")
@@ -347,8 +365,17 @@ def run_goal_mpc_smoke(
         )
         _estimator_observe(estimator, estimator_measurement)
         estimation_model = estimator.model
-        current_model = estimation_model
+        current_model = (
+            estimation_model
+            if initial_control_human_model is None
+            else initial_control_human_model
+        )
         cuff_allocator = default_engineering_cuff_allocator()
+    current_control_model_version = (
+        FIXED_HUMAN_MODEL_VERSION
+        if initial_control_human_model_version is None
+        else str(initial_control_human_model_version)
+    )
     initialization_interface = CONTROLLER_NOMINAL_INTERFACE
     if not reusing_session and initialize_loaded_equilibrium_with_plant_truth:
         # Evaluation-fixture setup only: hold Human q/dq and the required static
@@ -403,7 +430,11 @@ def run_goal_mpc_smoke(
         estimator_measurement = estimator_layer.current
         _estimator_observe(estimator, estimator_measurement)
         estimation_model = estimator.model
-        current_model = estimation_model
+        current_model = (
+            estimation_model
+            if initial_control_human_model is None
+            else initial_control_human_model
+        )
         interface_observer = (
             InterfaceAwareHumanStateObserver()
             if interface_uncertainty_spec is None
@@ -614,7 +645,6 @@ def run_goal_mpc_smoke(
         )
     last_executable_command = initial_support_command
     episode_origin_time_s = float(truth.time_s)
-    current_control_model_version = FIXED_HUMAN_MODEL_VERSION
     model_transition_events: list[dict[str, Any]] = []
     pending_model_transition_event: dict[str, Any] | None = None
 

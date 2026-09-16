@@ -90,9 +90,22 @@ immutable theta-bound model identity, explicit prior/current/candidate roles,
 immediate-predecessor transition authority, repetition-boundary queuing,
 versioned lineage and a post-update POSITIVE/NEUTRAL/NEGATIVE gate.  Decision:
 **PA-A — PROGRESSIVE AUTHORITY READY** at the state-machine level only.  No
-progressive MuJoCo session has run, gamma remains 0.5, and this is not evidence
-of progressive personalization.  See
+progressive MuJoCo session had run at that checkpoint, gamma remained 0.5, and
+PA-A itself was not evidence of progressive personalization.  See
 `docs/PROGRESSIVE_HUMAN_MODEL_AUTHORITY_V1.md`.
+
+The first preregistered longitudinal A/B has now run from PA-A with five matched
+seeds per arm.  All ten episodes completed.  The progressive arm applied four
+repetition-boundary successors beyond theta_1; each newly active predecessor
+received genuinely later POSITIVE support before the following activation.
+Deployable-domain active-model loss decreased monotonically from
+`0.00038295` to `0.00021518 Nms^2`, while gamma stayed exactly 0.5 and no
+registered safety-chain event occurred.  Decision: **PP2-A — PROGRESSIVE
+PERSONALIZATION FEASIBLE**, limited to the damping +20% simulation condition
+and fixed nominal interface.  Goal-MPC still misses the 20 ms runtime target,
+and the acceleration monitor remains unresolved.  See
+`docs/PROGRESSIVE_PERSONALIZATION_LONGITUDINAL_V1.md` and its compact JSON
+summary.
 
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
