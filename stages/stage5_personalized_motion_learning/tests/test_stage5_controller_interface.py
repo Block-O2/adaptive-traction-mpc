@@ -240,7 +240,7 @@ def test_predictor_rejects_stale_explicit_state_instead_of_hidden_reinference() 
         predictor.predict_batch(newer, _batch(np.zeros((1, 3))))
 
 
-def test_selected_first_action_reuses_population_screen() -> None:
+def test_selected_or_reordered_subset_reuses_population_screen() -> None:
     state, interface, model = _registered_model_and_interface()
     allocator = default_engineering_cuff_allocator()
     calls = 0
@@ -260,16 +260,20 @@ def test_selected_first_action_reuses_population_screen() -> None:
     )
     actions = np.array([[0.0, 0.0], [1.0, -0.5], [-0.5, 1.0]])
     population = preview(actions)
-    selected = preview(actions[1:2])
+    selected = preview(actions[[2, 0]])
 
     assert calls == 1
     np.testing.assert_allclose(
         selected.predicted_mean_force_world_n,
-        population.predicted_mean_force_world_n[1:2],
+        population.predicted_mean_force_world_n[[2, 0]],
     )
     np.testing.assert_allclose(
         selected.command(0).wrench_total_world,
-        population.command(1).wrench_total_world,
+        population.command(2).wrench_total_world,
+    )
+    np.testing.assert_allclose(
+        selected.command(1).wrench_total_world,
+        population.command(0).wrench_total_world,
     )
 
 

@@ -179,6 +179,7 @@ class _SupportCenteredBatchPreview:
             batched_human_step,
             action_resolver=self.support_provider,
             future_command_resolver=self._future_command_wrench,
+            initial_support_nm=self.support_nm,
         )
 
     def _future_command_wrench(

@@ -750,6 +750,10 @@ class InterfaceAwareFirstActionBatchPreview:
         self._screen_cache: list[
             tuple[np.ndarray, InterfaceHoldPredictionBatch]
         ] = []
+        # Diagnostic override exists only so the runtime regression test can
+        # compare the former duplicate-subset path against the equivalent
+        # cached path.  Production always keeps reuse enabled.
+        self._reuse_cached_subsets = True
         self._prefix_support_provider: Callable[[np.ndarray], np.ndarray] | None = None
         self._prefix_human_continuous_dynamics: Callable[
             [np.ndarray, np.ndarray, Any], np.ndarray
@@ -783,8 +787,8 @@ class InterfaceAwareFirstActionBatchPreview:
         self._prefix_future_command_resolver = future_command_resolver
 
     @staticmethod
-    def _slice_executable_batch(
-        batch: ExecutableCommandBatchPreview, index: int
+    def _take_executable_batch(
+        batch: ExecutableCommandBatchPreview, indices: np.ndarray
     ) -> ExecutableCommandBatchPreview:
         candidate_fields = (
             "force_position_n",
@@ -807,7 +811,7 @@ class InterfaceAwareFirstActionBatchPreview:
             "joint_torque_command_nm",
         )
         values = {
-            name: np.asarray(getattr(batch, name))[index : index + 1].copy()
+            name: np.asarray(getattr(batch, name))[indices].copy()
             for name in candidate_fields
         }
         return ExecutableCommandBatchPreview(
@@ -817,34 +821,33 @@ class InterfaceAwareFirstActionBatchPreview:
         )
 
     @classmethod
-    def _slice_prediction(
-        cls, prediction: InterfaceHoldPredictionBatch, index: int
+    def _take_prediction(
+        cls, prediction: InterfaceHoldPredictionBatch, indices: np.ndarray
     ) -> InterfaceHoldPredictionBatch:
+        selected = np.asarray(indices, dtype=int)
+        if selected.ndim != 1:
+            raise ValueError("cached prediction indices must be one-dimensional")
         return InterfaceHoldPredictionBatch(
-            executable_batch=cls._slice_executable_batch(
-                prediction.executable_batch, index
+            executable_batch=cls._take_executable_batch(
+                prediction.executable_batch, selected
             ),
-            feasible=prediction.feasible[index : index + 1].copy(),
-            predicted_peak_force_n=prediction.predicted_peak_force_n[
-                index : index + 1
-            ].copy(),
+            feasible=prediction.feasible[selected].copy(),
+            predicted_peak_force_n=prediction.predicted_peak_force_n[selected].copy(),
             predicted_endpoint_force_world_n=(
-                prediction.predicted_endpoint_force_world_n[index : index + 1].copy()
+                prediction.predicted_endpoint_force_world_n[selected].copy()
             ),
             predicted_mean_force_world_n=(
-                prediction.predicted_mean_force_world_n[index : index + 1].copy()
+                prediction.predicted_mean_force_world_n[selected].copy()
             ),
-            predicted_peak_moment_nm=prediction.predicted_peak_moment_nm[
-                index : index + 1
-            ].copy(),
+            predicted_peak_moment_nm=prediction.predicted_peak_moment_nm[selected].copy(),
             predicted_endpoint_moment_world_nm=(
-                prediction.predicted_endpoint_moment_world_nm[index : index + 1].copy()
+                prediction.predicted_endpoint_moment_world_nm[selected].copy()
             ),
             predicted_mean_moment_world_nm=(
-                prediction.predicted_mean_moment_world_nm[index : index + 1].copy()
+                prediction.predicted_mean_moment_world_nm[selected].copy()
             ),
             margin_to_physical_force_gate_n=(
-                prediction.margin_to_physical_force_gate_n[index : index + 1].copy()
+                prediction.margin_to_physical_force_gate_n[selected].copy()
             ),
             acceleration_semantics_version=prediction.acceleration_semantics_version,
             prefix_times_s=(
@@ -855,32 +858,40 @@ class InterfaceAwareFirstActionBatchPreview:
             predicted_prefix_states_rad_rad_s=(
                 None
                 if prediction.predicted_prefix_states_rad_rad_s is None
-                else prediction.predicted_prefix_states_rad_rad_s[
-                    index : index + 1
-                ].copy()
+                else prediction.predicted_prefix_states_rad_rad_s[selected].copy()
             ),
             predicted_prefix_acceleration_rad_s2=(
                 None
                 if prediction.predicted_prefix_acceleration_rad_s2 is None
-                else prediction.predicted_prefix_acceleration_rad_s2[
-                    index : index + 1
-                ].copy()
+                else prediction.predicted_prefix_acceleration_rad_s2[selected].copy()
             ),
             prefix_acceleration_margin_rad_s2=(
                 None
                 if prediction.prefix_acceleration_margin_rad_s2 is None
-                else prediction.prefix_acceleration_margin_rad_s2[
-                    index : index + 1
-                ].copy()
+                else prediction.prefix_acceleration_margin_rad_s2[selected].copy()
             ),
             prefix_acceleration_feasible=(
                 None
                 if prediction.prefix_acceleration_feasible is None
-                else prediction.prefix_acceleration_feasible[
-                    index : index + 1
-                ].copy()
+                else prediction.prefix_acceleration_feasible[selected].copy()
             ),
         )
+
+    def _cached_prediction_for_actions(
+        self, actions: np.ndarray
+    ) -> InterfaceHoldPredictionBatch | None:
+        """Return an exact cached row/subset/reordering, never an approximation."""
+
+        for cached_actions, cached_prediction in reversed(self._screen_cache):
+            matches = np.all(
+                actions[:, None, :] == cached_actions[None, :, :], axis=2
+            )
+            if np.all(np.any(matches, axis=1)):
+                selected = np.argmax(matches, axis=1)
+                return self._take_prediction(
+                    cached_prediction, np.asarray(selected, dtype=int)
+                )
+        return None
 
     def _batched_human_step_at_dt(
         self, states: np.ndarray, actions_nm: np.ndarray, dt_s: float
@@ -1086,18 +1097,19 @@ class InterfaceAwareFirstActionBatchPreview:
     def __call__(self, actions_nm: np.ndarray) -> InterfaceHoldPredictionBatch:
         actions = np.asarray(actions_nm, dtype=float)
         # The inherited solver asks for the selected first action once more
-        # after CEM.  Reuse its exact result from either population instead of
-        # repeating executable-command and 20 ms interface propagation.
-        if actions.shape == (1, 2):
-            for cached_actions, cached_prediction in reversed(self._screen_cache):
-                matches = np.flatnonzero(np.all(cached_actions == actions[0], axis=1))
-                if len(matches):
-                    prediction = self._slice_prediction(
-                        cached_prediction, int(matches[0])
-                    )
-                    self._last_actions = actions.copy()
-                    self._last_prediction = prediction
-                    return prediction
+        # after CEM, and the full-horizon rollout asks for the already-screened
+        # feasible subset. Reuse exact cached rows instead of repeating loaded
+        # execution plus the 80-substep V2 prefix propagation.
+        allow_cached_subset = self._reuse_cached_subsets or len(actions) == 1
+        cached = (
+            self._cached_prediction_for_actions(actions)
+            if allow_cached_subset
+            else None
+        )
+        if cached is not None:
+            self._last_actions = actions.copy()
+            self._last_prediction = cached
+            return cached
         prediction = self.predictor.predict_batch(
             self.interface_state, self.executable_preview(actions)
         )
@@ -1293,6 +1305,7 @@ class InterfaceAwareFirstActionBatchPreview:
         *,
         action_resolver: Callable[[np.ndarray], np.ndarray] | None = None,
         future_command_resolver: Callable[..., np.ndarray] | None = None,
+        initial_support_nm: np.ndarray | None = None,
     ) -> InterfaceHorizonPredictionBatch:
         """Propagate nominal interface and transmitted wrench through all steps.
 
@@ -1326,7 +1339,13 @@ class InterfaceAwareFirstActionBatchPreview:
         first_support = None
         if action_resolver is not None:
             section_start = perf_counter()
-            first_support = np.asarray(action_resolver(initial_states), dtype=float)
+            first_support = (
+                np.asarray(action_resolver(initial_states), dtype=float)
+                if initial_support_nm is None
+                else np.broadcast_to(
+                    np.asarray(initial_support_nm, dtype=float), (count, 2)
+                )
+            )
             first_actions = first_actions + first_support
             timing["support_dynamics"] += perf_counter() - section_start
         if self._last_actions is None or self._last_prediction is None:

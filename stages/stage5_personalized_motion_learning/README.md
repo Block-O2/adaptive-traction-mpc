@@ -107,6 +107,17 @@ and the acceleration monitor remains unresolved.  See
 `docs/PROGRESSIVE_PERSONALIZATION_LONGITUDINAL_V1.md` and its compact JSON
 summary.
 
+A fixed-snapshot runtime audit now isolates the persistent 75--80 ms-class
+Goal-MPC regression.  The V2 5/10/15/20 ms coupled acceleration-prefix screen
+is the dominant new control-time computation; a duplicate feasible-subset pass
+was removed with exact cache reuse.  The matched snapshot improved from 92.06
+to 53.45 ms mean with unchanged selected action/sequence and feasibility masks,
+but remains above 20 ms, so the result is **RT-C** rather than real-time
+readiness.  Saved PP2-A traces also show **U5**: repetition-boundary scheduling
+dominates elapsed activation time, while alpha=0.10 limits per-update movement;
+an offline alpha=0.25 comparison improves saved-future prediction but is not
+closed-loop evidence.  See `docs/RUNTIME_AND_PP2_LATENCY_AUDIT_V1.md`.
+
 Latest diagnostic checkpoint: Acceleration-Semantics V2 interval alignment was
 implemented, but targeted validation stopped at the first historical-failure
 case because the nominal loaded-interface predictor still underpredicted the
