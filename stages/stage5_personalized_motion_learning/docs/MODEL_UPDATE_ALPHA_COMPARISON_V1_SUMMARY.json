@@ -1,0 +1,108 @@
+{
+  "schema": "stage5_model_update_alpha_comparison_v1_summary",
+  "status": "FORMAL_MATCHED_LONGITUDINAL_EXECUTION_COMPLETE",
+  "decision": {
+    "code": "AS-A",
+    "label": "ALPHA 0.25 IMPROVES PERSONALIZATION SPEED"
+  },
+  "nat_a_checkpoint": "a0a69595a66672971a6f8f2e17572f33df328bd2",
+  "config_sha256": "60e0ce49048dc98e33c2efb6b44475d6fb530bde3f5fff0ffe881c87c26468b3",
+  "result": {
+    "path": "results/model_update_alpha_comparison_v1_formal_attempt_01/model_update_alpha_comparison_results.json",
+    "sha256": "43abe83c0b4509e38f542b4a83fcc14e78798971d646cd4759d8c088c09c0899",
+    "both_arms_run_fresh": true,
+    "total_formal_wall_time_s": 296.99828299996443
+  },
+  "contract": {
+    "only_scientific_variable": "model_update_alpha",
+    "arm_alpha_0p10": 0.1,
+    "arm_alpha_0p25": 0.25,
+    "maximum_per_scale_step": 0.03,
+    "bounds": [0.5, 1.5],
+    "regularization": 0.001,
+    "gamma": 0.5,
+    "prefix_backend": "native",
+    "prefix_times_ms": [5, 10, 15, 20],
+    "physical_substep_ms": 0.25,
+    "seeds": [20260828, 20260829, 20260830, 20260831, 20260832],
+    "truth_available_online": false
+  },
+  "frozen_endpoint_nms2": 0.00021518124214580563,
+  "endpoint": {
+    "alpha_0p10": {
+      "repetition": 5,
+      "simulated_task_time_s": 44.21000000001034,
+      "loss_nms2": 0.00021518124214580563
+    },
+    "alpha_0p25": {
+      "repetition": 4,
+      "simulated_task_time_s": 35.13000000000883,
+      "loss_nms2": 0.00014668603369234214
+    },
+    "task_time_saved_s": 9.080000000001512
+  },
+  "prediction_losses_nms2": {
+    "alpha_0p10": [
+      0.0003829484344853524,
+      0.0003033732258448142,
+      0.0002771243921860634,
+      0.00023242616828093808,
+      0.00021518124214580563
+    ],
+    "alpha_0p25": [
+      0.0003829484344853524,
+      0.0002921060869922927,
+      0.0002233074200821237,
+      0.00014668603369234214,
+      0.00010091951920842387
+    ]
+  },
+  "cap_binding": {
+    "alpha_0p10_alpha_D": 0,
+    "alpha_0p25_alpha_D": 3,
+    "alpha_0p25_qualified_transitions": 5,
+    "frequent_binding_rule_satisfied": true,
+    "alpha_M_or_alpha_K_cap_binding": false
+  },
+  "evidence": {
+    "qualified_successors_per_arm": 5,
+    "all_qualification_outcomes": "qualified at 8-block causal look",
+    "post_update_positive_per_arm": 4,
+    "post_update_neutral": 0,
+    "post_update_negative": 0,
+    "rep5_theta6_queued_not_activated": true
+  },
+  "stability": {
+    "alpha_D_direction_consistent": true,
+    "alpha_0p10_oscillation": false,
+    "alpha_0p25_oscillation": false,
+    "active_prediction_loss_monotone_improving_both_arms": true
+  },
+  "closed_loop": {
+    "complete": {"alpha_0p10": 5, "alpha_0p25": 5},
+    "peak_force_n": {"alpha_0p10": 113.92167959314993, "alpha_0p25": 113.04514086204999},
+    "summed_force_integral_n_s": {"alpha_0p10": 4151.7145964869715, "alpha_0p25": 4089.4142377118883},
+    "peak_moment_nm": {"alpha_0p10": 14.875150475573742, "alpha_0p25": 15.264822830479963},
+    "peak_deployable_acceleration_deg_s2": {"alpha_0p10": [154.98356635708643, 436.9870534118171], "alpha_0p25": [173.47228950498538, 472.8795487006164]},
+    "peak_truth_acceleration_deg_s2": {"alpha_0p10": [155.65519999087894, 462.5419690336554], "alpha_0p25": [160.0248468096135, 473.1294250721709]},
+    "no_safe_action": 0,
+    "force_gate": 0,
+    "safety_filter_intervention": 0,
+    "brake": 0,
+    "mujoco_warning": 0
+  },
+  "runtime_ms": {
+    "alpha_0p10": {"weighted_mean": 18.81735037197759, "worst_repetition_p95": 19.27329204045236, "max": 57.31604201719165, "deadline_misses": 15, "solve_count": 2037},
+    "alpha_0p25": {"weighted_mean": 18.888425459090833, "worst_repetition_p95": 19.460849417373538, "max": 47.00166592374444, "deadline_misses": 17, "solve_count": 1992},
+    "hard_realtime_or_WCET_claim": false
+  },
+  "next_study_design_only": {
+    "authorized_to_run": false,
+    "model_update_alpha": 0.25,
+    "arm_A_max_step": 0.03,
+    "arm_B_max_step": 0.04,
+    "reason": "alpha_D cap bound three of five qualified transitions"
+  },
+  "acceleration_monitor": "A-MONITOR-UNRESOLVED",
+  "value_or_RL_learning_active": false
+}

@@ -187,6 +187,7 @@ def _run_repetition(
     repetition: int,
     seed: int,
     session_time_s: float,
+    prefix_backend: str = "numpy",
 ) -> dict[str, Any]:
     arm = session.arm
     attempts_before = len(session.authority.service.attempts)
@@ -224,6 +225,7 @@ def _run_repetition(
         control_human_model_callback=session.observe,
         initial_control_human_model=session.control_human_model,
         initial_control_human_model_version=active_at_start.model_id,
+        prefix_backend=prefix_backend,
     )
     wall_time_s = perf_counter() - wall_start
     with np.load(episode_dir / "trace.npz") as loaded:

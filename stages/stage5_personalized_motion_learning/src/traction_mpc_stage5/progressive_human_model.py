@@ -14,7 +14,10 @@ from typing import Any
 
 import numpy as np
 
-from .human_identification_reduced import ReducedShadowHumanIdentificationService
+from .human_identification_reduced import (
+    ReducedShadowHumanIdentificationService,
+    Stage5ReducedHumanIDConfig,
+)
 from .human_model_update import (
     BoundedHumanModelTransition,
     build_bounded_human_model_transition,
@@ -221,6 +224,7 @@ class ProgressiveHumanModelAuthority:
         *,
         updates_enabled: bool = True,
         population_prior_theta: Any = POPULATION_PRIOR_THETA,
+        human_id_config: Stage5ReducedHumanIDConfig | None = None,
     ) -> None:
         self.active_model = active_model
         self.updates_enabled = bool(updates_enabled)
@@ -229,6 +233,11 @@ class ProgressiveHumanModelAuthority:
         )
         self.service = ReducedShadowHumanIdentificationService(
             geometry,
+            config=(
+                Stage5ReducedHumanIDConfig()
+                if human_id_config is None
+                else human_id_config
+            ),
             initial_incumbent_scales=active_model.theta,
             initial_model_version=active_model.model_id,
             population_prior_scales=self.population_prior_theta,

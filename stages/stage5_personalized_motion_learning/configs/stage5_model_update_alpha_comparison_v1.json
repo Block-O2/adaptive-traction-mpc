@@ -1,0 +1,95 @@
+{
+  "schema": "stage5_model_update_alpha_comparison_v1",
+  "evidence_category": "preregistered_closed_loop_model_update_alpha_comparison",
+  "status": "PREREGISTERED_FORMAL_EXECUTION_AUTHORIZED",
+  "research_question": "does model_update_alpha 0.25 reach deployable-domain model quality faster than 0.10 without changing evidence authority or degrading closed-loop behavior",
+  "only_scientific_variable": "model_update_alpha",
+  "arms": {
+    "alpha_0p10": {
+      "model_update_alpha": 0.1,
+      "source": "reuse frozen PP2-A progressive arm when semantic fingerprint passes"
+    },
+    "alpha_0p25": {
+      "model_update_alpha": 0.25,
+      "source": "new formal run reserved for the user"
+    }
+  },
+  "human_truth_evaluation_only": {
+    "condition": "damping_plus_20pct",
+    "scales": [1.0, 1.0, 1.2],
+    "available_to_online_fit_validation_update_authority_or_control": false
+  },
+  "initial_active_model": {
+    "name": "theta_1",
+    "scales": [
+      1.0000584390985465,
+      1.0010424686528112,
+      1.0193479803467633
+    ],
+    "support_state": "positive",
+    "source": "RPL-A frozen-successor independent replication"
+  },
+  "repetitions": {
+    "maximum_per_arm": 5,
+    "matched_cem_seeds": [
+      20260828,
+      20260829,
+      20260830,
+      20260831,
+      20260832
+    ],
+    "physical_reset_gap_in_session_time_s": 0.25,
+    "one_fixed_active_model_per_repetition": true,
+    "maximum_queued_successors_per_repetition": 1,
+    "activation_boundary": "next valid repetition only",
+    "regression_windows_cross_reset": false
+  },
+  "controller": {
+    "gamma": 0.5,
+    "gamma_dynamic": false,
+    "prefix_backend": "native",
+    "prefix_times_ms": [5, 10, 15, 20],
+    "physical_propagation_timestep_ms": 0.25,
+    "base_planning_joint_velocity_ceiling_deg_s": [15.0, 25.0],
+    "planning_physical_force_ceiling_n": 180.0,
+    "maximum_duration_s": 25.5,
+    "terminal_value": 0.0,
+    "goal_mpc_task_hold_limits_safety_filter_brake_gate_changed": false,
+    "acceleration_monitor_changed": false
+  },
+  "human_identification": {
+    "parameterization": ["alpha_M", "alpha_K", "alpha_D"],
+    "joint_estimation": true,
+    "lower_scales": [0.5, 0.5, 0.5],
+    "upper_scales": [1.5, 1.5, 1.5],
+    "maximum_per_scale_step": 0.03,
+    "maximum_step_fraction_of_span": 0.03,
+    "regularization_weight": 0.001,
+    "fit_future_validation_and_statistical_thresholds": "unchanged reduced Human-ID v1",
+    "population_prior_scales": [1.0, 1.0, 1.0],
+    "qualification_reference": "immediate active predecessor",
+    "post_update_gate": "POSITIVE required before another correction"
+  },
+  "frozen_primary_endpoint": {
+    "name": "PP2-A alpha=0.10 repetition-5 active-model deployable prediction loss",
+    "mean_squared_loss_nms2": 0.00021518124214580563,
+    "source": "results/progressive_personalization_longitudinal_v1_attempt_01/progressive_personalization_results.json"
+  },
+  "baseline_reuse": {
+    "candidate_source": "progressive_personalization_longitudinal_v1_attempt_01 progressive arm",
+    "requires_exact_start_truth_task_interface_gamma_cem_monitor_authority_seeds_and_validation_semantics": true,
+    "native_backend_difference_allowed_only_by_NAT_A_equivalence": true
+  },
+  "cap_bottleneck_interpretation": {
+    "frequent_binding_rule": "alpha_D step cap binds on at least half of qualified alpha_0p25 transitions",
+    "next_study_allowed_only_if": "AS-A and frequent_binding_rule is satisfied",
+    "next_study_execution_authorized": false
+  },
+  "decision_codes": ["AS-A", "AS-B", "AS-C", "AS-D"],
+  "frozen_open_issues": {
+    "acceleration_monitor": "A-MONITOR-UNRESOLVED",
+    "hard_realtime_or_WCET_claim": false,
+    "interface": "fixed nominal",
+    "value_or_RL_learning": false
+  }
+}

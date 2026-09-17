@@ -18,6 +18,7 @@ from traction_mpc_stage4.integral_identifier import integral_regression_block
 from .human import STAGE5_HUMAN
 from .human_identification import Stage5HumanIDMeasurement
 from .human_identification_reduced import (
+    Stage5ReducedHumanIDConfig,
     _reduced_block_losses,
     _session_validation_blocks,
 )
@@ -94,12 +95,14 @@ class ProgressiveLongitudinalSession:
         arm: ProgressiveLongitudinalArm | str,
         *,
         session_id: str,
+        human_id_config: Stage5ReducedHumanIDConfig | None = None,
     ) -> None:
         self.arm = ProgressiveLongitudinalArm(arm)
         self.authority = ProgressiveHumanModelAuthority(
             geometry,
             initial_theta_1_model(session_id),
             updates_enabled=self.arm is ProgressiveLongitudinalArm.PROGRESSIVE,
+            human_id_config=human_id_config,
         )
         self.session_offset_s = 0.0
         self.current_repetition: int | None = None

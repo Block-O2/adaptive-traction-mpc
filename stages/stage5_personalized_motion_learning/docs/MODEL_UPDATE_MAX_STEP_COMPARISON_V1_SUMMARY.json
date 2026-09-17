@@ -1,0 +1,69 @@
+{
+  "schema": "stage5_model_update_max_step_comparison_v1_summary",
+  "status": "FORMAL_COMPARISON_COMPLETE",
+  "decision": {
+    "code": "STEP_0P04_BEST_SPEED_STABILITY_TRADEOFF",
+    "label": "0.04 gives the best speed/stability tradeoff"
+  },
+  "config_sha256": "7591595d2709520c60b754b3dccba9983429162821fe14d2fe9c4e649f212b33",
+  "result": {
+    "path": "results/model_update_max_step_comparison_v1_formal_attempt_01/model_update_max_step_comparison_results.json",
+    "sha256": "be8cd160e0ca5b63d560c6f56888202fc20c3ba78f5d9aec0b30680f5e803fbb",
+    "fresh_B_C_wall_time_s": 284.7402370419586
+  },
+  "only_scientific_variable": "maximum_per_scale_step",
+  "fixed_model_update_alpha": 0.25,
+  "step_0p03_reused": true,
+  "step_0p03_reuse_checks_passed": 13,
+  "frozen_endpoint_nms2": 0.00021518124214580563,
+  "endpoint": {
+    "step_0p03": {"repetition": 4, "simulated_task_time_s": 35.13000000000883, "loss_nms2": 0.00014668603369234214},
+    "step_0p04": {"repetition": 3, "simulated_task_time_s": 26.73500000000572, "loss_nms2": 0.00017531557005780592},
+    "step_0p05": {"repetition": 3, "simulated_task_time_s": 25.97500000000749, "loss_nms2": 0.0001652826172938665}
+  },
+  "prediction_losses_nms2": {
+    "step_0p03": [0.0003829484344853524, 0.0002921060869922927, 0.0002233074200821237, 0.00014668603369234214, 0.00010091951920842387],
+    "step_0p04": [0.0003829484344853524, 0.00025464465231905917, 0.00017531557005780592, 0.00011811522500596802, 0.00007813045084284621],
+    "step_0p05": [0.0003829484344853524, 0.00026220246469743256, 0.0001652826172938665, 0.00011788079572109732, 0.00007692299761234616]
+  },
+  "cap_binding_M_K_D": {
+    "step_0p03": [0, 0, 3],
+    "step_0p04": [0, 0, 2],
+    "step_0p05": [0, 0, 0]
+  },
+  "step_0p05_effectively_uncapped": true,
+  "evidence": {
+    "qualified_successors_per_arm": 5,
+    "post_update_positive_per_arm": 4,
+    "neutral": 0,
+    "negative": 0
+  },
+  "stability": {
+    "alpha_D_direction_consistent_all_arms": true,
+    "parameter_oscillation_any_arm": false,
+    "prediction_loss_monotone_all_arms": true
+  },
+  "closed_loop": {
+    "complete_per_arm": 5,
+    "no_safe_action": 0,
+    "force_gate": 0,
+    "safety_filter_intervention": 0,
+    "brake": 0,
+    "mujoco_warning": 0
+  },
+  "runtime_ms": {
+    "step_0p03": {"weighted_mean": 18.888425459090833, "worst_repetition_p95": 19.460849417373538, "max": 47.00166592374444, "deadline_misses": 17},
+    "step_0p04": {"weighted_mean": 18.738661141148494, "worst_repetition_p95": 19.21027912176214, "max": 50.00954191200435, "deadline_misses": 7},
+    "step_0p05": {"weighted_mean": 18.776300433563037, "worst_repetition_p95": 19.347958033904433, "max": 48.22741693351418, "deadline_misses": 19},
+    "hard_realtime_or_WCET_claim": false
+  },
+  "material_benefit": {
+    "step_0p04_vs_0p03": true,
+    "step_0p05_vs_0p03": true,
+    "step_0p05_vs_0p04": false,
+    "step_0p05_vs_0p04_loss_improvement_at_endpoint_fraction": 0.0572279619011096,
+    "frozen_threshold_fraction": 0.1
+  },
+  "acceleration_monitor": "A-MONITOR-UNRESOLVED",
+  "value_or_RL_learning_active": false
+}

@@ -467,6 +467,22 @@ The six-episode V1 development command is retained for provenance, but its
 budget has been exhausted and it must not be rerun as tuning. The separately
 preregistered final campaign remains unauthorized.
 
+The first fresh closed-loop `model_update_alpha=0.10` versus `0.25` comparison
+is reported in `docs/MODEL_UPDATE_ALPHA_COMPARISON_V1.md`.  Both arms completed
+five matched repetitions.  Decision: **AS-A**; alpha=0.25 reached the frozen
+deployable prediction endpoint in repetition 4 rather than 5 without a
+registered closed-loop regression.  Its alpha_D update hit the unchanged 0.03
+cap in 3/5 qualified transitions, so the report designs—but does not run—a
+future 0.03 versus 0.04 cap study.
+
+That cap study was subsequently expanded under explicit user authorization to
+the preregistered `0.03 / 0.04 / 0.05` comparison and is reported in
+`docs/MODEL_UPDATE_MAX_STEP_COMPARISON_V1.md`.  Both fresh larger-cap arms
+completed 5/5 repetitions.  Step=0.04 and 0.05 both reached the frozen endpoint
+in repetition 3 versus repetition 4 for 0.03; 0.05 was fully uncapped but did
+not meet the frozen additional-benefit threshold over 0.04.  Supported choice:
+**0.04 gives the best speed/stability tradeoff**.
+
 Run the Stage-5 checks from the repository root:
 
 ```bash
