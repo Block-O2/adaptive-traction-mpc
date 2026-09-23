@@ -1,0 +1,16 @@
+{
+  "schema": "architecture_recovery_v2.phase0_reproduction.v1",
+  "evidence_category": "current_head_derivative_regression",
+  "historical_benchmark": "stage4_registered_single_challenger_closed_loop_ab_current_head_derivative",
+  "source_script": "stages/stage4_adaptive_control/scripts/run_stage4_single_challenger_closed_loop_ab.py",
+  "source_authoritative_result": "stages/stage4_adaptive_control/results/robustness/adaptive_ab",
+  "output_dir": "stages/stage5_personalized_motion_learning/results/architecture_recovery_v2/phase0/stage4_registered_ab_reproduction_v1",
+  "command": "cd stages/stage4_adaptive_control && PYTHONPATH=src:../stage3_full3d/src conda run -n mpc_learn python scripts/run_stage4_single_challenger_closed_loop_ab.py --output-dir ../stage5_personalized_motion_learning/results/architecture_recovery_v2/phase0/stage4_registered_ab_reproduction_v1",
+  "contract": {
+    "arms": ["prior_only", "trusted_adaptive"],
+    "wall_limit_s": 32.0,
+    "sensor_case": "noise_bias_drift_200hz",
+    "controller_estimator_trust_and_task": "historical estimator, trust, task and MPC lineage with later corrected robot translational velocity-feedback measurement path",
+    "interpretation": "Current-HEAD derivative regression, not an exact original-contract reproduction. The first/registered multi-link Human adaptive A/B begins in Stage 4 rather than Stage 1-3."
+  }
+}

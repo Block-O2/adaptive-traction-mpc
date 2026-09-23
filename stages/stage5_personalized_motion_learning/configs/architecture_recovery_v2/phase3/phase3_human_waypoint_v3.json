@@ -1,0 +1,57 @@
+{
+  "schema": "architecture_recovery_v2_phase3_hwmpc_v3",
+  "status": "FROZEN_AFTER_COMPLETE_ADAPTIVE_STATE_RECORD_REPAIR",
+  "evidence_category": "mechanical_interface_smoke",
+  "supersedes_evidence_artifact_only": "phase3_human_waypoint_v2",
+  "repair_scope": [
+    "record numeric effective geometry as part of every deployable adaptive-state snapshot",
+    "seal the exact state-feedback HWMPC regression test file"
+  ],
+  "recovered_model": "V2.2 five-feature state-conditioned residual with continual beta",
+  "planner": "direct two-joint state-feedback Human-waypoint HWMPC",
+  "task_semantics": "actual arrival and settling trigger HOLD; actual return and settling trigger COMPLETE",
+  "mechanics_screen": {
+    "force_limit_n": 200.0,
+    "moment_limit_nm": 60.0,
+    "deterministic_schedule_samples": 21
+  },
+  "scheduler_clearance_semantics": "fixed Stage-5 structural-prior Human geometry and bed plane; adaptive geometry is used by the separate V2.2 wrench mechanics screen",
+  "value_hook": {
+    "signature": "V(state_or_belief, candidate_next_waypoint)",
+    "default": 0.0,
+    "training_authorized": false
+  },
+  "adaptive_state_record": [
+    "effective geometry tuple",
+    "11-beta dynamics",
+    "state-residual weights and limit",
+    "source categories",
+    "update counts and sequence"
+  ],
+  "learning_record_contract": [
+    "observation",
+    "adaptive_state",
+    "candidates",
+    "selected_waypoint",
+    "executed_waypoint",
+    "next_observation",
+    "local_cost",
+    "completion",
+    "provenance"
+  ],
+  "declared_regression": {
+    "expected_collected_test_count": 47,
+    "test_files": [
+      "stages/stage5_personalized_motion_learning/tests/architecture_recovery_v2/test_functional_firewall.py",
+      "stages/stage5_personalized_motion_learning/tests/architecture_recovery_v2/test_phase3_human_waypoint.py",
+      "stages/stage5_personalized_motion_learning/tests/test_stage5_hwmpc_state_feedback_v1.py"
+    ]
+  },
+  "forbidden": {
+    "fixed_r_or_path_template": true,
+    "historical_detailed_robot_interface_predictor": true,
+    "hidden_truth_in_deployable_belief": true,
+    "rl_value_or_imitation_training": true,
+    "physical_hardware_actuation": true
+  }
+}

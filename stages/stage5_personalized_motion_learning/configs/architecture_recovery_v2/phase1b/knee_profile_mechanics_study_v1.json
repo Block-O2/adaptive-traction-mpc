@@ -1,0 +1,46 @@
+{
+  "schema": "architecture_recovery_v2.phase1b.knee_profile_mechanics_study.v1",
+  "study_id": "phase1b_revision0_knee_profile_mechanics_study_v1",
+  "evidence_category": "exploratory_mechanics_diagnostic",
+  "case_count_per_rom_stratum": 160,
+  "standard_setup_seed_start": 51001,
+  "standard_task_seed_start": 61001,
+  "high_rom_setup_seed_start": 52001,
+  "high_rom_task_seed_start": 62001,
+  "profiles": [
+    {"id": "coordinated", "kind": "production"},
+    {"id": "legacy_knee_lead", "kind": "production", "production_id": "knee_lead"},
+    {"id": "bounded_knee_lead_65_72", "kind": "bounded", "hip_midpoint_fraction": 0.65, "knee_midpoint_fraction": 0.72},
+    {"id": "bounded_knee_lead_72_80", "kind": "bounded", "hip_midpoint_fraction": 0.72, "knee_midpoint_fraction": 0.80},
+    {"id": "bounded_knee_lead_80_88", "kind": "bounded", "hip_midpoint_fraction": 0.80, "knee_midpoint_fraction": 0.88},
+    {"id": "bounded_knee_lead_88_96", "kind": "bounded", "hip_midpoint_fraction": 0.88, "knee_midpoint_fraction": 0.96}
+  ],
+  "trajectory_semantics": {
+    "outbound_midpoint_time_fraction": 0.52,
+    "return_rule": "exact geometric reverse of outbound via the same midpoint",
+    "segment_interpolation": "quintic with zero endpoint velocity and acceleration",
+    "bounded_profile_meaning": "normalized knee progress exceeds normalized hip progress at the outbound midpoint; both joints move in both segments"
+  },
+  "mechanics_gate": {
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.01,
+    "static_force_peak_n_maximum": 150.0,
+    "static_moment_peak_nm_maximum": 45.0,
+    "clearance_sample_count": 301,
+    "static_wrench_sample_count": 101
+  },
+  "hidden_generation": {
+    "source": "DEFAULT_GENERATION_DOMAIN continuous ranges without mechanics rejection sampling",
+    "task_profile_used_only_to_draw_goal_and_duration": "coordinated",
+    "minimum_reference_clearance_m": null,
+    "generation_static_force_peak_n_maximum": null,
+    "generation_static_moment_peak_nm_maximum": null
+  },
+  "held_out_policy": {
+    "is_held_out": false,
+    "seeds_may_inform_phase1b_revision_1": true,
+    "formal_seed_namespace": "not generated or accessed"
+  }
+}
+

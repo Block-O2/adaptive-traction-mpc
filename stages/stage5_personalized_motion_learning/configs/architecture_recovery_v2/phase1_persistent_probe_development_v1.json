@@ -1,0 +1,18 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase1_persistent_probe_development_v1",
+  "evidence_category": "development",
+  "arms": ["oracle", "adaptive", "fixed_nominal", "no_dynamics_adaptation"],
+  "cases": [{"seed": 1102, "high_rom": false}],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 6.0,
+  "hidden_generation": {
+    "source": "same continuous generator as phase1_development_v1",
+    "purpose": "test independently phased persistent commissioning excitation on the diagnosed setup"
+  },
+  "held_out_policy": {
+    "is_held_out": false,
+    "seeds_may_inform_repairs": true,
+    "formal_seed_namespace": "not accessed by this config"
+  }
+}

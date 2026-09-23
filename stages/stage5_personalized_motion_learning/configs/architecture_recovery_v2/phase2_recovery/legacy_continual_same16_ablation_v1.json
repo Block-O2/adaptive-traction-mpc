@@ -1,0 +1,33 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase2_recovery_legacy_continual_same16_ablation_v1",
+  "evidence_category": "development_ablation",
+  "task_dynamics_history_window_samples": null,
+  "task_dynamics_smoothing_alpha": null,
+  "task_residual_bias_alpha": null,
+  "arms": ["adaptive", "commissioning_only_dynamics"],
+  "cases": [
+    {"setup_seed": 312001, "task_seed": 322001, "task_profile": "coordinated", "high_rom": false},
+    {"setup_seed": 312002, "task_seed": 322002, "task_profile": "coordinated", "high_rom": false},
+    {"setup_seed": 312003, "task_seed": 322003, "task_profile": "coordinated", "high_rom": true},
+    {"setup_seed": 312004, "task_seed": 322004, "task_profile": "coordinated", "high_rom": true},
+    {"setup_seed": 312005, "task_seed": 322005, "task_profile": "hip_lead", "high_rom": false},
+    {"setup_seed": 312006, "task_seed": 322006, "task_profile": "hip_lead", "high_rom": false},
+    {"setup_seed": 312007, "task_seed": 322007, "task_profile": "hip_lead", "high_rom": true},
+    {"setup_seed": 312008, "task_seed": 322008, "task_profile": "hip_lead", "high_rom": true},
+    {"setup_seed": 312009, "task_seed": 322009, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": false},
+    {"setup_seed": 312010, "task_seed": 322010, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": false},
+    {"setup_seed": 312011, "task_seed": 322011, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": true},
+    {"setup_seed": 312012, "task_seed": 322012, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": true},
+    {"setup_seed": 312013, "task_seed": 322013, "task_profile": "two_rate", "high_rom": false},
+    {"setup_seed": 312014, "task_seed": 322014, "task_profile": "two_rate", "high_rom": false},
+    {"setup_seed": 312015, "task_seed": 322015, "task_profile": "two_rate", "high_rom": true},
+    {"setup_seed": 312016, "task_seed": 322016, "task_profile": "two_rate", "high_rom": true}
+  ],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 8.0,
+  "probe_control_dt_s": 0.01,
+  "environment_contract": {"scenario": "lying_bed_contact_free_clearance", "bed_height_m": 0.012, "shank_radius_m": 0.045, "minimum_reference_clearance_m": 0.025},
+  "hidden_generation": {"patient_height_scale": [0.88, 1.12], "patient_mass_scale": [0.78, 1.28], "passive_stiffness_scale": [0.65, 1.45], "passive_damping_scale": [0.70, 1.35], "rest_offset_q_deg": [[-4.0, -5.0], [5.0, 6.0]], "thigh_com_scale": [0.88, 1.12], "shank_com_scale": [0.86, 1.14], "hip_placement_x_m": [-0.12, 0.12], "hip_placement_z_m": [0.045, 0.16], "cuff_fraction_of_shank": [0.52, 0.88], "initial_q_deg": [[6.0, 10.0], [18.0, 28.0]], "task_profiles": ["coordinated", "hip_lead", "knee_led_clearance_constrained_v1", "two_rate"], "standard_goal_q_deg": [[35.0, 48.0], [62.0, 78.0]], "high_rom_goal_q_deg": [[66.0, 82.0], [75.0, 95.0]], "standard_duration_s": [9.0, 12.0], "high_rom_duration_s": [12.0, 15.0], "measurement_position_std_m": 0.00015, "measurement_angle_std_deg": 0.03, "bed_height_m": 0.012, "shank_radius_m": 0.045, "minimum_reference_clearance_m": 0.025, "generation_static_force_peak_n_maximum": 150.0, "generation_static_moment_peak_nm_maximum": 45.0, "generation_max_attempts": 5000},
+  "held_out_policy": {"is_held_out": false, "formal_seed_namespace": null}
+}

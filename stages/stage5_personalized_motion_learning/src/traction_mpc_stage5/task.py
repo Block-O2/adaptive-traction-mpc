@@ -422,6 +422,8 @@ def task_limit_violation(
     q_rad: Sequence[float],
     dq_rad_s: Sequence[float],
     ddq_rad_s2: Sequence[float] | None = None,
+    *,
+    acceleration_authority_valid: bool = True,
 ) -> str | None:
     """Return a task-level state-limit reason, or ``None`` when valid."""
 
@@ -434,7 +436,10 @@ def task_limit_violation(
         for value, limit in zip(dq, spec.task_joint_velocity_limit_rad_s, strict=True)
     ):
         return "TASK_VELOCITY_LIMIT"
-    if spec.task_joint_acceleration_limit_rad_s2 is not None:
+    if (
+        spec.task_joint_acceleration_limit_rad_s2 is not None
+        and acceleration_authority_valid
+    ):
         if ddq_rad_s2 is None:
             return "MISSING_TASK_ACCELERATION"
         ddq = _joint_pair(ddq_rad_s2, "ddq_rad_s2")
@@ -455,10 +460,18 @@ def start_episode(
     q_rad: Sequence[float],
     dq_rad_s: Sequence[float],
     ddq_rad_s2: Sequence[float] | None = None,
+    *,
+    acceleration_authority_valid: bool = True,
 ) -> GoalTaskState:
     """Validate the measured/estimated start set and create OUTBOUND state."""
 
-    violation = task_limit_violation(spec, q_rad, dq_rad_s, ddq_rad_s2)
+    violation = task_limit_violation(
+        spec,
+        q_rad,
+        dq_rad_s,
+        ddq_rad_s2,
+        acceleration_authority_valid=acceleration_authority_valid,
+    )
     if violation is not None:
         raise ValueError(f"cannot start episode: {violation}")
     if not at_goal(spec, q_rad, dq_rad_s, spec.start_return_target_rad):
@@ -480,6 +493,7 @@ def transition_phase(
     dt_s: float,
     *,
     ddq_rad_s2: Sequence[float] | None = None,
+    acceleration_authority_valid: bool = True,
     abort_reason: str | None = None,
     completion_margin: ControllerCompletionMargin | None = None,
 ) -> GoalTaskState:
@@ -502,7 +516,13 @@ def transition_phase(
     def online_at_goal(target_rad: Sequence[float]) -> bool:
         return at_goal_for_online_completion(spec, q_rad, dq_rad_s, target_rad, margin)
 
-    violation = task_limit_violation(spec, q_rad, dq_rad_s, ddq_rad_s2)
+    violation = task_limit_violation(
+        spec,
+        q_rad,
+        dq_rad_s,
+        ddq_rad_s2,
+        acceleration_authority_valid=acceleration_authority_valid,
+    )
     if violation is not None:
         return abort_episode(state, violation)
 

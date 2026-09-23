@@ -1,0 +1,26 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase1_bed_handoff_diagnosis_v1",
+  "evidence_category": "exploratory_diagnostic",
+  "arms": ["oracle", "adaptive"],
+  "cases": [
+    {"setup_seed": 3101, "task_seed": 4201, "task_profile": "coordinated", "high_rom": false}
+  ],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 8.0,
+  "hidden_generation": {
+    "source": "all continuous ranges are the explicit DEFAULT_GENERATION_DOMAIN in the snapshotted functional_benchmark.py",
+    "task_profiles": ["coordinated", "hip_lead", "two_rate"],
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.01,
+    "generation_static_force_peak_n_maximum": 150.0,
+    "generation_static_moment_peak_nm_maximum": 45.0,
+    "generation_max_attempts": 5000
+  },
+  "held_out_policy": {
+    "is_held_out": false,
+    "seeds_may_inform_repairs": true,
+    "formal_seed_namespace": "not accessed by this config"
+  }
+}

@@ -1,0 +1,698 @@
+# Architecture-Recovery Publication Staging Manifest
+
+Generated before staging on branch `codex/stage5-architecture-recovery` at starting HEAD `4caea258ec1450f082bb7cb8097cc1441bdf589f`.
+
+Remote: `git@github.com:Block-O2/adaptive-traction-mpc.git`
+
+Policy: stage only the exact paths below. Do not use `git add .`. All other dirty/untracked status entries are pre-existing unrelated state and remain local.
+
+## Exact planned staged file set (168 paths)
+
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v1/README.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v1/identifiability_audit_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase0_stage1_stage9j_reproduction_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase0_stage4_ef1fe90_registered_ab_reproduction_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase0_stage4_registered_ab_reproduction_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_bed_dynamics_refit_diagnosis_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_bed_feasible_development_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_bed_feasible_development_v2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_bed_feasible_development_v3.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_bed_feasible_development_v4.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_bed_handoff_diagnosis_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_development_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_dynamics_gate_diagnosis_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_firewall_safe_development_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_interior_probe_development_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_persistent_probe_development_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_probe_development_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_probe_diagnosis_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_probe_supervisor_diagnosis_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1_twist_diagnosis_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/combined_development_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/domain_characterization_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/dynamics_simplicity_ablation_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/dynamics_simplicity_ablation_v2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/dynamics_simplicity_ablation_v3_exact_current.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/dynamics_simplicity_ablation_v4_post_probe_reference_audit.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/knee_profile_mechanics_study_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/mass_matrix_margin_audit_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/oracle_mechanics_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/probe_candidate_study_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/probe_domain_stress_v2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/probe_event_settle_v3.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/probe_event_settle_v4.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/probe_event_settle_v5.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/probe_event_settle_v6.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/probe_stress_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/probe_support_candidate_study_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/probe_transient_support_study_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/revision3_mass_guard_regression_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/revision4_mass_active_set_regression_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1b/settle_damping_study_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1bf/continual_adaptation_ablation_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1bf/continual_adaptation_ablation_v2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1bf/continual_adaptation_ablation_v3.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1bf/freeze_qualification_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase1bf/freeze_qualification_v2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2/formal_unknown_setup_task_v2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_formal_unknown_setup_task_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/legacy_continual_same16_ablation_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/phase_banked_residual_dev_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/recency_window_200_alpha_020_screen_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/recency_window_200_alpha_030_screen_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/recency_window_screen_200_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/recency_window_screen_300_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/recency_window_screen_400_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/recency_window_screen_legacy_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/residual_bias_alpha_005_screen_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/residual_bias_alpha_010_screen_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/residual_bias_alpha_020_confirmation_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/residual_bias_alpha_020_screen_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/residual_bias_alpha_030_screen_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/residual_bias_alpha_050_screen_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/residual_bias_freeze_qualification_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/residual_bias_freeze_qualification_v2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/residual_only_dev_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_recovery/state_residual_dev_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_v21/formal_unknown_setup_task_v21.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase2_v22/formal_unknown_setup_task_v22.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase3/phase3_human_waypoint_v1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase3/phase3_human_waypoint_v2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/configs/architecture_recovery_v2/phase3/phase3_human_waypoint_v3.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v1/ARCHITECTURE_RECOVERY_FINAL.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v1/ORIGINAL_SYSTEM_CONTRACT.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v1/PHASE0_ASSUMPTION_SCOPE_AUDIT.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v1/RECOVERY_AUDIT_LOG.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v1/RECOVERY_PHASE_STATUS.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v1/RECOVERY_RELATED_WORK.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v1/recovery_refs.bib` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/ARCHITECTURE_RECOVERY_V2_CONTINUATION_FINAL.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/ARCHITECTURE_RECOVERY_V2_FINAL.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/FAILURE_LEDGER.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/FINAL_ARCHITECTURE_TECHNICAL_DEEP_DIVE.md` — documentation produced by publication task
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/FUNCTIONAL_MASTER_CONTRACT.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/HIGH_ROM_MECHANICS.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/PHASE0_FUNCTIONAL_RECOVERY.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/PHASE2_PREREGISTRATION_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/PUBLICATION_STAGING_MANIFEST.md` — documentation produced by publication task
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/RECOVERY_AUDIT_LOG.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/RECOVERY_PHASE_STATUS.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/RECOVERY_RELATED_WORK.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1b/CANDIDATE_FREEZE_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1b/CONTRACT_AMENDMENT_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1b/MECHANICS_PROVENANCE_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1b/PHASE1B_STATUS.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1b/REVISION_LEDGER.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1bf/CONTRACT_AMENDMENT_V2.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1bf/FRAGILITY_AUDIT_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1bf/FREEZE_CANDIDATE_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1bf/FREEZE_MANIFEST_V1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1bf/GATE_ADDENDUM_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1bf/HARDWARE_TRANSFER_RISK_LEDGER_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1bf/TRACE_ADDENDUM_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2/PHASE2_EXECUTION_SEAL_V2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2/PHASE2_FORMAL_RESULT_V2.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2/PHASE2_PREREGISTRATION_V2.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2/PHASE2_SEED_MANIFEST_V2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/FRAGILITY_AUDIT_V2_1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/FRAGILITY_AUDIT_V2_2.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/FREEZE_CANDIDATE_V2_1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/FREEZE_CANDIDATE_V2_2.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/FREEZE_MANIFEST_V2_1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/FREEZE_MANIFEST_V2_2.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/PHASE_BANK_DEV_PREREGISTRATION_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/PHASE_BANK_DEV_RESULT_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/PHASE_BANK_DEV_SEEDS_V1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/RESIDUAL_ONLY_DEV_PREREGISTRATION_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/RESIDUAL_ONLY_DEV_RESULT_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/RESIDUAL_ONLY_DEV_SEEDS_V1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/ROOT_CAUSE_AND_REPAIR_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/STATE_RESIDUAL_DEV_PREREGISTRATION_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/STATE_RESIDUAL_DEV_RESULT_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/STATE_RESIDUAL_DEV_SEEDS_V1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_recovery/STATE_RESIDUAL_DEV_SOURCE_SEAL_V1.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_v21/PHASE2_EXECUTION_SEAL_V21.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_v21/PHASE2_FORMAL_RESULT_V21.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_v21/PHASE2_PREREGISTRATION_V21.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_v21/PHASE2_SEED_MANIFEST_V21.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_v22/PHASE2_EXECUTION_SEAL_V22.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_v22/PHASE2_FORMAL_RESULT_V22.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_v22/PHASE2_PREREGISTRATION_V22.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase2_v22/PHASE2_SEED_MANIFEST_V22.json` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase3/PHASE3_HUMAN_WAYPOINT_INTEGRATION_V1.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase3/PHASE3_HUMAN_WAYPOINT_INTEGRATION_V2.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase3/PHASE3_HUMAN_WAYPOINT_INTEGRATION_V3.md` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/recovery_refs.bib` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/results/architecture_recovery_v2/phase2_v22/formal_unknown_setup_task_v22/result.json` — architecture-recovery V2 authoritative result
+- `stages/stage5_personalized_motion_learning/results/architecture_recovery_v2/phase3/phase3_human_waypoint_v3/result.json` — architecture-recovery V2 authoritative result
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v1/run_identifiability_audit.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1b/analyze_knee_profile_mechanics.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1b/audit_mass_matrix_margin.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1b/characterize_mechanics_domain.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1b/run_probe_domain_stress.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1b/run_probe_stress.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1b/study_probe_candidates.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1b/study_probe_support_candidates.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1b/study_probe_transient_support.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1b/study_settle_damping.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1bf/analyze_freeze_evidence.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1bf/build_freeze_manifest.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/phase1bf/verify_phase2_logging_equivalence.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/run_functional_campaign.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/scripts/architecture_recovery_v2/validate_phase3_human_waypoint_v1.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v1/__init__.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v1/provenance.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/__init__.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/effective_model.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/functional_benchmark.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/phase3_human_waypoint.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py` — architecture-recovery Phase-3 shared dependency
+- `stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py` — architecture-recovery Phase-3 shared dependency
+- `stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_shadow.py` — architecture-recovery Phase-3 shared dependency
+- `stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py` — architecture-recovery Phase-3 shared dependency
+- `stages/stage5_personalized_motion_learning/tests/architecture_recovery_v1/test_identifiability_and_provenance.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/tests/architecture_recovery_v2/test_campaign_gates.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/tests/architecture_recovery_v2/test_effective_model.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/tests/architecture_recovery_v2/test_functional_firewall.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/tests/architecture_recovery_v2/test_phase3_human_waypoint.py` — architecture-recovery V1/V2 work
+- `stages/stage5_personalized_motion_learning/tests/test_stage5_hwmpc_state_feedback_v1.py` — architecture-recovery Phase-3 shared dependency
+
+## Deliberately excluded dirty/untracked status entries (507 paths)
+
+These are classified as **pre-existing unrelated state** for this publication task.
+
+- ` M AGENTS.md`
+- ` M stages/stage4_adaptive_control/docs/research/PHASE3A_FINAL_DELIVERY_VALIDATION.md`
+- ` M stages/stage4_adaptive_control/results/engineering_validation/PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html`
+- ` M stages/stage4_adaptive_control/results/summaries/phase3a_corrected_high_rom/CLEAN_CLONE_SHA256SUMS`
+- ` M stages/stage4_adaptive_control/results/summaries/phase3a_corrected_high_rom/HTML_VERIFICATION.json`
+- ` M stages/stage4_adaptive_control/scripts/build_phase3a_corrected_professor_html.py`
+- ` M stages/stage5_personalized_motion_learning/README.md`
+- ` M stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/__init__.py`
+- ` M stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py`
+- ` M stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/goal_mpc_smoke.py`
+- ` M stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/interface_uncertainty.py`
+- ` M stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/progressive_personalization.py`
+- ` M stages/stage5_personalized_motion_learning/tests/test_stage5_progressive_personalization_longitudinal.py`
+- ` M stages/stage5_personalized_motion_learning/tests/test_stage5_task.py`
+- `?? CR12-12_assembly.zip`
+- `?? PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/campaign_result.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/coarse_rom_capability.csv`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/coarse_rom_capability.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/derived_artifacts.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/engineering_transient_capability.png`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/execution_commands.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/execution_spec.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/execution_spec.sha256`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/filter_brake_burden.png`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100/event_000_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100/event_000_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100/event_000_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100/event_000_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100/event_000_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee100_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee120/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee120/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee120/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee120/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee120/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee120_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee120_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee40/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee40/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee40/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee40/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee40/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee40_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee40_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee60/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee60/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee60/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee60/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee60/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee60_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee60_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80/event_000_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80/event_000_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80/event_000_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80/event_000_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80/event_000_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip100_knee80_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee100/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee100/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee100/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee100/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee100/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee100_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee100_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee120/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee120/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee120/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee120/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee120/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee120_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee120_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee40_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee40_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee60_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee60_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee80_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip120_knee80_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/event_000_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/event_000_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/event_000_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/event_000_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/event_000_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/event_001_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/event_001_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/event_001_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/event_001_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/event_001_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee100_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_000_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_000_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_000_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_000_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_000_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_001_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_001_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_001_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_001_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_001_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_002_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_002_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_002_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_002_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/event_002_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee120_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee60/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee60/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee60/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee60/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee60/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee60_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee60_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee80/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee80/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee80/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee80/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee80/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee80_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip40_knee80_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100/event_000_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100/event_000_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100/event_000_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100/event_000_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100/event_000_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee100_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120/event_000_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120/event_000_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120/event_000_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120/event_000_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120/event_000_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee120_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee40/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee40/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee40/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee40/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee40/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee40_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee40_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee60/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee60/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee60/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee60/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee60/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee60_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee60_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80/event_000_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80/event_000_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80/event_000_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80/event_000_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80/event_000_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip60_knee80_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip75_knee90/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip75_knee90/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip75_knee90/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip75_knee90/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip75_knee90/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip75_knee90_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip75_knee90_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100/event_000_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100/event_000_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100/event_000_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100/event_000_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100/event_000_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee100_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee120/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee120/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee120/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee120/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee120/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee120_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee120_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee40/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee40/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee40/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee40/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee40/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee40_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee40_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60/event_000_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60/event_000_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60/event_000_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60/event_000_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60/event_000_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee60_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80/event_000_commands.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80/event_000_controller.pkl`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80/event_000_fine.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80/event_000_manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80/event_000_pre_event.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip80_knee80_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip90_knee120/manifest.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip90_knee120/model_lock.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip90_knee120/model_lock_cycles.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip90_knee120/raw_summary.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip90_knee120/trace.npz`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip90_knee120_precheck.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/hip90_knee120_terminal.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/physical_force_peak.png`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/progress.json`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/research_report.md`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/strict_capability.png`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/tracking_rmse.png`
+- `?? stages/stage4_adaptive_control/results/engineering_validation/coarse_rom_remaining26_20260904/validation_record.md`
+- `?? stages/stage4_adaptive_control/scripts/run_stage4_remaining_rom_cells.py`
+- `?? stages/stage4_adaptive_control/scripts/summarize_stage4_remaining_rom_cells.py`
+- `?? stages/stage4_adaptive_control/tests/test_remaining_rom_cells.py`
+- `?? stages/stage4_adaptive_control/tests/test_remaining_rom_summary.py`
+- `?? stages/stage5_personalized_motion_learning/MUJOCO_LOG.TXT`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_cr12_lab_end_effector_v1_audit.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_cr12_provisional_cuff_baseline_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_cr12_sim_v0.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_human_waypoint_r_support_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_human_waypoint_r_support_v1_frozen.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_human_waypoint_trajectory_diversity_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_human_personalization_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_matched_pacing_r_boundary_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_matched_pacing_r_cost_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_matched_pacing_r_cost_v2.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_matched_pacing_r_domain_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_matched_pacing_scheduler_v2.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_state_feedback_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_state_triggered_terminal_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_terminal_closeout_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_matched_short_branch_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_posture_benefit_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_posture_force_landscape_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_shadow_value_v1.json`
+- `?? stages/stage5_personalized_motion_learning/configs/stage5_trust_gamma_matched_v1.json`
+- `?? stages/stage5_personalized_motion_learning/docs/ACCELERATION_MONITOR_CLOSEOUT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CONTROL_ABSTRACTION_STUDY_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_COMPACT_CLOSED_LOOP_PREDICTOR_V1_RESULT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_COMPACT_CLOSED_LOOP_PREDICTOR_V1_SPEC.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_EARLY_ACCELERATION_DIAGNOSIS.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_EXECUTION_CONTROL_AUDIT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_GRASP_EXECUTION_DIAGNOSIS.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_LAB_END_EFFECTOR_V1_CAD_AUDIT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_PREDICTION_FOUNDATION_AUDIT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_PROVISIONAL_CUFF_BASELINE.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_RIGID_BODY_PREDICTOR_V1_RESULT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_RIGID_BODY_PREDICTOR_V1_SPEC.md`
+- `?? stages/stage5_personalized_motion_learning/docs/CR12_SIMULATION_MIGRATION_V0.md`
+- `?? stages/stage5_personalized_motion_learning/docs/DIAGNOSTIC_POST_ABORT_CONTINUATION.md`
+- `?? stages/stage5_personalized_motion_learning/docs/FORCE_ACCELERATION_INDEPENDENCE_AUDIT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HUMAN_TABLE_CONTACT_ROLE_AUDIT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HUMAN_WAYPOINT_MPC_PROTOTYPE_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HUMAN_WAYPOINT_MPC_SHADOW_CONTRACT_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HUMAN_WAYPOINT_R_SUPPORT_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HUMAN_WAYPOINT_SCHEDULER_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HUMAN_WAYPOINT_TRAJECTORY_DIVERSITY_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HWMPC_HUMAN_PERSONALIZATION_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HWMPC_MATCHED_PACING_R_BOUNDARY_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HWMPC_MATCHED_PACING_R_COST_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HWMPC_MATCHED_PACING_R_COST_V2.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HWMPC_MATCHED_PACING_SCHEDULER_V2.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HWMPC_PHASE_COMPLETE_POST_UPDATE_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HWMPC_STATE_FEEDBACK_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HWMPC_STATE_TRIGGERED_TERMINAL_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HWMPC_STIFFNESS_EVIDENCE_AUDIT_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/HWMPC_TERMINAL_CLOSEOUT_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/MATCHED_SHORT_BRANCH_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/MATCHED_SHORT_BRANCH_V1_FORMAL_RESULT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/MATCHED_UR10E_CR12_PREDICTION_AUDIT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/NEAR_LIMIT_SHADOW_EVIDENCE.md`
+- `?? stages/stage5_personalized_motion_learning/docs/POSTURE_BENEFIT_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/POSTURE_BENEFIT_V1_FORMAL_RESULT.md`
+- `?? stages/stage5_personalized_motion_learning/docs/POSTURE_FORCE_LANDSCAPE_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/PREDICTION_SUPPORT_DOMAIN_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/REFERENCE_MOTION_GOVERNOR_V2.md`
+- `?? stages/stage5_personalized_motion_learning/docs/SHORT_HORIZON_DISTURBANCE_OBSERVER_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/SHORT_HORIZON_STATE_DEPENDENT_RESIDUAL_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/SPLIT_ACCELERATION_AUTHORITY_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/SPLIT_ACCELERATION_MONITOR_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/TRANSITION_RESPONSE_SHADOW_V2.md`
+- `?? stages/stage5_personalized_motion_learning/docs/TRUST_GAMMA_MATCHED_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/TRUST_GAMMA_MATCHED_V1_SUMMARY.json`
+- `?? stages/stage5_personalized_motion_learning/docs/VALUE_LEARNING_SHADOW_V1.md`
+- `?? stages/stage5_personalized_motion_learning/docs/WAYPOINT_CONTRACT_ACCELERATION_SEMANTICS_V2.md`
+- `?? stages/stage5_personalized_motion_learning/docs/WAYPOINT_GOVERNOR_REGRESSION_AUDIT_V1.md`
+- `?? stages/stage5_personalized_motion_learning/models/cr12_v0.xml`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_acceleration_monitor_closeout.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_control_abstraction.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_cr12_event_diagnosis.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_diagnostic_continuation.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_force_acceleration_independence.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_human_table_contact_role.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_hwmpc_stiffness_evidence.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_matched_robot_prediction.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_near_limit_shadow.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_posture_force_landscape_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_split_acceleration_monitor_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_transition_response_shadow_v2.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_waypoint_contract_semantics.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/audit_stage5_waypoint_governor_regression.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/export_stage5_hwmpc_state_feedback_dataset_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_cr12_compact_predictor_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_cr12_event_physics_diagnostic.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_cr12_execution_control_audit.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_cr12_grasp_execution_diagnostic.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_cr12_prediction_foundation_audit.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_cr12_rigid_body_predictor_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_cr12_smoke.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_diagnostic_continuation_cases.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_matched_short_branch_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_near_limit_shadow_cases.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_posture_benefit_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_shadow_value_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_split_authority_cases.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_transition_response_shadow_v2_cases.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/run_stage5_trust_gamma_matched_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/summarize_stage5_reference_motion_governor.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_human_waypoint_mpc.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_human_waypoint_r_support.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_human_waypoint_scheduler.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_human_waypoint_shadow.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_human_waypoint_trajectory_diversity.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_hwmpc_human_personalization.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_hwmpc_matched_pacing_r_boundary.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_hwmpc_matched_pacing_r_cost.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_hwmpc_matched_pacing_r_cost_v2.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_hwmpc_matched_pacing_scheduler.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_hwmpc_state_feedback_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_hwmpc_state_triggered_terminal_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_hwmpc_terminal_closeout_v1.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_phase_complete_post_update.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_prediction_support_domain.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_short_horizon_disturbance.py`
+- `?? stages/stage5_personalized_motion_learning/scripts/validate_stage5_short_horizon_residual.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/compact_execution_predictor.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/cr12_plant.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/cr12_rigid_body_predictor.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/cr12_robot.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/cr12_validation.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/diagnostic_continuation.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_mpc.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/matched_branch.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/near_limit_shadow.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/phase_complete_post_update.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/posture_benefit.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/posture_landscape.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/prediction_support_domain.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/shadow_value.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/short_horizon_disturbance.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/short_horizon_residual.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/split_acceleration_monitor.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/transition_response_shadow.py`
+- `?? stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/trust_gamma_matched.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_compact_execution_predictor.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_control_abstraction_study.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_cr12_model.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_cr12_rigid_body_predictor.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_human_table_contact_role_audit.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_human_waypoint_mpc.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_human_waypoint_r_support.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_human_waypoint_scheduler.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_human_waypoint_shadow.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_hwmpc_human_personalization.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_hwmpc_matched_pacing_r_boundary.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_hwmpc_matched_pacing_r_cost.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_hwmpc_matched_pacing_r_cost_v2.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_hwmpc_matched_pacing_scheduler.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_hwmpc_stiffness_evidence_audit.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_matched_robot_prediction_audit.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_matched_short_branch_v1.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_near_limit_shadow.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_phase_complete_post_update.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_posture_benefit_v1.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_posture_force_landscape_v1.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_prediction_support_domain.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_shadow_value_v1.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_short_horizon_disturbance.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_short_horizon_residual.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_split_acceleration_monitor.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_transition_response_shadow_v2.py`
+- `?? stages/stage5_personalized_motion_learning/tests/test_stage5_trust_gamma_matched_v1.py`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/LICENSE`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/README.md`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/meshes/xMateCR12_base.stl`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/meshes/xMateCR12_link1.stl`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/meshes/xMateCR12_link2.stl`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/meshes/xMateCR12_link3.stl`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/meshes/xMateCR12_link4.stl`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/meshes/xMateCR12_link5.stl`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/meshes/xMateCR12_link6.stl`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/xMateCR12.srdf`
+- `?? stages/stage5_personalized_motion_learning/vendor/rokae_ros2_xmatecr12/xMateCR12.urdf.xacro`
+- `?? xcoresdk_python-v0.7-2.0/.gitignore`
+- `?? xcoresdk_python-v0.7-2.0/CHANGELOG.md`
+- `?? xcoresdk_python-v0.7-2.0/README.md`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python.cpython-310-aarch64-linux-gnu.so`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/EventInfoKey/LogReporter.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/EventInfoKey/MoveExecution.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/EventInfoKey/RlExecution.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/EventInfoKey/Safety.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/EventInfoKey/__init__.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/RtSupportedFields.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/__init__.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/model.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/motioncontrolRT.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/planner.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/arm/xCoreSDK_python/utility.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python.cpython-310-x86_64-linux-gnu.so`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/EventInfoKey/LogReporter.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/EventInfoKey/MoveExecution.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/EventInfoKey/RlExecution.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/EventInfoKey/Safety.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/EventInfoKey/__init__.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/RtSupportedFields.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/__init__.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/model.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/motioncontrolRT.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/planner.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/linux/xCoreSDK_python/utility.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK.dll`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python.exp`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python.lib`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/EventInfoKey/LogReporter.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/EventInfoKey/MoveExecution.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/EventInfoKey/RlExecution.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/EventInfoKey/Safety.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/EventInfoKey/__init__.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/RtSupportedFields.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/__init__.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/model.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/motioncontrolRT.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/planner.pyi`
+- `?? xcoresdk_python-v0.7-2.0/Release/windows/xCoreSDK_python/utility.pyi`
+- `?? xcoresdk_python-v0.7-2.0/example/base_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/calibrate_frame_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/collisionDetection_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/communicate_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/drag_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/event_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/external_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/follow_joint_position.py`
+- `?? xcoresdk_python-v0.7-2.0/example/force_control_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/get_keypad_state_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/jog_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/log.py`
+- `?? xcoresdk_python-v0.7-2.0/example/main.py`
+- `?? xcoresdk_python-v0.7-2.0/example/model_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/move_command.py`
+- `?? xcoresdk_python-v0.7-2.0/example/move_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/read_robot_state_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/rl_project_example.py`
+- `?? xcoresdk_python-v0.7-2.0/example/setloop.py`
+- `?? xcoresdk_python-v0.7-2.0/example/setup_path.py`
+- `?? xcoresdk_python-v0.7-2.0/example/utility_example.py`
+
+## Classification notes
+
+- Ignored caches and intermediate results are not status entries and are not staged.
+- Only the two authoritative final JSON results named above are force-added from the ignored results tree.
+- The dirty `task.py` change and four untracked shared Phase-3 files are included because the exact Phase-3 implementation imports them and its listed source manifest hashes them.
+- No Stage-4 dirty work, root archive, vendor tree, unrelated Stage-5 work, cache, or intermediate result is included.
+

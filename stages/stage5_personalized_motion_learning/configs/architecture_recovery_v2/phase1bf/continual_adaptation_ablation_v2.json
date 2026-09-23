@@ -1,0 +1,54 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase1bf_continual_adaptation_ablation_v2",
+  "evidence_category": "development_freeze_ablation",
+  "preregistration_path": "stages/stage5_personalized_motion_learning/docs/architecture_recovery_v2/phase1bf/GATE_ADDENDUM_V1.md",
+  "arms": ["adaptive", "commissioning_only_dynamics", "no_dynamics_adaptation"],
+  "cases": [
+    {"setup_seed": 111001, "task_seed": 121001, "task_profile": "coordinated", "high_rom": false},
+    {"setup_seed": 111002, "task_seed": 121002, "task_profile": "coordinated", "high_rom": true},
+    {"setup_seed": 111003, "task_seed": 121003, "task_profile": "hip_lead", "high_rom": false},
+    {"setup_seed": 111004, "task_seed": 121004, "task_profile": "hip_lead", "high_rom": true},
+    {"setup_seed": 111005, "task_seed": 121005, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": false},
+    {"setup_seed": 111006, "task_seed": 121006, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": true},
+    {"setup_seed": 111007, "task_seed": 121007, "task_profile": "two_rate", "high_rom": false},
+    {"setup_seed": 111008, "task_seed": 121008, "task_profile": "two_rate", "high_rom": true}
+  ],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 8.0,
+  "probe_control_dt_s": 0.01,
+  "environment_contract": {
+    "scenario": "lying_bed_contact_free_clearance",
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.025,
+    "generation_static_force_peak_n_maximum": 150.0,
+    "generation_static_moment_peak_nm_maximum": 45.0,
+    "actual_clearance_evaluation_step_s_maximum": 0.005
+  },
+  "hidden_generation": {
+    "task_profiles": ["coordinated", "hip_lead", "knee_led_clearance_constrained_v1", "two_rate"],
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.025,
+    "generation_static_force_peak_n_maximum": 150.0,
+    "generation_static_moment_peak_nm_maximum": 45.0,
+    "generation_max_attempts": 5000
+  },
+  "ablation_contract": {
+    "adaptive": "commissioning plus continual online 11-beta updates",
+    "commissioning_only_dynamics": "same geometry and commissioning fit, beta frozen at task handoff",
+    "no_dynamics_adaptation": "same geometry, registered nominal beta throughout"
+  },
+  "ablation_gates": {
+    "expected_case_count_per_arm": 8,
+    "expected_arms": ["adaptive", "commissioning_only_dynamics", "no_dynamics_adaptation"],
+    "force_peak_n_maximum": 200.0,
+    "moment_peak_nm_maximum": 60.0,
+    "continual_vs_commissioning_median_improvement_fraction_minimum": 0.20,
+    "continual_vs_commissioning_completion_rate_margin_minimum": 0.25,
+    "continual_vs_no_dynamics_median_improvement_fraction_minimum": 0.20,
+    "continual_vs_no_dynamics_completion_rate_margin_minimum": 0.50
+  },
+  "held_out_policy": {"is_held_out": false, "fresh_phase2_seed_namespace": "not generated or accessed"}
+}

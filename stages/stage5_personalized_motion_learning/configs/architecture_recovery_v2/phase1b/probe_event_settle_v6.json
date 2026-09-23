@@ -1,0 +1,32 @@
+{
+  "schema": "architecture_recovery_v2.phase1b.probe_domain_stress.v6",
+  "study_id": "phase1b_revision2_probe_event_settle_v6",
+  "evidence_category": "development_regression",
+  "arm": "adaptive",
+  "case_count_per_profile_rom_cell": 12,
+  "setup_seed_start": 91001,
+  "task_seed_start": 101001,
+  "task_profiles": ["coordinated", "hip_lead", "knee_led_clearance_constrained_v1", "two_rate"],
+  "probe_duration_s": 8.0,
+  "probe_control_dt_s": 0.01,
+  "probe_settle_contract": {
+    "nominal_excitation_end_s": 8.0,
+    "settle_target": "original deployable interior target from first-pose commissioning geometry",
+    "settle_translation_kd_n_s_per_m": 75.0,
+    "settle_orientation_kd_nm_s_per_rad": 3.0,
+    "maximum_additional_settle_s": 4.0,
+    "estimated_joint_velocity_abs_deg_s_maximum": 5.0,
+    "consecutive_samples": 20,
+    "signal_source": "deployable measured cuff pose/twist mapped through commissioning geometry"
+  },
+  "mechanics_domain": {
+    "task_profiles": ["coordinated", "hip_lead", "knee_led_clearance_constrained_v1", "two_rate"],
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.025,
+    "generation_static_force_peak_n_maximum": 150.0,
+    "generation_static_moment_peak_nm_maximum": 45.0,
+    "generation_max_attempts": 5000
+  },
+  "held_out_policy": {"is_held_out": false, "formal_seed_namespace": "not generated or accessed"}
+}
