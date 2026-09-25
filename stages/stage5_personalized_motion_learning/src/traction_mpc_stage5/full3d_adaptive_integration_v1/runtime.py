@@ -36,7 +36,8 @@ from ..cr12_plant import Stage5CR12SensorBoundaryPlant, solve_cr12_stage5_ik
 from ..cr12_robot import CR12_VELOCITY_LIMITS_RAD_S
 from ..geometry import STAGE5_GEOMETRY
 from ..hold_stabilizer import solve_loaded_hold_equilibrium
-from ..human import STAGE5_HUMAN
+from ..human import STAGE5_HUMAN, Stage5HumanParameters
+from ..high_rom_v1 import deployable_prior as high_rom_deployable_prior, CONFIG_PATH as high_rom_config_path
 from ..human_waypoint_feedback_mpc import (
     HumanWaypointFeedbackMPCConfigV1,
     HumanWaypointFeedbackMPCV1,
@@ -129,11 +130,11 @@ def nominal_control_geometry() -> PlanarCuffGeometry:
     )
 
 
-def nominal_control_model() -> StateResidualHumanModel:
+def nominal_control_model(rom_human: Stage5HumanParameters = STAGE5_HUMAN) -> StateResidualHumanModel:
     return StateResidualHumanModel(
         nominal_control_geometry(),
-        nominal_base_parameters(STAGE5_HUMAN),
-        STAGE5_HUMAN,
+        nominal_base_parameters(rom_human),
+        rom_human,
         residual_weights_nm=np.zeros((2, 5)),
     )
 
@@ -232,9 +233,10 @@ def _initialize_loaded_runtime(name: str, start_q: np.ndarray, *,
                                spec: Any = PROVISIONAL_LOW_MODERATE_GOAL_TASK,
                                physical_human: Any = None,
                                physical_geometry: Any = None,
+                               control_human: Stage5HumanParameters = STAGE5_HUMAN,
                                startup_execution_pose_alignment: bool = False,
                                exact_cached_plant: bool = False) -> dict[str, Any]:
-    model = nominal_control_model()
+    model = nominal_control_model(control_human)
     allocator = default_engineering_cuff_allocator()
     physical_human = STAGE5_HUMAN if physical_human is None else physical_human
     physical_geometry = STAGE5_GEOMETRY if physical_geometry is None else physical_geometry
@@ -242,7 +244,11 @@ def _initialize_loaded_runtime(name: str, start_q: np.ndarray, *,
     plant = plant_type(
         physical_human, geometry=physical_geometry,
     )
-    plant.reset(start_q)
+    # The registered start target is public task data. The simulated physical
+    # initial joint state is a separate generation-side value; only the sensor
+    # measurement formed below, never this reset value, reaches the observer.
+    physical_initial_q_rad = np.array(start_q, dtype=float, copy=True)
+    plant.reset(physical_initial_q_rad)
     # Preserve the registered nominal loaded-support preload.  For a varied
     # physical setup, apply that same cuff-relative offset at the physical
     # cuff pose; hidden geometry is used only to construct the plant initial
@@ -252,7 +258,7 @@ def _initialize_loaded_runtime(name: str, start_q: np.ndarray, *,
     )
     nominal_cuff_pose = STAGE5_GEOMETRY.world_from_cuff(start_q)
     cuff_relative_support = nominal_cuff_pose.inverse().compose(equilibrium.robot_cuff_pose_world)
-    robot_pose = physical_geometry.world_from_cuff(start_q, physical_human).compose(cuff_relative_support)
+    robot_pose = physical_geometry.world_from_cuff(physical_initial_q_rad, physical_human).compose(cuff_relative_support)
     world_from_end_effector = robot_pose.compose(physical_geometry.end_effector_from_cuff.inverse())
     base_from_end_effector = physical_geometry.world_from_base.inverse().compose(world_from_end_effector)
     robot_q = solve_cr12_stage5_ik(
@@ -260,7 +266,7 @@ def _initialize_loaded_runtime(name: str, start_q: np.ndarray, *,
         base_from_end_effector,
         previous_q_rad=plant.data.qpos[plant.robot_qpos_indices].copy(),
     )
-    plant.data.qpos[plant.human_qpos_indices] = start_q
+    plant.data.qpos[plant.human_qpos_indices] = physical_initial_q_rad
     plant.data.qpos[plant.robot_qpos_indices] = robot_q
     plant.data.qvel[:] = 0.0
     plant.data.ctrl[:] = 0.0
@@ -959,14 +965,14 @@ def _geometry_observation(interface: Any) -> tuple[np.ndarray, float]:
     return position, phi
 
 
-def _fit_and_replay_commissioning(samples: list[dict[str, Any]]) -> tuple[Any, StateResidualBeliefUpdaterV22, list[dict[str, Any]]]:
+def _fit_and_replay_commissioning(samples: list[dict[str, Any]], rom_human: Stage5HumanParameters = STAGE5_HUMAN) -> tuple[Any, StateResidualBeliefUpdaterV22, list[dict[str, Any]]]:
     geometry_estimator = CausalEffectiveGeometryEstimator()
     for sample in samples:
         geometry_estimator.observe(sample["human_position_world_m"][[0, 2]], sample["phi_rad"])
     fit = geometry_estimator.attempt_fit()
     if not fit.accepted:
         raise RuntimeError(f"geometry_fit_rejected:{fit.reason}")
-    updater = StateResidualBeliefUpdaterV22.from_accepted_geometry_fit(fit)
+    updater = StateResidualBeliefUpdaterV22.from_accepted_geometry_fit(fit, rom_human=rom_human)
     model = updater.snapshot().human_model()
     aligned: list[dict[str, Any]] = []
     last: dict[str, Any] | None = None
@@ -1672,6 +1678,11 @@ def _run_executed_case(
                                          or not simulate_planning_latency):
         raise ValueError("DEV-D reference is development-only with DEV-A on, DEV-C off and timing replay")
     physical_human = physical_geometry = None
+    control_human = STAGE5_HUMAN
+    if qualification_case is not None and qualification_case.get("research_model") == "high_rom_v1":
+        control_human = high_rom_deployable_prior()
+        config["human_hard_rom_deg"] = [[0.0, 125.0], [0.0, 125.0]]
+        config["research_model_config_path"] = str(high_rom_config_path)
     if qualification_case is None:
         spec = PROVISIONAL_LOW_MODERATE_GOAL_TASK
         custom_commissioning = None
@@ -1681,6 +1692,7 @@ def _run_executed_case(
     start_q = np.asarray(spec.start_return_target_rad, dtype=float)
     runtime = _initialize_loaded_runtime("full3d_adaptive_v1", start_q, spec=spec,
         physical_human=physical_human,physical_geometry=physical_geometry,
+        control_human=control_human,
         startup_execution_pose_alignment=recovery_options.get("startup_execution_pose_alignment", False),
         exact_cached_plant=recovery_options.get("exact_cached_plant", False))
     plant = runtime["plant"]
@@ -2031,9 +2043,9 @@ def _run_executed_case(
         # must not selectively turn this structurally fixed arm into a crash.
         fit = None
         commissioning_updates = []
-        updater = StateResidualBeliefUpdaterV22(nominal_control_geometry())
+        updater = StateResidualBeliefUpdaterV22(nominal_control_geometry(), rom_human=control_human)
     else:
-        fit, updater, commissioning_updates = _fit_and_replay_commissioning(commissioning_samples)
+        fit, updater, commissioning_updates = _fit_and_replay_commissioning(commissioning_samples, control_human)
     if runtime.get("wall_session") is not None:
         runtime["wall_session"].catch_up("commissioning_fit_and_replay")
     belief = updater.snapshot()
@@ -2079,10 +2091,22 @@ def _run_executed_case(
     planner_type = (TerminalSetHumanWaypointPlannerV1
                     if recovery_options.get("terminal_set_reference", False)
                     else HumanWaypointFeedbackMPCV1)
+    candidate_mode = (qualification_case or {}).get("coordination_candidate")
+    if (qualification_case or {}).get("research_model") == "high_rom_v1":
+        if candidate_mode == "high_rom_hip_leading_feedback_v1":
+            directions = ((1.0, 0.5), (1.0, 0.75), (1.0, 1.0))
+        elif candidate_mode in (None, "high_rom_sync_feedback_v1",
+                                "synchronous_diagnostic_only_feedback_replanning_active"):
+            directions = HumanWaypointFeedbackMPCConfigV1().normalized_coordination_directions
+        else:
+            raise ValueError("unknown High-ROM coordination candidate")
+    else:
+        directions = HumanWaypointFeedbackMPCConfigV1().normalized_coordination_directions
     planner = planner_type(
         spec,
         scheduler,
-        HumanWaypointFeedbackMPCConfigV1(mechanics_duration_search=True),
+        HumanWaypointFeedbackMPCConfigV1(mechanics_duration_search=True,
+            normalized_coordination_directions=directions),
     )
     planner.robust_terminal_center = bool(recovery_options.get("robust_terminal_center", False))
     planner.robust_hold_reference = bool(recovery_options.get("robust_hold_reference", False))
@@ -2441,6 +2465,10 @@ def _run_executed_case(
                 "shank_clearance_session_m": shank_clearance.evaluate(state[:2]),
                 "dev_d_envelope_clearance_m": (
                     clearance.evaluate(state[:2]) if dev_d_rigid_table_reference else float("nan")),
+                "dev_d_measured_sleeve_gap_m": (
+                    clearance.envelope.measured_sleeve_gap(
+                        interface.human_position_world_m, interface.human_rotation_world)
+                    if dev_d_rigid_table_reference else float("nan")),
                 "shank_bed_contact_evaluation_only": _shank_bed_contact(plant),
                 "active_contact_pairs_evaluation_only": _active_contact_pairs(plant),
                 "actual_acceleration_rad_s2": split.human_motion_acceleration_rad_s2.copy(),
@@ -2798,6 +2826,10 @@ def _run_executed_case(
             "shank_clearance_session_m": shank_clearance.evaluate(state[:2]),
             "dev_d_envelope_clearance_m": (
                 clearance.evaluate(state[:2]) if dev_d_rigid_table_reference else float("nan")),
+            "dev_d_measured_sleeve_gap_m": (
+                clearance.envelope.measured_sleeve_gap(
+                    interface.human_position_world_m, interface.human_rotation_world)
+                if dev_d_rigid_table_reference else float("nan")),
             "shank_bed_contact_evaluation_only": _shank_bed_contact(plant),
             "active_contact_pairs_evaluation_only": _active_contact_pairs(plant),
             "actual_acceleration_rad_s2": split.human_motion_acceleration_rad_s2.copy(),
@@ -2965,7 +2997,7 @@ def _run_executed_case(
                 "accepted": False, "reason": "NOT_ATTEMPTED_FIXED_POPULATION_ARM"}),
             "aligned_update_count": len(commissioning_updates),
             "aligned_update_history": commissioning_updates,
-            "population_beta_initial": nominal_base_parameters(STAGE5_HUMAN),
+            "population_beta_initial": nominal_base_parameters(control_human),
             "population_residual_weights_initial_nm": np.zeros((2, 5)),
             "handoff_belief": commissioning_handoff_belief.value_state_record(),
             "history_preserved_at_handoff": True,
@@ -3045,6 +3077,7 @@ def _run_executed_case(
         "adaptation_trace": adaptation_trace,
         "dev_a_recovery": recovery_result,
         "startup_execution_pose_alignment": runtime.get("startup_alignment_record"),
+        "high_rom_coordination_candidate": candidate_mode if (qualification_case or {}).get("research_model") == "high_rom_v1" else None,
         "reference_pacing": {"enabled": recovery_options.get("reference_pacing", False),
             "velocity_fraction": scheduler.reference_velocity_fraction,
             "acceleration_fraction": scheduler.reference_acceleration_fraction,

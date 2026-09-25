@@ -23,6 +23,14 @@ class TruePhysicsMonitor:
         "COMMISSIONING": 0, "ACTIVE_RECOVERY": 0, "TASK": 0})
     boundary_observation_count: dict[str, int] = field(default_factory=lambda: {
         "COMMISSIONING": 0, "ACTIVE_RECOVERY": 0, "TASK": 0})
+    maximum_interface_force_n: dict[str, float] = field(default_factory=lambda: {
+        "COMMISSIONING": 0.0, "ACTIVE_RECOVERY": 0.0, "TASK": 0.0})
+    maximum_interface_moment_nm: dict[str, float] = field(default_factory=lambda: {
+        "COMMISSIONING": 0.0, "ACTIVE_RECOVERY": 0.0, "TASK": 0.0})
+    interface_load_observation_count: dict[str, int] = field(default_factory=lambda: {
+        "COMMISSIONING": 0, "ACTIVE_RECOVERY": 0, "TASK": 0})
+    missing_interface_load_observation_count: dict[str, int] = field(default_factory=lambda: {
+        "COMMISSIONING": 0, "ACTIVE_RECOVERY": 0, "TASK": 0})
 
     def observe(self, plant: object, *, integrated_step: bool = True) -> None:
         """Read physical truth for scoring only, after a step or at task handoff."""
@@ -52,6 +60,18 @@ class TruePhysicsMonitor:
         human = plant.human
         if np.any(q < np.asarray(human.q_min_rad) - 1e-9) or np.any(q > np.asarray(human.q_max_rad) + 1e-9):
             self.rom_violation_steps[stage] += 1
+        # Evaluation-only: the cached post-refresh interface wrench already
+        # belongs to this native state. Never recompute it or feed it to control.
+        interface = getattr(plant, "_interface_value", None)
+        wrench = getattr(interface, "human_wrench_world", None)
+        if wrench is None or np.shape(wrench) != (6,) or not np.all(np.isfinite(wrench)):
+            self.missing_interface_load_observation_count[stage] += 1
+        else:
+            force = math.sqrt(sum(float(v) ** 2 for v in wrench[:3]))
+            moment = math.sqrt(sum(float(v) ** 2 for v in wrench[3:]))
+            self.maximum_interface_force_n[stage] = max(self.maximum_interface_force_n[stage], force)
+            self.maximum_interface_moment_nm[stage] = max(self.maximum_interface_moment_nm[stage], moment)
+            self.interface_load_observation_count[stage] += 1
 
     def record(self) -> dict[str, object]:
         return {
@@ -64,4 +84,9 @@ class TruePhysicsMonitor:
             "rom_violation_steps": dict(self.rom_violation_steps),
             "step_count": dict(self.step_count),
             "boundary_observation_count": dict(self.boundary_observation_count),
+            "maximum_interface_force_n": dict(self.maximum_interface_force_n),
+            "maximum_interface_moment_nm": dict(self.maximum_interface_moment_nm),
+            "interface_load_observation_count": dict(self.interface_load_observation_count),
+            "missing_interface_load_observation_count": dict(self.missing_interface_load_observation_count),
+            "interface_load_scope": "evaluation-only cached post-refresh human-site wrench at native physical nodes",
         }

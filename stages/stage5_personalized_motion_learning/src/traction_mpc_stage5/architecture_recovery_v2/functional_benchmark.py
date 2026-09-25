@@ -877,7 +877,7 @@ def _base_model_with_residual_bias(
     return BaseParameterHumanModel(geometry, effective_beta, HUMAN)
 
 
-def _state_residual_features(state: np.ndarray) -> np.ndarray:
+def _state_residual_features(state: np.ndarray, rom_human: HumanV2Parameters = HUMAN) -> np.ndarray:
     """Return fixed bounded deployable features for the V2 state residual.
 
     Position is normalized by the registered Human-V2 ROM.  Velocity uses the
@@ -889,8 +889,8 @@ def _state_residual_features(state: np.ndarray) -> np.ndarray:
     x = np.asarray(state, dtype=float)
     if x.shape[-1] != 4 or not np.all(np.isfinite(x)):
         raise ValueError("state must contain finite [q1, q2, dq1, dq2]")
-    lower = np.asarray(HUMAN.q_min_rad, dtype=float)
-    upper = np.asarray(HUMAN.q_max_rad, dtype=float)
+    lower = np.asarray(rom_human.q_min_rad, dtype=float)
+    upper = np.asarray(rom_human.q_max_rad, dtype=float)
     q_normalized = 2.0 * (x[..., :2] - lower) / (upper - lower) - 1.0
     velocity_scale = STATE_RESIDUAL_VELOCITY_SCALE_RAD_S
     dq_bounded = x[..., 2:] / (velocity_scale + np.abs(x[..., 2:]))
@@ -904,6 +904,7 @@ def _update_state_residual_weights(
     residual_sample_nm: np.ndarray,
     alpha: float,
     limit_nm: float,
+    rom_human: HumanV2Parameters = HUMAN,
 ) -> tuple[np.ndarray, bool, bool]:
     """Apply one causal normalized-LMS update with a bounded weight projection."""
 
@@ -917,7 +918,7 @@ def _update_state_residual_weights(
         raise ValueError("alpha must be finite and in (0, 1]")
     if not math.isfinite(limit_nm) or limit_nm <= 0.0:
         raise ValueError("limit_nm must be finite and positive")
-    features = _state_residual_features(state)
+    features = _state_residual_features(state, rom_human)
     prediction = np.clip(previous @ features, -limit_nm, limit_nm)
     error = sample - prediction
     candidate = previous + alpha * np.outer(error, features) / float(
@@ -956,7 +957,7 @@ class StateResidualHumanModel(BaseParameterHumanModel):
         )
 
     def raw_state_residual_nm(self, state: np.ndarray) -> np.ndarray:
-        features = _state_residual_features(state)
+        features = _state_residual_features(state, self.rom_human)
         return np.einsum(
             "ij,...j->...i", np.asarray(self.residual_weights_nm), features
         )

@@ -14,7 +14,7 @@ from typing import Any, Callable, Sequence
 
 import numpy as np
 
-from traction_mpc_stage3.human import HUMAN, soft_limit_torque
+from traction_mpc_stage3.human import HUMAN, HumanV2Parameters, soft_limit_torque
 from traction_mpc_stage4.estimator_v2 import (
     PlanarCuffGeometry,
     dynamic_regressor_row,
@@ -72,6 +72,7 @@ class AdaptiveHumanBeliefV22:
     residual_source: str = "ONLINE_ESTIMATED"
     deployable_truth_consumed: bool = False
     residual_limit_nm: float = 12.0
+    rom_human: HumanV2Parameters = HUMAN
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "beta", _finite_array("beta", self.beta, (11,)))
@@ -108,7 +109,7 @@ class AdaptiveHumanBeliefV22:
         return StateResidualHumanModel(
             self.geometry,
             self.beta.copy(),
-            HUMAN,
+            self.rom_human,
             residual_weights_nm=self.state_residual_weights_nm.copy(),
             residual_limit_nm=float(self.residual_limit_nm),
         )
@@ -155,8 +156,10 @@ class StateResidualBeliefUpdaterV22:
         initial_beta: Sequence[float] | None = None,
         residual_alpha: float = 0.20,
         residual_limit_nm: float = 12.0,
+        rom_human: HumanV2Parameters = HUMAN,
     ) -> None:
         self.geometry = geometry
+        self.rom_human = rom_human
         self.dynamics = OnlineEffectiveDynamicsIdentifier()
         if initial_beta is not None:
             self.dynamics.beta = _finite_array("initial_beta", initial_beta, (11,))
@@ -193,7 +196,7 @@ class StateResidualBeliefUpdaterV22:
         torque = _finite_array(
             "applied_generalized_torque_nm", applied_generalized_torque_nm, (2,)
         )
-        if np.linalg.norm(soft_limit_torque(q, dq, HUMAN)) > 1.0e-8:
+        if np.linalg.norm(soft_limit_torque(q, dq, self.rom_human)) > 1.0e-8:
             self.excluded_soft_limit_sample_count += 1
             return {
                 "accepted_for_belief": False,
@@ -207,6 +210,7 @@ class StateResidualBeliefUpdaterV22:
             residual_sample,
             self.residual_alpha,
             self.residual_limit_nm,
+            self.rom_human,
         )
         self.sequence += 1
         self.residual_update_count += 1
@@ -231,6 +235,7 @@ class StateResidualBeliefUpdaterV22:
             accepted_beta_update_count=self.dynamics.accepted_updates,
             residual_update_count=self.residual_update_count,
             residual_limit_nm=self.residual_limit_nm,
+            rom_human=self.rom_human,
         )
 
     def record(self) -> dict[str, Any]:

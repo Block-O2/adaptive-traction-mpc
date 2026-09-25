@@ -1,0 +1,333 @@
+{
+  "schema": "high_rom_function_fresh16_preregistration_v1",
+  "registered_before_any_fresh_run": true,
+  "generation_rule": "eight ordered Stage-B sync physical setups, each interpolated toward the next cyclic setup at fractions 0.35 and 0.65; starts (6,11) and (8,13) degrees; fixed commissioning offsets; simultaneous (120,120) goal",
+  "physical_domain": "coordinate-wise convex hull of Stage-B eight setups",
+  "start_domain": "inside the existing Round19 legal-start observations; new High-ROM start capability is to be tested",
+  "candidate": "high_rom_sync_feedback_v1",
+  "candidate_source_set_sha256": "093b54e36af4e4171d6528be735e4a1371a6b43a7b128ca106b1eb9f14fc1b64",
+  "evaluation_only_instrumentation_sha256": "a1d79bce835cd05b71b0ae23934b31aa2d985227bf09f8a5b8b6fa2d0b3d3f0f",
+  "controller_options_sha256": "d11bb72950f9f74e451548f57ff509e89f92e10aa18f8c62f78bd7a4b7f4c6bb",
+  "physics_dt_s": 0.00025,
+  "sensor_dt_s": 0.005,
+  "case_count": 16,
+  "all_goal_deg": [
+    120.0,
+    120.0
+  ],
+  "excluded_case_count": 0,
+  "exposed_material_payload_count": 33,
+  "scoring": {
+    "base": "unchanged PHASE_B_MATRIX.json/scoring, using each registered start as RETURN target",
+    "native_truth": "both q within 1 degree and both dq within 2 deg/s at OUTBOUND->HOLD; every 0.25ms valid node in a >=0.5s consecutive HOLD run; actual RETURN at completion boundary",
+    "native_safety": "zero modeled contact/ROM violation, native shank clearance >=0, native interface force <=200N and moment <=60Nm with no missing load sample",
+    "native_timing": "zero expired activated plans, every activated plan age <100ms, no native phase timeout; original phase and global task timeouts",
+    "denominator": "all 16 registered cases, no exclusion, substitution or post-result tuning"
+  },
+  "cases": [
+    {
+      "case_key": "high_rom_function_fresh_01_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_01_v1.json",
+      "sha256": "002c7bd58597ce325e6fc8800517484ff60d8286c964201379af4a5a2edf5d59",
+      "material_payload_sha256": "3cd497f26135d67d6cc6cc26dbeb7a6a41cdbd9fba4ea52363d764df21dd33f8",
+      "parent_variants": [
+        "nominal",
+        "up2_xplus"
+      ],
+      "interpolation_fraction_to_second_parent": 0.35,
+      "start_deg": [
+        6.0,
+        11.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_02_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_02_v1.json",
+      "sha256": "91bdf6b756ccf738398df2ccd6b91c8be9b4aea70d93cce12750352d39e400b9",
+      "material_payload_sha256": "5131c20b80de119a6140a20196482a3fe279d4cff3fa3ba9bf7d566562c47947",
+      "parent_variants": [
+        "nominal",
+        "up2_xplus"
+      ],
+      "interpolation_fraction_to_second_parent": 0.65,
+      "start_deg": [
+        8.0,
+        13.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_03_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_03_v1.json",
+      "sha256": "dd8867714e3dc5b36a2814ef629c777af9e2bc4caeeca10e1940ce7e76d2e3b5",
+      "material_payload_sha256": "d5fef8ba5a22d74464ccf9331a72749f3f34050d04be8364956700b15d876c9a",
+      "parent_variants": [
+        "up2_xplus",
+        "up4_xminus"
+      ],
+      "interpolation_fraction_to_second_parent": 0.35,
+      "start_deg": [
+        6.0,
+        11.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_04_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_04_v1.json",
+      "sha256": "f05e24e7fe7131be8094a371a73ec5473076ba3646bd97dad770d6bfa2cbe508",
+      "material_payload_sha256": "24938a91f0d760d089757b14cbc1e3285946099a6fc06dcccc2b4859b06c62ec",
+      "parent_variants": [
+        "up2_xplus",
+        "up4_xminus"
+      ],
+      "interpolation_fraction_to_second_parent": 0.65,
+      "start_deg": [
+        8.0,
+        13.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_05_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_05_v1.json",
+      "sha256": "41c76d7a54730928666db56a50dc70af779f0541f87dc5084bef18e74298ba21",
+      "material_payload_sha256": "e39823d1c7c101a0cd13fbefbaf0d3647bf38f101b418ce9277d471838fda58a",
+      "parent_variants": [
+        "up4_xminus",
+        "heavy_stiff"
+      ],
+      "interpolation_fraction_to_second_parent": 0.35,
+      "start_deg": [
+        6.0,
+        11.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_06_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_06_v1.json",
+      "sha256": "8bc6d193dc4f2069b1bf92ce5909d6bdcce9bd281a7c4ec234e0a75e6c78d90f",
+      "material_payload_sha256": "e3c05b089e96768bd992854c542fcd3962b37017e3ad61acd02e27e323466ade",
+      "parent_variants": [
+        "up4_xminus",
+        "heavy_stiff"
+      ],
+      "interpolation_fraction_to_second_parent": 0.65,
+      "start_deg": [
+        8.0,
+        13.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_07_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_07_v1.json",
+      "sha256": "11887959b4f418dbca6ecefaf3f32a6e41b2e7da0bcbc108587fc2fa368c0a04",
+      "material_payload_sha256": "92c78246195ecfd859b09cd40d6d78a751ad7e0e7fc6dec9a739f62b4810e3c4",
+      "parent_variants": [
+        "heavy_stiff",
+        "light_soft"
+      ],
+      "interpolation_fraction_to_second_parent": 0.35,
+      "start_deg": [
+        6.0,
+        11.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_08_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_08_v1.json",
+      "sha256": "6756825766d0a1394fae67f2fa1b93edbba70fd6775e14ffea4bfdecbb6d3813",
+      "material_payload_sha256": "300d20618656ab9bf7fd95c9e798a231aaa8bcb8795c69460cea3b0b055734dd",
+      "parent_variants": [
+        "heavy_stiff",
+        "light_soft"
+      ],
+      "interpolation_fraction_to_second_parent": 0.65,
+      "start_deg": [
+        8.0,
+        13.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_09_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_09_v1.json",
+      "sha256": "084f4de3b05e8b59fdd6ec65cbb98df191205411de49a1fb5fdc52a55946ee8d",
+      "material_payload_sha256": "3215e79c0a80492417c7c98333ccb34fcf976f400aae6a70a5a58fef5653fc86",
+      "parent_variants": [
+        "light_soft",
+        "long_segments"
+      ],
+      "interpolation_fraction_to_second_parent": 0.35,
+      "start_deg": [
+        6.0,
+        11.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_10_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_10_v1.json",
+      "sha256": "2b13867e0070da5945574658eeb88598478c3cdb714bfeacefca8a96131e98ba",
+      "material_payload_sha256": "52829d647eb8eb6541c73da4e0180e5288da982ab9704eab0beea97bae5db6f0",
+      "parent_variants": [
+        "light_soft",
+        "long_segments"
+      ],
+      "interpolation_fraction_to_second_parent": 0.65,
+      "start_deg": [
+        8.0,
+        13.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_11_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_11_v1.json",
+      "sha256": "6dd7e3c874b1d0e9233e8ab2463e806bababae4018b991bdd404e887a2c172da",
+      "material_payload_sha256": "3d9a48302debed2d6a99cf2e101ff8f221a3baa0d6f12a02bd9eed65f9432867",
+      "parent_variants": [
+        "long_segments",
+        "short_segments"
+      ],
+      "interpolation_fraction_to_second_parent": 0.35,
+      "start_deg": [
+        6.0,
+        11.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_12_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_12_v1.json",
+      "sha256": "ed5489062ce6d24b20bb98fe39579fb141cea2e83f8ae38c198e0a403b972c0a",
+      "material_payload_sha256": "3782d601ee650ac5f5da8668d07027f923b703692008b51d7597f15b6d2438b7",
+      "parent_variants": [
+        "long_segments",
+        "short_segments"
+      ],
+      "interpolation_fraction_to_second_parent": 0.65,
+      "start_deg": [
+        8.0,
+        13.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_13_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_13_v1.json",
+      "sha256": "1538c4ff3555a52f8a1c7bb51291fb4a06279d1d7aabdeced8087bf5357a4682",
+      "material_payload_sha256": "1dc3d3378e3ba6f923170a78ecdce13b0ba37d1706faa8fdaaa2a69052a0e615",
+      "parent_variants": [
+        "short_segments",
+        "mixed"
+      ],
+      "interpolation_fraction_to_second_parent": 0.35,
+      "start_deg": [
+        6.0,
+        11.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_14_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_14_v1.json",
+      "sha256": "adc75d907340361c6ebce4ba632d197e21549b249f0b58aa78e209cfd9956440",
+      "material_payload_sha256": "f4c8d7ad1f06e31cbe0bc44759f50037a3450e0db711f923e94c819fc1a9311c",
+      "parent_variants": [
+        "short_segments",
+        "mixed"
+      ],
+      "interpolation_fraction_to_second_parent": 0.65,
+      "start_deg": [
+        8.0,
+        13.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_15_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_15_v1.json",
+      "sha256": "2effd8620926b150df212f970d726e9d04de4ac02957a674855ef8935491dcad",
+      "material_payload_sha256": "d7989477adfa50c224011952dbbcb08af4da8bd7084eea62b3348a39548be4f9",
+      "parent_variants": [
+        "mixed",
+        "nominal"
+      ],
+      "interpolation_fraction_to_second_parent": 0.35,
+      "start_deg": [
+        6.0,
+        11.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    },
+    {
+      "case_key": "high_rom_function_fresh_16_v1",
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_16_v1.json",
+      "sha256": "80d1d0eafabc690b680a699c459ea29c99c4ec64cee275beb2eded38e61d3083",
+      "material_payload_sha256": "5655a0bc25a4ae81d9c6563c6195fd061db9172582d6dc6e0b9aa1ed62b23fc5",
+      "parent_variants": [
+        "mixed",
+        "nominal"
+      ],
+      "interpolation_fraction_to_second_parent": 0.65,
+      "start_deg": [
+        8.0,
+        13.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ]
+    }
+  ]
+}

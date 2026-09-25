@@ -1,0 +1,179 @@
+{
+  "schema": "high_rom_function_confirmation_v1",
+  "status": "HIGH_ROM_FUNCTION_NOT_CONFIRMED",
+  "stop_reason": "FROZEN_CANDIDATE_REJECTS_REQUESTED_START_VARIATION_BEFORE_MUJOCO",
+  "evidence_category": "offline_discrete_simulation_function_check",
+  "branch": "codex/full3d-cr12-high-rom-v1",
+  "base_commit": "c72760ae76a5b77a7291b9108ca20ff10b6c3be6",
+  "candidate_freeze_set_sha256": "093b54e36af4e4171d6528be735e4a1371a6b43a7b128ca106b1eb9f14fc1b64",
+  "engineering_hypothesis": {
+    "human_hard_rom_deg": [
+      125,
+      125
+    ],
+    "soft_limit_onset_deg": [
+      120,
+      120
+    ],
+    "physical_validation": false
+  },
+  "existing_development_cases": {
+    "registered": 10,
+    "original_native_function_passed": 10,
+    "evaluation_only_instrumented_reruns": 10,
+    "instrumented_native_function_and_original_scoring_passed": 10,
+    "minimum_true_native_hold_valid_dwell_s": 0.5250000000025068,
+    "original_minimum_true_native_hold_valid_dwell_s": 0.5250000000025068,
+    "minimum_native_shank_clearance_m": 0.013134542748006583,
+    "minimum_5ms_causal_measured_sleeve_gap_m": 0.00661573846721299,
+    "minimum_deployable_session_clearance_m": 0.007717693070646539,
+    "maximum_native_cuff_force_n": 129.0610410662865,
+    "maximum_native_cuff_moment_nm": 17.932051932860247,
+    "maximum_robot_torque_fraction": 0.4691288882874332,
+    "maximum_all_stage_plan_activation_age_ms": 69.567917,
+    "maximum_planning_runtime_ms": 44.123,
+    "expired_or_missing_age_activation_count": 0,
+    "native_load_missing_sample_count": 0,
+    "native_contact_or_rom_violation_count": 0,
+    "total_instrumented_host_elapsed_s": 543.2945359169971,
+    "prior_corresponding_host_elapsed_s": 545.3446349976584,
+    "instrumented_host_elapsed_range_s": [
+      53.628153125057,
+      55.625231249956414
+    ]
+  },
+  "fresh_confirmation": {
+    "registered_denominator": 16,
+    "substantive_payload_unique_count": 16,
+    "duplicate_with_exposed_payload_count": 0,
+    "mujoCo_dynamic_executed_count": 0,
+    "dynamic_pass_count": 0,
+    "preflight_setup_blocked_count": 16,
+    "not_run_case_keys": [
+      "high_rom_function_fresh_01_v1",
+      "high_rom_function_fresh_02_v1",
+      "high_rom_function_fresh_03_v1",
+      "high_rom_function_fresh_04_v1",
+      "high_rom_function_fresh_05_v1",
+      "high_rom_function_fresh_06_v1",
+      "high_rom_function_fresh_07_v1",
+      "high_rom_function_fresh_08_v1",
+      "high_rom_function_fresh_09_v1",
+      "high_rom_function_fresh_10_v1",
+      "high_rom_function_fresh_11_v1",
+      "high_rom_function_fresh_12_v1",
+      "high_rom_function_fresh_13_v1",
+      "high_rom_function_fresh_14_v1",
+      "high_rom_function_fresh_15_v1",
+      "high_rom_function_fresh_16_v1"
+    ],
+    "blocked_case_keys": [
+      "high_rom_function_fresh_01_v1",
+      "high_rom_function_fresh_02_v1",
+      "high_rom_function_fresh_03_v1",
+      "high_rom_function_fresh_04_v1",
+      "high_rom_function_fresh_05_v1",
+      "high_rom_function_fresh_06_v1",
+      "high_rom_function_fresh_07_v1",
+      "high_rom_function_fresh_08_v1",
+      "high_rom_function_fresh_09_v1",
+      "high_rom_function_fresh_10_v1",
+      "high_rom_function_fresh_11_v1",
+      "high_rom_function_fresh_12_v1",
+      "high_rom_function_fresh_13_v1",
+      "high_rom_function_fresh_14_v1",
+      "high_rom_function_fresh_15_v1",
+      "high_rom_function_fresh_16_v1"
+    ],
+    "failure_classes": {
+      "frozen_high_rom_start_guard": 16,
+      "task_or_planning_timeout_observed": 0,
+      "mechanical_infeasibility_observed": 0,
+      "dynamic_safety_failure_observed": 0
+    },
+    "blocking_error": "ValueError:High-ROM start/return target differs from versioned task",
+    "all_goal_deg": [
+      120,
+      120
+    ],
+    "start_variants_deg": [
+      [
+        6,
+        11
+      ],
+      [
+        8,
+        13
+      ]
+    ],
+    "spec_sha256": "526a371b495687edac1f81c2c31a117ab089ffd33d3778d21f33f905a8ce7f97"
+  },
+  "candidate_change": {
+    "controller_source_modified_in_this_turn": false,
+    "physics_model_or_dt_modified": false,
+    "task_or_safety_threshold_modified": false,
+    "evaluation_only_physics_monitor_changed": [
+      {
+        "path": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/fresh_qualification_v1/physics_monitor.py",
+        "frozen_sha256": "064f26fc495196bc7a38d40693353188c1fa7f3a4614f7721394fd3a1b21592b",
+        "current_sha256": "a1d79bce835cd05b71b0ae23934b31aa2d985227bf09f8a5b8b6fa2d0b3d3f0f"
+      }
+    ],
+    "old_evidence_overwritten": false
+  },
+  "audit": {
+    "status": "ACCEPTED_LIMITED_NEGATIVE_CONFIRMATION",
+    "role": "single_independent_read_only_auditor",
+    "conclusion": "HIGH_ROM_FUNCTION_NOT_CONFIRMED; fresh16 all BLOCKED_BEFORE_MUJOCO",
+    "raw_native_spot_checks": [
+      "matrix_nominal_sync",
+      "matrix_heavy_stiff_sync",
+      "matrix_mixed_sync"
+    ],
+    "candidate_hash_finding": "only evaluation-only physics_monitor.py differs from frozen 168-file candidate",
+    "freshness_finding": "16 material payloads unique and distinct from 33 unique exposed old payloads",
+    "blocking_findings": [
+      "scenario.py:92 fixes High-ROM start/return at (5,10), rejecting both registered fresh start variants"
+    ],
+    "measurement_caveat": "native_states store qpos/qvel per step; monitor stores per-step accumulated load/clearance extrema and counts, not per-node load/clearance values",
+    "auditor_actions": "read-only; no simulation or Git mutation"
+  },
+  "checkpoint_commit": null,
+  "checkpoint_commit_reason": "conditional 16/16 fresh function and accepted audit gate not met",
+  "git_actions": {
+    "staged": false,
+    "committed": false,
+    "pushed": false,
+    "merged": false,
+    "reset": false,
+    "stash": false,
+    "clean": false
+  },
+  "quota": {
+    "limit_id": "codex",
+    "weekly_window_minutes": 10080,
+    "reset_unix_seconds": 1790917420,
+    "start_used_percent": 13,
+    "latest_used_percent": 14,
+    "new_percentage_points": 1,
+    "stop_new_experiment_at_used_percent": 15,
+    "maximum_authorized_used_percent": 16,
+    "outer_project_stop_at_used_percent": 45
+  },
+  "evidence_boundaries": [
+    "0.25ms post-integration native node scoring, not mathematical inter-step continuous safety",
+    "native shank physical monitor and modeled contact/ROM only",
+    "sleeve/table collision pair disabled; sleeve gap measured at 5ms",
+    "125-degree human ROM is an engineering hypothesis",
+    "no hardware evidence",
+    "per-node native-state file omits load/clearance series; physics-monitor maxima are source-and-count-auditable aggregates, not independently reconstructible per-node peaks"
+  ],
+  "file_locations": {
+    "candidate_freeze": "docs/high_rom_v1/HIGH_ROM_FUNCTION_FREEZE.json",
+    "existing10_native": "docs/high_rom_v1/HIGH_ROM_FUNCTION_EXISTING10_NATIVE.json",
+    "instrumented10_native": "docs/high_rom_v1/HIGH_ROM_FUNCTION_RECHECK10_NATIVE.json",
+    "fresh16_spec": "docs/high_rom_v1/HIGH_ROM_FUNCTION_FRESH16_SPEC.json",
+    "fresh16_preflight": "docs/high_rom_v1/HIGH_ROM_FUNCTION_FRESH16_PREFLIGHT.json",
+    "dependencies": "docs/high_rom_v1/HIGH_ROM_FUNCTION_DEPENDENCIES.json"
+  }
+}

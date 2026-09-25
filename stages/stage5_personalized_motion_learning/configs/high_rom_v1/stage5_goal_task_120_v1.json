@@ -1,0 +1,96 @@
+{
+  "schema": "stage5_goal_task_v1",
+  "name": "high_rom_120_120_research_only",
+  "provisional_not_hardware_or_clinically_calibrated": true,
+  "source_fixture": "Stage-5 low/moderate cold-start prefix endpoints",
+  "start_return_target_deg": [
+    5.0,
+    10.0
+  ],
+  "outbound_goal_target_deg": [
+    120.0,
+    120.0
+  ],
+  "q_bounds_deg": [
+    [
+      0.0,
+      125.0
+    ],
+    [
+      0.0,
+      125.0
+    ]
+  ],
+  "joint_angle_completion_tolerance_deg": [
+    1.0,
+    1.0
+  ],
+  "joint_velocity_completion_tolerance_deg_s": [
+    2.0,
+    2.0
+  ],
+  "hold_duration_s": 0.5,
+  "phase_timeout_s": 10.0,
+  "task_joint_velocity_limit_deg_s": [
+    45.0,
+    75.0
+  ],
+  "task_joint_acceleration_limit_deg_s2": [
+    300.0,
+    600.0
+  ],
+  "controller_completion_margin": {
+    "joint_angle_margin_deg": [
+      0.05,
+      0.1
+    ],
+    "joint_velocity_margin_deg_s": [
+      0.75,
+      1.5
+    ],
+    "source_evidence": "goal_mpc_complete_v1/attempt_05_final exact phase-transition estimator-minus-truth errors plus a small deterministic guard"
+  },
+  "trajectory_contract": {
+    "full_joint_trajectory_provided": false,
+    "fixed_joint_coordination_ratio": false,
+    "path_corridor_active": false
+  },
+  "status_note": "Provisional Stage-5 engineering limits only; not hardware- or clinically calibrated. They constrain each joint independently and do not define a trajectory, coordination ratio, or path corridor. The controller completion margin only tightens online decisions; the original 1 deg and 2 deg/s tolerances remain the actual task definition.",
+  "source_task": "configs/stage5_goal_task_v1.json",
+  "model_status": "ENGINEERING_HYPOTHESIS_NOT_PHYSICALLY_VALIDATED",
+  "rom_rationale": "125 deg is the minimum 5 deg soft-limit-offset hard bound that places the 120 deg goal at the original soft-limit onset. It is a simulation research hypothesis, not a measured human hard limit.",
+  "goal_near_limit_margin_deg": {
+    "to_soft_onset": [
+      0.0,
+      0.0
+    ],
+    "to_hard_limit": [
+      5.0,
+      5.0
+    ]
+  },
+  "qualification_status": "NONE",
+  "research_schema": "high_rom_120_model_and_task_v1",
+  "human_model": {
+    "hard_rom_deg": [
+      [
+        0.0,
+        125.0
+      ],
+      [
+        0.0,
+        125.0
+      ]
+    ],
+    "soft_limit_margin_deg": 5.0,
+    "passive_stiffness_nm_rad": [
+      10.0,
+      10.0
+    ],
+    "passive_damping_nms_rad": [
+      5.0,
+      5.0
+    ],
+    "model_authority": "ENGINEERING_HYPOTHESIS_ONLY"
+  }
+}

@@ -11,9 +11,11 @@ from typing import Any, Mapping
 
 import numpy as np
 
+from traction_mpc_stage3.coupled import BED_HEIGHT_M, SHANK_RADIUS_M
 from traction_mpc_stage3.frames import RigidTransform
 from ..geometry import STAGE5_GEOMETRY, Stage5Geometry
 from ..human import STAGE5_HUMAN, Stage5HumanParameters
+from ..high_rom_v1 import contract as high_rom_contract
 from ..task import GoalTaskSpec, PROVISIONAL_LOW_MODERATE_GOAL_TASK
 
 
@@ -75,15 +77,54 @@ def hidden_plant(case: Mapping[str,Any]) -> tuple[HiddenHumanV2,Stage5Geometry,G
         thigh_inertia_radius_fraction=float(physical['thigh_inertia_radius_fraction']),
         shank_inertia_radius_fraction=float(physical['shank_inertia_radius_fraction']),
     )
+    if case.get('research_model') == 'high_rom_v1':
+        record = high_rom_contract()
+        bounds = record['human_model']['hard_rom_deg']
+        human = replace(human, q_min_rad=tuple(np.radians([b[0] for b in bounds])),
+                        q_max_rad=tuple(np.radians([b[1] for b in bounds])))
+    elif 'research_model' in case:
+        raise ValueError('unknown research model')
+    hip_offset = np.asarray(physical['hip_translation_xz_m'], dtype=float)
+    if hip_offset.shape != (2,) or not np.all(np.isfinite(hip_offset)):
+        raise ValueError('hip translation must be two finite coordinates')
     translation=STAGE5_GEOMETRY.world_from_human.translation.copy()
-    translation[[0,2]]+=np.asarray(physical['hip_translation_xz_m'],dtype=float)
+    translation[[0,2]]+=hip_offset
     geometry=replace(STAGE5_GEOMETRY,world_from_human=RigidTransform(
         STAGE5_GEOMETRY.world_from_human.rotation.copy(),translation))
-    spec=replace(PROVISIONAL_LOW_MODERATE_GOAL_TASK,
-        name='fresh_qualification_'+str(case['case_key']),
-        start_return_target_rad=tuple(np.radians(task['start_deg'])),
-        outbound_goal_target_rad=tuple(np.radians(task['goal_deg'])))
+    if case.get('research_model') == 'high_rom_v1':
+        base_spec = GoalTaskSpec.from_mapping(record)
+        start_deg = np.asarray(task['start_deg'], dtype=float)
+        goal_deg = np.asarray(task['goal_deg'], dtype=float)
+        if (start_deg.shape != (2,) or goal_deg.shape != (2,)
+                or not np.all(np.isfinite(start_deg)) or not np.all(np.isfinite(goal_deg))):
+            raise ValueError('High-ROM start and goal must be finite joint pairs')
+        bounds = np.asarray(record['human_model']['hard_rom_deg'], dtype=float)
+        if np.any(start_deg < bounds[:, 0]) or np.any(start_deg > bounds[:, 1]):
+            raise ValueError('High-ROM start outside versioned hard ROM')
+        if np.any(goal_deg > 120.0) or np.any(goal_deg < 0.0):
+            raise ValueError('High-ROM development goal outside staged 0–120 degree target')
+        # Generation-side, physical start clearance. This never enters online control.
+        q1, q2 = np.radians(start_deg)
+        hip = geometry.world_from_human.translation
+        x_axis, z_axis = geometry.world_from_human.rotation[:, 0], geometry.world_from_human.rotation[:, 2]
+        knee = hip + human.thigh_length_m * (math.cos(q1) * x_axis + math.sin(q1) * z_axis)
+        ankle = knee + human.shank_length_m * (math.cos(q1-q2) * x_axis + math.sin(q1-q2) * z_axis)
+        if min(knee[2], ankle[2]) - SHANK_RADIUS_M - BED_HEIGHT_M < 0.0:
+            raise ValueError('High-ROM physical start has shank/bed overlap')
+        spec = replace(base_spec, name='high_rom_development_'+str(case['case_key']),
+                       start_return_target_rad=tuple(np.radians(start_deg)),
+                       outbound_goal_target_rad=tuple(np.radians(goal_deg)))
+    else:
+        spec=replace(PROVISIONAL_LOW_MODERATE_GOAL_TASK,
+            name='fresh_qualification_'+str(case['case_key']),
+            start_return_target_rad=tuple(np.radians(task['start_deg'])),
+            outbound_goal_target_rad=tuple(np.radians(task['goal_deg'])))
     commissioning=np.radians(np.asarray(task['commissioning_waypoints_deg'],dtype=float))
-    if commissioning.shape!=(5,2) or not np.allclose(commissioning[[0,-1]],spec.start_return_target_rad):
+    if (commissioning.shape!=(5,2) or not np.all(np.isfinite(commissioning))
+            or not np.allclose(commissioning[[0,-1]],spec.start_return_target_rad)):
         raise ValueError('commissioning must start and end at registered task start')
+    if case.get('research_model') == 'high_rom_v1' and (
+            np.any(commissioning < np.asarray(human.q_min_rad))
+            or np.any(commissioning > np.asarray(human.q_max_rad))):
+        raise ValueError('High-ROM commissioning outside versioned hard ROM')
     return human,geometry,spec,commissioning

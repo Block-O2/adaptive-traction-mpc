@@ -48,7 +48,7 @@ def rest_to_rest_clearance_lower(clearance: Any, origin: np.ndarray, target: np.
     half = 0.5/(env.sample_count-1)
     thigh_bound = half*g.thigh_length_m*1.875*abs(delta[0])
     limb_bound = thigh_bound + half*(env.shank_length_upper_m+SLEEVE_OUTER_RADIUS_M)*1.875*abs(delta[0]-delta[1])
-    if (min(origin[0],target[0]) >= 0 and max(origin[0],target[0]) <= np.pi/2
+    if (min(origin[0],target[0]) >= 0 and max(origin[0],target[0]) <= np.pi
             and abs(float(g.plane_x_world[2])) < 1e-9 and g.plane_z_world[2] > 0):
         thigh_bound = 0.0
     else:
@@ -236,7 +236,7 @@ def select_robust_terminal_reference(*, spec, goal, clearance, origin):
     # Excluding the constant proximal component from the radius ranking is
     # valid only if this entire original goal box retains that same branch.
     if not (np.array_equal(g.plane_x_world,[1.,0.,0.]) and np.array_equal(g.plane_z_world,[0.,0.,1.])
-            and lower[0]>=0. and upper[0]<=np.pi/2):
+            and lower[0]>=0. and upper[0]<=np.pi):
         return select_terminal_reference(spec=spec,goal=goal,clearance=clearance,origin=origin)
     margins = env.margins(points)
     floor = max(0.,float(np.min(clearance.evaluate(np.vstack([spec.start_return_target_rad,goal])))))

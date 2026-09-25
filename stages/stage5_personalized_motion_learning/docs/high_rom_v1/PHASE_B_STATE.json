@@ -1,0 +1,115 @@
+{
+  "schema": "high_rom_v1_phase_b_state",
+  "status": "HIGH_ROM_DEVELOPMENT_PASS",
+  "baseline_commit": "c72760ae76a5b77a7291b9108ca20ff10b6c3be6",
+  "branch": "codex/full3d-cr12-high-rom-v1",
+  "worktree": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-high-rom-v1",
+  "quota": {
+    "limit_id": "codex",
+    "window_duration_minutes": 10080,
+    "reset_unix_seconds": 1790917420,
+    "start_used_percent": 10,
+    "closeout_at_used_percent": 20,
+    "stop_new_model_dispatch_at_used_percent": 21,
+    "absolute_max_used_percent": 22,
+    "outer_project_stop_percent": 45,
+    "inflight_stop_verified": false,
+    "latest_used_percent": 12
+  },
+  "phase": "STAGE_B_CLOSED",
+  "dynamic_rollouts": [
+    {
+      "case": "high_rom_nominal_sync_100_v1",
+      "output": "stages/stage5_personalized_motion_learning/results/high_rom_v1/development/nominal_sync_100_attempt_01",
+      "status": "ABORTED",
+      "reason": "NO_FEASIBLE_WAYPOINT:ValueError:TERMINAL_REFERENCE_SEARCH_NO_FEASIBLE_POINT_FOUND",
+      "host_elapsed_s": 35.0819081668742,
+      "outbound_arrival_observed": true,
+      "hold_to_return_transition_observed": true,
+      "actual_return_completed": false
+    },
+    {
+      "case": "high_rom_nominal_sync_100_v1",
+      "output": "stages/stage5_personalized_motion_learning/results/high_rom_v1/development/nominal_sync_100_attempt_02",
+      "status": "COMPLETE",
+      "reason": null,
+      "host_elapsed_s": 49.842767709167674,
+      "true_goal_continuous_dwell_s": 0.995,
+      "actual_return_final_deg": [
+        5.311575837661751,
+        9.768909937458222
+      ],
+      "peak_force_n": 113.90870499160883,
+      "peak_moment_nm": 16.12916415269971,
+      "peak_robot_torque_fraction": 0.4086096726127135,
+      "minimum_true_clearance_m": 0.014139521865583659,
+      "maximum_plan_activation_age_ms": 60.027583,
+      "true_goal_valid_dwell_before_return_s": 0.755000000003605
+    },
+    {
+      "case": "high_rom_nominal_sync_110_v1",
+      "output": "stages/stage5_personalized_motion_learning/results/high_rom_v1/development/nominal_sync_110_attempt_01",
+      "status": "COMPLETE",
+      "host_elapsed_s": 51.87045487505384,
+      "true_goal_continuous_dwell_s": 0.9,
+      "actual_return_final_deg": [
+        5.339629835358899,
+        9.799610923237859
+      ],
+      "peak_force_n": 113.46818866471814,
+      "peak_moment_nm": 15.964567917989365,
+      "minimum_true_clearance_m": 0.014380823035600922,
+      "maximum_plan_activation_age_ms": 69.275333,
+      "true_goal_valid_dwell_before_return_s": 0.6500000000031037
+    },
+    {
+      "case": "high_rom_nominal_sync_120_v1",
+      "output": "stages/stage5_personalized_motion_learning/results/high_rom_v1/development/nominal_sync_120_attempt_01",
+      "status": "COMPLETE",
+      "host_elapsed_s": 54.92887966684066,
+      "true_goal_continuous_dwell_s": 0.925,
+      "actual_return_final_deg": [
+        5.365968753570369,
+        9.800101983728398
+      ],
+      "peak_force_n": 112.89342508599216,
+      "peak_moment_nm": 15.883270087417648,
+      "minimum_true_clearance_m": 0.014789008320818222,
+      "maximum_plan_activation_age_ms": 64.567166,
+      "true_goal_valid_dwell_before_return_s": 0.6600000000031514
+    }
+  ],
+  "next_action": "Stop Stage B. Fresh qualification or Stage C requires separate user instruction.",
+  "matrix_path": "stages/stage5_personalized_motion_learning/docs/high_rom_v1/PHASE_B_MATRIX.json",
+  "high_rom_matrix": {
+    "completed": 10,
+    "passed": 10,
+    "single_sync_candidate_all_eight_pass": true,
+    "summary": "stages/stage5_personalized_motion_learning/docs/high_rom_v1/PHASE_B_RESULTS.json"
+  },
+  "low_rom_regression": {
+    "completed": 23,
+    "passed": 23,
+    "total": 23,
+    "manifest": "stages/stage5_personalized_motion_learning/docs/high_rom_v1/PHASE_B_LOW_ROM_REGRESSION.json",
+    "summary": "stages/stage5_personalized_motion_learning/docs/high_rom_v1/PHASE_B_LOW_ROM_RESULTS.json"
+  },
+  "auditor": {
+    "role": "independent_read_only",
+    "high_rom_matrix": "10/10 verified from raw summary/trace",
+    "low_rom_same_source_regression": "23/23 verified from raw summary/trace",
+    "blocking_findings": [],
+    "limitations": [
+      "saved-node dwell and clearance evidence",
+      "robot swept collision not continuously proven",
+      "human physical 125-degree ROM not validated"
+    ]
+  },
+  "host_experiment_elapsed_s": {
+    "staged_ladder_all_attempts": 191.72401041793637,
+    "registered_high_rom_all_attempts": 654.7873074149247,
+    "low_rom_23": 826.1638265415095,
+    "all_monitored_dynamic_attempts": 1672.6751443743706
+  },
+  "evidence_category": "offline_simulation_development"
+}

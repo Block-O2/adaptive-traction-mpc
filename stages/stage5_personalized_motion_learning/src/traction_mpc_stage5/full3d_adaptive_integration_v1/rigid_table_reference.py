@@ -129,7 +129,7 @@ class RigidTableReferenceEnvelopeV1:
         # the fixed hip, so this structural bound is the deployable guarantee.
         proximal_gap = (np.full(len(rows), self.registered_proximal_installation_gap_lower_m)
                          if (np.all(rows[:, 0] >= 0.0)
-                             and np.all(rows[:, 0] <= math.pi / 2)
+                             and np.all(rows[:, 0] <= math.pi)
                              and abs(px_z) < 1e-9
                              and pz_z > 0.0)
                          else np.minimum(hip_z, knee_z)
@@ -213,7 +213,15 @@ class RigidTableReferenceEnvelopeV1:
         knee_z = (hip[2] + g.thigh_length_m * (
             np.cos(q[:, 0]) * g.plane_x_world[2]
             + np.sin(q[:, 0]) * g.plane_z_world[2]))
-        if (np.all(q[:, 0] >= 0.0) and np.all(q[:, 0] <= math.pi / 2)
+        # The knee stays above the fixed hip throughout 0 <= q1 <= pi,
+        # including the High-ROM range beyond 90 deg. Check polynomial
+        # extrema, not just grid nodes, before using the structural gap.
+        q1_derivative = np.polynomial.polynomial.polyder(c[0])
+        q1_roots = np.polynomial.polynomial.polyroots(q1_derivative)
+        q1_extrema = [0.0, 1.0, *(float(r.real) for r in q1_roots
+            if abs(float(r.imag)) < 1e-10 and 0.0 <= float(r.real) <= 1.0)]
+        q1_values = [float(np.polynomial.polynomial.polyval(t, c[0])) for t in q1_extrema]
+        if (min(q1_values) >= 0.0 and max(q1_values) <= math.pi
                 and abs(float(g.plane_x_world[2])) < 1e-9
                 and float(g.plane_z_world[2]) > 0.0):
             thigh_bound = 0.0

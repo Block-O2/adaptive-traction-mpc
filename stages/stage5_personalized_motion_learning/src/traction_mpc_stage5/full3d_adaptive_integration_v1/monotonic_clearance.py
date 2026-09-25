@@ -105,7 +105,7 @@ def monotonic_certificate(envelope,coefficients):
     # Recognition only controls specialization; all residuals are paid below.
     if max(e1,ephi)>1e-10: return record
     lo=min(q0[0].lo,q1[0].lo); hi=max(q0[0].hi,q1[0].hi)
-    if lo<0. or hi>math.pi/2: return record
+    if lo<0. or hi>math.pi: return record
     if max((q0[0]-q0[1]).abs().hi,(q1[0]-q1[1]).abs().hi)>4.: return record
     coslo=trig(I(hi),True).lo; coshi=trig(I(lo),True).hi
     k=I(g.thigh_length_m)*delta[0]*I(coslo,coshi)
@@ -133,7 +133,7 @@ def monotonic_certificate(envelope,coefficients):
             record['lowers'][name]=lower
             proof.update(endpoint_interval_m=ends[which][name].pair(),lower_m=lower)
         record['body_proofs'][name]=proof
-    if (I(lo)-I(e1)).lo>=0. and (I(hi)+I(e1)).hi<=math.pi/2:
+    if (I(lo)-I(e1)).lo>=0. and (I(hi)+I(e1)).hi<=math.pi:
         record['lowers']['proximal_thigh_m']=envelope.registered_proximal_installation_gap_lower_m
         record['body_proofs']['proximal_thigh_m']={'constant_registered_floor':True,'lower_m':envelope.registered_proximal_installation_gap_lower_m}
     return record
