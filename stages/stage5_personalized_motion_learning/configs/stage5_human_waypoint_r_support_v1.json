@@ -1,0 +1,68 @@
+{
+  "schema": "stage5_human_waypoint_r_support_v1",
+  "evidence_category": "bounded_engineering_validation",
+  "trajectory_family": {
+    "coordination_gain": 0.25,
+    "hip_progress": "s + 0.25*r*sin(pi*s)",
+    "knee_progress": "s - 0.25*r*sin(pi*s)",
+    "r_domain": [-1.0, 1.0]
+  },
+  "geometry_scan": {
+    "r_min": -1.0,
+    "r_max": 1.0,
+    "r_step": 0.001,
+    "path_sample_count": 4001,
+    "feasibility_contract": "existing shank-table clearance >= 0; no added margin"
+  },
+  "dynamic_boundary_audit_r": [
+    -0.27,
+    -0.26,
+    -0.25,
+    -0.245,
+    -0.24,
+    -0.235,
+    -0.225,
+    -0.2,
+    -0.125,
+    0.0,
+    0.25,
+    0.5,
+    0.55,
+    0.6,
+    0.625,
+    0.65,
+    0.675,
+    0.7,
+    0.725,
+    0.75,
+    1.0
+  ],
+  "support_acceptance": {
+    "minimum_representative_point_count": 5,
+    "minimum_boundary_pair_rms_path_distance_deg": 1.0,
+    "minimum_boundary_progress_separation_span": 0.1,
+    "require_complete_task": true,
+    "maximum_human_motion_violation_count": 0,
+    "maximum_contact_sample_count": 0,
+    "maximum_brake_cycle_count": 0,
+    "maximum_force_gate_event_count": 0,
+    "maximum_torque_clip_event_count": 0
+  },
+  "frozen_semantics": {
+    "hwmpc_unchanged": true,
+    "scheduler_unchanged": true,
+    "cr12_execution_unchanged": true,
+    "task_and_timing_unchanged": true,
+    "safety_limits_unchanged": true,
+    "geometry_and_contact_model_unchanged": true,
+    "force_used_for_interval_selection": false,
+    "personalization_or_learning_active": false
+  },
+  "notes": [
+    "The audit grid is fixed before dynamic execution and includes expected out-of-support negative-side points to locate the execution boundary.",
+    "The final grid refines the coarse attempt-01 positive-side bracket r=0.50 pass / r=0.75 contact before the self-contained final validation run.",
+    "The accepted interval is the widest contiguous run of passing audit points contained in the continuously geometry-feasible component that includes r=0.",
+    "Cuff force and moment are observation-only and never enter support selection.",
+    "Finite dynamic samples support an engineering interval; they are not a formal guarantee for every real-valued r."
+  ]
+}

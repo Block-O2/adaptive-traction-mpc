@@ -1,0 +1,128 @@
+<mujoco model="rokae_xmatecr12_v0">
+  <compiler angle="radian" meshdir="../vendor/rokae_ros2_xmatecr12/meshes" autolimits="true"/>
+  <option integrator="implicitfast"/>
+
+  <!--
+    Derived from the official xMateCR12 URDF at the commit recorded in the
+    vendor README. Joint frames, axes, limits, inertials, meshes, and effort
+    ranges are copied without CAD inference. This file is the MuJoCo adapter.
+  -->
+  <asset>
+    <material name="cr12_white" rgba="0.90 0.92 0.94 1" specular="0.35" shininess="0.2"/>
+    <mesh name="cr12_base_mesh" file="xMateCR12_base.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="cr12_link1_mesh" file="xMateCR12_link1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="cr12_link2_mesh" file="xMateCR12_link2.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="cr12_link3_mesh" file="xMateCR12_link3.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="cr12_link4_mesh" file="xMateCR12_link4.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="cr12_link5_mesh" file="xMateCR12_link5.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="cr12_link6_mesh" file="xMateCR12_link6.stl" scale="0.001 0.001 0.001"/>
+  </asset>
+
+  <worldbody>
+    <light name="spotlight" mode="targetbodycom" target="xMateCR12_link5" pos="0 -1 2"/>
+    <body name="xMateCR12_base">
+      <geom name="cr12_base_visual" type="mesh" mesh="cr12_base_mesh" material="cr12_white"
+        contype="0" conaffinity="0" group="2" mass="0"/>
+      <geom name="cr12_base_collision" type="mesh" mesh="cr12_base_mesh"
+        contype="1" conaffinity="1" group="3" rgba="0 0 0 0" mass="0"/>
+      <body name="xMateCR12_link1">
+        <!--
+          armature=0.1 is inherited unchanged from the existing Stage-5 MuJoCo
+          execution layer as numerical rotor-inertia regularization. It is not
+          an official CR12 hardware parameter; link inertials below remain the
+          official nominal URDF values.
+        -->
+        <joint name="joint1" type="hinge" axis="0 0 1" range="-6.2832 6.2832" armature="0.1"/>
+        <inertial pos="-0.000057 0.039544 0.19659" mass="9.762"
+          fullinertia="0.13037779 0.10332618 0.07160903 0.00003839 0.00015469 0.03481509"/>
+        <geom name="cr12_link1_visual" type="mesh" mesh="cr12_link1_mesh" material="cr12_white"
+          contype="0" conaffinity="0" group="2"/>
+        <geom name="cr12_link1_collision" type="mesh" mesh="cr12_link1_mesh"
+          contype="1" conaffinity="1" group="3" rgba="0 0 0 0"/>
+        <body name="xMateCR12_link2" pos="0 0 0.35">
+          <joint name="joint2" type="hinge" axis="0 1 0" range="-2.9671 2.9671" armature="0.1"/>
+          <inertial pos="-0.000521 0.171648 0.322684" mass="13.748"
+            fullinertia="1.45657505 1.45549299 0.05816521 0.00003009 0.00200615 0.00539027"/>
+          <geom name="cr12_link2_visual" type="mesh" mesh="cr12_link2_mesh" material="cr12_white"
+            contype="0" conaffinity="0" group="2"/>
+          <geom name="cr12_link2_collision" type="mesh" mesh="cr12_link2_mesh"
+            contype="1" conaffinity="1" group="3" rgba="0 0 0 0"/>
+          <body name="xMateCR12_link3" pos="0 0 0.76">
+            <joint name="joint3" type="hinge" axis="0 -1 0" range="-6.2832 6.2832" armature="0.1"/>
+            <inertial pos="-0.000034 -0.05076 0.059953" mass="4.659"
+              fullinertia="0.05218042 0.03753873 0.02573444 -0.00000246 0.00000101 0.01436120"/>
+            <geom name="cr12_link3_visual" type="mesh" mesh="cr12_link3_mesh" material="cr12_white"
+              contype="0" conaffinity="0" group="2"/>
+            <geom name="cr12_link3_collision" type="mesh" mesh="cr12_link3_mesh"
+              contype="1" conaffinity="1" group="3" rgba="0 0 0 0"/>
+            <body name="xMateCR12_link4" pos="0 0 0.54">
+              <joint name="joint4" type="hinge" axis="0 0 1" range="-6.2832 6.2832" armature="0.1"/>
+              <inertial pos="-0.000074 0.012412 -0.165484" mass="4.015"
+                fullinertia="0.09862021 0.09720570 0.00930672 0.00001912 -0.00003049 0.00809217"/>
+              <geom name="cr12_link4_visual" type="mesh" mesh="cr12_link4_mesh" material="cr12_white"
+                contype="0" conaffinity="0" group="2"/>
+              <geom name="cr12_link4_collision" type="mesh" mesh="cr12_link4_mesh"
+                contype="1" conaffinity="1" group="3" rgba="0 0 0 0"/>
+              <body name="xMateCR12_link5" pos="0 -0.15 0">
+                <joint name="joint5" type="hinge" axis="0 -1 0" range="-6.2832 6.2832" armature="0.1"/>
+                <inertial pos="-0.000043 -0.031099 0.014133" mass="2.34"
+                  fullinertia="0.00953363 0.00581555 0.00692085 -0.00000282 0.00000824 0.00099717"/>
+                <geom name="cr12_link5_visual" type="mesh" mesh="cr12_link5_mesh" material="cr12_white"
+                  contype="0" conaffinity="0" group="2"/>
+                <geom name="cr12_link5_collision" type="mesh" mesh="cr12_link5_mesh"
+                  contype="1" conaffinity="1" group="3" rgba="0 0 0 0"/>
+                <body name="xMateCR12_link6" pos="0 0 0.127">
+                  <joint name="joint6" type="hinge" axis="0 0 1" range="-6.2832 6.2832" armature="0.1"/>
+                  <inertial pos="0.000001 -0.000201 -0.049302" mass="1.142"
+                    fullinertia="0.00217743 0.00218830 0.00125122 -0.00000018 -0.00000015 -0.00000570"/>
+                  <geom name="cr12_link6_visual" type="mesh" mesh="cr12_link6_mesh" material="cr12_white"
+                    contype="0" conaffinity="0" group="2"/>
+                  <geom name="cr12_link6_collision" type="mesh" mesh="cr12_link6_mesh"
+                    contype="1" conaffinity="1" group="3" rgba="0 0 0 0"/>
+                  <!-- Official URDF ends at link6; no undocumented flange offset is added. -->
+                  <site name="attachment_site" pos="0 0 0" quat="1 0 0 0" size="0.006"
+                    rgba="0.1 0.8 0.9 1"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <contact>
+    <!-- Adjacent and non-adjacent exclusions copied from the official CR12 SRDF. -->
+    <exclude body1="xMateCR12_base" body2="xMateCR12_link1"/>
+    <exclude body1="xMateCR12_base" body2="xMateCR12_link3"/>
+    <exclude body1="xMateCR12_link1" body2="xMateCR12_link2"/>
+    <exclude body1="xMateCR12_link1" body2="xMateCR12_link3"/>
+    <exclude body1="xMateCR12_link2" body2="xMateCR12_link3"/>
+    <exclude body1="xMateCR12_link2" body2="xMateCR12_link4"/>
+    <exclude body1="xMateCR12_link3" body2="xMateCR12_link4"/>
+    <exclude body1="xMateCR12_link3" body2="xMateCR12_link5"/>
+    <exclude body1="xMateCR12_link3" body2="xMateCR12_link6"/>
+    <exclude body1="xMateCR12_link4" body2="xMateCR12_link5"/>
+    <exclude body1="xMateCR12_link4" body2="xMateCR12_link6"/>
+    <exclude body1="xMateCR12_link5" body2="xMateCR12_link6"/>
+  </contact>
+
+  <actuator>
+    <motor name="joint1_torque" joint="joint1" gear="1" ctrllimited="true"
+      ctrlrange="-436 436" forcelimited="true" forcerange="-436 436"/>
+    <motor name="joint2_torque" joint="joint2" gear="1" ctrllimited="true"
+      ctrlrange="-436 436" forcelimited="true" forcerange="-436 436"/>
+    <motor name="joint3_torque" joint="joint3" gear="1" ctrllimited="true"
+      ctrlrange="-194 194" forcelimited="true" forcerange="-194 194"/>
+    <motor name="joint4_torque" joint="joint4" gear="1" ctrllimited="true"
+      ctrlrange="-102 102" forcelimited="true" forcerange="-102 102"/>
+    <motor name="joint5_torque" joint="joint5" gear="1" ctrllimited="true"
+      ctrlrange="-66 66" forcelimited="true" forcerange="-66 66"/>
+    <motor name="joint6_torque" joint="joint6" gear="1" ctrllimited="true"
+      ctrlrange="-66 66" forcelimited="true" forcerange="-66 66"/>
+  </actuator>
+
+  <keyframe>
+    <key name="home" qpos="0 0 0 0 0 0" ctrl="0 0 0 0 0 0"/>
+  </keyframe>
+</mujoco>

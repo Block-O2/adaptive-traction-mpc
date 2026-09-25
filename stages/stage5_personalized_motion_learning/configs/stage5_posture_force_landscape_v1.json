@@ -1,0 +1,65 @@
+{
+  "schema": "stage5_posture_force_landscape_v1",
+  "evidence_category": "offline_audit_of_existing_formal_deployable_traces",
+  "status": "AUTHORIZED_NO_VALUE_TRAINING",
+  "source": {
+    "matched_branch_result": "results/matched_short_branch_v1_formal_attempt_01/matched_short_branch_results.json",
+    "required_rollouts": 27,
+    "reference_map_rollouts": [
+      "early_outbound/seed_20260917/balanced",
+      "early_outbound/seed_20260918/balanced",
+      "early_outbound/seed_20260919/balanced"
+    ],
+    "sample_period_s": 0.02,
+    "mujoco_truth_allowed_in_controller_side_quantities": false
+  },
+  "frozen_condition": {
+    "human_model_version": "stage5-human:max-step-v1-step_0p04:u005:540e39f0c5ef",
+    "gamma": 0.5,
+    "interface": "fixed_nominal",
+    "human_model_updates_enabled": false,
+    "trust_to_gamma_authority": false,
+    "value_or_rl_control": false
+  },
+  "representative_states": [
+    {"name": "early_outbound", "phase": "OUTBOUND", "target_progress": 0.25},
+    {"name": "mid_outbound", "phase": "OUTBOUND", "target_progress": 0.60},
+    {"name": "near_goal", "phase": "OUTBOUND", "target_progress": 0.92},
+    {"name": "hold_neighborhood", "phase": "HOLD", "target_phase_fraction": 0.50},
+    {"name": "mid_return", "phase": "RETURN", "target_progress": 0.50}
+  ],
+  "map": {
+    "q1_bins": 12,
+    "q2_bins": 12,
+    "minimum_samples_per_cell": 3,
+    "minimum_unique_seeds_per_cell": 2,
+    "low_support_cells_must_be_masked": true
+  },
+  "matched_local_audit": {
+    "duration_s": 0.20,
+    "groups": 9,
+    "branches": ["hip_leading", "balanced", "knee_leading"],
+    "primary_quantity": "mean norm of deployable measured physical cuff force over the fixed local interval",
+    "secondary_quantities": [
+      "cuff moment norm",
+      "deployable measured generalized Human input norm",
+      "support generalized-action norm",
+      "motion-increment generalized-action norm"
+    ]
+  },
+  "decision_rules": {
+    "meaningful_force_separation_fraction": 0.05,
+    "essentially_flat_force_separation_fraction": 0.01,
+    "minimum_repetitions_with_same_low_force_branch_per_anchor": 2,
+    "LF-A": "all validity gates pass and every anchor has repeatable local mean-force separation of at least 5 percent",
+    "LF-B": "a posture ordering is repeatable in at least one anchor but separation is below 5 percent or inconsistent across anchors/seeds",
+    "LF-C": "all valid matched local force separations are at most 1 percent and no anchor has a repeatable low-force posture",
+    "LF-D": "source completeness, deployable-only boundary, fixed-condition, matched-state, timing, or support validity fails"
+  },
+  "control_authority": {
+    "value_model_training": false,
+    "value_or_rl_connected_to_control": false,
+    "stronger_branch_study_only_if_lf_a": true,
+    "stage3_or_stage4_modified": false
+  }
+}

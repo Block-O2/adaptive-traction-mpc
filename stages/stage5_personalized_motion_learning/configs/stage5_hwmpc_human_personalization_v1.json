@@ -1,0 +1,69 @@
+{
+  "schema": "stage5_hwmpc_human_personalization_v1",
+  "evidence_category": "bounded_matched_engineering_validation",
+  "status": "PREREGISTERED_BEFORE_HWMPC_PERSONALIZATION_OUTCOMES",
+  "trajectory": {
+    "coordination_r": 0.25,
+    "frozen_support_interval": [-0.24, 0.55],
+    "selection_is_force_neutral": true,
+    "same_r_for_all_arms_conditions_and_repetitions": true
+  },
+  "mismatch_conditions": [
+    {
+      "name": "damping_plus_20pct",
+      "truth_scales_evaluation_only": [1.0, 1.0, 1.2],
+      "existing_evidence": "progressive_personalization_longitudinal_v1"
+    },
+    {
+      "name": "stiffness_plus_15pct",
+      "truth_scales_evaluation_only": [1.0, 1.15, 1.0],
+      "existing_evidence": "human_id_reduced_shadow_v1"
+    }
+  ],
+  "matched_arms": {
+    "fixed_population_prior": {
+      "initial_theta": [1.0, 1.0, 1.0],
+      "updates_enabled": false
+    },
+    "progressive": {
+      "initial_theta": [1.0, 1.0, 1.0],
+      "updates_enabled": true,
+      "activation": "next repetition boundary only",
+      "next_update_gate": "current active model post-update POSITIVE"
+    }
+  },
+  "repetitions_per_arm_condition": 5,
+  "physical_reset_gap_in_session_time_s": 0.25,
+  "human_identification": {
+    "parameterization": ["alpha_M", "alpha_K", "alpha_D"],
+    "lower_scales": [0.5, 0.5, 0.5],
+    "upper_scales": [1.5, 1.5, 1.5],
+    "smoothing_alpha": 0.1,
+    "maximum_update_fraction_of_span": 0.03,
+    "regularization_weight": 0.001,
+    "future_validation_blocks": [8, 10, 12],
+    "fit_validation_trust_and_post_update_logic": "unchanged existing progressive Human personalization"
+  },
+  "acceptance": {
+    "all_tasks_complete": true,
+    "minimum_progressive_activation_count_per_condition": 1,
+    "require_causal_model_version_alignment": true,
+    "require_positive_post_update_evidence_for_each_activated_model": true,
+    "require_r_inside_frozen_support": true,
+    "maximum_human_motion_violation_count": 0,
+    "maximum_contact_sample_count": 0,
+    "maximum_brake_cycle_count": 0,
+    "maximum_force_gate_event_count": 0,
+    "maximum_torque_clip_event_count": 0,
+    "require_progressive_final_prediction_not_worse_than_population_prior": true
+  },
+  "scope": {
+    "cumulative_force_objective": false,
+    "force_based_r_selection": false,
+    "value_learning": false,
+    "imitation_learning": false,
+    "rl": false,
+    "controller_gain_or_threshold_change": false,
+    "task_timing_geometry_or_contact_change": false
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "schema": "stage5_hwmpc_state_feedback_v1",
+  "status": "FROZEN_BEFORE_BOUNDED_MUJOCO_EXECUTION",
+  "evidence_category": "bounded_opt_in_engineering_validation",
+  "action_contract": {
+    "action": "next_2d_human_waypoint_increment_rad",
+    "maximum_waypoint_step_fraction": 0.20,
+    "action_scales": [0.5, 1.0],
+    "normalized_coordination_directions": [
+      [1.0, 0.5],
+      [1.0, 0.75],
+      [1.0, 1.0],
+      [0.75, 1.0],
+      [0.5, 1.0]
+    ],
+    "target_velocity_rad_s": [0.0, 0.0],
+    "selection_cost": {
+      "goal_error_weight": 1.0,
+      "waypoint_change_weight": 0.02,
+      "incomplete_phase_weight": 0.25
+    },
+    "force_used_for_generation_or_selection": false,
+    "fixed_r_or_path_template_used": false,
+    "return_replays_outbound_path": false
+  },
+  "matched_pacing": {
+    "outbound_duration_s": 2.2,
+    "hold_duration_s": 0.5,
+    "return_duration_s": 2.2,
+    "terminal_block_start_s": 1.5,
+    "terminal_transition_duration_s": 0.4,
+    "terminal_settle_duration_s": 0.3,
+    "terminal_target": "exact registered phase q_goal with dq_target=0",
+    "control_period_s": 0.005
+  },
+  "fixed_human": {
+    "mismatch_condition": "damping_plus_20pct",
+    "truth_scales_evaluation_only": [1.0, 1.0, 1.2],
+    "control_model_id": "stage5-human:hwmpc-damping_plus_20pct-progressive:u004:89ac34f2de7a",
+    "control_theta": [1.0001754892631383, 0.9992726057434099, 1.0778852088673856],
+    "support_outcome": "positive",
+    "support_evidence_id": "post-update:stage5-human:hwmpc-damping_plus_20pct-progressive:u004:89ac34f2de7a:positive:rep-5",
+    "source_artifact": "stages/stage5_personalized_motion_learning/results/engineering_validation/hwmpc_human_personalization_v1_attempt_02/hwmpc_human_personalization.json",
+    "source_artifact_sha256": "9ee3151edfc3b3fef79f365b599300bae77d7e2ca1adbf0bb1498881eb69bf74",
+    "updates_enabled": false,
+    "trust_driven_pacing_enabled": false
+  },
+  "bounded_test_budget": {
+    "maximum_complete_diagnostic_episodes": 6,
+    "complete_episodes": [
+      {"name": "greedy_repeat_0", "selection": "greedy", "seed": 0},
+      {"name": "greedy_repeat_1", "selection": "greedy", "seed": 1},
+      {"name": "explore_seed_101", "selection": "bounded_top_k", "seed": 101},
+      {"name": "explore_seed_203", "selection": "bounded_top_k", "seed": 203},
+      {"name": "explore_seed_307", "selection": "bounded_top_k", "seed": 307},
+      {"name": "explore_seed_401", "selection": "bounded_top_k", "seed": 401}
+    ],
+    "exploration_probability": 0.45,
+    "exploration_top_k": 3,
+    "declared_short_branch_checks": [
+      "candidate_lattice_has_independent_hip_knee_increments",
+      "outbound_targets_do_not_use_fixed_r_template",
+      "return_targets_are_replanned_not_reversed_outbound",
+      "replan_starts_from_last_emitted_reference",
+      "full_reference_segment_respects_motion_limits",
+      "full_reference_segment_respects_nonpenetration_geometry",
+      "insufficient_remaining_time_rejects_candidate",
+      "no_feasible_candidate_records_stop_without_time_extension"
+    ]
+  },
+  "scope": {
+    "opt_in_runner_only": true,
+    "production_default_changed": false,
+    "human_model_or_interface_changed": false,
+    "execution_gains_changed": false,
+    "rom_speed_acceleration_limits_changed": false,
+    "safety_filter_brake_force_gate_changed": false,
+    "actual_motion_monitor_changed": false,
+    "detailed_robot_interface_predictor_used": false,
+    "torque_increment_mpc_used": false,
+    "force_objective_or_learning_used": false,
+    "stage3_or_stage4_changed": false,
+    "historical_evidence_changed": false
+  }
+}

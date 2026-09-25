@@ -1,0 +1,78 @@
+{
+  "schema": "stage5_matched_short_branch_v1",
+  "evidence_category": "preregistered_matched_short_branch_study",
+  "status": "PREREGISTERED_USER_AUTHORIZED_MANUAL_FORMAL_RUN_REQUIRED",
+  "research_question": "from the same complete deployable state, do short q1/q2 coordination biases cause repeatable meaningful differences in future measured cumulative cuff force when task timing is comparable",
+  "source_personalization_policy": {
+    "model_update_alpha": 0.25,
+    "maximum_per_scale_step": 0.04,
+    "frozen_for_this_study": true
+  },
+  "fixed_condition": {
+    "human_model_version": "stage5-human:max-step-v1-step_0p04:u005:540e39f0c5ef",
+    "human_model_theta": [1.0000989140471204, 1.0012127972091571, 1.1539417660360922],
+    "human_model_updates_enabled": false,
+    "trust_to_gamma_authority": false,
+    "gamma": 0.5,
+    "base_planning_joint_velocity_ceiling_deg_s": [15.0, 25.0],
+    "effective_planning_joint_velocity_ceiling_deg_s": [7.5, 12.5],
+    "planning_physical_force_ceiling_n": 180.0,
+    "interface": "fixed_nominal",
+    "human_truth_condition_evaluation_only": "damping_plus_20pct",
+    "goal_task_config": "configs/stage5_goal_task_v1.json",
+    "maximum_duration_s": 25.5,
+    "prefix_backend": "native",
+    "learned_value_or_actor_control": false
+  },
+  "matched_units": {
+    "cem_seeds": [20260917, 20260918, 20260919],
+    "anchors": [
+      {"name": "early_outbound", "phase": "OUTBOUND", "minimum_progress": 0.25},
+      {"name": "mid_outbound", "phase": "OUTBOUND", "minimum_progress": 0.60},
+      {"name": "mid_return", "phase": "RETURN", "minimum_progress": 0.50}
+    ],
+    "branches": ["hip_leading", "balanced", "knee_leading"],
+    "short_bias_duration_s": 0.20,
+    "hip_bias_magnitude_nm": 0.40,
+    "knee_bias_magnitude_nm": 0.25,
+    "bias_semantics": "phase-relative total-action perturbation; hip-leading advances q1 and retards q2, knee-leading does the reverse, balanced is exactly zero",
+    "post_branch_control": "same frozen baseline Goal-MPC",
+    "full_prescribed_trajectory": false,
+    "permanent_discrete_action_set": false
+  },
+  "timing_contract": {
+    "same_goal_task_phase_timeouts": true,
+    "same_hold_duration": true,
+    "same_fixed_gamma": true,
+    "maximum_within_group_remaining_duration_range_s": 0.02,
+    "comparison_if_timing_gate_fails": "BR-B unless snapshot validity itself fails",
+    "faster_completion_alone_is_path_benefit": false
+  },
+  "separation_gates": {
+    "all_27_rollouts_complete": true,
+    "same_start_digest_within_each_seed_anchor_group": true,
+    "all_short_branch_prefix_screens_feasible": true,
+    "no_new_safety_or_motion_envelope_event": true,
+    "minimum_best_worst_future_force_difference_n_s": 5.0,
+    "minimum_best_worst_time_normalized_mean_force_relative_difference": 0.05,
+    "minimum_seed_groups_with_same_best_branch_per_anchor": 2,
+    "all_timing_groups_comparable": true
+  },
+  "decision_rules": {
+    "BR-A": "all validity and timing gates pass, every anchor has repeatable best-branch identity in at least two of three seeds, and both integral and mean-force separation gates pass",
+    "BR-B": "snapshots and executions are valid, but differences are too small, not repeatable, or timing comparability fails",
+    "BR-C": "snapshot equality, fixed-condition isolation, branch feasibility, artifact completeness, or experiment execution validity fails"
+  },
+  "future_shadow_value_if_br_a": {
+    "control_connection": false,
+    "dataset_unit": "complete rollout with matched-group and trajectory identifiers",
+    "target": "remaining integral of deployable measured cuff-force norm to required task completion with existing non-success penalty",
+    "split": "complete matched seed-anchor groups, never adjacent frames",
+    "primary_validation": "held-out within-group path ranking plus baseline progress/time predictor",
+    "ood_rule": "unsupported prediction cannot receive an attractive low value"
+  },
+  "frozen_open_issues": {
+    "acceleration_monitor": "A-MONITOR-UNRESOLVED",
+    "hard_realtime_or_WCET_claim": false
+  }
+}

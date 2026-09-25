@@ -27,6 +27,9 @@ from traction_mpc_stage4 import human_model as stage4_human_model
 from traction_mpc_stage4 import mpc as stage4_mpc
 from traction_mpc_stage5.architecture_recovery_v2 import effective_model
 from traction_mpc_stage5.architecture_recovery_v2 import functional_benchmark
+from traction_mpc_stage5.full3d_adaptive_integration_v1 import (
+    time_contract as full3d_time_contract,
+)
 from traction_mpc_stage5.architecture_recovery_v2.functional_benchmark import (
     make_benchmark_case,
     run_closed_loop_case,
@@ -1120,7 +1123,20 @@ def main() -> None:
     args = parser.parse_args()
     if args.output_dir.exists():
         raise FileExistsError(f"refusing to overwrite {args.output_dir}")
-    config = json.loads(args.config.read_text())
+    wrapper_config = json.loads(args.config.read_text())
+    base_config_path = wrapper_config.get("base_config_path")
+    if base_config_path is not None:
+        base_config_path = Path(base_config_path).resolve()
+        config = json.loads(base_config_path.read_text())
+        config.update(
+            {
+                key: value
+                for key, value in wrapper_config.items()
+                if key != "base_config_path"
+            }
+        )
+    else:
+        config = wrapper_config
     validate_config(config)
     pre_run_source_seal = validate_expected_source_seal(config)
     configured_case_keys = [
@@ -1145,8 +1161,11 @@ def main() -> None:
     source_paths = [
         args.config,
         Path(__file__).resolve(),
+        Path(full3d_time_contract.__file__).resolve(),
         *[path for root in package_roots for path in sorted(root.glob("*.py"))],
     ]
+    if base_config_path is not None:
+        source_paths.append(base_config_path)
     preregistration_values: list[str] = []
     if config.get("preregistration_path"):
         preregistration_values.append(str(config["preregistration_path"]))
@@ -1217,6 +1236,12 @@ def main() -> None:
                     task_residual_bias_limit_nm=float(
                         config.get("task_residual_bias_limit_nm", 12.0)
                     ),
+                    evaluation_time_contract=str(
+                        config.get(
+                            "evaluation_time_contract",
+                            "historical_post_state_pre_reference_v1",
+                        )
+                    ),
                 )
             except Exception as error:
                 row = {
@@ -1259,6 +1284,10 @@ def main() -> None:
         "study_id": config["study_id"],
         "config_path": str(args.config),
         "config_sha256": _sha256(args.config),
+        "base_config_path": (
+            str(base_config_path) if base_config_path is not None else None
+        ),
+        "effective_config": config,
         "git_branch": _git(["branch", "--show-current"]),
         "git_head": _git(["rev-parse", "HEAD"]),
         "source_or_config_changed_during_run": manifest_before != manifest_after,

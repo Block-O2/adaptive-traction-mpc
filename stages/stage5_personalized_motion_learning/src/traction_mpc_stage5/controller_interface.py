@@ -286,6 +286,15 @@ class InterfaceHoldPredictionBatch:
     predicted_prefix_interface_rotation_human_rad: np.ndarray | None = None
     predicted_prefix_interface_angular_velocity_human_rad_s: np.ndarray | None = None
     predicted_prefix_executable_wrench_world: np.ndarray | None = None
+    predicted_prefix_robot_cuff_position_world_m: np.ndarray | None = None
+    predicted_prefix_robot_cuff_rotation_world: np.ndarray | None = None
+    predicted_prefix_robot_cuff_linear_velocity_world_m_s: np.ndarray | None = None
+    predicted_prefix_robot_cuff_angular_velocity_world_rad_s: np.ndarray | None = None
+    predicted_prefix_physical_cuff_wrench_world: np.ndarray | None = None
+    predicted_prefix_robot_q_rad: np.ndarray | None = None
+    predicted_prefix_robot_dq_rad_s: np.ndarray | None = None
+    prediction_supported: np.ndarray | None = None
+    compact_model_supported: np.ndarray | None = None
 
     def command(self, index: int) -> ExecutableCommandPreview:
         return self.executable_batch.command(index)
@@ -1017,6 +1026,63 @@ class InterfaceAwareFirstActionBatchPreview:
                 None
                 if prediction.predicted_prefix_executable_wrench_world is None
                 else prediction.predicted_prefix_executable_wrench_world[selected].copy()
+            ),
+            predicted_prefix_robot_cuff_position_world_m=(
+                None
+                if prediction.predicted_prefix_robot_cuff_position_world_m is None
+                else prediction.predicted_prefix_robot_cuff_position_world_m[
+                    selected
+                ].copy()
+            ),
+            predicted_prefix_robot_cuff_rotation_world=(
+                None
+                if prediction.predicted_prefix_robot_cuff_rotation_world is None
+                else prediction.predicted_prefix_robot_cuff_rotation_world[
+                    selected
+                ].copy()
+            ),
+            predicted_prefix_robot_cuff_linear_velocity_world_m_s=(
+                None
+                if prediction.predicted_prefix_robot_cuff_linear_velocity_world_m_s
+                is None
+                else prediction.predicted_prefix_robot_cuff_linear_velocity_world_m_s[
+                    selected
+                ].copy()
+            ),
+            predicted_prefix_robot_cuff_angular_velocity_world_rad_s=(
+                None
+                if prediction.predicted_prefix_robot_cuff_angular_velocity_world_rad_s
+                is None
+                else prediction.predicted_prefix_robot_cuff_angular_velocity_world_rad_s[
+                    selected
+                ].copy()
+            ),
+            predicted_prefix_physical_cuff_wrench_world=(
+                None
+                if prediction.predicted_prefix_physical_cuff_wrench_world is None
+                else prediction.predicted_prefix_physical_cuff_wrench_world[
+                    selected
+                ].copy()
+            ),
+            predicted_prefix_robot_q_rad=(
+                None
+                if prediction.predicted_prefix_robot_q_rad is None
+                else prediction.predicted_prefix_robot_q_rad[selected].copy()
+            ),
+            predicted_prefix_robot_dq_rad_s=(
+                None
+                if prediction.predicted_prefix_robot_dq_rad_s is None
+                else prediction.predicted_prefix_robot_dq_rad_s[selected].copy()
+            ),
+            prediction_supported=(
+                None
+                if prediction.prediction_supported is None
+                else prediction.prediction_supported[selected].copy()
+            ),
+            compact_model_supported=(
+                None
+                if prediction.compact_model_supported is None
+                else prediction.compact_model_supported[selected].copy()
             ),
         )
 
@@ -2078,10 +2144,45 @@ def make_interface_aware_first_action_batch_preview(
     capture_prefix_diagnostics: bool = False,
     prefix_backend: str = "numpy",
     capture_prefix_substeps: bool = False,
+    compact_model: Any | None = None,
+    compact_robot_cuff_state: Any | None = None,
+    rigid_body_contract: Any | None = None,
+    rigid_body_robot_state: Any | None = None,
 ) -> InterfaceAwareFirstActionBatchPreview:
     """Compose one batched executable-command and physical-interface screen."""
 
-    return InterfaceAwareFirstActionBatchPreview(
+    preview_type = InterfaceAwareFirstActionBatchPreview
+    extra: dict[str, Any] = {}
+    if compact_model is not None and rigid_body_contract is not None:
+        raise ValueError("select exactly one shadow execution predictor")
+    if compact_model is not None:
+        # Lazy import avoids changing the authoritative/default prediction path.
+        from .compact_execution_predictor import (
+            CompactClosedLoopFirstActionBatchPreview,
+        )
+
+        preview_type = CompactClosedLoopFirstActionBatchPreview
+        extra["compact_model"] = compact_model
+        if compact_robot_cuff_state is None:
+            raise ValueError(
+                "compact predictor requires the current deployable robot cuff state"
+            )
+        extra["robot_cuff_state"] = compact_robot_cuff_state
+    elif compact_robot_cuff_state is not None:
+        raise ValueError("robot cuff state is only valid with the compact predictor")
+    if rigid_body_contract is not None:
+        from .cr12_rigid_body_predictor import (
+            CR12RigidBodyFirstActionBatchPreview,
+        )
+
+        if rigid_body_robot_state is None:
+            raise ValueError("rigid-body predictor requires deployable CR12 q/dq")
+        preview_type = CR12RigidBodyFirstActionBatchPreview
+        extra["rigid_body_contract"] = rigid_body_contract
+        extra["robot_state"] = rigid_body_robot_state
+    elif rigid_body_robot_state is not None:
+        raise ValueError("CR12 state is only valid with the rigid-body predictor")
+    return preview_type(
         executable_preview,
         predictor,
         interface_state,
@@ -2094,6 +2195,7 @@ def make_interface_aware_first_action_batch_preview(
         capture_prefix_diagnostics=capture_prefix_diagnostics,
         prefix_backend=prefix_backend,
         capture_prefix_substeps=capture_prefix_substeps,
+        **extra,
     )
 
 

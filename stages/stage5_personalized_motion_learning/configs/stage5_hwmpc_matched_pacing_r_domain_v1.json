@@ -1,0 +1,53 @@
+{
+  "schema": "stage5_hwmpc_matched_pacing_r_domain_v1",
+  "status": "FROZEN_FROM_RB_A_BOUNDARY_VALIDATION",
+  "source_artifact": {
+    "path": "stages/stage5_personalized_motion_learning/results/engineering_validation/hwmpc_matched_pacing_r_boundary_v1_attempt_01/matched_pacing_r_boundary.json",
+    "sha256": "13449fc906cfbaece429b5b0cdf6ceb9c795790b646bf7b2c7c1b7dc5c2925f8",
+    "decision": "RB-A — MATCHED-PACING r INTERVAL VALIDATED"
+  },
+  "older_free_pacing_support_interval": [-0.24, 0.55],
+  "frozen_matched_pacing_interval": [-0.24, 0.51],
+  "boundary_evidence": {
+    "largest_validated_grid_point": 0.51,
+    "first_failing_grid_point": 0.515,
+    "grid_resolution": 0.005,
+    "boundary_repeat_count": 2,
+    "classification_consistent": true,
+    "r_0p510_terminal_dq_deg_s": [1.9999394654555234, 0.8846274413998945],
+    "r_0p515_terminal_dq_deg_s": [2.101824775886229, 0.8035640506824917],
+    "interpretation": "deterministic simulation grid boundary under the exact V2 scheduler and existing 2 deg/s criterion; no additional robustness margin and no claim of a continuous mathematical boundary"
+  },
+  "matched_pacing_scheduler": {
+    "version": "boundary_conditioned_matched_pacing_v2_unchanged",
+    "outbound_duration_s": 2.2,
+    "hold_duration_s": 0.5,
+    "return_duration_s": 2.2,
+    "terminal_block_start_s": 1.5,
+    "terminal_transition_duration_s": 0.4,
+    "terminal_settle_duration_s": 0.3
+  },
+  "next_clean_cost_study": {
+    "status": "DESIGNED_NOT_EXECUTED",
+    "representative_r_values": [-0.24, -0.09, 0.0, 0.06, 0.21, 0.36, 0.51],
+    "selection_basis": "six equal interval coordinates plus exact balanced r=0, frozen without cuff-force outcomes",
+    "fixed_supported_personalized_human_model": "stage5-human:hwmpc-damping_plus_20pct-progressive:u004:89ac34f2de7a",
+    "matched_phase_durations_s": [2.2, 0.5, 2.2],
+    "order_randomization_seeds": [20260921, 20260922, 20260923],
+    "eligibility_gate": "every compared path must complete and satisfy the frozen matched-pacing completion, motion, geometry and execution-safety contract",
+    "primary_observation": "cumulative measured cuff-force norm integral over the same 4.9 s task window",
+    "secondary_observations": [
+      "mean and peak cuff force",
+      "peak cuff moment",
+      "q1-q2 path separation",
+      "tracking error",
+      "20 ms scheduled and realized acceleration",
+      "CR12 torque fraction",
+      "clearance and safety-event counts"
+    ],
+    "force_used_for_waypoint_or_r_selection": false,
+    "value_learning": false,
+    "imitation_learning": false,
+    "rl": false
+  }
+}

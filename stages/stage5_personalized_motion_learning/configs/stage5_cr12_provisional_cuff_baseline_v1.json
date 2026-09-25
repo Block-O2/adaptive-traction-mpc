@@ -1,0 +1,145 @@
+{
+  "schema": "stage5_cr12_provisional_cuff_baseline_v1",
+  "evidence_category": "smoke_engineering_validation_only",
+  "classification": "CR12-P-B — INTEGRATION WORKS BUT BASELINE BLOCKED BY EXISTING MONITOR/EXECUTION ISSUE",
+  "robot_model_selector": "cr12_v0",
+  "model_scope": {
+    "robot_geometry": "official ROKAE xMateCR12 model at pinned repository commit",
+    "robot_kinematics_dynamics_limits": "official nominal URDF data with the already documented MuJoCo armature assumption",
+    "end_effector_adapter_and_cuff_geometry": "existing provisional Stage-5 surrogate",
+    "end_effector_hardware_faithful": false,
+    "hex_h_qc_geometry_present": false,
+    "hex_h_qc_measurement_frame_present": false
+  },
+  "official_robot_source": {
+    "repository": "https://github.com/RokaeRobot/rokae_ros2.git",
+    "commit": "d6a508c38513d4c39b2f10f14275d0e26df7fb43",
+    "urdf": "vendor/rokae_ros2_xmatecr12/xMateCR12.urdf.xacro",
+    "srdf": "vendor/rokae_ros2_xmatecr12/xMateCR12.srdf",
+    "tip_link_and_provisional_flange": "xMateCR12_link6"
+  },
+  "placement_and_frame_chain": {
+    "transform_convention": "T_PARENT_CHILD maps CHILD coordinates into PARENT",
+    "T_world_base": {
+      "translation_m": [0.6, -0.62, 0.04],
+      "rotation": [
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "source": "unchanged Stage-5 robot placement"
+    },
+    "T_base_flange": "official CR12 joint1..joint6 chain; link6 origin is the provisional flange",
+    "T_flange_cuff": {
+      "translation_m": [0.0, 0.14, 0.0],
+      "rotation": [
+        [1.0, 0.0, 0.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 1.0, 0.0]
+      ],
+      "source": "unchanged Stage-5 T_EC rebound to the CR12 attachment_site",
+      "provisional": true
+    },
+    "cuff_frame": {
+      "x_axis": "along shank and cuff bar",
+      "y_axis": "circumferential or tangential",
+      "z_axis": "radial and principal contact-force direction",
+      "flange_positive_y_maps_to": "cuff negative z"
+    }
+  },
+  "provisional_geometry": {
+    "adapter": {
+      "type": "cylinder",
+      "centerline_start_m_in_flange": [0.0, 0.0, 0.0],
+      "centerline_end_m_in_flange": [0.0, 0.082, 0.0],
+      "radius_m": 0.018,
+      "collision_enabled": true
+    },
+    "cuff_bar": {
+      "center_m_in_flange": [0.0, 0.14, 0.0],
+      "axis_in_flange": [1.0, 0.0, 0.0],
+      "length_m": 0.08,
+      "radius_m": 0.012,
+      "collision_enabled": false
+    }
+  },
+  "interface_and_wrench_contract": {
+    "plant_interface": "unchanged Stage-5 explicit provisional spring-damper interface",
+    "robot_site": "adapter_cuff_site",
+    "human_site": "sleeve_attach_site",
+    "reported_cuff_wrench_expression_frame": "WORLD",
+    "reported_cuff_wrench_reference_point": "Human sleeve_attach_site",
+    "computation": "virtual-work-consistent mapping of the explicit interface site wrenches",
+    "hex_h_qc_measurement": false
+  },
+  "actuator_and_control_contract": {
+    "joint_order": ["joint1", "joint2", "joint3", "joint4", "joint5", "joint6"],
+    "actuator_order": [
+      "joint1_torque",
+      "joint2_torque",
+      "joint3_torque",
+      "joint4_torque",
+      "joint5_torque",
+      "joint6_torque"
+    ],
+    "torque_limits_nm": [436.0, 436.0, 194.0, 102.0, 66.0, 66.0],
+    "controller_command_contract": "unchanged six-axis Stage-5 Cartesian-to-joint torque realization",
+    "measured_velocity_feedback": "CR12 encoder state through CR12 cuff-offset Jacobian",
+    "official_velocity_limits_exposed_but_not_added_as_hidden_constraint": true
+  },
+  "validation": {
+    "result_directory": "results/cr12_provisional_cuff_baseline_20260918_attempt_02",
+    "mechanical_ready": true,
+    "representative_postures_reachable": true,
+    "start_goal_reachable": true,
+    "all_sampled_cuff_jacobians_full_rank": true,
+    "plant_vs_independent_cuff_jacobian_max_abs_error": 1.1102230246251565e-16,
+    "analytic_vs_finite_difference_cuff_jacobian_max_abs_error": 1.948053773848102e-09,
+    "wrench_generalized_force_reconstruction_residual": 0.0,
+    "wrench_human_torque_reconstruction_residual_nm": 0.0,
+    "wrench_action_reaction_force_balance_norm_n": 0.0,
+    "wrench_common_origin_moment_balance_norm_nm": 2.7755575615628914e-17,
+    "minimum_robot_arm_to_human_clearance_m": 0.02786943794063418,
+    "minimum_articulated_robot_to_bed_clearance_m": 0.08930264111655657,
+    "minimum_provisional_adapter_to_human_clearance_m": 0.012999999999964519,
+    "minimum_provisional_adapter_to_bed_clearance_m": 0.0810619435861064,
+    "active_robot_collision_contacts": 0,
+    "execution_preview_finite_and_feasible": true
+  },
+  "smoke": {
+    "maximum_requested_duration_s": 0.5,
+    "executed_duration_s": 0.314999999999993,
+    "task_status": "ABORTED",
+    "abort_reason": "TASK_ACCELERATION_LIMIT",
+    "stopped_by_existing_acceleration_monitor": true,
+    "mpc_solve_count": 16,
+    "mpc_status_counts": {"SAFE_ACTION": 16},
+    "mpc_failure_count": 0,
+    "force_gate_event_count": 0,
+    "brake_event_count": 0,
+    "mujoco_warning_counts": {},
+    "all_critical_trace_fields_finite": true,
+    "peak_physical_cuff_force_n": 119.89716758838924,
+    "registered_acceleration_limit_deg_s2": [300.0, 600.0],
+    "peak_deployable_acceleration_deg_s2": [
+      209.85661081797605,
+      899.3115357372377
+    ],
+    "peak_evaluation_only_acceleration_deg_s2": [
+      195.40705600755095,
+      560.6250055529866
+    ]
+  },
+  "unchanged_semantics": [
+    "Human V2",
+    "goal task and targets",
+    "provisional interface parameters",
+    "MPC cost, horizon, solver, and seed",
+    "Safety Filter and BRAKE",
+    "force and motion limits",
+    "pacing",
+    "Human adaptation",
+    "value and RL logic",
+    "acceleration thresholds and monitor semantics"
+  ]
+}

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
@@ -95,6 +95,7 @@ class QuinticHumanWaypointSchedule:
     feasibility_semantics: str = "legacy_reference_plus_pd_tracking_preview"
     reference_period_s: float = SCHEDULER_REFERENCE_PERIOD_S
     version: str = HUMAN_WAYPOINT_SCHEDULER_VERSION
+    continuous_clearance_certificate: dict[str, Any] | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "start_q_rad", _vector("start_q_rad", self.start_q_rad))
@@ -170,6 +171,7 @@ class QuinticHumanWaypointSchedule:
                 self.minimum_reference_shank_clearance_m
             ),
             "feasibility_semantics": self.feasibility_semantics,
+            "continuous_clearance_certificate": self.continuous_clearance_certificate,
             "learned": False,
             "new_safety_margin": False,
         }
@@ -289,12 +291,39 @@ class QuinticHumanWaypointSchedulerV1:
         *,
         reference_period_s: float = SCHEDULER_REFERENCE_PERIOD_S,
         human_geometry: Any = STAGE5_HUMAN,
+        clearance_evaluator: Callable[[np.ndarray], np.ndarray | float] | None = None,
+        clearance_source: str = "STRUCTURAL_PRIOR_STAGE5_GEOMETRY",
+        preserve_task_endpoint_clearance_floor: bool = False,
+        require_continuous_nonpenetrating_path: bool = False,
+        use_duration_lower_bound: bool = False,
+        reference_velocity_fraction: float = 1.0,
+        reference_acceleration_fraction: float = 1.0,
     ) -> None:
         if not math.isfinite(reference_period_s) or reference_period_s <= 0.0:
             raise ValueError("reference_period_s must be finite and positive")
         self.spec = spec
         self.human_model = human_model
         self.human_geometry = human_geometry
+        self.clearance_evaluator = clearance_evaluator
+        self.clearance_source = str(clearance_source)
+        self.preserve_task_endpoint_clearance_floor = bool(
+            preserve_task_endpoint_clearance_floor
+        )
+        self.require_continuous_nonpenetrating_path = bool(
+            require_continuous_nonpenetrating_path
+        )
+        self.use_duration_lower_bound = bool(use_duration_lower_bound)
+        for name, value in (("reference_velocity_fraction", reference_velocity_fraction),
+                            ("reference_acceleration_fraction", reference_acceleration_fraction)):
+            if isinstance(value, bool) or not math.isfinite(value) or not 0 < value <= 1:
+                raise ValueError(f"{name} must be finite and in (0,1]")
+            setattr(self, name, float(value))
+        if self.require_continuous_nonpenetrating_path and not callable(
+            getattr(clearance_evaluator, "certified_minimum", None)
+        ):
+            raise ValueError("strict hard-table path requires a continuous-clearance certificate")
+        if not self.clearance_source:
+            raise ValueError("clearance_source must be non-empty")
         self.reference_period_s = float(reference_period_s)
         self.position_gain = np.asarray(TRACKING_KP_RAD_S2_PER_RAD, dtype=float)
         self.velocity_gain = np.asarray(TRACKING_KD_RAD_S2_PER_RAD_S, dtype=float)
@@ -308,6 +337,18 @@ class QuinticHumanWaypointSchedulerV1:
         ):
             raise ValueError("reference period must be divisible by execution period")
 
+    def _clearance_m(self, q_rad: np.ndarray) -> np.ndarray | float:
+        if self.clearance_evaluator is not None:
+            value = self.clearance_evaluator(np.asarray(q_rad, dtype=float))
+            result = np.asarray(value, dtype=float)
+            expected = np.asarray(q_rad).shape[:-1]
+            if result.shape != expected or not np.all(np.isfinite(result)):
+                raise ValueError(
+                    "session clearance evaluator must return one finite value per q sample"
+                )
+            return float(result) if result.ndim == 0 else result
+        return shank_table_clearance_m(q_rad, self.human_geometry)
+
     def _expected_goal(self, phase: TaskPhase) -> np.ndarray:
         return np.asarray(
             self.spec.start_return_target_rad
@@ -315,6 +356,31 @@ class QuinticHumanWaypointSchedulerV1:
             else self.spec.outbound_goal_target_rad,
             dtype=float,
         )
+
+    def _path_clearance_is_valid(
+        self, clearance_m: np.ndarray, candidate: HumanWaypointCandidate
+    ) -> bool:
+        """Require nonpenetration and optionally preserve the task endpoint floor."""
+
+        clearance = np.asarray(clearance_m, dtype=float)
+        floor_m = 0.0
+        if self.preserve_task_endpoint_clearance_floor:
+            task_endpoints = np.vstack(
+                [self.spec.start_return_target_rad, candidate.phase_goal_rad]
+            )
+            floor_m = float(np.min(self._clearance_m(task_endpoints)))
+        if self.require_continuous_nonpenetrating_path:
+            floor_m = max(0.0, floor_m)
+        return bool(np.min(clearance) >= floor_m - 1.0e-12)
+
+    def _continuous_clearance_is_valid(
+        self, coefficients: np.ndarray, duration_s: float,
+        candidate: HumanWaypointCandidate,
+    ) -> tuple[bool, float]:
+        if not self.require_continuous_nonpenetrating_path:
+            return True, float("inf")
+        lower = float(self.clearance_evaluator.certified_minimum(coefficients, duration_s))
+        return self._path_clearance_is_valid(np.asarray([lower]), candidate), lower
 
     def _validate_request(
         self,
@@ -432,13 +498,15 @@ class QuinticHumanWaypointSchedulerV1:
         maximum_causal_acceleration = _maximum_causal_reference_acceleration(
             coefficients, duration_s, self.reference_period_s
         )
-        velocity_limit = np.asarray(self.spec.task_joint_velocity_limit_rad_s)
+        velocity_limit = np.asarray(self.spec.task_joint_velocity_limit_rad_s) * self.reference_velocity_fraction
         acceleration_limit = np.asarray(
             self.spec.task_joint_acceleration_limit_rad_s2
-        )
+        ) * self.reference_acceleration_fraction
         if np.any(maximum_velocity > velocity_limit + 1.0e-12):
             raise ValueError("fixed-duration reference exceeds registered velocity limits")
-        if np.any(maximum_causal_acceleration > acceleration_limit + 1.0e-12):
+        if np.any(maximum_causal_acceleration > acceleration_limit + 1.0e-12) or (
+                self.reference_acceleration_fraction < 1.0
+                and np.any(maximum_acceleration > acceleration_limit + 1.0e-12)):
             raise ValueError(
                 "fixed-duration reference exceeds registered causal 20 ms acceleration limits"
             )
@@ -458,13 +526,18 @@ class QuinticHumanWaypointSchedulerV1:
             q_samples > human_bounds[:, 1]
         ):
             raise ValueError("fixed-duration reference leaves Human-model ROM")
-        clearance = np.asarray(
-            shank_table_clearance_m(q_samples, self.human_geometry), dtype=float
-        )
-        if np.any(clearance < 0.0):
+        clearance = np.asarray(self._clearance_m(q_samples), dtype=float)
+        if not self._path_clearance_is_valid(clearance, candidate):
             raise WaypointGeometryInfeasible(
-                "fixed-duration reference enters existing shank-table geometry "
-                f"({1000.0 * float(np.min(clearance)):.6f} mm)"
+                "fixed-duration reference violates the registered shank-table "
+                f"clearance floor ({1000.0 * float(np.min(clearance)):.6f} mm)"
+            )
+        continuous_valid, continuous_lower = self._continuous_clearance_is_valid(
+            coefficients, float(duration_s), candidate)
+        if not continuous_valid:
+            raise WaypointGeometryInfeasible(
+                "fixed-duration reference violates continuous hard-table "
+                f"clearance floor ({1000.0 * continuous_lower:.6f} mm)"
             )
         return QuinticHumanWaypointSchedule(
             candidate=candidate,
@@ -479,11 +552,13 @@ class QuinticHumanWaypointSchedulerV1:
             ),
             maximum_nominal_tracking_acceleration_rad_s2=np.zeros(2),
             nominal_completion_time_s=float(duration_s),
-            minimum_reference_shank_clearance_m=float(np.min(clearance)),
+            minimum_reference_shank_clearance_m=float(
+                min(np.min(clearance), continuous_lower)),
             feasibility_semantics=(
                 "fixed_duration_causal_20ms_scheduled_reference_motion"
             ),
             reference_period_s=self.reference_period_s,
+            continuous_clearance_certificate=getattr(self.clearance_evaluator, "last_certificate", None),
         )
 
     def _plan(
@@ -500,9 +575,7 @@ class QuinticHumanWaypointSchedulerV1:
         self._validate_request(current_q, current_dq, candidate, phase_elapsed_s)
 
         endpoint_clearance = np.asarray(
-            shank_table_clearance_m(
-                np.vstack([current_q, candidate.q_waypoint_rad]), self.human_geometry
-            )
+            self._clearance_m(np.vstack([current_q, candidate.q_waypoint_rad]))
         )
         if np.any(endpoint_clearance < 0.0):
             label = "current state" if endpoint_clearance[0] < 0.0 else "target waypoint"
@@ -511,7 +584,7 @@ class QuinticHumanWaypointSchedulerV1:
                 f"{label} enters existing shank-table geometry ({1000.0 * value:.6f} mm)"
             )
 
-        if candidate.phase is TaskPhase.HOLD:
+        if candidate.phase is TaskPhase.HOLD and not getattr(self, "continuous_hold_reference", False):
             if not np.allclose(candidate.dq_waypoint_rad_s, 0.0, atol=1.0e-12):
                 raise ValueError("HOLD waypoint velocity must be zero")
             angle_tolerance = np.asarray(self.spec.joint_angle_completion_tolerance_rad)
@@ -542,15 +615,60 @@ class QuinticHumanWaypointSchedulerV1:
                     else "causal_20ms_scheduled_reference_motion"
                 ),
                 reference_period_s=self.reference_period_s,
+                continuous_clearance_certificate=(getattr(self.clearance_evaluator, "last_certificate", None)
+                                                  if candidate.phase is not TaskPhase.HOLD else None),
             )
 
-        velocity_limit = np.asarray(self.spec.task_joint_velocity_limit_rad_s)
+        velocity_limit = np.asarray(self.spec.task_joint_velocity_limit_rad_s) * self.reference_velocity_fraction
         acceleration_limit = np.asarray(
             self.spec.task_joint_acceleration_limit_rad_s2
-        )
+        ) * self.reference_acceleration_fraction
         available_s = self.spec.phase_timeout_s - phase_elapsed_s
+        # Every duration samples both boundary positions. If either boundary
+        # already violates the existing path floor, no duration can succeed.
+        # Keep a 1 nm *early-rejection guard* for polynomial endpoint roundoff:
+        # cases inside that guard still run all original checks/tolerances.
+        # HOLD above intentionally retains its original separate semantics.
+        if self.preserve_task_endpoint_clearance_floor and not self._path_clearance_is_valid(
+            endpoint_clearance + 1.0e-9, candidate
+        ):
+            raise ValueError("no quintic schedule satisfies the registered phase and motion limits")
         maximum_steps = int(math.floor(available_s / self.reference_period_s + 1.0e-12))
-        for step_count in range(1, maximum_steps + 1):
+        first_step = 1
+        if self.use_duration_lower_bound:
+            # Integral |dq| bounds displacement for every valid schedule. For
+            # exact rest-to-rest quintics the peak is exactly 15/8 * |dq_total|/T.
+            # Skip only durations mathematically incapable of meeting the
+            # unchanged velocity test; keep every subsequent original check.
+            delta = np.abs(candidate.q_waypoint_rad - current_q)
+            # dq(1/2)=15/8*delta/T - 7/16*(dq0+dq1). Triangle
+            # inequality yields a necessary bound even for moving endpoints,
+            # including tiny nonzero roundoff in an emitted terminal velocity.
+            midpoint_bound = 1.875 * delta / (velocity_limit + 1.0e-12
+                + .4375 * np.abs(current_dq + candidate.dq_waypoint_rad_s))
+            lower_s = float(np.max(np.maximum(delta/(velocity_limit+1e-12), midpoint_bound)))
+            if use_legacy_nominal_tracking_preview or self.reference_acceleration_fraction < 1.0:
+                # Necessary acceleration inequalities at the two extrema of
+                # rest-to-rest progress. They remain valid for arbitrary
+                # endpoint velocities by the triangle inequality:
+                # |A*delta_q| <= a_limit*T^2 + |B*v0+C*v1|*T.
+                # This only prunes durations that the original instantaneous
+                # acceleration check below must reject; it does not replace it.
+                for u in ((3.-math.sqrt(3.))/6., (3.+math.sqrt(3.))/6.):
+                    aa = 60*u-180*u*u+120*u*u*u
+                    bb = -36*u+96*u*u-60*u*u*u
+                    cc = -24*u+84*u*u-60*u*u*u
+                    distance = abs(aa)*delta
+                    velocity_term = np.abs(bb*current_dq+cc*candidate.dq_waypoint_rad_s)
+                    denominator = np.sqrt(velocity_term**2+4*(acceleration_limit+1e-12)*distance)+velocity_term
+                    necessary = np.divide(2*distance, denominator, out=np.zeros(2), where=denominator>0.)
+                    lower_s = max(lower_s, float(np.max(necessary)))
+            first_step = max(1, int(math.ceil(lower_s / self.reference_period_s - 1.0e-9)))
+        if candidate.phase is TaskPhase.HOLD:
+            # The opt-in moving HOLD still spans at least the original dwell.
+            # Completion itself remains measured-state based in the task clock.
+            first_step = max(first_step, int(math.ceil(self.spec.hold_duration_s / self.reference_period_s)))
+        for step_count in range(first_step, maximum_steps + 1):
             duration_s = step_count * self.reference_period_s
             coefficients = _quintic_coefficients(
                 current_q,
@@ -568,7 +686,7 @@ class QuinticHumanWaypointSchedulerV1:
             if np.any(maximum_velocity > velocity_limit + 1.0e-12) or np.any(
                 maximum_causal_acceleration > acceleration_limit + 1.0e-12
             ) or (
-                use_legacy_nominal_tracking_preview
+                (use_legacy_nominal_tracking_preview or self.reference_acceleration_fraction < 1.0)
                 and np.any(maximum_acceleration > acceleration_limit + 1.0e-12)
             ):
                 continue
@@ -583,10 +701,12 @@ class QuinticHumanWaypointSchedulerV1:
                 q_samples > task_bounds[:, 1]
             ):
                 continue
-            clearance = np.asarray(
-                shank_table_clearance_m(q_samples, self.human_geometry), dtype=float
-            )
-            if np.any(clearance < 0.0):
+            clearance = np.asarray(self._clearance_m(q_samples), dtype=float)
+            if not self._path_clearance_is_valid(clearance, candidate):
+                continue
+            continuous_valid, continuous_lower = self._continuous_clearance_is_valid(
+                coefficients, duration_s, candidate)
+            if not continuous_valid:
                 continue
             if use_legacy_nominal_tracking_preview:
                 nominal = self._nominal_tracking_check(
@@ -626,10 +746,11 @@ class QuinticHumanWaypointSchedulerV1:
                 ),
                 nominal_completion_time_s=nominal_completion_time,
                 minimum_reference_shank_clearance_m=float(
-                    min(np.min(clearance), nominal_clearance)
+                    min(np.min(clearance), nominal_clearance, continuous_lower)
                 ),
                 feasibility_semantics=semantics,
                 reference_period_s=self.reference_period_s,
+                continuous_clearance_certificate=getattr(self.clearance_evaluator, "last_certificate", None),
             )
         raise ValueError("no quintic schedule satisfies the registered phase and motion limits")
 
@@ -699,7 +820,7 @@ class QuinticHumanWaypointSchedulerV1:
         q = current_q.copy()
         dq = current_dq.copy()
         maximum_acceleration = np.zeros(2)
-        minimum_clearance = float(shank_table_clearance_m(q, self.human_geometry))
+        minimum_clearance = float(self._clearance_m(q))
         step_count = int(math.floor(available_s / self.execution_period_s + 1.0e-12))
         for step in range(step_count + 1):
             elapsed_s = step * self.execution_period_s
@@ -746,7 +867,7 @@ class QuinticHumanWaypointSchedulerV1:
                 return None
             if np.any(np.abs(dq) > velocity_limit + 1.0e-12):
                 return None
-            clearance = float(shank_table_clearance_m(q, self.human_geometry))
+            clearance = float(self._clearance_m(q))
             minimum_clearance = min(minimum_clearance, clearance)
             if clearance < 0.0:
                 return None

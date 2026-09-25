@@ -95,7 +95,7 @@ class AdaptiveHumanBeliefV22:
         if not math.isfinite(self.residual_limit_nm) or self.residual_limit_nm <= 0.0:
             raise ValueError("residual_limit_nm must be finite and positive")
         if any(
-            source not in {"ONLINE_ESTIMATED", "CALIBRATED", "STRUCTURAL_PRIOR"}
+            source not in {"ONLINE_ESTIMATED", "CALIBRATED", "STRUCTURAL_PRIOR", "FIXED_NOMINAL"}
             for source in (
                 self.geometry_source,
                 self.dynamics_source,

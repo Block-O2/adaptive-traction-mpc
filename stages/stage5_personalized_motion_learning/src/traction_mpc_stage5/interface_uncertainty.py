@@ -298,6 +298,8 @@ class InterfaceUncertaintyMonitor:
 def uncertainty_motion_violation(
     spec: GoalTaskSpec,
     estimate: InterfaceUncertaintyEstimate,
+    *,
+    include_acceleration: bool = True,
 ) -> str | None:
     states = estimate.state_matrix
     if any(not within_q_bounds(spec, state[:2]) for state in states):
@@ -306,7 +308,7 @@ def uncertainty_motion_violation(
         limits = np.asarray(spec.task_joint_velocity_limit_rad_s, dtype=float)
         if np.any(np.abs(states[:, 2:]) > limits[None, :] + 1.0e-12):
             return "INTERFACE_UNCERTAINTY_VELOCITY_LIMIT"
-    if spec.task_joint_acceleration_limit_rad_s2 is not None:
+    if include_acceleration and spec.task_joint_acceleration_limit_rad_s2 is not None:
         limits = np.asarray(spec.task_joint_acceleration_limit_rad_s2, dtype=float)
         if np.any(
             np.abs(estimate.decision_acceleration_matrix)
@@ -366,8 +368,14 @@ def uncertainty_motion_diagnostics(
 def start_episode_uncertainty_aware(
     spec: GoalTaskSpec,
     estimate: InterfaceUncertaintyEstimate,
+    *,
+    include_model_acceleration_authority: bool = True,
 ) -> GoalTaskState:
-    violation = uncertainty_motion_violation(spec, estimate)
+    violation = uncertainty_motion_violation(
+        spec,
+        estimate,
+        include_acceleration=include_model_acceleration_authority,
+    )
     if violation is not None:
         raise ValueError(f"cannot start episode: {violation}")
     if not all(
@@ -386,7 +394,12 @@ def start_episode_uncertainty_aware(
         spec,
         state[:2],
         state[2:],
-        nominal.model_acceleration.acceleration_rad_s2,
+        (
+            nominal.model_acceleration.acceleration_rad_s2
+            if include_model_acceleration_authority
+            else None
+        ),
+        acceleration_authority_valid=include_model_acceleration_authority,
     )
 
 
@@ -404,10 +417,17 @@ def transition_phase_uncertainty_aware(
     *,
     completion_margin: ControllerCompletionMargin,
     abort_reason: str | None = None,
+    human_motion_acceleration_rad_s2: np.ndarray | None = None,
+    human_motion_acceleration_valid: bool = False,
+    include_model_acceleration_authority: bool = True,
 ) -> GoalTaskState:
     if abort_reason is not None:
         return abort_episode(state, abort_reason)
-    violation = uncertainty_motion_violation(spec, estimate)
+    violation = uncertainty_motion_violation(
+        spec,
+        estimate,
+        include_acceleration=include_model_acceleration_authority,
+    )
     if violation is not None:
         return abort_episode(state, violation)
     target = np.asarray(_phase_target(spec, state.phase), dtype=float)
@@ -432,7 +452,16 @@ def transition_phase_uncertainty_aware(
         representative_state[:2],
         representative_state[2:],
         dt_s,
-        ddq_rad_s2=representative.model_acceleration.acceleration_rad_s2,
+        ddq_rad_s2=(
+            representative.model_acceleration.acceleration_rad_s2
+            if include_model_acceleration_authority
+            else human_motion_acceleration_rad_s2
+        ),
+        acceleration_authority_valid=(
+            True
+            if include_model_acceleration_authority
+            else human_motion_acceleration_valid
+        ),
         completion_margin=completion_margin,
     )
     if result.phase is not state.phase and result.phase is not TaskPhase.ABORTED:

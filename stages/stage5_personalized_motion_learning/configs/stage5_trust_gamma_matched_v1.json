@@ -1,0 +1,75 @@
+{
+  "schema": "stage5_trust_gamma_matched_v1",
+  "evidence_category": "preregistered_formal_closed_loop_trust_pacing_comparison",
+  "status": "PREREGISTERED_FORMAL_EXECUTION_AUTHORIZED",
+  "research_question": "given the same already-supported personalized Human model, does persistent current-model trust allow gamma to recover from conservative pacing and materially improve task efficiency without interaction, motion-envelope, or safety-chain regression",
+  "source_personalization_policy": {
+    "model_update_alpha": 0.25,
+    "maximum_per_scale_step": 0.04,
+    "frozen_for_this_study": true
+  },
+  "source_artifact": {
+    "relative_path": "results/model_update_max_step_comparison_v1_formal_attempt_01/model_update_max_step_comparison_results.json",
+    "sha256": "be8cd160e0ca5b63d560c6f56888202fc20c3ba78f5d9aec0b30680f5e803fbb",
+    "arm": "step_0p04",
+    "selection": "final active model after repetition 5; queued but inactive successor excluded",
+    "required_post_update_evidence": "positive"
+  },
+  "arms": {
+    "fixed_pacing": {
+      "gamma_semantics": "constant",
+      "gamma": 0.5
+    },
+    "trust_driven_pacing": {
+      "gamma_semantics": "existing persistent current-model trust, confidence filter, hysteresis, and rate limits",
+      "initial_gamma": 0.5,
+      "initial_filtered_confidence": 0.0,
+      "raw_support_source": "exact model-versioned POST_UPDATE POSITIVE provenance from source artifact",
+      "gamma_min": 0.5,
+      "gamma_max": 1.0,
+      "filter_time_constant_s": 0.75,
+      "high_confidence_enter": 0.75,
+      "high_confidence_exit": 0.25,
+      "recovery_rate_per_s": 0.25,
+      "slowdown_rate_per_s": 1.0
+    }
+  },
+  "repetitions": {
+    "per_arm": 3,
+    "matched_cem_seeds": [20260917, 20260918, 20260919],
+    "same_seed_for_both_arms_at_each_repetition": true,
+    "physical_reset_gap_in_session_time_s": 0.25,
+    "trust_filter_and_gamma_lifecycle_persist_across_repetitions": true,
+    "physical_plant_and_controller_episode_state_reset_each_repetition": true
+  },
+  "fixed_conditions": {
+    "human_truth_condition": "damping_plus_20pct",
+    "interface": "fixed_nominal",
+    "active_human_model_fixed_for_all_repetitions": true,
+    "human_model_updates_enabled": false,
+    "successor_activation_enabled": false,
+    "human_identification_control_authority": false,
+    "prefix_backend": "native",
+    "prefix_times_ms": [5, 10, 15, 20],
+    "physical_propagation_timestep_ms": 0.25,
+    "base_planning_joint_velocity_ceiling_deg_s": [15.0, 25.0],
+    "planning_physical_force_ceiling_n": 180.0,
+    "maximum_duration_s": 25.5,
+    "task_interface_acceleration_monitor_limits_safety_filter_brake_changed": false
+  },
+  "decision_rules": {
+    "causal_gamma_recovery": "raw support is restored only from the source artifact evidence for the exact active model; filtered confidence starts at zero; gamma changes only after the existing filter, hysteresis, and rate limits",
+    "material_efficiency": "trust-driven mean task duration is at least 5 percent lower and at least two of three matched repetitions are shorter",
+    "meaningful_interaction_regression": "trust-driven arm exceeds fixed arm matched mean peak force, force integral, or peak moment by more than 10 percent",
+    "registered_constraint_regression": "any new task abort, deployable or evaluation-only motion-envelope violation, NO_SAFE_ACTION, force gate, Safety Filter intervention, BRAKE, or MuJoCo warning",
+    "TG-A": "causal gamma recovery, material efficiency improvement, and no meaningful interaction or registered-constraint regression",
+    "TG-B": "causal gamma recovery and acceptable closed loop, but material efficiency rule is not met",
+    "TG-C": "trust/gamma authority inconsistency or meaningful closed-loop/constraint regression"
+  },
+  "frozen_open_issues": {
+    "acceleration_monitor": "A-MONITOR-UNRESOLVED",
+    "hard_realtime_or_WCET_claim": false,
+    "interface_adaptation": false,
+    "value_or_RL_learning": false
+  }
+}

@@ -34,6 +34,11 @@ from .controller_interface import (
     NominalInterfaceHoldPredictor,
     make_interface_aware_first_action_batch_preview,
 )
+from .diagnostic_continuation import (
+    capture_diagnostic_continuation_clone,
+    run_diagnostic_continuation,
+    run_diagnostic_post_abort_continuation,
+)
 from .goal_mpc import (
     GoalDirectedHumanSpaceMPC,
     local_command_reference,
@@ -62,10 +67,24 @@ from .loaded_execution import (
 )
 from .loaded_supervisor import Stage5LoadedTrackBrakeSupervisor
 from .mechanics import NOMINAL_PHYSICS_DT_S, STAGE5_RIGID_INTERFACE
+from .near_limit_shadow import NearLimitShadowTarget
+from .matched_branch import (
+    MatchedBranchIntervention,
+    capture_runtime_snapshot,
+    restore_runtime_snapshot,
+    task_state_record,
+)
+from .split_acceleration_monitor import (
+    HUMAN_MOTION_ACCELERATION_AUTHORITY_VERSION,
+    HumanMotionAccelerationAuthorityV1,
+    SplitAccelerationMonitorV1,
+)
+from .transition_response_shadow import TransitionResponseShadowV2
 from .task import (
     PROVISIONAL_CONTROLLER_COMPLETION_MARGIN,
     PROVISIONAL_LOW_MODERATE_GOAL_TASK,
     ControllerCompletionMargin,
+    GoalTaskState,
     GoalTaskSpec,
     TaskPhase,
     abort_episode,
@@ -79,6 +98,36 @@ from .task import (
 CONTROL_DT_S = 0.005
 MPC_DT_S = 0.020
 FIXED_HUMAN_MODEL_VERSION = "stage5_fixed_registered_human_v1"
+
+
+def _apply_minimum_phase_duration(
+    previous: GoalTaskState,
+    candidate: GoalTaskState,
+    *,
+    dt_s: float,
+    minimum_phase_duration_s: dict[TaskPhase, float],
+) -> GoalTaskState:
+    """Delay only successful moving-phase transitions to a fixed time floor."""
+
+    minimum = minimum_phase_duration_s.get(previous.phase)
+    if (
+        minimum is None
+        or candidate.phase is previous.phase
+        or candidate.phase is TaskPhase.ABORTED
+    ):
+        return candidate
+    next_elapsed = previous.phase_elapsed_s + dt_s
+    if next_elapsed + 1.0e-12 >= minimum:
+        return candidate
+    if previous.phase not in (TaskPhase.OUTBOUND, TaskPhase.RETURN):
+        raise ValueError("minimum phase duration is supported only for moving phases")
+    return GoalTaskState(
+        phase=previous.phase,
+        phase_elapsed_s=next_elapsed,
+        hold_elapsed_s=0.0,
+        start_validated=previous.start_validated,
+        outbound_hold_completed=previous.outbound_hold_completed,
+    )
 
 
 class InitialConditionValidationError(ValueError):
@@ -265,10 +314,15 @@ def run_goal_mpc_smoke(
     | None = None,
     control_human_model_callback: Callable[[dict[str, Any]], dict[str, Any]]
     | None = None,
+    control_human_model_callback_is_no_update_freeze: bool = False,
     initial_control_human_model: Any | None = None,
     initial_control_human_model_version: str | None = None,
     use_optimized_prefix_numpy: bool = True,
     prefix_backend: str = "numpy",
+    matched_branch_intervention: MatchedBranchIntervention | None = None,
+    minimum_phase_duration_s: dict[str, float] | None = None,
+    diagnostic_post_abort_continuation: bool = False,
+    near_limit_shadow_targets: tuple[NearLimitShadowTarget, ...] = (),
 ) -> dict[str, Any]:
     """Run one explicitly engineering-only low/moderate Goal-MPC v1.1 episode."""
 
@@ -292,6 +346,31 @@ def run_goal_mpc_smoke(
         )
         if not np.isfinite(minimum_eigenvalue) or minimum_eigenvalue <= 1.0e-6:
             raise ValueError("initial control Human model is not positive definite")
+    if matched_branch_intervention is not None:
+        if control_human_model_callback is None:
+            raise ValueError(
+                "matched short branches require an explicit no-update Human callback"
+            )
+        if initial_control_human_model is None:
+            raise ValueError("matched short branches require a fixed personalized model")
+        if not control_human_model_callback_is_no_update_freeze:
+            raise ValueError("matched short branches require a declared no-update callback")
+    if control_human_model_callback_is_no_update_freeze and (
+        control_human_model_callback is None
+    ):
+        raise ValueError("no-update callback declaration requires a callback")
+    target_times = [target.timestamp_s for target in near_limit_shadow_targets]
+    if len(target_times) != len(set(target_times)):
+        raise ValueError("near-limit shadow target timestamps must be unique")
+    phase_duration_floor: dict[TaskPhase, float] = {}
+    for name, duration in (minimum_phase_duration_s or {}).items():
+        phase = TaskPhase(str(name))
+        value = float(duration)
+        if phase not in (TaskPhase.OUTBOUND, TaskPhase.RETURN):
+            raise ValueError("phase timing floors are allowed only for OUTBOUND/RETURN")
+        if not np.isfinite(value) or value <= 0.0 or value >= spec.phase_timeout_s:
+            raise ValueError("phase timing floor must lie inside the task timeout")
+        phase_duration_floor[phase] = value
 
     reusing_session = session_context is not None and bool(session_context)
     if reusing_session and control_human_model_callback is not None:
@@ -314,6 +393,12 @@ def run_goal_mpc_smoke(
         cuff_allocator = session_context["cuff_allocator"]
         interface_observer = session_context["interface_observer"]
         acceleration_monitor = session_context["acceleration_monitor"]
+        split_acceleration_monitor = session_context.get(
+            "split_acceleration_monitor", SplitAccelerationMonitorV1()
+        )
+        # V2 response windows are per saved episode.  They do not carry
+        # evidence across repeatability-session file boundaries.
+        transition_response_shadow = TransitionResponseShadowV2()
         interface_uncertainty_monitor = None
         screening_interface_predictor = session_context[
             "screening_interface_predictor"
@@ -447,6 +532,8 @@ def run_goal_mpc_smoke(
             if interface_uncertainty_spec is None
             else None
         )
+        split_acceleration_monitor = SplitAccelerationMonitorV1()
+        transition_response_shadow = TransitionResponseShadowV2()
         interface_uncertainty_monitor = (
             None
             if interface_uncertainty_spec is None
@@ -472,6 +559,13 @@ def run_goal_mpc_smoke(
             ),
         )
         supervisor = Stage5LoadedTrackBrakeSupervisor()
+    human_motion_acceleration_authority = (
+        None
+        if spec.task_joint_acceleration_limit_rad_s2 is None
+        else HumanMotionAccelerationAuthorityV1(
+            spec.task_joint_acceleration_limit_rad_s2
+        )
+    )
     loaded_equilibrium = None
     hold_stabilizer = None
     hold_handoff = None
@@ -523,11 +617,14 @@ def run_goal_mpc_smoke(
                 spec,
                 initial_task_observation.as_array()[:2],
                 initial_task_observation.as_array()[2:],
-                initial_realized_acceleration.acceleration_rad_s2,
+                None,
+                acceleration_authority_valid=False,
             )
         else:
             task_state = start_episode_uncertainty_aware(
-                spec, initial_uncertainty_estimate
+                spec,
+                initial_uncertainty_estimate,
+                include_model_acceleration_authority=False,
             )
     except ValueError as error:
         initial_state = initial_task_observation.as_array()
@@ -660,6 +757,9 @@ def run_goal_mpc_smoke(
     previous_phase = task_state.phase
     previous_task_time_s = float(truth.time_s)
     pending_abort_reason: str | None = None
+    diagnostic_abort_clone = None
+    near_limit_diagnostic_clones = []
+    captured_near_limit_target_times: set[float] = set()
     task_events = [
         {"time_s": float(truth.time_s), "phase": task_state.phase.value, "reason": None}
     ]
@@ -698,6 +798,7 @@ def run_goal_mpc_smoke(
     brake_event_count = 0
     force_gate_event_count = 0
     structural_event_count = 0
+    human_motion_acceleration_event_count = 0
     hold_control_runtimes_ms: list[float] = []
     handoff_entry_time_s: float | None = None
     handoff_initial_force_jump_n: float | None = None
@@ -771,6 +872,28 @@ def run_goal_mpc_smoke(
     trace_progress_pacing_gamma_rate: list[float] = []
     trace_progress_pacing_velocity_ceiling: list[np.ndarray] = []
     trace_control_human_model_version: list[str] = []
+    trace_shadow_human_motion_acceleration: list[np.ndarray] = []
+    trace_shadow_human_motion_valid: list[bool] = []
+    trace_shadow_human_motion_coverage: list[float] = []
+    trace_shadow_human_motion_sample_count: list[int] = []
+    trace_human_motion_authority_acceleration: list[np.ndarray] = []
+    trace_human_motion_authority_active: list[bool] = []
+    trace_human_motion_authority_violation: list[bool] = []
+    trace_shadow_fast_motion_acceleration: list[np.ndarray] = []
+    trace_shadow_fast_motion_valid: list[bool] = []
+    trace_shadow_fast_alignment_interval: list[float] = []
+    trace_shadow_cuff_wrench: list[np.ndarray] = []
+    trace_shadow_cuff_wrench_slew: list[np.ndarray] = []
+    trace_shadow_interface_translation: list[np.ndarray] = []
+    trace_shadow_interface_velocity: list[np.ndarray] = []
+    trace_shadow_interface_rotation: list[np.ndarray] = []
+    trace_shadow_interface_angular_velocity: list[np.ndarray] = []
+    trace_shadow_command_wrench: list[np.ndarray] = []
+    trace_shadow_command_wrench_slew: list[np.ndarray] = []
+    trace_shadow_robot_joint_torque: list[np.ndarray] = []
+    trace_shadow_robot_joint_torque_slew: list[np.ndarray] = []
+    trace_shadow_robot_joint_torque_available: list[bool] = []
+    trace_shadow_robot_joint_torque_slew_valid: list[bool] = []
     pending_predicted_force = np.full(3, np.nan)
     pending_predicted_peak_force = float("nan")
     base_planning_velocity_ceiling = (
@@ -782,6 +905,102 @@ def run_goal_mpc_smoke(
         raise ValueError("progress pacing requires a declared base planning ceiling")
 
     maximum_steps = int(np.ceil(maximum_duration_s / CONTROL_DT_S)) + 1
+
+    def _capture_current_diagnostic_clone(
+        *,
+        trigger_kind: str,
+        trigger_metadata: dict[str, Any],
+        current_time_s: float,
+        control_index: int,
+        task_observation: Any,
+        interface_state: Any,
+        estimator_measurement: Any,
+        mpc_measurement: Any,
+        low_level_measurement: Any,
+        estimated_state: np.ndarray,
+        realized_acceleration: Any,
+        split_shadow_sample: Any,
+        authoritative_task_state: GoalTaskState,
+        pre_trigger_task_state: GoalTaskState,
+    ):
+        controller_graph = {
+            "estimator_layer": estimator_layer,
+            "mpc_layer": mpc_layer,
+            "low_level_layer": low_level_layer,
+            "estimator": estimator,
+            "interface_observer": interface_observer,
+            "acceleration_monitor": acceleration_monitor,
+            "split_acceleration_monitor": split_acceleration_monitor,
+            "human_motion_acceleration_authority": (
+                human_motion_acceleration_authority
+            ),
+            "transition_response_shadow": transition_response_shadow,
+            "interface_uncertainty_monitor": interface_uncertainty_monitor,
+            "screening_interface_predictor": screening_interface_predictor,
+            "diagnostic_interface_predictor": diagnostic_interface_predictor,
+            "mpc": mpc,
+            "supervisor": supervisor,
+            "hold_stabilizer": hold_stabilizer,
+            "hold_handoff": hold_handoff,
+            "return_handoff": return_handoff,
+            "current_model": current_model,
+            "cuff_allocator": cuff_allocator,
+        }
+        runtime_state = {
+            "pre_trigger_task_state": pre_trigger_task_state,
+            "authoritative_task_state": authoritative_task_state,
+            "previous_phase": previous_phase,
+            "previous_task_time_s": previous_task_time_s,
+            "pending_abort_reason": pending_abort_reason,
+            "current_action": current_action.copy(),
+            "last_executable_command": last_executable_command,
+            "previous_command_wrench": previous_command_wrench.copy(),
+            "latest_realized_acceleration": latest_realized_acceleration,
+            "task_observation": task_observation,
+            "interface_state": interface_state,
+            "estimator_measurement": estimator_measurement,
+            "mpc_measurement": mpc_measurement,
+            "low_level_measurement": low_level_measurement,
+            "estimated_state": estimated_state.copy(),
+            "realized_acceleration": realized_acceleration,
+            "split_shadow_sample": split_shadow_sample,
+            "human_motion_authority_decision": (
+                human_motion_authority_decision
+            ),
+            "current_control_model_version": current_control_model_version,
+        }
+        deployable_start = {
+            "episode_time_s": current_time_s - episode_origin_time_s,
+            "sample_timestamp_s": task_observation.sample_timestamp_s,
+            "estimated_human_state_rad_rad_s": estimated_state.tolist(),
+            "estimated_interface_translation_human_m": (
+                interface_state.displacement_human_m.tolist()
+            ),
+            "estimated_interface_velocity_human_m_s": (
+                interface_state.velocity_human_m_s.tolist()
+            ),
+            "current_total_action_nm": current_action.tolist(),
+            "last_executable_wrench_world": (
+                last_executable_command.wrench_total_world.tolist()
+            ),
+            "last_robot_joint_torque_command_nm": (
+                last_executable_command.joint_torque_command_nm.tolist()
+            ),
+            "trigger_kind": trigger_kind,
+            "trigger_metadata": trigger_metadata,
+            "plant_truth_in_deployable_record": False,
+        }
+        return capture_diagnostic_continuation_clone(
+            plant=plant,
+            controller_graph=controller_graph,
+            runtime_state=runtime_state,
+            deployable_start=deployable_start,
+            trigger_timestamp_s=current_time_s,
+            trigger_kind=trigger_kind,
+            trigger_metadata=trigger_metadata,
+            original_control_index=control_index,
+        )
+
     for control_index in range(maximum_steps):
         truth = plant.observe()
         estimator_measurement = estimator_layer.update(truth)
@@ -833,21 +1052,90 @@ def run_goal_mpc_smoke(
             plant.data.qacc[plant.human_dof_indices], dtype=float
         ).copy()
         current_time_s = float(truth.time_s)
+        split_shadow_sample = split_acceleration_monitor.update(
+            sample_timestamp_s=task_observation.sample_timestamp_s,
+            estimated_dq_rad_s=estimated_state[2:],
+            cuff_force_world_n=interface_state.measured_force_world_n,
+            cuff_moment_world_nm=interface_state.measured_moment_world_nm,
+            interface_translation_human_m=interface_state.displacement_human_m,
+            interface_velocity_human_m_s=interface_state.velocity_human_m_s,
+            interface_rotation_human_rad=interface_state.rotation_error_human_rad,
+            interface_angular_velocity_human_rad_s=(
+                interface_state.angular_velocity_human_rad_s
+            ),
+            command_wrench_world=last_executable_command.wrench_total_world,
+            robot_joint_torque_command_nm=(
+                last_executable_command.joint_torque_command_nm
+            ),
+        )
+        human_motion_authority_decision = (
+            None
+            if human_motion_acceleration_authority is None
+            else human_motion_acceleration_authority.evaluate(
+                split_shadow_sample
+            )
+        )
+        if (
+            human_motion_authority_decision is not None
+            and human_motion_authority_decision.violation
+        ):
+            human_motion_acceleration_event_count += 1
+        transition_response_shadow.observe(split_shadow_sample)
         dt_task = current_time_s - previous_task_time_s
         if dt_task > 1.0e-12:
             if pending_abort_reason is not None:
                 task_state = abort_episode(task_state, pending_abort_reason)
             else:
                 if uncertainty_estimate is None:
-                    task_state = transition_phase(
+                    pre_transition_task_state = task_state
+                    candidate_task_state = transition_phase(
                         spec,
                         task_state,
                         estimated_state[:2],
                         estimated_state[2:],
                         dt_task,
-                        ddq_rad_s2=realized_acceleration.acceleration_rad_s2,
+                        ddq_rad_s2=(
+                            None
+                            if human_motion_authority_decision is None
+                            else human_motion_authority_decision.acceleration_rad_s2
+                        ),
+                        acceleration_authority_valid=bool(
+                            human_motion_authority_decision is not None
+                            and human_motion_authority_decision.authority_active
+                        ),
                         completion_margin=completion_margin,
                     )
+                    task_state = _apply_minimum_phase_duration(
+                        task_state,
+                        candidate_task_state,
+                        dt_s=dt_task,
+                        minimum_phase_duration_s=phase_duration_floor,
+                    )
+                    if (
+                        diagnostic_post_abort_continuation
+                        and diagnostic_abort_clone is None
+                        and task_state.phase is TaskPhase.ABORTED
+                        and task_state.abort_reason == "TASK_ACCELERATION_LIMIT"
+                    ):
+                        diagnostic_abort_clone = _capture_current_diagnostic_clone(
+                            trigger_kind="ACCELERATION_MONITOR_ABORT",
+                            trigger_metadata={
+                                "authoritative_abort_reason": task_state.abort_reason,
+                                "authoritative_abort_timestamp_s": current_time_s,
+                            },
+                            current_time_s=current_time_s,
+                            control_index=control_index,
+                            task_observation=task_observation,
+                            interface_state=interface_state,
+                            estimator_measurement=estimator_measurement,
+                            mpc_measurement=mpc_measurement,
+                            low_level_measurement=low_level_measurement,
+                            estimated_state=estimated_state,
+                            realized_acceleration=realized_acceleration,
+                            split_shadow_sample=split_shadow_sample,
+                            authoritative_task_state=task_state,
+                            pre_trigger_task_state=pre_transition_task_state,
+                        )
                 else:
                     task_state = transition_phase_uncertainty_aware(
                         spec,
@@ -855,6 +1143,16 @@ def run_goal_mpc_smoke(
                         uncertainty_estimate,
                         dt_task,
                         completion_margin=completion_margin,
+                        human_motion_acceleration_rad_s2=(
+                            None
+                            if human_motion_authority_decision is None
+                            else human_motion_authority_decision.acceleration_rad_s2
+                        ),
+                        human_motion_acceleration_valid=bool(
+                            human_motion_authority_decision is not None
+                            and human_motion_authority_decision.authority_active
+                        ),
+                        include_model_acceleration_authority=False,
                     )
             previous_task_time_s = current_time_s
             if task_state.phase is not previous_phase:
@@ -867,6 +1165,84 @@ def run_goal_mpc_smoke(
                     }
                 )
                 previous_phase = task_state.phase
+
+        episode_time_s = current_time_s - episode_origin_time_s
+        for target in near_limit_shadow_targets:
+            if target.timestamp_s in captured_near_limit_target_times:
+                continue
+            if not np.isclose(
+                episode_time_s,
+                target.timestamp_s,
+                atol=1.0e-10,
+                rtol=0.0,
+            ):
+                continue
+            if task_state.phase in (TaskPhase.COMPLETE, TaskPhase.ABORTED):
+                raise RuntimeError("near-limit replay target became terminal")
+            if task_state.phase.value != target.task_phase:
+                raise RuntimeError("near-limit replay task phase changed")
+            if control_index % high_level_steps != target.mpc_cycle_offset:
+                raise RuntimeError("near-limit replay MPC-cycle context changed")
+            if spec.task_joint_acceleration_limit_rad_s2 is None:
+                raise ValueError("near-limit collection requires registered limits")
+            registered_limit = np.asarray(
+                spec.task_joint_acceleration_limit_rad_s2, dtype=float
+            )
+            if (
+                human_motion_authority_decision is None
+                or not human_motion_authority_decision.authority_active
+            ):
+                raise RuntimeError(
+                    "near-limit replay target lacks full 20 ms authority history"
+                )
+            actual_normalized = np.abs(
+                human_motion_authority_decision.acceleration_rad_s2
+            ) / registered_limit
+            if np.any(actual_normalized >= 1.0):
+                raise RuntimeError("near-limit replay target reached abort boundary")
+            near_limit_diagnostic_clones.append(
+                _capture_current_diagnostic_clone(
+                    trigger_kind="NEAR_LIMIT_BENIGN_TRIGGER",
+                    trigger_metadata={
+                        "selection_plan": target.record(),
+                        "actual_boundary_proximity": float(
+                            np.max(actual_normalized)
+                        ),
+                        "actual_normalized_joint_acceleration": (
+                            actual_normalized.tolist()
+                        ),
+                        "actual_human_motion_acceleration_deg_s2": np.degrees(
+                            human_motion_authority_decision.acceleration_rad_s2
+                        ).tolist(),
+                        "registered_limit_deg_s2": np.degrees(
+                            registered_limit
+                        ).tolist(),
+                        "task_phase": task_state.phase.value,
+                        "support_load_state": "LOADED_TRACK",
+                        "interface_load_state": "LOADED",
+                        "mpc_cycle_offset": target.mpc_cycle_offset,
+                        "elapsed_since_mpc_update_ms": float(
+                            1000.0 * CONTROL_DT_S * target.mpc_cycle_offset
+                        ),
+                        "selection_uses_new_numeric_threshold": False,
+                        "selection_is_offline_rank_below_existing_boundary": True,
+                        "control_authority": False,
+                    },
+                    current_time_s=current_time_s,
+                    control_index=control_index,
+                    task_observation=task_observation,
+                    interface_state=interface_state,
+                    estimator_measurement=estimator_measurement,
+                    mpc_measurement=mpc_measurement,
+                    low_level_measurement=low_level_measurement,
+                    estimated_state=estimated_state,
+                    realized_acceleration=realized_acceleration,
+                    split_shadow_sample=split_shadow_sample,
+                    authoritative_task_state=task_state,
+                    pre_trigger_task_state=task_state,
+                )
+            )
+            captured_near_limit_target_times.add(target.timestamp_s)
 
         deployable_callback_payload = {
             "episode_time_s": current_time_s - episode_origin_time_s,
@@ -1026,6 +1402,80 @@ def run_goal_mpc_smoke(
             ).copy()
         )
         trace_control_human_model_version.append(current_control_model_version)
+        trace_shadow_human_motion_acceleration.append(
+            split_shadow_sample.human_motion_acceleration_rad_s2.copy()
+        )
+        trace_shadow_human_motion_valid.append(
+            split_shadow_sample.human_motion_valid
+        )
+        trace_shadow_human_motion_coverage.append(
+            split_shadow_sample.human_motion_history_coverage_s
+        )
+        trace_shadow_human_motion_sample_count.append(
+            split_shadow_sample.human_motion_history_sample_count
+        )
+        trace_human_motion_authority_acceleration.append(
+            (
+                np.full(2, np.nan)
+                if human_motion_authority_decision is None
+                else human_motion_authority_decision.acceleration_rad_s2.copy()
+            )
+        )
+        trace_human_motion_authority_active.append(
+            bool(
+                human_motion_authority_decision is not None
+                and human_motion_authority_decision.authority_active
+            )
+        )
+        trace_human_motion_authority_violation.append(
+            bool(
+                human_motion_authority_decision is not None
+                and human_motion_authority_decision.violation
+            )
+        )
+        trace_shadow_fast_motion_acceleration.append(
+            split_shadow_sample.fast_motion_acceleration_rad_s2.copy()
+        )
+        trace_shadow_fast_motion_valid.append(split_shadow_sample.fast_motion_valid)
+        trace_shadow_fast_alignment_interval.append(
+            split_shadow_sample.fast_alignment_interval_s
+        )
+        trace_shadow_cuff_wrench.append(
+            split_shadow_sample.cuff_wrench_world.copy()
+        )
+        trace_shadow_cuff_wrench_slew.append(
+            split_shadow_sample.cuff_wrench_slew_world_per_s.copy()
+        )
+        trace_shadow_interface_translation.append(
+            split_shadow_sample.interface_translation_human_m.copy()
+        )
+        trace_shadow_interface_velocity.append(
+            split_shadow_sample.interface_velocity_human_m_s.copy()
+        )
+        trace_shadow_interface_rotation.append(
+            split_shadow_sample.interface_rotation_human_rad.copy()
+        )
+        trace_shadow_interface_angular_velocity.append(
+            split_shadow_sample.interface_angular_velocity_human_rad_s.copy()
+        )
+        trace_shadow_command_wrench.append(
+            split_shadow_sample.command_wrench_world.copy()
+        )
+        trace_shadow_command_wrench_slew.append(
+            split_shadow_sample.command_wrench_slew_world_per_s.copy()
+        )
+        trace_shadow_robot_joint_torque.append(
+            split_shadow_sample.robot_joint_torque_command_nm.copy()
+        )
+        trace_shadow_robot_joint_torque_slew.append(
+            split_shadow_sample.robot_joint_torque_slew_nm_s.copy()
+        )
+        trace_shadow_robot_joint_torque_available.append(
+            split_shadow_sample.robot_joint_torque_available
+        )
+        trace_shadow_robot_joint_torque_slew_valid.append(
+            split_shadow_sample.robot_joint_torque_slew_valid
+        )
 
         progress = diagnostic_normalized_progress(spec, task_state.phase, estimated_state[:2])
         trace_time.append(current_time_s)
@@ -1129,9 +1579,57 @@ def run_goal_mpc_smoke(
             )
 
         if task_state.phase in (TaskPhase.COMPLETE, TaskPhase.ABORTED):
+            transition_response_shadow.record_context(
+                event_timestamp_s=current_time_s,
+                mpc_command_update=False,
+                support_load_state="LOADED_TERMINAL",
+                task_phase=task_state.phase.value,
+                interface_load_state="LOADED",
+                execution_state={
+                    "control_human_model_version": current_control_model_version,
+                    "pacing_mode": (
+                        "UNPACED"
+                        if float(pacing_status["gamma"]) == 1.0
+                        else "PACED"
+                    ),
+                    "command_path": "TERMINATED",
+                },
+                metadata={
+                    "termination_reason": task_state.abort_reason,
+                    "phase_changed": bool(phase_changed),
+                    "command_wrench_before_world": (
+                        split_shadow_sample.command_wrench_world
+                    ),
+                    "command_wrench_after_world": (
+                        split_shadow_sample.command_wrench_world
+                    ),
+                    "robot_joint_torque_before_nm": (
+                        split_shadow_sample.robot_joint_torque_command_nm
+                    ),
+                    "robot_joint_torque_after_nm": (
+                        split_shadow_sample.robot_joint_torque_command_nm
+                    ),
+                    "command_applied_after_event": False,
+                },
+            )
             trace_local_reference_q.append(estimated_state[:2].copy())
             break
         if stop_on_return_entry and task_state.phase is TaskPhase.RETURN:
+            transition_response_shadow.record_context(
+                event_timestamp_s=current_time_s,
+                mpc_command_update=False,
+                support_load_state="LOADED_TRACK",
+                task_phase=task_state.phase.value,
+                interface_load_state="LOADED",
+                execution_state={
+                    "control_human_model_version": current_control_model_version,
+                    "command_path": "GOAL_MPC_TRACK",
+                },
+                metadata={
+                    "stop_on_return_entry": True,
+                    "phase_changed": bool(phase_changed),
+                },
+            )
             trace_local_reference_q.append(estimated_state[:2].copy())
             break
         if (
@@ -1146,8 +1644,230 @@ def run_goal_mpc_smoke(
                     "reason": task_state.abort_reason,
                 }
             )
+            transition_response_shadow.record_context(
+                event_timestamp_s=current_time_s,
+                mpc_command_update=False,
+                support_load_state="LOADED_TERMINAL",
+                task_phase=task_state.phase.value,
+                interface_load_state="LOADED",
+                execution_state={
+                    "control_human_model_version": current_control_model_version,
+                    "pacing_mode": (
+                        "UNPACED"
+                        if float(pacing_status["gamma"]) == 1.0
+                        else "PACED"
+                    ),
+                    "command_path": "TERMINATED",
+                },
+                metadata={
+                    "termination_reason": task_state.abort_reason,
+                    "phase_changed": True,
+                    "command_wrench_before_world": (
+                        split_shadow_sample.command_wrench_world
+                    ),
+                    "command_wrench_after_world": (
+                        split_shadow_sample.command_wrench_world
+                    ),
+                    "robot_joint_torque_before_nm": (
+                        split_shadow_sample.robot_joint_torque_command_nm
+                    ),
+                    "robot_joint_torque_after_nm": (
+                        split_shadow_sample.robot_joint_torque_command_nm
+                    ),
+                    "command_applied_after_event": False,
+                },
+            )
             trace_local_reference_q.append(estimated_state[:2].copy())
             break
+
+        if (
+            matched_branch_intervention is not None
+            and matched_branch_intervention.should_capture(
+                phase=task_state.phase,
+                progress=progress,
+                high_level_cycle=high_level_cycle,
+            )
+        ):
+            controller_graph = {
+                "estimator_layer": estimator_layer,
+                "mpc_layer": mpc_layer,
+                "low_level_layer": low_level_layer,
+                "estimator": estimator,
+                "interface_observer": interface_observer,
+                "acceleration_monitor": acceleration_monitor,
+                "split_acceleration_monitor": split_acceleration_monitor,
+                "human_motion_acceleration_authority": (
+                    human_motion_acceleration_authority
+                ),
+                "transition_response_shadow": transition_response_shadow,
+                "screening_interface_predictor": screening_interface_predictor,
+                "diagnostic_interface_predictor": diagnostic_interface_predictor,
+                "mpc": mpc,
+                "supervisor": supervisor,
+                "hold_stabilizer": hold_stabilizer,
+                "hold_handoff": hold_handoff,
+                "return_handoff": return_handoff,
+                "current_model": current_model,
+                "cuff_allocator": cuff_allocator,
+            }
+            runtime_state = {
+                "task_state": task_state,
+                "previous_phase": previous_phase,
+                "previous_task_time_s": previous_task_time_s,
+                "pending_abort_reason": pending_abort_reason,
+                "current_action": current_action.copy(),
+                "last_executable_command": last_executable_command,
+                "previous_command_wrench": previous_command_wrench.copy(),
+                "latest_realized_acceleration": latest_realized_acceleration,
+                "task_events": task_events,
+                "task_observation": task_observation,
+                "interface_state": interface_state,
+                "estimator_measurement": estimator_measurement,
+                "mpc_measurement": mpc_measurement,
+                "low_level_measurement": low_level_measurement,
+                "estimated_state": estimated_state.copy(),
+                "realized_acceleration": realized_acceleration,
+                "human_motion_authority_decision": (
+                    human_motion_authority_decision
+                ),
+                "pending_predicted_force": pending_predicted_force.copy(),
+                "pending_predicted_peak_force": pending_predicted_peak_force,
+                "return_mpc_resumed_after_handoff": (
+                    return_mpc_resumed_after_handoff
+                ),
+                "current_control_model_version": current_control_model_version,
+            }
+            deployable_start = {
+                "episode_time_s": current_time_s - episode_origin_time_s,
+                "estimated_human_state_rad_rad_s": estimated_state.tolist(),
+                "estimated_interface": {
+                    "translation_human_m": (
+                        interface_state.displacement_human_m.tolist()
+                    ),
+                    "velocity_human_m_s": (
+                        interface_state.velocity_human_m_s.tolist()
+                    ),
+                    "rotation_human_rad": (
+                        interface_state.rotation_error_human_rad.tolist()
+                    ),
+                    "angular_velocity_human_rad_s": (
+                        interface_state.angular_velocity_human_rad_s.tolist()
+                    ),
+                },
+                "robot_cuff_measurement": {
+                    "robot_q_rad": np.asarray(
+                        low_level_measurement.robot_q_rad, dtype=float
+                    ).tolist(),
+                    "robot_dq_rad_s": np.asarray(
+                        low_level_measurement.robot_dq_rad_s, dtype=float
+                    ).tolist(),
+                    "position_world_m": np.asarray(
+                        low_level_measurement.attachment_position_m, dtype=float
+                    ).tolist(),
+                    "rotation_world": np.asarray(
+                        low_level_measurement.attachment_rotation_matrix, dtype=float
+                    ).tolist(),
+                    "linear_velocity_world_m_s": np.asarray(
+                        low_level_measurement.attachment_velocity_m_s, dtype=float
+                    ).tolist(),
+                    "angular_velocity_world_rad_s": np.asarray(
+                        low_level_measurement.attachment_angular_velocity_rad_s,
+                        dtype=float,
+                    ).tolist(),
+                    "measured_force_world_n": np.asarray(
+                        low_level_measurement.cuff_force_vector_n, dtype=float
+                    ).tolist(),
+                    "measured_moment_world_nm": np.asarray(
+                        low_level_measurement.cuff_moment_vector_nm, dtype=float
+                    ).tolist(),
+                },
+                "task": task_state_record(task_state),
+                "diagnostic_phase_progress": progress,
+                "current_total_action_nm": current_action.tolist(),
+                "current_support_action_nm": current_support.tolist(),
+                "current_executable_wrench_world": (
+                    previous_command_wrench.tolist()
+                ),
+                "control_human_model_version": current_control_model_version,
+                "control_human_model_minimum_mass_eigenvalue": float(
+                    current_model.minimum_mass_matrix_eigenvalue()
+                ),
+                "plant_truth_in_deployable_record": False,
+            }
+            snapshot = capture_runtime_snapshot(
+                plant=plant,
+                controller_graph=controller_graph,
+                runtime_state=runtime_state,
+                deployable_start=deployable_start,
+            )
+            restored_graph, restored_runtime = restore_runtime_snapshot(
+                plant, snapshot
+            )
+            estimator_layer = restored_graph["estimator_layer"]
+            mpc_layer = restored_graph["mpc_layer"]
+            low_level_layer = restored_graph["low_level_layer"]
+            estimator = restored_graph["estimator"]
+            interface_observer = restored_graph["interface_observer"]
+            acceleration_monitor = restored_graph["acceleration_monitor"]
+            split_acceleration_monitor = restored_graph[
+                "split_acceleration_monitor"
+            ]
+            human_motion_acceleration_authority = restored_graph[
+                "human_motion_acceleration_authority"
+            ]
+            transition_response_shadow = restored_graph[
+                "transition_response_shadow"
+            ]
+            screening_interface_predictor = restored_graph[
+                "screening_interface_predictor"
+            ]
+            diagnostic_interface_predictor = restored_graph[
+                "diagnostic_interface_predictor"
+            ]
+            mpc = restored_graph["mpc"]
+            supervisor = restored_graph["supervisor"]
+            hold_stabilizer = restored_graph["hold_stabilizer"]
+            hold_handoff = restored_graph["hold_handoff"]
+            return_handoff = restored_graph["return_handoff"]
+            current_model = restored_graph["current_model"]
+            cuff_allocator = restored_graph["cuff_allocator"]
+            task_state = restored_runtime["task_state"]
+            previous_phase = restored_runtime["previous_phase"]
+            previous_task_time_s = restored_runtime["previous_task_time_s"]
+            pending_abort_reason = restored_runtime["pending_abort_reason"]
+            current_action = restored_runtime["current_action"]
+            last_executable_command = restored_runtime[
+                "last_executable_command"
+            ]
+            previous_command_wrench = restored_runtime[
+                "previous_command_wrench"
+            ]
+            latest_realized_acceleration = restored_runtime[
+                "latest_realized_acceleration"
+            ]
+            task_events = restored_runtime["task_events"]
+            task_observation = restored_runtime["task_observation"]
+            interface_state = restored_runtime["interface_state"]
+            estimator_measurement = restored_runtime["estimator_measurement"]
+            mpc_measurement = restored_runtime["mpc_measurement"]
+            low_level_measurement = restored_runtime["low_level_measurement"]
+            estimated_state = restored_runtime["estimated_state"]
+            realized_acceleration = restored_runtime["realized_acceleration"]
+            pending_predicted_force = restored_runtime[
+                "pending_predicted_force"
+            ]
+            pending_predicted_peak_force = restored_runtime[
+                "pending_predicted_peak_force"
+            ]
+            return_mpc_resumed_after_handoff = restored_runtime[
+                "return_mpc_resumed_after_handoff"
+            ]
+            current_control_model_version = restored_runtime[
+                "current_control_model_version"
+            ]
+            matched_branch_intervention.register_snapshot(
+                snapshot, current_time_s - episode_origin_time_s
+            )
 
         local_hold_cycle = use_loaded_local_hold and task_state.phase is TaskPhase.HOLD
         return_handoff_in_progress = bool(
@@ -1201,6 +1921,21 @@ def run_goal_mpc_smoke(
             hold_control_runtimes_ms.append(1000.0 * (perf_counter() - started))
             current_action = proposed_action.copy()
         if solve_this_cycle:
+            planning_spec = spec
+            if matched_branch_intervention is not None:
+                planning_spec = matched_branch_intervention.planning_spec(
+                    spec,
+                    episode_time_s=current_time_s - episode_origin_time_s,
+                    phase=task_state.phase,
+                    q_rad=estimated_state[:2],
+                )
+                if matched_branch_intervention.consume_goal_transition():
+                    # A temporary waypoint is a distinct Goal-MPC problem.
+                    # Preserve the executed command/slew state, but never warm
+                    # start the restored baseline goal with a waypoint plan.
+                    mpc.synchronize_executed_total_action(
+                        current_action, task_observation, current_model
+                    )
             if (
                 use_loaded_local_hold
                 and task_state.phase is TaskPhase.RETURN
@@ -1266,7 +2001,7 @@ def run_goal_mpc_smoke(
                 continuations = mpc.build_deterministic_continuations(
                     task_observation,
                     task_state,
-                    spec,
+                    planning_spec,
                     current_model,
                     previous_selected_sequence_nm=previous_selected_sequence,
                     previous_safest_sequence_nm=previous_safest_sequence,
@@ -1274,7 +2009,7 @@ def run_goal_mpc_smoke(
                 continuation_audit = mpc.audit_candidate_sequences_with_preview(
                     task_observation,
                     task_state,
-                    spec,
+                    planning_spec,
                     current_model,
                     continuations,
                     first_action_batch_preview=candidate_batch_preview,
@@ -1363,7 +2098,7 @@ def run_goal_mpc_smoke(
             proposed_action, mpc_diagnostics = mpc.solve_goal(
                 task_observation,
                 task_state,
-                spec,
+                planning_spec,
                 current_model,
                 first_action_batch_preview=candidate_batch_preview,
             )
@@ -1458,7 +2193,7 @@ def run_goal_mpc_smoke(
                     continuations = mpc.build_deterministic_continuations(
                         task_observation,
                         task_state,
-                        spec,
+                        planning_spec,
                         current_model,
                         previous_selected_sequence_nm=previous_selected_sequence,
                         previous_safest_sequence_nm=previous_safest_sequence,
@@ -1466,7 +2201,7 @@ def run_goal_mpc_smoke(
                     continuation_audit = mpc.audit_candidate_sequences_with_preview(
                         task_observation,
                         task_state,
-                        spec,
+                        planning_spec,
                         current_model,
                         continuations,
                         first_action_batch_preview=candidate_batch_preview,
@@ -1495,7 +2230,7 @@ def run_goal_mpc_smoke(
                     offline_action, offline_diagnostics = diagnostic_mpc.solve_goal(
                         task_observation,
                         task_state,
-                        spec,
+                        planning_spec,
                         current_model,
                         first_action_batch_preview=candidate_batch_preview,
                     )
@@ -1511,7 +2246,7 @@ def run_goal_mpc_smoke(
                             mpc.audit_candidate_sequences_with_preview(
                                 task_observation,
                                 task_state,
-                                spec,
+                                planning_spec,
                                 current_model,
                                 {
                                     "larger_offline_cem_selected": (
@@ -1679,6 +2414,35 @@ def run_goal_mpc_smoke(
                     selected_prediction_first_executable_wrench_world.append(
                         selected.executable_wrench_world[0, 0].copy()
                     )
+                if matched_branch_intervention is not None:
+                    episode_time_s = current_time_s - episode_origin_time_s
+                    branch_candidate = matched_branch_intervention.candidate_action(
+                        current_action,
+                        episode_time_s=episode_time_s,
+                        phase=task_state.phase,
+                    )
+                    mpc._active_human_model = current_model
+                    try:
+                        branch_preview = candidate_batch_preview(
+                            branch_candidate[np.newaxis, :]
+                        )
+                    finally:
+                        mpc._active_human_model = None
+                    current_action = matched_branch_intervention.apply(
+                        current_action,
+                        episode_time_s=episode_time_s,
+                        phase=task_state.phase,
+                        prefix_feasible=bool(branch_preview.feasible[0]),
+                    )
+                    if not np.array_equal(current_action, proposed_action):
+                        # The intervention changes only the short total-action
+                        # coordination.  All subsequent solves remain the same
+                        # frozen Goal-MPC, synchronized to what was executed.
+                        mpc.synchronize_executed_total_action(
+                            current_action, task_observation, current_model
+                        )
+                        proposed_action = current_action.copy()
+                        proposed_filter_result = None
 
         if local_reference is None:
             local_reference = support_reference
@@ -1784,6 +2548,45 @@ def run_goal_mpc_smoke(
                     "phase": task_state.phase.value,
                     "reason": task_state.abort_reason,
                 }
+            )
+            transition_response_shadow.record_context(
+                event_timestamp_s=current_time_s,
+                mpc_command_update=False,
+                support_load_state="LOADED_TERMINAL",
+                task_phase=task_state.phase.value,
+                interface_load_state="LOADED",
+                execution_state={
+                    "supervisor_mode": str(decision.mode),
+                    "safety_filter_status": (
+                        "NOT_APPLIED"
+                        if decision.safety_filter is None
+                        else str(decision.safety_filter["status"])
+                    ),
+                    "control_human_model_version": current_control_model_version,
+                    "pacing_mode": (
+                        "UNPACED"
+                        if float(pacing_status["gamma"]) == 1.0
+                        else "PACED"
+                    ),
+                    "command_path": "TERMINATED",
+                },
+                metadata={
+                    "termination_reason": task_state.abort_reason,
+                    "phase_changed": True,
+                    "command_wrench_before_world": (
+                        split_shadow_sample.command_wrench_world
+                    ),
+                    "command_wrench_after_world": (
+                        split_shadow_sample.command_wrench_world
+                    ),
+                    "robot_joint_torque_before_nm": (
+                        split_shadow_sample.robot_joint_torque_command_nm
+                    ),
+                    "robot_joint_torque_after_nm": (
+                        split_shadow_sample.robot_joint_torque_command_nm
+                    ),
+                    "command_applied_after_event": False,
+                },
             )
             break
         if decision.action_nm is None or decision.executable_preview is None:
@@ -1968,6 +2771,80 @@ def run_goal_mpc_smoke(
                     executed_prediction.predicted_peak_force_n[0]
                 )
             previous_command_wrench = command_wrench.copy()
+        if task_state.phase in (TaskPhase.COMPLETE, TaskPhase.ABORTED):
+            support_load_state = "LOADED_TERMINAL"
+        elif local_hold_cycle:
+            support_load_state = "LOADED_LOCAL_HOLD"
+        elif return_handoff_cycle:
+            support_load_state = "LOADED_RETURN_HANDOFF"
+        else:
+            support_load_state = "LOADED_TRACK"
+        transition_response_shadow.record_context(
+            event_timestamp_s=current_time_s,
+            mpc_command_update=bool(mpc_diagnostics is not None),
+            support_load_state=support_load_state,
+            task_phase=task_state.phase.value,
+            interface_load_state="LOADED",
+            execution_state={
+                "supervisor_mode": str(decision.mode),
+                "safety_filter_status": (
+                    "NOT_APPLIED"
+                    if decision.safety_filter is None
+                    else str(decision.safety_filter["status"])
+                ),
+                "mpc_status": (
+                    None
+                    if mpc_diagnostics is None
+                    else str(mpc_diagnostics["status"])
+                ),
+                "control_human_model_version": current_control_model_version,
+                "pacing_mode": (
+                    "UNPACED"
+                    if float(pacing_status["gamma"]) == 1.0
+                    else "PACED"
+                ),
+                "command_path": (
+                    "LOCAL_HOLD"
+                    if local_hold_cycle
+                    else (
+                        "RETURN_HANDOFF"
+                        if return_handoff_cycle
+                        else "GOAL_MPC_TRACK"
+                    )
+                ),
+            },
+            metadata={
+                "high_level_cycle": bool(high_level_cycle),
+                "phase_changed": bool(phase_changed),
+                "mpc_solve_this_cycle": bool(solve_this_cycle),
+                "mpc_status": (
+                    None
+                    if mpc_diagnostics is None
+                    else str(mpc_diagnostics["status"])
+                ),
+                "supervisor_mode": str(decision.mode),
+                "safety_filter_status": (
+                    None
+                    if decision.safety_filter is None
+                    else str(decision.safety_filter["status"])
+                ),
+                "control_human_model_transition": bool(
+                    pending_model_transition_event is not None
+                ),
+                "progress_pacing_gamma": float(pacing_status["gamma"]),
+                "command_wrench_before_world": (
+                    split_shadow_sample.command_wrench_world
+                ),
+                "command_wrench_after_world": command_wrench,
+                "robot_joint_torque_before_nm": (
+                    split_shadow_sample.robot_joint_torque_command_nm
+                ),
+                "robot_joint_torque_after_nm": (
+                    decision.executable_preview.command.joint_torque_command_nm
+                ),
+                "executed_generalized_action_after_nm": current_action,
+            },
+        )
         plant.apply_executable_command(decision.executable_preview.command)
         last_executable_command = decision.executable_preview.command
         screening_interface_predictor.synchronize(
@@ -2004,6 +2881,47 @@ def run_goal_mpc_smoke(
         ):
             structural_event_count += 1
             pending_abort_reason = "SIMULATION_STRUCTURAL_EVENT"
+
+    diagnostic_continuation_artifact = None
+    if diagnostic_abort_clone is not None:
+        diagnostic_continuation_artifact = run_diagnostic_post_abort_continuation(
+            diagnostic_abort_clone,
+            control_dt_s=CONTROL_DT_S,
+            physics_substeps=physics_substeps,
+            high_level_steps=high_level_steps,
+        )
+    near_limit_diagnostic_artifact = None
+    if near_limit_shadow_targets:
+        near_limit_windows = [
+            run_diagnostic_continuation(
+                clone,
+                control_dt_s=CONTROL_DT_S,
+                physics_substeps=physics_substeps,
+                high_level_steps=high_level_steps,
+            )
+            for clone in near_limit_diagnostic_clones
+        ]
+        near_limit_diagnostic_artifact = {
+            "schema": "stage5_near_limit_shadow_collection_v1",
+            "shadow_only": True,
+            "abort_authority": False,
+            "hard_threshold_active": False,
+            "controller_semantics_changed": False,
+            "scientific_parameters_changed": False,
+            "selection_contract": (
+                "offline rank within task-phase/MPC-cycle context below the "
+                "existing registered acceleration boundary; no new numeric threshold"
+            ),
+            "planned_target_count": len(near_limit_shadow_targets),
+            "captured_target_count": len(near_limit_windows),
+            "missed_targets": [
+                target.record()
+                for target in near_limit_shadow_targets
+                if target.timestamp_s not in captured_near_limit_target_times
+            ],
+            "targets": [target.record() for target in near_limit_shadow_targets],
+            "windows": near_limit_windows,
+        }
 
     trace = {
         "time_s": np.asarray(trace_time, dtype=float),
@@ -2091,6 +3009,72 @@ def run_goal_mpc_smoke(
         ),
         "deployable_measured_cuff_moment_world_nm": np.asarray(
             trace_measured_cuff_moment_world, dtype=float
+        ),
+        "shadow_human_motion_acceleration_rad_s2": np.asarray(
+            trace_shadow_human_motion_acceleration, dtype=float
+        ).reshape(-1, 2),
+        "shadow_human_motion_valid": np.asarray(
+            trace_shadow_human_motion_valid, dtype=bool
+        ),
+        "shadow_human_motion_history_coverage_s": np.asarray(
+            trace_shadow_human_motion_coverage, dtype=float
+        ),
+        "shadow_human_motion_history_sample_count": np.asarray(
+            trace_shadow_human_motion_sample_count, dtype=int
+        ),
+        "human_motion_authority_acceleration_rad_s2": np.asarray(
+            trace_human_motion_authority_acceleration, dtype=float
+        ).reshape(-1, 2),
+        "human_motion_authority_active": np.asarray(
+            trace_human_motion_authority_active, dtype=bool
+        ),
+        "human_motion_authority_violation": np.asarray(
+            trace_human_motion_authority_violation, dtype=bool
+        ),
+        "shadow_fast_motion_acceleration_rad_s2": np.asarray(
+            trace_shadow_fast_motion_acceleration, dtype=float
+        ).reshape(-1, 2),
+        "shadow_fast_motion_valid": np.asarray(
+            trace_shadow_fast_motion_valid, dtype=bool
+        ),
+        "shadow_fast_alignment_interval_s": np.asarray(
+            trace_shadow_fast_alignment_interval, dtype=float
+        ),
+        "shadow_cuff_wrench_world": np.asarray(
+            trace_shadow_cuff_wrench, dtype=float
+        ).reshape(-1, 6),
+        "shadow_cuff_wrench_slew_world_per_s": np.asarray(
+            trace_shadow_cuff_wrench_slew, dtype=float
+        ).reshape(-1, 6),
+        "shadow_interface_translation_human_m": np.asarray(
+            trace_shadow_interface_translation, dtype=float
+        ).reshape(-1, 3),
+        "shadow_interface_velocity_human_m_s": np.asarray(
+            trace_shadow_interface_velocity, dtype=float
+        ).reshape(-1, 3),
+        "shadow_interface_rotation_human_rad": np.asarray(
+            trace_shadow_interface_rotation, dtype=float
+        ).reshape(-1, 3),
+        "shadow_interface_angular_velocity_human_rad_s": np.asarray(
+            trace_shadow_interface_angular_velocity, dtype=float
+        ).reshape(-1, 3),
+        "shadow_command_wrench_world": np.asarray(
+            trace_shadow_command_wrench, dtype=float
+        ).reshape(-1, 6),
+        "shadow_command_wrench_slew_world_per_s": np.asarray(
+            trace_shadow_command_wrench_slew, dtype=float
+        ).reshape(-1, 6),
+        "shadow_robot_joint_torque_command_nm": np.asarray(
+            trace_shadow_robot_joint_torque, dtype=float
+        ).reshape(-1, 6),
+        "shadow_robot_joint_torque_slew_nm_s": np.asarray(
+            trace_shadow_robot_joint_torque_slew, dtype=float
+        ).reshape(-1, 6),
+        "shadow_robot_joint_torque_available": np.asarray(
+            trace_shadow_robot_joint_torque_available, dtype=bool
+        ),
+        "shadow_robot_joint_torque_slew_valid": np.asarray(
+            trace_shadow_robot_joint_torque_slew_valid, dtype=bool
         ),
         "interface_uncertainty_state_min_rad_rad_s": np.asarray(
             trace_uncertainty_state_min, dtype=float
@@ -2212,6 +3196,9 @@ def run_goal_mpc_smoke(
         return_handoff_entry_time_s -= episode_origin_time_s
     if return_handoff_completed_time_s is not None:
         return_handoff_completed_time_s -= episode_origin_time_s
+    transition_response_artifact = transition_response_shadow.artifact(
+        time_origin_s=episode_origin_time_s
+    )
     time = trace["time_s"]
     force_norm = np.linalg.norm(trace["physical_cuff_force_world_n"], axis=1)
     moment_norm = np.linalg.norm(trace["physical_cuff_moment_world_nm"], axis=1)
@@ -2220,6 +3207,13 @@ def run_goal_mpc_smoke(
     evaluation_dq = trace["evaluation_human_dq_rad_s"]
     estimated_dq = trace["estimated_state_rad_rad_s"][:, 2:]
     deployable_realized_ddq = trace["deployable_realized_acceleration_rad_s2"]
+    human_motion_authority_active = trace["human_motion_authority_active"]
+    human_motion_authority_ddq = trace[
+        "human_motion_authority_acceleration_rad_s2"
+    ]
+    valid_human_motion_authority_ddq = human_motion_authority_ddq[
+        human_motion_authority_active
+    ]
     deployable_instantaneous_ddq = trace[
         "deployable_instantaneous_model_acceleration_rad_s2"
     ]
@@ -2528,11 +3522,15 @@ def run_goal_mpc_smoke(
         },
         "fixed_human_control_model": not bool(model_transition_events),
         "human_model_version": current_control_model_version,
-        "online_identification_or_learning": (
+        "online_identification_or_learning": bool(
             control_human_model_callback is not None
+            and not control_human_model_callback_is_no_update_freeze
         ),
         "human_model_control_transition": {
             "callback_enabled": control_human_model_callback is not None,
+            "callback_declared_no_update_freeze": bool(
+                control_human_model_callback_is_no_update_freeze
+            ),
             "transition_count": len(model_transition_events),
             "at_most_one_transition_enforced": True,
             "events": model_transition_events,
@@ -2541,6 +3539,26 @@ def run_goal_mpc_smoke(
             "truth_available_to_callback": False,
         },
         "learned_terminal_value": 0.0,
+        "matched_short_branch": (
+            None
+            if matched_branch_intervention is None
+            or getattr(matched_branch_intervention, "intervention_kind", None)
+            != "short_action_bias"
+            else matched_branch_intervention.report()
+        ),
+        "posture_region_branch": (
+            None
+            if matched_branch_intervention is None
+            or getattr(matched_branch_intervention, "intervention_kind", None)
+            != "temporary_intermediate_posture_region"
+            else matched_branch_intervention.report()
+        ),
+        "minimum_phase_duration_s": {
+            phase.value: duration
+            for phase, duration in sorted(
+                phase_duration_floor.items(), key=lambda item: item[0].value
+            )
+        },
         "prescribed_full_q_reference_used": False,
         "fixed_q1_q2_coordination_ratio": False,
         "path_corridor_active": False,
@@ -2842,9 +3860,13 @@ def run_goal_mpc_smoke(
         "peak_abs_evaluation_only_joint_velocity_deg_s": np.degrees(
             np.max(np.abs(trace["evaluation_human_dq_rad_s"]), axis=0)
         ).tolist(),
-        "peak_abs_estimated_joint_acceleration_deg_s2": np.degrees(
-            np.max(np.abs(deployable_realized_ddq), axis=0)
-        ).tolist(),
+        "peak_abs_estimated_joint_acceleration_deg_s2": (
+            np.degrees(
+                np.max(np.abs(valid_human_motion_authority_ddq), axis=0)
+            ).tolist()
+            if len(valid_human_motion_authority_ddq)
+            else None
+        ),
         "peak_abs_evaluation_only_joint_acceleration_deg_s2": np.degrees(
             np.max(np.abs(evaluation_interval_ddq), axis=0)
         ).tolist(),
@@ -2877,8 +3899,37 @@ def run_goal_mpc_smoke(
                 "peak_abs_deg_s2": np.degrees(
                     np.max(np.abs(deployable_realized_ddq), axis=0)
                 ).tolist(),
-                "online_monitor_authority": True,
+                "online_monitor_authority": False,
                 "causal": True,
+                "truth_used_online": False,
+            },
+            "human_motion_acceleration_authority": {
+                "version": HUMAN_MOTION_ACCELERATION_AUTHORITY_VERSION,
+                "definition": (
+                    "full causal 20 ms deployable dq_hat difference; valid only "
+                    "with complete history coverage"
+                ),
+                "source": "full_causal_20ms_deployable_dq_hat_history",
+                "peak_abs_deg_s2_on_valid_samples": (
+                    np.degrees(
+                        np.max(
+                            np.abs(valid_human_motion_authority_ddq), axis=0
+                        )
+                    ).tolist()
+                    if len(valid_human_motion_authority_ddq)
+                    else None
+                ),
+                "valid_sample_count": int(
+                    np.count_nonzero(human_motion_authority_active)
+                ),
+                "invalid_warmup_sample_count": int(
+                    len(human_motion_authority_active)
+                    - np.count_nonzero(human_motion_authority_active)
+                ),
+                "history_coverage_required_s": MPC_DT_S,
+                "event_count": human_motion_acceleration_event_count,
+                "online_monitor_authority": True,
+                "model_based_qdd_used": False,
                 "truth_used_online": False,
             },
             "evaluation_only_truth_acceleration": {
@@ -2907,7 +3958,105 @@ def run_goal_mpc_smoke(
                 "online_monitor_authority": False,
             },
             "aligned_20ms_intervals": aligned_acceleration_intervals,
-            "startup_exemption": False,
+            "startup_policy": (
+                "authority inactive until one full causal 20 ms dq_hat history "
+                "is valid; validity and coverage are recorded"
+            ),
+        },
+        "split_acceleration_monitor_shadow": {
+            "version": "split_acceleration_monitor_v1_shadow_only",
+            "shadow_only": True,
+            "abort_authority": False,
+            "existing_model_based_monitor_remains_authoritative": False,
+            "human_motion_channel": {
+                "definition": (
+                    "full causal 20 ms deployable dq_hat difference; no "
+                    "model-based qdd"
+                ),
+                "window_s": MPC_DT_S,
+                "signal_consumed_by_separate_abort_authority": True,
+                "authority_version": (
+                    HUMAN_MOTION_ACCELERATION_AUTHORITY_VERSION
+                ),
+                "valid_sample_count": int(
+                    np.count_nonzero(trace["shadow_human_motion_valid"])
+                ),
+                "history_coverage_recorded": True,
+                "peak_abs_deg_s2_on_valid_samples": (
+                    np.degrees(
+                        np.max(
+                            np.abs(
+                                trace["shadow_human_motion_acceleration_rad_s2"][
+                                    trace["shadow_human_motion_valid"]
+                                ]
+                            ),
+                            axis=0,
+                        )
+                    ).tolist()
+                    if np.any(trace["shadow_human_motion_valid"])
+                    else None
+                ),
+            },
+            "fast_transient_channel": {
+                "window_s": CONTROL_DT_S,
+                "shadow_only": True,
+                "abort_authority": False,
+                "valid_sample_count": int(
+                    np.count_nonzero(trace["shadow_fast_motion_valid"])
+                ),
+                "event_aligned_cuff_wrench_and_slew_recorded": True,
+                "event_aligned_interface_state_and_rate_recorded": True,
+                "event_aligned_command_wrench_and_slew_recorded": True,
+                "event_aligned_robot_joint_torque_and_slew_recorded": True,
+                "robot_joint_torque_slew_valid_sample_count": int(
+                    np.count_nonzero(
+                        trace["shadow_robot_joint_torque_slew_valid"]
+                    )
+                ),
+                "hard_threshold_registered": False,
+                "protection_delegation": (
+                    "future lower-level CR12 and force/torque safety"
+                ),
+            },
+            "truth_used_online": False,
+        },
+        "human_motion_acceleration_authority": {
+            "version": HUMAN_MOTION_ACCELERATION_AUTHORITY_VERSION,
+            "abort_authority": True,
+            "source": "full_causal_20ms_deployable_dq_hat_history",
+            "registered_limit_deg_s2": (
+                None
+                if spec.task_joint_acceleration_limit_rad_s2 is None
+                else np.degrees(
+                    spec.task_joint_acceleration_limit_rad_s2
+                ).tolist()
+            ),
+            "valid_sample_count": int(
+                np.count_nonzero(human_motion_authority_active)
+            ),
+            "event_count": human_motion_acceleration_event_count,
+            "model_based_qdd_used": False,
+            "truth_used_online": False,
+        },
+        "transition_response_shadow_v2": {
+            "version": transition_response_artifact["schema"],
+            "shadow_only": True,
+            "abort_authority": False,
+            "hard_threshold_active": False,
+            "causal_append_only": True,
+            "window_s": transition_response_artifact["window_s"],
+            "event_count": transition_response_artifact["event_count"],
+            "complete_window_count": transition_response_artifact[
+                "complete_window_count"
+            ],
+            "partial_window_count": transition_response_artifact[
+                "partial_window_count"
+            ],
+            "label_counts": transition_response_artifact["label_counts"],
+            "artifact": "transition_response_shadow_v2.json",
+            "existing_model_based_monitor_remains_authoritative": False,
+            "fast_transient_abort_authority": False,
+            "truth_used_online": False,
         },
         "motion_envelope": {
             "velocity_limit_deg_s": (
@@ -2929,7 +4078,25 @@ def run_goal_mpc_smoke(
                     <= np.asarray(spec.task_joint_velocity_limit_rad_s) + 1.0e-9
                 )
             ),
+            "human_motion_authority_acceleration_satisfied": bool(
+                spec.task_joint_acceleration_limit_rad_s2 is None
+                or not len(valid_human_motion_authority_ddq)
+                or np.all(
+                    np.max(np.abs(valid_human_motion_authority_ddq), axis=0)
+                    <= np.asarray(spec.task_joint_acceleration_limit_rad_s2)
+                    + 1.0e-9
+                )
+            ),
             "deployable_realized_acceleration_satisfied": bool(
+                spec.task_joint_acceleration_limit_rad_s2 is None
+                or not len(valid_human_motion_authority_ddq)
+                or np.all(
+                    np.max(np.abs(valid_human_motion_authority_ddq), axis=0)
+                    <= np.asarray(spec.task_joint_acceleration_limit_rad_s2)
+                    + 1.0e-9
+                )
+            ),
+            "model_based_acceleration_diagnostic_satisfied": bool(
                 spec.task_joint_acceleration_limit_rad_s2 is None
                 or np.all(
                     np.max(np.abs(deployable_realized_ddq), axis=0)
@@ -3271,6 +4438,32 @@ def run_goal_mpc_smoke(
     (output_dir / "summary.json").write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    (output_dir / "transition_response_shadow_v2.json").write_text(
+        json.dumps(transition_response_artifact, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    if diagnostic_continuation_artifact is not None:
+        (output_dir / "diagnostic_post_abort_continuation.json").write_text(
+            json.dumps(
+                diagnostic_continuation_artifact,
+                indent=2,
+                sort_keys=True,
+                allow_nan=False,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+    if near_limit_diagnostic_artifact is not None:
+        (output_dir / "near_limit_diagnostic_continuations.json").write_text(
+            json.dumps(
+                near_limit_diagnostic_artifact,
+                indent=2,
+                sort_keys=True,
+                allow_nan=False,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
     _write_plots(output_dir, trace)
     if session_context is not None:
         session_context.update(
@@ -3283,6 +4476,7 @@ def run_goal_mpc_smoke(
                 "cuff_allocator": cuff_allocator,
                 "interface_observer": interface_observer,
                 "acceleration_monitor": acceleration_monitor,
+                "split_acceleration_monitor": split_acceleration_monitor,
                 "screening_interface_predictor": screening_interface_predictor,
                 "diagnostic_interface_predictor": diagnostic_interface_predictor,
                 "mpc": mpc,

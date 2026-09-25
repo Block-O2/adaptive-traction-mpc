@@ -1,0 +1,132 @@
+{
+  "schema": "full3d_cr12_campaign_closeout_v1",
+  "status": "SIMULATION_QUALIFIED",
+  "candidate": "Round19 frozen production candidate",
+  "production_source_manifest_sha256": "2880c67d0844ce551ff068474642a4b6ff9bc1fa2d7c81dfcd6914dd32c1ab99",
+  "production_source_manifest_entries": 652,
+  "controller_config_sha256": "d11bb72950f9f74e451548f57ff509e89f92e10aa18f8c62f78bd7a4b7f4c6bb",
+  "system_chain": [
+    "CR12 simulated plant",
+    "compliant cuff",
+    "Human V2",
+    "causal deployable observation and estimation",
+    "frozen Round19 controller and planner",
+    "simulated feedback"
+  ],
+  "development": {
+    "registered_executable": 23,
+    "true_arrival": 23,
+    "continuous_dwell_ge_0_5_s": 23,
+    "actual_return": 23,
+    "true_complete": 23,
+    "native_node_safety_pass": 23,
+    "minimum_measured_sleeve_clearance_mm": 0.035379,
+    "minimum_measured_shank_clearance_mm": 5.947059,
+    "maximum_force_n": 131.113593,
+    "maximum_moment_nm": 18.113815,
+    "stale_activated": 0,
+    "control_cycle_deadline_misses": 20675
+  },
+  "qualification_attempt1": {
+    "status": "FAIL",
+    "registered": 48,
+    "started": 10,
+    "runner_complete": 9,
+    "measured_sleeve_failure": 1,
+    "not_executed": 38,
+    "exposed_cases_reused_as_fresh": false
+  },
+  "qualification_attempt2": {
+    "status": "PASS",
+    "registered": 48,
+    "TASK_entered": 48,
+    "valid_physical_arrival": 47,
+    "continuous_dwell_ge_0_5_s": 47,
+    "actual_return": 47,
+    "true_complete": 47,
+    "frozen_minimum_true_complete": 46,
+    "native_node_safety_pass": 48,
+    "failure_category_counts": {
+      "plan_stale": 1,
+      "waypoint_infeasible": 0,
+      "velocity": 0,
+      "acceleration": 0,
+      "measured_sleeve_clearance": 0,
+      "measured_shank_or_table_clearance": 0,
+      "force_or_moment": 0,
+      "solver": 0,
+      "timeout": 0,
+      "transition_semantics": 0,
+      "nonfinite_or_numerical": 0,
+      "other": 0
+    },
+    "failed_case": "b02_elevated_start_near_upper_current_rom_r02",
+    "minimum_measured_sleeve_clearance_mm": 0.09999999999545095,
+    "minimum_measured_shank_clearance_mm": 5.446838911200555,
+    "maximum_force_n": 133.6308872922393,
+    "maximum_moment_nm": 18.493695577527628,
+    "total_requests": 897,
+    "activated": 893,
+    "safely_dropped": 4,
+    "stale": 4,
+    "stale_activated": 0,
+    "planning_compute_ms": {
+      "mean": 28.739889629877364,
+      "p95": 40.173317,
+      "max": 4143.554375
+    },
+    "sample_to_activation_age_ms": {
+      "mean": 36.31881646136618,
+      "p95": 63.7759502,
+      "max": 77.341667
+    },
+    "control_cycle_deadline_misses": 40509,
+    "frozen_gate_pass": true,
+    "independent_final_audit": "FINAL_AUDIT_PASS"
+  },
+  "supported_claims": [
+    "qualified in the frozen offline MuJoCo simulation domain"
+  ],
+  "unsupported_claims": [
+    "physical CR12 readiness",
+    "hard real-time guarantee",
+    "continuous-time safety between saved nodes",
+    "clinical safety",
+    "patient suitability"
+  ],
+  "remaining_issues": [
+    "single plan_stale task failure with unresolved planner compute tail",
+    "planning compute maximum 4143.554 ms",
+    "control-cycle deadline misses",
+    "narrow development measured sleeve clearance"
+  ],
+  "evidence_paths": [
+    "DEVELOPMENT_CANDIDATE_FREEZE_REPORT.md",
+    "ROUND19_FULL23_FREEZE.json",
+    "ROUND19_DEVELOPMENT_PROMOTION.json",
+    "audits/native_round19_full23_confirmation_v1/ROUND19_FULL23_RAW_AUDIT.json",
+    "FRESH_BATCH01_DISPOSITION_V1.json",
+    "FRESH_QUALIFICATION_V1.md",
+    "QUALIFICATION_ATTEMPT2_PREREGISTRATION.md",
+    "QUALIFICATION_ATTEMPT2_CASE_MANIFEST.json",
+    "QUALIFICATION_ATTEMPT2_STREAM_AMENDMENT_V2.md",
+    "audits/qualification_attempt2_v1/ATTEMPT2_FRESHNESS_AUDIT.json",
+    "QUALIFICATION_ATTEMPT2_RAW_RESULT.json",
+    "audits/qualification_attempt2_v1/FRESH_COHORT_GATE.json",
+    "QUALIFICATION_ATTEMPT2_FINAL_REPORT.md",
+    "audits/qualification_attempt2_v1/INDEPENDENT_FINAL_AUDIT.json",
+    "CLOSEOUT_WORKTREE_AUDIT.json",
+    "FINAL_CAMPAIGN_CLOSEOUT_AUDIT.json"
+  ],
+  "new_scientific_rollouts_for_closeout": 0,
+  "production_behavior_changed_for_closeout": false,
+  "repository_checkpoint": {
+    "branch": "codex/full3d-cr12-qualified-closeout",
+    "commit_status": "CLOSEOUT_READY_COMMIT_BLOCKED_BY_WORKTREE",
+    "raw_trace_trees_in_git": false,
+    "worktree_classification": "CLOSEOUT_WORKTREE_AUDIT.json",
+    "commit_sha": null,
+    "pushed": false
+  },
+  "independent_closeout_auditor_verdict": "AUDITOR_PASS"
+}

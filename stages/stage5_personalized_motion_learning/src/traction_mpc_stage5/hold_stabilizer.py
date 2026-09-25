@@ -258,11 +258,17 @@ def filter_stage5_executable_action_with_pose(
     action_nm: np.ndarray,
     reference: CuffPoseReference,
     execution_target: Stage5LoadedExecutionTarget,
+    explicit_robot_linear_velocity_world_m_s: np.ndarray | None = None,
+    explicit_robot_angular_velocity_world_rad_s: np.ndarray | None = None,
 ) -> ExecutableForceFilterResult:
     """Run the inherited Safety Filter with one explicit Stage-5 pose authority."""
 
     action = np.asarray(action_nm, dtype=float)
-    target = with_explicit_robot_target(execution_target, reference)
+    target = with_explicit_robot_target(
+        execution_target, reference,
+        linear_velocity_world_m_s=explicit_robot_linear_velocity_world_m_s,
+        angular_velocity_world_rad_s=explicit_robot_angular_velocity_world_rad_s,
+    )
     context = build_stage5_loaded_execution_context(
         plant=plant,
         measurement=measurement,

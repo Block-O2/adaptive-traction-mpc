@@ -17,6 +17,7 @@ from traction_mpc_stage5.progressive_personalization import (
     ProgressiveLongitudinalArm,
     ProgressiveLongitudinalSession,
     fixed_progress_pacing_status,
+    initial_population_prior_model,
     parameter_direction_diagnostics,
 )
 
@@ -116,6 +117,35 @@ def test_progressive_arm_starts_exactly_at_theta_1() -> None:
     snapshot = session.begin_repetition(1, 0.0)
     np.testing.assert_array_equal(snapshot.active_theta, FROZEN_THETA_1)
     assert session.active_model.post_update_support is PostUpdateSupport.POSITIVE
+
+
+@pytest.mark.parametrize(
+    "arm",
+    (
+        ProgressiveLongitudinalArm.FIXED_POPULATION_PRIOR,
+        ProgressiveLongitudinalArm.PROGRESSIVE,
+    ),
+)
+def test_explicit_population_prior_session_root_is_exact_and_causal(arm) -> None:
+    session_id = f"population-prior-{arm.value}"
+    initial = initial_population_prior_model(session_id)
+    session = ProgressiveLongitudinalSession(
+        _geometry(),
+        arm,
+        session_id=session_id,
+        initial_active_model=initial,
+    )
+
+    snapshot = session.begin_repetition(1, 0.0)
+
+    np.testing.assert_array_equal(snapshot.active_theta, np.ones(3))
+    assert snapshot.activation is None
+    assert session.active_model.update_index == 0
+    assert session.active_model.predecessor_model_id is None
+    assert session.repetition_active_model_id == session.active_model.model_id
+    assert session.authority.updates_enabled is (
+        arm is ProgressiveLongitudinalArm.PROGRESSIVE
+    )
 
 
 def test_qualified_proposal_queues_without_mid_repetition_activation() -> None:

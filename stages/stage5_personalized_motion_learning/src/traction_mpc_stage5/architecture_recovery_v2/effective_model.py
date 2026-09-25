@@ -496,6 +496,11 @@ class OnlineEffectiveDynamicsIdentifier:
             reasons.append("all_parameters_bound_limited")
         if minimum_mass_eigenvalue < self.minimum_mass_matrix_eigenvalue:
             reasons.append("insufficient_mass_matrix_margin")
+        raw_smoothed_step = self.smoothing_alpha * (trusted_candidate - self.beta)
+        maximum_step = self.maximum_update_fraction_of_span * self.span
+        rate_limit_hit = bool(
+            not reasons and np.any(np.abs(raw_smoothed_step) > maximum_step + 1.0e-12)
+        )
         if reasons:
             self.rejected_updates += 1
             for reason in reasons:
@@ -503,10 +508,8 @@ class OnlineEffectiveDynamicsIdentifier:
                     self.rejection_reason_counts.get(reason, 0) + 1
                 )
         else:
-            step = self.smoothing_alpha * (trusted_candidate - self.beta)
-            maximum_step = self.maximum_update_fraction_of_span * self.span
             self.beta = np.clip(
-                self.beta + np.clip(step, -maximum_step, maximum_step),
+                self.beta + np.clip(raw_smoothed_step, -maximum_step, maximum_step),
                 self.lower,
                 self.upper,
             )
@@ -523,6 +526,11 @@ class OnlineEffectiveDynamicsIdentifier:
             "raw_candidate_residual_rms_nm": raw_candidate_rms,
             "trusted_candidate_residual_rms_nm": trusted_rms,
             "bound_hit": bound_hit,
+            "rate_limit_hit": rate_limit_hit,
+            "smoothing_alpha": self.smoothing_alpha,
+            "maximum_update_fraction_of_span": self.maximum_update_fraction_of_span,
+            "raw_smoothed_step": raw_smoothed_step.copy(),
+            "maximum_step": maximum_step.copy(),
             "frozen_bound_parameter_names": [
                 name
                 for name, frozen in zip(

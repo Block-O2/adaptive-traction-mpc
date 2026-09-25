@@ -1,0 +1,65 @@
+{
+  "schema": "stage5_hwmpc_matched_pacing_scheduler_v2",
+  "status": "FROZEN_AFTER_V1_SCHEDULE_AUDIT_BEFORE_V2_EXECUTION",
+  "evidence_category": "bounded_matched_pacing_scheduler_engineering_validation",
+  "audit_source": {
+    "artifact": "stages/stage5_personalized_motion_learning/results/engineering_validation/hwmpc_matched_pacing_r_cost_v1_attempt_02/matched_pacing_r_cost.json",
+    "sha256": "840c7c4f1f832e4da3663d8e4df199e691845c2df492bd7b607cf3fdd18a1876"
+  },
+  "coordination": {
+    "frozen_support_interval": [-0.24, 0.55],
+    "representative_profiles": [
+      {"name": "lower_boundary_knee", "r": -0.24},
+      {"name": "knee_interior", "r": -0.125},
+      {"name": "near_balanced", "r": 0.0},
+      {"name": "hip_interior", "r": 0.25},
+      {"name": "upper_interior", "r": 0.4},
+      {"name": "upper_boundary_hip", "r": 0.55}
+    ],
+    "trajectory_family": {
+      "hip_progress": "s + 0.25*r*sin(pi*s)",
+      "knee_progress": "s - 0.25*r*sin(pi*s)"
+    }
+  },
+  "fixed_human": {
+    "mismatch_condition": "damping_plus_20pct",
+    "truth_scales_evaluation_only": [1.0, 1.0, 1.2],
+    "control_model_id": "stage5-human:hwmpc-damping_plus_20pct-progressive:u004:89ac34f2de7a",
+    "control_theta": [1.0001754892631383, 0.9992726057434099, 1.0778852088673856],
+    "support_outcome": "positive",
+    "support_evidence_id": "post-update:stage5-human:hwmpc-damping_plus_20pct-progressive:u004:89ac34f2de7a:positive:rep-5",
+    "source_artifact": "stages/stage5_personalized_motion_learning/results/engineering_validation/hwmpc_human_personalization_v1_attempt_02/hwmpc_human_personalization.json",
+    "source_artifact_sha256": "9ee3151edfc3b3fef79f365b599300bae77d7e2ca1adbf0bb1498881eb69bf74",
+    "updates_enabled": false,
+    "trust_driven_pacing_enabled": false
+  },
+  "matched_pacing": {
+    "outbound_duration_s": 2.2,
+    "hold_duration_s": 0.5,
+    "return_duration_s": 2.2,
+    "terminal_block_start_s": 1.5,
+    "terminal_transition_duration_s": 0.4,
+    "terminal_settle_duration_s": 0.3,
+    "terminal_target": "exact registered phase q_goal with dq_target=0",
+    "selection_basis": "V1 kinematic audit: the same fixed terminal block is reference-feasible for every audited r/phase, remains within 300/600 deg/s2 causal limits and non-penetration geometry, and is independent of cuff force",
+    "registered_phase_timeout_s_unchanged": 10.0,
+    "control_period_s": 0.005
+  },
+  "execution": {
+    "order_seed": 20260921,
+    "force_used_for_selection": false,
+    "human_model_updates": false,
+    "trust_driven_pacing": false
+  },
+  "scope": {
+    "terminal_velocity_criterion_changed": false,
+    "r_support_bounds_changed": false,
+    "safety_thresholds_changed": false,
+    "task_geometry_or_contact_model_changed": false,
+    "hwmpc_cost_changed": false,
+    "human_personalization_changed": false,
+    "rl_or_value_changed": false,
+    "stage3_or_stage4_changed": false,
+    "historical_results_changed": false
+  }
+}

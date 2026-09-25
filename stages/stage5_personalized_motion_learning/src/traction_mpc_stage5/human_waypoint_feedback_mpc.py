@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from time import perf_counter
 from typing import Any, Callable, Sequence
 
@@ -43,6 +44,7 @@ class HumanWaypointFeedbackMPCConfigV1:
     goal_error_weight: float = 1.0
     waypoint_change_weight: float = 0.02
     incomplete_phase_weight: float = 0.25
+    mechanics_duration_search: bool = False
 
     def __post_init__(self) -> None:
         if not 0.0 < self.maximum_waypoint_step_fraction <= 1.0:
@@ -175,11 +177,15 @@ class HumanWaypointFeedbackMPCV1:
             return self.start_rad.copy()
         raise ValueError("feedback HWMPC supports OUTBOUND, HOLD and RETURN only")
 
+    def reference_phase_goal(self, phase: TaskPhase) -> np.ndarray:
+        """Internal endpoint; by default identical to the registered cost goal."""
+        return self.phase_goal(phase)
+
     def candidate_actions(
         self, current_q_rad: Sequence[float], phase: TaskPhase
     ) -> tuple[np.ndarray, ...]:
         current_q = _vector("current_q_rad", current_q_rad)
-        goal = self.phase_goal(phase)
+        goal = self.reference_phase_goal(phase)
         if phase is TaskPhase.HOLD:
             return (goal - current_q,)
         remaining = goal - current_q
@@ -221,8 +227,9 @@ class HumanWaypointFeedbackMPCV1:
     ) -> FeedbackCandidateEvaluationV1:
         goal = self.phase_goal(phase)
         target = state[:2] + action
-        reference_remaining = goal - reference_state[:2]
-        target_remaining = goal - target
+        reference_goal = self.reference_phase_goal(phase)
+        reference_remaining = reference_goal - reference_state[:2]
+        target_remaining = reference_goal - target
         if np.any(reference_remaining * (target - reference_state[:2]) < -1.0e-12) or np.any(
             np.abs(target_remaining) > np.abs(reference_remaining) + 1.0e-12
         ):
@@ -263,6 +270,43 @@ class HumanWaypointFeedbackMPCV1:
             if execution_feasibility_checker is None
             else dict(execution_feasibility_checker(candidate, schedule))
         )
+        if (
+            self.config.mechanics_duration_search
+            and screen.get("evaluated")
+            and not screen.get("feasible")
+            and candidate.phase is not TaskPhase.HOLD
+        ):
+            first_duration = schedule.duration_s
+            maximum_steps = int(
+                math.floor(phase_remaining_s / self.scheduler.reference_period_s + 1.0e-12)
+            )
+            first_step = int(round(first_duration / self.scheduler.reference_period_s))
+            attempts = 0
+            for step_count in range(first_step + 1, maximum_steps + 1):
+                attempts += 1
+                try:
+                    proposed = self.scheduler.plan_fixed_duration_reference_contract(
+                        current_q_hat_rad=reference_state[:2],
+                        current_dq_hat_rad_s=reference_state[2:],
+                        candidate=candidate,
+                        duration_s=step_count * self.scheduler.reference_period_s,
+                        phase_elapsed_s=phase_elapsed_s,
+                    )
+                except (ValueError, WaypointGeometryInfeasible):
+                    continue
+                proposed_screen = dict(
+                    execution_feasibility_checker(candidate, proposed)
+                )
+                if proposed_screen.get("feasible"):
+                    schedule = proposed
+                    screen = {
+                        **proposed_screen,
+                        "duration_search_used": True,
+                        "duration_search_attempt_count": attempts,
+                        "shortest_reference_feasible_duration_s": first_duration,
+                        "selected_mechanics_feasible_duration_s": proposed.duration_s,
+                    }
+                    break
         if screen.get("evaluated") and not screen.get("feasible"):
             return FeedbackCandidateEvaluationV1(
                 label, action, target, False,
@@ -386,6 +430,7 @@ class HumanWaypointFeedbackMPCV1:
             "fixed_r_or_path_template_used": False,
             "return_replays_outbound_path": False,
             "old_robot_interface_predictor_used": False,
+            "mechanics_duration_search_enabled": self.config.mechanics_duration_search,
             "force_or_value_objective_used": bool(
                 self.value_hook_evaluation_count
             ),

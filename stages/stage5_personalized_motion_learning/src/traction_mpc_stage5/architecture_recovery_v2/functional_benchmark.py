@@ -27,6 +27,9 @@ from traction_mpc_stage4.estimator_v2 import (
 )
 from traction_mpc_stage4.human_model import ScaledHumanV2
 from traction_mpc_stage4.mpc import HumanMPCConfig, HumanSpaceMPC
+from traction_mpc_stage5.full3d_adaptive_integration_v1.time_contract import (
+    build_boundary_time_grid,
+)
 
 from .effective_model import (
     CausalEffectiveGeometryEstimator,
@@ -1085,9 +1088,16 @@ def run_closed_loop_case(
     task_dynamics_smoothing_alpha: float | None = None,
     task_residual_bias_alpha: float | None = None,
     task_residual_bias_limit_nm: float = 12.0,
+    evaluation_time_contract: str = "historical_post_state_pre_reference_v1",
 ) -> dict[str, Any]:
     """Run one arm with a strict truth/deployable object separation."""
 
+    if evaluation_time_contract not in {
+        "historical_post_state_pre_reference_v1",
+        "boundary_aligned_v2",
+    }:
+        raise ValueError("unknown evaluation_time_contract")
+    boundary_aligned = evaluation_time_contract == "boundary_aligned_v2"
     rng = np.random.default_rng(setup.seed + 170000)
     true_model = BaseParameterHumanModel(setup.geometry, setup.beta, setup.human)
     state_true = np.concatenate([setup.initial_q_rad.copy(), np.zeros(2)])
@@ -1702,6 +1712,7 @@ def run_closed_loop_case(
     actions: list[np.ndarray] = []
     forces: list[float] = []
     moments: list[float] = []
+    executed_interval_durations_s: list[float] = []
     solve_failures = 0
     safety_abort_count = 0
     rom_violations = 0
@@ -1714,8 +1725,18 @@ def run_closed_loop_case(
     previous_wrench: tuple[np.ndarray, float] | None = None
     termination_reason = "task_horizon_reached"
     diagnostics: dict[str, Any] = {"status": "NOT_RUN"}
-    task_steps = int(round(task.duration_s / dt_s)) + 1
+    corrected_grid = (
+        build_boundary_time_grid(task.duration_s, dt_s)
+        if boundary_aligned
+        else None
+    )
+    task_steps = (
+        corrected_grid.interval_count
+        if corrected_grid is not None
+        else int(round(task.duration_s / dt_s)) + 1
+    )
     estimated_rom_supervisor_abort_count = 0
+    previous_observation_time_s: float | None = None
 
     def observe_task_substep(substep_state: np.ndarray) -> None:
         nonlocal task_min_clearance_m, table_clearance_violation_samples
@@ -1730,7 +1751,16 @@ def run_closed_loop_case(
         table_clearance_violation_samples += int(clearance < 0.0)
 
     for step in range(task_steps):
-        time_s = step * dt_s
+        time_s = (
+            float(corrected_grid.boundary_times_s[step])
+            if corrected_grid is not None
+            else step * dt_s
+        )
+        interval_dt_s = (
+            float(corrected_grid.interval_durations_s[step])
+            if corrected_grid is not None
+            else dt_s
+        )
         current_residual_phase = _task_reference_phase(
             task.task_id, task.duration_s, time_s
         )
@@ -1760,7 +1790,12 @@ def run_closed_loop_case(
             filtered_dq = raw_dq.copy()
             state_hat = np.concatenate([q_hat, filtered_dq])
             if previous_q_hat is not None and previous_wrench is not None:
-                ddq = (filtered_dq - previous_filtered_dq) / dt_s
+                observation_dt_s = (
+                    time_s - previous_observation_time_s
+                    if boundary_aligned and previous_observation_time_s is not None
+                    else dt_s
+                )
+                ddq = (filtered_dq - previous_filtered_dq) / observation_dt_s
                 force_prev, moment_prev = previous_wrench
                 tau_est = _wrench_to_generalized(
                     control_geometry, previous_q_hat, force_prev, moment_prev
@@ -1932,6 +1967,7 @@ def run_closed_loop_case(
                         model = base_model
             previous_filtered_dq = filtered_dq.copy()
             previous_q_hat = q_hat.copy()
+            previous_observation_time_s = time_s
 
         if phase_banked_residual and residual_layer_enabled:
             residual_bias = residual_bias_banks[current_residual_phase].copy()
@@ -1957,7 +1993,7 @@ def run_closed_loop_case(
                 reference,
                 model,
                 first_action_preview=lambda candidate, active=model, q=state_hat[:2].copy(): _preview(
-                    candidate, active, q, dt_s
+                    candidate, active, q, interval_dt_s
                 ),
             )
         except (ValueError, RuntimeError, FloatingPointError, np.linalg.LinAlgError):
@@ -2003,11 +2039,12 @@ def run_closed_loop_case(
             setup.geometry, state_true[:2], force_xz, moment_y
         )
         clearance_violations_before = table_clearance_violation_samples
+        pre_interval_true_state = state_true.copy()
         state_true = _integrate_substeps(
             true_model,
             state_true,
             true_torque,
-            dt_s,
+            interval_dt_s,
             evaluation_observer=observe_task_substep,
         )
         previous_wrench = (force_xz.copy(), moment_y)
@@ -2019,12 +2056,15 @@ def run_closed_loop_case(
         clearance_violation = (
             table_clearance_violation_samples > clearance_violations_before
         )
-        true_states.append(state_true.copy())
+        true_states.append(
+            pre_interval_true_state.copy() if boundary_aligned else state_true.copy()
+        )
         estimated_states.append(state_hat.copy())
         references.append(np.concatenate([ref.q_rad, ref.dq_rad_s]))
         actions.append(np.asarray(action, dtype=float))
         forces.append(float(np.linalg.norm(force_xz)))
         moments.append(abs(moment_y))
+        executed_interval_durations_s.append(interval_dt_s)
         if rom_violation:
             termination_reason = "evaluation_hidden_rom_violation"
             break
@@ -2035,6 +2075,34 @@ def run_closed_loop_case(
             safety_abort_count += 1
             termination_reason = "state_nonfinite_abort"
             break
+
+    if boundary_aligned and len(true_states) == len(executed_interval_durations_s):
+        # Whether the run reaches T or aborts at an intermediate boundary, an
+        # integrated interval must always have both of its boundary states.
+        final_time_s = float(sum(executed_interval_durations_s))
+        final_ref = reference(final_time_s)
+        if arm == "oracle":
+            final_state_hat = state_true.copy()
+        else:
+            final_position, final_phi, final_velocity, final_phi_dot = _pose_observation(
+                setup.geometry,
+                state_true[:2],
+                state_true[2:],
+                rng,
+                setup.measurement_position_std_m,
+                setup.measurement_angle_std_rad,
+            )
+            final_state_hat = control_geometry.estimate_state(
+                np.array([final_position[0], 0.0, final_position[1]]),
+                _rotation_from_phi(final_phi),
+                np.array([final_velocity[0], 0.0, final_velocity[1]]),
+                np.array([0.0, -final_phi_dot, 0.0]),
+            )
+        true_states.append(state_true.copy())
+        estimated_states.append(final_state_hat.copy())
+        references.append(
+            np.concatenate([final_ref.q_rad, final_ref.dq_rad_s])
+        )
 
     true_array = np.asarray(true_states)
     estimated_array = np.asarray(estimated_states)
@@ -2053,6 +2121,9 @@ def run_closed_loop_case(
             "probe_control_dt_s": probe_control_dt_s,
             "termination_reason": termination_reason,
             "sample_count": 0,
+            "evaluation_time_contract": evaluation_time_contract,
+            "integration_interval_count": len(executed_interval_durations_s),
+            "boundary_sample_count": 0,
             "task_start_true_state_evaluation_only": state_true.tolist(),
             "task_start_estimated_state": state_hat.tolist(),
             "task_initial_reference_q_deg": np.degrees(
@@ -2105,7 +2176,11 @@ def run_closed_loop_case(
         }
     error_deg = np.degrees(true_array[:, :2] - reference_array[:, :2])
     dq_error_deg_s = np.degrees(true_array[:, 2:] - reference_array[:, 2:])
-    sample_times_s = np.arange(len(error_deg), dtype=float) * dt_s
+    sample_times_s = (
+        corrected_grid.boundary_times_s[: len(error_deg)]
+        if boundary_aligned
+        else np.arange(len(error_deg), dtype=float) * dt_s
+    )
     outbound_duration_s, hold_duration_s, _ = _task_phase_durations(
         task.task_id, task.duration_s
     )
@@ -2121,8 +2196,9 @@ def run_closed_loop_case(
 
     final_q_error = np.abs(error_deg[-1])
     final_dq = np.abs(np.degrees(true_array[-1, 2:]))
+    expected_boundary_sample_count = task_steps + 1 if boundary_aligned else task_steps
     completed = bool(
-        len(true_array) == task_steps
+        len(true_array) == expected_boundary_sample_count
         and np.all(final_q_error <= 2.0)
         and np.all(final_dq <= 5.0)
         and rom_violations == 0
@@ -2155,11 +2231,20 @@ def run_closed_loop_case(
         "task_id": task.task_id,
         "high_rom_case": task.high_rom,
         "completed": completed,
-        "full_horizon_executed": len(true_array) == task_steps,
+        "full_horizon_executed": len(true_array) == expected_boundary_sample_count,
         "clearance_evaluation_enabled": clearance_evaluation_enabled,
         "probe_control_dt_s": probe_control_dt_s,
         "termination_reason": termination_reason,
         "sample_count": len(true_array),
+        "evaluation_time_contract": evaluation_time_contract,
+        "integration_interval_count": len(executed_interval_durations_s),
+        "boundary_sample_count": len(true_array),
+        "requested_task_duration_s": task.duration_s,
+        "executed_task_duration_s": float(sum(executed_interval_durations_s)),
+        "boundary_interval_relation_holds": bool(
+            not boundary_aligned
+            or len(true_array) == len(executed_interval_durations_s) + 1
+        ),
         "task_start_true_q_evaluation_only": task_start_true.tolist(),
         "task_start_estimated_state": estimated_array[0].tolist(),
         "task_initial_reference_q_deg": np.degrees(
@@ -2186,13 +2271,19 @@ def run_closed_loop_case(
         "probe_moment_peak_nm": probe_moment_peak,
         "probe_force_exposure_n_s": probe_force_exposure_n_s,
         "probe_moment_exposure_nm_s": probe_moment_exposure_nm_s,
-        "task_force_exposure_n_s": float(sum(forces) * dt_s),
-        "task_moment_exposure_nm_s": float(sum(moments) * dt_s),
+        "task_force_exposure_n_s": float(
+            np.dot(forces, executed_interval_durations_s)
+        ),
+        "task_moment_exposure_nm_s": float(
+            np.dot(moments, executed_interval_durations_s)
+        ),
         "full_episode_force_exposure_n_s": float(
-            probe_force_exposure_n_s + sum(forces) * dt_s
+            probe_force_exposure_n_s
+            + np.dot(forces, executed_interval_durations_s)
         ),
         "full_episode_moment_exposure_nm_s": float(
-            probe_moment_exposure_nm_s + sum(moments) * dt_s
+            probe_moment_exposure_nm_s
+            + np.dot(moments, executed_interval_durations_s)
         ),
         "probe_rom_violation": probe_rom_violation,
         "probe_clearance_violation": probe_clearance_violation,

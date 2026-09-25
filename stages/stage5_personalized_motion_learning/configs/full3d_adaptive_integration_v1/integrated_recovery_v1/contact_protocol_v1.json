@@ -1,0 +1,19 @@
+{
+  "schema": "integrated_recovery_contact_protocol_v1",
+  "category": "executed_development_diagnostic_protocol_not_qualification_preregistration",
+  "baseline": "DEV-A lifecycle; DEV-C off; all physical and estimation parameters unchanged",
+  "checkpoint_cases": ["balanced_near_upper_current_rom_r01", "balanced_ordinary_r01", "balanced_middle_r01", "development_nominal"],
+  "physical_prefix_replays": ["balanced_near_upper_current_rom_r01", "balanced_ordinary_r01", "development_nominal"],
+  "static_domain_census": "all 24 consumed fresh_qualification_v1 admitted cases; no exclusions",
+  "static_q1_sweep_deg": [0, 5, 15, 40, 80],
+  "control_dt_s": 0.005,
+  "physics_dt_s": 0.00025,
+  "delay_semantics": "replay saved DEV-A first planner latency; actual CR12 physics continues under previous reference",
+  "force_sample": "read mj_contactForce after native mj_step2 and before next-boundary refresh",
+  "normal_impulse": "sum contact normal force times actual executed interval duration",
+  "contact_duration": "sum executed interval durations with that geom pair reported; force activity reported separately",
+  "positive_or_negative_gap_numerical_tolerance_m": 1e-9,
+  "truth_boundary": "all contact, gap, Human state and diagnostic static q sweeps are evaluation-only",
+  "no_controller_or_physics_revision": true,
+  "no_new_completion_or_safety_threshold": true
+}

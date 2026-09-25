@@ -1,0 +1,100 @@
+{
+  "schema": "stage5_shadow_value_v1",
+  "evidence_category": "shadow_offline_design_and_mechanical_validation_only",
+  "status": "IMPLEMENTATION_READY_FORMAL_BRANCH_COLLECTION_RESERVED_FOR_USER",
+  "research_question": "can deployable posture and loaded-interface state predict and rank remaining measured cumulative cuff-force cost beyond an obvious phase/progress/time baseline",
+  "value_semantics": {
+    "quantity": "undiscounted remaining integral of the norm of deployable measured physical cuff force",
+    "units": "N s",
+    "target": "G_t = integral_t^terminal ||F_cuff_measured(tau)|| d tau + non_success_terminal_penalty",
+    "optimization_sign": "the fitted quantity is remaining cost C_rem >= 0; a cost-minimizing MPC would use J_short + C_rem. If an API retains J_short - V, it must publish V = -C_rem without changing the target semantics",
+    "mujoco_truth_online": false
+  },
+  "frozen_condition": {
+    "source_personalization_policy": {
+      "model_update_alpha": 0.25,
+      "maximum_per_scale_step": 0.04
+    },
+    "human_model_version": "stage5-human:max-step-v1-step_0p04:u005:540e39f0c5ef",
+    "human_model_theta": [1.0000989140471204, 1.0012127972091571, 1.1539417660360922],
+    "human_model_updates_enabled": false,
+    "successor_activation_enabled": false,
+    "interface_version": "stage5_controller_nominal_interface_plant_v1_matched_seed",
+    "pacing": {
+      "gamma": 0.5,
+      "gamma_dynamic": false,
+      "trust_to_gamma_authority": false,
+      "planning_joint_velocity_ceiling_deg_s": [7.5, 12.5]
+    },
+    "goal_task_config": "configs/stage5_goal_task_v1.json",
+    "prefix_backend": "native",
+    "planning_physical_force_ceiling_n": 180.0,
+    "human_truth_condition_evaluation_only": "damping_plus_20pct"
+  },
+  "failure_target": {
+    "engineering_force_gate_n": 200.0,
+    "phase_timeout_s": 10.0,
+    "minimum_equivalent_duration_s": 10.0,
+    "rule": "charge the greater of one full phase timeout or the remaining registered active-phase budget at the unchanged engineering force-gate scale",
+    "interpretation": "pessimistic value-target convention only; not a new constraint, clinical threshold, or hardware limit"
+  },
+  "episode_split": {
+    "train": [
+      {
+        "episode_id": "fixed_gamma_seed_20260917",
+        "directory": "results/trust_gamma_matched_v1_formal_attempt_01/fixed_pacing/repetition_01"
+      }
+    ],
+    "validation": [
+      {
+        "episode_id": "fixed_gamma_seed_20260918",
+        "directory": "results/trust_gamma_matched_v1_formal_attempt_01/fixed_pacing/repetition_02"
+      }
+    ],
+    "test": [
+      {
+        "episode_id": "fixed_gamma_seed_20260919",
+        "directory": "results/trust_gamma_matched_v1_formal_attempt_01/fixed_pacing/repetition_03"
+      }
+    ],
+    "split_unit": "complete rollout/trajectory",
+    "random_adjacent_frame_split": false
+  },
+  "model": {
+    "family": "standardized linear ridge with auditable engineered deployable features",
+    "ridge_alphas": [0.001, 0.01, 0.1, 1.0, 10.0, 100.0],
+    "support_abs_z_limit": 4.0,
+    "candidate_uses_human_truth": false,
+    "baseline_features": "phase one-hot, diagnostic progress, phase elapsed, remaining registered time budget, HOLD remaining",
+    "candidate_additions": "q_hat, dq_hat, q1/q2 posture coordination terms, measured cuff wrench, and estimated interface displacement/velocity/rotation/angular velocity",
+    "fixed_human_model_context": "model version and theta are artifact metadata because they are constant in this isolated study"
+  },
+  "matched_branch_validation": {
+    "manifest": null,
+    "required_same_start_state_hash": true,
+    "required_same_phase_and_timing_condition": true,
+    "maximum_branch_duration_difference_s": 0.02,
+    "minimum_observed_pair_difference_n_s": 5.0,
+    "minimum_groups_for_v_a": 10,
+    "minimum_pairs_for_v_a": 30,
+    "minimum_ranking_accuracy_for_v_a": 0.7,
+    "faster_completion_alone_counts_as_posture_benefit": false
+  },
+  "decision_gates": {
+    "minimum_complete_rollouts_per_split_for_readiness": 3,
+    "candidate_must_strictly_beat_baseline_test_rmse": true,
+    "v_a": "adequate trajectory support, candidate beats baseline on held-out trajectories, and matched feasible branch-ranking gates pass",
+    "v_b": "adequate trajectory support and held-out prediction beats baseline, but matched path-ranking evidence is missing or insufficient",
+    "v_c": "trajectory support, target/state representation, or held-out prediction is insufficient"
+  },
+  "control_authority": {
+    "value_connected_to_mpc": false,
+    "learned_actor_or_policy": false,
+    "unsupported_terminal_rule_for_future_ab": "if any compared candidate terminal is OOD, disable learned terminal value for the entire solve and use the zero-value incumbent for all candidates",
+    "stage3_or_stage4_modified": false
+  },
+  "frozen_open_issues": {
+    "acceleration_monitor": "A-MONITOR-UNRESOLVED",
+    "hard_realtime_or_WCET_claim": false
+  }
+}

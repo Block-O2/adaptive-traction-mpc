@@ -25,6 +25,7 @@ from .human_identification_reduced import (
 from .human_model_update import classify_post_update_evidence
 from .progressive_human_model import (
     ActiveHumanModel,
+    POPULATION_PRIOR_THETA,
     PROGRESSIVE_FIXED_GAMMA,
     PostUpdateSupport,
     ProgressiveHumanModelAuthority,
@@ -48,6 +49,7 @@ LONGITUDINAL_CEM_SEEDS = (
 
 
 class ProgressiveLongitudinalArm(str, Enum):
+    FIXED_POPULATION_PRIOR = "fixed_population_prior"
     FIXED_THETA_1 = "fixed_theta_1"
     PROGRESSIVE = "progressive"
 
@@ -82,6 +84,26 @@ def initial_theta_1_model(session_id: str) -> ActiveHumanModel:
     )
 
 
+def initial_population_prior_model(session_id: str) -> ActiveHumanModel:
+    """Build the fixed Stage-5 population prior as a session root."""
+
+    return ActiveHumanModel.create(
+        session_id=session_id,
+        update_index=0,
+        theta=POPULATION_PRIOR_THETA,
+        predecessor_model_id=None,
+        provenance="stage5_population_prior",
+        activation_repetition=1,
+        activation_time_s=0.0,
+        rollback_predecessor_id=None,
+        candidate_evidence_id=None,
+        bounded_transition_delta=(0.0, 0.0, 0.0),
+        qualification_repetition=None,
+        qualification_time_s=None,
+        post_update_support=PostUpdateSupport.POSITIVE,
+    )
+
+
 def fixed_progress_pacing_status(_: dict[str, Any]) -> dict[str, float]:
     return {"gamma": PROGRESSIVE_FIXED_GAMMA, "gamma_rate_per_s": 0.0}
 
@@ -96,11 +118,16 @@ class ProgressiveLongitudinalSession:
         *,
         session_id: str,
         human_id_config: Stage5ReducedHumanIDConfig | None = None,
+        initial_active_model: ActiveHumanModel | None = None,
     ) -> None:
         self.arm = ProgressiveLongitudinalArm(arm)
         self.authority = ProgressiveHumanModelAuthority(
             geometry,
-            initial_theta_1_model(session_id),
+            (
+                initial_theta_1_model(session_id)
+                if initial_active_model is None
+                else initial_active_model
+            ),
             updates_enabled=self.arm is ProgressiveLongitudinalArm.PROGRESSIVE,
             human_id_config=human_id_config,
         )
@@ -297,8 +324,8 @@ class ProgressiveLongitudinalSession:
 
         proposal = self.authority.service.queued_publication
         if proposal is not None and self.authority.queued_update is None:
-            if self.arm is ProgressiveLongitudinalArm.FIXED_THETA_1:
-                self._record_blocked_proposal("fixed_theta_1_arm_has_no_update_authority")
+            if self.arm is not ProgressiveLongitudinalArm.PROGRESSIVE:
+                self._record_blocked_proposal("fixed_model_arm_has_no_update_authority")
             elif self.authority.can_qualify_next:
                 self.authority.queue_service_qualified_successor(
                     transition_source="registered_reduced_human_id",
@@ -433,6 +460,7 @@ __all__ = [
     "RepetitionAuthoritySnapshot",
     "deployable_prediction_summary",
     "fixed_progress_pacing_status",
+    "initial_population_prior_model",
     "initial_theta_1_model",
     "parameter_direction_diagnostics",
 ]

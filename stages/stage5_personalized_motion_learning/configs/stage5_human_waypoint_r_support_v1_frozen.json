@@ -1,0 +1,50 @@
+{
+  "schema": "stage5_human_waypoint_r_support_v1_frozen",
+  "status": "validated_shadow_support_range_not_active_in_production",
+  "trajectory_family": {
+    "hip_progress": "s + 0.25*r*sin(pi*s)",
+    "knee_progress": "s - 0.25*r*sin(pi*s)"
+  },
+  "validated_interval": {
+    "lower_r": -0.24,
+    "upper_r": 0.55,
+    "lower_bound_inclusive": true,
+    "upper_bound_inclusive": true
+  },
+  "dynamic_boundary_brackets": {
+    "lower_nearest_rejected_r": -0.245,
+    "lower_rejection": "3 shank-table contact samples; minimum truth clearance -0.009773 mm",
+    "upper_nearest_rejected_r": 0.6,
+    "upper_rejection": "2 shank-table contact samples; minimum truth clearance -0.139174 mm"
+  },
+  "geometry_component_containing_balanced": {
+    "scan_resolution_r": 0.001,
+    "lower_r": -0.27,
+    "upper_r": 1.0,
+    "contract": "existing shank-table clearance >= 0 with no added margin"
+  },
+  "validated_representative_r": [
+    -0.24,
+    -0.235,
+    -0.225,
+    -0.2,
+    -0.125,
+    0.0,
+    0.25,
+    0.5,
+    0.55
+  ],
+  "evidence": {
+    "category": "bounded_engineering_validation",
+    "result": "stages/stage5_personalized_motion_learning/results/engineering_validation/human_waypoint_r_support_v1_attempt_02/human_waypoint_r_support.json",
+    "result_sha256": "5f9342e23c774969be7e68a9063bc8a4340330635ea535c67ecc42bc8082e637",
+    "finite_dynamic_validation_not_formal_continuum_guarantee": true
+  },
+  "constraints": {
+    "force_used_for_interval_selection": false,
+    "new_clearance_or_safety_threshold_added": false,
+    "controller_or_scheduler_changed": false,
+    "task_timing_or_contact_model_changed": false,
+    "personalization_force_optimization_or_learning_active": false
+  }
+}

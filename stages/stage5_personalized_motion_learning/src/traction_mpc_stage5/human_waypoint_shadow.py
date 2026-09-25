@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from enum import Enum
+from typing import Any, Callable
 
 import numpy as np
 
@@ -32,6 +33,15 @@ HUMAN_WAYPOINT_SHADOW_CONTRACT_VERSION = (
     "human_waypoint_mpc_shadow_contract_20ms_motion_v2"
 )
 SCHEDULED_REFERENCE_MOTION_WINDOW_S = 0.020
+
+
+class WaypointExecutionContext(str, Enum):
+    """Progress rules belong to the task, not physical support/commissioning."""
+
+    TASK = "TASK"
+    STARTUP_SUPPORT = "STARTUP_SUPPORT"
+    COMMISSIONING = "COMMISSIONING"
+    ACTIVE_RECOVERY = "ACTIVE_RECOVERY"
 
 
 def _vector(name: str, value: Any, length: int) -> np.ndarray:
@@ -184,12 +194,15 @@ class HumanWaypointCandidate:
     phase_goal_rad: np.ndarray
     q_waypoint_rad: np.ndarray
     dq_waypoint_rad_s: np.ndarray
+    execution_context: WaypointExecutionContext = WaypointExecutionContext.TASK
 
     def __post_init__(self) -> None:
         if not self.label:
             raise ValueError("waypoint label must be non-empty")
         if self.phase in (TaskPhase.COMPLETE, TaskPhase.ABORTED):
             raise ValueError("waypoint phase must be executable")
+        if not isinstance(self.execution_context, WaypointExecutionContext):
+            raise ValueError("waypoint execution context is not registered")
         for name, length in (
             ("phase_goal_rad", 2),
             ("q_waypoint_rad", 2),
@@ -304,6 +317,11 @@ class HumanWaypointMPCShadowContractV1:
             )
             if np.any(np.abs(candidate.dq_waypoint_rad_s) > velocity_limit):
                 raise ValueError("waypoint velocity exceeds registered task limits")
+        if candidate.execution_context is not WaypointExecutionContext.TASK:
+            # The bounds, velocity and phase-goal checks above remain active.
+            # Before the registered task, holding or returning to its start is
+            # physical support, not progress toward its outbound goal.
+            return
         if candidate.phase is TaskPhase.OUTBOUND:
             phase_origin = np.asarray(self.spec.start_return_target_rad, dtype=float)
         elif candidate.phase is TaskPhase.RETURN:
@@ -376,6 +394,7 @@ class HumanWaypointMPCShadowContractV1:
         observation: ControllerTaskObservation,
         interface_state: Any,
         mapped_waypoint: MappedHumanWaypoint,
+        action_transform: Callable[[np.ndarray, np.ndarray, np.ndarray, float], np.ndarray] | None = None,
     ) -> HumanWaypointShadowCommand:
         """Use existing Human tracking and loaded execution, with no predictor."""
 
@@ -456,6 +475,17 @@ class HumanWaypointMPCShadowContractV1:
         action = _model_inverse_dynamics(
             state[:2], state[2:], desired_acceleration, self.human_model
         )
+        if action_transform is not None:
+            action = _vector(
+                "transferred_generalized_action_nm",
+                action_transform(state.copy(), desired_acceleration.copy(), action.copy(), timestamp_s),
+                2,
+            )
+        recovery_target = (
+            mapped_waypoint.execution_target.robot_cuff_target
+            if candidate.execution_context is WaypointExecutionContext.ACTIVE_RECOVERY
+            else None
+        )
         filter_result = filter_stage5_executable_action_with_pose(
             plant=plant,
             measurement=measurement,
@@ -466,6 +496,14 @@ class HumanWaypointMPCShadowContractV1:
             action_nm=action,
             reference=mapped_waypoint.reference,
             execution_target=mapped_waypoint.execution_target,
+            explicit_robot_linear_velocity_world_m_s=(
+                None if recovery_target is None
+                else recovery_target.linear_velocity_world_m_s
+            ),
+            explicit_robot_angular_velocity_world_rad_s=(
+                None if recovery_target is None
+                else recovery_target.angular_velocity_world_rad_s
+            ),
         )
         self.reference_motion_history.commit(
             timestamp_s,
@@ -526,4 +564,5 @@ __all__ = [
     "HumanWaypointShadowCommand",
     "MappedHumanWaypoint",
     "ScheduledReferenceHistoryStatus",
+    "WaypointExecutionContext",
 ]

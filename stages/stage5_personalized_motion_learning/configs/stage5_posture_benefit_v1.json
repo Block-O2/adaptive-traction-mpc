@@ -1,0 +1,189 @@
+{
+  "schema": "stage5_posture_benefit_v1",
+  "evidence_category": "preregistered_final_posture_benefit_experiment",
+  "status": "PREREGISTERED_USER_MANUAL_FORMAL_RUN_REQUIRED",
+  "research_question": "can clearly separated temporary q1/q2 intermediate posture regions reduce future total measured cuff-force integral under matched task timing",
+  "region_selection_rule": {
+    "force_or_moment_results_used": false,
+    "basis": [
+      "existing task start and goal geometry",
+      "existing joint position velocity and acceleration limits",
+      "equal mean normalized progress across branches",
+      "fixed waypoint and phase timing budgets"
+    ],
+    "frozen_before_formal_force_outcomes": true
+  },
+  "feasibility_audit_history": [
+    {
+      "candidate": "candidate_01",
+      "centers": {
+        "hip_biased": [0.675, 0.375],
+        "balanced": [0.525, 0.525],
+        "knee_biased": [0.375, 0.675]
+      },
+      "result": "rejected_before_formal_comparison",
+      "reason": "outbound hip and both knee regions were not reached; both knee branches violated the unchanged deployable acceleration monitor",
+      "force_or_moment_used_in_rejection_or_revision": false,
+      "artifact": "results/posture_benefit_v1_mechanical_smoke/posture_benefit_results.json"
+    },
+    {
+      "candidate": "candidate_02",
+      "centers": {
+        "hip_biased": [0.625, 0.425],
+        "balanced": [0.525, 0.525],
+        "knee_biased": [0.425, 0.625]
+      },
+      "result": "regions_reached_but_hold_semantics_rejected",
+      "reason": "all regions were reached, but retaining the region target after entry produced one deployable acceleration-monitor violation in each knee branch; final semantics now release to baseline at first region entry",
+      "force_or_moment_used_in_rejection_or_revision": false,
+      "artifact": "results/posture_benefit_v1_mechanical_smoke_candidate_02/posture_benefit_results.json"
+    },
+    {
+      "candidate": "candidate_03",
+      "centers": {
+        "hip_biased": [0.625, 0.425],
+        "balanced": [0.525, 0.525],
+        "knee_biased": [0.425, 0.625]
+      },
+      "result": "region_release_semantics_validated_but_warm_start_transition_rejected",
+      "reason": "all regions were reached and five of six branches passed; early outbound knee reused a waypoint warm start after returning to the baseline goal and recorded one deployable acceleration-monitor violation",
+      "force_or_moment_used_in_rejection_or_revision": false,
+      "artifact": "results/posture_benefit_v1_mechanical_smoke_candidate_03/posture_benefit_results.json"
+    },
+    {
+      "candidate": "candidate_04_final",
+      "centers": {
+        "hip_biased": [0.625, 0.425],
+        "balanced": [0.525, 0.525],
+        "knee_biased": [0.425, 0.625]
+      },
+      "result": "accepted_and_frozen_for_manual_formal_comparison",
+      "reason": "all six smoke branches reached their regions with feasible prefixes and no registered safety or motion-envelope event after baseline-goal warm-start invalidation",
+      "observed_extreme_separation_normalized": {
+        "early_outbound": 0.194533900571839,
+        "early_return": 0.19953723609025467
+      },
+      "force_or_moment_used_in_acceptance_or_freeze": false,
+      "artifact": "results/posture_benefit_v1_mechanical_smoke_candidate_04/posture_benefit_results.json"
+    }
+  ],
+  "source_personalization_policy": {
+    "model_update_alpha": 0.25,
+    "maximum_per_scale_step": 0.04,
+    "frozen_for_this_study": true
+  },
+  "fixed_condition": {
+    "human_model_version": "stage5-human:max-step-v1-step_0p04:u005:540e39f0c5ef",
+    "human_model_theta": [1.0000989140471204, 1.0012127972091571, 1.1539417660360922],
+    "human_model_updates_enabled": false,
+    "trust_to_gamma_authority": false,
+    "gamma": 0.5,
+    "base_planning_joint_velocity_ceiling_deg_s": [15.0, 25.0],
+    "effective_planning_joint_velocity_ceiling_deg_s": [7.5, 12.5],
+    "planning_physical_force_ceiling_n": 180.0,
+    "interface": "fixed_nominal",
+    "human_truth_condition_evaluation_only": "damping_plus_20pct",
+    "goal_task_config": "configs/stage5_goal_task_v1.json",
+    "maximum_duration_s": 25.5,
+    "prefix_backend": "native",
+    "learned_value_or_actor_control": false
+  },
+  "formal_design": {
+    "cem_seeds": [20260917, 20260918, 20260919],
+    "starts": [
+      {
+        "name": "early_outbound",
+        "phase": "OUTBOUND",
+        "minimum_progress": 0.25
+      },
+      {
+        "name": "early_return",
+        "phase": "RETURN",
+        "minimum_progress": 0.25
+      }
+    ],
+    "regions": [
+      {
+        "name": "hip_biased",
+        "center_progress": [0.625, 0.425],
+        "half_width_progress": [0.04, 0.04]
+      },
+      {
+        "name": "balanced",
+        "center_progress": [0.525, 0.525],
+        "half_width_progress": [0.04, 0.04]
+      },
+      {
+        "name": "knee_biased",
+        "center_progress": [0.425, 0.625],
+        "half_width_progress": [0.04, 0.04]
+      }
+    ],
+    "maximum_waypoint_duration_s": 2.0,
+    "waypoint_release_rule": "first deployable entry into the target region",
+    "post_region_control": "same frozen baseline Goal-MPC",
+    "full_prescribed_trajectory": false,
+    "permanent_discrete_action_set": false,
+    "rollout_count": 18
+  },
+  "feasibility_gates": {
+    "minimum_adjacent_center_distance_normalized": 0.14,
+    "minimum_extreme_center_distance_normalized": 0.28,
+    "region_boxes_must_be_disjoint": true,
+    "centers_must_have_equal_mean_normalized_progress": true,
+    "all_centers_inside_existing_task_bounds": true,
+    "velocity_only_reach_time_must_be_below_waypoint_deadline": true,
+    "all_smoke_regions_reached": true,
+    "no_constraint_or_safety_threshold_change": true,
+    "minimum_actual_extreme_separation_normalized": 0.18,
+    "minimum_actual_extreme_joint_separation_deg": [1.5, 3.0]
+  },
+  "timing_contract": {
+    "minimum_phase_duration_s": {
+      "OUTBOUND": 6.0,
+      "RETURN": 6.0
+    },
+    "hold_duration_unchanged": true,
+    "maximum_within_group_remaining_duration_range_s": 0.02,
+    "region_waypoint_released_at_first_entry": true,
+    "phase_timing_floor_is_the_timing_match_authority": true,
+    "faster_completion_alone_is_posture_benefit": false
+  },
+  "primary_objective": {
+    "quantity": "future integral of norm of deployable measured physical cuff force from matched snapshot through required task completion",
+    "failure_terminal_penalty": "not applicable to valid PB-A/PB-B comparisons; any incomplete or aborted formal rollout fails execution validity and cannot appear cheap",
+    "objective_may_not_change_after_results": true
+  },
+  "benefit_gates": {
+    "minimum_relative_integral_reduction_vs_balanced": 0.05,
+    "minimum_repetitions_with_same_biased_winner_per_start": 2,
+    "minimum_repetitions_meeting_reduction_per_start": 2,
+    "both_starts_must_pass": true
+  },
+  "decision_rules": {
+    "PB-A": "snapshot execution timing and separation gates pass; at each start the same biased region beats balanced in at least two seeds and reaches at least 5 percent force-integral reduction in at least two seeds",
+    "PB-B": "valid timing-matched executions produce sufficiently separated paths, but the primary force-integral benefit gate is too small or inconsistent",
+    "PB-C": "the fixed regions cannot be reached and kept sufficiently separated under unchanged task and safety constraints",
+    "PB-D": "snapshot identity, fixed-condition isolation, timing, artifact completeness, or execution contract is invalid"
+  },
+  "future_shadow_value_if_pb_a": {
+    "design_only": true,
+    "control_connection": false,
+    "target": "remaining measured cuff-force integral to required task completion with explicit non-success penalty",
+    "split": "complete rollout and matched start-seed group",
+    "primary_validation": "held-out matched path ranking against progress-time-phase baseline",
+    "ood_rule": "unsupported states cannot receive attractive low predicted value"
+  },
+  "control_authority": {
+    "temporary_waypoint_changes_goal_only": true,
+    "direct_learned_or_region_actor_commands": false,
+    "mpc_cost_constraints_solver_and_safety_unchanged": true,
+    "value_model_training": false,
+    "value_or_rl_connected_to_control": false,
+    "stage3_or_stage4_modified": false
+  },
+  "frozen_open_issues": {
+    "acceleration_monitor": "A-MONITOR-UNRESOLVED",
+    "hard_realtime_or_WCET_claim": false
+  }
+}

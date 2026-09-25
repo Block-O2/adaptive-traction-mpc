@@ -252,3 +252,35 @@ def test_motion_envelope_is_jointwise_and_aborts_observed_violations() -> None:
     )
     assert result.phase is TaskPhase.ABORTED
     assert result.abort_reason == "TASK_VELOCITY_LIMIT"
+
+
+def test_acceleration_authority_waits_for_valid_history_without_skipping_other_limits() -> None:
+    state = start_episode(
+        SPEC,
+        START,
+        STOPPED,
+        None,
+        acceleration_authority_valid=False,
+    )
+    warming = transition_phase(
+        SPEC,
+        state,
+        START,
+        STOPPED,
+        0.005,
+        ddq_rad_s2=None,
+        acceleration_authority_valid=False,
+    )
+    assert warming.phase is TaskPhase.OUTBOUND
+
+    velocity_violation = transition_phase(
+        SPEC,
+        warming,
+        START,
+        (1.01 * SPEC.task_joint_velocity_limit_rad_s[0], 0.0),
+        0.005,
+        ddq_rad_s2=None,
+        acceleration_authority_valid=False,
+    )
+    assert velocity_violation.phase is TaskPhase.ABORTED
+    assert velocity_violation.abort_reason == "TASK_VELOCITY_LIMIT"

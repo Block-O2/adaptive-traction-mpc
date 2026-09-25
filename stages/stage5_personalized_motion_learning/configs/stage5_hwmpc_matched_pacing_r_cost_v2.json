@@ -1,0 +1,71 @@
+{
+  "schema": "stage5_hwmpc_matched_pacing_r_cost_v2",
+  "status": "PREREGISTERED_BEFORE_CLEAN_COST_EXECUTION",
+  "evidence_category": "bounded_clean_matched_pacing_r_cost_engineering_study",
+  "frozen_domain_source": {
+    "path": "stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_matched_pacing_r_domain_v1.json",
+    "sha256": "2446db21a81b805b79a4b00a260596a7f16b05f8ac404e6185737c699c532544",
+    "matched_pacing_interval": [-0.24, 0.51]
+  },
+  "coordination": {
+    "preregistered_r_values": [-0.24, -0.09, 0.0, 0.06, 0.21, 0.36, 0.51],
+    "trajectory_family": {
+      "hip_progress": "s + 0.25*r*sin(pi*s)",
+      "knee_progress": "s - 0.25*r*sin(pi*s)"
+    },
+    "force_used_for_selection_or_adaptation": false
+  },
+  "fixed_human": {
+    "mismatch_condition": "damping_plus_20pct",
+    "truth_scales_evaluation_only": [1.0, 1.0, 1.2],
+    "control_model_id": "stage5-human:hwmpc-damping_plus_20pct-progressive:u004:89ac34f2de7a",
+    "control_theta": [1.0001754892631383, 0.9992726057434099, 1.0778852088673856],
+    "support_outcome": "positive",
+    "support_evidence_id": "post-update:stage5-human:hwmpc-damping_plus_20pct-progressive:u004:89ac34f2de7a:positive:rep-5",
+    "source_artifact": "stages/stage5_personalized_motion_learning/results/engineering_validation/hwmpc_human_personalization_v1_attempt_02/hwmpc_human_personalization.json",
+    "source_artifact_sha256": "9ee3151edfc3b3fef79f365b599300bae77d7e2ca1adbf0bb1498881eb69bf74",
+    "updates_enabled": false,
+    "trust_driven_pacing_enabled": false
+  },
+  "matched_pacing": {
+    "outbound_duration_s": 2.2,
+    "hold_duration_s": 0.5,
+    "return_duration_s": 2.2,
+    "terminal_block_start_s": 1.5,
+    "terminal_transition_duration_s": 0.4,
+    "terminal_settle_duration_s": 0.3,
+    "terminal_target": "exact registered phase q_goal with dq_target=0",
+    "registered_phase_timeout_s_unchanged": 10.0,
+    "control_period_s": 0.005
+  },
+  "repeatability": {
+    "order_randomization_seeds": [20260921, 20260922, 20260923],
+    "interpretation": "seeds change isolated-run order only; identical repeats establish deterministic reproducibility, not stochastic robustness"
+  },
+  "analysis_contract": {
+    "primary_outcome": "J_F = integral norm(F_cuff) dt over the complete 4.9 s task",
+    "balanced_reference_r": 0.0,
+    "minimum_relative_J_F_range_for_RC2_A": 0.05,
+    "minimum_mean_phase_rms_path_distance_deg_for_useful_path_separation": 1.0,
+    "maximum_within_r_range_fraction_of_between_r_range": 0.1,
+    "minimum_absolute_spearman_rho_for_consistent_small_effect": 0.9,
+    "conclusion_order": [
+      "RC2-D if any analyzed case violates timing, completion, motion, geometry or execution-safety contract",
+      "RC2-A if relative J_F range is at least 5%, path separation is at least 1 deg RMS and deterministic repeatability passes",
+      "RC2-B if the force effect is numerically repeatable, monotonic/consistent and path-separated but below 5%",
+      "RC2-C otherwise"
+    ]
+  },
+  "scope": {
+    "scheduler_changed": false,
+    "pacing_or_completion_criterion_changed": false,
+    "r_domain_or_points_changed": false,
+    "human_model_changed": false,
+    "hwmpc_cost_changed": false,
+    "safety_task_interface_contact_or_cr12_execution_changed": false,
+    "force_used_for_control_or_selection": false,
+    "value_imitation_or_rl_active": false,
+    "stage3_or_stage4_changed": false,
+    "historical_results_changed": false
+  }
+}
