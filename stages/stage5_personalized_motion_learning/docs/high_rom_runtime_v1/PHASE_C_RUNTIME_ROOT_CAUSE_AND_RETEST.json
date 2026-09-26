@@ -1,0 +1,290 @@
+{
+  "schema": "high_rom_runtime_root_cause_and_retest_v1",
+  "status": "RUNTIME_TARGET_NOT_MET",
+  "category": "stage_c_development_not_qualification",
+  "branch": "codex/full3d-cr12-high-rom-runtime-v1",
+  "head": "89798cb83af7c8da20e63963495ebbc068489e20",
+  "worktree": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-high-rom-runtime-v1",
+  "candidate": "candidate07_same_semantics_uncommitted",
+  "quota": {
+    "limit_id": "codex",
+    "weekly_window_minutes": 10080,
+    "reset_unix_seconds": 1790917420,
+    "start_used_percent": 18,
+    "finish_used_percent": 20,
+    "increment_percentage_points": 2,
+    "stop_expand_diagnosis_at_used_percent": 20,
+    "start_wrap_at_used_percent": 21,
+    "maximum_authorized_used_percent": 22,
+    "outer_project_stop_at_used_percent": 45,
+    "hard_reserve_boundary_used_percent": 50,
+    "inflight_interruption_verified": false
+  },
+  "gate_contract": {
+    "planning_compute_p95_ms_max": 30,
+    "sample_to_activation_p95_ms_max": 55,
+    "control_miss_ratio_strictly_below": 0.1181843407482773,
+    "expired_activated_max": 0,
+    "representative_function_safety_pass_required": true
+  },
+  "gate": {
+    "pass": false,
+    "failed": [
+      "planning_compute_p95_ms"
+    ],
+    "baseline": {
+      "planning_compute_ms": {
+        "count": 139,
+        "mean": 23.605092381294963,
+        "p95": 41.8486292,
+        "max": 44.395
+      },
+      "sample_to_activation_ms": {
+        "count": 139,
+        "mean": 37.88356066906475,
+        "p95": 63.9916541,
+        "max": 69.275333
+      },
+      "control_cycle_misses": 5111,
+      "control_grid_count": 43246,
+      "control_cycle_miss_ratio": 0.1181843407482773,
+      "longest_consecutive_control_misses": 19,
+      "request_outcomes": {
+        "ACTIVATED": 139
+      },
+      "expired_activated": 0
+    },
+    "candidate03": {
+      "planning_compute_ms": {
+        "count": 140,
+        "mean": 18.675505664285712,
+        "p95": 33.37249375,
+        "max": 34.619042
+      },
+      "sample_to_activation_ms": {
+        "count": 140,
+        "mean": 33.29087436428571,
+        "p95": 55.60917049999999,
+        "max": 59.668333
+      },
+      "control_cycle_misses": 13021,
+      "control_grid_count": 43239,
+      "control_cycle_miss_ratio": 0.301140174379611,
+      "longest_consecutive_control_misses": 19,
+      "request_outcomes": {
+        "ACTIVATED": 140
+      },
+      "expired_activated": 0
+    },
+    "candidate06": {
+      "planning_compute_ms": {
+        "count": 142,
+        "mean": 17.199466253521127,
+        "p95": 30.762243749999996,
+        "max": 32.207875
+      },
+      "sample_to_activation_ms": {
+        "count": 142,
+        "mean": 31.326296183098595,
+        "p95": 53.99104645,
+        "max": 58.17825
+      },
+      "control_cycle_misses": 4091,
+      "control_grid_count": 43213,
+      "control_cycle_miss_ratio": 0.09467058524055261,
+      "longest_consecutive_control_misses": 19,
+      "request_outcomes": {
+        "ACTIVATED": 142
+      },
+      "expired_activated": 0
+    },
+    "candidate07": {
+      "planning_compute_ms": {
+        "count": 139,
+        "mean": 17.39869601438849,
+        "p95": 31.0335419,
+        "max": 31.9645
+      },
+      "sample_to_activation_ms": {
+        "count": 139,
+        "mean": 30.964460863309352,
+        "p95": 52.22995829999999,
+        "max": 55.846042
+      },
+      "control_cycle_misses": 4100,
+      "control_grid_count": 43049,
+      "control_cycle_miss_ratio": 0.09524030755650538,
+      "longest_consecutive_control_misses": 18,
+      "request_outcomes": {
+        "ACTIVATED": 139
+      },
+      "expired_activated": 0
+    }
+  },
+  "paired_timing": {
+    "order": [
+      "high120_01_baseline",
+      "high120_02_candidate",
+      "high120_03_candidate",
+      "high120_04_baseline",
+      "low_01_baseline",
+      "low_02_candidate",
+      "low_03_candidate",
+      "low_04_baseline"
+    ],
+    "rows": [
+      {
+        "case": "high120_01_baseline",
+        "control_miss_ratio": 0.12454873646209386,
+        "longest_consecutive_misses": 19,
+        "longest_miss_duration_ms": 95.0,
+        "task_miss_ratio": 0.16181549087321165,
+        "task_poll_end_to_next_tick_start_p95_ms": 8.132251749999998,
+        "gc_events_during_epoch": 0
+      },
+      {
+        "case": "high120_02_candidate",
+        "control_miss_ratio": 0.17666392769104355,
+        "longest_consecutive_misses": 18,
+        "longest_miss_duration_ms": 90.0,
+        "task_miss_ratio": 0.245427582797825,
+        "task_poll_end_to_next_tick_start_p95_ms": 8.4690998,
+        "gc_events_during_epoch": 0
+      },
+      {
+        "case": "high120_03_candidate",
+        "control_miss_ratio": 0.2569033530571992,
+        "longest_consecutive_misses": 18,
+        "longest_miss_duration_ms": 90.0,
+        "task_miss_ratio": 0.36093943139678614,
+        "task_poll_end_to_next_tick_start_p95_ms": 9.214925,
+        "gc_events_during_epoch": 0
+      },
+      {
+        "case": "high120_04_baseline",
+        "control_miss_ratio": 0.2780871274156567,
+        "longest_consecutive_misses": 18,
+        "longest_miss_duration_ms": 90.0,
+        "task_miss_ratio": 0.397539975399754,
+        "task_poll_end_to_next_tick_start_p95_ms": 9.255783200000002,
+        "gc_events_during_epoch": 0
+      },
+      {
+        "case": "low_01_baseline",
+        "control_miss_ratio": 0.15117719950433706,
+        "longest_consecutive_misses": 16,
+        "longest_miss_duration_ms": 80.0,
+        "task_miss_ratio": 0.34789915966386553,
+        "task_poll_end_to_next_tick_start_p95_ms": 9.1206671,
+        "gc_events_during_epoch": 0
+      },
+      {
+        "case": "low_02_candidate",
+        "control_miss_ratio": 0.1505443234836703,
+        "longest_consecutive_misses": 16,
+        "longest_miss_duration_ms": 80.0,
+        "task_miss_ratio": 0.3522920203735144,
+        "task_poll_end_to_next_tick_start_p95_ms": 9.2463911,
+        "gc_events_during_epoch": 0
+      },
+      {
+        "case": "low_03_candidate",
+        "control_miss_ratio": 0.16703022748519789,
+        "longest_consecutive_misses": 17,
+        "longest_miss_duration_ms": 85.0,
+        "task_miss_ratio": 0.3796928327645051,
+        "task_poll_end_to_next_tick_start_p95_ms": 9.27433325,
+        "gc_events_during_epoch": 0
+      },
+      {
+        "case": "low_04_baseline",
+        "control_miss_ratio": 0.17984496124031008,
+        "longest_consecutive_misses": 16,
+        "longest_miss_duration_ms": 80.0,
+        "task_miss_ratio": 0.42459983150800334,
+        "task_poll_end_to_next_tick_start_p95_ms": 9.2697913,
+        "gc_events_during_epoch": 0
+      }
+    ],
+    "conclusion": "strong order/host drift in both versions; prior cross-day miss regression cannot be assigned causally to planner optimization",
+    "unresolved": [
+      "OS/thermal contention not directly measured",
+      "worker/main CPU contention not isolated",
+      "active I/O and lock waits not instrumented"
+    ]
+  },
+  "long_tail": {
+    "snapshot_sha256": "3851383008d96e5094c3cdbc6ed07518da08de852d9df64f4d0cf8b444978dd7",
+    "prior_repeated_wall_ms": [
+      1854.184917,
+      1850.050209
+    ],
+    "prior_repeated_cpu_ms": [
+      1849.84,
+      1845.483
+    ],
+    "certificate_calls": 1873,
+    "special_candidate_trials": 1854,
+    "candidate07_wall_ms_observed_once": 1440.827041,
+    "candidate07_cpu_ms_observed_once": 1435.315,
+    "classification": "specific saved snapshot dominated by finite repeated conservative certificate/search computation; not proof all online tails share cause",
+    "remaining_worst_case_ms_approx": 1441
+  },
+  "changes": {
+    "production": [
+      "fast_physics_monitor.py: same native evaluation metrics, fewer temporary arrays and sets",
+      "runtime.py: use versioned fast evaluation monitor only on evaluation path",
+      "monotonic_clearance.py: exact bound-pair memoization of interval trig and endpoint proof",
+      "rigid_table_reference.py: skip sampled knee-height computation only after the existing structural proof succeeds"
+    ],
+    "scientific_model_changed": false,
+    "candidate_count_cost_search_space_changed": false,
+    "task_safety_stale_rule_changed": false,
+    "known_uncommitted_prior_stage_c_files": [
+      "human_waypoint_scheduler.py",
+      "terminal_reference.py",
+      "rigid_table_reference.py"
+    ]
+  },
+  "equivalence": {
+    "fixed_120_outbound_hold_return_decisions_exact": true,
+    "historical_saved_decision_exact": true,
+    "synthetic_monitor_records_exact_count": 2000,
+    "scope": "tested snapshots and synthetic monitor inputs; no formal proof over all inputs"
+  },
+  "function_safety": {
+    "denominator": 8,
+    "confirmed": 8,
+    "minimum_native_dwell_s": 0.5200000000021259,
+    "minimum_native_clearance_m": 0.008247327779019428,
+    "maximum_native_force_n": 114.10278952183126,
+    "maximum_native_moment_nm": 16.11616012818244,
+    "stale_activated": 0,
+    "full_49_case_candidate07_not_run": true,
+    "reason": "frozen runtime gate failed; user requires full development regression only after gate passes"
+  },
+  "auditor": {
+    "role": "single_independent_read_only",
+    "conclusion": "ACCEPT representative 8/8 scoring and finite same-semantics evidence; REJECT runtime gate; control miss cause unresolved",
+    "limitations": [
+      "ABBA host-order drift prevents causal attribution",
+      "checked monitor equivalence and truth firewall are finite-path evidence"
+    ]
+  },
+  "raw_paths": {
+    "paired": "stages/stage5_personalized_motion_learning/results/high_rom_runtime_v1/paired_root_cause",
+    "candidate06_gate": "stages/stage5_personalized_motion_learning/results/high_rom_runtime_v1/candidate06_gate",
+    "candidate07_gate": "stages/stage5_personalized_motion_learning/results/high_rom_runtime_v1/candidate07_gate"
+  },
+  "artifacts": [
+    "ROOT_CAUSE_FREEZE.json",
+    "PAIRED_ROOT_CAUSE_TIMING.json",
+    "HISTORICAL_TAIL_EVENT_TRACE.json",
+    "CONTROL_STAGE_INSTRUMENTED.json",
+    "CANDIDATE06_BENCHMARK.json",
+    "CANDIDATE07_BENCHMARK.json",
+    "CANDIDATE07_FUNCTION.json",
+    "ROOT_CAUSE_FINAL_FINGERPRINTS.json"
+  ],
+  "next_action": "Further same-semantics worker certificate hot-path optimization under a new frozen candidate, then one preregistered development runtime retest; do not enter qualification or RL."
+}

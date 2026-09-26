@@ -1,0 +1,109 @@
+{
+  "adaptation_period_s": 0.02,
+  "commissioning_reference": {
+    "sample_period_s": 0.02,
+    "segment_duration_s": 1.5,
+    "settle_duration_s": 1.0,
+    "waypoints_deg": [
+      [
+        5.0,
+        10.0
+      ],
+      [
+        14.0,
+        19.0
+      ],
+      [
+        9.0,
+        27.0
+      ],
+      [
+        16.0,
+        22.0
+      ],
+      [
+        5.0,
+        10.0
+      ]
+    ]
+  },
+  "completion_angle_tolerance_deg": [
+    1.0,
+    1.0
+  ],
+  "completion_velocity_tolerance_deg_s": [
+    2.0,
+    2.0
+  ],
+  "cuff_force_limit_n": 200.0,
+  "cuff_moment_limit_nm": 60.0,
+  "dev_a_recovery": {
+    "description": "Development-only lifecycle repair; no geometry, beta, residual, task or safety retuning",
+    "minimum_recovery_segment_duration_s": 1.5,
+    "minimum_segment_duration_source": "existing_commissioning_quintic_segment_duration_s",
+    "planning_maximum_age_s": 0.1,
+    "planning_maximum_age_source": "existing_stale_plan_contract",
+    "recovery_timeout_source": "registered_goal_task_phase_timeout_s",
+    "schema": "full3d_dev_a_recovery_v1",
+    "settle_persistence_s": 0.02,
+    "settle_persistence_source": "existing_20ms_adaptation_observation_interval",
+    "value_hook": 0.0
+  },
+  "evidence_category": "development",
+  "hardware_actuation": false,
+  "high_level_decision_trigger": "event_driven_at_task_start_phase_change_or_completed_and_settled_waypoint_segment",
+  "hold_duration_s": 0.5,
+  "human_acceleration_limit_deg_s2": [
+    300.0,
+    600.0
+  ],
+  "human_hard_rom_deg": [
+    [
+      0.0,
+      125.0
+    ],
+    [
+      0.0,
+      125.0
+    ]
+  ],
+  "human_velocity_limit_deg_s": [
+    45.0,
+    75.0
+  ],
+  "low_level_execution_period_s": 0.005,
+  "maximum_stale_plan_age_s": 0.1,
+  "phase_timeout_s": 10.0,
+  "physics_dt_s": 0.00025,
+  "planning_latency_replay_quantization_s": 0.005,
+  "research_model_config_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-high-rom-runtime-v1/stages/stage5_personalized_motion_learning/configs/high_rom_v1/stage5_goal_task_120_v1.json",
+  "revision_reason": "post-audit correction of decision-trigger label; no plant, task, limit, estimator, controller-weight, or safety-threshold change",
+  "robot_model": "cr12_v0",
+  "robot_torque_limit_nm": [
+    436.0,
+    436.0,
+    194.0,
+    102.0,
+    66.0,
+    66.0
+  ],
+  "robot_velocity_limit_deg_s": [
+    120.0,
+    120.0,
+    180.0,
+    234.0,
+    240.0,
+    240.0
+  ],
+  "schema": "full3d_adaptive_integration_v1.development_v1_1",
+  "session_clearance_contract": {
+    "additional_clearance_margin_m": 0.001,
+    "bed_height_m": 0.012,
+    "conservative_shank_length_upper_m": 0.46,
+    "geometry_source": "ONLINE_EFFECTIVE_HIP_AND_THIGH_PLUS_STRUCTURAL_PRIOR_SHANK_LENGTH_SET",
+    "hidden_geometry_consumed": false,
+    "shank_radius_m": 0.045
+  },
+  "value_hook": 0.0,
+  "value_or_rl_training": false
+}

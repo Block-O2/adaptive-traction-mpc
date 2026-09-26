@@ -1,0 +1,35 @@
+{
+  "schema": "high_rom_runtime_benchmark_v1",
+  "category": "development_runtime_not_fresh_qualification",
+  "base_checkpoint": "89798cb83af7c8da20e63963495ebbc068489e20",
+  "baseline_raw_root": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-high-rom-v1/stages/stage5_personalized_motion_learning/results/high_rom_v1",
+  "cases": [
+    {"id": "low_ordinary", "plant": "low_rom", "case": "configs/high_rom_v1/low_rom_regression_cases/balanced_ordinary_r01.json", "baseline": "low_rom_regression/balanced_ordinary_r01_attempt_01"},
+    {"id": "low_near_upper", "plant": "low_rom", "case": "configs/high_rom_v1/low_rom_regression_cases/hip_dominant_near_upper_current_rom_r02.json", "baseline": "low_rom_regression/hip_dominant_near_upper_current_rom_r02_attempt_01"},
+    {"id": "high_100_sync", "plant": "high_rom", "case": "configs/high_rom_v1/high_rom_nominal_sync_100_v1.json", "baseline": "development/nominal_sync_100_attempt_02"},
+    {"id": "high_110_sync", "plant": "high_rom", "case": "configs/high_rom_v1/high_rom_nominal_sync_110_v1.json", "baseline": "development/nominal_sync_110_attempt_01"},
+    {"id": "high_120_sync", "plant": "high_rom", "case": "configs/high_rom_v1/high_rom_nominal_sync_120_v1.json", "baseline": "development/nominal_sync_120_attempt_01"},
+    {"id": "high_120_hip", "plant": "high_rom", "case": "configs/high_rom_v1/high_rom_matrix_nominal_hip_v1.json", "baseline": "development/matrix_nominal_hip_attempt_02"},
+    {"id": "high_120_start_6_11", "plant": "high_rom", "case": "configs/high_rom_v1/high_rom_function_fresh_01_v1.json", "baseline": "variable_start_v1/trial_fresh_01"},
+    {"id": "high_120_start_8_13", "plant": "high_rom", "case": "configs/high_rom_v1/high_rom_function_fresh_16_v1.json", "baseline": "variable_start_v1/case_16"}
+  ],
+  "timing_definitions": {
+    "physics_step_s": 0.00025,
+    "control_and_sensor_period_s": 0.005,
+    "adaptation_period_s": 0.020,
+    "waypoint_planning_trigger": "request events from retained task state machine, not an assumed fixed periodic task planner",
+    "plan_expiration_ms": 100.0,
+    "compute_ms": "worker_start_ns to compute_finish_ns for every completed request, including dropped and failed",
+    "sample_to_activation_ms": "max(actual activation_ns,effective_activation_ns)-sensor_capture_ns for ACTIVATED requests only",
+    "control_cycle_miss": "WallPhysicsSession.boundary grid gap; missed sensor/control grids divided by total elapsed 5ms grids",
+    "longest_consecutive_miss": "maximum single boundary grid gap minus one, reconstructed from control_poll catchup end grids",
+    "request_counts": "all lifecycle outcomes, no exclusion of dropped or stale requests",
+    "stats": "arithmetic mean, numpy percentile p95, maximum; all times in milliseconds"
+  },
+  "historical_tail": {"recorded_max_compute_ms": 4143.554375, "source": "QUALIFICATION_ATTEMPT2_FINAL_REPORT.md", "reproduction": "attempt exact retained deployable snapshot if accessible; otherwise report historical only"},
+  "same_semantics_equivalence": {"decision_atol": 1e-10, "decision_rtol": 1e-10, "required_fields": "candidate labels, feasibility, chosen action, waypoint, schedule, cost and safety checks"},
+  "development_target": {"planning_compute_p95_ms_max": 30.0, "planning_compute_max_ms_max": 100.0, "sample_to_activation_p95_ms_max": 55.0, "expired_activated_max": 0, "task_and_safety_regressions_max": 0, "cycle_miss_ratio": "must decrease relative to the paired baseline corpus"},
+  "source_changes_allowed": "implementation-preserving optimization only unless separately versioned as a new algorithm candidate",
+  "candidate_gate": "fixed-snapshot equivalence before short closed-loop cases; final low-ROM23 and confirmed High-ROM fixed/variable matrices with unchanged task/safety/stale rules",
+  "exclusions": []
+}

@@ -7,6 +7,7 @@ The old scientific model and dynamics update laws are not modified.
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from functools import lru_cache
 import math
 from typing import Any
 
@@ -26,6 +27,15 @@ def _cylinder_gap(a_z: np.ndarray, b_z: np.ndarray,
                   axis_z: np.ndarray, radius_m: float) -> np.ndarray:
     radial_z = radius_m * np.sqrt(np.maximum(0.0, 1.0 - axis_z**2))
     return np.minimum(a_z, b_z) - radial_z - BED_HEIGHT_M
+
+
+@lru_cache(maxsize=16)
+def _quintic_sample_powers(sample_count: int) -> np.ndarray:
+    """Reuse the immutable, geometry-independent certificate sample grid."""
+    s = np.linspace(0.0, 1.0, sample_count)
+    powers = np.stack([s**i for i in range(6)])
+    powers.flags.writeable = False
+    return powers
 
 
 @dataclass(frozen=True)
@@ -180,8 +190,7 @@ class RigidTableReferenceEnvelopeV1:
         c = np.asarray(coefficients, dtype=float)
         if c.shape != (2, 6) or duration_s <= 0:
             raise ValueError("invalid quintic segment")
-        s = np.linspace(0.0, 1.0, self.sample_count)
-        powers = np.stack([s**i for i in range(6)])
+        powers = _quintic_sample_powers(self.sample_count)
         q = (c @ powers).T
         margins = self.margins(q)
         g = self.geometry
@@ -207,12 +216,6 @@ class RigidTableReferenceEnvelopeV1:
             * max_phi_deriv)
         # On a segment where the knee stays above the hip, the proximal
         # capsule's support point is the fixed hip, so its gap is constant.
-        hip = (np.asarray(g.origin_world_m)
-               + g.hip_plane_m[0] * g.plane_x_world
-               + g.hip_plane_m[1] * g.plane_z_world)
-        knee_z = (hip[2] + g.thigh_length_m * (
-            np.cos(q[:, 0]) * g.plane_x_world[2]
-            + np.sin(q[:, 0]) * g.plane_z_world[2]))
         # The knee stays above the fixed hip throughout 0 <= q1 <= pi,
         # including the High-ROM range beyond 90 deg. Check polynomial
         # extrema, not just grid nodes, before using the structural gap.
@@ -225,8 +228,17 @@ class RigidTableReferenceEnvelopeV1:
                 and abs(float(g.plane_x_world[2])) < 1e-9
                 and float(g.plane_z_world[2]) > 0.0):
             thigh_bound = 0.0
-        elif float(np.min(knee_z - hip[2])) - thigh_bound >= 0.0:
-            thigh_bound = 0.0
+        else:
+            # Only the fallback bound consumes sampled knee height. The
+            # structural proof above already establishes this exact result.
+            hip = (np.asarray(g.origin_world_m)
+                   + g.hip_plane_m[0] * g.plane_x_world
+                   + g.hip_plane_m[1] * g.plane_z_world)
+            knee_z = (hip[2] + g.thigh_length_m * (
+                np.cos(q[:, 0]) * g.plane_x_world[2]
+                + np.sin(q[:, 0]) * g.plane_z_world[2]))
+            if float(np.min(knee_z - hip[2])) - thigh_bound >= 0.0:
+                thigh_bound = 0.0
         minima = {name: float(np.min(value)) for name, value in margins.items()}
         lower = {name: value - (thigh_bound if name == "proximal_thigh_m"
                                 else limb_bound) for name, value in minima.items()}

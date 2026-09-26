@@ -358,17 +358,21 @@ class QuinticHumanWaypointSchedulerV1:
         )
 
     def _path_clearance_is_valid(
-        self, clearance_m: np.ndarray, candidate: HumanWaypointCandidate
+        self, clearance_m: np.ndarray, candidate: HumanWaypointCandidate,
+        *, task_floor_override_m: float | None = None,
     ) -> bool:
         """Require nonpenetration and optionally preserve the task endpoint floor."""
 
         clearance = np.asarray(clearance_m, dtype=float)
         floor_m = 0.0
         if self.preserve_task_endpoint_clearance_floor:
-            task_endpoints = np.vstack(
-                [self.spec.start_return_target_rad, candidate.phase_goal_rad]
-            )
-            floor_m = float(np.min(self._clearance_m(task_endpoints)))
+            if task_floor_override_m is None:
+                task_endpoints = np.vstack(
+                    [self.spec.start_return_target_rad, candidate.phase_goal_rad]
+                )
+                floor_m = float(np.min(self._clearance_m(task_endpoints)))
+            else:
+                floor_m = task_floor_override_m
         if self.require_continuous_nonpenetrating_path:
             floor_m = max(0.0, floor_m)
         return bool(np.min(clearance) >= floor_m - 1.0e-12)
@@ -376,11 +380,14 @@ class QuinticHumanWaypointSchedulerV1:
     def _continuous_clearance_is_valid(
         self, coefficients: np.ndarray, duration_s: float,
         candidate: HumanWaypointCandidate,
+        *, task_floor_override_m: float | None = None,
     ) -> tuple[bool, float]:
         if not self.require_continuous_nonpenetrating_path:
             return True, float("inf")
         lower = float(self.clearance_evaluator.certified_minimum(coefficients, duration_s))
-        return self._path_clearance_is_valid(np.asarray([lower]), candidate), lower
+        return self._path_clearance_is_valid(
+            np.asarray([lower]), candidate,
+            task_floor_override_m=task_floor_override_m), lower
 
     def _validate_request(
         self,
@@ -624,13 +631,24 @@ class QuinticHumanWaypointSchedulerV1:
             self.spec.task_joint_acceleration_limit_rad_s2
         ) * self.reference_acceleration_fraction
         available_s = self.spec.phase_timeout_s - phase_elapsed_s
+        task_floor_override_m = None
+        if self.preserve_task_endpoint_clearance_floor:
+            # The CombinedRigidTableClearance evaluator is a pure function of
+            # this immutable worker snapshot's geometry and the two registered
+            # task endpoints. Reuse the exact scalar within this request only;
+            # a new request recomputes it after any model/geometry update.
+            from .full3d_adaptive_integration_v1.rigid_table_reference import CombinedRigidTableClearanceV1
+            if isinstance(self.clearance_evaluator, CombinedRigidTableClearanceV1):
+                task_floor_override_m = float(np.min(self._clearance_m(np.vstack(
+                    [self.spec.start_return_target_rad, candidate.phase_goal_rad]))))
         # Every duration samples both boundary positions. If either boundary
         # already violates the existing path floor, no duration can succeed.
         # Keep a 1 nm *early-rejection guard* for polynomial endpoint roundoff:
         # cases inside that guard still run all original checks/tolerances.
         # HOLD above intentionally retains its original separate semantics.
         if self.preserve_task_endpoint_clearance_floor and not self._path_clearance_is_valid(
-            endpoint_clearance + 1.0e-9, candidate
+            endpoint_clearance + 1.0e-9, candidate,
+            task_floor_override_m=task_floor_override_m,
         ):
             raise ValueError("no quintic schedule satisfies the registered phase and motion limits")
         maximum_steps = int(math.floor(available_s / self.reference_period_s + 1.0e-12))
@@ -690,22 +708,24 @@ class QuinticHumanWaypointSchedulerV1:
                 and np.any(maximum_acceleration > acceleration_limit + 1.0e-12)
             ):
                 continue
-            samples = []
-            for sample_index in range(step_count + 1):
-                normalized = sample_index / step_count
-                powers = np.asarray([normalized**index for index in range(6)])
-                samples.append(coefficients @ powers)
-            q_samples = np.asarray(samples)
+            # Same inclusive normalized grid and polynomial; evaluate the
+            # full batch in NumPy instead of allocating a Python object for
+            # every sample at every trial duration.
+            normalized = np.arange(step_count + 1, dtype=float) / step_count
+            powers = np.stack([normalized**index for index in range(6)], axis=1)
+            q_samples = powers @ coefficients.T
             task_bounds = np.asarray(self.spec.q_bounds_rad, dtype=float)
             if np.any(q_samples < task_bounds[:, 0]) or np.any(
                 q_samples > task_bounds[:, 1]
             ):
                 continue
             clearance = np.asarray(self._clearance_m(q_samples), dtype=float)
-            if not self._path_clearance_is_valid(clearance, candidate):
+            if not self._path_clearance_is_valid(
+                clearance, candidate, task_floor_override_m=task_floor_override_m):
                 continue
             continuous_valid, continuous_lower = self._continuous_clearance_is_valid(
-                coefficients, duration_s, candidate)
+                coefficients, duration_s, candidate,
+                task_floor_override_m=task_floor_override_m)
             if not continuous_valid:
                 continue
             if use_legacy_nominal_tracking_preview:

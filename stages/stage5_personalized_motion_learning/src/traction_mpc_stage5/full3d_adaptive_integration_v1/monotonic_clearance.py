@@ -6,6 +6,7 @@ assumption or coefficient-only generic epsilon is used in acceptance.
 """
 import math
 from fractions import Fraction
+from functools import lru_cache
 import numpy as np
 from traction_mpc_stage3.coupled import (SLEEVE_HALF_LENGTH_M, SLEEVE_OUTER_RADIUS_M,
                                        SHANK_RADIUS_M, BED_HEIGHT_M)
@@ -54,7 +55,11 @@ SIN_REMAINDER=up(float(Fraction(4**37,math.factorial(37))))
 COS_REMAINDER=up(float(Fraction(4**36,math.factorial(36))))
 
 
-def trig(x,cosine=False):
+@lru_cache(maxsize=8192)
+def _trig_bounds(lo,hi,cosine):
+    # Exact binary64 interval inputs recur at the common start of every
+    # candidate. Cache only immutable output bounds, never mutable I objects.
+    x=I(lo,hi)
     if x.abs().hi>4.: raise ValueError('trig interval outside registered proof domain')
     coefs=COS_COEFFICIENTS if cosine else SIN_COEFFICIENTS
     square=x*x; value=coefs[-1]
@@ -62,23 +67,45 @@ def trig(x,cosine=False):
     if not cosine: value=x*value
     remainder=COS_REMAINDER if cosine else SIN_REMAINDER
     value=value+I(-remainder,remainder)
-    return I(max(-1.,value.lo),min(1.,value.hi))
+    return max(-1.,value.lo),min(1.,value.hi)
 
 
-def endpoint(envelope,q):
-    g=envelope.geometry; shank=trig(q[0]-q[1]); radial=trig(q[0]-q[1],True)
-    knee=I(g.origin_world_m[2])+I(g.hip_plane_m[1])+I(g.thigh_length_m)*trig(q[0])
-    cuff=knee+I(g.cuff_distance_m)*shank+I(envelope.cuff_reference_translation_world_m[2])
-    thigh=I(envelope.registered_proximal_installation_gap_lower_m)
-    distal=minimum(knee,knee+I(envelope.shank_length_upper_m)*shank)-SHANK_RADIUS_M-BED_HEIGHT_M-envelope.existing_shank_margin_m
+def trig(x,cosine=False):
+    return I(*_trig_bounds(x.lo,x.hi,cosine))
+
+
+@lru_cache(maxsize=8192)
+def _endpoint_bounds(key):
+    # The key includes every envelope value read by the endpoint proof.
+    # Return immutable bound pairs so callers cannot mutate cached intervals.
+    (q0lo,q0hi,q1lo,q1hi,origin_z,hip_y,thigh_length,cuff_distance,
+     cuff_z,proximal_floor,shank_length,shank_margin,tool_y) = key
+    q=(I(q0lo,q0hi),I(q1lo,q1hi))
+    shank=trig(q[0]-q[1]); radial=trig(q[0]-q[1],True)
+    knee=I(origin_z)+I(hip_y)+I(thigh_length)*trig(q[0])
+    cuff=knee+I(cuff_distance)*shank+I(cuff_z)
+    thigh=I(proximal_floor)
+    distal=minimum(knee,knee+I(shank_length)*shank)-SHANK_RADIUS_M-BED_HEIGHT_M-shank_margin
     sleeve_radial=nonnegative_sqrt(I(1.)-shank*shank)
     sleeve=cuff-I(SLEEVE_HALF_LENGTH_M)*shank.abs()-I(SLEEVE_OUTER_RADIUS_M)*sleeve_radial-BED_HEIGHT_M
     bar=cuff-I(.5*STAGE5_GEOMETRY.cuff_bar_length_m)*shank.abs()-I(STAGE5_GEOMETRY.cuff_bar_radius_m)*sleeve_radial-BED_HEIGHT_M
     # Registered exact signed-permutation R_EC and positive y translation:
     # adapter endpoints are cuff+t_y*cos(phi), cuff+R_sleeve*cos(phi).
-    ty=float(STAGE5_GEOMETRY.end_effector_from_cuff.translation[1])
-    adapter=minimum(cuff+I(ty)*radial,cuff+I(SLEEVE_OUTER_RADIUS_M)*radial)-I(.018)*nonnegative_sqrt(I(1.)-radial*radial)-BED_HEIGHT_M
-    return dict(proximal_thigh_m=thigh,distal_shank_m=distal,sleeve_m=sleeve,cuff_bar_m=bar,cuff_adapter_m=adapter)
+    adapter=minimum(cuff+I(tool_y)*radial,cuff+I(SLEEVE_OUTER_RADIUS_M)*radial)-I(.018)*nonnegative_sqrt(I(1.)-radial*radial)-BED_HEIGHT_M
+    return tuple((name,value.lo,value.hi) for name,value in
+                 (('proximal_thigh_m',thigh),('distal_shank_m',distal),
+                  ('sleeve_m',sleeve),('cuff_bar_m',bar),('cuff_adapter_m',adapter)))
+
+
+def endpoint(envelope,q):
+    g=envelope.geometry
+    key=(q[0].lo,q[0].hi,q[1].lo,q[1].hi,float(g.origin_world_m[2]),
+         float(g.hip_plane_m[1]),g.thigh_length_m,g.cuff_distance_m,
+         float(envelope.cuff_reference_translation_world_m[2]),
+         envelope.registered_proximal_installation_gap_lower_m,
+         envelope.shank_length_upper_m,envelope.existing_shank_margin_m,
+         float(STAGE5_GEOMETRY.end_effector_from_cuff.translation[1]))
+    return {name:I(lo,hi) for name,lo,hi in _endpoint_bounds(key)}
 
 
 def monotonic_certificate(envelope,coefficients):

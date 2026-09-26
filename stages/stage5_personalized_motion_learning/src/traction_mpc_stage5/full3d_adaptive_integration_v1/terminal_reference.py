@@ -321,8 +321,15 @@ class TerminalSetHumanWaypointPlannerV1(HumanWaypointFeedbackMPCV1):
         velocity_error = state[2:]-np.asarray(snapshot["dq_ref_rad_s"])
         coefficients = evaluated.schedule.coefficients.copy()
         coefficients[:, 0] += error
-        nominal_lower = float(self.scheduler.clearance_evaluator.certified_minimum(
-            evaluated.schedule.coefficients, evaluated.schedule.duration_s))
+        # The scheduler has already certified these exact unshifted
+        # coefficients. Reuse its saved per-body lower bounds; retain the
+        # original calculation for other clearance implementations.
+        certificate = evaluated.schedule.continuous_clearance_certificate
+        body_lowers = (certificate.get("combined_body_lowers_m")
+                       if isinstance(certificate, dict) else None)
+        nominal_lower = (float(min(body_lowers.values()))
+                         if body_lowers else float(self.scheduler.clearance_evaluator.certified_minimum(
+                             evaluated.schedule.coefficients, evaluated.schedule.duration_s)))
         lower = float(self.scheduler.clearance_evaluator.certified_minimum(
             coefficients, evaluated.schedule.duration_s))
         if not np.all(np.isfinite(error)) or not np.isfinite(lower):

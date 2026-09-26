@@ -1722,8 +1722,8 @@ def _run_executed_case(
     measurement_layer = runtime["measurement_layer"]
     observer = runtime["observer"]
     if qualification_case is not None:
-        from ..fresh_qualification_v1.physics_monitor import TruePhysicsMonitor
-        runtime["true_physics_monitor"] = TruePhysicsMonitor()
+        from .fast_physics_monitor import FastTruePhysicsMonitor
+        runtime["true_physics_monitor"] = FastTruePhysicsMonitor()
 
     commissioning_waypoints = (
         np.radians(np.asarray(config["commissioning_reference"]["waypoints_deg"], dtype=float))

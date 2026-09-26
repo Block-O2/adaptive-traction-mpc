@@ -1,0 +1,186 @@
+{
+  "schema": "high_rom_phase_c_certificate_optimization_v1",
+  "status": "RUNTIME_DEVELOPMENT_PASS",
+  "scope": "frozen development runtime gate; not fresh qualification, continuous safety, hardware readiness, or hard realtime",
+  "branch": "codex/full3d-cr12-high-rom-runtime-v1",
+  "worktree": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-high-rom-runtime-v1",
+  "head": "89798cb83af7c8da20e63963495ebbc068489e20",
+  "candidate": "C08",
+  "source_config_count": 173,
+  "fingerprints_file": "PHASE_C_CERTIFICATE_FINGERPRINTS.json",
+  "production_change": [
+    "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py"
+  ],
+  "change": "request-local exact task endpoint clearance floor reuse for pure CombinedRigidTableClearanceV1; other evaluators retain old path; no cross-request cache",
+  "science_contract_changed": false,
+  "candidate_count_search_cost_safety_model_stale_rule_changed": false,
+  "snapshot_equivalence": [
+    {
+      "snapshot": "high120",
+      "repetition": 1,
+      "certificate_calls": 21,
+      "certificate_input_lower_proof_equal": true,
+      "selected_decision_sha256": "71c970a73c0058d1d239aaae1c9363abb80499c5cf2dee95b3d91c28e64de2e9",
+      "before_wall_ms": 29.818625,
+      "after_wall_ms": 28.182834,
+      "before_certificate_sum_ms": 8.744874999999999,
+      "after_certificate_sum_ms": 8.800628000000001,
+      "cache_hits_before": {
+        "trig": 39,
+        "endpoint": 19,
+        "grid": 20
+      },
+      "cache_hits_after": {
+        "trig": 39,
+        "endpoint": 19,
+        "grid": 20
+      }
+    },
+    {
+      "snapshot": "historical",
+      "repetition": 1,
+      "certificate_calls": 1873,
+      "certificate_input_lower_proof_equal": true,
+      "selected_decision_sha256": "9e3623a8e3f1a0468b4965ea3c60ae6c1a6e3cfeaf4ac6eed8eb172d00f7f91e",
+      "before_wall_ms": 1509.295208,
+      "after_wall_ms": 1286.210917,
+      "before_certificate_sum_ms": 527.2261699999991,
+      "after_certificate_sum_ms": 532.5847110000001,
+      "cache_hits_before": {
+        "trig": 3745,
+        "endpoint": 3717,
+        "grid": 1872
+      },
+      "cache_hits_after": {
+        "trig": 3745,
+        "endpoint": 3717,
+        "grid": 1872
+      }
+    },
+    {
+      "snapshot": "historical",
+      "repetition": 2,
+      "certificate_calls": 1873,
+      "certificate_input_lower_proof_equal": true,
+      "selected_decision_sha256": "9e3623a8e3f1a0468b4965ea3c60ae6c1a6e3cfeaf4ac6eed8eb172d00f7f91e",
+      "before_wall_ms": 1561.135709,
+      "after_wall_ms": 1272.661208,
+      "before_certificate_sum_ms": 542.6167530000008,
+      "after_certificate_sum_ms": 525.146396,
+      "cache_hits_before": {
+        "trig": 7491,
+        "endpoint": 7463,
+        "grid": 3745
+      },
+      "cache_hits_after": {
+        "trig": 7491,
+        "endpoint": 7463,
+        "grid": 3745
+      }
+    }
+  ],
+  "historical_unique_certificate_inputs": 1873,
+  "historical_wall_mean_before_ms": 1535.2154584999998,
+  "historical_wall_mean_after_ms": 1279.4360625,
+  "historical_wall_reduction_percent": 16.66081425794866,
+  "historical_tail_still_second_scale": true,
+  "runtime_gate": {
+    "compute_ms": {
+      "count": 142,
+      "mean": 16.024894943661966,
+      "p95": 28.644385399999997,
+      "max": 29.784042
+    },
+    "activation_ms": {
+      "count": 142,
+      "mean": 28.403823485915492,
+      "p95": 49.34248509999999,
+      "max": 54.659791
+    },
+    "control_misses": 4817,
+    "control_grids": 43121,
+    "control_miss_ratio": 0.11170891213098026,
+    "longest_consecutive_misses": 19,
+    "request_outcomes": {
+      "ACTIVATED": 142
+    },
+    "expired_activated": 0,
+    "thresholds": {
+      "compute_p95_ms_max": 30,
+      "compute_max_ms_max": 100,
+      "activation_p95_ms_max": 55,
+      "control_miss_ratio_less_than": 0.11818,
+      "expired_activated_max": 0
+    },
+    "passes": true,
+    "c07_control_miss_ratio": 0.09524030755650538
+  },
+  "function": {
+    "gate_confirmed": 8,
+    "gate_denominator": 8,
+    "low_rom_confirmed": 23,
+    "low_rom_denominator": 23,
+    "low_rom_same_source_reused": 2,
+    "high_120_representatives": [
+      "high_120_sync",
+      "high_120_hip",
+      "high_120_start_6_11",
+      "high_120_start_8_13"
+    ],
+    "gate_min_native_dwell_s": 0.5149999999987998,
+    "gate_min_native_clearance_m": 0.008247327779019428,
+    "gate_max_native_force_n": 114.60644981112215,
+    "gate_max_native_moment_nm": 16.105336307330493,
+    "low_min_native_dwell_s": 0.5149999999987998,
+    "low_min_native_clearance_m": 0.005950637806418715,
+    "low_max_native_force_n": 131.15069232855046,
+    "low_max_native_moment_nm": 18.07874707397,
+    "stale_activated": 0
+  },
+  "auditor": {
+    "mode": "independent_read_only",
+    "conclusion": "accept RUNTIME_DEVELOPMENT_PASS against frozen development gate",
+    "limits": [
+      "C08 control misses worse than C07",
+      "historical snapshot still approximately 1.28 s",
+      "no fresh qualification or hard realtime claim"
+    ]
+  },
+  "quota": {
+    "limit_id": "codex",
+    "weekly_window_minutes": 10080,
+    "reset_unix_seconds": 1790917420,
+    "start_used_percent": 20,
+    "finish_used_percent": 21,
+    "increment_percentage_points": 1,
+    "stop_expand_at_used_percent": 21.5,
+    "wrap_at_used_percent": 22,
+    "maximum_authorized_used_percent": 23,
+    "outer_project_stop_used_percent": 45,
+    "hard_reserve_boundary_used_percent": 50,
+    "inflight_worker_interrupt_verified": false
+  },
+  "evidence_paths": [
+    "CANDIDATE08_FREEZE.json",
+    "CANDIDATE08_BENCHMARK.json",
+    "CANDIDATE08_FUNCTION.json",
+    "CANDIDATE08_LOW23_PLAN.json",
+    "CANDIDATE08_LOW23_RESULT.json",
+    "CERTIFICATE_C07_HISTORICAL_BASELINE.json",
+    "CERTIFICATE_C08_HISTORICAL_DEDUP.json",
+    "CERTIFICATE_C07_120_BASELINE.json",
+    "CERTIFICATE_C08_120_DEDUP.json",
+    "PHASE_C_CERTIFICATE_FINGERPRINTS.json"
+  ],
+  "git_actions": {
+    "staged": false,
+    "committed": false,
+    "pushed": false,
+    "merged": false,
+    "reset": false,
+    "stashed": false,
+    "cleaned": false,
+    "deleted": false
+  },
+  "stop_after_phase_c": true
+}

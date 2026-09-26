@@ -1,0 +1,202 @@
+{
+  "schema": "high_rom_phase_c_runtime_optimization_v1",
+  "status": "RUNTIME_TARGET_NOT_MET",
+  "evidence_category": "offline_simulation_development_not_fresh_qualification",
+  "baseline_checkpoint": "89798cb83af7c8da20e63963495ebbc068489e20",
+  "branch": "codex/full3d-cr12-high-rom-runtime-v1",
+  "worktree": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-high-rom-runtime-v1",
+  "runtime_candidate": "candidate03_same_semantics_uncommitted",
+  "frozen_benchmark_spec_sha256": "70df9b84789a1635956cbd05e26ca84129afbe04689f4d5ff52ad6c3339ab63d",
+  "frozen_regression_plan_sha256": "c1f5e61109ab743f4b48ad08c54b91874b04d8062d3899010f0593a31dab3d23",
+  "runtime_gates": {
+    "planning_compute_p95_ms_max_30": false,
+    "planning_compute_max_ms_max_100": true,
+    "sample_to_activation_p95_ms_max_55": false,
+    "control_cycle_miss_ratio_decreases": false,
+    "zero_stale_activated": true,
+    "function_and_safety_49_of_49": true
+  },
+  "benchmark_8": {
+    "baseline": {
+      "planning_compute_ms": {
+        "count": 139,
+        "mean": 23.605092381294963,
+        "p95": 41.8486292,
+        "max": 44.395
+      },
+      "sample_to_activation_ms": {
+        "count": 139,
+        "mean": 37.88356066906475,
+        "p95": 63.9916541,
+        "max": 69.275333
+      },
+      "control_cycle_misses": 5111,
+      "control_grid_count": 43246,
+      "control_cycle_miss_ratio": 0.1181843407482773,
+      "longest_consecutive_control_misses": 19,
+      "request_outcomes": {
+        "ACTIVATED": 139
+      },
+      "expired_activated": 0
+    },
+    "candidate": {
+      "planning_compute_ms": {
+        "count": 140,
+        "mean": 18.675505664285712,
+        "p95": 33.37249375,
+        "max": 34.619042
+      },
+      "sample_to_activation_ms": {
+        "count": 140,
+        "mean": 33.29087436428571,
+        "p95": 55.60917049999999,
+        "max": 59.668333
+      },
+      "control_cycle_misses": 13021,
+      "control_grid_count": 43239,
+      "control_cycle_miss_ratio": 0.301140174379611,
+      "longest_consecutive_control_misses": 19,
+      "request_outcomes": {
+        "ACTIVATED": 140
+      },
+      "expired_activated": 0
+    }
+  },
+  "matched_49": {
+    "baseline": {
+      "cases": 49,
+      "complete": 49,
+      "planning_compute_ms": {
+        "count": 881,
+        "mean": 22.93137214415437,
+        "p95": 41.847167,
+        "max": 43.886958
+      },
+      "sample_to_activation_ms": {
+        "count": 881,
+        "mean": 37.66932994097616,
+        "p95": 64.125833,
+        "max": 68.873084
+      },
+      "control_cycle_misses": 34521,
+      "control_grid_count": 247642,
+      "control_cycle_miss_ratio": 0.139398809571882,
+      "request_outcomes": {
+        "ACTIVATED": 881
+      },
+      "expired_activated": 0,
+      "task_force_integral_n_s_mean": 1010.985564330077,
+      "task_estimation_q_rmse_deg": [
+        0.010414006677999386,
+        0.010431353384557222
+      ],
+      "summed_host_run_s": 2222.8139938719105
+    },
+    "candidate": {
+      "cases": 49,
+      "complete": 49,
+      "planning_compute_ms": {
+        "count": 874,
+        "mean": 18.484167869565216,
+        "p95": 32.832292,
+        "max": 34.204875
+      },
+      "sample_to_activation_ms": {
+        "count": 874,
+        "mean": 32.999435692219684,
+        "p95": 54.98150405,
+        "max": 60.342083
+      },
+      "control_cycle_misses": 57739,
+      "control_grid_count": 246996,
+      "control_cycle_miss_ratio": 0.2337649192699477,
+      "request_outcomes": {
+        "ACTIVATED": 874
+      },
+      "expired_activated": 0,
+      "task_force_integral_n_s_mean": 818.0580297930953,
+      "task_estimation_q_rmse_deg": [
+        0.010657871686616523,
+        0.010677186621365317
+      ],
+      "summed_host_run_s": 2196.7165511252824,
+      "longest_consecutive_control_misses": 25,
+      "longest_consecutive_control_misses_case": "low_hip_dominant_middle_r01"
+    }
+  },
+  "function_safety": {
+    "denominator": 49,
+    "confirmed": 49,
+    "low_rom": {
+      "total": 23,
+      "confirmed": 23
+    },
+    "high_rom_fixed": {
+      "total": 10,
+      "confirmed": 10
+    },
+    "high_rom_variable": {
+      "total": 16,
+      "confirmed": 16
+    },
+    "minimum_native_dwell_s": 0.5199999999987881,
+    "minimum_native_clearance_m": 0.005951914230867255,
+    "minimum_sampled_sleeve_gap_m": 0.004984982196384383,
+    "maximum_native_force_n": 131.2763535552729,
+    "maximum_native_moment_nm": 18.15886052215423,
+    "maximum_activation_age_ms": 60.342083,
+    "stale_activated": 0
+  },
+  "historical_tail": {
+    "original_full_replay_max_compute_ms": 4174.399,
+    "candidate03_fixed_snapshot_wall_ms": [
+      1885.546,
+      1003.826,
+      644.802
+    ],
+    "full_decision_equivalent_within_1e_10": true,
+    "classification": "conservative_certificate_duration_search_runtime_tail_not_mechanical_infeasibility"
+  },
+  "source_changes": [
+    "cached_readonly_quintic_certificate_grid",
+    "batched_same_grid_quintic_sampling",
+    "reuse_saved_identical_nominal_clearance_certificate"
+  ],
+  "scientific_definition_changed": false,
+  "physical_model_changed": false,
+  "controller_algorithm_changed": false,
+  "auditor": {
+    "role": "one_independent_read_only",
+    "function_and_fixed_snapshot_equivalence": "accepted_for_tested_inputs",
+    "runtime_gate": "rejected",
+    "blocking_findings": [
+      "benchmark_compute_p95_above_30ms",
+      "benchmark_activation_p95_above_55ms",
+      "control_cycle_miss_ratio_increased"
+    ],
+    "no_truth_leakage_in_checked_path": true
+  },
+  "quota": {
+    "limit_id": "codex",
+    "weekly_window_minutes": 10080,
+    "reset_unix_seconds": 1790917420,
+    "start_used_percent": 14,
+    "finish_used_percent": 18,
+    "increment_percentage_points": 4,
+    "stop_expand_at_used_percent": 19,
+    "start_wrap_at_used_percent": 20,
+    "stop_model_dispatch_at_used_percent": 21,
+    "maximum_authorized_used_percent": 22,
+    "outer_project_stop_at_used_percent": 45,
+    "hard_reserve_boundary_used_percent": 50,
+    "inflight_interruption_verified": false
+  },
+  "new_dynamic_execution_count": 64,
+  "new_dynamic_summed_host_s": 2877.1841119171586,
+  "final_regression_summed_host_s": 2196.7165511252824,
+  "raw_root": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-high-rom-runtime-v1/stages/stage5_personalized_motion_learning/results/high_rom_runtime_v1",
+  "next_step": "Continue Stage C with paired-host-load main-thread control-cycle miss diagnosis and optimization, then rerun frozen runtime gate.",
+  "fresh_qualification_run": false,
+  "rl_run": false,
+  "git_final_candidate_committed": false
+}
