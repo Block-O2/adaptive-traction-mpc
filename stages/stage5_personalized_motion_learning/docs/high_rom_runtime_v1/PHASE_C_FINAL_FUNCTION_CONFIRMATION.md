@@ -26,10 +26,10 @@
 
 一位独立只读 Auditor **接受**同版开发确认：复核 173 项哈希、6 个脚本哈希、26 个登记 payload、156 个原始文件 SHA，全部 26 例紧凑评分与一次固定/一次变起点原生节点独立抽查；同版低 ROM 23/23 和正确 C08 gate 也已核对。Auditor 未重算全部 5.7 GB 节点，且明确保留上述长尾与安全限制。未运行仿真、修改文件或操作 Git。
 
-真实 Codex 周额度窗口 10,080 min，reset Unix `1790917420`：本轮起点 **21% used**，封存前读数 **22% used**，新增 **1 个百分点**；+2 即 23% 是开始封存线，24% 是不可主动越过的最大授权，45% 是项目停止线，50% 为硬保留。一次自动审批曾把 22% 误判成起点 +2；凭同一真实窗口及 21→22 的读数复核后，原命令获准继续，没有绕过监测或另起实验路径。无付费服务、Astra、并行仿真 worker 或硬件动作。
+真实 Codex 周额度窗口 10,080 min，reset Unix `1790917420`：本轮起点 **21% used**，最终收口读数 **23% used**，新增 **2 个百分点**；+2 即 23% 是开始封存线，24% 是不可主动越过的最大授权，45% 是项目停止线，50% 为硬保留。一次自动审批曾把 22% 误判成起点 +2；凭同一真实窗口及 21→22 的读数复核后，原命令获准继续，没有绕过监测或另起实验路径。无付费服务、Astra、并行仿真 worker 或硬件动作。
 
 复现入口：`scripts/high_rom_v1/run_final26_batch.py --start <0..25> --count <1|2>`，runner 的确切命令、源码/配置 SHA 和 host 耗时在每例 `HIGH_ROM_CASE_RESULT.json`；汇总命令为 `scripts/high_rom_v1/summarize_final26.py`。26 例合计 host 执行 **1457.1 s**。原低 ROM 与 8 例 gate 的原始证据和摘要仍在 `results/high_rom_runtime_v1/candidate08_low23/`、`candidate08_gate/` 及本目录相应 JSON。
 
-本地 checkpoint 仅逐项 stage 本 runtime/High-ROM campaign 的源码、评估脚本、配置/报告与紧凑证据；约 5.7 GB 原始轨迹继续保留在本工作区，由指纹关联，未放进 Git。checkpoint 的确切 SHA 由 `git rev-parse HEAD`（封存完成后）和最终交付记录；报告自身无法预先包含其所属 commit 的 SHA。未 push、merge、reset、stash、clean 或删除。
+本地 checkpoint 仅逐项 stage 本 runtime/High-ROM campaign 的源码、评估脚本、配置/报告与紧凑证据；约 5.7 GB 原始轨迹继续保留在本工作区，由指纹关联，未放进 Git。实现与证据的本地 checkpoint SHA 为 `534d59ba3c31b28bf4acc7ab65c2850e810ae22a`；其后的额度/SHA 元数据更正另做本地收口提交，最终 HEAD 见交付记录。未 push、merge、reset、stash、clean 或删除。
 
 **阶段 C-close 到此停止。** 不进入 fresh qualification、进一步优化或 RL。
