@@ -1,0 +1,111 @@
+{
+  "schema": "scorer_v2_online_offline_verification_v1",
+  "status": "SCORER_V2_ONLINE_OFFLINE_CONFIRMED",
+  "branch": "codex/full3d-cr12-waypoint-smoothness-v1",
+  "starting_head": "1901d4f6806cf08016495cabace58626ce994181",
+  "case": "p03_rss",
+  "new_development_runs": 1,
+  "raw_run_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/scorer_v2_endpoint_v1/p03_rss_development_01",
+  "post_run_runtime_scorer_v2_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/scorer_v2_endpoint_v1/p03_rss_development_01/SCORER_V2_RUNTIME_RESULT.json",
+  "independent_offline_v1_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/docs/scorer_v2_endpoint_v1/NEW_RUN_SCORER_V1_OFFLINE.json",
+  "independent_offline_v2_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/docs/scorer_v2_endpoint_v1/NEW_RUN_SCORER_V2_OFFLINE.json",
+  "scorer_v1_source_module": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/scripts/high_rom_v1/summarize_phase_b.py",
+  "scorer_v2_source_module": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/scripts/high_rom_v1/score_return_endpoint_v2.py",
+  "exact_required_fields": {
+    "scorer_version": true,
+    "rescore_status": true,
+    "return_endpoint_provenance": true,
+    "true_return": true,
+    "final_true_q_deg": true,
+    "final_true_dq_deg_s": true,
+    "pass": true,
+    "conditions": true,
+    "complete_timestamp": true,
+    "selected_native_sample_timestamp": true
+  },
+  "entire_v2_json_equal": true,
+  "non_return_conditions_equal": true,
+  "v1_reproduced": true,
+  "provenance": {
+    "scorer_version": "scorer-v2-return-physical-commit",
+    "proposal_source_time_s": 23.770000000022485,
+    "proposal_estimated_state_rad_rad_s": [
+      0.08654737211034315,
+      0.15914934687249518,
+      -0.022903862909574395,
+      0.033119596095178616
+    ],
+    "proposal_true_state_evaluation_only_rad_rad_s": [
+      0.0865266803969977,
+      0.15910494351207227,
+      -0.02232707483063576,
+      0.03444745709610864
+    ],
+    "physical_complete_commit_time_s": 23.771750000022493,
+    "physical_complete_commit_host_ns": 1236856150769791,
+    "scorer_time_s": 23.771750000022493,
+    "scorer_true_state_evaluation_only_rad_rad_s": [
+      0.08648924862244485,
+      0.1591650525079193,
+      -0.020689468933355052,
+      0.03427034882578747
+    ],
+    "scorer_v1_time_s": 23.770000000022485,
+    "scorer_v1_true_state_evaluation_only_rad_rad_s": [
+      0.0865266803969977,
+      0.15910494351207227,
+      -0.02232707483063576,
+      0.03444745709610864
+    ],
+    "mapping": "exact last native physics node equals final native boundary and accepted COMPLETE commit",
+    "truth_consumed_by_control": false
+  },
+  "metrics": {
+    "runner_status": "COMPLETE",
+    "scorer_v1_pass": true,
+    "scorer_v2_runtime_pass": true,
+    "scorer_v2_offline_pass": true,
+    "v1_endpoint_q_deg": [
+      4.957613602025322,
+      9.116041762909111
+    ],
+    "v1_endpoint_dq_deg_s": [
+      -1.2792471566681964,
+      1.9736939065650039
+    ],
+    "v2_endpoint_q_deg": [
+      4.955468919323759,
+      9.119485754681914
+    ],
+    "v2_endpoint_dq_deg_s": [
+      -1.1854192502482777,
+      1.9635463501587387
+    ],
+    "goal_dwell_s": 0.9200000000043929,
+    "peak_force_n": 116.62112058968141,
+    "peak_moment_nm": 16.049094435503235,
+    "minimum_session_shank_clearance_m": 0.008494321360180298,
+    "minimum_true_shank_clearance_m": 0.013738409427628242,
+    "minimum_measured_sleeve_gap_m": 0.006182535864491318,
+    "maximum_plan_activation_age_ms": 53.660666,
+    "host_elapsed_s": 41.50004099984653
+  },
+  "frozen_source_config_scorer_no_drift": true,
+  "production_controller_modified_this_turn": false,
+  "quota_start_used_percent": 7,
+  "quota_last_valid_used_percent": 7,
+  "quota_window_minutes": 10080,
+  "quota_resets_at_unix": 1791047434,
+  "tests": {
+    "mapping_unit_tests": "4/4 PASS",
+    "syntax": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "limitations": [
+    "Scorer-v2 runtime artifact is generated immediately after runner exit, outside the control loop.",
+    "One development run only; this is not qualification or broad reliability evidence.",
+    "Control miss is descriptive and is not a status gate for this scorer verification.",
+    "Full native trajectory remains in git-ignored local results and is identified by SHA-256."
+  ],
+  "checkpoint_commit_ref": "HEAD after local checkpoint"
+}

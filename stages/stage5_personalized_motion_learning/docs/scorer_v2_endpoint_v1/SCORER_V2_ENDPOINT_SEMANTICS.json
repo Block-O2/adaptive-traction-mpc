@@ -1,0 +1,157 @@
+{
+  "status": "SCORER_V2_VALIDATED",
+  "category": "development_offline_evaluation_only",
+  "timestamp_utc": "2026-09-27T15:41:06.353409+00:00",
+  "scorer_version": "scorer-v2-return-physical-commit",
+  "scorer_v1_preserved": true,
+  "mapping_rule": "RETURN COMPLETE transition time == accepted commit final_native_time_s == last native node time == final native boundary time, exact float equality; no interpolation or post hoc sample selection",
+  "v1_v2_existing": {
+    "cases": 5,
+    "v1_pass": 3,
+    "v2_pass": 5,
+    "changed_results": 2,
+    "changes_only_endpoint_fields": true,
+    "deterministic_repeated_score": true,
+    "rows": [
+      {
+        "case": "p03_rss",
+        "v1_time_s": 23.74000000002234,
+        "v1_dq_deg_s": [
+          -1.1390744649503826,
+          2.007421041759649
+        ],
+        "v1_pass": false,
+        "commit_time_s": 23.742250000022352,
+        "v2_time_s": 23.742250000022352,
+        "v2_dq_deg_s": [
+          -1.0058482519230185,
+          1.9979473572569428
+        ],
+        "v2_pass": true,
+        "other_task_safety_identical": true
+      },
+      {
+        "case": "p04_rss",
+        "v1_time_s": 23.760000000022437,
+        "v1_dq_deg_s": [
+          -1.277556693395709,
+          2.000546704763214
+        ],
+        "v1_pass": false,
+        "commit_time_s": 23.762000000022446,
+        "v2_time_s": 23.762000000022446,
+        "v2_dq_deg_s": [
+          -1.1642939407375812,
+          1.9874123618135775
+        ],
+        "v2_pass": true,
+        "other_task_safety_identical": true
+      },
+      {
+        "case": "p01_rss",
+        "v1_time_s": 23.705000000022174,
+        "v1_dq_deg_s": [
+          -1.0324489577428202,
+          1.8549320319390417
+        ],
+        "v1_pass": true,
+        "commit_time_s": 23.707000000022184,
+        "v2_time_s": 23.707000000022184,
+        "v2_dq_deg_s": [
+          -0.9146197484104395,
+          1.8488403263048243
+        ],
+        "v2_pass": true,
+        "other_task_safety_identical": true
+      },
+      {
+        "case": "p03_c08",
+        "v1_time_s": 27.500000000040295,
+        "v1_dq_deg_s": [
+          1.0489985277607299,
+          0.9639828838177198
+        ],
+        "v1_pass": true,
+        "commit_time_s": 27.502000000040304,
+        "v2_time_s": 27.502000000040304,
+        "v2_dq_deg_s": [
+          1.0692516021065577,
+          0.9813849388195305
+        ],
+        "v2_pass": true,
+        "other_task_safety_identical": true
+      },
+      {
+        "case": "p04_c08",
+        "v1_time_s": 27.4800000000402,
+        "v1_dq_deg_s": [
+          1.0324211391487166,
+          0.9828473202334016
+        ],
+        "v1_pass": true,
+        "commit_time_s": 27.48250000004021,
+        "v2_time_s": 27.48250000004021,
+        "v2_dq_deg_s": [
+          1.0600584887363158,
+          1.0010368103911156
+        ],
+        "v2_pass": true,
+        "other_task_safety_identical": true
+      }
+    ]
+  },
+  "history": {
+    "scanned": 253,
+    "counts": {
+      "CLEAR_MARGIN": 244,
+      "NEAR_BOUNDARY": 2,
+      "NO_RAW_TRACE": 0,
+      "NON_COMPLETE": 7
+    },
+    "result_changes": 2,
+    "qualification_level_blocker_found": false
+  },
+  "tests": {
+    "unit_tests_passed": 4,
+    "exact_mapping_test_passed": true,
+    "mismatch_rejection_test_passed": true,
+    "five_case_repeated_scoring_passed": true,
+    "cli_offline_endpoint_and_conditions_match": true,
+    "py_compile_passed": true,
+    "git_diff_check_passed": true
+  },
+  "limitations": [
+    "No new development simulation was run after weekly quota rose to 7%; scorer-v2 CLI was verified on retained trace, not a newly produced online artifact.",
+    "The original scorer-v1 FAIL artifacts remain authoritative under their scorer version.",
+    "Formal Round19 qualification was not rescored or reinterpreted."
+  ],
+  "quota": {
+    "u0_used_percent": 6,
+    "end_used_percent": 7,
+    "window_duration_minutes": 10080,
+    "resets_at_unix": 1791047434,
+    "new_simulations": 0
+  },
+  "git": {
+    "branch": "codex/full3d-cr12-waypoint-smoothness-v1",
+    "head": "1901d4f6806cf08016495cabace58626ce994181",
+    "production_modified_this_turn": false,
+    "scorer_v1_modified": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false,
+    "merged": false,
+    "reset": false,
+    "stash": false,
+    "clean": false,
+    "deleted": false,
+    "checkpoint_commit_sha": null
+  },
+  "files": {
+    "scorer_v2": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/scripts/high_rom_v1/score_return_endpoint_v2.py",
+    "test": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/tests/high_rom_v1/test_score_return_endpoint_v2.py",
+    "comparison": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/docs/scorer_v2_endpoint_v1/SCORER_V1_V2_EXISTING_COMPARISON.json",
+    "history": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/docs/scorer_v2_endpoint_v1/HISTORICAL_IMPACT_AUDIT.json"
+  },
+  "fingerprints_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/docs/scorer_v2_endpoint_v1/FINGERPRINTS.json"
+}
