@@ -1,0 +1,7 @@
+# Portability audit — actual WSL execution path
+
+`run_dev_case.py` resolves the repository from `__file__`, takes explicit `--case` and `--output`, and launches the same frozen runtime/options. The new cross-host launcher uses its own `__file__`, repo-relative case paths from the frozen representative manifest, `sys.executable`, a platform temporary directory, and unique ignored output paths. The CR12 XML and seven STL meshes are tracked and load on the Mac reference host.
+
+The only existing-code diff is `docs/safe_fallback_verification_v1/verification_runner.py`: replace a literal `/Users/hankli/...` repository root with `Path(__file__).resolve().parents[4]`, and replace `/private/tmp/fallback-mpl` with `Path(tempfile.gettempdir())/'fallback-mpl'`. No production source, case config, scorer or control semantics changed. Focused portability tests check both runner roots, fingerprint, four case hashes and 24 IDs. Historical Mac absolute paths remain in archived docs/results, where they are provenance, not launch inputs. Historical scorer audit scripts with Mac-local paths are not called by this benchmark.
+
+The launcher refuses a mismatched HEAD, dirty tracked tree, altered frozen source map or case hash, existing output directory, and unregistered run ID. `--list` is a no-simulation preflight. WSL XML import, EGL/GPU and full run timing remain to be checked on WSL; Mac checks do not prove those host properties.

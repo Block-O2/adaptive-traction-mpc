@@ -1,8 +1,8 @@
-import argparse, hashlib, json, os, subprocess, sys
+import argparse, hashlib, json, os, subprocess, sys, tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path('/Users/hankli/Desktop/coding/adaptive-traction-mpc-learning')
+ROOT = Path(__file__).resolve().parents[4]
 STAGE = ROOT / 'stages/stage5_personalized_motion_learning'
 OLD = STAGE / 'docs/safe_fallback_execution_v1'
 BASE = STAGE / 'docs/simulation_research_baseline_v1'
@@ -91,7 +91,7 @@ def run_case(stage,id):
     out=output(stage,id)
     if out.exists(): raise FileExistsError(out)
     cmd=[sys.executable,str(STAGE/'scripts/high_rom_v1/run_dev_case.py'),'--plant-mode',row['plant'],'--case',str(ROOT/row['case']),'--output',str(out),'--host-monitor-limit-s','300']
-    env=os.environ.copy();env.update(PYTHONDONTWRITEBYTECODE='1',MPLCONFIGDIR='/private/tmp/fallback-mpl',OPENBLAS_NUM_THREADS='1')
+    env=os.environ.copy();env.update(PYTHONDONTWRITEBYTECODE='1',MPLCONFIGDIR=str(Path(tempfile.gettempdir())/'fallback-mpl'),OPENBLAS_NUM_THREADS='1')
     result=subprocess.run(cmd,cwd=ROOT,env=env,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
     (DOC/(stage+'_'+id+'_CONSOLE.txt')).write_text(result.stdout)
     save(DOC/(stage+'_'+id+'_COMMAND.json'),dict(command=cmd,returncode=result.returncode,source_fingerprint=p['source_fingerprint'],head=p['head'],timestamp_utc=datetime.now(timezone.utc).isoformat()))
