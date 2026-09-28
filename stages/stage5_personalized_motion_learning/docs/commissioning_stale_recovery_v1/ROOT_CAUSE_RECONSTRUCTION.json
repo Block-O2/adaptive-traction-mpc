@@ -1,0 +1,124 @@
+{
+  "schema": "commissioning_stale_failure_read_only_reconstruction_v1",
+  "classification": "MOVING_COMMISSIONING",
+  "source_head": "a3101121a3c3e9b4ba7a469c224ad9d58fd96bd7",
+  "source_fingerprint": "5a4b1d15f0711c349926cba2ed604906853215edd7cfdee6d188a7bac1c72ae7",
+  "prior_failure_status": "TASK_FAILURE",
+  "case_id": "low_balanced_near_upper_current_rom_r02",
+  "case_sha256": "223bf7c9d4e7ac4558b4e7332f4f8939815f3dade82d95c94a691f186154e1d3",
+  "command_type": "per-5ms loaded Stage-5 CR12 robot torque TRACK command following commissioning quintic reference; not a new model-identification or planner future result",
+  "candidate_reference": {
+    "q_rad": [
+      0.3533334137392453,
+      0.42858419664082886
+    ],
+    "dq_rad_s": [
+      0.10804731927358313,
+      -0.06966723447095992
+    ],
+    "ddq_rad_s2": [
+      -0.2782151155627292,
+      0.17938878835296337
+    ],
+    "segment_index": 2,
+    "segment_target_q_rad": [
+      0.3731396065022543,
+      0.41581347095809607
+    ],
+    "segment_duration_s": 1.5
+  },
+  "command_torque_nm": [
+    42.34734465778777,
+    122.84429444812648,
+    30.257954727884737,
+    -10.949073710452362,
+    -8.218271425108886,
+    20.63779401645805
+  ],
+  "supervisor_mode": "TRACK",
+  "source_sample_time_s": 4.094999999999259,
+  "source_capture_ns": 1295201270309666,
+  "command_construction_finish_ns": 1295201311362583,
+  "command_ready_ns": 1295201311434750,
+  "effective_activation_ns": 1295201311559666,
+  "command_ready_source_age_ms": 41.125084,
+  "write_guard": "max(clock,effective_activation_ns)-source_capture_ns > 100000000 ns",
+  "write_rejection_host_ns_lower_bound_exclusive": 1295201370309666,
+  "write_rejection_host_ns_exact": null,
+  "write_rejection_timestamp_limit": "not recorded; exact timestamp cannot be reconstructed from retained trace",
+  "applied": false,
+  "cancelled_reason": "STALE_COMMAND_SOURCE_MAXIMUM_AGE",
+  "human_at_sample": {
+    "estimated_q_dq_rad_rad_s": [
+      0.35831450988035973,
+      0.4542691773378806,
+      0.12217345689083284,
+      -0.09334670433929758
+    ],
+    "simulation_truth_evaluation_only_q_dq_rad_rad_s": [
+      0.36324443310634363,
+      0.4591997757847168,
+      0.12275842232986821,
+      -0.09272941542466792
+    ]
+  },
+  "robot_at_sample": {
+    "q_rad": [
+      -2.058042321305423,
+      -0.898568971688012,
+      2.3104162787929106,
+      -0.48826690415655366,
+      -1.6283588763708567,
+      1.6662253334178505
+    ],
+    "dq_rad_s": [
+      0.0673584107862451,
+      0.2260667627641662,
+      0.06207691306502878,
+      0.07113315186180316,
+      0.1498252149568128,
+      -0.13401904622655347
+    ]
+  },
+  "prior_active_command": {
+    "receipt_index": 803,
+    "source_sample_time_s": 4.089999999999253,
+    "apply_ns": 1295201271105041,
+    "torque_nm": [
+      42.351375613721565,
+      122.91913569310549,
+      30.341698549365702,
+      -10.98621131350573,
+      -8.227561450809702,
+      20.652447244715344
+    ],
+    "end_physics_s": 4.2884999999994955
+  },
+  "failed_attempt": {
+    "start_physics_s": 4.097499999999262,
+    "end_physics_s": 4.136249999999309,
+    "native_steps": 155,
+    "exception": "RuntimeError:STALE_COMMAND_SOURCE_MAXIMUM_AGE"
+  },
+  "planner_context": {
+    "last_commissioning_selection_request_id": 2,
+    "last_commissioning_selection_source_s": 3.039999999999675,
+    "last_commissioning_selection_compute_finish_ns": 1295200217742541,
+    "last_commissioning_selection_activation_age_ms": 5.686667,
+    "separate_future_for_failed_command": false
+  },
+  "motion_evidence": "nonzero Human reference dq, estimated Human dq, CR12 dq, and prior TRACK torque; this is moving commissioning, not a stationary hold",
+  "abort_chain": [
+    "WallPhysicsSession.apply rejects source age before plant write",
+    "_execute_interval records exception and rethrows",
+    "commissioning loop has no stale-command recovery catch",
+    "run_dev_case reports EXCEPTION and task incomplete"
+  ],
+  "recovery_primitives": {
+    "task_safe_fallback": "TASK High-ROM pass-through only, constructed after commissioning fit; no commissioning latch",
+    "track_brake": "reactive loaded safety BRAKE requiring a new observation and command computation; no prevalidated mid-segment stop or resume boundary",
+    "commissioning_reference": "registered rest-to-rest quintic with geometric/kinematic check, but no independent safe stop/hold execution during a host stall"
+  },
+  "exact_100ms_boundary_observation": "command write guard uses >100000000 ns; exactly 100 ms would not be rejected by this guard, while plan activation has a separate >=100 ms rule",
+  "raw_artifacts_path": "stages/stage5_personalized_motion_learning/results/safe_fallback_verification_v1/development49/low_balanced_near_upper_current_rom_r02"
+}
