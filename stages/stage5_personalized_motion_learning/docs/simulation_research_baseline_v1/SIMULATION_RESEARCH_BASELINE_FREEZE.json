@@ -1,0 +1,119 @@
+{
+  "schema": "simulation_research_baseline_freeze_result_v1",
+  "status": "SIMULATION_RESEARCH_BASELINE_NOT_FROZEN",
+  "finished_utc": "2026-09-28T10:30:57.609290+00:00",
+  "branch": "codex/adaptive-traction-learning-baseline",
+  "head": "5d977ab321af72d4ddb8fef919449c37ad67a4f9",
+  "source_fingerprint": "920b030d191eed8286aad355304c114bfc459a58ae6972dbdd1666f1c935103b",
+  "source_file_count": 178,
+  "source_drift_count": 0,
+  "production_source_modified": false,
+  "representative": {
+    "completed": 8,
+    "passed": 8,
+    "denominator": 8
+  },
+  "development49": {
+    "completed": 36,
+    "passed": 35,
+    "denominator": 49,
+    "low_rom": {
+      "completed": 23,
+      "passed": 23
+    },
+    "high_rom_fixed": {
+      "completed": 10,
+      "passed": 10
+    },
+    "high_rom_variable": {
+      "completed": 3,
+      "passed": 2
+    },
+    "not_run": [
+      "high_rom_function_fresh_04_v1",
+      "high_rom_function_fresh_05_v1",
+      "high_rom_function_fresh_06_v1",
+      "high_rom_function_fresh_07_v1",
+      "high_rom_function_fresh_08_v1",
+      "high_rom_function_fresh_09_v1",
+      "high_rom_function_fresh_10_v1",
+      "high_rom_function_fresh_11_v1",
+      "high_rom_function_fresh_12_v1",
+      "high_rom_function_fresh_13_v1",
+      "high_rom_function_fresh_14_v1",
+      "high_rom_function_fresh_15_v1",
+      "high_rom_function_fresh_16_v1"
+    ]
+  },
+  "failure": {
+    "case_id": "high_rom_function_fresh_03_v1",
+    "case_sha256": "dd8867714e3dc5b36a2814ef629c777af9e2bc4caeeca10e1940ce7e76d2e3b5",
+    "classification": "TASK_LOGIC_FAILURE",
+    "abort_reason": "PASS_THROUGH_PREFETCH_NOT_READY_AT_ENDPOINT",
+    "phase": "RETURN",
+    "abort_simulation_time_s": 24.42000000002559,
+    "prefetch_source_simulation_time_s": 24.375000000025373,
+    "prefetch_compute_ms": 191.428042,
+    "prefetch_outcome": "CANCELLED/TASK_PHASE_CHANGED",
+    "reason": "pass-through segment reached endpoint while its asynchronous prefetch future was unfinished; production code explicitly aborted",
+    "return_target_deg": [
+      6.0,
+      11.0
+    ],
+    "last_saved_true_q_deg": [
+      29.032155860647485,
+      34.71438751597828
+    ],
+    "last_saved_true_dq_deg_s": [
+      -9.952711772800889,
+      -19.164009273981137
+    ],
+    "raw_path": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/simulation_research_baseline_v1/development49/high_rom_function_fresh_03_v1"
+  },
+  "observed_pass_metrics": {
+    "minimum_continuous_dwell_s": 0.5299999999987648,
+    "maximum_reference_near_stop_s": 0.3000000000013969,
+    "maximum_actual_near_stop_s": 0.21000000000100272,
+    "maximum_peak_force_n": 131.20732114430743,
+    "maximum_peak_moment_nm": 18.16361545458999,
+    "minimum_session_clearance_m": 0.0009156983881183607,
+    "maximum_control_miss_ratio": 0.15745222929936306,
+    "stale_activated": 0,
+    "planning_compute_p95_ms_range": [
+      19.03599725,
+      32.457028550000004
+    ],
+    "activation_p95_ms_range": [
+      36.77099100000001,
+      54.966529200000004
+    ],
+    "cases_compute_p95_above_30ms": 9,
+    "cases_activation_p95_above_55ms": 0
+  },
+  "runtime_claim": "characterization only; prior RSS_RUNTIME_QUALIFICATION_NOT_MET and protocol-v4 failure remain authoritative",
+  "quota": {
+    "start_used_percent": 23,
+    "end_used_percent": 24,
+    "account_wide_delta_percentage_points": 1,
+    "resets_at_unix_s": 1791047434,
+    "window_minutes": 10080,
+    "note": "Shared account change, not attributed to this task"
+  },
+  "auditor": {
+    "invoked": false,
+    "reason": "8+49 did not pass; user requires audit only after both stages pass"
+  },
+  "learning_execution_contract_frozen": false,
+  "checkpoint_commit": null,
+  "git_actions": {
+    "staged": false,
+    "committed": false,
+    "pushed": false,
+    "merged": false,
+    "reset": false,
+    "stashed": false,
+    "cleaned": false,
+    "deleted": false
+  },
+  "next_action": "In a separately authorized development revision, diagnose the pass-through prefetch deadline/continuation behavior before any new frozen matrix."
+}
