@@ -1,0 +1,472 @@
+{
+  "schema": "runtime_acceptance_protocol_v4_matched_session",
+  "status": "RUNTIME_ACCEPTANCE_PROTOCOL_FROZEN",
+  "category": "development_simulation_runtime_protocol_not_qualification",
+  "version": "v4",
+  "pre_rss_frozen": true,
+  "source_inputs": {
+    "phase1_fault_summary_sha256": "07143f420143aa06df9341b3237d080dc6267330053f476605acccbb836db0a3",
+    "phase2_12_run_prereg_sha256": "2bfb35a9745b3b9f33dfa2a305af8ef84ad218a96c66e1846eb1619711bc31ca",
+    "phase2_12_run_scores_sha256": "7fdd08b6237fb70c6cac6136cded3f93369ab5a646b9e194d37f6b531c898a62",
+    "pooled_design_draft_sha256": "a92e1f5cdb7ae0c7e63bf20819a0e0b84e8903afaedc8e2580d594470fea25bd",
+    "previous_24_C08_summary_sha256": "75e7edde6fc4fbf5e686b72d640af80aef0efecf69604104d67acd89ef25f65e",
+    "previous_high100_C08_report_sha256": "788ed71501ac8044fc504bdef0dda89c7a51cf4e00bf0c5bf68d63cbcdd75f8f",
+    "extra_C08_prereg_sha256": "2bfb35a9745b3b9f33dfa2a305af8ef84ad218a96c66e1846eb1619711bc31ca",
+    "extra_C08_scores_sha256": "7fdd08b6237fb70c6cac6136cded3f93369ab5a646b9e194d37f6b531c898a62",
+    "eight_case_freeze_sha256": "9e36e6a9e9932c7e17d50c6a57f91b507c4859c6b925afb9eb4a8718a8bb012b"
+  },
+  "eight_case_manifest": [
+    {
+      "id": "low_ordinary",
+      "plant": "low_rom",
+      "case": "configs/high_rom_v1/low_rom_regression_cases/balanced_ordinary_r01.json",
+      "baseline": "low_rom_regression/balanced_ordinary_r01_attempt_01",
+      "case_sha256": "ceb33e9eeb243d49ad4bd1ad0a17637243219f3e058f4da0aaf2ed9fbf975b2d"
+    },
+    {
+      "id": "low_near_upper",
+      "plant": "low_rom",
+      "case": "configs/high_rom_v1/low_rom_regression_cases/hip_dominant_near_upper_current_rom_r02.json",
+      "baseline": "low_rom_regression/hip_dominant_near_upper_current_rom_r02_attempt_01",
+      "case_sha256": "79ed7011765b593bb55bef72a9f8ce33db2eaa01819687e9a6834fd4ca865136"
+    },
+    {
+      "id": "high_100_sync",
+      "plant": "high_rom",
+      "case": "configs/high_rom_v1/high_rom_nominal_sync_100_v1.json",
+      "baseline": "development/nominal_sync_100_attempt_02",
+      "case_sha256": "478d94f0cf1def23916e11ff7b249a4f7b92bfe544cce21a4045c53fe226d960"
+    },
+    {
+      "id": "high_110_sync",
+      "plant": "high_rom",
+      "case": "configs/high_rom_v1/high_rom_nominal_sync_110_v1.json",
+      "baseline": "development/nominal_sync_110_attempt_01",
+      "case_sha256": "12f74755846f9920c3688dfa37ee799bc632304962ae64c667d832dfb1881c58"
+    },
+    {
+      "id": "high_120_sync",
+      "plant": "high_rom",
+      "case": "configs/high_rom_v1/high_rom_nominal_sync_120_v1.json",
+      "baseline": "development/nominal_sync_120_attempt_01",
+      "case_sha256": "d9f4d636b98db5792cf4b50915f4509bf2274c1c80764d6d8629bf22e3ae9b96"
+    },
+    {
+      "id": "high_120_hip",
+      "plant": "high_rom",
+      "case": "configs/high_rom_v1/high_rom_matrix_nominal_hip_v1.json",
+      "baseline": "development/matrix_nominal_hip_attempt_02",
+      "case_sha256": "8b22c034e25c4519d96ee671bdef012da2b34be7f3513cbb8d83fdc6ac3486a3"
+    },
+    {
+      "id": "high_120_start_6_11",
+      "plant": "high_rom",
+      "case": "configs/high_rom_v1/high_rom_function_fresh_01_v1.json",
+      "baseline": "variable_start_v1/trial_fresh_01",
+      "case_sha256": "002c7bd58597ce325e6fc8800517484ff60d8286c964201379af4a5a2edf5d59"
+    },
+    {
+      "id": "high_120_start_8_13",
+      "plant": "high_rom",
+      "case": "configs/high_rom_v1/high_rom_function_fresh_16_v1.json",
+      "baseline": "variable_start_v1/case_16",
+      "case_sha256": "80d1d0eafabc690b680a699c459ea29c99c4ec64cee275beb2eded38e61d3083"
+    }
+  ],
+  "runtime_sentinels": [
+    "low_ordinary",
+    "high_100_sync",
+    "high_120_sync",
+    "high_120_hip",
+    "high_120_start_8_13"
+  ],
+  "baseline_cohort_policy": "Use six C08 repeats executed under one contiguous host protocol block per sentinel. For high_100_sync and high_120_hip use the new preregistered six-run block; for the other three use the earlier expanded-baseline six-run block. The older volatile C08 runs remain retained as between-session drift evidence and invalidate any single-rollout 11.82% absolute gate. Cohort choice uses C08 data only and was frozen before new RSS matched validation.",
+  "baseline_cohorts": {
+    "low_ordinary": {
+      "source": "prior_24_case_C08_expansion",
+      "runs": [
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r01_low_ordinary",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r08_low_ordinary",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r10_low_ordinary",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r15_low_ordinary",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r17_low_ordinary",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r24_low_ordinary"
+      ]
+    },
+    "high_100_sync": {
+      "source": "new_preregistered_C08_extra_block",
+      "runs": [
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e01_high_100_sync",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e04_high_100_sync",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e05_high_100_sync",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e08_high_100_sync",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e09_high_100_sync",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e12_high_100_sync"
+      ]
+    },
+    "high_120_sync": {
+      "source": "prior_24_case_C08_expansion",
+      "runs": [
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r03_high_120_sync",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r06_high_120_sync",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r12_high_120_sync",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r13_high_120_sync",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r18_high_120_sync",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r23_high_120_sync"
+      ]
+    },
+    "high_120_hip": {
+      "source": "new_preregistered_C08_extra_block",
+      "runs": [
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e02_high_120_hip",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e03_high_120_hip",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e06_high_120_hip",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e07_high_120_hip",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e10_high_120_hip",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/overnight_rl_ready_v1/phase2_extra_c08/e11_high_120_hip"
+      ]
+    },
+    "high_120_start_8_13": {
+      "source": "prior_24_case_C08_expansion",
+      "runs": [
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r04_high_120_start_8_13",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r05_high_120_start_8_13",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r11_high_120_start_8_13",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r14_high_120_start_8_13",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r20_high_120_start_8_13",
+        "/Users/hankli/Desktop/coding/adaptive-traction-mpc-waypoint-smoothness-v1/stages/stage5_personalized_motion_learning/results/c08_runtime_baseline_expansion_v1/r21_high_120_start_8_13"
+      ]
+    }
+  },
+  "c08_only_noise_envelopes": {
+    "low_ordinary": {
+      "miss_ratio_pp": {
+        "n": 6,
+        "median": 4.578818576117537,
+        "range": [
+          4.3125,
+          18.144909431605246
+        ],
+        "iqr": 0.37383143737214386,
+        "c08_self_split_q90_abs_median_difference": 0.4051543005745497,
+        "partition_count": 20
+      },
+      "cycle_p95_ms": {
+        "n": 6,
+        "median": 6.2319961,
+        "range": [
+          5.976178600000001,
+          10.808541399999996
+        ],
+        "iqr": 0.25021267499999933,
+        "c08_self_split_q90_abs_median_difference": 0.32564749999999965,
+        "partition_count": 20
+      },
+      "cycle_p99_ms": {
+        "n": 6,
+        "median": 13.494682175000001,
+        "range": [
+          12.613701839999912,
+          14.20704984
+        ],
+        "iqr": 1.1730412400000123,
+        "c08_self_split_q90_abs_median_difference": 1.4397888700000205,
+        "partition_count": 20
+      },
+      "longest_consecutive_miss_ms": {
+        "n": 6,
+        "median": 75.0,
+        "range": [
+          70.0,
+          85.0
+        ],
+        "iqr": 0.0,
+        "c08_self_split_q90_abs_median_difference": 0.0,
+        "partition_count": 20
+      }
+    },
+    "high_100_sync": {
+      "miss_ratio_pp": {
+        "n": 6,
+        "median": 5.97921363068679,
+        "range": [
+          5.094614264919942,
+          6.859534206695779
+        ],
+        "iqr": 0.9769003216326313,
+        "c08_self_split_q90_abs_median_difference": 1.2758253612732426,
+        "partition_count": 20
+      },
+      "cycle_p95_ms": {
+        "n": 6,
+        "median": 6.064186474999998,
+        "range": [
+          5.847641999999999,
+          6.475885249999999
+        ],
+        "iqr": 0.22657867499999895,
+        "c08_self_split_q90_abs_median_difference": 0.290153049999998,
+        "partition_count": 20
+      },
+      "cycle_p99_ms": {
+        "n": 6,
+        "median": 14.49047615,
+        "range": [
+          13.85403705,
+          14.916064999999978
+        ],
+        "iqr": 0.3991799625000052,
+        "c08_self_split_q90_abs_median_difference": 0.5144703100000072,
+        "partition_count": 20
+      },
+      "longest_consecutive_miss_ms": {
+        "n": 6,
+        "median": 85.0,
+        "range": [
+          80.0,
+          90.0
+        ],
+        "iqr": 7.5,
+        "c08_self_split_q90_abs_median_difference": 10.0,
+        "partition_count": 20
+      }
+    },
+    "high_120_sync": {
+      "miss_ratio_pp": {
+        "n": 6,
+        "median": 5.760971927496398,
+        "range": [
+          4.361473649430034,
+          6.647970966677664
+        ],
+        "iqr": 0.5471457408205147,
+        "c08_self_split_q90_abs_median_difference": 0.7081521698810223,
+        "partition_count": 20
+      },
+      "cycle_p95_ms": {
+        "n": 6,
+        "median": 6.274360399999999,
+        "range": [
+          6.0557019,
+          6.444833
+        ],
+        "iqr": 0.05469016249999825,
+        "c08_self_split_q90_abs_median_difference": 0.062832949999998,
+        "partition_count": 20
+      },
+      "cycle_p99_ms": {
+        "n": 6,
+        "median": 14.487122224999998,
+        "range": [
+          13.201025999999999,
+          14.922823460000004
+        ],
+        "iqr": 0.21281143250000056,
+        "c08_self_split_q90_abs_median_difference": 0.25834139999999906,
+        "partition_count": 20
+      },
+      "longest_consecutive_miss_ms": {
+        "n": 6,
+        "median": 85.0,
+        "range": [
+          80.0,
+          85.0
+        ],
+        "iqr": 3.75,
+        "c08_self_split_q90_abs_median_difference": 5.0,
+        "partition_count": 20
+      }
+    },
+    "high_120_hip": {
+      "miss_ratio_pp": {
+        "n": 6,
+        "median": 6.512739301276083,
+        "range": [
+          5.285832642916321,
+          7.748344370860927
+        ],
+        "iqr": 1.3444074121369747,
+        "c08_self_split_q90_abs_median_difference": 1.492459602709748,
+        "partition_count": 20
+      },
+      "cycle_p95_ms": {
+        "n": 6,
+        "median": 6.0373095249999995,
+        "range": [
+          5.8622166,
+          8.29527940000003
+        ],
+        "iqr": 0.27102676249999913,
+        "c08_self_split_q90_abs_median_difference": 0.31165869999999973,
+        "partition_count": 20
+      },
+      "cycle_p99_ms": {
+        "n": 6,
+        "median": 14.852409819999998,
+        "range": [
+          14.245224999999996,
+          15.027875420000008
+        ],
+        "iqr": 0.5712738799999872,
+        "c08_self_split_q90_abs_median_difference": 0.6939241199999824,
+        "partition_count": 20
+      },
+      "longest_consecutive_miss_ms": {
+        "n": 6,
+        "median": 85.0,
+        "range": [
+          80.0,
+          95.0
+        ],
+        "iqr": 3.75,
+        "c08_self_split_q90_abs_median_difference": 5.0,
+        "partition_count": 20
+      }
+    },
+    "high_120_start_8_13": {
+      "miss_ratio_pp": {
+        "n": 6,
+        "median": 6.590248684617679,
+        "range": [
+          5.808503515232675,
+          7.5765178123432015
+        ],
+        "iqr": 1.0968930470297957,
+        "c08_self_split_q90_abs_median_difference": 1.3744178346142775,
+        "partition_count": 20
+      },
+      "cycle_p95_ms": {
+        "n": 6,
+        "median": 6.432346874999999,
+        "range": [
+          6.2440506000000005,
+          8.612550199999962
+        ],
+        "iqr": 1.5210955624999887,
+        "c08_self_split_q90_abs_median_difference": 1.9477919999999864,
+        "partition_count": 20
+      },
+      "cycle_p99_ms": {
+        "n": 6,
+        "median": 14.698774784999994,
+        "range": [
+          14.47932064,
+          14.95453383
+        ],
+        "iqr": 0.2638830850000069,
+        "c08_self_split_q90_abs_median_difference": 0.3345530100000058,
+        "partition_count": 20
+      },
+      "longest_consecutive_miss_ms": {
+        "n": 6,
+        "median": 85.0,
+        "range": [
+          80.0,
+          90.0
+        ],
+        "iqr": 0.0,
+        "c08_self_split_q90_abs_median_difference": 0.0,
+        "partition_count": 20
+      }
+    }
+  },
+  "between_session_variability_retained": {
+    "high_100_sync_all_12_miss_range_pp": [
+      4.9299617973440055,
+      18.65727002967359
+    ],
+    "high_120_hip_all_12_miss_range_pp": [
+      5.285832642916321,
+      28.968713789107763
+    ],
+    "pooled_draft": "RUNTIME_ACCEPTANCE_PROTOCOL_FROZEN.json, marked superseded rather than deleted"
+  },
+  "margin_derivation": "For each metric, enumerate all 20 disjoint 3-vs-3 partitions of six C08 runs in the same host-protocol block; take absolute median difference and freeze its 90th percentile. This estimates within-block C08 sampling noise, not acceptable physical degradation. RSS outcomes are not used.",
+  "matched_runtime_protocol": {
+    "pairs_per_sentinel": 6,
+    "run_order_each_sentinel": [
+      "C08",
+      "RSS",
+      "RSS",
+      "C08",
+      "C08",
+      "RSS",
+      "RSS",
+      "C08",
+      "C08",
+      "RSS",
+      "RSS",
+      "C08"
+    ],
+    "case_order": [
+      "low_ordinary",
+      "high_100_sync",
+      "high_120_sync",
+      "high_120_hip",
+      "high_120_start_8_13"
+    ],
+    "other_three_case_ids": [
+      "low_near_upper",
+      "high_110_sync",
+      "high_120_start_6_11"
+    ],
+    "warmup": "existing process prewarm; 5 s idle before every run",
+    "host": "same macOS host and default priority, sequential single simulation, 1 Hz host-load and process monitor; no cherry-picked quiet periods",
+    "logging": "same native trajectory/request/control-poll/command-receipt payload on both; RSS-specific provenance additionally retained",
+    "functional_denominator": "all eight distinct RSS cases; each matched sentinel run retained for task/safety",
+    "runtime_denominator": "six matched C08/RSS pairs for each of five sentinel cases; no replacement run"
+  },
+  "absolute_gates_unchanged": {
+    "planning_compute_p95_ms_max": 30.0,
+    "sample_to_activation_p95_ms_max": 55.0,
+    "stale_activated_max": 0,
+    "plan_age_ms_exclusive": 100.0,
+    "apply_to_each_run_of_both_versions": true
+  },
+  "control_execution_decision": {
+    "paired_metrics": [
+      "miss_ratio_pp",
+      "cycle_p95_ms",
+      "cycle_p99_ms",
+      "longest_consecutive_miss_ms"
+    ],
+    "paired_delta": "RSS minus matched adjacent C08, six signed deltas per sentinel and metric",
+    "noninferiority": "For each sentinel and paired metric, median of six RSS-C08 deltas must not exceed the frozen C08-only q90 split-half envelope.",
+    "directional_consistency": "Report count of positive deltas. Six of six positive is an attribution alert; investigate before accepting even if the numeric margin passes.",
+    "single_run_11_82_percent_gate": "retired for future development decisions, historical evidence unchanged",
+    "longest_miss": "Compare full-session missed-control-grid streaks but never equate nominal missed-grid duration to actual command starvation.",
+    "command_gap": "Report every TASK and full-session maximum from actual applied-command receipts, plus paired deltas. Any TASK command gap beyond the 107.75 ms Phase1 observed response envelope pauses acceptance for additional physical evidence. This is an evidence coverage trigger, not a safe gap threshold. The high_100_sync TASK fault response was not directly studied.",
+    "fault_response": "Phase1 24/24 original task/safety PASS at four fixed OUTBOUND fault locations with 0-100 ms hold; no continuous-time, hardware, clinical or unattended-operation claim."
+  },
+  "smoothness_task_safety": {
+    "scorer": "scorer-v2 physical COMPLETE native-state endpoint",
+    "all_eight": "unchanged original task and safety; no fail replacement",
+    "high_rom_120_reference_near_stop_s_max": 0.175,
+    "low_rom_policy": "no regression beyond earlier unchanged low-ROM development reference near-stop",
+    "low_rom_baseline_s": {
+      "low_ordinary": 0.145,
+      "low_near_upper": 0.185
+    },
+    "low_rom_comparison_tolerance_s": 0.005,
+    "splice_q_dq_ddq": "C2 continuity without regression, evaluated at actual splice"
+  },
+  "stop_and_retry": {
+    "source_or_case_drift": "stop; preserve all completed results",
+    "run_task_safety_stale_or_absolute_gate_fail": "preserve FAIL; one authorized local plumbing repair at most, then restart affected frozen validation under a new source version",
+    "paired_noninferiority_or_direction_fail": "preserve FAIL; one authorized local plumbing repair at most, no cost/search/safety/task changes",
+    "missing_host_or_command_receipts": "evidence invalid; stop, do not impute",
+    "no_result_based_case_replacement": true
+  },
+  "estimated_simulation_count": {
+    "eight_case_representative": 63,
+    "eight_case_calculation": "5 sentinels x (6 C08 + 6 RSS) + 3 remaining RSS = 63",
+    "later_49_case_function_safety": 49,
+    "later_49_case_runtime_repeats": 0
+  },
+  "claim_boundary": "Development simulation non-inferiority relative to frozen C08 under recorded host conditions; not a safe starvation threshold, hard-real-time guarantee or qualification.",
+  "limitations": [
+    "Six repeats per case provide an engineering comparison, not a formal high-confidence statistical guarantee.",
+    "Between-session C08 miss drift remains large; if the new paired C08 cohort is itself unstable, classify runtime acceptance inconclusive and preserve all runs.",
+    "Phase1 faults cover only one OUTBOUND location per four cases and do not define a safe starvation duration."
+  ]
+}

@@ -73,9 +73,12 @@ from ..architecture_recovery_v2.phase3_human_waypoint import (
 )
 from .online_planning import PlanLifecycle, snapshot_task_call
 from .wall_physics import WallPhysicsSession
-from .activation_validation import (validate_activation, SensorSupportedTaskClock,
+from .activation_validation import (validate_activation, validate_rolling_composite,
+                                    clearance_geometry_signature,
+                                    SensorSupportedTaskClock,
                                     reference_safe_task_transition, causal_return_projection,
                                     return_finalization_reason)
+from .rolling_suffix_splice import RollingSuffixCompositeSchedule
 from .terminal_commit import attempt_return_commit, terminal_sample_evidence
 from .applied_reference_history import AppliedReferenceMotionHistory
 from .receipt_reference_governor import ReceiptReferenceGovernor, velocity_box
@@ -451,6 +454,8 @@ def persist_runtime_artifacts(output_dir: Path, capture: dict[str, Any]) -> None
         "execution_attempts": runtime.get("execution_attempts", []),
         "reference_governor_records": runtime.get("reference_governor_records", []),
         "activation_validations": runtime.get("activation_validations", []),
+        "future_handoff_bridges": runtime.get("future_handoff_bridges", []),
+        "rolling_splice_events": runtime.get("rolling_splice_events", []),
         "return_projection_guards": runtime.get("return_projection_guards", []),
         "return_projection_finalization": runtime.get("return_projection_finalization"),
         "return_commit_attempts": runtime.get("return_commit_attempts", []),
@@ -868,6 +873,9 @@ def _execute_interval(
                 if float(plant.data.time) > validation["phase_deadline_physics_s"]-validation["schedule_duration_s"]+1e-12:
                     runtime["plan_lifecycle"].finish(activation_request, "REJECTED", "ACTUAL_REMAINING_PHASE_TIME")
                     raise RuntimeError("ACTUAL_REMAINING_PHASE_TIME")
+            splice_guard = runtime.pop("suffix_splice_apply_guard", None)
+            if splice_guard is not None and not splice_guard():
+                raise RuntimeError("ROLLING_SUFFIX_STALE_AT_APPLY")
         if wall is not None and actuation_enabled:
             if decision.mode == "TRACK":
                 attempt["actual_reference_motion_check"] = contract.reference_motion_history.validate_at_apply(
@@ -2111,6 +2119,10 @@ def _run_executed_case(
     planner.robust_terminal_center = bool(recovery_options.get("robust_terminal_center", False))
     planner.robust_hold_reference = bool(recovery_options.get("robust_hold_reference", False))
     planner.causal_tracking_offset_clearance = bool(recovery_options.get("causal_tracking_offset_clearance", False))
+    # This branch's High-ROM development candidate keeps the existing q lattice
+    # and cost, but allows intermediate waypoints to be passed with bounded dq.
+    smooth_waypoint_mode = (qualification_case or {}).get("research_model") == "high_rom_v1"
+    planner.pass_through_waypoints = smooth_waypoint_mode
     adaptive_planner = AdaptiveHumanWaypointHWMPCV22(planner)
 
     recovery_result = None
@@ -2155,6 +2167,12 @@ def _run_executed_case(
 
     active_schedule = None
     async_pending: dict[str, Any] | None = None
+    prefetch_attempt_schedule = None
+    future_handoff_bridges: list[dict[str, Any]] = []
+    runtime["future_handoff_bridges"] = future_handoff_bridges
+    rolling_splice_events: list[dict[str, Any]] = []
+    runtime["rolling_splice_events"] = rolling_splice_events
+    rolling_splice_pending = None
     task_expiry_retries = 0
     if runtime.get("wall_session") is not None:
         runtime["sensor_task_clock"] = SensorSupportedTaskClock(
@@ -2412,6 +2430,10 @@ def _run_executed_case(
                     trigger="causal_return_actual_completion_commit")
             phase_previous = task_state.phase
             active_schedule = None
+            prefetch_attempt_schedule = None
+            if rolling_splice_pending is not None and not rolling_splice_pending["spliced"]:
+                rolling_splice_pending["event"]["outcome"] = "CANCELLED_PHASE_CHANGED"
+            rolling_splice_pending = None
             active_decision_index = None
             planner.reset_phase()
             if online_timing and async_pending is not None:
@@ -2488,11 +2510,23 @@ def _run_executed_case(
             and np.all(np.abs(state[:2] - active_schedule.candidate.q_waypoint_rad) <= np.asarray(spec.joint_angle_completion_tolerance_rad))
             and np.all(np.abs(state[2:] - active_schedule.candidate.dq_waypoint_rad_s) <= np.asarray(spec.joint_velocity_completion_tolerance_rad_s))
         )
+        stationary_terminal_reference = bool(
+            smooth_waypoint_mode and active_schedule is not None and schedule_done
+            and task_state.phase in (TaskPhase.OUTBOUND, TaskPhase.RETURN)
+            and in_original_terminal_box(spec, active_schedule.candidate.q_waypoint_rad,
+                spec.start_return_target_rad if task_state.phase is TaskPhase.RETURN
+                else spec.outbound_goal_target_rad)
+            and np.allclose(active_schedule.candidate.dq_waypoint_rad_s, 0.0,
+                            atol=1e-10, rtol=0.0)
+        )
         if online_timing and async_pending is not None:
             request = async_pending["request"]
             future = async_pending["future"]
             if lifecycle.expired(request):
                 lifecycle.discard(request, "EXPIRED", "STALE_PLAN_MAXIMUM_AGE")
+                if async_pending.get("pass_through_prefetch"):
+                    task_state = abort_episode(task_state, "PASS_THROUGH_PREFETCH_EXPIRED")
+                    continue
                 if runtime.get("wall_session") is None:
                     task_state = abort_episode(task_state, "STALE_PLAN_MAXIMUM_AGE")
                     continue
@@ -2508,7 +2542,11 @@ def _run_executed_case(
                     if task_expiry_retries >= 3:
                         task_state = abort_episode(task_state, "TASK_EXPIRED_REQUEST_RETRY_LIMIT")
                         continue
-            if async_pending is not None and not async_pending.get("expired", False) and future.done():
+            if (async_pending is not None and not async_pending.get("expired", False)
+                    and future.done()
+                    and (not async_pending.get("pass_through_prefetch") or schedule_done
+                         or (async_pending.get("handoff_bridge_schedule") is not None
+                             and active_schedule is async_pending["handoff_bridge_schedule"]))):
                 lifecycle.mark(request, "result_collected_ns")
                 try:
                     decision = lifecycle.result(future)
@@ -2523,7 +2561,27 @@ def _run_executed_case(
                     task_state = abort_episode(task_state, f"NO_FEASIBLE_WAYPOINT:{error}")
                     async_pending = None
                     continue
-                active_schedule = decision.executed.schedule
+                suffix_schedule = decision.executed.schedule
+                rolling_composite = None
+                if (async_pending.get("handoff_bridge_schedule") is not None
+                        and async_pending["handoff_bridge_schedule"] is active_schedule
+                        and not schedule_done):
+                    prefix_progress = (reference_governor.progress_s
+                                       if reference_governor is not None
+                                       and reference_governor.schedule is active_schedule
+                                       else min(active_schedule.duration_s,
+                                                max(0., float(plant.data.time)-schedule_start_time)))
+                    if prefix_progress < active_schedule.duration_s-1e-12:
+                        try:
+                            rolling_composite = RollingSuffixCompositeSchedule(
+                                prefix=active_schedule, prefix_start_s=prefix_progress,
+                                suffix=suffix_schedule, request_id=request.request_id)
+                        except ValueError as error:
+                            lifecycle.finish(request, "REJECTED", "ROLLING_SUFFIX_C2")
+                            task_state = abort_episode(task_state, f"ROLLING_SUFFIX_C2:{error}")
+                            async_pending = None
+                            continue
+                active_schedule = rolling_composite or suffix_schedule
                 schedule_done = False
                 schedule_start_time = float(truth.time_s)
                 first = active_schedule.sample(0.0)
@@ -2550,9 +2608,22 @@ def _run_executed_case(
                     "value_hook_numeric_value": 0.0,
                     "deadline_wait_physical_intervals": async_pending["wait_intervals"],
                     "simulated_planning_delay_s": None,
+                    "pass_through_prefetch": bool(async_pending.get("pass_through_prefetch")),
+                    "future_handoff_bridge": bool(async_pending.get("handoff_bridge_schedule") is not None),
+                    "rolling_composite": (None if rolling_composite is None
+                                          else rolling_composite.record()),
                 })
                 decisions.append(record)
                 active_decision_index = len(decisions) - 1
+                if async_pending.get("pass_through_prefetch") and pending is not None:
+                    pending.update(next_observation=state.copy(),
+                                   next_adaptive_state=belief.value_state_record(),
+                                   end_time_s=float(truth.time_s),
+                                   duration_s=max(0.0, float(truth.time_s)-pending["start_time_s"]),
+                                   selected_plan_activated=bool(decisions[pending["decision_index"]]["plan_activated"]),
+                                   completion="SEGMENT_COMPLETE")
+                    learning_records.append(pending)
+                    pending = None
                 planner.previous_executed_delta_q_rad = decision.executed.proposed_delta_q_rad.copy()
                 planner.decisions.append(decision)
                 if hasattr(planner, "note_accepted_decision"):
@@ -2576,24 +2647,114 @@ def _run_executed_case(
                 }
                 request_sequence = async_pending["belief_sequence"]
                 requested_phase = async_pending["phase"]
-                runtime["activation_validator"] = lambda reference_origin=reference_state.copy(): validate_activation(
-                    belief=belief, request_sequence=request_sequence, schedule=active_schedule,
-                    clearance=clearance, phase=task_state.phase, request_phase=requested_phase,
-                    remaining_s=spec.phase_timeout_s-task_state.phase_elapsed_s
-                        -max(0., float(plant.data.time)-physical_now), reference_state=reference_origin,
-                    now_physics_s=float(plant.data.time))
+                handoff = bool(async_pending.get("handoff_bridge_schedule") is not None)
+                revalidation_sample_s = float(observation.sample_timestamp_s)
+                revalidation_capture_ns = (runtime["wall_session"].source_ns(revalidation_sample_s)
+                                           if handoff else None)
+                revalidation_state = state.copy()
+                revalidation_ddq = split.human_motion_acceleration_rad_s2.copy()
+                revalidation_accel_valid = bool(split.human_motion_valid)
+                reference_ddq = reference_acceleration.copy()
+                request_plan_version = suffix_schedule.version
+                request_geometry_signature = async_pending["certificate_geometry_signature"]
+                future_inputs = (dict(
+                        spec=spec, estimated_state=revalidation_state,
+                        estimated_acceleration=revalidation_ddq,
+                        reference_acceleration=reference_ddq,
+                        acceleration_valid=revalidation_accel_valid,
+                        revalidation_capture_ns=revalidation_capture_ns,
+                        request_plan_version=request_plan_version,
+                        original_sample_s=request.source_sample_time_s,
+                        revalidation_sample_s=revalidation_sample_s,
+                    ) if handoff else None)
+                def validate_current_activation(reference_origin=reference_state.copy(),
+                                                acceleration_origin=reference_acceleration.copy(),
+                                                composite=rolling_composite,
+                                                suffix=suffix_schedule,
+                                                inputs=future_inputs):
+                    current_inputs = (None if inputs is None else {
+                        **inputs, "now_ns": monotonic_ns(),
+                        "original_capture_ns": request.sensor_capture_ns})
+                    common = dict(belief=belief, request_sequence=request_sequence,
+                                  clearance=clearance, phase=task_state.phase,
+                                  request_phase=requested_phase,
+                                  remaining_s=spec.phase_timeout_s-task_state.phase_elapsed_s
+                                      -max(0., float(plant.data.time)-physical_now),
+                                  now_physics_s=float(plant.data.time))
+                    if composite is not None:
+                        return validate_rolling_composite(
+                            composite=composite, spec=spec,
+                            current_reference_state=reference_origin,
+                            current_reference_acceleration=acceleration_origin,
+                            future_handoff=current_inputs,
+                            certificate_geometry_at_request=request_geometry_signature,
+                            **common)
+                    return validate_activation(
+                        schedule=suffix, reference_state=reference_origin,
+                        future_handoff=current_inputs,
+                        certificate_geometry_at_request=request_geometry_signature,
+                        **common)
+                runtime["activation_validator"] = validate_current_activation
+                splice_event = None
+                if rolling_composite is not None:
+                    splice_event = dict(
+                        request_id=request.request_id,
+                        original_request_sample_s=request.source_sample_time_s,
+                        original_request_capture_ns=request.sensor_capture_ns,
+                        planning_model_sequence=request_sequence,
+                        suffix_version=suffix_schedule.version,
+                        revalidation_sample_s=revalidation_sample_s,
+                        revalidation_capture_ns=revalidation_capture_ns,
+                        composite=rolling_composite.record(),
+                        outcome="AWAITING_ACTIVATION")
+                    rolling_splice_events.append(splice_event)
                 def on_task_activation(receipt):
-                    nonlocal schedule_start_time
+                    nonlocal schedule_start_time, rolling_splice_pending
                     schedule_start_time = float(plant.data.time)
                     if pending is not None:
                         pending["start_time_s"] = schedule_start_time
                     decisions[active_decision_index]["actual_schedule_start_physics_s"] = schedule_start_time
+                    if splice_event is not None:
+                        apply_ns = int(receipt["apply_ns"])
+                        splice_event.update(
+                            outcome="COMPOSITE_ACTIVATED",
+                            composite_activation_ns=apply_ns,
+                            composite_activation_physics_s=schedule_start_time,
+                            request_to_activation_ms=(apply_ns-request.sensor_capture_ns)/1e6,
+                            revalidation_to_activation_ms=(apply_ns-revalidation_capture_ns)/1e6,
+                            activation_model_sequence=belief.sequence)
+                        rolling_splice_pending = dict(
+                            composite=rolling_composite, request=request,
+                            request_sequence=request_sequence,
+                            request_phase=requested_phase,
+                            certificate_geometry_signature=request_geometry_signature,
+                            activation_revalidation_capture_ns=revalidation_capture_ns,
+                            event=splice_event, spliced=False)
                 runtime["actual_activation_hook"] = on_task_activation
                 runtime["plan_to_activate"] = request
                 async_pending = None
+        if (online_timing and async_pending is not None
+                and async_pending.get("pass_through_prefetch") and schedule_done
+                and not async_pending["future"].done()):
+            task_state = abort_episode(task_state, "PASS_THROUGH_PREFETCH_NOT_READY_AT_ENDPOINT")
+            continue
+        prefetch_due = False
+        if (online_timing and smooth_waypoint_mode and active_schedule is not None
+                and active_schedule is not prefetch_attempt_schedule and schedule_done
+                and task_state.phase in (TaskPhase.OUTBOUND, TaskPhase.RETURN)
+                and np.any(np.abs(active_schedule.candidate.dq_waypoint_rad_s) > 1e-12)):
+            # Start a certified constant-velocity continuation at the actual
+            # completed endpoint. Planning begins while this continuation is
+            # executing, so request age contains one 40 ms bridge rather than
+            # uncertain pre-endpoint progress plus the bridge. 40 ms is eight
+            # registered control periods: measured ~30 ms p95 worker compute
+            # plus two periods for worker/main scheduling. It leaves 15 ms
+            # under the independently scored 55 ms activation gate.
+            prefetch_due = True
         if online_timing and async_pending is None and (
-                active_schedule is None or (schedule_done and waypoint_reached)):
-            if pending is not None:
+                active_schedule is None or (schedule_done and waypoint_reached
+                                            and not stationary_terminal_reference) or prefetch_due):
+            if pending is not None and not prefetch_due:
                 pending.update(next_observation=state.copy(), next_adaptive_state=belief.value_state_record(),
                                end_time_s=float(truth.time_s),
                                duration_s=max(0.0, float(truth.time_s) - pending["start_time_s"]),
@@ -2604,18 +2765,57 @@ def _run_executed_case(
             # Requests occur only at an old segment endpoint (or phase start).
             # Hold that emitted boundary under the existing supervisor while
             # the independent worker runs; physical time and task clocks advance.
+            handoff_bridge = None
+            if prefetch_due:
+                old_end = active_schedule.sample(active_schedule.duration_s)
+                bridge_duration_s = 8.0*CONTROL_DT_S
+                bridge_target_q = old_end.q_rad + bridge_duration_s*old_end.dq_rad_s
+                bridge_candidate = _candidate(
+                    f"future_handoff_bridge_{len(decisions):03d}", task_state.phase,
+                    bridge_target_q, old_end.dq_rad_s, spec)
+                try:
+                    scheduler.human_model = belief.human_model()
+                    handoff_bridge = scheduler.plan_fixed_duration_reference_contract(
+                        current_q_hat_rad=old_end.q_rad,
+                        current_dq_hat_rad_s=old_end.dq_rad_s,
+                        candidate=bridge_candidate, duration_s=bridge_duration_s,
+                        phase_elapsed_s=task_state.phase_elapsed_s)
+                    bridge_mechanics = adaptive_planner.mechanics_screen.evaluate(
+                        belief, bridge_candidate, handoff_bridge)
+                    if not bridge_mechanics["feasible"]:
+                        raise ValueError(f"BRIDGE_MECHANICS:{bridge_mechanics['rejection_reason']}")
+                except (ValueError, RuntimeError) as error:
+                    task_state = abort_episode(task_state, f"FUTURE_HANDOFF_BRIDGE_REJECTED:{error}")
+                    continue
+                future_handoff_bridges.append(dict(
+                    request_sample_s=float(observation.sample_timestamp_s),
+                    source_schedule_label=active_schedule.candidate.label,
+                    bridge_duration_s=bridge_duration_s,
+                    bridge_target_q_rad=bridge_target_q.copy(),
+                    bridge_target_dq_rad_s=old_end.dq_rad_s.copy(),
+                    bridge_mechanics=bridge_mechanics))
+                first_bridge = handoff_bridge.sample(0.0)
+                if any(np.max(np.abs(delta)) > 1e-10 for delta in (
+                        first_bridge.q_rad-reference_state[:2],
+                        first_bridge.dq_rad_s-reference_state[2:],
+                        first_bridge.ddq_rad_s2-reference_acceleration)):
+                    task_state = abort_episode(task_state, "FUTURE_HANDOFF_BRIDGE_C2")
+                    continue
             request = lifecycle.request("TASK", observation.sample_timestamp_s, asynchronous=True)
+            request_reference = (np.r_[handoff_bridge.sample(handoff_bridge.duration_s).q_rad,
+                                      handoff_bridge.sample(handoff_bridge.duration_s).dq_rad_s]
+                                 if prefetch_due else reference_state.copy())
             if recovery_options.get("causal_tracking_offset_clearance", False):
                 tracking_snapshot = receipt_reference_at_sample(
                     runtime["wall_session"].applied_commands, observation.sample_timestamp_s)
                 tracking_snapshot.update(request_id=request.request_id,
                     source_state_rad_rad_s=state.copy(),
-                    proposed_schedule_origin_rad_rad_s=reference_state.copy(),
+                    proposed_schedule_origin_rad_rad_s=request_reference.copy(),
                     belief_sequence=belief.sequence)
                 runtime.setdefault("causal_tracking_request_snapshots", []).append(tracking_snapshot)
                 planner.tracking_reference_snapshot = tracking_snapshot
             arguments = dict(belief=belief, current_deployable_state=state,
-                             current_reference_state=reference_state, phase=task_state.phase,
+                             current_reference_state=request_reference, phase=task_state.phase,
                              phase_elapsed_s=task_state.phase_elapsed_s,
                              phase_remaining_s=spec.phase_timeout_s-task_state.phase_elapsed_s,
                              value_evaluator=None)
@@ -2625,9 +2825,20 @@ def _run_executed_case(
                 "request": request, "future": lifecycle.submit(request, payload),
                 "phase": task_state.phase, "state": state.copy(), "belief_record": belief.value_state_record(),
                 "belief_sequence": belief.sequence, "request_time_s": float(truth.time_s),
+                "certificate_geometry_signature": clearance_geometry_signature(clearance),
                 "wait_intervals": 0, "wait_force_integral_n_s": 0.0,
+                "pass_through_prefetch": prefetch_due,
+                "handoff_source_schedule": active_schedule if prefetch_due else None,
+                "handoff_bridge_schedule": handoff_bridge,
             }
-            active_schedule = None
+            if prefetch_due:
+                prefetch_attempt_schedule = active_schedule
+                active_schedule = handoff_bridge
+                schedule_start_time = float(plant.data.time)
+                schedule_done = False
+                future_handoff_bridges[-1]["bridge_start_physics_s"] = schedule_start_time
+            else:
+                active_schedule = None
         if not online_timing and planning_wait is None and (active_schedule is None or (schedule_done and waypoint_reached)):
             if pending is not None:
                 pending["next_observation"] = state.copy()
@@ -2765,7 +2976,7 @@ def _run_executed_case(
                         "value_hook": 0.0,
                     }
 
-        if online_timing and async_pending is not None:
+        if online_timing and async_pending is not None and active_schedule is None:
             reference = SimpleNamespace(q_rad=reference_state[:2].copy(),
                                         dq_rad_s=reference_state[2:].copy(),
                                         ddq_rad_s2=reference_acceleration.copy())
@@ -2785,11 +2996,77 @@ def _run_executed_case(
                     active_schedule, max(0.0, schedule_elapsed), runtime["contract"].reference_motion_history,
                     spec.task_joint_acceleration_limit_rad_s2,
                     first=runtime.get("plan_to_activate") is not None)
+                splice_commit_pending = None
+                if (rolling_splice_pending is not None
+                        and not rolling_splice_pending["spliced"]
+                        and active_schedule is rolling_splice_pending["composite"]
+                        and progress_proposal["selected_progress_s"]
+                            > active_schedule.splice_elapsed_s+1e-12):
+                    splice_request = rolling_splice_pending["request"]
+                    splice_suffix = active_schedule.suffix
+                    suffix_first = splice_suffix.sample(0.)
+                    splice_sample_s = float(observation.sample_timestamp_s)
+                    splice_capture_ns = runtime["wall_session"].source_ns(splice_sample_s)
+                    splice_validation = validate_activation(
+                        belief=belief,
+                        request_sequence=rolling_splice_pending["request_sequence"],
+                        schedule=splice_suffix, clearance=clearance,
+                        phase=task_state.phase,
+                        request_phase=rolling_splice_pending["request_phase"],
+                        remaining_s=spec.phase_timeout_s-task_state.phase_elapsed_s,
+                        reference_state=np.r_[suffix_first.q_rad, suffix_first.dq_rad_s],
+                        now_physics_s=float(plant.data.time),
+                        future_handoff=dict(
+                            spec=spec, estimated_state=state.copy(),
+                            observed_reference_state=reference_state.copy(),
+                            estimated_acceleration=split.human_motion_acceleration_rad_s2.copy(),
+                            reference_acceleration=suffix_first.ddq_rad_s2.copy(),
+                            acceleration_valid=bool(split.human_motion_valid),
+                            now_ns=monotonic_ns(),
+                            original_capture_ns=splice_request.sensor_capture_ns,
+                            revalidation_capture_ns=splice_capture_ns,
+                            request_plan_version=splice_suffix.version,
+                            original_sample_s=splice_request.source_sample_time_s,
+                            revalidation_sample_s=splice_sample_s),
+                        certificate_geometry_at_request=rolling_splice_pending[
+                            "certificate_geometry_signature"])
+                    rolling_splice_pending["event"]["splice_revalidation"] = splice_validation
+                    if not splice_validation["feasible"]:
+                        rolling_splice_pending["event"]["outcome"] = "SPLICE_REJECTED"
+                        task_state = abort_episode(task_state, "ROLLING_SUFFIX_SPLICE_REVALIDATION")
+                        continue
+                    splice_commit_pending = rolling_splice_pending
+                    def splice_apply_guard(pending_splice=splice_commit_pending,
+                                           fresh_ns=splice_capture_ns):
+                        age_original = monotonic_ns()-pending_splice["request"].sensor_capture_ns
+                        age_fresh = monotonic_ns()-fresh_ns
+                        valid = 0 <= age_original <= lifecycle.maximum_age_ns and (
+                            0 <= age_fresh <= lifecycle.maximum_age_ns)
+                        if not valid:
+                            pending_splice["event"]["outcome"] = "SPLICE_STALE_AT_APPLY"
+                        return valid
+                    runtime["suffix_splice_apply_guard"] = splice_apply_guard
                 def commit_reference_progress(receipt, schedule=active_schedule, proposal=progress_proposal):
                     nonlocal schedule_start_time
                     reference_governor.commit(schedule, proposal, receipt)
                     schedule_start_time += proposal["delay_added_s"]
                     receipt["reference_progress"] = proposal
+                    if splice_commit_pending is not None:
+                        event = splice_commit_pending["event"]
+                        apply_ns = int(receipt["apply_ns"])
+                        validation_input = event["splice_revalidation"]["future_handoff_revalidation"]
+                        event.update(
+                            outcome="SPLICED",
+                            actual_splice_ns=apply_ns,
+                            actual_splice_physics_s=float(receipt["start_physics_s"]),
+                            activation_revalidation_to_splice_ms=(
+                                apply_ns-splice_commit_pending["activation_revalidation_capture_ns"])/1e6,
+                            splice_revalidation_to_splice_ms=(
+                                apply_ns-validation_input["revalidation_capture_ns"])/1e6,
+                            suffix_model_provenance_age_ms=(
+                                apply_ns-splice_commit_pending["request"].sensor_capture_ns)/1e6,
+                            splice_model_sequence=belief.sequence)
+                        splice_commit_pending["spliced"] = True
                 runtime["reference_progress_commit"] = commit_reference_progress
             else:
                 reference = active_schedule.sample(0.0 if runtime.get("plan_to_activate") is not None

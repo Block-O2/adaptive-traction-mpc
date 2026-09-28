@@ -1,7 +1,9 @@
 """Current deployable-model certificate reuse and sensor-supported dwell."""
 from dataclasses import replace
+import hashlib
 import numpy as np
 from ..architecture_recovery_v2.phase3_human_waypoint import AdaptiveMechanicsScreenV22
+from ..human_waypoint_scheduler import _quintic_coefficients
 from ..task import (TaskPhase, at_goal, abort_episode, transition_phase,
                     task_limit_violation, phase_timed_out)
 
@@ -89,23 +91,236 @@ def return_finalization_reason(*, physical_age, host_age, horizon_s,
     return None
 
 
+def clearance_geometry_signature(clearance):
+    """Complete numeric input key for the frozen combined path certificate."""
+    envelope = clearance.envelope
+    shank = clearance.shank_contract
+    geometry = envelope.geometry
+    numeric = [
+        *np.asarray(geometry.origin_world_m).ravel(),
+        *np.asarray(geometry.plane_x_world).ravel(),
+        *np.asarray(geometry.joint_axis_world).ravel(),
+        *np.asarray(geometry.plane_z_world).ravel(),
+        *np.asarray(geometry.hip_plane_m).ravel(),
+        geometry.thigh_length_m,
+        *np.asarray(geometry.knee_to_cuff_in_cuff_m).ravel(),
+        envelope.shank_length_upper_m, envelope.existing_shank_margin_m,
+        envelope.registered_proximal_installation_gap_lower_m,
+        envelope.sample_count,
+        *np.asarray(envelope.cuff_reference_translation_world_m).ravel(),
+        shank.shank_length_upper_m, shank.margin_m,
+        float(clearance.use_monotonic_certificate),
+    ]
+    digest = hashlib.sha256(b"combined_rigid_table_clearance_v1/monotonic_v2")
+    digest.update(np.asarray(numeric, dtype="<f8").tobytes())
+    return digest.hexdigest()
+
+
+def certified_original_schedule_lower(schedule, clearance, request_geometry_signature):
+    """Reuse only the certificate bound to this immutable schedule and geometry.
+
+    The scheduler constructs coefficients and certificate together. Rebuilding
+    coefficients verifies that no schedule state was changed after selection.
+    A different geometry or missing proof takes the original computation path.
+    """
+    proof = schedule.continuous_clearance_certificate
+    if (request_geometry_signature is not None and proof is not None
+            and clearance_geometry_signature(clearance) == request_geometry_signature
+            and schedule.candidate.phase is not TaskPhase.HOLD):
+        rebuilt = _quintic_coefficients(
+            schedule.start_q_rad, schedule.start_dq_rad_s,
+            schedule.candidate.q_waypoint_rad,
+            schedule.candidate.dq_waypoint_rad_s,
+            schedule.duration_s)
+        lowers = proof.get("combined_body_lowers_m")
+        if (np.array_equal(rebuilt, schedule.coefficients)
+                and isinstance(lowers, dict) and lowers
+                and all(np.isfinite(v) for v in lowers.values())):
+            return float(min(lowers.values())), proof, True
+    lower = float(clearance.certified_minimum(schedule.coefficients, schedule.duration_s))
+    return lower, getattr(clearance, "last_certificate", None), False
+
+
 def validate_activation(*, belief, request_sequence, schedule, clearance,
-                        phase, request_phase, remaining_s, reference_state, now_physics_s=0.):
+                        phase, request_phase, remaining_s, reference_state, now_physics_s=0.,
+                        future_handoff=None, certificate_geometry_at_request=None):
     first = schedule.sample(0.)
     continuity = bool(np.max(np.abs(np.r_[first.q_rad, first.dq_rad_s]-reference_state)) <= 1e-10
                       and np.max(np.abs(first.ddq_rad_s2)) <= 1e-10)
     mechanics = AdaptiveMechanicsScreenV22().evaluate(belief, schedule.candidate, schedule)
-    lower = float(clearance.certified_minimum(schedule.coefficients, schedule.duration_s))
+    lower, original_certificate, reused_certificate = certified_original_schedule_lower(
+        schedule, clearance, certificate_geometry_at_request)
     record = {"request_model_sequence": request_sequence, "activation_model_sequence": belief.sequence,
               "request_phase": request_phase.value, "activation_phase": phase.value,
               "phase_deadline_physics_s": now_physics_s+remaining_s,
               "remaining_phase_time_s": remaining_s, "schedule_duration_s": schedule.duration_s,
               "reference_continuity": continuity, "current_model_mechanics": mechanics,
               "current_geometry_continuous_lower_m": lower,
-              "current_geometry_certificate":getattr(clearance,"last_certificate",None), "truth_consumed": False}
+              "current_geometry_certificate":original_certificate,
+              "original_geometry_certificate_reused":reused_certificate,
+              "truth_consumed": False}
     record["feasible"] = bool(phase is request_phase and schedule.duration_s <= remaining_s+1e-12
                               and continuity and mechanics["feasible"] and lower >= 0.)
+    if future_handoff is not None:
+        # Revalidate a speculative endpoint plan against a *new* deployable
+        # observation. Neither the original request capture nor its age is
+        # replaced by the revalidation sample in PlanLifecycle.
+        spec = future_handoff["spec"]
+        observed = np.asarray(future_handoff["estimated_state"], dtype=float)
+        observed_ddq = np.asarray(future_handoff["estimated_acceleration"], dtype=float)
+        reference_ddq = np.asarray(future_handoff["reference_acceleration"], dtype=float)
+        now_ns = int(future_handoff["now_ns"])
+        original_ns = int(future_handoff["original_capture_ns"])
+        revalidation_ns = int(future_handoff["revalidation_capture_ns"])
+        finite = bool(observed.shape == (4,) and observed_ddq.shape == (2,)
+                      and reference_ddq.shape == (2,)
+                      and np.all(np.isfinite(np.r_[observed, observed_ddq, reference_ddq])))
+        observed_reference = np.asarray(
+            future_handoff.get("observed_reference_state", reference_state), dtype=float)
+        finite = bool(finite and observed_reference.shape == (4,)
+                      and np.all(np.isfinite(observed_reference)))
+        q_error = observed[:2]-observed_reference[:2] if finite else np.full(2, np.nan)
+        dq_error = observed[2:]-observed_reference[2:] if finite else np.full(2, np.nan)
+        model = belief.human_model()
+        q_bounds = np.asarray(spec.q_bounds_rad)
+        hard_bounds = np.column_stack([model.q_min_rad, model.q_max_rad])
+        velocity_limit = np.asarray(spec.task_joint_velocity_limit_rad_s)
+        acceleration_limit = np.asarray(spec.task_joint_acceleration_limit_rad_s2)
+        state_rom = bool(finite and np.all(observed[:2] >= q_bounds[:, 0])
+                         and np.all(observed[:2] <= q_bounds[:, 1])
+                         and np.all(observed[:2] >= hard_bounds[:, 0])
+                         and np.all(observed[:2] <= hard_bounds[:, 1]))
+        state_motion = bool(finite and future_handoff["acceleration_valid"]
+                            and np.all(np.abs(observed[2:]) <= velocity_limit+1e-12)
+                            and np.all(np.abs(observed_ddq) <= acceleration_limit+1e-12)
+                            and np.all(schedule.maximum_reference_velocity_rad_s+np.abs(dq_error)
+                                       <= velocity_limit+1e-12)
+                            and np.all(schedule.maximum_reference_acceleration_rad_s2
+                                       +np.abs(observed_ddq-reference_ddq)
+                                       <= acceleration_limit+1e-12))
+        live_c2 = bool(continuity and np.max(np.abs(first.ddq_rad_s2-reference_ddq)) <= 1e-10)
+        shifted_lower = float("-inf")
+        shifted_rom = False
+        current_clearance = float("-inf")
+        if finite:
+            shifted = schedule.coefficients.copy()
+            shifted[:, 0] += q_error
+            steps = max(1, int(round(schedule.duration_s/schedule.reference_period_s)))
+            u = np.linspace(0., 1., steps+1)
+            q_path = np.stack([u**power for power in range(6)], axis=1) @ shifted.T
+            shifted_rom = bool(np.all(q_path >= q_bounds[:, 0])
+                               and np.all(q_path <= q_bounds[:, 1])
+                               and np.all(q_path >= hard_bounds[:, 0])
+                               and np.all(q_path <= hard_bounds[:, 1]))
+            current_clearance = float(clearance.evaluate(observed[:2]))
+            if shifted_rom and current_clearance >= 0.:
+                shifted_lower = float(clearance.certified_minimum(shifted, schedule.duration_s))
+        original_age_ms = (now_ns-original_ns)/1e6
+        revalidation_age_ms = (now_ns-revalidation_ns)/1e6
+        version_valid = bool(schedule.version == future_handoff["request_plan_version"]
+                             and belief.sequence >= request_sequence)
+        expected_goal = (spec.start_return_target_rad if phase is TaskPhase.RETURN
+                         else spec.outbound_goal_target_rad)
+        goal_valid = bool(np.allclose(schedule.candidate.phase_goal_rad,
+                                      expected_goal, atol=1e-12, rtol=0.0))
+        ages_valid = bool(0 <= original_age_ms <= 100. and 0 <= revalidation_age_ms <= 100.)
+        record["future_handoff_revalidation"] = {
+            "original_request_sample_s": future_handoff["original_sample_s"],
+            "original_request_capture_ns": original_ns,
+            "original_request_age_ms": original_age_ms,
+            "revalidation_sample_s": future_handoff["revalidation_sample_s"],
+            "revalidation_capture_ns": revalidation_ns,
+            "revalidation_sample_age_ms": revalidation_age_ms,
+            "request_model_sequence": request_sequence,
+            "current_model_sequence": belief.sequence,
+            "request_plan_version": future_handoff["request_plan_version"],
+            "current_plan_version": schedule.version,
+            "model_changed_and_rescreened": belief.sequence != request_sequence,
+            "q_deviation_rad": q_error,
+            "dq_deviation_rad_s": dq_error,
+            "observation_reference_state_rad_rad_s": observed_reference,
+            "state_rom_valid": state_rom,
+            "state_and_shifted_path_motion_valid": state_motion,
+            "shifted_path_rom_valid": shifted_rom,
+            "current_clearance_m": current_clearance,
+            "shifted_continuous_clearance_lower_m": shifted_lower,
+            "live_reference_c2": live_c2,
+            "version_valid": version_valid,
+            "task_goal_valid": goal_valid,
+            "both_ages_valid": ages_valid,
+            "current_model_force_moment_feasible": mechanics["feasible"],
+        }
+        record["feasible"] = bool(record["feasible"] and live_c2 and state_rom
+                                  and state_motion and shifted_rom and current_clearance >= 0.
+                                  and shifted_lower >= 0. and version_valid and ages_valid)
+        record["feasible"] = bool(record["feasible"] and goal_valid)
     return record
+
+
+def validate_rolling_composite(*, composite, belief, request_sequence, clearance,
+                               spec, phase, request_phase, remaining_s,
+                               current_reference_state, current_reference_acceleration,
+                               future_handoff, now_physics_s,
+                               certificate_geometry_at_request=None):
+    """Recertify the unchanged active prefix and selected suffix at activation."""
+    suffix_origin = composite.suffix.sample(0.0)
+    suffix_state = np.r_[suffix_origin.q_rad, suffix_origin.dq_rad_s]
+    suffix_validation = validate_activation(
+        belief=belief, request_sequence=request_sequence,
+        schedule=composite.suffix, clearance=clearance,
+        phase=phase, request_phase=request_phase,
+        remaining_s=remaining_s-composite.splice_elapsed_s,
+        reference_state=suffix_state, now_physics_s=now_physics_s,
+        certificate_geometry_at_request=certificate_geometry_at_request,
+        future_handoff={**future_handoff,
+                        "observed_reference_state": current_reference_state,
+                        "reference_acceleration": suffix_origin.ddq_rad_s2})
+    current = composite.sample(0.0)
+    prefix_c2 = bool(all(np.max(np.abs(a-b)) <= 1e-10 for a, b in (
+        (current.q_rad, current_reference_state[:2]),
+        (current.dq_rad_s, current_reference_state[2:]),
+        (current.ddq_rad_s2, current_reference_acceleration))))
+    model = belief.human_model()
+    q_bounds = np.asarray(spec.q_bounds_rad, dtype=float)
+    hard_bounds = np.column_stack([model.q_min_rad, model.q_max_rad])
+    observed = np.asarray(future_handoff["estimated_state"], dtype=float)
+    q_offset = observed[:2]-current_reference_state[:2]
+    shifted = composite.prefix.coefficients.copy()
+    shifted[:, 0] += q_offset
+    count = max(1, int(round(composite.splice_elapsed_s/composite.prefix.reference_period_s)))
+    remaining_times = np.linspace(composite.prefix_start_s,
+                                  composite.prefix.duration_s, count+1)
+    u = remaining_times/composite.prefix.duration_s
+    path = np.stack([u**power for power in range(6)], axis=1) @ shifted.T
+    prefix_rom = bool(np.all(path >= q_bounds[:, 0]) and np.all(path <= q_bounds[:, 1])
+                      and np.all(path >= hard_bounds[:, 0])
+                      and np.all(path <= hard_bounds[:, 1]))
+    prefix_clearance = (float(clearance.certified_minimum(
+        shifted, composite.prefix.duration_s)) if prefix_rom else float("-inf"))
+    prefix_mechanics = AdaptiveMechanicsScreenV22().evaluate(
+        belief, composite.prefix.candidate, composite.prefix)
+    motion_limit = bool(
+        np.all(composite.prefix.maximum_reference_velocity_rad_s
+               <= np.asarray(spec.task_joint_velocity_limit_rad_s)+1e-12)
+        and np.all(composite.prefix.maximum_reference_acceleration_rad_s2
+                   <= np.asarray(spec.task_joint_acceleration_limit_rad_s2)+1e-12))
+    prefix_valid = bool(prefix_c2 and prefix_rom and prefix_clearance >= 0.
+                        and prefix_mechanics["feasible"] and motion_limit)
+    suffix_validation["rolling_composite"] = dict(
+        prefix_c2=prefix_c2, prefix_shifted_rom_valid=prefix_rom,
+        prefix_shifted_continuous_clearance_m=prefix_clearance,
+        prefix_current_model_mechanics=prefix_mechanics,
+        prefix_motion_limit_valid=motion_limit,
+        prefix_duration_remaining_s=composite.splice_elapsed_s,
+        composite_duration_s=composite.duration_s,
+        suffix_boundary_c2=True,
+        composite_version=composite.version,
+        request_id=composite.request_id)
+    suffix_validation["schedule_duration_s"] = composite.duration_s
+    suffix_validation["feasible"] = bool(
+        suffix_validation["feasible"] and prefix_valid
+        and composite.duration_s <= remaining_s+1e-12)
+    return suffix_validation
 
 
 def projected_dwell_sample(spec, row):

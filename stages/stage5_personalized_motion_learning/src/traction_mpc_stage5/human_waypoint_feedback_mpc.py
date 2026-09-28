@@ -181,6 +181,36 @@ class HumanWaypointFeedbackMPCV1:
         """Internal endpoint; by default identical to the registered cost goal."""
         return self.phase_goal(phase)
 
+    def _waypoint_terminal_velocity(
+        self, *, phase: TaskPhase, reference_state: np.ndarray,
+        target_q_rad: np.ndarray,
+    ) -> np.ndarray:
+        """Bound pass-through speed by the existing motion and braking limits."""
+        if not getattr(self, "pass_through_waypoints", False) or phase is TaskPhase.HOLD:
+            return np.zeros(2)
+        goal = self.reference_phase_goal(phase)
+        tolerance = np.asarray(self.spec.joint_angle_completion_tolerance_rad)
+        if np.all(np.abs(target_q_rad - goal) <= tolerance):
+            return np.zeros(2)
+        delta = target_q_rad - reference_state[:2]
+        remaining = goal - target_q_rad
+        velocity_limit = (np.asarray(self.spec.task_joint_velocity_limit_rad_s)
+                          * self.scheduler.reference_velocity_fraction)
+        acceleration_limit = (np.asarray(self.spec.task_joint_acceleration_limit_rad_s2)
+                              * self.scheduler.reference_acceleration_fraction)
+        braking_distance = np.minimum(np.abs(delta), np.abs(remaining))
+        # 15/8 is the exact peak/mean-speed ratio of the existing rest-to-rest
+        # quintic. Its inverse caps pass-through speed at the previously
+        # certified segment's mean-speed scale, without an empirical gain.
+        speed = np.minimum(velocity_limit / 1.875,
+                           np.sqrt(2.0 * acceleration_limit * braking_distance))
+        # Reserve a full velocity-limit stopping time near the registered
+        # terminal point. This follows v <= a * remaining / v_limit and gives
+        # the subsequent terminal segment room to settle under the same a.
+        speed = np.minimum(speed, acceleration_limit * np.abs(remaining)
+                           / velocity_limit)
+        return np.where(delta * remaining > 0.0, np.sign(delta) * speed, 0.0)
+
     def candidate_actions(
         self, current_q_rad: Sequence[float], phase: TaskPhase
     ) -> tuple[np.ndarray, ...]:
@@ -249,7 +279,8 @@ class HumanWaypointFeedbackMPCV1:
             phase=phase,
             phase_goal_rad=goal,
             q_waypoint_rad=target,
-            dq_waypoint_rad_s=np.zeros(2),
+            dq_waypoint_rad_s=self._waypoint_terminal_velocity(
+                phase=phase, reference_state=reference_state, target_q_rad=target),
         )
         try:
             schedule = self.scheduler.plan_reference_contract(
