@@ -1,10 +1,15 @@
 {
   "schema": "wsl_migration_state_v1",
-  "updated_local": "2026-09-29T01:19:37.565264+08:00",
-  "status": "COMPLETE",
+  "updated_local": "2026-09-29T01:44:05+08:00",
+  "status": "WSL_CROSS_HOST_CLOSEOUT_READY_FOR_PUSH",
+  "cross_host_classification": "CROSS_HOST_RESULT_INCONCLUSIVE",
   "migration_branch": "codex/learning-wsl-migration-v1",
   "migration_head": "96010c61a665f4f58ccb9198dbfdf3e2ca8aa014",
+  "evidence_checkpoint": "0d79adb78daa9fee0643be5d1dd9e801aced3978",
+  "evidence_branch": "codex/wsl-cross-host-evidence-v1",
+  "production_fingerprint": "5a4b1d15f0711c349926cba2ed604906853215edd7cfdee6d188a7bac1c72ae7",
   "production_fingerprint_match": true,
+  "tracked_production_changed": false,
   "fixture_sha256_match": true,
   "deterministic_gate": "PASS_17_OF_17",
   "smoke": "PASS",
@@ -15,13 +20,35 @@
     "EXCEPTION": 3,
     "ABORTED": 15
   },
-  "cross_host_classification": "CROSS_HOST_RESULT_INCONCLUSIVE",
+  "raw_evidence": {
+    "manifest": "stages/stage5_personalized_motion_learning/docs/wsl_migration_v1/RAW_DATA_MANIFEST.json",
+    "file_count": 187,
+    "total_bytes": 1948086815,
+    "hash_verification": "PASS_187_OF_187",
+    "retention": "PRESERVED_IN_WSL_NOT_ADDED_TO_GIT",
+    "windows_staging_copy": "C:\\Users\\HankL\\Desktop\\Coding\\adaptive_traction_mpc\\evidence_staging",
+    "windows_staging_scope": "SUMMARIES_AND_PLOTS_ONLY_NOT_COMPLETE_RAW_MIRROR"
+  },
+  "host_decision": {
+    "primary_simulation_host": "Mac",
+    "wsl_role": "OPTIONAL_FUTURE_COMPUTE_OR_TRAINING_HOST",
+    "formal_simulation_matrices_must_not_mix_hosts": true
+  },
+  "training_environment": {
+    "python": "3.10.21",
+    "mujoco": "3.10.0",
+    "rtx_4060_visible": true,
+    "cuda_bridge_visible": true,
+    "pytorch_configured_or_verified": false,
+    "future_environment_name": "PYTORCH_CUDA_TRAINING_ENV"
+  },
+  "hardware_publication_requirement": "REQUIRED_BEFORE_HARDWARE_EXPERIMENTS",
   "quota": {
     "account_wide_used_percent_original_start": 30,
     "account_wide_used_percent_resume_observed": 31,
     "account_wide_used_percent_during_analysis": 32,
-    "final_used_percent": 32,
+    "account_wide_used_percent_closeout_observed": 33,
     "attribution_note": "Account-wide only; delta is not attributed solely to this task."
   },
-  "next_minimum_action": "Stop. Do not enter 49-case, 30-repeat, value learning, RL, or runtime architecture work in this task."
+  "next_minimum_action": "Mac fetches the evidence branch and archives the reports into canonical provenance. Do not enter 49-case, 30-repeat, value learning, RL, runtime architecture work, or new simulation in this closeout."
 }
