@@ -1,0 +1,7 @@
+# Local scoring bookkeeping correction
+
+Original natural and delay_0 results remain preserved without rerun. The initial wrapper incorrectly declared normal_smoothness_pass false solely because any fallback occurred, independently of the actual near-stop metric. The user allows natural fallback and requires normal-path smoothness measurement. The architecture document written before execution says intended fallback intervals must be separately reported.
+
+The corrected complete expression is: normal=bool(smooth['non_task_reference_near_stop_longest_s'] <= cap + 1e-9). The entire measured trace, including fallback near-stop, is still checked against the SAME cap: .350 s for the original failure case, .150 for low ordinary, .175 for other representatives. No interval is removed. No safety, continuity, stale, scorer-v2 or metric threshold is relaxed. Report actual fallback incidence separately and do not claim delay_0 had zero fallback.
+
+Initial wrapper-false results are preserved. Corrected reviews are recomputed from recorded scorer flags, C2 flags and exact same near-stop metric/cap; no dynamic rerun. This is conservatively charged as the single local bookkeeping repair. Production is unchanged, so its fingerprint remains the same; wrapper hash is recorded. The first shell edit assertion failed before writing; a partial-string replacement was then rejected by automatic approval. The explicit complete comparison above was submitted with evidence that the threshold remains intact.

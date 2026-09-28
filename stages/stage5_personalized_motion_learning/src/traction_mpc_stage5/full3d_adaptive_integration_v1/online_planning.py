@@ -42,7 +42,11 @@ def snapshot_task_call(adaptive_planner: Any, arguments: dict[str, Any]) -> byte
 
 def execute_task_snapshot(payload: bytes) -> Any:
     planner, arguments = pickle.loads(payload)
-    return planner.decide(**arguments)
+    decision = planner.decide(**arguments)
+    if getattr(planner.planner, "safe_fallback_enabled", False):
+        from .safe_fallback import prepare_decision
+        decision = prepare_decision(decision, planner.planner, arguments["belief"])
+    return decision
 
 
 def _warm_planner_process() -> int:
@@ -173,7 +177,7 @@ class PlanLifecycle:
         return result["value"]
 
     def expired(self, request: PlanRequest) -> bool:
-        return self.clock() - request.sensor_capture_ns > self.maximum_age_ns
+        return self.clock() - request.sensor_capture_ns >= self.maximum_age_ns
 
     def finish(self, request: PlanRequest, outcome: str, reason: str | None = None) -> None:
         with self._lock:
@@ -204,7 +208,7 @@ class PlanLifecycle:
         checked = self.mark(request, "activation_check_ns")
         if effective_activation_ns is not None:
             self.mark(request, "effective_activation_ns", effective_activation_ns)
-        if max(checked, effective_activation_ns or checked) - request.sensor_capture_ns > self.maximum_age_ns:
+        if max(checked, effective_activation_ns or checked) - request.sensor_capture_ns >= self.maximum_age_ns:
             self.finish(request, "EXPIRED", "STALE_PLAN_MAXIMUM_AGE")
             raise RuntimeError("STALE_PLAN_MAXIMUM_AGE")
         try:
@@ -213,14 +217,14 @@ class PlanLifecycle:
             applied_receipt = applied_receipt or getattr(error, "applied_receipt", None)
             if applied_receipt is not None and applied_receipt.get("applied"):
                 activated = self.mark(request, "activation_ns", applied_receipt["apply_ns"])
-                miss = max(activated, effective_activation_ns or activated)-request.sensor_capture_ns > self.maximum_age_ns
+                miss = max(activated, effective_activation_ns or activated)-request.sensor_capture_ns >= self.maximum_age_ns
                 self.finish(request, "ACTIVATION_DEADLINE_MISS" if miss else "ACTIVATED_COMMIT_FAILED",
                             f"POST_WRITE_COMMIT:{type(error).__name__}:{error}")
             else:
                 self.finish(request, "FAILED", f"COMMAND_APPLICATION:{type(error).__name__}:{error}")
             raise
         activated = self.mark(request, "activation_ns")
-        if max(activated, effective_activation_ns or activated) - request.sensor_capture_ns > self.maximum_age_ns:
+        if max(activated, effective_activation_ns or activated) - request.sensor_capture_ns >= self.maximum_age_ns:
             self.finish(request, "ACTIVATION_DEADLINE_MISS", "COMMAND_WRITE_CROSSED_EXPIRATION")
             raise RuntimeError("COMMAND_WRITE_CROSSED_EXPIRATION")
         self.finish(request, "ACTIVATED")

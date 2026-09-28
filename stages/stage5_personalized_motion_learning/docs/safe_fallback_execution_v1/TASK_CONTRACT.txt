@@ -1,0 +1,596 @@
+这是进入30-repeat / value learning之前，最后一个允许的执行架构修复任务。
+
+工作目录：
+
+/Users/hankli/Desktop/coding/adaptive-traction-mpc-learning
+
+使用当前learning baseline及其provenance，不建立新的worktree。
+允许在当前repo内建立新的development branch。
+
+核心问题：
+
+当前RSS/pass-through架构正常情况下运动平滑，但隐含假设：
+
+“下一段future plan必须在当前pass-through segment到达endpoint前准备好。”
+
+最终baseline freeze中真实失败：
+
+case:
+`high_rom_function_fresh_03_v1`
+
+表现：
+- arrival PASS
+- HOLD PASS
+- RETURN过程中失败
+- abort:
+  `PASS_THROUGH_PREFETCH_NOT_READY_AT_ENDPOINT`
+- corresponding planning compute:
+  191.428 ms
+
+这是functional failure，不能按已接受的55 ms simulation runtime-tail limitation豁免。
+
+目标不是继续让planner更快，而是建立：
+
+`planner/value can be late, but execution always has a prevalidated trajectory to follow`
+
+本轮最高成功状态：
+
+`FALLBACK_EXECUTION_REPRESENTATIVE_READY`
+
+不进入49-case、30-repeat或RL。
+
+==================================================
+0. Preserve provenance first
+==================================================
+
+先读取：
+
+- learning baseline provenance
+- 最新 `SIMULATION_RESEARCH_BASELINE_FREEZE.md/json`
+- failure raw trace / STATE
+- existing RSS implementation
+- scorer-v2
+- 100 ms stale-plan semantics
+
+当前失败矩阵必须永久保留。
+
+如果freeze失败产生的docs/evidence尚未commit：
+允许先建立一个仅包含docs/results/manifests的local provenance checkpoint。
+禁止把production修改混入该commit。
+
+记录当前：
+- branch
+- HEAD
+- production fingerprint
+- git status
+
+然后建立单一development branch，例如：
+
+`codex/learning-safe-fallback-v1`
+
+不要创建新的worktree目录。
+
+==================================================
+1. Read-only failure reconstruction
+==================================================
+
+先不改production。
+
+对 `high_rom_function_fresh_03_v1` 精确重建：
+
+- current RETURN pass-through segment start
+- next-plan request timestamp
+- planner start/finish
+- segment endpoint time
+- remaining reference q/dq/ddq
+- endpoint q/dq/ddq
+- abort timestamp
+- plan age
+- active safety state
+
+确认：
+
+1. 为什么endpoint到达时没有合法next segment；
+2. 当前代码在prefetch not-ready时有哪些已有fallback primitives；
+3. 是否已有braking / hold / terminal-stop machinery可复用；
+4. 当前segment在endpoint前多早开始具备“必须决定继续还是停车”的条件。
+
+不要根据191 ms单例直接设固定等待时间。
+
+==================================================
+2. Architecture objective
+==================================================
+
+实现一种：
+
+`Always-Ready Prevalidated Fallback`
+
+正常路径保持：
+
+current segment
+→ continuous pass-through
+→ next segment
+
+异常路径变成：
+
+current segment
+→ prevalidated controlled deceleration
+→ safe hold
+→ fresh replan
+→ resume
+
+而不是：
+
+current segment
+→ endpoint
+→ next plan not ready
+→ abort
+
+核心原则：
+
+任何被允许进入pass-through执行的segment，都不能把未来安全性依赖于“下一次planner一定及时完成”。
+
+==================================================
+3. Compare fallback designs before coding
+==================================================
+
+至少比较以下实现思路：
+
+A. Precomputed safe-stop branch
+
+当当前segment建立/激活时，同时准备一个fallback braking suffix。
+在某个预先确定的commit point：
+
+- next primary ready + valid:
+  continue primary/pass-through
+
+- next primary not ready:
+  atomically commit fallback suffix
+
+fallback从commit时刻当前reference的
+q/dq/ddq
+开始，保持至少C2 continuity，并减速至零速安全hold。
+
+B. Existing terminal-stop primitive reuse
+
+若现有controller已经存在经过验证的stop/hold primitive，
+评估能否预先绑定为当前segment的escape branch，而不是重新设计braking控制器。
+
+C. 其他更小但语义等价的方案
+
+允许提出，但不能依赖：
+- endpoint之后才临时规划
+- planner必须及时返回
+- 放宽stale rule
+- arbitrary sleep/wait
+
+只选一个最小、安全、最容易证明的方案实现。
+
+==================================================
+4. Commit/deadline semantics
+==================================================
+
+fallback必须在endpoint之前有明确commit semantics。
+
+不要使用拍脑袋固定毫秒数。
+
+优先从：
+
+- active trajectory
+- current q/dq/ddq
+- existing velocity/acceleration limits
+- fallback braking duration
+- certified feasible suffix
+
+推导：
+
+`latest safe fallback commit point`
+
+到该点：
+
+如果next plan未ready + valid，
+立即永久commit fallback。
+
+一旦fallback braking已经commit：
+
+late-arriving primary plan不得中途抢占braking。
+
+它必须：
+- 被drop/defer
+- 或等safe hold完成后重新基于fresh observation规划
+
+这样避免：
+
+brake → suddenly resume pass-through
+
+造成新的不连续。
+
+==================================================
+5. Safety invariants
+==================================================
+
+不得修改：
+
+- planner cost
+- candidate search space
+- task goal
+- force threshold
+- moment threshold
+- clearance threshold
+- ROM model / 125° assumption
+- scorer-v2 semantics
+- 100 ms stale-plan rejection
+- stale activation=0 requirement
+- normal RSS/pass-through semantics
+
+fallback必须遵守已有：
+
+- q limits
+- dq limits
+- acceleration constraints
+- force/moment
+- clearance
+- task phase semantics
+
+正常情况下fallback不得影响当前smoothness。
+
+如果无法在现有安全模型下证明/验证fallback branch：
+不要“先实现再看看”。
+输出：
+
+`SAFE_FALLBACK_ARCHITECTURE_NOT_JUSTIFIED`
+
+并停止。
+
+==================================================
+6. Failure handling after fallback
+==================================================
+
+fallback完成后进入明确的：
+
+`SAFE_FALLBACK_HOLD`
+
+此时：
+
+- current trajectory已经零速结束
+- robot/Human state继续正常观测
+- late stale primary不得执行
+- 必须使用fresh deployable observation重新请求plan
+- 继续遵守100 ms rule
+
+只有fresh plan完成并通过原validation后才允许resume。
+
+Resume trajectory必须从当前hold状态连续开始。
+
+记录：
+
+- FALLBACK_COMMITTED
+- FALLBACK_STOPPED
+- FALLBACK_HOLD
+- FRESH_REPLAN_REQUESTED
+- RESUME_ACTIVATED
+
+等明确事件。
+
+==================================================
+7. Implementation budget
+==================================================
+
+只允许：
+
+- 1个主fallback architecture implementation
+- 最多1次针对明确implementation bug的局部修复
+
+禁止第二套architecture重新设计。
+
+如果第一次实现暴露的是概念性错误：
+停止并报告，不继续堆补丁。
+
+==================================================
+8. Tests before MuJoCo
+==================================================
+
+先做确定性测试：
+
+至少验证：
+
+1. normal path未触发fallback
+2. commit前primary ready → normal pass-through
+3. commit前primary not ready → fallback selected
+4. fallback q/dq/ddq与active reference至少C2连续
+5. late primary cannot interrupt committed braking
+6. stale primary >=100 ms cannot activate
+7. fallback end dq=0（及原terminal ddq语义）
+8. fresh replan after hold can resume
+9. scorer-v2不受影响
+
+测试失败不进入动态实验。
+
+==================================================
+9. Targeted MuJoCo validation
+==================================================
+
+第一组只针对原失败机制。
+
+### A. Original failure case
+
+运行：
+
+`high_rom_function_fresh_03_v1`
+
+一次自然运行。
+
+不得为了PASS重跑。
+
+如果自然planner这次足够快而未触发fallback：
+仍保留结果，但不能据此证明fallback。
+
+### B. Controlled planner-readiness delay
+
+使用test harness，不修改planner输出内容，
+只延迟future result对execution layer的可用时间。
+
+预注册少量delay：
+- 0 ms
+- 100 ms
+- 200 ms
+
+如有必要最多增加一个约250 ms stress point。
+
+目的不是模拟临床delay，而是验证：
+
+即使planner比历史191.428 ms tail更晚，
+execution仍不会出现
+`PASS_THROUGH_PREFETCH_NOT_READY_AT_ENDPOINT`.
+
+要求：
+
+0 ms:
+- 正常RSS pass-through
+- smoothness不退化
+
+100/200 ms:
+- fallback在latest-safe-commit point前正确commit
+- controlled deceleration
+- safety PASS
+- stale plan不激活
+- safe hold
+- fresh replan
+- resume
+- 最终任务COMPLETE
+
+如果200 ms导致old plan超过100 ms：
+应正确drop旧plan，
+然后从hold状态做fresh replan；
+不得为了完成任务绕过100 ms stale rule。
+
+==================================================
+10. Targeted representative regression
+==================================================
+
+若上述全部通过，再用同一source fingerprint运行少量代表case：
+
+- low-ROM ordinary
+- 120/120 synchronous
+- 120/120 hip-leading
+- 120/120 variable-start
+
+正常情况下应主要走primary path。
+
+至少一个case可以使用controlled delayed planner，
+验证fallback不是只对原失败场景有效。
+
+本阶段最多约6–10个动态runs总量。
+
+==================================================
+11. One repair rule
+==================================================
+
+如果动态验证FAIL：
+
+只有根因明确属于：
+- event plumbing
+- branch selection
+- commit timing calculation
+- state/version bookkeeping
+- deterministic trajectory stitching bug
+
+才允许1次局部修复。
+
+禁止为了PASS：
+- 调宽安全阈值
+- 调宽100 ms
+- 改任务
+- 修改planner cost/search
+- 放宽continuity
+- 增加固定sleep
+- 重跑直到随机PASS
+
+修复后受影响的validation必须用新source fingerprint从头运行。
+
+==================================================
+12. Optional 8-case representative freeze
+==================================================
+
+只有：
+
+- original failure mechanism解决
+- controlled 200 ms planner delay可fallback并恢复
+- targeted representative全部PASS
+- 仍有时间和quota空间
+
+才允许进一步运行原冻结8-case representative set一次。
+
+同一source fingerprint。
+
+判定硬条件：
+
+- task COMPLETE
+- scorer-v2 safety
+- arrival/dwell/RETURN
+- force/moment/clearance
+- C2 continuity
+- smoothness无明显normal-path regression
+- stale activation=0
+- >=100 ms old plan不执行
+- fallback如触发，最终能安全resume并完成
+
+已接受的55 ms simulation runtime-tail limitation继续记录，
+但不单独阻止本轮research fallback validation。
+
+若8/8 PASS：
+
+状态：
+`FALLBACK_EXECUTION_REPRESENTATIVE_READY`
+
+建立local checkpoint。
+
+本轮不要跑49-case。
+
+==================================================
+13. Future RL contract
+==================================================
+
+无论结果如何，验证该设计是否支持：
+
+value / RL / planner asynchronous
+
+即：
+
+active trajectory execution永远不等待value或planner。
+
+未来value result必须：
+- versioned
+- deadline-bound
+- droppable
+- fallback-capable
+
+value failure/late output：
+→ baseline ranking / fallback
+
+而不是：
+→ execution stall
+
+本轮禁止训练RL。
+
+==================================================
+14. Budget
+==================================================
+
+当前账户约：
+
+24% used
+
+目前其他项目暂停，因此account-wide delta可作为近似监控，
+但最终报告仍标为ACCOUNT-WIDE。
+
+本轮：
+
+目标结束：
+27–28% used
+
+规则：
+
+- >=27%：
+  禁止扩大实验范围，只完成当前milestone
+- >=28%：
+  不启动8-case optional stage；完成当前targeted验证并收尾
+- >=29%：
+  硬停止本项目所有模型续调度
+
+用户整个项目/账户保护线：
+50% used
+
+本轮必须至少为后续：
+49-case、30-repeat、value/RL、final evaluation
+保留约20个百分点。
+
+如果quota接口失败：
+完成当前不可中断的单次run后最多重试3次。
+仍失败则保存STATE停止。
+
+==================================================
+15. Time
+==================================================
+
+预计2–4小时。
+
+- >3小时：
+  禁止扩大实验
+- >4小时：
+  不启动optional 8-case
+- >5小时：
+  强制收尾
+- >6小时：
+  硬停止
+
+==================================================
+16. Git
+==================================================
+
+不要建立新worktree目录。
+
+允许：
+- 当前learning repo内新branch
+- local checkpoint commits
+
+禁止：
+- push
+- merge
+- reset
+- stash
+- clean
+- `git add -A`
+
+逐项stage。
+
+raw traces保持git-ignored并生成manifest/hash。
+
+==================================================
+17. Outputs
+==================================================
+
+保存：
+
+- `SAFE_FALLBACK_ARCHITECTURE.md`
+- failure reconstruction
+- architecture comparison
+- chosen design
+- commit/deadline derivation
+- deterministic tests
+- targeted run results
+- forced-delay results
+- representative results（若运行）
+- RL compatibility notes
+- STATE
+- fingerprints
+- raw-data manifest
+- checkpoint SHA（若成功）
+
+最终状态仅允许：
+
+`FALLBACK_EXECUTION_REPRESENTATIVE_READY`
+
+`SAFE_FALLBACK_ARCHITECTURE_NOT_JUSTIFIED`
+
+`SAFE_FALLBACK_TARGETED_VALIDATION_FAIL`
+
+`PAUSED_QUOTA_OR_TIME`
+
+最终报告必须回答：
+
+1. 原191.428 ms failure的准确机制；
+2. fallback在什么条件、什么时刻commit；
+3. fallback是否完全不依赖future planner及时完成；
+4. 200 ms planner-delay stress是否能stop→hold→fresh replan→resume→COMPLETE；
+5. normal path smoothness是否保持；
+6. stale plan是否仍正确拒绝；
+7. 是否完成8-case representative；
+8. production source fingerprint；
+9. checkpoint SHA；
+10. account-wide quota起止；
+11. 下一步是否可以重新做最终49-case freeze。
+
+完成后停止。
+
+不要进入49-case、30-repeat、value learning、RL或fresh qualification。

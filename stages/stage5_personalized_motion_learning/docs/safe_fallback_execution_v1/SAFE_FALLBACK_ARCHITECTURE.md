@@ -1,0 +1,15 @@
+# Always-Ready Prevalidated Fallback v1
+
+Chosen implementation A reuses the existing fixed-duration quintic scheduler. See READ_ONLY_RECONSTRUCTION.md for failure reconstruction, alternatives and the braking derivation. RETAINED_ESCAPE_GATE.json records 69/69 retained accepted endpoints with a feasible escape under their deployable belief; this is model analysis, not dynamic evidence.
+
+Admission: after unchanged MPC selection, the isolated worker prepares the original 40 ms constant-velocity bridge plus a stop. The stop uses q=q0+v*T*(u-u³+u⁴/2), T=ceil_grid(max(1.5*abs(v)/a_limit)), and the existing q/ROM/motion/clearance/mechanics screens. The latest certified grid node strictly before the original endpoint is the fork. Search concerns escape feasibility only and never reranks or alters MPC candidates/costs.
+
+Execution must cap reference progress at the fork. A valid primary may replace the bridge only while ARMED; otherwise the fork is permanently committed and the stored stop runs to zero dq/ddq. Main-thread scheduling does not permit reference progress to skip the fork. No fallback computation or planner output is needed at commit. Existing per-command supervisor checks remain active. Certification is model-scoped; no new claim of physical invariance or hardware timing is made.
+
+Late primaries are discarded and harvested. Braking is non-preemptible. SAFE_FALLBACK_HOLD is separate from task HOLD and cannot credit task dwell. A new request must be based on a post-stop deployable observation. Resume retains original activation validation and strict age <100 ms at actual application. The boundary at exactly 100 ms is tightened from the baseline's > comparator to match the explicit user requirement; no limit is widened.
+
+One architecture implementation, at most one local implementation-bug repair. No planner cost/search/task/safety/model/scorer changes. Natural original case once; controlled readiness delay 0/100/200 ms once each on the third RETURN prefetch (the retained failure's mechanism). Delay only gates result visibility, never output contents or worker computation. Then low ordinary, high 120 synchronous, high 120 hip-leading, variable start; one representative delay allowed. At most eight targeted dynamic runs. Optional eight-case stage only under original budget gates and after every targeted gate passes. No 49-case or learning.
+
+Formal acceptance: original scorer-v2 COMPLETE, arrival/dwell/RETURN and safety; C2; zero >=100ms activation. Delay cases require committed->stopped->hold->fresh request->resume->COMPLETE. Normal paths use original smoothness caps; intended fallback stop intervals must be separately reported, never misclassified as normal-path smoothness. All failure evidence retained. No held-out robustness claim: these are development cases.
+
+Async value contract: values are versioned, deadline-bound, droppable ranking inputs. Missing/late values fall back to baseline ranking. Neither value nor planner completion may be a prerequisite for executing the attached stop. This task does not implement or train value/RL.

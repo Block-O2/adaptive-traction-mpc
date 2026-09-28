@@ -79,6 +79,7 @@ from .activation_validation import (validate_activation, validate_rolling_compos
                                     reference_safe_task_transition, causal_return_projection,
                                     return_finalization_reason)
 from .rolling_suffix_splice import RollingSuffixCompositeSchedule
+from .safe_fallback import FallbackLatch
 from .terminal_commit import attempt_return_commit, terminal_sample_evidence
 from .applied_reference_history import AppliedReferenceMotionHistory
 from .receipt_reference_governor import ReceiptReferenceGovernor, velocity_box
@@ -455,6 +456,7 @@ def persist_runtime_artifacts(output_dir: Path, capture: dict[str, Any]) -> None
         "reference_governor_records": runtime.get("reference_governor_records", []),
         "activation_validations": runtime.get("activation_validations", []),
         "future_handoff_bridges": runtime.get("future_handoff_bridges", []),
+        "safe_fallback_events": runtime.get("safe_fallback_events", []),
         "rolling_splice_events": runtime.get("rolling_splice_events", []),
         "return_projection_guards": runtime.get("return_projection_guards", []),
         "return_projection_finalization": runtime.get("return_projection_finalization"),
@@ -2123,6 +2125,7 @@ def _run_executed_case(
     # and cost, but allows intermediate waypoints to be passed with bounded dq.
     smooth_waypoint_mode = (qualification_case or {}).get("research_model") == "high_rom_v1"
     planner.pass_through_waypoints = smooth_waypoint_mode
+    planner.safe_fallback_enabled = bool(smooth_waypoint_mode and online_timing)
     adaptive_planner = AdaptiveHumanWaypointHWMPCV22(planner)
 
     recovery_result = None
@@ -2174,6 +2177,21 @@ def _run_executed_case(
     runtime["rolling_splice_events"] = rolling_splice_events
     rolling_splice_pending = None
     task_expiry_retries = 0
+    active_escape = None
+    fallback_latch = None
+    fallback_bridge = None
+    fallback_stop_sample_s = None
+    activation_backup = None
+    fallback_events = runtime.setdefault("safe_fallback_events", [])
+    readiness_hook = (runtime_capture or {}).get("future_result_ready")
+    def result_ready(pending_request):
+        if not pending_request["future"].done():
+            return False
+        return readiness_hook is None or readiness_hook(pending_request, monotonic_ns())
+    def fallback_event(name, **details):
+        fallback_events.append(dict(event=name, host_ns=monotonic_ns(),
+            physics_s=float(plant.data.time), phase=task_state.phase.value, **details))
+
     if runtime.get("wall_session") is not None:
         runtime["sensor_task_clock"] = SensorSupportedTaskClock(
             projected_dwell=bool(recovery_options.get('causal_dwell_projection',False)))
@@ -2405,7 +2423,8 @@ def _run_executed_case(
                     commit_record["reason"])
             else:
                 runtime["return_projection_finalization"] = commit_record
-        if ((planning_wait is not None or (online_timing and async_pending is not None))
+        if ((planning_wait is not None or (online_timing and async_pending is not None
+                                           and not async_pending.get("fallback_discarded")))
                 and task_state.phase is not previous_task_state.phase
                 and task_state.phase not in (TaskPhase.ABORTED, TaskPhase.COMPLETE)):
             task_state = abort_episode(task_state, "PLANNING_WAIT_PHASE_CHANGED")
@@ -2430,6 +2449,10 @@ def _run_executed_case(
                     trigger="causal_return_actual_completion_commit")
             phase_previous = task_state.phase
             active_schedule = None
+            active_escape = None
+            fallback_latch = None
+            fallback_bridge = None
+            activation_backup = None
             prefetch_attempt_schedule = None
             if rolling_splice_pending is not None and not rolling_splice_pending["spliced"]:
                 rolling_splice_pending["event"]["outcome"] = "CANCELLED_PHASE_CHANGED"
@@ -2501,6 +2524,25 @@ def _run_executed_case(
             })
             break
 
+        if (fallback_latch is not None and fallback_latch.mode == "BRAKING"
+                and active_schedule is fallback_bridge):
+            stop = fallback_latch.bundle.stop
+            first_stop = stop.sample(0.)
+            jumps = np.r_[first_stop.q_rad-reference_state[:2],
+                          first_stop.dq_rad_s-reference_state[2:],
+                          first_stop.ddq_rad_s2-reference_acceleration]
+            if np.max(np.abs(jumps)) > 1e-10:
+                task_state = abort_episode(task_state, "FALLBACK_C2_ORIGIN")
+                continue
+            active_schedule = stop
+            schedule_start_time = float(plant.data.time)
+            active_decision_index = None
+            if pending is not None:
+                pending.update(next_observation=state.copy(), next_adaptive_state=belief.value_state_record(),
+                    end_time_s=float(truth.time_s), duration_s=max(0.,float(truth.time_s)-pending["start_time_s"]),
+                    completion="FALLBACK_COMMITTED", selected_plan_activated=True)
+                learning_records.append(pending)
+                pending = None
         schedule_done = bool(
             active_schedule is not None
             and (reference_governor.is_complete(active_schedule) if reference_governor is not None else (float(plant.data.time) if runtime.get("wall_session") is not None else float(truth.time_s)) - schedule_start_time + 1.0e-12 >= active_schedule.duration_s)
@@ -2519,7 +2561,30 @@ def _run_executed_case(
             and np.allclose(active_schedule.candidate.dq_waypoint_rad_s, 0.0,
                             atol=1e-10, rtol=0.0)
         )
-        if online_timing and async_pending is not None:
+        if (fallback_latch is not None and fallback_latch.mode == "BRAKING"
+                and active_schedule is fallback_latch.bundle.stop and schedule_done):
+            fallback_latch.stopped()
+            fallback_stop_sample_s = float(observation.sample_timestamp_s)
+            fallback_event("FALLBACK_STOPPED", q_rad=reference_state[:2].copy(),
+                           dq_rad_s=reference_state[2:].copy(),ddq_rad_s2=reference_acceleration.copy())
+            fallback_event("FALLBACK_HOLD", execution_state="SAFE_FALLBACK_HOLD")
+        if (async_pending is not None and async_pending.get("pass_through_prefetch")
+                and fallback_latch is not None and lifecycle.expired(async_pending["request"])):
+            lifecycle.discard(async_pending["request"], "EXPIRED", "STALE_PLAN_MAXIMUM_AGE")
+            async_pending["fallback_discarded"] = True
+        if async_pending is not None and async_pending.get("fallback_discarded"):
+            if result_ready(async_pending):
+                old_request = async_pending["request"]
+                lifecycle.mark_once(old_request, "result_collected_ns")
+                try:
+                    lifecycle.result(async_pending["future"])
+                except Exception:
+                    pass  # Immutable worker exception remains in the lifecycle.
+                fallback_event("OLD_PRIMARY_DROPPED", request_id=old_request.request_id,
+                    age_ms=(monotonic_ns()-old_request.sensor_capture_ns)/1e6,
+                    stale=lifecycle.expired(old_request))
+                async_pending = None
+        if online_timing and async_pending is not None and not async_pending.get("fallback_discarded"):
             request = async_pending["request"]
             future = async_pending["future"]
             if lifecycle.expired(request):
@@ -2543,10 +2608,15 @@ def _run_executed_case(
                         task_state = abort_episode(task_state, "TASK_EXPIRED_REQUEST_RETRY_LIMIT")
                         continue
             if (async_pending is not None and not async_pending.get("expired", False)
-                    and future.done()
+                    and result_ready(async_pending)
                     and (not async_pending.get("pass_through_prefetch") or schedule_done
                          or (async_pending.get("handoff_bridge_schedule") is not None
                              and active_schedule is async_pending["handoff_bridge_schedule"]))):
+                activation_backup = (dict(schedule=active_schedule, start_time=schedule_start_time,
+                    reference_state=reference_state.copy(), reference_acceleration=reference_acceleration.copy(),
+                    request=request, latch=fallback_latch)
+                    if fallback_latch is not None and fallback_latch.mode == "ARMED"
+                    and active_schedule is fallback_bridge else None)
                 lifecycle.mark(request, "result_collected_ns")
                 try:
                     decision = lifecycle.result(future)
@@ -2558,10 +2628,18 @@ def _run_executed_case(
                         "planning_runtime_ms_measured": lifecycle.records()[request.request_id]["compute_ms"],
                         "reference_boundary_continuity": None,
                     })
+                    if activation_backup is not None:
+                        fallback_event("PRIMARY_REJECTED_ESCAPE_RETAINED", reason=str(error))
+                        async_pending = None
+                        activation_backup = None
+                        continue
                     task_state = abort_episode(task_state, f"NO_FEASIBLE_WAYPOINT:{error}")
                     async_pending = None
                     continue
                 suffix_schedule = decision.executed.schedule
+                if (smooth_waypoint_mode and np.any(np.abs(suffix_schedule.candidate.dq_waypoint_rad_s)>1e-12)
+                        and getattr(suffix_schedule, "safe_escape", None) is None):
+                    raise RuntimeError("PASS_THROUGH_WITHOUT_PREVALIDATED_ESCAPE")
                 rolling_composite = None
                 if (async_pending.get("handoff_bridge_schedule") is not None
                         and async_pending["handoff_bridge_schedule"] is active_schedule
@@ -2709,7 +2787,26 @@ def _run_executed_case(
                         outcome="AWAITING_ACTIVATION")
                     rolling_splice_events.append(splice_event)
                 def on_task_activation(receipt):
-                    nonlocal schedule_start_time, rolling_splice_pending
+                    nonlocal schedule_start_time, rolling_splice_pending, active_escape
+                    nonlocal fallback_latch, activation_backup
+                    if fallback_latch is not None:
+                        age_ns = int(receipt["apply_ns"])-request.sensor_capture_ns
+                        if fallback_latch.mode == "ARMED":
+                            if not fallback_latch.choose_primary(validated=True, age_ns=age_ns):
+                                raise RuntimeError("PRIMARY_AFTER_FALLBACK_COMMIT")
+                        elif fallback_latch.mode == "SAFE_FALLBACK_HOLD":
+                            if not fallback_latch.resume(fresh=request.source_sample_time_s >= fallback_stop_sample_s,
+                                                         validated=True, age_ns=age_ns):
+                                raise RuntimeError("INVALID_FALLBACK_RESUME")
+                            fallback_event("RESUME_ACTIVATED", request_id=request.request_id,age_ms=age_ns/1e6)
+                        else:
+                            raise RuntimeError("PRIMARY_INTERRUPTED_BRAKING")
+                        fallback_latch = None
+                    active_escape = getattr(suffix_schedule, "safe_escape", None)
+                    if active_escape is not None:
+                        fallback_event("ESCAPE_ADMITTED", request_id=request.request_id,
+                                       certificate=active_escape.certificate)
+                    activation_backup = None
                     schedule_start_time = float(plant.data.time)
                     if pending is not None:
                         pending["start_time_s"] = schedule_start_time
@@ -2735,6 +2832,7 @@ def _run_executed_case(
                 async_pending = None
         if (online_timing and async_pending is not None
                 and async_pending.get("pass_through_prefetch") and schedule_done
+                and not async_pending.get("fallback_discarded")
                 and not async_pending["future"].done()):
             task_state = abort_episode(task_state, "PASS_THROUGH_PREFETCH_NOT_READY_AT_ENDPOINT")
             continue
@@ -2767,33 +2865,20 @@ def _run_executed_case(
             # the independent worker runs; physical time and task clocks advance.
             handoff_bridge = None
             if prefetch_due:
-                old_end = active_schedule.sample(active_schedule.duration_s)
-                bridge_duration_s = 8.0*CONTROL_DT_S
-                bridge_target_q = old_end.q_rad + bridge_duration_s*old_end.dq_rad_s
-                bridge_candidate = _candidate(
-                    f"future_handoff_bridge_{len(decisions):03d}", task_state.phase,
-                    bridge_target_q, old_end.dq_rad_s, spec)
-                try:
-                    scheduler.human_model = belief.human_model()
-                    handoff_bridge = scheduler.plan_fixed_duration_reference_contract(
-                        current_q_hat_rad=old_end.q_rad,
-                        current_dq_hat_rad_s=old_end.dq_rad_s,
-                        candidate=bridge_candidate, duration_s=bridge_duration_s,
-                        phase_elapsed_s=task_state.phase_elapsed_s)
-                    bridge_mechanics = adaptive_planner.mechanics_screen.evaluate(
-                        belief, bridge_candidate, handoff_bridge)
-                    if not bridge_mechanics["feasible"]:
-                        raise ValueError(f"BRIDGE_MECHANICS:{bridge_mechanics['rejection_reason']}")
-                except (ValueError, RuntimeError) as error:
-                    task_state = abort_episode(task_state, f"FUTURE_HANDOFF_BRIDGE_REJECTED:{error}")
-                    continue
+                if active_escape is None:
+                    raise RuntimeError("PASS_THROUGH_WITHOUT_PREVALIDATED_ESCAPE")
+                handoff_bridge = active_escape.bridge
+                fallback_bridge = handoff_bridge
+                fallback_latch = FallbackLatch(active_escape)
                 future_handoff_bridges.append(dict(
                     request_sample_s=float(observation.sample_timestamp_s),
                     source_schedule_label=active_schedule.candidate.label,
-                    bridge_duration_s=bridge_duration_s,
-                    bridge_target_q_rad=bridge_target_q.copy(),
-                    bridge_target_dq_rad_s=old_end.dq_rad_s.copy(),
-                    bridge_mechanics=bridge_mechanics))
+                    bridge_duration_s=handoff_bridge.duration_s,
+                    bridge_target_q_rad=handoff_bridge.candidate.q_waypoint_rad.copy(),
+                    bridge_target_dq_rad_s=handoff_bridge.candidate.dq_waypoint_rad_s.copy(),
+                    bridge_mechanics=active_escape.certificate["bridge_mechanics"],
+                    fallback_commit_progress_s=active_escape.commit_progress_s,
+                    prevalidated=True))
                 first_bridge = handoff_bridge.sample(0.0)
                 if any(np.max(np.abs(delta)) > 1e-10 for delta in (
                         first_bridge.q_rad-reference_state[:2],
@@ -2802,6 +2887,9 @@ def _run_executed_case(
                     task_state = abort_episode(task_state, "FUTURE_HANDOFF_BRIDGE_C2")
                     continue
             request = lifecycle.request("TASK", observation.sample_timestamp_s, asynchronous=True)
+            if fallback_latch is not None and fallback_latch.mode == "SAFE_FALLBACK_HOLD":
+                fallback_event("FRESH_REPLAN_REQUESTED", request_id=request.request_id,
+                    source_sample_s=request.source_sample_time_s, stopped_sample_s=fallback_stop_sample_s)
             request_reference = (np.r_[handoff_bridge.sample(handoff_bridge.duration_s).q_rad,
                                       handoff_bridge.sample(handoff_bridge.duration_s).dq_rad_s]
                                  if prefetch_due else reference_state.copy())
@@ -2992,10 +3080,22 @@ def _run_executed_case(
             # deadline validation are still running. Its first actual command
             # must use the C2 origin; the receipt hook establishes its clock.
             if reference_governor is not None:
+                if fallback_latch is not None and active_schedule is fallback_bridge:
+                    schedule_elapsed = fallback_latch.cap(schedule_elapsed)
                 reference, progress_proposal = reference_governor.select(
                     active_schedule, max(0.0, schedule_elapsed), runtime["contract"].reference_motion_history,
                     spec.task_joint_acceleration_limit_rad_s2,
                     first=runtime.get("plan_to_activate") is not None)
+                if (fallback_latch is not None and active_schedule is fallback_bridge
+                        and fallback_latch.mode == "ARMED"
+                        and progress_proposal["selected_progress_s"] >= fallback_latch.bundle.commit_progress_s-1e-12):
+                    fallback_latch.commit()
+                    fallback_event("FALLBACK_COMMITTED", commit_progress_s=fallback_latch.bundle.commit_progress_s,
+                        selected_progress_s=progress_proposal["selected_progress_s"],
+                        q_rad=reference.q_rad.copy(),dq_rad_s=reference.dq_rad_s.copy(),ddq_rad_s2=reference.ddq_rad_s2.copy())
+                    if async_pending is not None:
+                        lifecycle.discard(async_pending["request"], "CANCELLED", "FALLBACK_COMMITTED")
+                        async_pending["fallback_discarded"] = True
                 splice_commit_pending = None
                 if (rolling_splice_pending is not None
                         and not rolling_splice_pending["spliced"]
@@ -3040,8 +3140,8 @@ def _run_executed_case(
                                            fresh_ns=splice_capture_ns):
                         age_original = monotonic_ns()-pending_splice["request"].sensor_capture_ns
                         age_fresh = monotonic_ns()-fresh_ns
-                        valid = 0 <= age_original <= lifecycle.maximum_age_ns and (
-                            0 <= age_fresh <= lifecycle.maximum_age_ns)
+                        valid = 0 <= age_original < lifecycle.maximum_age_ns and (
+                            0 <= age_fresh < lifecycle.maximum_age_ns)
                         if not valid:
                             pending_splice["event"]["outcome"] = "SPLICE_STALE_AT_APPLY"
                         return valid
@@ -3184,6 +3284,21 @@ def _run_executed_case(
                 trace[-1].update(attempt)
             else:
                 trace[-1]["execution_rejected_before_apply"] = True
+            if (activation_backup is not None and not attempt.get("applied")
+                    and str(error) in ("CURRENT_MODEL_ACTIVATION_REVALIDATION", "STALE_PLAN_MAXIMUM_AGE",
+                                       "ACTUAL_REMAINING_PHASE_TIME")):
+                backup = activation_backup
+                active_schedule = backup["schedule"]
+                schedule_start_time = backup["start_time"]
+                reference_state = backup["reference_state"]
+                reference_acceleration = backup["reference_acceleration"]
+                fallback_latch = backup["latch"]
+                active_decision_index = None
+                for key in ("plan_to_activate", "activation_validator", "actual_activation_hook", "reference_progress_commit"):
+                    runtime.pop(key, None)
+                fallback_event("PRIMARY_REJECTED_ESCAPE_RETAINED", reason=str(error),request_id=backup["request"].request_id)
+                activation_backup = None
+                continue
             task_state = abort_episode(task_state, f"LOW_LEVEL_EXECUTION:{error}")
 
     if task_state.phase not in (TaskPhase.COMPLETE, TaskPhase.ABORTED):

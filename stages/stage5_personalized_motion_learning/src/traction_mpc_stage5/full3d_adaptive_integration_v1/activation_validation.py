@@ -161,6 +161,17 @@ def validate_activation(*, belief, request_sequence, schedule, clearance,
               "truth_consumed": False}
     record["feasible"] = bool(phase is request_phase and schedule.duration_s <= remaining_s+1e-12
                               and continuity and mechanics["feasible"] and lower >= 0.)
+    escape = getattr(schedule, "safe_escape", None)
+    if escape is not None:
+        bridge_mechanics = AdaptiveMechanicsScreenV22().evaluate(belief, escape.bridge.candidate, escape.bridge)
+        stop_mechanics = AdaptiveMechanicsScreenV22().evaluate(belief, escape.stop.candidate, escape.stop)
+        geometry_valid = clearance_geometry_signature(clearance) == escape.certificate["geometry_signature"]
+        reserve = schedule.duration_s + escape.commit_progress_s + escape.stop.duration_s
+        escape_valid = bool(geometry_valid and bridge_mechanics["feasible"] and stop_mechanics["feasible"]
+                            and reserve <= remaining_s+1e-12)
+        record["safe_escape"] = dict(feasible=escape_valid, geometry_valid=geometry_valid,
+            bridge_mechanics=bridge_mechanics, stop_mechanics=stop_mechanics, stop_horizon_s=reserve)
+        record["feasible"] = record["feasible"] and escape_valid
     if future_handoff is not None:
         # Revalidate a speculative endpoint plan against a *new* deployable
         # observation. Neither the original request capture nor its age is
@@ -223,7 +234,7 @@ def validate_activation(*, belief, request_sequence, schedule, clearance,
                          else spec.outbound_goal_target_rad)
         goal_valid = bool(np.allclose(schedule.candidate.phase_goal_rad,
                                       expected_goal, atol=1e-12, rtol=0.0))
-        ages_valid = bool(0 <= original_age_ms <= 100. and 0 <= revalidation_age_ms <= 100.)
+        ages_valid = bool(0 <= original_age_ms < 100. and 0 <= revalidation_age_ms < 100.)
         record["future_handoff_revalidation"] = {
             "original_request_sample_s": future_handoff["original_sample_s"],
             "original_request_capture_ns": original_ns,
