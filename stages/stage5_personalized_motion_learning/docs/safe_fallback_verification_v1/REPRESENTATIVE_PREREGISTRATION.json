@@ -1,0 +1,83 @@
+{
+  "schema": "safe_fallback_representative_freeze_v1",
+  "evidence": "development_representative",
+  "created_utc": "2026-09-28T11:53:52.690582+00:00",
+  "branch": "codex/learning-safe-fallback-v1",
+  "head": "0cb898b61497b51b5d2a645b3941d03dd3f3f74b",
+  "source_fingerprint": "5a4b1d15f0711c349926cba2ed604906853215edd7cfdee6d188a7bac1c72ae7",
+  "source_map_sha256": "5043119ad85feac3ce97dce482a792d6137ec1da30df7f49c6a0fd41f7c704ba",
+  "old_case_manifest_sha256": "778cc5b0bd9b3015ed1e46e4d63785fed026b507169dfe6a8a6737b8cdf39314",
+  "rows": [
+    {
+      "id": "low_ordinary",
+      "plant": "low_rom",
+      "case": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/low_rom_regression_cases/balanced_ordinary_r01.json",
+      "case_sha256": "ceb33e9eeb243d49ad4bd1ad0a17637243219f3e058f4da0aaf2ed9fbf975b2d"
+    },
+    {
+      "id": "low_near_upper",
+      "plant": "low_rom",
+      "case": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/low_rom_regression_cases/hip_dominant_near_upper_current_rom_r02.json",
+      "case_sha256": "79ed7011765b593bb55bef72a9f8ce33db2eaa01819687e9a6834fd4ca865136"
+    },
+    {
+      "id": "high_100_sync",
+      "plant": "high_rom",
+      "case": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_nominal_sync_100_v1.json",
+      "case_sha256": "478d94f0cf1def23916e11ff7b249a4f7b92bfe544cce21a4045c53fe226d960"
+    },
+    {
+      "id": "high_110_sync",
+      "plant": "high_rom",
+      "case": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_nominal_sync_110_v1.json",
+      "case_sha256": "12f74755846f9920c3688dfa37ee799bc632304962ae64c667d832dfb1881c58"
+    },
+    {
+      "id": "high_120_sync",
+      "plant": "high_rom",
+      "case": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_nominal_sync_120_v1.json",
+      "case_sha256": "d9f4d636b98db5792cf4b50915f4509bf2274c1c80764d6d8629bf22e3ae9b96"
+    },
+    {
+      "id": "high_120_hip",
+      "plant": "high_rom",
+      "case": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_matrix_nominal_hip_v1.json",
+      "case_sha256": "8b22c034e25c4519d96ee671bdef012da2b34be7f3513cbb8d83fdc6ac3486a3"
+    },
+    {
+      "id": "high_120_start_6_11",
+      "plant": "high_rom",
+      "case": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_01_v1.json",
+      "case_sha256": "002c7bd58597ce325e6fc8800517484ff60d8286c964201379af4a5a2edf5d59"
+    },
+    {
+      "id": "high_120_start_8_13",
+      "plant": "high_rom",
+      "case": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_16_v1.json",
+      "case_sha256": "80d1d0eafabc690b680a699c459ea29c99c4ec64cee275beb2eded38e61d3083"
+    }
+  ],
+  "run_order": [
+    "low_ordinary",
+    "low_near_upper",
+    "high_100_sync",
+    "high_110_sync",
+    "high_120_sync",
+    "high_120_hip",
+    "high_120_start_6_11",
+    "high_120_start_8_13"
+  ],
+  "budget": 8,
+  "exclusions": "none; every attempted run retained",
+  "scorer": "scorer-v2-return-physical-commit",
+  "pass_rule": "COMPLETE; all scorer-v2 task/safety conditions; arrival/dwell/RETURN; C2 <=1e-6; zero >=100ms stale activation; frozen representative near-stop caps; committed fallback certified, before bridge endpoint, irrevocable, stop-hold-fresh replan-resume-COMPLETE",
+  "smoothness_caps_s": {
+    "low_ordinary": 0.15,
+    "low_near_upper": 0.19,
+    "high_rom": 0.175
+  },
+  "runtime_rule": "characterization only; historical 55ms activation FAIL retained; no hardware qualification",
+  "scientific_variables_changed": [],
+  "scorer_changed": false,
+  "production_changed": false
+}
