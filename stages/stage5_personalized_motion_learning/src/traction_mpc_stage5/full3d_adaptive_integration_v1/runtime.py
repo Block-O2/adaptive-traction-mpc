@@ -74,6 +74,7 @@ from ..architecture_recovery_v2.phase3_human_waypoint import (
 from .online_planning import PlanLifecycle, snapshot_task_call
 from .wall_physics import WallPhysicsSession
 from .scientific_scheduler import ScientificPhysicsSession
+from .session_state import carryover_runtime_fields, FORBIDDEN_TRANSIENT_FIELDS
 from .execution_policy import ExecutionMode, ScientificPlanLifecycle, SimulationVersion
 from .activation_validation import (validate_activation, validate_rolling_composite,
                                     clearance_geometry_signature,
@@ -1620,6 +1621,81 @@ def _run_dev_a_active_recovery(
     return result
 
 
+def _resume_session_runtime(session_context: dict[str, Any], spec: Any) -> dict[str, Any]:
+    """Start a new task runtime around only the contracted persistent state."""
+    previous = session_context["runtime"]
+    prior_wall = previous.get("wall_session")
+    prior_lifecycle = previous.get("plan_lifecycle")
+    if prior_wall is None or prior_wall.active or (
+            prior_lifecycle is not None and prior_lifecycle._outstanding is not None):
+        raise RuntimeError("previous repetition not fully finalized")
+    runtime = carryover_runtime_fields(previous)
+    if set(runtime).intersection(FORBIDDEN_TRANSIENT_FIELDS):
+        raise RuntimeError("transient state crossed repetition boundary")
+    plant = runtime["plant"]
+    if not math.isclose(float(plant.data.time), session_context["end_time_s"],
+                        abs_tol=1.0e-12, rel_tol=0.0):
+        raise RuntimeError("continuous plant time changed between repetitions")
+    runtime["model"] = session_context["updater"].snapshot().human_model()
+    runtime["model_sequence"] = session_context["updater"].sequence
+    runtime["contract"] = HumanWaypointMPCShadowContractV1(
+        spec, runtime["model"], runtime["allocator"])
+    runtime["supervisor"] = Stage5LoadedTrackBrakeSupervisor()
+    runtime["monitor"] = SplitAccelerationMonitorV1()
+    runtime["authority"] = HumanMotionAccelerationAuthorityV1(
+        spec.task_joint_acceleration_limit_rad_s2)
+    runtime["offline_support_setup"] = {
+        "scope": "previous repetition terminal command carried into next epoch",
+        "source_sample_time_s": runtime["last_command_source_sample_s"],
+        "receipt_index": 0}
+    return runtime
+
+
+def _start_applied_reference_history(runtime: dict[str, Any], start_q: np.ndarray,
+                                     resumed: bool) -> AppliedReferenceMotionHistory:
+    plant = runtime["plant"]
+    if resumed:
+        initial_q, initial_dq = start_q.copy(), np.zeros(2)
+    else:
+        initial_q, initial_dq = runtime["contract"].reference_motion_history.last_reference()[:2]
+    return AppliedReferenceMotionHistory(
+        lambda: float(plant.data.time), initial_q, initial_dq, float(plant.data.time))
+
+
+def _start_scientific_session_epoch(runtime: dict[str, Any], output_dir: Path,
+                                    runtime_capture: dict[str, Any] | None,
+                                    host_delay_s: float, start_q: np.ndarray,
+                                    resumed: bool) -> ScientificPlanLifecycle:
+    plant = runtime["plant"]
+    session = ScientificPhysicsSession(
+        runtime, stop_check=(None if runtime_capture is None
+                             else runtime_capture.get("stop_check")))
+    runtime["wall_session"] = session
+
+    def simulation_version():
+        return SimulationVersion(
+            episode_epoch=str(output_dir.resolve()),
+            state_version=session.steps + len(session.samples),
+            physics_step=session.steps,
+            sim_time_s=float(plant.data.time),
+            phase_version=len(session.phase_records)-1+int(runtime.get("task_phase_version", 0)),
+            human_model_version=str(runtime.get("model_sequence", "population_prior_v1")),
+            reference_version=str(len(session.applied_commands)))
+
+    lifecycle = ScientificPlanLifecycle(
+        session, version_provider=simulation_version,
+        process_worker=bool(runtime["autonomous_recovery_options"].get(
+            "planner_process_worker", False)),
+        host_delay_s=host_delay_s)
+    runtime["plan_lifecycle"] = lifecycle
+    # The first epoch creates the measurement layer. Later epochs keep its
+    # filter/RNG/delivery history and merely acquire a fresh boundary sample.
+    session.capture(initial=not resumed)
+    runtime["contract"].reference_motion_history = _start_applied_reference_history(
+        runtime, start_q, resumed)
+    return lifecycle
+
+
 def _run_executed_case(
     output_dir: Path,
     *,
@@ -1637,6 +1713,7 @@ def _run_executed_case(
     runtime_capture: dict[str, Any] | None = None,
     execution_mode: str = ExecutionMode.REALTIME_CHARACTERIZATION.value,
     scientific_host_delay_s: float = 0.0,
+    session_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run physical commissioning and one event-driven OUTBOUND/HOLD/RETURN task."""
 
@@ -1649,6 +1726,9 @@ def _run_executed_case(
         raise ValueError("scientific mode requires the registered async worker and physical session")
     if not scientific and scientific_host_delay_s:
         raise ValueError("host delay injection is scientific-mode only")
+    resumed = session_context is not None and "updater" in session_context
+    if session_context is not None and not scientific:
+        raise ValueError("continuous session requires SCIENTIFIC_SIMULATION")
     validate_recovery_options(recovery_options)
     if recovery_options and not dev_d_rigid_table_reference:
         raise ValueError("autonomous recovery options require the rigid-table closed-loop path")
@@ -1713,15 +1793,19 @@ def _run_executed_case(
         from ..fresh_qualification_v1.scenario import hidden_plant
         physical_human, physical_geometry, spec, custom_commissioning = hidden_plant(qualification_case)
     start_q = np.asarray(spec.start_return_target_rad, dtype=float)
-    runtime = _initialize_loaded_runtime("full3d_adaptive_v1", start_q, spec=spec,
-        physical_human=physical_human,physical_geometry=physical_geometry,
-        control_human=control_human,
-        startup_execution_pose_alignment=recovery_options.get("startup_execution_pose_alignment", False),
-        exact_cached_plant=recovery_options.get("exact_cached_plant", False))
-    plant = runtime["plant"]
+    if resumed:
+        runtime = _resume_session_runtime(session_context, spec)
+        plant = runtime["plant"]
+    else:
+        runtime = _initialize_loaded_runtime("full3d_adaptive_v1", start_q, spec=spec,
+            physical_human=physical_human,physical_geometry=physical_geometry,
+            control_human=control_human,
+            startup_execution_pose_alignment=recovery_options.get("startup_execution_pose_alignment", False),
+            exact_cached_plant=recovery_options.get("exact_cached_plant", False))
+        plant = runtime["plant"]
     runtime["execution_mode"] = mode.value
     runtime["autonomous_recovery_options"] = recovery_options
-    if recovery_options.get('incremental_window_wrench_baseline', False):
+    if recovery_options.get('incremental_window_wrench_baseline', False) and not resumed:
         from .command_response_history import CommandResponseHistory
         history = CommandResponseHistory()
         history.record(float(plant.data.time), runtime['last_command_source_sample_s'],
@@ -1735,32 +1819,18 @@ def _run_executed_case(
                  if online_timing and not scientific else None)
     if lifecycle is not None:
         runtime["plan_lifecycle"] = lifecycle
-    if recovery_options.get("whole_session_wall_physics", False):
+    if scientific:
+        lifecycle = _start_scientific_session_epoch(
+            runtime, output_dir, runtime_capture, scientific_host_delay_s,
+            start_q, resumed)
+    elif recovery_options.get("whole_session_wall_physics", False):
         if not online_timing:
             raise ValueError("whole_session_wall_physics requires monotonic_async_planning")
-        session_type = ScientificPhysicsSession if scientific else WallPhysicsSession
-        runtime["wall_session"] = session_type(runtime, stop_check=(None if runtime_capture is None
-                                                    else runtime_capture.get("stop_check")))
-        if scientific:
-            session = runtime["wall_session"]
-            def simulation_version():
-                return SimulationVersion(
-                    episode_epoch=str(output_dir.resolve()),
-                    state_version=session.steps + len(session.samples),
-                    physics_step=session.steps,
-                    sim_time_s=float(plant.data.time),
-                    phase_version=len(session.phase_records)-1+int(runtime.get("task_phase_version", 0)),
-                    human_model_version=str(runtime.get("model_sequence", "population_prior_v1")),
-                    reference_version=str(len(session.applied_commands)))
-            lifecycle = ScientificPlanLifecycle(
-                session, version_provider=simulation_version,
-                process_worker=bool(recovery_options.get("planner_process_worker", False)),
-                host_delay_s=scientific_host_delay_s)
-            runtime["plan_lifecycle"] = lifecycle
+        runtime["wall_session"] = WallPhysicsSession(runtime, stop_check=(
+            None if runtime_capture is None else runtime_capture.get("stop_check")))
         runtime["wall_session"].capture(initial=True)
-        initial_reference = runtime["contract"].reference_motion_history.last_reference()
-        runtime["contract"].reference_motion_history = AppliedReferenceMotionHistory(
-            lambda: float(plant.data.time), *initial_reference, float(plant.data.time))
+        runtime["contract"].reference_motion_history = _start_applied_reference_history(
+            runtime, start_q, resumed)
     measurement_layer = runtime["measurement_layer"]
     observer = runtime["observer"]
     if qualification_case is not None:
@@ -1771,7 +1841,7 @@ def _run_executed_case(
         np.radians(np.asarray(config["commissioning_reference"]["waypoints_deg"], dtype=float))
         if custom_commissioning is None else custom_commissioning
     )
-    if qualification_case is not None:
+    if qualification_case is not None and not resumed:
         # The first 20 ms must hold the causally reconstructed state that was
         # committed by initial support, not a hidden physical start angle.
         # Subsequent/terminal commissioning targets remain the registered path.
@@ -1797,7 +1867,7 @@ def _run_executed_case(
     runtime["trace"] = trace
     runtime["commissioning_reference_events"] = commissioning_reference_events
     next_identification_time = 0.0
-    commissioning_steps = int(round(commissioning_duration / CONTROL_DT_S))
+    commissioning_steps = -1 if resumed else int(round(commissioning_duration / CONTROL_DT_S))
     def dev_d_abort_record(reason: str, truth: Any, observation: Any,
                            interface: Any, **details: Any) -> None:
         """Persist the causal boundary plus separately labeled oracle state."""
@@ -2050,8 +2120,9 @@ def _run_executed_case(
             commissioning_delay_elapsed_s += CONTROL_DT_S
         step += 1
 
-    commissioning_duration = (float(plant.data.time) if runtime.get("wall_session") is not None
-                              else commissioning_steps * CONTROL_DT_S)
+    commissioning_duration = (0.0 if resumed else
+        float(plant.data.time) if runtime.get("wall_session") is not None
+        else commissioning_steps * CONTROL_DT_S)
 
     old_commissioning_model = runtime["model"]
     if transfer_config is not None:
@@ -2063,7 +2134,7 @@ def _run_executed_case(
             output_envelope=transfer_config["output_envelope"],
         )
     old_commissioning_pose = None
-    if dev_a_recovery and (recovery_options.get("fitted_coordinate_handoff", False)
+    if dev_a_recovery and not resumed and (recovery_options.get("fitted_coordinate_handoff", False)
                            or recovery_options.get("startup_execution_pose_alignment", False)):
         continuity = stationary_emitted_boundary(
             trace, runtime.get("emitted_robot_reference_history", []), settle_duration)
@@ -2071,7 +2142,7 @@ def _run_executed_case(
         if not continuity["stationary_verified"]:
             raise RuntimeError("HANDOFF_EMITTED_REFERENCE_NOT_STATIONARY")
         old_commissioning_pose = runtime["emitted_robot_reference_history"][-1]["pose"]
-    elif dev_a_recovery:
+    elif dev_a_recovery and not resumed:
         terminal_support = _candidate(
             "commissioning_terminal_support", TaskPhase.RETURN,
             start_q, np.zeros(2), spec, WaypointExecutionContext.COMMISSIONING,
@@ -2079,7 +2150,11 @@ def _run_executed_case(
         old_commissioning_pose = runtime["contract"].prepare(
             terminal_support).reference.world_from_cuff
 
-    if qualification_arm == "fixed_population":
+    if resumed:
+        fit = session_context["fit"]
+        updater = session_context["updater"]
+        commissioning_updates = []
+    elif qualification_arm == "fixed_population":
         # Commissioning is still physically executed; the fixed arm deliberately
         # never fits the commissioned observations.  A rejected geometry fit
         # must not selectively turn this structurally fixed arm into a crash.
@@ -2167,15 +2242,16 @@ def _run_executed_case(
         recovery_config = json.loads(recovery_config_path.read_text(encoding="utf-8"))
         if recovery_config["schema"] != "full3d_dev_a_recovery_v1" or recovery_config["value_hook"] != 0.0:
             raise ValueError("unexpected DEV-A recovery config")
-        assert old_commissioning_pose is not None
-        recovery_result = _run_dev_a_active_recovery(
-            runtime, spec=spec, updater=updater, scheduler=scheduler,
-            clearance=clearance, old_model=old_commissioning_model,
-            old_robot_cuff_pose=old_commissioning_pose,
-            commissioning_segment_duration_s=segment_duration,
-            trace=trace, simulate_planning_latency=simulate_planning_latency,
-            config={**config, **recovery_config},
-        )
+        if not resumed:
+            assert old_commissioning_pose is not None
+            recovery_result = _run_dev_a_active_recovery(
+                runtime, spec=spec, updater=updater, scheduler=scheduler,
+                clearance=clearance, old_model=old_commissioning_model,
+                old_robot_cuff_pose=old_commissioning_pose,
+                commissioning_segment_duration_s=segment_duration,
+                trace=trace, simulate_planning_latency=simulate_planning_latency,
+                config={**config, **recovery_config},
+            )
 
     truth, measurement = _capture_boundary(runtime)
     observation, interface = observer.update(
@@ -2197,6 +2273,7 @@ def _run_executed_case(
             outbound_hold_completed=False,
             abort_reason=(f"ACTIVE_RECOVERY_ABORTED:{error}"
                           if recovery_result is not None and recovery_result["entered"]
+                          else f"REPETITION_START_NOT_SETTLED:{error}" if resumed
                           else f"COMMISSIONING_HANDOFF_NOT_SETTLED:{error}"),
         )
 
@@ -3724,6 +3801,10 @@ def _run_executed_case(
             [str(row.get("safety_mode", "")) for row in trace]
         ),
     )
+    if session_context is not None:
+        session_context.update(runtime=runtime, updater=updater, fit=fit,
+                               end_time_s=float(plant.data.time),
+                               final_belief=updater.snapshot())
     return summary
 
 

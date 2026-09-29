@@ -1,0 +1,28 @@
+{
+  "schema": "zero_value_session_v1_deterministic_tests",
+  "before_dynamic_attempt": {
+    "command": "python -m unittest discover -s stages/stage5_personalized_motion_learning/tests/full3d_adaptive_integration_v1 -p test_zero_value_session_state.py -v",
+    "tests": 5,
+    "status": "PASS",
+    "coverage": [
+      "explicit runtime state carryover and transient filtering",
+      "missing persistent state rejected",
+      "measured-force and moment integration on synthetic simulation-time trace",
+      "zero-value candidate/selection logging",
+      "nonzero value rejected"
+    ]
+  },
+  "standalone_single_repetition": {
+    "case": "balanced_ordinary_r01",
+    "execution_mode": "SCIENTIFIC_SIMULATION",
+    "status": "COMPLETE",
+    "physical": "PASS",
+    "scientific": "PASS",
+    "raw_scorer_v2": "PASS",
+    "host_elapsed_s": 38.90204524599999
+  },
+  "after_logger_fix": {
+    "same_five_deterministic_tests": "PASS",
+    "dynamic_simulation_rerun": false
+  }
+}
