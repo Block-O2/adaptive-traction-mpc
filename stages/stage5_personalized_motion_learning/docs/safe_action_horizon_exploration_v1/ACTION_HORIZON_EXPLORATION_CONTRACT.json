@@ -1,0 +1,119 @@
+{
+  "action_family": "exploration-only deviations of direct two-joint waypoint increments; no production planner objective or safety edit",
+  "amplitude_rule": "small/medium/large fractions of current local phase-goal remaining and task span, anchored to the existing 0.20-span candidate maximum; actual radians/degrees and feasibility recorded; no fixed-degree scale",
+  "analysis": [
+    "benefit distribution and baseline scale ratios",
+    "amplitude, horizon and checkpoint effects",
+    "feasibility and force-clearance tradeoff",
+    "short versus full-task rank/correlation",
+    "behavior and state divergence",
+    "cross-state BEST/NEUTRAL/WORSE safe validation"
+  ],
+  "baseline_branch": "codex/zero-value-30rep-baseline-v3",
+  "baseline_commit": "1f6308b820b64fc2cc7d8a01baa42e433835e68e",
+  "baseline_variability_reference": {
+    "late_range_J_F_task_n_s": 1.9148941252947225,
+    "late_std_J_F_task_n_s": 0.6425003226154133,
+    "scope": "descriptive from one continuous baseline session, not a significance threshold"
+  },
+  "coarse_target_valid": 80,
+  "directions": [
+    "progress_slower",
+    "progress_faster",
+    "hip_leading",
+    "knee_leading",
+    "hip_dominant",
+    "knee_dominant",
+    "opposed_differential_with_nonnegative_progress"
+  ],
+  "exploration_branch": "codex/safe-action-horizon-exploration-v1",
+  "hard_constraints": [
+    "existing ROM",
+    "existing velocity and acceleration",
+    "existing force and moment",
+    "existing clearance",
+    "existing controller and safety",
+    "existing Scientific Simulation semantics",
+    "physical/scientific validity"
+  ],
+  "held_out_policy": "all selected checkpoints are exploratory; cross-state validation is confirmatory within this exploratory landscape and is not an independent held-out test",
+  "horizons": {
+    "H1": "first affected OUTBOUND decision",
+    "H2": "first three OUTBOUND decisions",
+    "H3": "all OUTBOUND decisions",
+    "H4": "OUTBOUND and RETURN, HOLD remains existing planner"
+  },
+  "ideal_valid_range": [
+    100,
+    160
+  ],
+  "infrastructure_repair_limit": 5,
+  "invalid_policy": "record every safety rejection, infeasible candidate, physical/scientific failure and exception; continue other candidates",
+  "learner": "none",
+  "matched_baseline_replay_required": true,
+  "maximum_wall_hours": 8,
+  "minimum_valid": 60,
+  "primary_outcome": {
+    "benefit": "matched_baseline_J_F_task - exploration_J_F_task",
+    "definition": "integral norm(measured cuff force) dt over OUTBOUND + HOLD + RETURN",
+    "name": "J_F_task",
+    "positive_meaning": "lower interaction cost",
+    "unit": "N s"
+  },
+  "progress_interval_rollouts": 25,
+  "scheduling": "per-decision waypoint deviations are applied through the existing constrained quintic scheduler; continuous reference and C2 guards must pass; smooth phase envelopes for multi-decision perturbations",
+  "schema": "safe_action_horizon_exploration_contract_v1",
+  "scientific_question": "state x legal action perturbation x horizon -> measured scientific outcome; identify behavior worth learning without choosing a learner",
+  "separate_outcomes": [
+    "J_F_session",
+    "peak_cuff_force",
+    "cumulative_moment",
+    "peak_moment",
+    "minimum_deployable_clearance",
+    "completion_time",
+    "smoothness",
+    "task_completion",
+    "physical_validity",
+    "scientific_validity"
+  ],
+  "source_checkpoints": [
+    {
+      "checkpoint_path": "stages/stage5_personalized_motion_learning/results/zero_value_30rep_baseline_v3/formal_session_01/checkpoint_01.pkl.z",
+      "checkpoint_repetition": 1,
+      "checkpoint_sha256": "084214b7547ce4cf37bd0bea8234860fdff06e426235edfe6bb72e6b9def368f",
+      "stage": "EARLY",
+      "target_repetition": 2
+    },
+    {
+      "checkpoint_path": "stages/stage5_personalized_motion_learning/results/zero_value_30rep_baseline_v3/formal_session_01/checkpoint_05.pkl.z",
+      "checkpoint_repetition": 5,
+      "checkpoint_sha256": "92411a14e08ba3e1edb415cd94667d8fea8ab79af783cb49fa00c66cb6395f5e",
+      "stage": "POST_EARLY",
+      "target_repetition": 6
+    },
+    {
+      "checkpoint_path": "stages/stage5_personalized_motion_learning/results/zero_value_30rep_baseline_v3/formal_session_01/checkpoint_15.pkl.z",
+      "checkpoint_repetition": 15,
+      "checkpoint_sha256": "6040c56613b6db4ba3a51fa7fc029748a1bf54beacb2452e286860abff5adaab",
+      "stage": "MID",
+      "target_repetition": 16
+    },
+    {
+      "checkpoint_path": "stages/stage5_personalized_motion_learning/results/zero_value_30rep_baseline_v3/formal_session_01/checkpoint_25.pkl.z",
+      "checkpoint_repetition": 25,
+      "checkpoint_sha256": "489e21870798de4f86f41acb3b94af4fa281246386196ad1545e768eab60ca71",
+      "stage": "LATE",
+      "target_repetition": 26
+    }
+  ],
+  "status": "FROZEN_BEFORE_EXPLORATION",
+  "stop_conditions": [
+    "systemic matched-replay failure at a majority of checkpoints",
+    "production controller or scientific baseline damaged",
+    "required change to controller mathematics, Human dynamics, planner objective, safety/clearance or Scientific Mode",
+    "irrecoverable raw manifest/data damage",
+    "same infrastructure failure dominates after five bounded repair cycles",
+    "8-hour cap after current run"
+  ],
+  "truth_firewall": "evaluation-only Human/native state may be recorded after a run but never used to propose or select action"
+}
