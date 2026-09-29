@@ -1,0 +1,13 @@
+# WSL Learning Scientific Baseline v1
+
+**WSL_LEARNING_SCIENTIFIC_BASELINE_READY**
+
+Y9000P Ubuntu WSL2 is the sole primary scientific host for the next formal learning research. The frozen production source commit is `85fb8f10392c20289710c78274d78bb22b01df8c` on `codex/wsl-learning-scientific-v1`; the 618-file production fingerprint is `56a25e2411d1da5ece6e168960fbc26624b0fd4d6bdcd35cab1102c27a300edb`. Ubuntu 24.04.3 LTS / WSL2 kernel `6.6.87.2-microsoft-standard-WSL2` ran Python 3.10.21, MuJoCo 3.10.0, NumPy 2.2.6, SciPy 1.15.3, with OMP/OPENBLAS/MKL thread counts all 1.
+
+The four registered configs and SHA-256 hashes are in the companion JSON. The existing fixed CR12 IK multi-start seed is 20260918; no separate case seed was supplied. Initial IK keeps maximum minimum-Jacobian singular value as the primary score and resolves a 64-float64-epsilon numerical tie by distance to nominal home posture, then lexicographic q. The scientific execution contract freezes simulation state during host-only waits and uses simulation time and versioned receipts for scientific decisions; wall time is profiling only.
+
+Two 0 ms repetitions for each of low-ROM ordinary, high-ROM hip, 120/120 synchronous, and 120/120 variable-start were COMPLETE and physical/scientific PASS. All 48 trace arrays and the full native time/q/dq/torque/contact series matched exactly within each pair, as did scientific scorer values, phase boundaries, initial q and final q/dq. The low-ROM initial IK branch was identical in all its runs. The low-ROM 0 versus 500 ms host-only delay comparison also matched exactly on those scientific outputs. The old raw scorer's wall-time `plan_age` condition was false at 500 ms, as expected; the mode-aware physical and scientific outcomes remained PASS. One launcher invocation stopped because it incorrectly required this wall-time condition; completed outputs were retained and reused after correcting only the external launcher check. No production or config change occurred during the gate.
+
+Formal baseline, headroom, value learning, and final simulation statistics must run in this environment or an explicitly versioned successor. Mac evidence is historical development evidence and must not be pooled with formal WSL learning statistics. The cross-host equivalence FAIL remains in the record. Realtime qualification and hardware work are outside this baseline.
+
+The exact commands and output paths are in `WSL_LEARNING_GATE_RUN_MANIFEST.json`; raw ignored file hashes are in `WSL_LEARNING_GATE_RAW_DATA_MANIFEST.json`; detailed exact comparisons are in `WSL_LEARNING_GATE_VERIFICATION.json`. No 3-rep, 30-rep, headroom, RL/value learning, realtime or hardware run was performed.

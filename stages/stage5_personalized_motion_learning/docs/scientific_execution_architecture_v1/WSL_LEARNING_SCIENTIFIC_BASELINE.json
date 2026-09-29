@@ -1,0 +1,54 @@
+{
+  "schema": "wsl_learning_scientific_baseline_v1",
+  "status": "WSL_LEARNING_SCIENTIFIC_BASELINE_READY",
+  "scientific_source_commit_sha": "85fb8f10392c20289710c78274d78bb22b01df8c",
+  "branch": "codex/wsl-learning-scientific-v1",
+  "production_fingerprint": "56a25e2411d1da5ece6e168960fbc26624b0fd4d6bdcd35cab1102c27a300edb",
+  "production_file_count": 618,
+  "host": "Lenovo Y9000P",
+  "wsl": "Ubuntu 24.04.3 LTS / WSL2",
+  "kernel": "6.6.87.2-microsoft-standard-WSL2",
+  "python": "3.10.21",
+  "mujoco": "3.10.0",
+  "numpy": "2.2.6",
+  "scipy": "1.15.3",
+  "thread_settings": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1"
+  },
+  "configs": {
+    "low_rom_ordinary": {
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/low_rom_regression_cases/balanced_ordinary_r01.json",
+      "sha256": "ceb33e9eeb243d49ad4bd1ad0a17637243219f3e058f4da0aaf2ed9fbf975b2d"
+    },
+    "high_rom_hip": {
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_matrix_nominal_hip_v1.json",
+      "sha256": "8b22c034e25c4519d96ee671bdef012da2b34be7f3513cbb8d83fdc6ac3486a3"
+    },
+    "sync_120": {
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_nominal_sync_120_v1.json",
+      "sha256": "d9f4d636b98db5792cf4b50915f4509bf2274c1c80764d6d8629bf22e3ae9b96"
+    },
+    "variable_start_120": {
+      "path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_01_v1.json",
+      "sha256": "002c7bd58597ce325e6fc8800517484ff60d8286c964201379af4a5a2edf5d59"
+    }
+  },
+  "fixed_ik_multistart_rng_seed": 20260918,
+  "case_seed": "No additional RNG seed supplied by registered case launcher; complete case SHA-256 fixed.",
+  "initial_ik_rule": "Maximize minimum attachment-Jacobian singular value; among candidates within 64 float64 epsilon * max(1,abs(best)) select minimum nominal-home Euclidean distance, with same numerical-resolution rule then lexicographic q for secondary ties.",
+  "scientific_execution_contract": "Immutable SCIENTIFIC_SIMULATION episode; integer-step simulation time; frozen scientific state during host-only planning delay; versioned requests and receipts; host wall time profiling only; task, safety, and physical parameters unchanged.",
+  "same_host_gate": "PASS: four cases, two 0 ms repeats each, exact native/trace/scientific scorer and final-state comparison",
+  "host_delay_gate": "PASS: low-ROM 0 vs 500 ms, exact scientific comparison",
+  "learning_campaign_host_rule": "Formal baseline, headroom, value learning, and final simulation statistics run only in this WSL environment or an explicitly versioned successor. Mac development evidence remains historical and is never pooled with formal WSL statistics.",
+  "historical_cross_host_equivalence": "FAIL; retained independently",
+  "realtime_hardware_scope": "Out of scope; historical runtime and hardware assurance gates unchanged",
+  "evidence_files": [
+    "WSL_SCIENTIFIC_STABILITY_DIAGNOSIS.md",
+    "WSL_LEARNING_DETERMINISM_GATE.json",
+    "WSL_LEARNING_GATE_RUN_MANIFEST.json",
+    "WSL_LEARNING_GATE_RAW_DATA_MANIFEST.json",
+    "WSL_LEARNING_GATE_VERIFICATION.json"
+  ]
+}
