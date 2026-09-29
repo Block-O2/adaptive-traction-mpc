@@ -1,0 +1,28 @@
+{
+  "schema": "scientific_host_delay_development_acceptance_v1",
+  "category": "formal_development_validation_not_held_out_robustness",
+  "question": "Does injected host-only worker receipt delay change the native scientific trajectory?",
+  "source_head": "1bfbc6d9ba451202b4e91d3354800716e7990b39",
+  "integration_source_fingerprint_sha256": "70a9ea090053dde80a0411d7b27be90bed87871c72c32011648388c37bb12d34",
+  "case": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_matrix_nominal_sync_v1.json",
+  "case_sha256": "0ec5c4318f5d15edf7383326f2c3f3f315612790d4b563ebf18ff6b0e9751a2d",
+  "options_sha256": "d11bb72950f9f74e451548f57ff509e89f92e10aa18f8c62f78bd7a4b7f4c6bb",
+  "delays_ms": [0, 100, 200, 500],
+  "delay_location": "after actual async worker future completion, before receipt, with simulation frozen",
+  "repetitions_per_delay": 1,
+  "randomization": "registered deterministic case; no extra seed or new hidden setup drawn",
+  "environment": "Mac arm64; mpc_learn Python; OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1",
+  "allowed_controller_inputs": "unchanged deployable observations and by-value planner request snapshot",
+  "hidden_truth": "evaluation and scoring only",
+  "exclusions": "none; retain all failures and incomplete runs",
+  "pass_criteria": {
+    "all_runs_complete": true,
+    "scorer_v2_all_pass": true,
+    "trace_npz": "all arrays equal elementwise with identical NaN positions and exact finite values; all discrete strings and integers equal",
+    "native_states": "exact qpos, qvel, command torque, and contact pair sequence",
+    "requests": "same request count, source simulation version sequence, outcomes, and activation simulation version sequence",
+    "wall_time": "may differ and cannot decide scientific acceptance"
+  },
+  "failure_rule": "Any scientific array or discrete event mismatch is SCIENTIFIC_SIMULATION_VALIDATION_FAIL; preserve outputs and do not tune against these cases.",
+  "smoke_preceding_contract": "smoke_nominal_sync_0ms was run before this contract and is excluded from the four-way comparison"
+}
