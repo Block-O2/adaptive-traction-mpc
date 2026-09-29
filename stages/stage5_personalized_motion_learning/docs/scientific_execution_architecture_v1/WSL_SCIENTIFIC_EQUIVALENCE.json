@@ -1,0 +1,267 @@
+{
+  "schema": "wsl_scientific_cross_host_equivalence_v1",
+  "terminal_status": "SCIENTIFIC_CROSS_HOST_EQUIVALENCE_FAIL",
+  "decision_reason": "The low-ROM ordinary case differs from the Mac scientific summary beyond the predeclared tolerance in dwell, force, moment and clearance. No WSL case trace package is byte-identical to the Mac manifest. Mac raw arrays are unavailable locally, so full q/dq/reference/native-state tolerance comparisons for the other three cases are inconclusive.",
+  "tolerance_preregistration": "WSL_SCIENTIFIC_EQUIVALENCE_TOLERANCE_PREREGISTRATION.json",
+  "absolute_tolerance": 1e-09,
+  "relative_tolerance": 1e-09,
+  "cases_run_once": [
+    {
+      "run": "representative_low_rom_ordinary_v1",
+      "family": "low-ROM ordinary",
+      "config": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/low_rom_regression_cases/balanced_ordinary_r01.json",
+      "plant_mode": "low_rom",
+      "status": "COMPLETE",
+      "execution_mode": "SCIENTIFIC_SIMULATION",
+      "wsl_mode_result": "PASS",
+      "physical": "PASS",
+      "scientific": "PASS",
+      "raw_scorer_v2_pass": true,
+      "summary_classification": "MISMATCH",
+      "full_scientific_output_classification": "MISMATCH",
+      "trace_package_exact": false,
+      "trace_sha256_wsl": "7a55121d38889dfec822ccd5600272cd7eac6b8a71782ec570d7842a13bf426d",
+      "trace_sha256_mac": "0c93ba0d42a575a6c3831ebfefd2a50bfcc52266352649d1443b52d6b82a1c6c",
+      "discrete_summary_checks": {
+        "execution_mode": true,
+        "complete": true,
+        "physical_pass": true,
+        "scientific_pass": true,
+        "raw_scorer_v2_pass": true,
+        "true_return": true,
+        "request_count": true,
+        "case_hash": true
+      },
+      "metrics": {
+        "goal_dwell_s": {
+          "wsl": 0.6099999999985783,
+          "mac": 0.5999999999986017,
+          "absolute_difference": 0.009999999999976694,
+          "classification": "MISMATCH"
+        },
+        "peak_force_n": {
+          "wsl": 108.57878193374732,
+          "mac": 108.71942970814422,
+          "absolute_difference": 0.14064777439689635,
+          "classification": "MISMATCH"
+        },
+        "peak_moment_nm": {
+          "wsl": 14.444792434814971,
+          "mac": 14.435377459897882,
+          "absolute_difference": 0.00941497491708887,
+          "classification": "MISMATCH"
+        },
+        "minimum_session_clearance_m": {
+          "wsl": 0.01793654784224921,
+          "mac": 0.017871243177064396,
+          "absolute_difference": 6.530466518481215e-05,
+          "classification": "MISMATCH"
+        }
+      },
+      "host_elapsed_s": 39.50483525799996,
+      "maximum_wall_plan_age_ms": 58.366216,
+      "request_count_wsl": 19,
+      "request_count_mac": 19
+    },
+    {
+      "run": "representative_high_rom_hip_v1",
+      "family": "high-ROM hip",
+      "config": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_matrix_nominal_hip_v1.json",
+      "plant_mode": "high_rom",
+      "status": "COMPLETE",
+      "execution_mode": "SCIENTIFIC_SIMULATION",
+      "wsl_mode_result": "PASS",
+      "physical": "PASS",
+      "scientific": "PASS",
+      "raw_scorer_v2_pass": true,
+      "summary_classification": "WITHIN_PREDECLARED_TOLERANCE",
+      "full_scientific_output_classification": "INCONCLUSIVE_RAW_MAC_ARRAYS_UNAVAILABLE",
+      "trace_package_exact": false,
+      "trace_sha256_wsl": "3fe8c71b5980bd69518d1f8d5c6a0c9c6a9de086aacaee8f59f08322faf2abe5",
+      "trace_sha256_mac": "1ae8c5d57efb542ea471e27ec00b9298a2115a8cc83be3462854a48085a627e4",
+      "discrete_summary_checks": {
+        "execution_mode": true,
+        "complete": true,
+        "physical_pass": true,
+        "scientific_pass": true,
+        "raw_scorer_v2_pass": true,
+        "true_return": true,
+        "request_count": true,
+        "case_hash": true
+      },
+      "metrics": {
+        "goal_dwell_s": {
+          "wsl": 1.030000000004918,
+          "mac": 1.030000000004918,
+          "absolute_difference": 0.0,
+          "classification": "EXACT_MATCH"
+        },
+        "peak_force_n": {
+          "wsl": 115.48242278143697,
+          "mac": 115.48242282392,
+          "absolute_difference": 4.2483037532292656e-08,
+          "classification": "WITHIN_PREDECLARED_TOLERANCE"
+        },
+        "peak_moment_nm": {
+          "wsl": 15.70906880017942,
+          "mac": 15.709068793538881,
+          "absolute_difference": 6.640538785518402e-09,
+          "classification": "WITHIN_PREDECLARED_TOLERANCE"
+        },
+        "minimum_session_clearance_m": {
+          "wsl": 0.008289684339379638,
+          "mac": 0.008289684335678765,
+          "absolute_difference": 3.700872941436728e-12,
+          "classification": "WITHIN_PREDECLARED_TOLERANCE"
+        }
+      },
+      "host_elapsed_s": 67.36486359500009,
+      "maximum_wall_plan_age_ms": 57.325236,
+      "request_count_wsl": 20,
+      "request_count_mac": 20
+    },
+    {
+      "run": "representative_120_sync_v1",
+      "family": "120/120 synchronous",
+      "config": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_nominal_sync_120_v1.json",
+      "plant_mode": "high_rom",
+      "status": "COMPLETE",
+      "execution_mode": "SCIENTIFIC_SIMULATION",
+      "wsl_mode_result": "PASS",
+      "physical": "PASS",
+      "scientific": "PASS",
+      "raw_scorer_v2_pass": true,
+      "summary_classification": "WITHIN_PREDECLARED_TOLERANCE",
+      "full_scientific_output_classification": "INCONCLUSIVE_RAW_MAC_ARRAYS_UNAVAILABLE",
+      "trace_package_exact": false,
+      "trace_sha256_wsl": "4ebca5a792891b833c388b32349680e8e4a8d954699147df5dfddb19ebb22333",
+      "trace_sha256_mac": "7332e2211293ddb6e488485ba8d46d5bc19579b0c87a272586aecfdf8b90fdee",
+      "discrete_summary_checks": {
+        "execution_mode": true,
+        "complete": true,
+        "physical_pass": true,
+        "scientific_pass": true,
+        "raw_scorer_v2_pass": true,
+        "true_return": true,
+        "request_count": true,
+        "case_hash": true
+      },
+      "metrics": {
+        "goal_dwell_s": {
+          "wsl": 1.030000000004918,
+          "mac": 1.030000000004918,
+          "absolute_difference": 0.0,
+          "classification": "EXACT_MATCH"
+        },
+        "peak_force_n": {
+          "wsl": 115.48242278143697,
+          "mac": 115.48242282392,
+          "absolute_difference": 4.2483037532292656e-08,
+          "classification": "WITHIN_PREDECLARED_TOLERANCE"
+        },
+        "peak_moment_nm": {
+          "wsl": 15.70906880017942,
+          "mac": 15.709068793538881,
+          "absolute_difference": 6.640538785518402e-09,
+          "classification": "WITHIN_PREDECLARED_TOLERANCE"
+        },
+        "minimum_session_clearance_m": {
+          "wsl": 0.006334888207593145,
+          "mac": 0.006334888406348796,
+          "absolute_difference": 1.987556508264987e-10,
+          "classification": "WITHIN_PREDECLARED_TOLERANCE"
+        }
+      },
+      "host_elapsed_s": 68.75349661400003,
+      "maximum_wall_plan_age_ms": 73.376821,
+      "request_count_wsl": 20,
+      "request_count_mac": 20
+    },
+    {
+      "run": "representative_120_variable_start_v1",
+      "family": "120/120 variable-start",
+      "config": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_01_v1.json",
+      "plant_mode": "high_rom",
+      "status": "COMPLETE",
+      "execution_mode": "SCIENTIFIC_SIMULATION",
+      "wsl_mode_result": "PASS",
+      "physical": "PASS",
+      "scientific": "PASS",
+      "raw_scorer_v2_pass": true,
+      "summary_classification": "WITHIN_PREDECLARED_TOLERANCE",
+      "full_scientific_output_classification": "INCONCLUSIVE_RAW_MAC_ARRAYS_UNAVAILABLE",
+      "trace_package_exact": false,
+      "trace_sha256_wsl": "7015e3a069b7880657ac2533d9bb40ca4daa220e878daa0d2894f8cbd70a69c4",
+      "trace_sha256_mac": "6b7874042625366fd537d13d818ce851688154e0fffc9698c9cac9f07e705739",
+      "discrete_summary_checks": {
+        "execution_mode": true,
+        "complete": true,
+        "physical_pass": true,
+        "scientific_pass": true,
+        "raw_scorer_v2_pass": true,
+        "true_return": true,
+        "request_count": true,
+        "case_hash": true
+      },
+      "metrics": {
+        "goal_dwell_s": {
+          "wsl": 1.035000000004942,
+          "mac": 1.035000000004942,
+          "absolute_difference": 0.0,
+          "classification": "EXACT_MATCH"
+        },
+        "peak_force_n": {
+          "wsl": 115.48403013232371,
+          "mac": 115.48403013230354,
+          "absolute_difference": 2.0165202840871643e-11,
+          "classification": "WITHIN_PREDECLARED_TOLERANCE"
+        },
+        "peak_moment_nm": {
+          "wsl": 15.474901076421958,
+          "mac": 15.474901076423693,
+          "absolute_difference": 1.7355006320940447e-12,
+          "classification": "WITHIN_PREDECLARED_TOLERANCE"
+        },
+        "minimum_session_clearance_m": {
+          "wsl": 0.008246494181183252,
+          "mac": 0.008246494181138136,
+          "absolute_difference": 4.51166881632048e-14,
+          "classification": "WITHIN_PREDECLARED_TOLERANCE"
+        }
+      },
+      "host_elapsed_s": 69.43557936599996,
+      "maximum_wall_plan_age_ms": 75.745623,
+      "request_count_wsl": 20,
+      "request_count_mac": 20
+    }
+  ],
+  "deterministic_gate": {
+    "production_fingerprint": "PASS_618_OF_618",
+    "config_hashes": "PASS_4_OF_4",
+    "xml_mesh_imports": "PASS",
+    "focused_tests": "PASS_39_OF_39",
+    "git_diff_check": "PASS",
+    "first_test_invocation": "ENVIRONMENT_COMMAND_ERROR_RELATIVE_PYTHONPATH; corrected to absolute PYTHONPATH before any scientific case"
+  },
+  "semantic_sanity": {
+    "case": "representative_120_sync_v1",
+    "execution_mode": "SCIENTIFIC_SIMULATION",
+    "physical": "PASS",
+    "scientific": "PASS",
+    "raw_scorer_v2": "PASS",
+    "source_receipt_version_provenance": "PASS",
+    "worker_wait_freezes_simulation": "PASS_BY_DETERMINISTIC_TEST",
+    "wall_time_recorded_but_not_scientific_gate": true
+  },
+  "human_cr12_q_dq_equivalence": "NOT_ESTABLISHED: Mac raw trace arrays are not present in WSL and all trace package hashes differ",
+  "force_moment_clearance_equivalence": "FAIL: low-ROM summary values exceed the predeclared tolerance",
+  "scorer_v2_physical_semantics": "PASS on all four WSL runs and PASS in Mac registered summaries",
+  "optional_500ms_host_delay_run": "NOT_RUN_AFTER_MISMATCH",
+  "bulk_host_recommendation": "NOT_RECOMMENDED_UNDER_THIS_FAILED_EQUIVALENCE_GATE",
+  "three_rep_or_30_repeat_allowed_next": false,
+  "realtime_qualified": false,
+  "hardware_safe": false,
+  "clinical_safe": false,
+  "account_wide_used_percent_at_start": 37,
+  "account_wide_used_percent_at_end": 37
+}

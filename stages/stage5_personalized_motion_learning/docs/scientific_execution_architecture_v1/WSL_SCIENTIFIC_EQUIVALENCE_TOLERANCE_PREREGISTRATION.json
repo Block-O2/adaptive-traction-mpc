@@ -1,0 +1,34 @@
+{
+  "schema": "wsl_scientific_equivalence_tolerance_preregistration_v1",
+  "frozen_before_wsl_outcomes": true,
+  "source_branch": "codex/scientific-simulation-v1",
+  "remote_head": "cc41ccf0f1d150ef710855ee850bad7a12d6d4e2",
+  "implementation_checkpoint": "8da559fd579e32e53516f909527a25c3de22fc98",
+  "production_fingerprint": "0b3c66bcf853255f70b59f8196ccfe5ea554c18fe3690be327c831fc9f52e358",
+  "execution_mode": "SCIENTIFIC_SIMULATION",
+  "comparison_order": [
+    "EXACT_MATCH",
+    "WITHIN_PREDECLARED_TOLERANCE",
+    "MISMATCH"
+  ],
+  "continuous_float_arrays": {
+    "absolute_tolerance": 1e-9,
+    "relative_tolerance": 1e-9,
+    "same_shape_required": true,
+    "same_nan_mask_required": true,
+    "finite_values_required": true
+  },
+  "exact_only": [
+    "simulation_time_axis",
+    "waypoint_sequence",
+    "phase_transitions",
+    "request_and_version_provenance",
+    "execution_mode",
+    "scientific_validity",
+    "raw_scorer_v2_condition_names_and_booleans",
+    "completion_and_final_state_labels"
+  ],
+  "wall_clock_runtime_is_a_gate": false,
+  "rationale": "The Mac and WSL runs use the same MuJoCo, NumPy and SciPy versions but different CPU architectures, operating systems and Python patch releases. Exact equality is tested first. The fallback 1e-9 absolute/relative bound applies only to continuous floating-point scientific outputs and was frozen before any WSL case outcome was inspected. Discrete scientific semantics remain exact-only.",
+  "post_outcome_relaxation_allowed": false
+}
