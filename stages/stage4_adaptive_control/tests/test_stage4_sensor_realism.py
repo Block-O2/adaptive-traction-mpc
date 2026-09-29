@@ -211,3 +211,20 @@ def test_long_session_native_grid_drift_does_not_skip_200hz_sample() -> None:
         sample = layer.update(replace(initial, time_s=native_time))
         assert sample.new_sample, (index, native_time, sample.sample_time_s)
         assert sample.sample_time_s == native_time
+
+
+def test_full_100_second_native_timing_grid_keeps_every_200hz_sample() -> None:
+    plant = Stage4CoupledPlant()
+    initial = plant.reset(np.radians([5.0, 10.0]))
+    layer = CausalMeasurementLayer(sensor_realism_cases()[0], initial)
+    native_time = float(initial.time_s)
+    previous = native_time
+    for index in range(1, 20_001):
+        for _ in range(20):
+            native_time += 0.00025
+        sample = layer.update(replace(initial, time_s=native_time))
+        assert sample.new_sample, (index, native_time, sample.sample_time_s)
+        assert sample.sample_time_s == native_time
+        assert abs(sample.sample_time_s - previous - 0.005) < 1e-8
+        previous = sample.sample_time_s
+    assert native_time > 99.999

@@ -1,0 +1,40 @@
+{
+  "formal_command": "OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 /home/hank/envs/adaptive-traction-mpc/bin/python -u stages/stage5_personalized_motion_learning/scripts/high_rom_v1/run_zero_value_30rep_baseline_v3.py --case stages/stage5_personalized_motion_learning/configs/high_rom_v1/low_rom_regression_cases/balanced_ordinary_r01.json --output stages/stage5_personalized_motion_learning/results/zero_value_30rep_baseline_v3/formal_session_01 --session-seed 20260918",
+  "preserved_v2_prefix_audit": {
+    "first_anomaly": null,
+    "repetitions": 13,
+    "samples": 16468,
+    "status": "PASS",
+    "unique_interval_s_rounded_9dp": [
+      0.005
+    ]
+  },
+  "python_interpreter": "/home/hank/envs/adaptive-traction-mpc/bin/python",
+  "schema": "zero_value_30rep_baseline_v3_preflight",
+  "single_rep_command": "OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 /home/hank/envs/adaptive-traction-mpc/bin/python stages/stage5_personalized_motion_learning/scripts/high_rom_v1/run_dev_case.py --case stages/stage5_personalized_motion_learning/configs/high_rom_v1/low_rom_regression_cases/balanced_ordinary_r01.json --output stages/stage5_personalized_motion_learning/results/zero_value_30rep_baseline_v3/preflight_single_rep_01 --plant-mode low_rom --execution-mode SCIENTIFIC_SIMULATION",
+  "single_rep_regression": {
+    "mode_overall": "PASS",
+    "output": "results/zero_value_30rep_baseline_v3/preflight_single_rep_01",
+    "physical": "PASS",
+    "raw_scorer_v2": "PASS",
+    "scientific": "PASS",
+    "status": "COMPLETE"
+  },
+  "source_fingerprint": "PRODUCTION_FINGERPRINT_V3.json",
+  "status": "PASS",
+  "synthetic_timing": "100-second native clock, 20,000 consecutive 5 ms samples including 83.805 s",
+  "targeted_tests": "47 passed",
+  "test_categories": [
+    "sensor/time bookkeeping",
+    "repetition boundary",
+    "zero-value parsing/evaluation",
+    "scientific mode",
+    "sensor integrity audit"
+  ],
+  "test_command": "PYTHONPATH=stages/stage5_personalized_motion_learning/src:stages/stage4_adaptive_control/src:stages/stage3_full3d/src:stages/stage5_personalized_motion_learning/scripts/high_rom_v1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 /home/hank/envs/adaptive-traction-mpc/bin/python -m pytest -q stages/stage4_adaptive_control/tests/test_stage4_sensor_realism.py stages/stage5_personalized_motion_learning/tests/full3d_adaptive_integration_v1/test_repetition_boundary_v1.py stages/stage5_personalized_motion_learning/tests/full3d_adaptive_integration_v1/test_zero_value_session_state.py stages/stage5_personalized_motion_learning/tests/full3d_adaptive_integration_v1/test_zero_value_session_lifecycle_v3.py stages/stage5_personalized_motion_learning/tests/full3d_adaptive_integration_v1/test_scientific_scheduler.py stages/stage5_personalized_motion_learning/tests/high_rom_v1/test_baseline_acceptance_v2.py stages/stage5_personalized_motion_learning/tests/high_rom_v1/test_baseline_accounting_v2.py stages/stage5_personalized_motion_learning/tests/high_rom_v1/test_sensor_time_integrity_v3.py",
+  "thread_environment": {
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  }
+}

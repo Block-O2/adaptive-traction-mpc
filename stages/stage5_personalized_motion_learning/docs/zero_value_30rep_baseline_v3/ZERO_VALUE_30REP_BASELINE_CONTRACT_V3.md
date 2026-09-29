@@ -1,0 +1,7 @@
+# Zero-value 30-repetition baseline V3 — frozen before formal run
+
+The scientific and mode-aware acceptance rules are inherited unchanged from the V2 contract. This is one fresh 30-repetition Scientific Simulation session from Rep1 with the repaired native-sample sensor deadline, registered balanced ordinary case, options, seed 20260918, continuous Human adaptation and zero learned value. V2 remains a failed historical campaign. The forensic source is `6b07720b459900951056aeff851d3989fe4bbd6d`.
+
+New mandatory audit checks every saved 5 ms sensor timestamp across all repetitions, causal-estimate alignment and validity, and applied control interval chronology. Any anomaly stops the formal session. Wall-time measurements remain recorded and do not alone fail the scientific baseline. The historical raw scorer-v2 and strict realtime 100 ms rule are unchanged. Up to two bounded repairs of harness, logging, reporting or timestamp bookkeeping implementation defects are allowed; any repair requires a regression test and a fresh Rep1 restart. No controller mathematics, Human dynamics, planner objective, safety threshold, clearance criterion or Scientific Mode semantics change is permitted.
+
+Only after 30/30 COMPLETE may Rep1–5 versus Rep6–30 descriptive baseline variability be analyzed and promoted. No causal adaptation, RL, significance, optimality, realtime or hardware claim follows from this run.
