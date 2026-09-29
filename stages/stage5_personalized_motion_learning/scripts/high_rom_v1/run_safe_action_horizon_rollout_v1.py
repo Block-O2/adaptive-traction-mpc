@@ -110,7 +110,7 @@ if __name__=='__main__':
     ap.add_argument('--checkpoint-rep',type=int,required=True,choices=[1,5,15,25])
     ap.add_argument('--run-id',required=True)
     ap.add_argument('--direction',choices=['slower','faster','hip_leading','knee_leading','hip_dominant','knee_dominant'])
-    ap.add_argument('--amplitude',choices=['small','medium','large'])
+    ap.add_argument('--amplitude',choices=['very_small','small','fine_low','medium','fine_mid','fine_high','large'])
     ap.add_argument('--horizon',choices=['H1','H2','H3','H4'])
     args=ap.parse_args()
     if args.direction is not None and (args.amplitude is None or args.horizon is None):

@@ -9,7 +9,7 @@ from traction_mpc_stage5.task import TaskPhase
 
 SPEC_ENV='SAFE_ACTION_HORIZON_EXPLORATION_SPEC_V1'
 WEIGHTS={'H1':(.999999,), 'H2':(.65,1.0,.65), 'H3':(.5,.8,1.0,1.0,.8,.5), 'H4':(.5,.8,1.0,1.0,.8,.5)}
-AMPLITUDE={'small':.25,'medium':.5,'large':1.0}
+AMPLITUDE={'very_small':.125,'small':.25,'fine_low':.35,'medium':.5,'fine_mid':.65,'fine_high':.85,'large':1.0}
 
 def factors(direction,scale):
     if direction=='slower': return np.array([1-.7*scale,1-.7*scale])

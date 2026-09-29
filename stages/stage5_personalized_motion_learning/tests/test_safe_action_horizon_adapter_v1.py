@@ -28,3 +28,8 @@ def test_safety_rejected_rollout_is_classified_as_infeasible():
     from run_safe_action_horizon_rollout_v1 import classify_abort
     assert classify_abort({'abort_reason':'NO_FEASIBLE_WAYPOINT:EXPLORATION_ACTION_INFEASIBLE:shank-table clearance'})=='INFEASIBLE'
     assert classify_abort({'abort_reason':'PHYSICAL_FORCE_LIMIT'})=='INVALID'
+
+
+def test_refinement_amplitudes_are_ordered_inside_existing_envelope():
+    from safe_action_horizon_adapter_v1 import AMPLITUDE
+    assert [AMPLITUDE[x] for x in ('very_small','small','fine_low','medium','fine_mid','fine_high','large')]==[.125,.25,.35,.5,.65,.85,1.0]
