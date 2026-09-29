@@ -1,0 +1,2117 @@
+{
+  "note": "Lexical inventory, including inactive functions; not a call-graph proof",
+  "matches": [
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 1,
+      "function": "<module>",
+      "text": "\"\"\"Opt-in monotonic request accounting and isolated task planning."
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 5,
+      "function": "<module>",
+      "text": "time is deliberately separate from the monotonic wall clock used for expiry."
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 15,
+      "function": "<module>",
+      "text": "from time import monotonic_ns"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 21,
+      "function": "<module>",
+      "text": "request_id: int"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 23,
+      "function": "<module>",
+      "text": "source_sample_time_s: float"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 55,
+      "function": "_warm_planner_process",
+      "text": "return monotonic_ns()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 59,
+      "function": "_process_task_snapshot",
+      "text": "started = monotonic_ns()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 67,
+      "function": "_process_task_snapshot",
+      "text": "result.update(worker_start_ns=started, compute_finish_ns=monotonic_ns())"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 76,
+      "function": "__init__",
+      "text": "def __init__(self, *, clock: Callable[[], int] = monotonic_ns, process_worker: bool = False) -> None:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 96,
+      "function": "capture",
+      "text": "def capture(self, sample_time_s: float, capture_ns: int) -> None:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 98,
+      "function": "capture",
+      "text": "self._captures.setdefault(float(sample_time_s), int(capture_ns))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 100,
+      "function": "request",
+      "text": "def request(self, stage: str, sample_time_s: float, *, asynchronous: bool) -> PlanRequest:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 103,
+      "function": "request",
+      "text": "source = float(sample_time_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 116,
+      "function": "mark",
+      "text": "row = self._events[request.request_id]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 124,
+      "function": "mark_once",
+      "text": "self._events[request.request_id].setdefault(event, self.clock())"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 132,
+      "function": "compute",
+      "text": "self._events[request.request_id][\"worker_exception\"] = f\"{type(error).__name__}:{error}\""
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 134,
+      "function": "compute",
+      "text": "self._events[request.request_id][\"terminal_reference_selection\"] = error.terminal_reference_selection"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 160,
+      "function": "_harvest_process",
+      "text": "row = self._events[request.request_id]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 184,
+      "function": "finish",
+      "text": "row = self._events[request.request_id]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 193,
+      "function": "discard",
+      "text": "row = self._events[request.request_id]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 197,
+      "function": "discard",
+      "text": "self._events[request.request_id][\"future_cancel_succeeded\"] = cancelled"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 234,
+      "function": "fallback",
+      "text": "row = self._events[request.request_id]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/online_planning.py",
+      "line": 244,
+      "function": "fail_pending",
+      "text": "event = self._events[request.request_id]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_reference.py",
+      "line": 288,
+      "function": "receipt_reference_at_sample",
+      "text": "def receipt_reference_at_sample(receipts, sample_time_s):"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_reference.py",
+      "line": 290,
+      "function": "receipt_reference_at_sample",
+      "text": "if not np.isfinite(sample_time_s):"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_reference.py",
+      "line": 294,
+      "function": "receipt_reference_at_sample",
+      "text": "if not receipt.get(\"applied\") or receipt[\"start_physics_s\"] > sample_time_s+1e-12:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_reference.py",
+      "line": 301,
+      "function": "receipt_reference_at_sample",
+      "text": "return {\"receipt_index\": index, \"source_sample_time_s\": float(sample_time_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/safe_fallback.py",
+      "line": 51,
+      "function": "prepare_decision",
+      "text": "duration_s=bridge_duration,phase_elapsed_s=decision.phase_elapsed_s+primary.duration_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/safe_fallback.py",
+      "line": 68,
+      "function": "prepare_decision",
+      "text": "phase_elapsed_s=decision.phase_elapsed_s+primary.duration_s+commit)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_commit.py",
+      "line": 25,
+      "function": "terminal_sample_evidence",
+      "text": "return {\"sample_time_s\": float(observation.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_commit.py",
+      "line": 48,
+      "function": "attempt_return_commit",
+      "text": "source_s, source_ns = guard[\"source_sample_time_s\"], guard[\"source_capture_ns\"]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_commit.py",
+      "line": 49,
+      "function": "attempt_return_commit",
+      "text": "record = {\"source_sample_time_s\": source_s, \"source_capture_ns\": source_ns,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_commit.py",
+      "line": 61,
+      "function": "hook",
+      "text": "sample = {\"sample_time_s\": float(observation.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_commit.py",
+      "line": 74,
+      "function": "attempt_return_commit",
+      "text": "native_s = float(wall.plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_commit.py",
+      "line": 116,
+      "function": "attempt_return_commit",
+      "text": "last_attempt_host_ns=wall.clock(), last_attempt_native_s=float(wall.plant.data.time))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/terminal_commit.py",
+      "line": 120,
+      "function": "attempt_return_commit",
+      "text": "last_attempt_host_ns=wall.clock(), last_attempt_native_s=float(wall.plant.data.time))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 16,
+      "function": "<module>",
+      "text": "from time import perf_counter, monotonic_ns"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 315,
+      "function": "_initialize_loaded_runtime",
+      "text": "\"offline_support_setup\": {\"source_sample_time_s\": float(measurements.current.sample_time_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 323,
+      "function": "_initialize_loaded_runtime",
+      "text": "\"reference_effective_physics_s\": float(plant.data.time),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 338,
+      "function": "_initialize_loaded_runtime",
+      "text": "\"last_command_source_sample_s\": float(measurements.current.sample_time_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 339,
+      "function": "_initialize_loaded_runtime",
+      "text": "\"last_command_receipt_physics_s\": float(plant.data.time),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 377,
+      "function": "_capture_boundary",
+      "text": "\"physics_time_s\": float(runtime[\"plant\"].data.time),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 387,
+      "function": "_capture_boundary",
+      "text": "if abs(float(measurement.sample_time_s) - float(truth.time_s)) > 1e-10:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 389,
+      "function": "_capture_boundary",
+      "text": "lifecycle.capture(measurement.sample_time_s, captured)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 408,
+      "function": "synchronize_request_outcomes",
+      "text": "request_id = item.get(\"timing_request_id\")"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 409,
+      "function": "synchronize_request_outcomes",
+      "text": "if request_id is None:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 411,
+      "function": "synchronize_request_outcomes",
+      "text": "record = records[request_id]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 498,
+      "function": "_execute_interval",
+      "text": "attempt = {\"source_sample_time_s\": float(observation.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 499,
+      "function": "_execute_interval",
+      "text": "\"start_physics_s\": float(plant.data.time), \"native_steps\": 0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 651,
+      "function": "transform_action",
+      "text": "\"response_model_sequence\":runtime.get(\"model_sequence\"),\"response_model_beta\":model.beta.copy(),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 673,
+      "function": "transform_action",
+      "text": "\"response_model_sequence\":runtime.get(\"model_sequence\"),\"response_model_beta\":model.beta.copy(),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 765,
+      "function": "_execute_interval",
+      "text": "attempt.update(construction_finish_ns=monotonic_ns(), mode=str(decision.mode),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 777,
+      "function": "commit",
+      "text": "runtime['command_response_history'].record(float(plant.data.time), observation.sample_timestamp_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 805,
+      "function": "commit",
+      "text": "runtime[\"last_command_receipt_physics_s\"] = float(plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 812,
+      "function": "commit",
+      "text": "history.commit_applied(float(plant.data.time), candidate.q_waypoint_rad, candidate.dq_waypoint_rad_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 814,
+      "function": "commit",
+      "text": "history.invalidate(float(plant.data.time))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 817,
+      "function": "commit",
+      "text": "reference_effective_physics_s=float(plant.data.time))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 821,
+      "function": "commit",
+      "text": "emitted.append({\"time_s\": float(plant.data.time), \"apply_ns\": receipt[\"apply_ns\"],"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 822,
+      "function": "commit",
+      "text": "\"source_sample_time_s\": float(observation.sample_timestamp_s), \"mode\": \"TRACK\","
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 838,
+      "function": "commit",
+      "text": "\"actual_physics_time_s\": float(plant.data.time)}"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 849,
+      "function": "apply_actual",
+      "text": "source_sample_time_s=observation.sample_timestamp_s, commit=commit, catchup=False,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 853,
+      "function": "apply_actual",
+      "text": "commit({\"apply_ns\": monotonic_ns()})"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 855,
+      "function": "_execute_interval",
+      "text": "before_steps = float(plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 864,
+      "function": "_execute_interval",
+      "text": "if runtime.get(\"validated_request_id\") != activation_request.request_id:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 867,
+      "function": "_execute_interval",
+      "text": "runtime[\"validated_request_id\"] = activation_request.request_id"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 875,
+      "function": "_execute_interval",
+      "text": "if float(plant.data.time) > validation[\"phase_deadline_physics_s\"]-validation[\"schedule_duration_s\"]+1e-12:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 889,
+      "function": "_execute_interval",
+      "text": "prepared_receipt = wall.prepare_apply(command, source_sample_time_s=observation.sample_timestamp_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 931,
+      "function": "_execute_interval",
+      "text": "float(plant.data.time)-before_steps, str(decision.mode))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 938,
+      "function": "_execute_interval",
+      "text": "attempt[\"end_physics_s\"] = float(plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 939,
+      "function": "_execute_interval",
+      "text": "attempt[\"native_steps\"] = int(round((float(plant.data.time)-before_steps)/NOMINAL_PHYSICS_DT_S))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 940,
+      "function": "_execute_interval",
+      "text": "attempt[\"actual_duration_s\"] = float(plant.data.time)-before_steps"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1062,
+      "function": "_run_dev_a_active_recovery",
+      "text": "start_time_s = float(plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1108,
+      "function": "_run_dev_a_active_recovery",
+      "text": "\"model_sequence\": belief.sequence,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1134,
+      "function": "_run_dev_a_active_recovery",
+      "text": "\"sample_time_s\": float(observation_new.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1191,
+      "function": "_run_dev_a_active_recovery",
+      "text": "now_s = float(plant.data.time) if runtime.get(\"wall_session\") is not None else float(truth.time_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1249,
+      "function": "_run_dev_a_active_recovery",
+      "text": "planning_started = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1277,
+      "function": "_run_dev_a_active_recovery",
+      "text": "phase_elapsed_s=0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1285,
+      "function": "_run_dev_a_active_recovery",
+      "text": "phase_elapsed_s=0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1335,
+      "function": "_run_dev_a_active_recovery",
+      "text": "planning_ms = 1000.0 * (perf_counter() - planning_started)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1362,
+      "function": "_run_dev_a_active_recovery",
+      "text": "\"timing_request_id\": None if timing_request is None else timing_request.request_id,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1391,
+      "function": "_run_dev_a_active_recovery",
+      "text": "\"sample_time_s\": float(observation.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1428,
+      "function": "_run_dev_a_active_recovery",
+      "text": "remaining_s=start_time_s+timeout_s-float(plant.data.time),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1429,
+      "function": "_run_dev_a_active_recovery",
+      "text": "reference_state=np.r_[reference_q, reference_dq], now_physics_s=float(plant.data.time))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1431,
+      "function": "on_recovery_activation",
+      "text": "active_segment[\"start_time_s\"] = float(plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1432,
+      "function": "on_recovery_activation",
+      "text": "result[\"segments\"][-1][\"start_time_s\"] = float(plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1508,
+      "function": "_run_dev_a_active_recovery",
+      "text": "\"source_sample_time_s\": float(observation.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1713,
+      "function": "_run_executed_case",
+      "text": "history.record(float(plant.data.time), runtime['last_command_source_sample_s'],"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1731,
+      "function": "_run_executed_case",
+      "text": "lambda: float(plant.data.time), *initial_reference, float(plant.data.time))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1802,
+      "function": "_run_executed_case",
+      "text": "elapsed = (float(plant.data.time) if runtime.get(\"wall_session\") is not None else step * CONTROL_DT_S)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1827,
+      "function": "_run_executed_case",
+      "text": "state_sample_time_s=float(observation.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1828,
+      "function": "_run_executed_case",
+      "text": "interface_sample_time_s=float(interface.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1829,
+      "function": "_run_executed_case",
+      "text": "current_time_s=float(plant.data.time))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1832,
+      "function": "_run_executed_case",
+      "text": "\"source_sample_time_s\": float(observation.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1847,
+      "function": "_run_executed_case",
+      "text": "planning_started = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1888,
+      "function": "_run_executed_case",
+      "text": "planning_ms = 1000.0 * (perf_counter() - planning_started)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1891,
+      "function": "_run_executed_case",
+      "text": "event = {\"timing_request_id\": None if timing_request is None else timing_request.request_id,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1930,
+      "function": "on_commissioning_activation",
+      "text": "delay = max(0., float(plant.data.time)-nominal_start)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 1934,
+      "function": "on_commissioning_activation",
+      "text": "event[\"actual_segment_start_physics_s\"] = float(plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2021,
+      "function": "_run_executed_case",
+      "text": "commissioning_duration = (float(plant.data.time) if runtime.get(\"wall_session\") is not None"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2067,
+      "function": "_run_executed_case",
+      "text": "runtime[\"model_sequence\"] = belief.sequence"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2162,
+      "function": "_run_executed_case",
+      "text": "phase_elapsed_s=0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2190,
+      "function": "result_ready",
+      "text": "return readiness_hook is None or readiness_hook(pending_request, monotonic_ns())"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2192,
+      "function": "fallback_event",
+      "text": "fallback_events.append(dict(event=name, host_ns=monotonic_ns(),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2193,
+      "function": "fallback_event",
+      "text": "physics_s=float(plant.data.time), phase=task_state.phase.value, **details))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2225,
+      "function": "_run_executed_case",
+      "text": "task_start_time = float(plant.data.time) if runtime.get(\"wall_session\") is not None else float(truth.time_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2243,
+      "function": "_run_executed_case",
+      "text": "runtime[\"model_sequence\"] = belief.sequence"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2254,
+      "function": "_run_executed_case",
+      "text": "and (reference_governor.is_complete(active_schedule) if reference_governor is not None else (float(plant.data.time) if runtime.get(\"wall_session\") is not None else float(truth.time_s)) - schedule_start_time + 1.0e-12 >= active_schedule.duration_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2297,
+      "function": "_run_executed_case",
+      "text": "runtime[\"model_sequence\"] = belief.sequence"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2319,
+      "function": "_run_executed_case",
+      "text": "physical_now = float(plant.data.time) if runtime.get(\"wall_session\") is not None else float(truth.time_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2325,
+      "function": "_run_executed_case",
+      "text": "and (reference_governor.is_complete(active_schedule) if reference_governor is not None else (float(plant.data.time) if runtime.get(\"wall_session\") is not None else float(truth.time_s)) - schedule_start_time + 1.0e-12 >= active_schedule.duration_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2365,
+      "function": "_run_executed_case",
+      "text": "dwell_options = ({\"sample_time_s\": float(observation.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2391,
+      "function": "_run_executed_case",
+      "text": "guard.update(source_sample_time_s=source_s, source_capture_ns=capture_ns,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2405,
+      "function": "_run_executed_case",
+      "text": "phase_elapsed_at_boundary_s=previous_task_state.phase_elapsed_s+task_dt,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2417,
+      "function": "_run_executed_case",
+      "text": "phase_elapsed_s=previous_task_state.phase_elapsed_s+task_dt)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2422,
+      "function": "_run_executed_case",
+      "text": "phase_elapsed_s=commit_record[\"actual_return_elapsed_s\"]),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2538,
+      "function": "_run_executed_case",
+      "text": "schedule_start_time = float(plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2548,
+      "function": "_run_executed_case",
+      "text": "and (reference_governor.is_complete(active_schedule) if reference_governor is not None else (float(plant.data.time) if runtime.get(\"wall_session\") is not None else float(truth.time_s)) - schedule_start_time + 1.0e-12 >= active_schedule.duration_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2583,
+      "function": "_run_executed_case",
+      "text": "fallback_event(\"OLD_PRIMARY_DROPPED\", request_id=old_request.request_id,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2584,
+      "function": "_run_executed_case",
+      "text": "age_ms=(monotonic_ns()-old_request.sensor_capture_ns)/1e6,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2625,
+      "function": "_run_executed_case",
+      "text": "\"timing_request_id\": request.request_id,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2628,
+      "function": "_run_executed_case",
+      "text": "\"planning_runtime_ms_measured\": lifecycle.records()[request.request_id][\"compute_ms\"],"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2651,
+      "function": "_run_executed_case",
+      "text": "max(0., float(plant.data.time)-schedule_start_time)))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2656,
+      "function": "_run_executed_case",
+      "text": "suffix=suffix_schedule, request_id=request.request_id)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2678,
+      "function": "_run_executed_case",
+      "text": "\"timing_request_id\": request.request_id,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2680,
+      "function": "_run_executed_case",
+      "text": "\"request_measurement_timestamp_s\": request.source_sample_time_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2681,
+      "function": "_run_executed_case",
+      "text": "\"planning_runtime_ms_measured\": lifecycle.records()[request.request_id][\"compute_ms\"],"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2745,
+      "function": "_run_executed_case",
+      "text": "original_sample_s=request.source_sample_time_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2754,
+      "function": "validate_current_activation",
+      "text": "**inputs, \"now_ns\": monotonic_ns(),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2759,
+      "function": "validate_current_activation",
+      "text": "remaining_s=spec.phase_timeout_s-task_state.phase_elapsed_s"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2760,
+      "function": "validate_current_activation",
+      "text": "-max(0., float(plant.data.time)-physical_now),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2761,
+      "function": "validate_current_activation",
+      "text": "now_physics_s=float(plant.data.time))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2779,
+      "function": "_run_executed_case",
+      "text": "request_id=request.request_id,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2780,
+      "function": "_run_executed_case",
+      "text": "original_request_sample_s=request.source_sample_time_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2782,
+      "function": "_run_executed_case",
+      "text": "planning_model_sequence=request_sequence,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2798,
+      "function": "on_task_activation",
+      "text": "if not fallback_latch.resume(fresh=request.source_sample_time_s >= fallback_stop_sample_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2801,
+      "function": "on_task_activation",
+      "text": "fallback_event(\"RESUME_ACTIVATED\", request_id=request.request_id,age_ms=age_ns/1e6)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2807,
+      "function": "on_task_activation",
+      "text": "fallback_event(\"ESCAPE_ADMITTED\", request_id=request.request_id,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2810,
+      "function": "on_task_activation",
+      "text": "schedule_start_time = float(plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2822,
+      "function": "on_task_activation",
+      "text": "activation_model_sequence=belief.sequence)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2891,
+      "function": "_run_executed_case",
+      "text": "fallback_event(\"FRESH_REPLAN_REQUESTED\", request_id=request.request_id,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2892,
+      "function": "_run_executed_case",
+      "text": "source_sample_s=request.source_sample_time_s, stopped_sample_s=fallback_stop_sample_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2899,
+      "function": "_run_executed_case",
+      "text": "tracking_snapshot.update(request_id=request.request_id,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2907,
+      "function": "_run_executed_case",
+      "text": "phase_elapsed_s=task_state.phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2908,
+      "function": "_run_executed_case",
+      "text": "phase_remaining_s=spec.phase_timeout_s-task_state.phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2925,
+      "function": "_run_executed_case",
+      "text": "schedule_start_time = float(plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2944,
+      "function": "_run_executed_case",
+      "text": "started = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2951,
+      "function": "_run_executed_case",
+      "text": "phase_elapsed_s=task_state.phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2952,
+      "function": "_run_executed_case",
+      "text": "phase_remaining_s=spec.phase_timeout_s - task_state.phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 2956,
+      "function": "_run_executed_case",
+      "text": "planning_ms = 1000.0 * (perf_counter() - started)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3002,
+      "function": "_run_executed_case",
+      "text": "planning_ms = 1000.0 * (perf_counter() - started)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3078,
+      "function": "_run_executed_case",
+      "text": "schedule_elapsed = min((float(plant.data.time) if runtime.get(\"wall_session\") is not None else float(truth.time_s)) - schedule_start_time, active_schedule.duration_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3116,
+      "function": "_run_executed_case",
+      "text": "remaining_s=spec.phase_timeout_s-task_state.phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3118,
+      "function": "_run_executed_case",
+      "text": "now_physics_s=float(plant.data.time),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3125,
+      "function": "_run_executed_case",
+      "text": "now_ns=monotonic_ns(),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3129,
+      "function": "_run_executed_case",
+      "text": "original_sample_s=splice_request.source_sample_time_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3141,
+      "function": "splice_apply_guard",
+      "text": "age_original = monotonic_ns()-pending_splice[\"request\"].sensor_capture_ns"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3142,
+      "function": "splice_apply_guard",
+      "text": "age_fresh = monotonic_ns()-fresh_ns"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3168,
+      "function": "commit_reference_progress",
+      "text": "splice_model_sequence=belief.sequence)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3247,
+      "function": "_run_executed_case",
+      "text": "timing_row = lifecycle.records()[decisions[active_decision_index][\"timing_request_id\"]]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3299,
+      "function": "_run_executed_case",
+      "text": "fallback_event(\"PRIMARY_REJECTED_ESCAPE_RETAINED\", reason=str(error),request_id=backup[\"request\"].request_id)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3318,
+      "function": "_run_executed_case",
+      "text": "physical_age = float(plant.data.time)-guard[\"source_sample_time_s\"]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3321,
+      "function": "_run_executed_case",
+      "text": "return_elapsed = previous_task_state.phase_elapsed_s + task_dt + max("
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3322,
+      "function": "_run_executed_case",
+      "text": "0., float(plant.data.time)-physical_now)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3323,
+      "function": "_run_executed_case",
+      "text": "task_elapsed = float(plant.data.time)-task_start_time"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3330,
+      "function": "_run_executed_case",
+      "text": "\"source_sample_time_s\": guard[\"source_sample_time_s\"],"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3332,
+      "function": "_run_executed_case",
+      "text": "\"final_native_time_s\": float(plant.data.time), \"final_host_ns\": wall.end_ns,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3347,
+      "function": "_run_executed_case",
+      "text": "phase_elapsed_s=return_elapsed), finalization_reason)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3350,
+      "function": "_run_executed_case",
+      "text": "terminal_commit_physics_s=float(plant.data.time))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3353,
+      "function": "_run_executed_case",
+      "text": "state_source_time_s=guard[\"source_sample_time_s\"],"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3354,
+      "function": "_run_executed_case",
+      "text": "time_s=float(plant.data.time), trigger=task_state.abort_reason)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3364,
+      "function": "_run_executed_case",
+      "text": "if \"timing_request_id\" in item:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "line": 3365,
+      "function": "_run_executed_case",
+      "text": "record = timing_records[item[\"timing_request_id\"]]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 8,
+      "function": "<module>",
+      "text": "from time import monotonic_ns, sleep"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 15,
+      "function": "__init__",
+      "text": "def __init__(self, runtime: dict[str, Any], *, clock: Callable[[], int] = monotonic_ns,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 36,
+      "function": "__init__",
+      "text": "self.origin_physics_s = float(self.plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 65,
+      "function": "gc_event",
+      "text": "\"physics_s\":float(self.plant.data.time), **info})"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 76,
+      "function": "native_boundary",
+      "text": "return {\"time_s\":float(self.plant.data.time), \"host_read_ns\":self.clock(),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 83,
+      "function": "set_phase",
+      "text": "self.phase_records[-1][\"end_physics_s\"] = float(self.plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 84,
+      "function": "set_phase",
+      "text": "self.phase_records[-1][\"duration_s\"] = float(self.plant.data.time)-self.phase_records[-1][\"start_physics_s\"]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 85,
+      "function": "set_phase",
+      "text": "self.phase_records.append({\"phase\":name, \"start_physics_s\":float(self.plant.data.time), \"limit_s\":float(limit_s)})"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 93,
+      "function": "capture",
+      "text": "delay = self.source_ns(float(self.plant.data.time))-self.clock()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 106,
+      "function": "capture",
+      "text": "source = self.source_ns(measurement.sample_time_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 107,
+      "function": "capture",
+      "text": "self.runtime[\"plan_lifecycle\"].capture(measurement.sample_time_s, source)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 108,
+      "function": "capture",
+      "text": "self.samples.append({\"sample_time_s\": float(measurement.sample_time_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 113,
+      "function": "capture",
+      "text": "human_model_version=str(self.runtime.get(\"model_sequence\", \"population_prior_v1\")))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 126,
+      "function": "capture",
+      "text": "self.sampled_estimates.append({\"sample_time_s\": float(observation.sample_timestamp_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 140,
+      "function": "_step",
+      "text": "before = float(self.plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 149,
+      "function": "_step",
+      "text": "advanced = int(round((float(self.plant.data.time)-before)/self.dt))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 153,
+      "function": "_step",
+      "text": "self.applied_commands[self.active_receipt_index][\"end_physics_s\"] = float(self.plant.data.time)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 155,
+      "function": "_step",
+      "text": "self.native_states.append({\"time_s\": float(self.plant.data.time),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 162,
+      "function": "_step",
+      "text": "phase_elapsed = float(self.plant.data.time)-phase[\"start_physics_s\"]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 164,
+      "function": "_step",
+      "text": "(\"PHYSICAL_SESSION_TIMEOUT\", float(self.plant.data.time)-self.origin_physics_s > 47.420+1e-10)):"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 166,
+      "function": "_step",
+      "text": "self.limit_violations.append({\"reason\":name,\"first_observed_physics_s\":float(self.plant.data.time),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 167,
+      "function": "_step",
+      "text": "\"host_observed_ns\":self.clock(), \"phase_elapsed_s\":phase_elapsed})"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 178,
+      "function": "catch_up",
+      "text": "\"start_physics_s\": float(self.plant.data.time), \"native_steps\": 0}"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 202,
+      "function": "catch_up",
+      "text": "record.update(host_end_ns=self.clock(), end_physics_s=float(self.plant.data.time),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 222,
+      "function": "prepare_apply",
+      "text": "def prepare_apply(self, command, *, source_sample_time_s):"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 227,
+      "function": "prepare_apply",
+      "text": "\"source_sample_time_s\":float(source_sample_time_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 228,
+      "function": "prepare_apply",
+      "text": "\"source_capture_ns\":self.source_ns(source_sample_time_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 236,
+      "function": "prepare_apply",
+      "text": "start_physics_s=float(self.plant.data.time), end_physics_s=float(self.plant.data.time))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 244,
+      "function": "apply",
+      "text": "def apply(self, command, apply, *, source_sample_time_s, commit=None, catchup=True, prepared=None):"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 247,
+      "function": "apply",
+      "text": "receipt = prepared if prepared is not None else self.prepare_apply(command, source_sample_time_s=source_sample_time_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 287,
+      "function": "record",
+      "text": "phases[-1].update(end_physics_s=float(self.plant.data.time),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/wall_physics.py",
+      "line": 288,
+      "function": "record",
+      "text": "duration_s=float(self.plant.data.time)-phases[-1][\"start_physics_s\"])"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/startup_alignment.py",
+      "line": 66,
+      "function": "<module>",
+      "text": "source_sample_time_s: float"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/startup_alignment.py",
+      "line": 77,
+      "function": "from_measurement",
+      "text": "float(measurement.sample_time_s))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/startup_alignment.py",
+      "line": 95,
+      "function": "record",
+      "text": "\"source_sample_time_s\": self.source_sample_time_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/startup_alignment.py",
+      "line": 102,
+      "function": "align_active_startup_reference",
+      "text": "def align_active_startup_reference(runtime: dict[str, Any], mapped: Any, sample_time_s: float) -> Any:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/startup_alignment.py",
+      "line": 114,
+      "function": "align_active_startup_reference",
+      "text": "runtime[\"startup_alignment_geometry_checks\"].append({\"sample_time_s\":float(sample_time_s),**check})"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 16,
+      "function": "reference_safe_task_transition",
+      "text": "elapsed = previous.phase_elapsed_s + physical_dt"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 19,
+      "function": "reference_safe_task_transition",
+      "text": "return abort_episode(replace(previous, phase_elapsed_s=elapsed), \"TIMEOUT_HOLD\")"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 27,
+      "function": "reference_safe_task_transition",
+      "text": "deferred = replace(previous, phase_elapsed_s=elapsed,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 153,
+      "function": "validate_activation",
+      "text": "record = {\"request_model_sequence\": request_sequence, \"activation_model_sequence\": belief.sequence,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 245,
+      "function": "validate_activation",
+      "text": "\"request_model_sequence\": request_sequence,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 246,
+      "function": "validate_activation",
+      "text": "\"current_model_sequence\": belief.sequence,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 329,
+      "function": "validate_rolling_composite",
+      "text": "request_id=composite.request_id)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 342,
+      "function": "projected_dwell_sample",
+      "text": "stamp = row.get('sample_time_s', float('nan'))"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 372,
+      "function": "transition",
+      "text": "def transition(self, spec, state, q, dq, physical_dt, sample_time_s, captured_samples=None,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 378,
+      "function": "transition",
+      "text": "if physical_time_s is None or not np.isfinite(physical_time_s) or physical_time_s < sample_time_s-1e-10:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 380,
+      "function": "transition",
+      "text": "latest = [r for r in (captured_samples or []) if abs(r['sample_time_s']-sample_time_s)<=1e-12]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 384,
+      "function": "transition",
+      "text": "delta = None if self.previous_sample_s is None else sample_time_s-self.previous_sample_s"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 390,
+      "function": "transition",
+      "text": "self.hold_entry_physics_s = physical_time_s-state.phase_elapsed_s"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 399,
+      "function": "transition",
+      "text": "if (self.previous_sample_s is None or r[\"sample_time_s\"] > self.previous_sample_s+1e-10)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 400,
+      "function": "transition",
+      "text": "and r[\"sample_time_s\"] <= sample_time_s+1e-10]"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 405,
+      "function": "transition",
+      "text": "t = float(row[\"sample_time_s\"])"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 419,
+      "function": "transition",
+      "text": "self.evidence.append({\"sample_time_s\":t,\"previous_sample_s\":self.previous_sample_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 427,
+      "function": "transition",
+      "text": "self.evidence.append({'sample_time_s':sample_time_s,'previous_sample_s':self.previous_sample_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 432,
+      "function": "transition",
+      "text": "result = replace(state, phase_elapsed_s=state.phase_elapsed_s+physical_dt, hold_elapsed_s=dwell)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 434,
+      "function": "transition",
+      "text": "result = replace(result, phase=TaskPhase.RETURN, phase_elapsed_s=0.,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 439,
+      "function": "transition",
+      "text": "self.evidence.append({\"sample_time_s\": sample_time_s, \"previous_sample_s\": self.previous_sample_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 450,
+      "function": "transition",
+      "text": "deferred = replace(state, phase_elapsed_s=state.phase_elapsed_s+physical_dt)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 454,
+      "function": "transition",
+      "text": "'sample_time_s': sample_time_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "line": 467,
+      "function": "transition",
+      "text": "self.previous_sample_s = sample_time_s"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/fast_plant.py",
+      "line": 67,
+      "function": "step_native",
+      "text": "record = {\"time_s\": float(self.data.time),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/fast_plant.py",
+      "line": 70,
+      "function": "step_native",
+      "text": "if self.interface_history and abs(self.interface_history[-1][\"time_s\"]-self.data.time) < 1e-12:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/rigid_table_reference.py",
+      "line": 61,
+      "function": "with_causal_cuff_reference_origin",
+      "text": "state_sample_time_s: float, interface_sample_time_s: float,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/rigid_table_reference.py",
+      "line": 70,
+      "function": "with_causal_cuff_reference_origin",
+      "text": "times = np.asarray([state_sample_time_s, interface_sample_time_s, current_time_s])"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/rigid_table_reference.py",
+      "line": 72,
+      "function": "with_causal_cuff_reference_origin",
+      "text": "or abs(state_sample_time_s-interface_sample_time_s) > 1e-12"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/rigid_table_reference.py",
+      "line": 73,
+      "function": "with_causal_cuff_reference_origin",
+      "text": "or current_time_s-state_sample_time_s < -1e-12"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/rigid_table_reference.py",
+      "line": 74,
+      "function": "with_causal_cuff_reference_origin",
+      "text": "or current_time_s-state_sample_time_s > .100):"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/rolling_suffix_splice.py",
+      "line": 19,
+      "function": "<module>",
+      "text": "request_id: int"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/rolling_suffix_splice.py",
+      "line": 57,
+      "function": "record",
+      "text": "return dict(version=self.version, request_id=self.request_id,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 14,
+      "function": "<module>",
+      "text": "from time import perf_counter"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 169,
+      "function": "update",
+      "text": "timestamp = float(measurement.sample_time_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1279,
+      "function": "_propagate_prefix_segment_numpy",
+      "text": "section_start = perf_counter() if profile else 0.0"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1286,
+      "function": "_propagate_prefix_segment_numpy",
+      "text": "perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1288,
+      "function": "_propagate_prefix_segment_numpy",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1318,
+      "function": "_propagate_prefix_segment_numpy",
+      "text": "perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1320,
+      "function": "_propagate_prefix_segment_numpy",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1324,
+      "function": "_propagate_prefix_segment_numpy",
+      "text": "perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1326,
+      "function": "_propagate_prefix_segment_numpy",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1348,
+      "function": "_propagate_prefix_segment_numpy",
+      "text": "perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1438,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "setup_start = perf_counter() if profile else 0.0"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1486,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "region_timing[\"state_copy_and_setup\"] += perf_counter() - setup_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1487,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1496,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1498,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "setup_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1524,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "region_timing[\"state_copy_and_setup\"] += perf_counter() - setup_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1532,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "section_start = perf_counter() if profile else 0.0"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1562,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1578,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "section_start = perf_counter() if profile else 0.0"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1591,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1593,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1610,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1612,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "section_start = perf_counter() if profile else 0.0"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1622,
+      "function": "_apply_v2_prefix_acceleration_screen",
+      "text": "perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1880,
+      "function": "rollout_horizon",
+      "text": "setup_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1892,
+      "function": "rollout_horizon",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1901,
+      "function": "rollout_horizon",
+      "text": "timing[\"support_dynamics\"] += perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1956,
+      "function": "rollout_horizon",
+      "text": "geometry_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1960,
+      "function": "rollout_horizon",
+      "text": "timing[\"geometry\"] += perf_counter() - geometry_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1963,
+      "function": "rollout_horizon",
+      "text": "perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1970,
+      "function": "rollout_horizon",
+      "text": "bookkeeping_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1972,
+      "function": "rollout_horizon",
+      "text": "timing[\"rollout_bookkeeping_numpy\"] += perf_counter() - bookkeeping_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1974,
+      "function": "rollout_horizon",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1983,
+      "function": "rollout_horizon",
+      "text": "timing[\"support_dynamics\"] += perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1984,
+      "function": "rollout_horizon",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1992,
+      "function": "rollout_horizon",
+      "text": "timing[\"cuff_allocation\"] += perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 1993,
+      "function": "rollout_horizon",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2013,
+      "function": "rollout_horizon",
+      "text": "perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2017,
+      "function": "rollout_horizon",
+      "text": "bookkeeping_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2036,
+      "function": "rollout_horizon",
+      "text": "timing[\"rollout_bookkeeping_numpy\"] += perf_counter() - bookkeeping_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2037,
+      "function": "rollout_horizon",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2076,
+      "function": "rollout_horizon",
+      "text": "timing[\"interface_state_propagation\"] += perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2077,
+      "function": "rollout_horizon",
+      "text": "section_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2088,
+      "function": "rollout_horizon",
+      "text": "timing[\"human_dynamics_propagation\"] += perf_counter() - section_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2089,
+      "function": "rollout_horizon",
+      "text": "bookkeeping_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2095,
+      "function": "rollout_horizon",
+      "text": "timing[\"rollout_bookkeeping_numpy\"] += perf_counter() - bookkeeping_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2098,
+      "function": "rollout_horizon",
+      "text": "geometry_start = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "line": 2113,
+      "function": "rollout_horizon",
+      "text": "timing[\"geometry\"] += perf_counter() - geometry_start"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 7,
+      "function": "<module>",
+      "text": "from time import perf_counter"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 112,
+      "function": "<module>",
+      "text": "phase_elapsed_s: float"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 127,
+      "function": "record",
+      "text": "\"phase_elapsed_s\": self.phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 247,
+      "function": "_evaluate",
+      "text": "phase_elapsed_s: float,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 290,
+      "function": "_evaluate",
+      "text": "phase_elapsed_s=phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 324,
+      "function": "_evaluate",
+      "text": "phase_elapsed_s=phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 383,
+      "function": "decide",
+      "text": "phase_elapsed_s: float,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 400,
+      "function": "decide",
+      "text": "if not np.isfinite(phase_elapsed_s) or phase_elapsed_s < 0.0:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 401,
+      "function": "decide",
+      "text": "raise ValueError(\"phase_elapsed_s must be finite and nonnegative\")"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 407,
+      "function": "decide",
+      "text": "started = perf_counter()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 415,
+      "function": "decide",
+      "text": "phase_elapsed_s=phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 440,
+      "function": "decide",
+      "text": "phase_elapsed_s=float(phase_elapsed_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "line": 449,
+      "function": "decide",
+      "text": "runtime_ms=1000.0 * (perf_counter() - started),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 397,
+      "function": "_validate_request",
+      "text": "phase_elapsed_s: float,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 399,
+      "function": "_validate_request",
+      "text": "if not math.isfinite(phase_elapsed_s) or phase_elapsed_s < 0.0:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 400,
+      "function": "_validate_request",
+      "text": "raise ValueError(\"phase_elapsed_s must be finite and nonnegative\")"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 401,
+      "function": "_validate_request",
+      "text": "if phase_elapsed_s >= self.spec.phase_timeout_s:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 431,
+      "function": "plan",
+      "text": "phase_elapsed_s: float = 0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 437,
+      "function": "plan",
+      "text": "phase_elapsed_s=phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 447,
+      "function": "plan_reference_contract",
+      "text": "phase_elapsed_s: float = 0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 455,
+      "function": "plan_reference_contract",
+      "text": "phase_elapsed_s=phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 466,
+      "function": "plan_fixed_duration_reference_contract",
+      "text": "phase_elapsed_s: float = 0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 479,
+      "function": "plan_fixed_duration_reference_contract",
+      "text": "self._validate_request(current_q, current_dq, candidate, phase_elapsed_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 492,
+      "function": "plan_fixed_duration_reference_contract",
+      "text": "if phase_elapsed_s + duration_s > self.spec.phase_timeout_s + 1.0e-12:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 577,
+      "function": "_plan",
+      "text": "phase_elapsed_s: float,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 582,
+      "function": "_plan",
+      "text": "self._validate_request(current_q, current_dq, candidate, phase_elapsed_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 633,
+      "function": "_plan",
+      "text": "available_s = self.spec.phase_timeout_s - phase_elapsed_s"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 783,
+      "function": "start_session",
+      "text": "phase_elapsed_s: float = 0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 791,
+      "function": "start_session",
+      "text": "phase_elapsed_s=phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 796,
+      "function": "start_session",
+      "text": "phase_start_elapsed_s=phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 805,
+      "function": "start_reference_contract_session",
+      "text": "phase_elapsed_s: float = 0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 811,
+      "function": "start_reference_contract_session",
+      "text": "phase_elapsed_s=phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 816,
+      "function": "start_reference_contract_session",
+      "text": "phase_start_elapsed_s=phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 925,
+      "function": "advance",
+      "text": "phase_elapsed_s: float,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 929,
+      "function": "advance",
+      "text": "if not math.isfinite(phase_elapsed_s) or phase_elapsed_s < 0.0:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 930,
+      "function": "advance",
+      "text": "raise ValueError(\"phase_elapsed_s must be finite and nonnegative\")"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 931,
+      "function": "advance",
+      "text": "if phase_elapsed_s >= self.scheduler.spec.phase_timeout_s:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 957,
+      "function": "advance",
+      "text": "history_status = self.reference_motion_history.status(phase_elapsed_s)"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 1012,
+      "function": "advance",
+      "text": "phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "line": 1019,
+      "function": "advance",
+      "text": "\"phase_elapsed_s\": float(phase_elapsed_s),"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 202,
+      "function": "<module>",
+      "text": "phase_elapsed_s: float"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 209,
+      "function": "__post_init__",
+      "text": "if not math.isfinite(self.phase_elapsed_s) or self.phase_elapsed_s < 0.0:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 387,
+      "function": "phase_timed_out",
+      "text": "state.phase_elapsed_s + 1.0e-12 >= spec.phase_timeout_s"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 412,
+      "function": "abort_episode",
+      "text": "phase_elapsed_s=state.phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 481,
+      "function": "start_episode",
+      "text": "phase_elapsed_s=0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 529,
+      "function": "transition_phase",
+      "text": "next_phase_elapsed = state.phase_elapsed_s + dt_s"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 534,
+      "function": "transition_phase",
+      "text": "phase_elapsed_s=0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 541,
+      "function": "transition_phase",
+      "text": "phase_elapsed_s=next_phase_elapsed,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 554,
+      "function": "transition_phase",
+      "text": "phase_elapsed_s=next_phase_elapsed,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 562,
+      "function": "transition_phase",
+      "text": "phase_elapsed_s=0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 572,
+      "function": "transition_phase",
+      "text": "phase_elapsed_s=0.0,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py",
+      "line": 579,
+      "function": "transition_phase",
+      "text": "phase_elapsed_s=next_phase_elapsed,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/phase3_human_waypoint.py",
+      "line": 348,
+      "function": "decide",
+      "text": "phase_elapsed_s: float,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/phase3_human_waypoint.py",
+      "line": 380,
+      "function": "decide",
+      "text": "phase_elapsed_s=phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/phase3_human_waypoint.py",
+      "line": 473,
+      "function": "_finalize_pending_learning_record",
+      "text": "\"phase_elapsed_s\": next_task_state.phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/phase3_human_waypoint.py",
+      "line": 509,
+      "function": "_start_pending_learning_record",
+      "text": "\"phase_elapsed_s\": decision.phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/phase3_human_waypoint.py",
+      "line": 590,
+      "function": "observe_and_plan",
+      "text": "remaining = self.spec.phase_timeout_s - updated.phase_elapsed_s"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/phase3_human_waypoint.py",
+      "line": 598,
+      "function": "observe_and_plan",
+      "text": "phase_elapsed_s=updated.phase_elapsed_s,"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/scripts/high_rom_v1/run_dev_case.py",
+      "line": 29,
+      "function": "main",
+      "text": "started=time.monotonic()"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/scripts/high_rom_v1/run_dev_case.py",
+      "line": 32,
+      "function": "stop_check",
+      "text": "if time.monotonic()-started>=args.host_monitor_limit_s:"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/scripts/high_rom_v1/run_dev_case.py",
+      "line": 69,
+      "function": "main",
+      "text": "record['elapsed_host_s']=time.monotonic()-started"
+    },
+    {
+      "file": "stages/stage5_personalized_motion_learning/scripts/high_rom_v1/score_return_endpoint_v2.py",
+      "line": 54,
+      "function": "endpoint_from_records",
+      "text": "_require_same(source_s, float(commit[\"source_sample_time_s\"]), \"proposal source timestamp\")"
+    }
+  ]
+}
