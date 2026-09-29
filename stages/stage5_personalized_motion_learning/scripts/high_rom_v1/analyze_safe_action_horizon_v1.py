@@ -93,9 +93,10 @@ def make_plots(valid):
     benefit=np.asarray([r['benefit_n_s'] for r in valid])
     plt.figure(figsize=(7,4));plt.hist(benefit,bins=25,color='#246b8f');plt.axvline(0,color='black');plt.xlabel('Benefit (N s)');plt.ylabel('Valid rollouts');save('benefit_distribution.png')
     plt.figure(figsize=(7,4));
-    for amplitude,marker in [('small','o'),('medium','s'),('large','^')]:
+    for amplitude,color in zip(('very_small','small','fine_low','medium','fine_mid','fine_high','large'),plt.cm.viridis(np.linspace(0,1,7))):
         group=[r for r in valid if r['amplitude']==amplitude]
-        plt.scatter([r.get('first_action_deviation_deg',0) for r in group],[r['benefit_n_s'] for r in group],label=amplitude,marker=marker,alpha=.65)
+        if group:
+            plt.scatter([r.get('first_action_deviation_deg',0) for r in group],[r['benefit_n_s'] for r in group],label=amplitude,color=color,alpha=.65)
     plt.axhline(0,color='black');plt.xlabel('First action deviation from baseline (deg)');plt.ylabel('Benefit (N s)');plt.legend();save('benefit_vs_action_amplitude.png')
     plt.figure(figsize=(7,4));plt.boxplot([[r['benefit_n_s'] for r in valid if r['horizon']==h] for h in ('H1','H2','H3','H4')],tick_labels=('H1','H2','H3','H4'));plt.axhline(0,color='black');plt.ylabel('Benefit (N s)');save('benefit_vs_horizon.png')
     plt.figure(figsize=(7,4));plt.boxplot([[r['benefit_n_s'] for r in valid if r['checkpoint_rep']==cp] for cp in (1,5,15,25)],tick_labels=('Rep2','Rep6','Rep16','Rep26'));plt.axhline(0,color='black');plt.ylabel('Benefit (N s)');save('checkpoint_vs_benefit.png')
@@ -128,7 +129,7 @@ def main(final=False):
     write('ALL_EXPLORATORY_ROLLOUTS.json',rows)
     columns=['run_id','campaign_stage','checkpoint_rep','target_rep','direction','amplitude','horizon','status','failure_reason','physical_validity','scientific_validity','matched_baseline_J_F_task_n_s','J_F_task_n_s','J_F_session_n_s','benefit_n_s','benefit_percent','benefit_baseline_std_units','benefit_baseline_range_units','immediate_benefit_n_s','short_benefit_n_s','outbound_benefit_n_s','first_action_deviation_deg','first_target_outside_baseline_candidate_hull','reference_path_rms_distance_deg','human_q_rms_distance_deg','human_dq_rms_distance_deg_s','force_vector_rms_divergence_n','force_peak_n','moment_peak_nm','moment_integral_nm_s','minimum_deployable_clearance_m','completion_time_s','completion_time_change_s','mean_task_force_n','mean_task_force_change_n','time_component_n_s','mean_force_component_n_s']
     with (DOC/'ALL_EXPLORATORY_ROLLOUTS.csv').open('w',newline='') as f:
-        writer=csv.DictWriter(f,fieldnames=columns);writer.writeheader();writer.writerows({k:r.get(k) for k in columns} for r in rows)
+        writer=csv.DictWriter(f,fieldnames=columns,lineterminator='\n');writer.writeheader();writer.writerows({k:r.get(k) for k in columns} for r in rows)
     by=lambda key:{str(k):stats([r['benefit_n_s'] for r in valid if r[key]==k]) for k in sorted(set(r[key] for r in rows))}
     positive=[r for r in valid if r['benefit_n_s']>0]
     best=max(valid,key=lambda r:r['benefit_n_s']) if valid else None

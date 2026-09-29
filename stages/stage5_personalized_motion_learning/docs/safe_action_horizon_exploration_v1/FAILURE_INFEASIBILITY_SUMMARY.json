@@ -1,5 +1,15 @@
 {
   "by_amplitude": {
+    "fine_high": {
+      "VALID": 16
+    },
+    "fine_low": {
+      "INFEASIBLE": 4,
+      "VALID": 20
+    },
+    "fine_mid": {
+      "VALID": 16
+    },
     "large": {
       "INFEASIBLE": 16,
       "VALID": 24
@@ -13,11 +23,15 @@
       "INFEASIBLE": 12,
       "INVALID": 1,
       "VALID": 27
+    },
+    "very_small": {
+      "INFEASIBLE": 4,
+      "VALID": 4
     }
   },
   "by_direction": {
     "faster": {
-      "VALID": 20
+      "VALID": 68
     },
     "hip_dominant": {
       "INFEASIBLE": 2,
@@ -25,8 +39,8 @@
       "VALID": 16
     },
     "hip_leading": {
-      "INFEASIBLE": 4,
-      "VALID": 16
+      "INFEASIBLE": 12,
+      "VALID": 24
     },
     "knee_dominant": {
       "INFEASIBLE": 17,
@@ -44,27 +58,27 @@
     "H1": {
       "INFEASIBLE": 12,
       "INVALID": 1,
-      "VALID": 35
+      "VALID": 47
     },
     "H2": {
       "INFEASIBLE": 8,
-      "VALID": 16
+      "VALID": 36
     },
     "H3": {
       "INFEASIBLE": 7,
       "INVALID": 1,
-      "VALID": 16
+      "VALID": 28
     },
     "H4": {
-      "INFEASIBLE": 13,
+      "INFEASIBLE": 21,
       "INVALID": 3,
-      "VALID": 8
+      "VALID": 20
     }
   },
   "counts": {
-    "INFEASIBLE": 40,
+    "INFEASIBLE": 48,
     "INVALID": 5,
-    "VALID": 75
+    "VALID": 131
   },
   "invalid_samples": [
     {
@@ -471,10 +485,82 @@
       "horizon": "H1",
       "run_id": "coarse_120_cp25_knee_dominant_small_H1",
       "status": "INVALID"
+    },
+    {
+      "amplitude": "very_small",
+      "checkpoint_rep": 1,
+      "direction": "hip_leading",
+      "failure_reason": "NO_FEASIBLE_WAYPOINT:ValueError:EXPLORATION_ACTION_INFEASIBLE:target waypoint enters existing shank-table geometry (-4.217454 mm)",
+      "horizon": "H4",
+      "run_id": "refine_051_cp01_hip_leading_very_small_H4",
+      "status": "INFEASIBLE"
+    },
+    {
+      "amplitude": "fine_low",
+      "checkpoint_rep": 1,
+      "direction": "hip_leading",
+      "failure_reason": "NO_FEASIBLE_WAYPOINT:ValueError:EXPLORATION_ACTION_INFEASIBLE:target waypoint enters existing shank-table geometry (-7.762165 mm)",
+      "horizon": "H4",
+      "run_id": "refine_052_cp01_hip_leading_fine_low_H4",
+      "status": "INFEASIBLE"
+    },
+    {
+      "amplitude": "very_small",
+      "checkpoint_rep": 5,
+      "direction": "hip_leading",
+      "failure_reason": "NO_FEASIBLE_WAYPOINT:ValueError:EXPLORATION_ACTION_INFEASIBLE:target waypoint enters existing shank-table geometry (-4.203246 mm)",
+      "horizon": "H4",
+      "run_id": "refine_055_cp05_hip_leading_very_small_H4",
+      "status": "INFEASIBLE"
+    },
+    {
+      "amplitude": "fine_low",
+      "checkpoint_rep": 5,
+      "direction": "hip_leading",
+      "failure_reason": "NO_FEASIBLE_WAYPOINT:ValueError:EXPLORATION_ACTION_INFEASIBLE:target waypoint enters existing shank-table geometry (-7.772348 mm)",
+      "horizon": "H4",
+      "run_id": "refine_056_cp05_hip_leading_fine_low_H4",
+      "status": "INFEASIBLE"
+    },
+    {
+      "amplitude": "very_small",
+      "checkpoint_rep": 15,
+      "direction": "hip_leading",
+      "failure_reason": "NO_FEASIBLE_WAYPOINT:ValueError:EXPLORATION_ACTION_INFEASIBLE:target waypoint enters existing shank-table geometry (-4.188458 mm)",
+      "horizon": "H4",
+      "run_id": "refine_059_cp15_hip_leading_very_small_H4",
+      "status": "INFEASIBLE"
+    },
+    {
+      "amplitude": "fine_low",
+      "checkpoint_rep": 15,
+      "direction": "hip_leading",
+      "failure_reason": "NO_FEASIBLE_WAYPOINT:ValueError:EXPLORATION_ACTION_INFEASIBLE:target waypoint enters existing shank-table geometry (-7.736851 mm)",
+      "horizon": "H4",
+      "run_id": "refine_060_cp15_hip_leading_fine_low_H4",
+      "status": "INFEASIBLE"
+    },
+    {
+      "amplitude": "very_small",
+      "checkpoint_rep": 25,
+      "direction": "hip_leading",
+      "failure_reason": "NO_FEASIBLE_WAYPOINT:ValueError:EXPLORATION_ACTION_INFEASIBLE:target waypoint enters existing shank-table geometry (-4.188945 mm)",
+      "horizon": "H4",
+      "run_id": "refine_063_cp25_hip_leading_very_small_H4",
+      "status": "INFEASIBLE"
+    },
+    {
+      "amplitude": "fine_low",
+      "checkpoint_rep": 25,
+      "direction": "hip_leading",
+      "failure_reason": "NO_FEASIBLE_WAYPOINT:ValueError:EXPLORATION_ACTION_INFEASIBLE:target waypoint enters existing shank-table geometry (-7.723529 mm)",
+      "horizon": "H4",
+      "run_id": "refine_064_cp25_hip_leading_fine_low_H4",
+      "status": "INFEASIBLE"
     }
   ],
   "reason_categories": {
-    "clearance_or_geometry": 45
+    "clearance_or_geometry": 53
   },
   "schema": "failure_infeasibility_summary_v1"
 }
