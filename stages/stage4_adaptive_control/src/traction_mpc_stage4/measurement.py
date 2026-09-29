@@ -183,7 +183,10 @@ class CausalMeasurementLayer:
         tolerance = 0.25e-9
         if arrival_time + tolerance >= self._next_capture_time_s:
             self._capture(truth)
-            self._next_capture_time_s += self.case.sample_period_s
+            # Anchor the next deadline to the acquired native sample. Repeated
+            # floating-point additions from session time zero otherwise drift
+            # beyond the 200 Hz acquisition tolerance during long sessions.
+            self._next_capture_time_s = arrival_time + self.case.sample_period_s
 
         eligible_time = arrival_time - self.case.latency_s + tolerance
         newest = self._delivered_index

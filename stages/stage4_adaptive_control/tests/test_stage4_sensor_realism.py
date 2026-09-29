@@ -196,3 +196,18 @@ def test_independent_measurement_routing_is_reported() -> None:
         "control_velocity_frame": "WORLD",
         "control_velocity_reference_point": "registered_cuff_center",
     }
+
+
+def test_long_session_native_grid_drift_does_not_skip_200hz_sample() -> None:
+    plant = Stage4CoupledPlant()
+    initial = plant.reset(np.radians([5.0, 10.0]))
+    initial = replace(initial, time_s=82.334999999781)
+    layer = CausalMeasurementLayer(sensor_realism_cases()[0], initial)
+    # The Rep13 checkpoint had a 216 ps deadline lead; the native clock
+    # gradually fell another ~40 ps behind its nominal 5 ms schedule.
+    layer._next_capture_time_s = 82.3399999999976
+    for index in range(1, 296):
+        native_time = 82.334999999781 + index * 0.005 - index * 0.00000000004 / 295
+        sample = layer.update(replace(initial, time_s=native_time))
+        assert sample.new_sample, (index, native_time, sample.sample_time_s)
+        assert sample.sample_time_s == native_time
