@@ -3,10 +3,15 @@ import csv
 import hashlib
 import json
 from pathlib import Path
+import sys
+import mujoco
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[4]
 STAGE = ROOT / "stages/stage5_personalized_motion_learning"
+for relative in ("stages/stage5_personalized_motion_learning/src", "stages/stage4_adaptive_control/src", "stages/stage3_full3d/src"):
+    sys.path.insert(0, str(ROOT / relative))
+from zero_value_30rep_checkpoint import load_checkpoint
 FORMAL = STAGE / "results/zero_value_30rep_baseline_v2/formal_session_02"
 REPLAY = STAGE / "results/rep14_clearance_forensic_v1"
 DOC = STAGE / "docs/rep14_clearance_forensic_v1"
@@ -84,6 +89,40 @@ def main():
       "measured_sleeve_gap_m":float(t["dev_d_measured_sleeve_gap_m"][j]),
       "human_model_sequence":int(t["belief_sequence"][j]),"human_model_beta":t["task_beta"][j].tolist(),
       "planner_request_provenance":snap,"abort_reason":json.loads((p/"summary.json").read_text())["abort_reason"]}
+    # Recompute instantaneous native geometry from saved qpos/qvel and the
+    # unchanged plant model. This is offline evaluation only, never control.
+    rec = json.loads((FORMAL / "session_checkpoints_manifest.json").read_text())[-1]
+    context, _ = load_checkpoint(FORMAL / rec["path"], rec["sha256"], rec["provenance_sha256"])
+    plant = context["runtime"]["plant"]
+    native_rows = a["wall_physics"]["native_states_evaluation_only"]
+    def native_clearance(at_s):
+        native = next(v for v in native_rows if v["time_s"] == at_s)
+        plant.data.qpos[:] = native["qpos_evaluation_only"]
+        plant.data.qvel[:] = native["qvel_evaluation_only"]
+        mujoco.mj_forward(plant.model, plant.data)
+        shank = int(plant.model.geom("shank_geom").id)
+        bed = int(plant.bed_geom_id)
+        half_length = float(plant.model.geom_size[shank, 1])
+        radius = float(plant.model.geom_size[shank, 0])
+        return (float(plant.data.geom_xpos[shank, 2])
+                - abs(float(plant.data.geom_xmat[shank, 8])) * half_length
+                - radius - float(plant.data.geom_xpos[bed, 2]))
+    first["last_legal_control_state"] = {
+        "sim_time_s": float(t["time_s"][j-1]),
+        "human_truth_q_dq": t["evaluation_only_human_state_rad_rad_s"][j-1].tolist(),
+        "human_estimated_q_dq": t["estimated_human_state_rad_rad_s"][j-1].tolist(),
+        "cr12_q": t["cr12_q_rad"][j-1].tolist(),
+        "cr12_dq": t["cr12_dq_rad_s"][j-1].tolist(),
+        "cuff_force_world_n": t["physical_cuff_force_world_n"][j-1].tolist(),
+        "cuff_moment_world_nm": t["physical_cuff_moment_world_nm"][j-1].tolist(),
+        "reference_q": t["reference_q_rad"][j-1].tolist(),
+        "reference_dq": t["reference_dq_rad_s"][j-1].tolist(),
+        "deployable_shank_clearance_m": float(t["session_shank_clearance_m"][j-1]),
+        "instantaneous_native_shank_clearance_m": native_clearance(float(t["time_s"][j-1])),
+        "fast_history_source_sample_s": a["wall_physics"]["causal_sensor_estimates"][-2]["motion_source_sample_s"]}
+    first["instantaneous_native_shank_clearance_m"] = native_clearance(first["first_invalid_sim_time_s"])
+    first["native_clearance_method"] = "Offline mj_forward of saved native qpos/qvel under exact Rep13 checkpoint plant model; same shank/bed geometry formula as FastTruePhysicsMonitor."
+    first["causal_history_tail"] = [{k:v[k] for k in ("sample_time_s", "motion_source_sample_s", "fast_motion_valid", "human_motion_valid")} for v in a["wall_physics"]["causal_sensor_estimates"][-5:]]
     save("REP14_FIRST_FAILURE_STATE.json",first)
     replay=[]
     for i in range(1,5):
