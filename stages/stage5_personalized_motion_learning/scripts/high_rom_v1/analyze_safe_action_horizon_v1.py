@@ -155,7 +155,15 @@ def main(final=False):
     write('CROSS_STATE_VALIDATION.json',{'schema':'cross_state_validation_v1','runs':cross,'by_pattern':{f"{d}/{a}/{h}":{str(cp):next((r['benefit_n_s'] for r in cross if r['direction']==d and r['amplitude']==a and r['horizon']==h and r['checkpoint_rep']==cp),None) for cp in (1,5,15,25)} for d,a,h in sorted(set((r['direction'],r['amplitude'],r['horizon']) for r in cross))}})
     if valid:make_plots(valid)
     if final:
-        write('STATE.json',{'schema':'safe_action_horizon_exploration_state_v1','status':'SAFE_ACTION_HORIZON_EXPLORATION_COMPLETE' if len(valid)>=60 and len(cross)>0 else 'SAFE_ACTION_HORIZON_EXPLORATION_PARTIAL','total_exploratory_attempts':len(rows),'valid':len(valid),'infeasible':counts.get('INFEASIBLE',0),'invalid':counts.get('INVALID',0),'exception':counts.get('EXCEPTION',0),'baseline_replays_passed':4,'repair_cycles_used':2,'learning_started':False})
+        stage_counts=Counter(r['campaign_stage'] for r in rows)
+        replay_pass={str(cp):bool(matched[cp].get('matched_replay_pass')) for cp in (1,5,15,25)}
+        plan=json.loads((DOC/'CROSS_STATE_PLAN.json').read_text())
+        pattern_valid={category:len(set(r['checkpoint_rep'] for r in cross if r['status']=='VALID' and any(e['run_id']==r['run_id'] and e['category']==category for e in plan['entries']))) for category in sorted(set(e['category'] for e in plan['entries']))}
+        fingerprint=json.loads((DOC/'PRODUCTION_FINGERPRINT.json').read_text())
+        gates={'matched_replays':all(replay_pass.values()),'coarse_120':stage_counts['coarse']==120,'refinement_64':stage_counts['refine']==64,'cross_state_20':stage_counts['cross']==20,'valid_at_least_60':len(valid)>=60,'cross_pattern_at_least_three_states':all(n>=3 for n in pattern_valid.values()),'production_fingerprint_unchanged':fingerprint['all_baseline_sources_unchanged']}
+        if not all(gates.values()):
+            raise RuntimeError('final completion gates not met: '+json.dumps(gates,sort_keys=True))
+        write('STATE.json',{'schema':'safe_action_horizon_exploration_state_v1','status':'SAFE_ACTION_HORIZON_EXPLORATION_COMPLETE','total_exploratory_attempts':len(rows),'valid':len(valid),'infeasible':counts.get('INFEASIBLE',0),'invalid':counts.get('INVALID',0),'exception':counts.get('EXCEPTION',0),'baseline_replays_passed':replay_pass,'phase_counts':dict(stage_counts),'cross_pattern_valid_state_counts':pattern_valid,'completion_gates':gates,'repair_cycles_used':2,'learning_started':False,'scientific_variables_changed':[],'safety_thresholds_changed':False})
     print(json.dumps({'attempts':len(rows),'counts':counts,'positive':len(positive),'best':horizon['best'],'short_full':horizon['short_to_full_correlation']}))
 
 if __name__=='__main__':
