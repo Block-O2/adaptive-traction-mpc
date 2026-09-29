@@ -1,0 +1,21 @@
+{
+  "schema": "mode_aware_evaluation_contract_v1",
+  "frozen_date": "2026-09-29",
+  "branch": "codex/scientific-simulation-v1",
+  "pre_change_head": "d312b96400dd459d51ee9744ce469e5bebf417b2",
+  "implementation_source_fingerprint": "193c374b379ab8568b113672220e9e8c03a47c7455c97ac0a4a63e56567c7ffa",
+  "source_file_count": 617,
+  "mandatory_mode_sources": ["HIGH_ROM_CASE_RESULT.json", "summary.json", "runtime_artifacts.json"],
+  "raw_scorer_v2": "unchanged summarize_phase_b.score output retained",
+  "common_physical_condition_rule": "all original scorer-v2 conditions except plan_age must be true; COMPLETE, finite native/trace state, no crash and required C2 diagnostics also required",
+  "realtime_rule": "original plan_age strictly below 100 ms; no stale activation, control miss, command gap or host-lateness fallback",
+  "scientific_rule": "source/receipt/activation epoch and version provenance valid; source simulation age and original physical horizons enforced; no physics/task/reference/model advance during worker computation; host age profiling only",
+  "same_host_delay_ms": [0, 100, 200, 500],
+  "same_host_equality": "exact finite array/native values, same NaN masks, exact discrete events and simulation-time transitions",
+  "representative_case_families": ["low-ROM ordinary", "high-ROM", "120/120 synchronous", "120/120 variable-start"],
+  "representative_run_budget": [4, 8],
+  "failed_case_exclusion": "none",
+  "historical_runtime_status": "RSS_RUNTIME_QUALIFICATION_NOT_MET",
+  "hardware_gate": "RUNTIME_ASSURANCE_REQUIRED_BEFORE_HARDWARE_EXPERIMENTS",
+  "success_status": "SCIENTIFIC_SIMULATION_MODE_VALIDATED"
+}

@@ -14,6 +14,9 @@ def main():
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--host-monitor-limit-s',type=float,default=300.0)
     parser.add_argument('--plant-mode',choices=('high_rom','low_rom'),default='high_rom')
+    parser.add_argument('--execution-mode',choices=('REALTIME_CHARACTERIZATION','SCIENTIFIC_SIMULATION'),
+                        default='REALTIME_CHARACTERIZATION')
+    parser.add_argument('--scientific-host-delay-ms',type=float,default=0.0)
     args=parser.parse_args()
     case=json.loads(args.case.read_text())
     if args.plant_mode=='high_rom' and case.get('research_model')!='high_rom_v1':raise ValueError('High-ROM case required')
@@ -53,13 +56,17 @@ def main():
             'runtime_path':str(Path(runtime.__file__).resolve()),
             'command':sys.argv,'category':('high_rom_development_not_qualification' if args.plant_mode=='high_rom' else 'low_rom_same_source_development_regression'),
             'plant_mode':args.plant_mode,
+            'execution_mode':args.execution_mode,
+            'scientific_host_delay_ms':args.scientific_host_delay_ms,
             'host_monitor_limit_s':args.host_monitor_limit_s}
     try:
         summary=run_executed_case(args.output,qualification_case=case,
             qualification_arm='continual_adaptive',simulate_planning_latency=True,
             formal_qualification=False,dev_a_recovery=True,dev_c_bumpless_transfer=False,
             dev_d_rigid_table_reference=True,autonomous_recovery_options=options,
-            task_timeout_s=30.0,runtime_capture=capture)
+            task_timeout_s=30.0,runtime_capture=capture,
+            execution_mode=args.execution_mode,
+            scientific_host_delay_s=args.scientific_host_delay_ms/1000.0)
         record['status']=summary.get('status');record['abort_reason']=summary.get('abort_reason');
         record['task']=summary.get('task');record['timing']=summary.get('timing')
     except BaseException as error:

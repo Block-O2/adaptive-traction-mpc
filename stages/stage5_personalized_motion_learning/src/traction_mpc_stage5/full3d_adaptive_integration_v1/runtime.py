@@ -73,6 +73,8 @@ from ..architecture_recovery_v2.phase3_human_waypoint import (
 )
 from .online_planning import PlanLifecycle, snapshot_task_call
 from .wall_physics import WallPhysicsSession
+from .scientific_scheduler import ScientificPhysicsSession
+from .execution_policy import ExecutionMode, ScientificPlanLifecycle, SimulationVersion
 from .activation_validation import (validate_activation, validate_rolling_composite,
                                     clearance_geometry_signature,
                                     SensorSupportedTaskClock,
@@ -80,7 +82,8 @@ from .activation_validation import (validate_activation, validate_rolling_compos
                                     return_finalization_reason)
 from .rolling_suffix_splice import RollingSuffixCompositeSchedule
 from .safe_fallback import FallbackLatch
-from .terminal_commit import attempt_return_commit, terminal_sample_evidence
+from .terminal_commit import (attempt_return_commit, attempt_scientific_return_commit,
+                              terminal_sample_evidence)
 from .applied_reference_history import AppliedReferenceMotionHistory
 from .receipt_reference_governor import ReceiptReferenceGovernor, velocity_box
 from .fast_plant import CachedStage5CR12SensorBoundaryPlant
@@ -442,6 +445,7 @@ def persist_runtime_artifacts(output_dir: Path, capture: dict[str, Any]) -> None
     records = [] if lifecycle is None else lifecycle.records()
     payload = {
         "schema": "autonomous_recovery_runtime_artifacts_v1",
+        "execution_mode": runtime.get("execution_mode", ExecutionMode.REALTIME_CHARACTERIZATION.value),
         "timing_semantics": ("whole_session_wall_physics_v2" if runtime.get("wall_session") is not None else
                              "monotonic_acquisition_to_command; task worker concurrent with physics; "
                              "commissioning/recovery synchronous; no latency replay"
@@ -1631,11 +1635,20 @@ def _run_executed_case(
     dev_d_rigid_table_reference: bool = False,
     autonomous_recovery_options: dict[str, Any] | None = None,
     runtime_capture: dict[str, Any] | None = None,
+    execution_mode: str = ExecutionMode.REALTIME_CHARACTERIZATION.value,
+    scientific_host_delay_s: float = 0.0,
 ) -> dict[str, Any]:
     """Run physical commissioning and one event-driven OUTBOUND/HOLD/RETURN task."""
 
     output_dir = Path(output_dir)
     recovery_options = dict(autonomous_recovery_options or {})
+    mode = ExecutionMode(execution_mode)
+    scientific = mode is ExecutionMode.SCIENTIFIC_SIMULATION
+    if scientific and not (recovery_options.get("whole_session_wall_physics")
+                           and recovery_options.get("monotonic_async_planning")):
+        raise ValueError("scientific mode requires the registered async worker and physical session")
+    if not scientific and scientific_host_delay_s:
+        raise ValueError("host delay injection is scientific-mode only")
     validate_recovery_options(recovery_options)
     if recovery_options and not dev_d_rigid_table_reference:
         raise ValueError("autonomous recovery options require the rigid-table closed-loop path")
@@ -1706,6 +1719,7 @@ def _run_executed_case(
         startup_execution_pose_alignment=recovery_options.get("startup_execution_pose_alignment", False),
         exact_cached_plant=recovery_options.get("exact_cached_plant", False))
     plant = runtime["plant"]
+    runtime["execution_mode"] = mode.value
     runtime["autonomous_recovery_options"] = recovery_options
     if recovery_options.get('incremental_window_wrench_baseline', False):
         from .command_response_history import CommandResponseHistory
@@ -1717,14 +1731,32 @@ def _run_executed_case(
     if runtime_capture is not None:
         runtime_capture["runtime"] = runtime
     online_timing = bool(recovery_options.get("monotonic_async_planning", False))
-    lifecycle = PlanLifecycle(process_worker=bool(recovery_options.get("planner_process_worker", False))) if online_timing else None
+    lifecycle = (PlanLifecycle(process_worker=bool(recovery_options.get("planner_process_worker", False)))
+                 if online_timing and not scientific else None)
     if lifecycle is not None:
         runtime["plan_lifecycle"] = lifecycle
     if recovery_options.get("whole_session_wall_physics", False):
-        if lifecycle is None:
+        if not online_timing:
             raise ValueError("whole_session_wall_physics requires monotonic_async_planning")
-        runtime["wall_session"] = WallPhysicsSession(runtime, stop_check=(None if runtime_capture is None
-                                                      else runtime_capture.get("stop_check")))
+        session_type = ScientificPhysicsSession if scientific else WallPhysicsSession
+        runtime["wall_session"] = session_type(runtime, stop_check=(None if runtime_capture is None
+                                                    else runtime_capture.get("stop_check")))
+        if scientific:
+            session = runtime["wall_session"]
+            def simulation_version():
+                return SimulationVersion(
+                    episode_epoch=str(output_dir.resolve()),
+                    state_version=session.steps + len(session.samples),
+                    physics_step=session.steps,
+                    sim_time_s=float(plant.data.time),
+                    phase_version=len(session.phase_records)-1+int(runtime.get("task_phase_version", 0)),
+                    human_model_version=str(runtime.get("model_sequence", "population_prior_v1")),
+                    reference_version=str(len(session.applied_commands)))
+            lifecycle = ScientificPlanLifecycle(
+                session, version_provider=simulation_version,
+                process_worker=bool(recovery_options.get("planner_process_worker", False)),
+                host_delay_s=scientific_host_delay_s)
+            runtime["plan_lifecycle"] = lifecycle
         runtime["wall_session"].capture(initial=True)
         initial_reference = runtime["contract"].reference_motion_history.last_reference()
         runtime["contract"].reference_motion_history = AppliedReferenceMotionHistory(
@@ -2187,6 +2219,8 @@ def _run_executed_case(
     def result_ready(pending_request):
         if not pending_request["future"].done():
             return False
+        if scientific:
+            return True
         return readiness_hook is None or readiness_hook(pending_request, monotonic_ns())
     def fallback_event(name, **details):
         fallback_events.append(dict(event=name, host_ns=monotonic_ns(),
@@ -2387,7 +2421,8 @@ def _run_executed_case(
                 split.fast_motion_acceleration_rad_s2, split.human_motion_acceleration_rad_s2,
                 fast_valid=split.fast_motion_valid, slow_valid=split.human_motion_valid,
                 aligned=abs(split.sample_timestamp_s-source_s) <= 1e-12,
-                source_age_s=(wall.clock()-capture_ns)/1e9, horizon_s=2*CONTROL_DT_S)
+                source_age_s=((float(plant.data.time)-source_s) if scientific
+                              else (wall.clock()-capture_ns)/1e9), horizon_s=2*CONTROL_DT_S)
             guard.update(source_sample_time_s=source_s, source_capture_ns=capture_ns,
                          reference_ready=transition_reference_ready,
                          decision_host_ns=wall.clock(), belief_sequence=belief.sequence,
@@ -2401,7 +2436,8 @@ def _run_executed_case(
         if (task_state.phase is TaskPhase.COMPLETE
                 and recovery_options.get("causal_terminal_commit", False)):
             wall = runtime["wall_session"]
-            commit_record = attempt_return_commit(wall, runtime["return_projection_guards"][-1],
+            commit_operation = (attempt_scientific_return_commit if scientific else attempt_return_commit)
+            commit_record = commit_operation(wall, runtime["return_projection_guards"][-1],
                 phase_elapsed_at_boundary_s=previous_task_state.phase_elapsed_s+task_dt,
                 boundary_physics_s=physical_now, phase_timeout_s=spec.phase_timeout_s,
                 task_start_s=task_start_time, task_timeout_s=task_timeout_s,
@@ -2434,6 +2470,8 @@ def _run_executed_case(
         ):
             task_state = abort_episode(task_state, "GLOBAL_TASK_TIMEOUT")
         if task_state.phase is not phase_previous:
+            if scientific:
+                runtime["task_phase_version"] = int(runtime.get("task_phase_version", 0)) + 1
             transitions.append({
                 "time_s": float(truth.time_s),
                 "from": phase_previous.value,
@@ -2744,6 +2782,7 @@ def _run_executed_case(
                         request_plan_version=request_plan_version,
                         original_sample_s=request.source_sample_time_s,
                         revalidation_sample_s=revalidation_sample_s,
+                        age_policy=("simulation" if scientific else "wall"),
                     ) if handoff else None)
                 def validate_current_activation(reference_origin=reference_state.copy(),
                                                 acceleration_origin=reference_acceleration.copy(),
@@ -2790,7 +2829,8 @@ def _run_executed_case(
                     nonlocal schedule_start_time, rolling_splice_pending, active_escape
                     nonlocal fallback_latch, activation_backup
                     if fallback_latch is not None:
-                        age_ns = int(receipt["apply_ns"])-request.sensor_capture_ns
+                        age_ns = (int(round((float(plant.data.time)-request.source_sample_time_s)*1e9))
+                                  if scientific else int(receipt["apply_ns"])-request.sensor_capture_ns)
                         if fallback_latch.mode == "ARMED":
                             if not fallback_latch.choose_primary(validated=True, age_ns=age_ns):
                                 raise RuntimeError("PRIMARY_AFTER_FALLBACK_COMMIT")
@@ -3127,7 +3167,8 @@ def _run_executed_case(
                             revalidation_capture_ns=splice_capture_ns,
                             request_plan_version=splice_suffix.version,
                             original_sample_s=splice_request.source_sample_time_s,
-                            revalidation_sample_s=splice_sample_s),
+                            revalidation_sample_s=splice_sample_s,
+                            age_policy=("simulation" if scientific else "wall")),
                         certificate_geometry_at_request=rolling_splice_pending[
                             "certificate_geometry_signature"])
                     rolling_splice_pending["event"]["splice_revalidation"] = splice_validation
@@ -3138,8 +3179,10 @@ def _run_executed_case(
                     splice_commit_pending = rolling_splice_pending
                     def splice_apply_guard(pending_splice=splice_commit_pending,
                                            fresh_ns=splice_capture_ns):
-                        age_original = monotonic_ns()-pending_splice["request"].sensor_capture_ns
-                        age_fresh = monotonic_ns()-fresh_ns
+                        age_original = (int(round((float(plant.data.time)-pending_splice["request"].source_sample_time_s)*1e9))
+                                        if scientific else monotonic_ns()-pending_splice["request"].sensor_capture_ns)
+                        age_fresh = (int(round((float(plant.data.time)-splice_sample_s)*1e9))
+                                     if scientific else monotonic_ns()-fresh_ns)
                         valid = 0 <= age_original < lifecycle.maximum_age_ns and (
                             0 <= age_fresh < lifecycle.maximum_age_ns)
                         if not valid:
@@ -3317,12 +3360,13 @@ def _run_executed_case(
             wall = runtime["wall_session"]
             physical_age = float(plant.data.time)-guard["source_sample_time_s"]
             host_age = (wall.end_ns-guard["source_capture_ns"])/1e9
-            covered = max(physical_age, host_age) <= guard["capture_anchored_horizon_s"]+1e-12
+            covered = ((physical_age if scientific else max(physical_age, host_age))
+                       <= guard["capture_anchored_horizon_s"]+1e-12)
             return_elapsed = previous_task_state.phase_elapsed_s + task_dt + max(
                 0., float(plant.data.time)-physical_now)
             task_elapsed = float(plant.data.time)-task_start_time
             finalization_reason = return_finalization_reason(
-                physical_age=physical_age, host_age=host_age,
+                physical_age=physical_age, host_age=(physical_age if scientific else host_age),
                 horizon_s=guard["capture_anchored_horizon_s"],
                 return_elapsed_s=return_elapsed, phase_timeout_s=spec.phase_timeout_s,
                 task_elapsed_s=task_elapsed, task_timeout_s=task_timeout_s)
@@ -3374,6 +3418,7 @@ def _run_executed_case(
     robot_tau = np.asarray([row.get("applied_robot_tau_nm", np.zeros(6)) for row in task_rows]) if task_rows else np.empty((0, 6))
     summary = {
         "schema": ("full3d_dev_a_recovery_v1.executed_case.v1" if dev_a_recovery else SCHEMA),
+        "execution_mode": mode.value,
         "evidence_category": "development_full3d_physical_execution",
         "status": task_state.phase.value,
         "abort_reason": task_state.abort_reason,

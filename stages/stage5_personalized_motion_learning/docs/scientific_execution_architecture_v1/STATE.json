@@ -1,99 +1,161 @@
 {
-  "schema": "scientific_execution_implementation_state_v1",
-  "terminal_status": "SCIENTIFIC_SIMULATION_VALIDATION_FAIL",
+  "schema": "scientific_simulation_mode_aware_state_v2",
+  "terminal_status": "SCIENTIFIC_SIMULATION_MODE_VALIDATED",
   "date": "2026-09-29",
-  "architecture_audit_checkpoint": {
-    "commit": "1bfbc6d9ba451202b4e91d3354800716e7990b39",
-    "previous_state": {
-      "schema": "scientific_execution_architecture_audit_v1",
-      "terminal_status": "SCIENTIFIC_MODE_MODERATE_REFACTOR",
-      "date": "2026-09-29",
-      "repository": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-learning",
-      "starting_branch": "codex/learning-wsl-migration-v1",
-      "starting_head": "1298733a1993449a7bdefe6ee1c068cae71c3056",
-      "startup_dirty_files": [],
-      "recommended_scheduler": "B_ASYNC_WORKER_FROZEN_SIMULATION_EPOCH",
-      "production_changed": false,
-      "configs_or_parameters_changed": false,
-      "scientific_variables_changed": [],
-      "scientific_assumptions_changed_in_executable_system": false,
-      "proposed_assumption": "Explicit ideal sim-time computation semantics only in new scientific mode",
-      "controller_rewrite_required": false,
-      "implementation_or_dynamic_validation_performed": false,
-      "simulation_runs": 0,
-      "learning_runs": 0,
-      "subagents": 0,
-      "historical_runtime_status": "RSS_RUNTIME_QUALIFICATION_NOT_MET",
-      "account_wide_used_percent_start": 33,
-      "account_wide_used_percent_last_observed": 34,
-      "quota_resolution_note": "Tool reports integer percentages; 34.5 cannot be resolved precisely. No audit expansion after observed34.",
-      "git_mutations": [],
-      "known_findings": [
-        "command pre/post write >100 versus required >=100; unchanged",
-        "RSS source receipt and delayed activation need separate version transactions",
-        "RETURN host horizon and finalization catch-up also require isolation"
+  "branch": "codex/scientific-simulation-v1",
+  "starting_head": "d312b96400dd459d51ee9744ce469e5bebf417b2",
+  "previous_state": {
+    "schema": "scientific_execution_implementation_state_v1",
+    "terminal_status": "SCIENTIFIC_SIMULATION_VALIDATION_FAIL",
+    "date": "2026-09-29",
+    "architecture_audit_checkpoint": {
+      "commit": "1bfbc6d9ba451202b4e91d3354800716e7990b39",
+      "previous_state": {
+        "schema": "scientific_execution_architecture_audit_v1",
+        "terminal_status": "SCIENTIFIC_MODE_MODERATE_REFACTOR",
+        "date": "2026-09-29",
+        "repository": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-learning",
+        "starting_branch": "codex/learning-wsl-migration-v1",
+        "starting_head": "1298733a1993449a7bdefe6ee1c068cae71c3056",
+        "startup_dirty_files": [],
+        "recommended_scheduler": "B_ASYNC_WORKER_FROZEN_SIMULATION_EPOCH",
+        "production_changed": false,
+        "configs_or_parameters_changed": false,
+        "scientific_variables_changed": [],
+        "scientific_assumptions_changed_in_executable_system": false,
+        "proposed_assumption": "Explicit ideal sim-time computation semantics only in new scientific mode",
+        "controller_rewrite_required": false,
+        "implementation_or_dynamic_validation_performed": false,
+        "simulation_runs": 0,
+        "learning_runs": 0,
+        "subagents": 0,
+        "historical_runtime_status": "RSS_RUNTIME_QUALIFICATION_NOT_MET",
+        "account_wide_used_percent_start": 33,
+        "account_wide_used_percent_last_observed": 34,
+        "quota_resolution_note": "Tool reports integer percentages; 34.5 cannot be resolved precisely. No audit expansion after observed34.",
+        "git_mutations": [],
+        "known_findings": [
+          "command pre/post write >100 versus required >=100; unchanged",
+          "RSS source receipt and delayed activation need separate version transactions",
+          "RETURN host horizon and finalization catch-up also require isolation"
+        ],
+        "checks": {
+          "static_source_inspection": "completed for named path; lexical inventory supplements focused reads",
+          "json_document_integrity": "PASS",
+          "tracked_files_unchanged": "PASS: 2663 tracked file hashes",
+          "dynamic_tests": "NOT_RUN",
+          "git_diff_check": "PASS"
+        },
+        "next_step": "Sol High implement only the bounded mode refactor and acceptance gates under this proposed contract; no 30-repeat or learner yet.",
+        "account_wide_used_percent_end": 34,
+        "output_directory": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/docs/scientific_execution_architecture_v1"
+      }
+    },
+    "base_head": "1298733a1993449a7bdefe6ee1c068cae71c3056",
+    "base_production_fingerprint": "see architecture audit PROVENANCE.json at documentation checkpoint",
+    "campaign_branch": "codex/scientific-simulation-v1",
+    "production_fingerprint_sha256": "193c374b379ab8568b113672220e9e8c03a47c7455c97ac0a4a63e56567c7ffa",
+    "implementation_committed": false,
+    "remote_pushed": false,
+    "execution_mode": "SCIENTIFIC_SIMULATION",
+    "deterministic_tests": {
+      "focused": "23 passed",
+      "broader_old_endpoint_pruning": "1 preexisting unchanged test wrapper TypeError"
+    },
+    "host_delay_test": {
+      "delays_ms": [
+        0,
+        100,
+        200,
+        500
       ],
-      "checks": {
-        "static_source_inspection": "completed for named path; lexical inventory supplements focused reads",
-        "json_document_integrity": "PASS",
-        "tracked_files_unchanged": "PASS: 2663 tracked file hashes",
-        "dynamic_tests": "NOT_RUN",
-        "git_diff_check": "PASS"
-      },
-      "next_step": "Sol High implement only the bounded mode refactor and acceptance gates under this proposed contract; no 30-repeat or learner yet.",
-      "account_wide_used_percent_end": 34,
-      "output_directory": "/Users/hankli/Desktop/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/docs/scientific_execution_architecture_v1"
-    }
+      "complete_count": 4,
+      "trace_array_count": 48,
+      "trace_array_mismatch_count": 0,
+      "native_state_count": 104180,
+      "native_qpos_qvel_torque_contact_mismatch_count": 0,
+      "scorer_v2_pass": [
+        true,
+        false,
+        false,
+        false
+      ],
+      "failure_condition": "plan_age host activation interval > unchanged 100 ms scorer limit"
+    },
+    "same_host_repeatability": "exploratory smoke 0ms equals formal 0ms exactly in all scientific arrays and native states",
+    "realtime_dynamic_differential": "NOT_RUN_GATE_STOP",
+    "representative_scientific_4_to_8": "NOT_RUN_GATE_STOP",
+    "truth_firewall": "by-value snapshot test PASS; whole-program version/firewall audit incomplete",
+    "historical_runtime_status": "RSS_RUNTIME_QUALIFICATION_NOT_MET",
+    "hardware_boundary": "RUNTIME_ASSURANCE_REQUIRED_BEFORE_HARDWARE_EXPERIMENTS",
+    "account_wide_used_percent_last_observed": 35,
+    "raw_data_manifest": "RAW_DATA_MANIFEST.json",
+    "comparison": "HOST_DELAY_COMPARISON.json",
+    "implementation_report": "IMPLEMENTATION_REPORT.md",
+    "exact_remaining_next_action": "Do not rerun this formal delay set or push. Obtain a new versioned scientific acceptance contract for scorer-v2 plan_age semantics, then repair and preregister fresh validation.",
+    "git_mutations": [
+      "allowlist stage 13 Astra audit files",
+      "documentation checkpoint commit 1bfbc6d9",
+      "create/switch codex/scientific-simulation-v1"
+    ],
+    "staged_production": false,
+    "pushed": false,
+    "reset": false,
+    "deleted": false
   },
-  "base_head": "1298733a1993449a7bdefe6ee1c068cae71c3056",
-  "base_production_fingerprint": "see architecture audit PROVENANCE.json at documentation checkpoint",
-  "campaign_branch": "codex/scientific-simulation-v1",
-  "production_fingerprint_sha256": "193c374b379ab8568b113672220e9e8c03a47c7455c97ac0a4a63e56567c7ffa",
-  "implementation_committed": false,
+  "contract": "MODE_AWARE_EVALUATION_CONTRACT.md/json",
+  "production_fingerprint": "0b3c66bcf853255f70b59f8196ccfe5ea554c18fe3690be327c831fc9f52e358",
+  "production_file_count": 618,
+  "deterministic_tests": "39 passed",
+  "truth_firewall": "PASS_SCOPED",
+  "fresh_delay_runs": {
+    "count": 4,
+    "statuses": [
+      "COMPLETE",
+      "COMPLETE",
+      "COMPLETE",
+      "COMPLETE"
+    ],
+    "common_physical": [
+      "PASS",
+      "PASS",
+      "PASS",
+      "PASS"
+    ],
+    "scientific_validity": [
+      "PASS",
+      "PASS",
+      "PASS",
+      "PASS"
+    ],
+    "exact_trace_arrays": 48,
+    "exact_native_states": 104180
+  },
+  "realtime_nonregression": {
+    "run_status": "COMPLETE",
+    "physical": "PASS",
+    "realtime_execution": "FAIL",
+    "control_cycle_misses": 412,
+    "historical_runtime_status": "RSS_RUNTIME_QUALIFICATION_NOT_MET"
+  },
+  "representatives": {
+    "count": 4,
+    "complete": 4,
+    "physical_pass": 4,
+    "scientific_pass": 4
+  },
+  "hardware_gate": "RUNTIME_ASSURANCE_REQUIRED_BEFORE_HARDWARE_EXPERIMENTS",
+  "wsl_handoff": "prepared; exact pushed implementation checkpoint SHA must be pinned before running",
+  "validated_implementation_checkpoint_sha": null,
   "remote_pushed": false,
-  "execution_mode": "SCIENTIFIC_SIMULATION",
-  "deterministic_tests": {
-    "focused": "23 passed",
-    "broader_old_endpoint_pruning": "1 preexisting unchanged test wrapper TypeError"
-  },
-  "host_delay_test": {
-    "delays_ms": [
-      0,
-      100,
-      200,
-      500
-    ],
-    "complete_count": 4,
-    "trace_array_count": 48,
-    "trace_array_mismatch_count": 0,
-    "native_state_count": 104180,
-    "native_qpos_qvel_torque_contact_mismatch_count": 0,
-    "scorer_v2_pass": [
-      true,
-      false,
-      false,
-      false
-    ],
-    "failure_condition": "plan_age host activation interval > unchanged 100 ms scorer limit"
-  },
-  "same_host_repeatability": "exploratory smoke 0ms equals formal 0ms exactly in all scientific arrays and native states",
-  "realtime_dynamic_differential": "NOT_RUN_GATE_STOP",
-  "representative_scientific_4_to_8": "NOT_RUN_GATE_STOP",
-  "truth_firewall": "by-value snapshot test PASS; whole-program version/firewall audit incomplete",
-  "historical_runtime_status": "RSS_RUNTIME_QUALIFICATION_NOT_MET",
-  "hardware_boundary": "RUNTIME_ASSURANCE_REQUIRED_BEFORE_HARDWARE_EXPERIMENTS",
-  "account_wide_used_percent_last_observed": 35,
-  "raw_data_manifest": "RAW_DATA_MANIFEST.json",
-  "comparison": "HOST_DELAY_COMPARISON.json",
-  "implementation_report": "IMPLEMENTATION_REPORT.md",
-  "exact_remaining_next_action": "Do not rerun this formal delay set or push. Obtain a new versioned scientific acceptance contract for scorer-v2 plan_age semantics, then repair and preregister fresh validation.",
-  "git_mutations": [
-    "allowlist stage 13 Astra audit files",
-    "documentation checkpoint commit 1bfbc6d9",
-    "create/switch codex/scientific-simulation-v1"
-  ],
-  "staged_production": false,
-  "pushed": false,
+  "production_source_changed_this_continuation": false,
+  "evaluation_source_added": true,
+  "test_wrapper_fixed": true,
+  "scientific_parameters_changed": false,
+  "configs_changed": false,
+  "historical_v1_failure_rewritten": false,
+  "staged": false,
   "reset": false,
+  "stash": false,
   "deleted": false
 }

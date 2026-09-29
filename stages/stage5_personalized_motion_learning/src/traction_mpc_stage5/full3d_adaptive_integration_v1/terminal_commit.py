@@ -121,3 +121,54 @@ def attempt_return_commit(wall, guard, *, phase_elapsed_at_boundary_s,
         raise
     finally:
         runtime.pop("terminal_capture_hook", None)
+
+
+def attempt_scientific_return_commit(wall, guard, *, phase_elapsed_at_boundary_s,
+                                     boundary_physics_s, phase_timeout_s,
+                                     task_start_s, task_timeout_s, inspect_sample):
+    """Commit COMPLETE at the current native state with no host catch-up."""
+    if not wall.active:
+        raise RuntimeError("terminal commit requires an active physical session")
+    runtime = wall.runtime
+    source_s = float(guard["source_sample_time_s"])
+    source_ns = int(guard["source_capture_ns"])
+    native_s = float(wall.plant.data.time)
+    now_ns = wall.clock()
+    physical_age = native_s-source_s
+    host_age = (now_ns-source_ns)/1e9
+    return_elapsed = phase_elapsed_at_boundary_s+native_s-boundary_physics_s
+    task_elapsed = native_s-task_start_s
+    record = {"source_sample_time_s": source_s, "source_capture_ns": source_ns,
+              "capture_anchored_horizon_s": guard["capture_anchored_horizon_s"],
+              "truth_used_for_decision": False, "causal_tail_samples": [],
+              "attempt_entered_host_ns": now_ns, "final_native_time_s": native_s,
+              "final_host_ns": now_ns, "source_to_final_physical_s": physical_age,
+              "source_to_final_host_s": host_age,
+              "actual_return_elapsed_s": return_elapsed,
+              "original_phase_timeout_s": phase_timeout_s,
+              "actual_task_elapsed_s": task_elapsed,
+              "original_task_timeout_s": task_timeout_s,
+              "quantization_residual_ns": 0,
+              "scientific_validity_age_s": physical_age}
+    runtime.setdefault("return_commit_attempts", []).append(record)
+    if source_s <= runtime.get("last_return_commit_source_s", -float("inf"))+1e-12:
+        record.update(action="DEFER", accepted=False,
+                      reason="TERMINAL_COMMIT_REQUIRES_NEW_CAPTURE")
+        return record
+    runtime["last_return_commit_source_s"] = source_s
+    reason = return_finalization_reason(
+        physical_age=physical_age, host_age=physical_age,
+        horizon_s=guard["capture_anchored_horizon_s"],
+        return_elapsed_s=return_elapsed, phase_timeout_s=phase_timeout_s,
+        task_elapsed_s=task_elapsed, task_timeout_s=task_timeout_s)
+    if not guard.get("ready", False) and reason is None:
+        reason = "TERMINAL_RETURN_PROJECTION_NOT_READY"
+    accepted = reason is None
+    action = ("COMPLETE" if accepted else "DEFER" if reason ==
+              "TERMINAL_RETURN_PROJECTION_HORIZON_EXCEEDED" else "ABORT")
+    record.update(accepted=accepted, action=action, reason=reason,
+                  covered=physical_age <= guard["capture_anchored_horizon_s"]+1e-12)
+    if accepted:
+        wall.end_ns = now_ns
+        wall.active = False
+    return record

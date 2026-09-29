@@ -46,8 +46,8 @@ def test_roundoff_guard_does_not_relax_path_acceptance(monkeypatch):
     candidate=HumanWaypointCandidate('guard',TaskPhase.RETURN,start,target,np.zeros(2))
     calls=[];original=mod._quintic_coefficients
     sample_counts=[];path_check=scheduler._path_clearance_is_valid
-    def counted_path(values,c):
-        sample_counts.append(len(values));return path_check(values,c)
+    def counted_path(values,c,**kwargs):
+        sample_counts.append(len(values));return path_check(values,c,**kwargs)
     monkeypatch.setattr(scheduler,'_path_clearance_is_valid',counted_path)
     def counted(*args,**kwargs):
         calls.append(1);return original(*args,**kwargs)

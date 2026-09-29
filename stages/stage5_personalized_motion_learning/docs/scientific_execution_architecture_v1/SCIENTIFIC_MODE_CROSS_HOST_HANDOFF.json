@@ -1,0 +1,20 @@
+{
+  "schema": "scientific_mode_cross_host_handoff_v1",
+  "status": "PREPARED_AFTER_MAC_VALIDATION",
+  "source_branch": "codex/scientific-simulation-v1",
+  "exact_remote_sha": null,
+  "sha_freeze_rule": "record final pushed branch SHA before WSL work; use that exact SHA for every case",
+  "execution_mode": "SCIENTIFIC_SIMULATION",
+  "cases": [
+    {"path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/low_rom_regression_cases/balanced_ordinary_r01.json", "sha256": "ceb33e9eeb243d49ad4bd1ad0a17637243219f3e058f4da0aaf2ed9fbf975b2d"},
+    {"path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_matrix_nominal_hip_v1.json", "sha256": "8b22c034e25c4519d96ee671bdef012da2b34be7f3513cbb8d83fdc6ac3486a3"},
+    {"path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_nominal_sync_120_v1.json", "sha256": "d9f4d636b98db5792cf4b50915f4509bf2274c1c80764d6d8629bf22e3ae9b96"},
+    {"path": "stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_function_fresh_01_v1.json", "sha256": "002c7bd58597ce325e6fc8800517484ff60d8286c964201379af4a5a2edf5d59"}
+  ],
+  "compare": ["simulation_time_human_q_dq", "simulation_time_cr12_q_dq", "waypoint_sequence", "phase_transitions", "force", "moment", "clearance", "raw_scorer_v2_conditions", "scientific_validity", "final_state"],
+  "tolerance_rule": "preregister justified cross-host numerical tolerances before WSL outcome inspection; preserve identical discrete decisions",
+  "runtime_speed_gate": false,
+  "hardware_actuation_authorized": false,
+  "historical_runtime_status": "RSS_RUNTIME_QUALIFICATION_NOT_MET",
+  "hardware_gate": "RUNTIME_ASSURANCE_REQUIRED_BEFORE_HARDWARE_EXPERIMENTS"
+}

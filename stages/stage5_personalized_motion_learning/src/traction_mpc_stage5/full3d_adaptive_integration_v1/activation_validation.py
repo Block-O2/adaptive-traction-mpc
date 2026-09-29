@@ -226,8 +226,14 @@ def validate_activation(*, belief, request_sequence, schedule, clearance,
             current_clearance = float(clearance.evaluate(observed[:2]))
             if shifted_rom and current_clearance >= 0.:
                 shifted_lower = float(clearance.certified_minimum(shifted, schedule.duration_s))
-        original_age_ms = (now_ns-original_ns)/1e6
-        revalidation_age_ms = (now_ns-revalidation_ns)/1e6
+        original_host_age_ms = (now_ns-original_ns)/1e6
+        revalidation_host_age_ms = (now_ns-revalidation_ns)/1e6
+        if future_handoff.get("age_policy", "wall") == "simulation":
+            original_age_ms = 1000. * (now_physics_s-future_handoff["original_sample_s"])
+            revalidation_age_ms = 1000. * (now_physics_s-future_handoff["revalidation_sample_s"])
+        else:
+            original_age_ms = original_host_age_ms
+            revalidation_age_ms = revalidation_host_age_ms
         version_valid = bool(schedule.version == future_handoff["request_plan_version"]
                              and belief.sequence >= request_sequence)
         expected_goal = (spec.start_return_target_rad if phase is TaskPhase.RETURN
@@ -239,9 +245,12 @@ def validate_activation(*, belief, request_sequence, schedule, clearance,
             "original_request_sample_s": future_handoff["original_sample_s"],
             "original_request_capture_ns": original_ns,
             "original_request_age_ms": original_age_ms,
+            "original_request_host_age_ms_profile": original_host_age_ms,
             "revalidation_sample_s": future_handoff["revalidation_sample_s"],
             "revalidation_capture_ns": revalidation_ns,
             "revalidation_sample_age_ms": revalidation_age_ms,
+            "revalidation_host_age_ms_profile": revalidation_host_age_ms,
+            "age_policy": future_handoff.get("age_policy", "wall"),
             "request_model_sequence": request_sequence,
             "current_model_sequence": belief.sequence,
             "request_plan_version": future_handoff["request_plan_version"],
