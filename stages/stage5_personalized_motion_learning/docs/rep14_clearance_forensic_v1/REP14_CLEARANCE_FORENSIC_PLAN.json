@@ -1,0 +1,30 @@
+{
+  "schema": "rep14_clearance_forensic_plan_v1",
+  "frozen_before_production_edit": true,
+  "question": "Why does continuous zero-value Rep14 OUTBOUND lose incremental clearance after Rep1-13 pass?",
+  "evidence_order": [
+    "verify V2 raw/checkpoint manifests and source/config/seed/fingerprint",
+    "audit Rep10-14 trends and first invalid native/control state",
+    "restore exact Rep13 checkpoint twice and replay Rep14 unchanged",
+    "compare scientific states and offline counterfactuals",
+    "classify and preserve safety failure"
+  ],
+  "preregistered_hypotheses": {
+    "A": "Human-model/adaptation drift",
+    "B": "persistent causal-history or estimator implementation defect",
+    "C": "waypoint/candidate selection enters low-clearance region",
+    "D": "accumulated physical-state drift",
+    "E": "safety layer correctly rejects genuinely unsafe state",
+    "F": "other or insufficient evidence"
+  },
+  "decision_rule": "Choose the earliest causal divergence supported by raw state, checkpoint, source audit, and replay; nondeterministic replays supersede algorithmic attribution; no repair without a demonstrated implementation defect.",
+  "replay": "Two independent restorations of formal_session_02 checkpoint_13.pkl.z, unchanged source/config/seed and control logic; separate raw output directories.",
+  "repair_limit": "At most one minimal production fix only for proven timestamp/history alignment, checkpoint serialization, persistence/reset, or deterministic bookkeeping defect, with regression test and exact replay.",
+  "prohibitions": [
+    "no complete 30-rep rerun",
+    "no safety threshold or clearance requirement change",
+    "no controller/planner/Human model tuning",
+    "no bypass of aligned history or safety rejection",
+    "no raw trajectory overwrite"
+  ]
+}
