@@ -193,6 +193,32 @@ def build_stage5_cr12_model_xml(
     return ET.tostring(root, encoding="unicode")
 
 
+
+def _select_initial_cr12_ik_candidate(
+    candidates: list[np.ndarray], scores: list[float], nominal_q: np.ndarray
+) -> np.ndarray:
+    """Keep the best conditioning branch, resolving numerical ties canonically.
+
+    A 6x6 Jacobian SVD has rounding error beyond a single float64 ULP.  The
+    64-epsilon window is numerical resolution, not a physical score margin.
+    """
+
+    best = max(scores)
+    score_resolution = 64.0 * np.finfo(np.float64).eps * max(1.0, abs(best))
+    near_best = [
+        i for i, score in enumerate(scores) if best - score <= score_resolution
+    ]
+    distances = [float(np.linalg.norm(candidates[i] - nominal_q)) for i in near_best]
+    closest = min(distances)
+    distance_resolution = 64.0 * np.finfo(np.float64).eps * max(1.0, closest)
+    near_nominal = [
+        i for i, distance in zip(near_best, distances)
+        if distance - closest <= distance_resolution
+    ]
+    # The final key makes even a nominal-distance tie independent of seed order.
+    return candidates[min(near_nominal, key=lambda i: tuple(candidates[i]))].copy()
+
+
 def solve_cr12_stage5_ik(
     robot: CR12TorqueRobot,
     target,
@@ -224,7 +250,8 @@ def solve_cr12_stage5_ik(
             robot.set_configuration(q_rad)
             return float(np.linalg.svd(robot.attachment_jacobian(), compute_uv=False)[-1])
 
-        return max(exact, key=minimum_singular_value).copy()
+        scores = [minimum_singular_value(candidate) for candidate in exact]
+        return _select_initial_cr12_ik_candidate(exact, scores, robot.home_q_rad)
 
     previous = np.asarray(previous_q_rad, dtype=float)
     seeds = [previous]

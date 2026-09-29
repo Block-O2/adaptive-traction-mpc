@@ -1,0 +1,16 @@
+{
+  "schema": "wsl_learning_determinism_gate_v1",
+  "category": "development_validation_not_learning_statistics",
+  "host": "Lenovo Y9000P / Ubuntu WSL2 only",
+  "environment": "Python 3.10.21, MuJoCo 3.10.0, NumPy 2.2.6, SciPy 1.15.3; OMP_NUM_THREADS=OPENBLAS_NUM_THREADS=MKL_NUM_THREADS=1",
+  "execution_mode": "SCIENTIFIC_SIMULATION",
+  "cases": ["low-ROM ordinary", "high-ROM hip", "120/120 synchronous", "120/120 variable-start"],
+  "repetitions_per_case": 2,
+  "host_only_delay_sanity": {"case": "low-ROM ordinary", "delays_ms": [0, 500], "one_run_per_delay": true},
+  "seed_rule": "Use each registered deterministic case and fixed IK multi-start seed 20260918; no additional RNG seed is supplied by the case launcher.",
+  "source_rule": "Commit IK fix and this gate before any new run; no source/config change during the gate.",
+  "exact_acceptance": ["all trace.npz arrays with equal shape, dtype, NaN mask, and exact finite values", "all native qpos, qvel, command torque, time, and contact-pair rows", "waypoint and phase sequences", "raw scorer-v2 scientific metrics/booleans", "physical and scientific PASS; COMPLETE", "final scientific state", "same low-ROM initial IK branch"],
+  "excluded_from_comparison": ["host monotonic timestamps", "host elapsed time", "output paths", "host-only delay profile"],
+  "exclusions": "none; retain failed and incomplete run outputs",
+  "failure_rule": "Any differing scientific array or discrete decision, failed scorer, or incomplete run fails the same-host gate. Do not weaken this standard after observing results."
+}
