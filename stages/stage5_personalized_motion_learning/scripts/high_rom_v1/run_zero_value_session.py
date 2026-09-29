@@ -25,10 +25,11 @@ for relative in (
 ):
     sys.path.insert(0, str(ROOT / relative))
 
-from traction_mpc_stage5.full3d_adaptive_integration_v1.runtime import run_executed_case, _jsonable
+from traction_mpc_stage5.full3d_adaptive_integration_v1.runtime import run_executed_case, advance_inter_rep_boundary, _jsonable
 from traction_mpc_stage5.full3d_adaptive_integration_v1.session_state import (
     integrate_measured_wrench,
     zero_value_decision_rows,
+    PersistentSessionState,
 )
 from evaluate_execution_mode import evaluate
 from summarize_phase_b import DOC
@@ -126,9 +127,11 @@ def main() -> None:
     }
     save(args.output / "session_provenance.json", provenance)
     context: dict = {}
+    persistent = PersistentSessionState(session_id=session_id)
     rows: list[dict] = []
     fail_reason = None
     for rep_index in range(1, 4):
+        persistent.begin_repetition(rep_index)
         rep_dir = args.output / f"rep_{rep_index:02d}"
         previous = context.get("runtime")
         previous_updater = context.get("updater")
@@ -136,6 +139,7 @@ def main() -> None:
         previous_plant = None if previous is None else previous["plant"]
         previous_end = context.get("end_time_s")
         before_model = None if not context else context["final_belief"].value_state_record()
+        inter_rep_boundary = None
         started = time.monotonic()
         stop = STAGE / "docs/high_rom_v1/STOP"
         def stop_check():
@@ -157,6 +161,23 @@ def main() -> None:
             "command": sys.argv,
         }
         try:
+            if previous is not None:
+                inter_rep_boundary = advance_inter_rep_boundary(
+                    context, max_wait_s=2.0, stop_check=stop_check)
+                save(args.output / f"boundary_{rep_index-1:02d}_to_{rep_index:02d}.json",
+                     inter_rep_boundary)
+                previous_end = context["end_time_s"]
+                rows[-1]["inter_rep_boundary_after"] = {
+                    "settle_duration_s": inter_rep_boundary["settle_duration_s"],
+                    "hold_duration_s": inter_rep_boundary["hold_duration_s"],
+                    "J_F_n_s": inter_rep_boundary["cost"]["J_F_n_s"],
+                    "moment_integral_nm_s": inter_rep_boundary["cost"]["moment_integral_nm_s"],
+                    "peak_force_n": inter_rep_boundary["cost"]["peak_force_n"],
+                    "peak_moment_nm": inter_rep_boundary["cost"]["peak_moment_nm"]}
+                rows[-1]["J_F_session_n_s"] += inter_rep_boundary["cost"]["J_F_n_s"]
+                rows[-1]["moment_session_integral_nm_s"] += (
+                    inter_rep_boundary["cost"]["moment_integral_nm_s"])
+                save(args.output / "per_repetition.json", rows)
             summary = run_executed_case(
                 rep_dir, qualification_case=case,
                 qualification_arm="continual_adaptive",
@@ -250,10 +271,17 @@ def main() -> None:
                 "old_scientific_epoch_ended": previous is None or (
                     not previous["wall_session"].active),
                 "native_boundary_exact": previous_row is None or (
-                    np.array_equal(initial_native["qpos_evaluation_only"],
-                                   previous_row["final_native_state_evaluation_only"]["qpos"])
+                    inter_rep_boundary is not None
+                    and np.array_equal(
+                        inter_rep_boundary["terminal_native_qpos_evaluation_only"],
+                        previous_row["final_native_state_evaluation_only"]["qpos"])
+                    and np.array_equal(
+                        inter_rep_boundary["terminal_native_qvel_evaluation_only"],
+                        previous_row["final_native_state_evaluation_only"]["qvel"])
+                    and np.array_equal(initial_native["qpos_evaluation_only"],
+                        inter_rep_boundary["settled_native_qpos_evaluation_only"])
                     and np.array_equal(initial_native["qvel_evaluation_only"],
-                                       previous_row["final_native_state_evaluation_only"]["qvel"])),
+                        inter_rep_boundary["settled_native_qvel_evaluation_only"])),
                 "simulation_time_continuous": previous_end is None or (
                     initial_native["time_s"] == previous_end),
                 "model_version_continuous": previous_row is None or (
@@ -267,6 +295,12 @@ def main() -> None:
                 "new_episode_epoch": previous is None or all(
                     request["source_simulation_version"]["episode_epoch"] ==
                     str(rep_dir.resolve()) for request in summary["timing"]["requests"]),
+                "fresh_track_bootstrap": previous is None or (
+                    new_runtime.get("fresh_track_bootstrap", {}).get("execution_mode") == "TRACK"
+                    and new_runtime["fresh_track_bootstrap"]["reference"]["receipt_index"]
+                        == new_runtime["fresh_track_bootstrap"]["receipt_index"]
+                    and new_runtime["fresh_track_bootstrap"]["source_sample_time_s"]
+                        > new_runtime["fresh_track_bootstrap"]["receipt_source_sample_time_s"]),
             }
             if previous is not None:
                 for key, value in boundary.items():
@@ -283,7 +317,15 @@ def main() -> None:
                 "scientific": mode["scientific_validity"]["status"],
                 "scorer_v2": mode["raw_scorer_v2"]["pass"],
                 "J_F_n_s": costs["J_F_n_s"],
+                "J_F_task_n_s": costs["J_F_n_s"],
+                "J_F_session_n_s": costs["J_F_n_s"] + (
+                    0.0 if previous is None else
+                    new_runtime["fresh_track_bootstrap"]["cost"]["J_F_n_s"]),
                 "moment_integral_nm_s": costs["moment_integral_nm_s"],
+                "moment_session_integral_nm_s": costs["moment_integral_nm_s"] + (
+                    0.0 if previous is None else
+                    new_runtime["fresh_track_bootstrap"]["cost"]["moment_integral_nm_s"]),
+                "fresh_track_bootstrap": new_runtime.get("fresh_track_bootstrap"),
                 "peak_force_n": costs["peak_force_n"],
                 "peak_moment_nm": costs["peak_moment_nm"],
                 "completion_time_s": summary["task"]["physics_duration_s"],
@@ -319,6 +361,13 @@ def main() -> None:
                 "gate_reasons": reasons,
             }
             rows.append(row)
+            persistent.human_updater = context["updater"]
+            persistent.human_model_state = context["final_belief"]
+            persistent.causal_belief = new_runtime["observer"]
+            persistent.session_history.append({
+                "repetition_index": rep_index, "status": row["status"],
+                "J_F_task_n_s": row["J_F_task_n_s"],
+                "human_model_sequence": row["human_model_sequence_after"]})
             save(args.output / "per_repetition.json", rows)
             print(json.dumps({"rep": rep_index, "status": row["status"],
                               "J_F_n_s": row["J_F_n_s"], "gate_reasons": reasons}), flush=True)
@@ -340,7 +389,9 @@ def main() -> None:
         with (args.output / "per_repetition.csv").open("w", newline="") as stream:
             writer = csv.DictWriter(stream, fieldnames=[
                 "repetition_index", "status", "physical", "scientific", "scorer_v2",
-                "J_F_n_s", "moment_integral_nm_s", "peak_force_n", "peak_moment_nm",
+                "J_F_n_s", "J_F_task_n_s", "J_F_session_n_s",
+                "moment_integral_nm_s", "moment_session_integral_nm_s",
+                "peak_force_n", "peak_moment_nm",
                 "completion_time_s", "human_model_sequence_after",
             ])
             writer.writeheader()

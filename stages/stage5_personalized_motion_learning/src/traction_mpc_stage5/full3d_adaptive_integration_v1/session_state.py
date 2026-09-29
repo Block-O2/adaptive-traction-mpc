@@ -2,8 +2,32 @@
 from __future__ import annotations
 
 from typing import Any
+from dataclasses import dataclass, field
 
 import numpy as np
+
+
+@dataclass
+class PersistentSessionState:
+    """Explicit session ownership; future RL slots are inert in zero-value mode."""
+
+    session_id: str
+    repetition_number: int = 0
+    human_model_state: Any = None
+    human_updater: Any = None
+    causal_belief: Any = None
+    session_history: list[dict[str, Any]] = field(default_factory=list)
+    value_model_parameters: Any = None
+    replay_history: list[Any] = field(default_factory=list)
+    exploration_state: Any = None
+    primary_learned_parameters_frozen: bool = False
+
+    def begin_repetition(self, number: int) -> None:
+        if number != self.repetition_number + 1:
+            raise ValueError("repetition index must advance exactly once")
+        self.repetition_number = number
+        if number > 5:
+            self.primary_learned_parameters_frozen = True
 
 
 # Only these objects may cross an episode boundary. A new controller/task

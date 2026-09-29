@@ -74,7 +74,7 @@ from ..architecture_recovery_v2.phase3_human_waypoint import (
 from .online_planning import PlanLifecycle, snapshot_task_call
 from .wall_physics import WallPhysicsSession
 from .scientific_scheduler import ScientificPhysicsSession
-from .session_state import carryover_runtime_fields, FORBIDDEN_TRANSIENT_FIELDS
+from .session_state import carryover_runtime_fields, FORBIDDEN_TRANSIENT_FIELDS, integrate_measured_wrench
 from .execution_policy import ExecutionMode, ScientificPlanLifecycle, SimulationVersion
 from .activation_validation import (validate_activation, validate_rolling_composite,
                                     clearance_geometry_signature,
@@ -779,9 +779,16 @@ def _execute_interval(
                            selected_command_moment_total_nm=command.moment_total_nm.copy(),
                            command_source_robot_point_m=measurement.attachment_position_m.copy())
         if 'command_response_history' in runtime:
-            runtime['command_response_history'].record(float(plant.data.time), observation.sample_timestamp_s,
+            history = runtime['command_response_history']
+            # Physics receipts are episode-local; response history is continuous.
+            # Its monotonically increasing identity is separate from the local
+            # index used for TRACK ownership in this epoch.
+            response_index = (history.rows[-1]['receipt_index'] + 1
+                              if history.rows else 0)
+            history.record(float(plant.data.time), observation.sample_timestamp_s,
                 command.force_total_n, command.moment_total_nm, measurement.attachment_position_m,
-                receipt_index=receipt['receipt_index'])
+                receipt_index=response_index)
+            receipt['session_response_receipt_index'] = response_index
         robot_target = mapped.execution_target.robot_cuff_target
         target_pose = robot_target.world_from_cuff
         if target_pose is not None:
@@ -1621,6 +1628,169 @@ def _run_dev_a_active_recovery(
     return result
 
 
+def advance_inter_rep_boundary(session_context: dict[str, Any], *,
+                               max_wait_s: float = 2.0,
+                               stop_check: Any = None) -> dict[str, Any]:
+    """Advance one continuous plant through explicit settle and hold states."""
+    previous = session_context["runtime"]
+    wall = previous["wall_session"]
+    lifecycle = previous["plan_lifecycle"]
+    if wall.active or lifecycle._outstanding is not None:
+        raise RuntimeError("INTER_REP_PREVIOUS_EPISODE_OPEN")
+    plant = previous["plant"]
+    spec = session_context["spec"]
+    config = session_context["config"]
+    model = session_context["updater"].snapshot().human_model()
+    geometry = model.geometry
+    shank = SessionClearanceContract(geometry)
+    clearance = CombinedRigidTableClearanceV1(
+        shank, RigidTableReferenceEnvelopeV1(geometry),
+        use_monotonic_certificate=bool(previous["autonomous_recovery_options"].get(
+            "monotonic_clearance_certificate", False)))
+    terminal_time = float(plant.data.time)
+    terminal_qpos = plant.data.qpos.copy()
+    terminal_qvel = plant.data.qvel.copy()
+    trace = previous["trace"]
+    last_reference = previous["contract"].reference_motion_history.last_reference()
+    reference_settled = (last_reference is not None
+        and np.allclose(last_reference[1], 0., atol=1e-10, rtol=0.)
+        and np.allclose(trace[-1]["ddq_ref_rad_s2"], 0., atol=1e-10, rtol=0.))
+    limit_steps = int(round(max_wait_s / CONTROL_DT_S))
+    if limit_steps < 1:
+        raise ValueError("inter-repetition maximum wait must cover one control interval")
+    records = []
+    phase = "INTER_REP_SETTLE"
+    settle_intervals = hold_intervals = 0
+
+    def sample():
+        truth = plant.observe()
+        measurement = previous["measurement_layer"].current
+        if abs(float(measurement.sample_time_s)-float(truth.time_s)) > 1e-10:
+            measurement = previous["measurement_layer"].update(truth)
+        observation, interface = previous["observer"].update(
+            measurement, model, human_model_version=f"belief_{session_context['updater'].sequence}")
+        state = observation.as_array()
+        try:
+            start_episode(spec, state[:2], state[2:], acceleration_authority_valid=False)
+            start_set = True
+        except ValueError:
+            start_set = False
+        force = interface.measured_force_world_n.copy()
+        moment = interface.measured_moment_world_nm.copy()
+        clearance_m = float(clearance.evaluate(state[:2]))
+        valid = bool(start_set and reference_settled
+            and np.linalg.norm(force) <= float(config["cuff_force_limit_n"])+1e-9
+            and np.linalg.norm(moment) <= float(config["cuff_moment_limit_nm"])+1e-9
+            and clearance_m >= -1e-9
+            and np.all(np.abs(measurement.robot_dq_rad_s) <= CR12_VELOCITY_LIMITS_RAD_S+1e-9))
+        return {"state": phase, "time_s": float(truth.time_s),
+            "human_q_rad_evaluation_only": truth.human_q_rad.copy(),
+            "human_dq_rad_s_evaluation_only": truth.human_dq_rad_s.copy(),
+            "cr12_q_rad_evaluation_only": truth.robot_q_rad.copy(),
+            "cr12_dq_rad_s_evaluation_only": truth.robot_dq_rad_s.copy(),
+            "force_world_n": force, "moment_world_nm": moment,
+            "clearance_m": clearance_m, "start_set": start_set,
+            "reference_settled": reference_settled, "gate": valid}
+
+    records.append(sample())
+    for _ in range(limit_steps):
+        if phase == "INTER_REP_SETTLE" and records[-1]["gate"]:
+            phase = "INTER_REP_HOLD"
+        if stop_check is not None:
+            stop_check()
+        for _native in range(int(round(CONTROL_DT_S / NOMINAL_PHYSICS_DT_S))):
+            plant.step_native()
+        previous["measurement_layer"].update(plant.observe())
+        if phase == "INTER_REP_SETTLE":
+            settle_intervals += 1
+        else:
+            hold_intervals += 1
+        records.append(sample())
+        if phase == "INTER_REP_HOLD":
+            if records[-1]["gate"]:
+                break
+            phase = "INTER_REP_SETTLE"
+    else:
+        raise RuntimeError("INTER_REP_SETTLE_TIMEOUT")
+    costs = integrate_measured_wrench(
+        np.asarray([r["time_s"] for r in records]),
+        np.asarray([r["force_world_n"] for r in records]),
+        np.asarray([r["moment_world_nm"] for r in records]))
+    result = {"schema": "inter_rep_boundary_v1", "status": "SETTLED_HELD",
+        "from_repetition": session_context["repetition_index"],
+        "to_repetition": session_context["repetition_index"]+1,
+        "start_time_s": terminal_time, "end_time_s": float(plant.data.time),
+        "settle_duration_s": settle_intervals*CONTROL_DT_S,
+        "hold_duration_s": hold_intervals*CONTROL_DT_S,
+        "cost": costs, "samples": records,
+        "terminal_native_qpos_evaluation_only": terminal_qpos,
+        "terminal_native_qvel_evaluation_only": terminal_qvel,
+        "settled_native_qpos_evaluation_only": plant.data.qpos.copy(),
+        "settled_native_qvel_evaluation_only": plant.data.qvel.copy(),
+        "physical_object_unchanged": plant is previous["plant"],
+        "updater_sequence": session_context["updater"].sequence}
+    session_context["end_time_s"] = float(plant.data.time)
+    session_context["final_belief"] = session_context["updater"].snapshot()
+    session_context["last_boundary"] = result
+    return result
+
+
+def _bootstrap_fresh_track_reference(runtime: dict[str, Any], spec: Any,
+                                     start_q: np.ndarray) -> dict[str, Any]:
+    """Apply a new-epoch TRACK hold and prove its ownership before planning."""
+    wall = runtime["wall_session"]
+    sample = runtime["measurement_layer"].current
+    observation, interface = runtime["observer"].update(
+        sample, runtime["model"],
+        human_model_version=f"belief_{runtime['model_sequence']}")
+    before = float(runtime["plant"].data.time)
+    force = interface.measured_force_world_n.copy()
+    moment = interface.measured_moment_world_nm.copy()
+    # The fresh split monitor needs two genuinely acquired 5 ms samples.
+    # Keep the prior physical command during this reseed interval; it is a
+    # boundary HOLD cost, never a new-episode TRACK receipt.
+    wall.next_control_tick()
+    sample = runtime["measurement_layer"].current
+    observation, interface = runtime["observer"].update(
+        sample, runtime["model"],
+        human_model_version=f"belief_{runtime['model_sequence']}")
+    warmup_end = float(runtime["plant"].data.time)
+    warmup_force = interface.measured_force_world_n.copy()
+    warmup_moment = interface.measured_moment_world_nm.copy()
+    motion = runtime["monitor"].latest
+    if (motion is None or not motion.fast_motion_valid
+            or abs(motion.sample_timestamp_s-observation.sample_timestamp_s)>1e-10):
+        raise RuntimeError("INTER_REP_CAUSAL_ACCELERATION_RESEED_FAILED")
+    candidate = _candidate("fresh_episode_track_hold", TaskPhase.OUTBOUND,
+                           start_q, np.zeros(2), spec)
+    _command, execution = _execute_interval(
+        runtime, observation=observation, interface=interface, measurement=sample,
+        candidate=candidate, actuation_enabled=True)
+    receipt = wall.applied_commands[wall.active_receipt_index]
+    if receipt.get("mode") != "TRACK" or not receipt.get("applied"):
+        raise RuntimeError("FRESH_EPISODE_TRACK_BOOTSTRAP_FAILED")
+    source = runtime["measurement_layer"].current.sample_time_s
+    ownership = receipt_reference_at_sample(wall.applied_commands, source)
+    if ownership["receipt_index"] != wall.active_receipt_index:
+        raise RuntimeError("FRESH_EPISODE_RECEIPT_OWNERSHIP_INVALID")
+    end_truth = runtime["plant"].observe()
+    end_measurement = runtime["measurement_layer"].current
+    _end_observation, end_interface = runtime["observer"].update(
+        end_measurement, runtime["model"],
+        human_model_version=f"belief_{runtime['model_sequence']}")
+    costs = integrate_measured_wrench(
+        np.asarray([before, warmup_end, float(end_truth.time_s)]),
+        np.asarray([force, warmup_force, end_interface.measured_force_world_n]),
+        np.asarray([moment, warmup_moment, end_interface.measured_moment_world_nm]))
+    return {"receipt_index": wall.active_receipt_index,
+            "source_sample_time_s": float(source),
+            "receipt_source_sample_time_s": float(receipt["source_sample_time_s"]),
+            "reference": ownership, "execution_mode": str(execution["safety_mode"]),
+            "start_time_s": before, "warmup_end_time_s": warmup_end,
+            "end_time_s": float(end_truth.time_s),
+            "cost": costs}
+
+
 def _resume_session_runtime(session_context: dict[str, Any], spec: Any) -> dict[str, Any]:
     """Start a new task runtime around only the contracted persistent state."""
     previous = session_context["runtime"]
@@ -1823,6 +1993,9 @@ def _run_executed_case(
         lifecycle = _start_scientific_session_epoch(
             runtime, output_dir, runtime_capture, scientific_host_delay_s,
             start_q, resumed)
+        if resumed:
+            runtime["fresh_track_bootstrap"] = _bootstrap_fresh_track_reference(
+                runtime, spec, start_q)
     elif recovery_options.get("whole_session_wall_physics", False):
         if not online_timing:
             raise ValueError("whole_session_wall_physics requires monotonic_async_planning")
@@ -3803,6 +3976,8 @@ def _run_executed_case(
     )
     if session_context is not None:
         session_context.update(runtime=runtime, updater=updater, fit=fit,
+                               spec=spec, config=config,
+                               repetition_index=session_context.get("repetition_index", 0)+1,
                                end_time_s=float(plant.data.time),
                                final_belief=updater.snapshot())
     return summary
