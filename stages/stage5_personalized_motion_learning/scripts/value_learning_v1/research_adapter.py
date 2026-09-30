@@ -13,6 +13,7 @@ from traction_mpc_stage5.task import TaskPhase
 from coordination_pacing_adapter_v1 import shape
 
 SPEC_ENV='VALUE_LEARNING_RESEARCH_SPEC_V1'
+MAIN_RESEARCH_PLANNER=None
 
 def canonical(value): return json.dumps(value,sort_keys=True,separators=(',',':'))
 def digest(value): return hashlib.sha256(canonical(value).encode()).hexdigest()
@@ -93,7 +94,9 @@ def snapshot_research_task_call(adaptive_planner,arguments):
 
 class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
  def __init__(self,*args,**kwargs):
+  global MAIN_RESEARCH_PLANNER
   super().__init__(*args,**kwargs)
+  MAIN_RESEARCH_PLANNER=self
   self.research_spec=json.loads(os.environ[SPEC_ENV])
   self.research_model=None
   if self.research_spec.get('model_path'):
@@ -115,6 +118,7 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
     action=np.asarray(target)-state[:2],execution_feasibility_checker=kwargs.get('execution_feasibility_checker'),
     value_state_or_belief=kwargs.get('value_state_or_belief'),candidate_value_evaluator=None)
   if not alternative.feasible: return alternative
+  if self.research_spec.get('timing_policy')=='NATIVE_SCHEDULER':return alternative
   period=self.scheduler.reference_period_s
   duration=round(float(item['duration_s'])*float(self.research_spec.get('matched_duration_factor',1.3))/period)*period
   try:
@@ -150,10 +154,19 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
   original=super().decide(**kwargs)
   self.previous_executed_delta_q_rad=previous.copy()
   legacy_finish=time.perf_counter(); spec=self.research_spec; phase=kwargs['phase'].value
+  if spec.get('mode')=='NATIVE_BASELINE':
+   self.previous_executed_delta_q_rad=original.executed.proposed_delta_q_rad.copy()
+   return original
   if phase=='HOLD': return original
   index=getattr(self,'research_phase_index',sum(d.phase is kwargs['phase'] for d in self.decisions)-1)
   descriptor=spec.get('committed_descriptor') or spec.get('descriptor',{'parameters':[0,.5],'horizon':'H4'})
   descriptor={**descriptor,'matched_duration_factor':spec.get('matched_duration_factor',1.3)}
+  if spec.get('timing_policy')=='NATIVE_SCHEDULER' and spec.get('mode')=='NATIVE_PATH':
+   horizon=descriptor.get('horizon','H3')
+   active=not ((phase=='RETURN' and horizon!='H4') or (phase=='OUTBOUND' and horizon=='H1' and index>=1) or (phase=='OUTBOUND' and horizon=='H2' and index>=3))
+   if not active:
+    self.previous_executed_delta_q_rad=original.executed.proposed_delta_q_rad.copy()
+    return original
   baseline=spec['baseline_waypoints']
   path=spec.get('replay_targets') or make_path(baseline,self.start_rad,self.goal_rad,descriptor)
   source=path.get(phase,[])
@@ -180,10 +193,11 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
    proposals=[(f'local_{j}',base+span*np.array([delta,-delta])) for j,delta in enumerate(offsets)]
   proposal_finish=time.perf_counter()
   evaluations=[]; feature_ms=0.; features=[]; first_feature_start_ns=None
-  continuation_id=digest({'descriptor':descriptor,'baseline':baseline,'rule':'frozen_declared_path_after_current_action'})
+  continuation_rule='native_scheduler_then_state_feedback_after_declared_horizon' if spec.get('mode')=='NATIVE_PATH' else 'frozen_declared_path_after_current_action'
+  continuation_id=digest({'descriptor':descriptor,'baseline':baseline,'rule':continuation_rule})
   for label,q in proposals:
    desc,declared_path,proposed_item=proposal_contexts.get(label,(descriptor,path,item))
-   cid=digest({'descriptor':desc,'baseline':baseline,'rule':'frozen_declared_path_after_current_action'})
+   cid=digest({'descriptor':desc,'baseline':baseline,'rule':continuation_rule})
    if spec.get('replay_targets'):
     cid=digest({'descriptor':desc,'baseline':baseline,'replay_targets':declared_path,'rule':'frozen_declared_path_after_current_action'})
    ev=self.screen_target(q,proposed_item,f'research_{phase.lower()}_{index:02d}_{label}',kwargs)
@@ -196,10 +210,12 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
     feature_ms+=1000*(time.perf_counter()-before)
     context={'schema':'research_decision_context_v1','features':x.tolist(),'feature_names':names,
       'belief':kwargs.get('value_state_or_belief'),'previous_executed_action':previous.tolist(),
-      'continuation_id':cid,'continuation_descriptor':desc,'continuation_rule':'frozen_declared_path_after_current_action',
+      'continuation_id':cid,'continuation_descriptor':desc,'continuation_rule':continuation_rule,
       'path_index':index,'declared_remaining_targets':declared_path.get(phase,[])[index+1:],
       'execution_policy': 'receding_value_ranking' if spec.get('mode')=='VALUE_RANK' else 'committed_declared_continuation',
       'critic_target_continuation':'frozen_declared_path_after_current_action',
+      'timing_policy':spec.get('timing_policy','FIXED_MATCHED_DURATION'),
+      'declared_targets_role':'nominal proposal template; actual state feedback after horizon' if spec.get('mode')=='NATIVE_PATH' else 'declared committed continuation',
       'active_value_version':spec.get('model_version','ZERO'),'branch':branch,'action_provenance':label,'safety_truth_consumed':False}
     ev=replace(ev,execution_screen={**ev.execution_screen,'research_context':context})
     features.append((len(evaluations),x))
@@ -222,6 +238,8 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
   reference_selected_ns=time.monotonic_ns()
   chosen=evaluations[chosen_index]
   targets=np.stack([q for _,q in proposals]); dists=np.linalg.norm(targets[:,None]-targets[None,:],axis=-1)
+  safe_targets=np.stack([evaluations[i].target_q_rad for i in admissible])
+  safe_dists=np.linalg.norm(safe_targets[:,None]-safe_targets[None,:],axis=-1)
   latency={'legacy_planner_ms':1000*(legacy_finish-started),'proposal_ms':1000*(proposal_finish-legacy_finish),
    'feature_ms':feature_ms,'feasibility_scheduling_ms':max(0.,1000*(screen_finish-proposal_finish)-feature_ms),
    'inference_selection_ms':1000*(inference_finish-screen_finish),'decision_total_ms':1000*(inference_finish-started),
@@ -229,6 +247,9 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
    'legacy_candidate_count':len(original.evaluations),'adapter_start_ns':adapter_start_ns,
    'first_feature_start_ns':first_feature_start_ns,'reference_selected_ns':reference_selected_ns,
    'target_pairwise_max_distance_rad':float(np.max(dists)),'target_pairwise_mean_distance_rad':float(np.mean(dists)),
+   'safe_target_pairwise_max_distance_rad':float(np.max(safe_dists)),
+   'safe_distinct_targets':len({tuple(q) for q in safe_targets}),
+   'safe_distinct_continuation_contexts':len({evaluations[i].execution_screen['research_context']['continuation_id'] for i in admissible}),
    'scope':'research adapter through selected scheduled reference; downstream production command and activation validation measured by request lifecycle'}
   chosen=replace(chosen,execution_screen={**chosen.execution_screen,'research_latency':latency,
    'predicted_remaining_cost_n_s':None if predicted is None else float(predicted[admissible.index(chosen_index)]),
@@ -245,6 +266,13 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
   if self.research_spec.get('mode')=='VALUE_PATTERN' and decision.phase is TaskPhase.OUTBOUND:
    context=decision.executed.execution_screen.get('research_context',{})
    if context.get('path_index')==0:
-    # Only the accepted next target commits the causal continuation plan.
-    # No future observation, no active-model parameter mutation is involved.
-    self.research_spec['committed_descriptor']=context['continuation_descriptor']
+    # Worker-result acceptance precedes the authority's activation validator.
+    # Save pending memory only; research_activation commits on actual receipt.
+    snapshot=decision.executed.execution_screen.get('causal_tracking_offset_clearance',{}).get('reference_snapshot',{})
+    request_id=snapshot.get('request_id')
+    if request_id is None:raise ValueError('research continuation commit lacks authoritative request identity')
+    self.research_pending_commit={'descriptor':context['continuation_descriptor'],'request_id':request_id}
+
+ def note_research_actual_activation(self,descriptor):
+  if descriptor is not None:
+   self.research_spec['committed_descriptor']=dict(descriptor)

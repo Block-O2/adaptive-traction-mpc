@@ -165,6 +165,11 @@ def run(condition_id, arm, pattern, run_id):
         "research_source_files_sha256": {str(p.relative_to(ROOT)): sha(p) for p in sorted((STAGE / "scripts/value_learning_v1").glob("*.py"))},
         "source_commit": subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip(),
     }
+    model_path = None if pattern is None or not pattern.get("model_path") else Path(pattern["model_path"])
+    record["research_learning_used"] = model_path is not None and pattern.get("mode") in ("VALUE_PATTERN", "VALUE_RANK")
+    record["production_legacy_value_hook_still_zero"] = True
+    if model_path is not None:
+        record["model_sha256_at_start"] = sha(model_path)
     save(out / "rollout_result.json", record)
     started = time.monotonic()
     try:
@@ -185,6 +190,9 @@ def run(condition_id, arm, pattern, run_id):
                                                "baseline_waypoints": reference["baseline_waypoints"]}, sort_keys=True)
             runtime.TerminalSetHumanWaypointPlannerV1 = ResearchPlanner
             runtime.snapshot_task_call = snapshot_research_task_call
+            if pattern.get("mode") == "VALUE_PATTERN":
+                from research_activation import install
+                install(runtime)
         capture = {}
         global LAST_CAPTURE
         LAST_CAPTURE = capture
@@ -264,6 +272,11 @@ def run(condition_id, arm, pattern, run_id):
         record.update(status="EXCEPTION", failure_reason=f"{type(error).__name__}:{error}",
                       traceback=traceback.format_exc()[-10000:])
     finally:
+        if model_path is not None:
+            record["model_sha256_at_end"] = sha(model_path)
+            record["active_model_file_immutable_during_rep"] = record["model_sha256_at_start"] == record["model_sha256_at_end"]
+            if not record["active_model_file_immutable_during_rep"]:
+                record.update(status="INVALID", failure_reason="ACTIVE_VALUE_MODEL_MUTATED_DURING_REPETITION")
         record["elapsed_host_s"] = time.monotonic() - started
         save(out / "rollout_result.json", record)
     print(json.dumps({k: record.get(k) for k in ("run_id", "status", "J_F_task_n_s", "duration_s", "failure_reason", "gate_reasons", "elapsed_host_s")}), flush=True)

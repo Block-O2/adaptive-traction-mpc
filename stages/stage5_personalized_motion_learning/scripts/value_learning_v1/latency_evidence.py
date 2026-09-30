@@ -41,6 +41,8 @@ def analyze_artifacts(paths,*,capture_profile_paths=()):
         if path.is_dir(): path=path/'runtime_artifacts.json'
         try:
             artifact,source=archived_json(path)
+            if not isinstance(artifact,dict) or not isinstance(artifact.get('requests'),list):
+                raise ValueError('runtime artifact missing required request evidence')
         except Exception as error:
             read_failures.append(dict(path=str(path),error=f'{type(error).__name__}:{error}'))
             continue
@@ -62,8 +64,13 @@ def analyze_artifacts(paths,*,capture_profile_paths=()):
                 if candidate.get('label')!=decision.get('executed_label'):continue
                 research=candidate.get('execution_screen',{}).get('research_latency')
                 if research:
+                    context=candidate.get('execution_screen',{}).get('research_context',{})
                     instrumented.append(dict(research,request_id=decision.get('timing_request_id'),
-                        source_path=str(path),request_timing=lookup.get(decision.get('timing_request_id'))))
+                        source_path=str(path),request_timing=lookup.get(decision.get('timing_request_id')),
+                        phase=decision.get('phase'),path_index=context.get('path_index'),
+                        pass_through_prefetch=bool(decision.get('pass_through_prefetch')),
+                        role='first_pattern_selection' if decision.get('phase')=='OUTBOUND' and context.get('path_index')==0 else 'continuation',
+                        snapshot_capture_extra_io=source['path'] in capture_profiles))
         sources.append(dict(source,execution_mode=artifact.get('execution_mode'),task_requests=len(task),
                             snapshot_capture_extra_io=source['path'] in capture_profiles))
     activated=[row for row in requests if row.get('outcome')=='ACTIVATED']
@@ -108,6 +115,20 @@ def analyze_artifacts(paths,*,capture_profile_paths=()):
                 if delta<0:raise ValueError('absolute research timestamp incompatible with lifecycle clock')
                 values.append(delta)
         exact_boundaries[boundary]=distribution(values)
+    role_timings={}
+    for role in ('first_pattern_selection','continuation','moving_continuation'):
+        rows=[r for r in instrumented if not r['snapshot_capture_extra_io'] and
+              (r['role']==role or (role=='moving_continuation' and r['pass_through_prefetch']))]
+        role_timings[role]=dict(count=len(rows),
+            capture_to_activation_ms=distribution(r['request_timing']['activation_age_ms'] for r in rows
+                if r.get('request_timing') and r['request_timing'].get('activation_age_ms') is not None),
+            capture_to_validation_ms=distribution((r['request_timing']['validation_finish_ns']-r['request_timing']['sensor_capture_ns'])/1e6
+                for r in rows if r.get('request_timing') and r['request_timing'].get('validation_finish_ns') is not None),
+            nonproducer_capture_to_activation_ms=distribution(max(0.,r['request_timing']['activation_age_ms']-r['request_timing']['compute_ms'])
+                for r in rows if r.get('request_timing') and r['request_timing'].get('activation_age_ms') is not None
+                    and r['request_timing'].get('compute_ms') is not None),
+            research_candidate_counts=dict(Counter(r.get('candidate_count') for r in rows)),
+            legacy_candidate_counts=dict(Counter(r.get('legacy_candidate_count') for r in rows)))
     return dict(schema='value_learning_actual_artifact_latency_v1',
         evidence_category='descriptive_scientific_simulation_host_profile',source_artifacts=sources,
         input_read_failures=read_failures,source_complete=not read_failures,
@@ -125,6 +146,7 @@ def analyze_artifacts(paths,*,capture_profile_paths=()):
         candidate_count_distribution=dict(Counter(counts)),
         research_candidate_count_distribution=dict(Counter(r.get('candidate_count') for r in instrumented)),
         candidate_count_scaling=scaling,exact_research_to_validation_activation_boundaries_ms=exact_boundaries,
+        clean_role_timings_ms=role_timings,
         caveats=['sensor capture precedes observation ready, so capture-to-validation is a conservative broader boundary',
                  'activation validation is later than candidate feasibility/scheduling; they must not be conflated',
                  'Scientific Simulation freezes physics during producer compute, host latency is profiling only',

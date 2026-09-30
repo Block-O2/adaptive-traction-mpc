@@ -47,6 +47,8 @@ def benchmark_snapshot(payload, *, counts=(1,3,6), legacy_limits=(None,1,3),
         validate_activation,clearance_geometry_signature)
     from traction_mpc_stage5.full3d_adaptive_integration_v1.safe_fallback import prepare_decision
     if repeats<1 or warmup<0:raise ValueError('invalid benchmark repetition count')
+    frozen_planner,frozen_arguments=pickle.loads(payload)
+    frozen_spec=frozen_planner.planner.research_spec
     rows=[]
     for legacy_limit,count in ((limit,count) for limit in legacy_limits for count in counts):
         samples=[];errors=[];components={};feasible=[];legacy_counts=[]
@@ -113,6 +115,10 @@ def benchmark_snapshot(payload, *, counts=(1,3,6), legacy_limits=(None,1,3),
     return dict(schema='real_deployable_snapshot_candidate_scaling_v1',
                 evidence_category='offline_same_epoch_algorithm_microbenchmark',
                 snapshot_sha256=hashlib.sha256(payload).hexdigest(),rows=rows,
+                captured_phase=getattr(frozen_arguments['phase'],'value',str(frozen_arguments['phase'])),
+                captured_path_index=getattr(frozen_planner.planner,'research_phase_index',None),
+                captured_research_mode=frozen_spec.get('mode'),
+                captured_continuation_committed=bool(frozen_spec.get('committed_descriptor')),
                 legacy_limits=list(legacy_limits),research_counts=list(counts),
                 full_live_decision_latency_measured=False,
                 excluded=['capture/observation construction','worker transport and main scheduling',

@@ -44,6 +44,8 @@ def extract_run(out,record,source_category, *, branch_entry=None):
  policy_kind='frozen_declared_path_after_current_action' if record.get('pattern') else 'production_state_feedback_zero_value'
  continuation_id=digest({'descriptor':descriptor,'baseline':base,'rule':policy_kind})
  output=[];previous=np.zeros(2);phase_counts={};validation=[]
+ current_descriptor=descriptor;current_path=path;current_cid=continuation_id;current_policy=policy_kind
+ current_value_version=p.get('model_version','ZERO')
  for transition in transitions:
   k=transition['decision_index'];decision=decisions[k]
   if not transition.get('selected_plan_activated') or not decision.get('plan_activated'):continue
@@ -61,10 +63,12 @@ def extract_run(out,record,source_category, *, branch_entry=None):
   rc=chosen.get('execution_screen',{}).get('research_context')
   if rc:
    x=np.asarray(rc['features']);names=rc['feature_names'];cid=rc['continuation_id'];desc=rc['continuation_descriptor'];policy=rc['continuation_rule']
+   current_descriptor=desc;current_cid=cid;current_policy=policy;current_value_version=rc.get('active_value_version','ZERO')
+   if p.get('mode')=='VALUE_PATTERN':current_path=make_path(base,start,goal,desc)
   else:
    obj=SimpleNamespace(duration_s=schedule['duration_s'],candidate=SimpleNamespace(dq_waypoint_rad_s=np.asarray(schedule['target_dq_rad_s'])))
-   x,names=context_features(state=transition['observation'],reference=decision['reference_state_rad_rad_s'],belief=transition['adaptive_state'],phase=phase,elapsed=decision['phase_elapsed_s'],remaining=decision['phase_remaining_s'],start=start,goal=goal,previous=previous,descriptor=descriptor,index=index,path=path,target=target,schedule=obj)
-   cid=continuation_id;desc=descriptor;policy=policy_kind
+   x,names=context_features(state=transition['observation'],reference=decision['reference_state_rad_rad_s'],belief=transition['adaptive_state'],phase=phase,elapsed=decision['phase_elapsed_s'],remaining=decision['phase_remaining_s'],start=start,goal=goal,previous=previous,descriptor=current_descriptor,index=index,path=current_path,target=target,schedule=obj)
+   cid=current_cid;desc=current_descriptor;policy=current_policy
   if transition['adaptive_state'].get('deployable_truth_consumed'):raise ValueError('truth-tainted belief')
   short_end=min(len(interval_cost),idx+300)
   segment=float(np.sum(interval_cost[idx:end_idx]));full=float(remaining[idx]);short=float(np.sum(interval_cost[idx:short_end]))
@@ -77,7 +81,7 @@ def extract_run(out,record,source_category, *, branch_entry=None):
    'split':split(condition),'run_id':record['run_id'],'source_category':source_category,'decision_index':k,'phase_index':index,'phase':phase,
    'state':{'estimated_human_q_dq':transition['observation'],'reference_q_dq':decision['reference_state_rad_rad_s'],'phase_elapsed_s':decision['phase_elapsed_s'],'phase_remaining_s':decision['phase_remaining_s'],'deployable_belief':transition['adaptive_state'],'model_version':transition['belief_sequence_at_request'],'previous_executed_delta_q_rad':previous.tolist()},
    'action':{'target_q_rad':target.tolist(),'delta_q_rad':chosen['proposed_delta_q_rad'],'proposal_family':decision['selection_mode'],'legacy_score':chosen['total_cost'],'schedule':schedule},
-   'transition':{'next_high_level_state':next_q,'next_deployable_belief':transition.get('next_adaptive_state'),'measured_actual_segment_cost_n_s':segment,'native_recorded_segment_cost_n_s':transition['measured_force_integral_n_s'],'request_time_s':transition.get('request_time_s'),'native_recorded_start_time_s':transition['start_time_s'],'actual_activation_time_s':float(actual_start),'end_time_s':end,'task_grid_activation_index':idx,'terminal':transition.get('completion')=='COMPLETE','completion':transition.get('completion'),'value_model_version_afterward':rc.get('active_value_version','ZERO') if rc else 'ZERO'},
+   'transition':{'next_high_level_state':next_q,'next_deployable_belief':transition.get('next_adaptive_state'),'measured_actual_segment_cost_n_s':segment,'native_recorded_segment_cost_n_s':transition['measured_force_integral_n_s'],'request_time_s':transition.get('request_time_s'),'native_recorded_start_time_s':transition['start_time_s'],'actual_activation_time_s':float(actual_start),'end_time_s':end,'task_grid_activation_index':idx,'terminal':transition.get('completion')=='COMPLETE','completion':transition.get('completion'),'value_model_version_afterward':current_value_version},
    'return_full_n_s':full,'return_short_1p5_n_s':short,'remaining_cost_origin':'actual selected-action activation node through TASK termination; left endpoint measured force',
    'continuation_id':cid,'continuation_policy':policy,'continuation_descriptor':desc,'branch_group':branch_group,
    'feature_names':names,'features':x.tolist(),'actual_activation_verified':True,'safety_feasible':True,'task_scientific_valid':True,
@@ -95,7 +99,7 @@ def extract_dataset(output_name='dataset_v1'):
  historical=json.loads((OD/'ALL_COORDINATION_ROLLOUTS.json').read_text())
  entries={x['run_id']:x for x in json.loads((D/'ONE_STEP_BRANCH_PLAN.json').read_text())['entries']} if (D/'ONE_STEP_BRANCH_PLAN.json').exists() else {}
  paths=[(OLD/x['run_id'],'historical') for x in historical]
- paths += [(p.parent,'research') for p in sorted((RAW/'runs').glob('*/rollout_result.json')) if not p.parent.name.startswith('pilot_')]
+ paths += [(p.parent,'research') for p in sorted((RAW/'runs').glob('*/rollout_result.json')) if not p.parent.name.startswith(('pilot_','native_'))]
  seen=set()
  for out,category in paths:
   rp=out/'rollout_result.json';record=json.loads(rp.read_text())
@@ -103,7 +107,7 @@ def extract_dataset(output_name='dataset_v1'):
   seen.add(record['run_id'])
   if record['status']!='VALID':
    failures.append({'run_id':record['run_id'],'status':record['status'],'reason':record.get('failure_reason'),'truncated_cost_excluded':True});continue
-  if category=='historical' and record['arm']!='MATCHED':
+  if record['arm']!='MATCHED':
    # Active study uses matched timing; native historical trajectories remain
    # separate to avoid pooling materially different scheduler continuations.
    continue

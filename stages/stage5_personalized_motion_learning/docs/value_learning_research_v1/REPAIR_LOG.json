@@ -47,6 +47,16 @@
         "branch_low_ordinary_early_outbound_00_A4"
       ],
       "repair": "Lossless gzip of only NEW raw logs with original-content SHA verification, remove verified redundant originals, sudo -n fstrim -v /; host C free space restored >6GB"
+    },
+    {
+      "PATH_BRANCH_physics_unchanged": true,
+      "cycle": 4,
+      "diagnosis": "worker result acceptance precedes authoritative activation validation; descriptor must not commit from rejected action",
+      "kind": "research_activation_commit_bookkeeping",
+      "production_unchanged": true,
+      "regression_tests": "three PASS: authority rejection never commits; successful original hook precedes one commit; cancelled request cannot commit on another receipt",
+      "repair": "research-only receipt observer calls original authority hook first; commit only after its successful TRACK receipt",
+      "request_identity_binding": true
     }
   ],
   "logging_cycle_accounting": "One comparator/provenance logging cycle plus two infrastructure cycles; all three have bounded fixes and regression checks.",
@@ -61,6 +71,6 @@
     }
   ],
   "push_block": "Automatic approval review rejected GitHub upload to unverified destination. Local-only commits continue; final explicit destination approval required.",
-  "repair_cycles_used": 3,
+  "repair_cycles_used": 4,
   "schema": "bounded_repair_log_v1"
 }

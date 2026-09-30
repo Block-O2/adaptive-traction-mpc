@@ -25,15 +25,15 @@ BANK += [{'parameters':[.03,.5],'horizon':'H4','return_reverse':True}]
 
 def train_update(X,y,names,kind,path,metadata,validation=None):
  start=time.perf_counter()
- model=fit_ridge(X,y,alpha=10.,feature_names=names,metadata=metadata) if kind=='ridge' else fit_mlp(X,y,validation=validation,epochs=250,seed=20260930,metadata=metadata)
+ model=fit_ridge(X,y,alpha=metadata.get('ridge_regularization_alpha',10.),feature_names=names,metadata=metadata) if kind=='ridge' else fit_mlp(X,y,validation=validation,epochs=250,seed=20260930,metadata=metadata)
  model_sha=save_model(path,model)
  return {'path':str(path),'sha256':model_sha,'wall_s':time.perf_counter()-start,'training_rows':len(X),'metadata':metadata}
 
-def run_mode(mode,condition,kind,prior_data,output_tag):
+def run_mode(mode,condition,kind,prior_data,output_tag,latency_configuration):
  directory=RAW/'pilot_sessions'/output_tag;directory.mkdir(parents=True,exist_ok=False)
  provenance={'schema':'value_learning_pilot_session_v1','condition':condition,'mode':mode,'value_model_kind':kind,
   'source_head':runner.subprocess.check_output(['git','-C',str(R),'rev-parse','HEAD'],text=True).strip(),
-  'proposal_bank':BANK,'cross_condition_prior':mode=='PRIOR','prior_excludes_current_condition_and_test':True,
+  'proposal_bank':BANK,'latency_configuration':latency_configuration,'cross_condition_prior':mode=='PRIOR','prior_excludes_current_condition_and_test':True,
   'scope':'first next target commits recorded smooth continuation; full feedback and safety stay live; not arbitrary first-action credit',
   'max_attempted_repetitions':8,'update_wait_bound_s':2.,'convergence_thresholds_not_fixed_yet':True}
  save(directory/'session_provenance.json',provenance);provenance_sha=sha(directory/'session_provenance.json')
@@ -42,7 +42,7 @@ def run_mode(mode,condition,kind,prior_data,output_tag):
  names=json.loads((D/'VALUE_DATASET_SCHEMA.json').read_text())['feature_names']
  X_prior,y_prior=prior_data
  if mode=='PRIOR':
-  model_path=directory/'models/prior_v0.npz';result=train_update(X_prior,y_prior,names,kind,model_path,{'mode':'PRIOR','excludes_condition':condition,'current_condition_online_rows':0})
+  model_path=directory/'models/prior_v0.npz';result=train_update(X_prior,y_prior,names,kind,model_path,{'mode':'PRIOR','excludes_condition':condition,'current_condition_online_rows':0,'ridge_regularization_alpha':latency_configuration.get('ridge_regularization_alpha',10.)})
   slot.propose(model_path,X_prior[:8]);slot.switch(at_safe_repetition_boundary=True);updates.append({**result,'stage':'offline_other_condition_prior_initialization'})
  pool=ThreadPoolExecutor(max_workers=1)
  try:
@@ -53,18 +53,25 @@ def run_mode(mode,condition,kind,prior_data,output_tag):
     boundary=advance_inter_rep_boundary(context,max_wait_s=2.)
     save(directory/f'boundary_before_{repetition:02d}.json',boundary)
    if pending and pending.done():
-    result=pending.result();slot.propose(result['path'],np.asarray([x['features'] for x in learning_rows[-8:]]));slot.switch(at_safe_repetition_boundary=True)
-    updates.append({**result,'stage':'repetition_boundary_update','promoted_before_repetition':repetition});pending=None
+    try:
+     result=pending.result();slot.propose(result['path'],np.asarray([x['features'] for x in learning_rows[-8:]]));slot.switch(at_safe_repetition_boundary=True)
+     updates.append({**result,'stage':'repetition_boundary_update','promoted_before_repetition':repetition})
+    except Exception as error:updates.append({'stage':'update_rejected_previous_model_retained','before_repetition':repetition,'error':str(error)})
+    pending=None
    prior_native_state=None
    if context:
     plant=context['runtime']['plant'];prior_native_state={'qpos':plant.data.qpos.tolist(),'qvel':plant.data.qvel.tolist(),'time_s':float(plant.data.time),'human_model_sequence':context['updater'].sequence}
-   spec={'mode':'VALUE_PATTERN','proposal_descriptors':BANK,'descriptor':{'parameters':[0,.5],'horizon':'H3'},'matched_duration_factor':1.3,'model_path':slot.active_path,'model_version':slot.active_version}
+   proposal_indices=latency_configuration.get('proposal_indices',list(range(len(BANK))))
+   proposals=[BANK[i] for i in proposal_indices]
+   spec={'mode':'VALUE_PATTERN','proposal_descriptors':proposals,'descriptor':{'parameters':[0,.5],'horizon':'H3'},'matched_duration_factor':1.3,'model_path':slot.active_path,'model_version':slot.active_version}
+   if latency_configuration.get('legacy_candidate_limit') is not None:spec['legacy_candidate_limit']=latency_configuration['legacy_candidate_limit']
    # Scratch starts with no value information. Two initial coherent legal
    # probes establish local data; subsequent decisions use updated value.
-   if mode=='SCRATCH' and repetition<=2:spec['force_descriptor_index']={1:2,2:3}[repetition]
+   if mode=='SCRATCH' and repetition<=2:spec['force_descriptor_index']=proposal_indices.index({1:2,2:3}[repetition])
    run_id=f'pilot_{output_tag}_rep_{repetition:02d}'
    out=RAW/'runs'/run_id
    record=runner.run(condition,'MATCHED',spec,run_id)
+   processing_start=time.perf_counter()
    capture=runner.LAST_CAPTURE
    if record['status']=='VALID':
     fresh_rows=extract_run(out,record,'online_'+mode.lower());learning_rows+=fresh_rows
@@ -97,11 +104,13 @@ def run_mode(mode,condition,kind,prior_data,output_tag):
       X=np.vstack([X_prior,np.repeat(online_X,8,axis=0)]);y=np.r_[y_prior,np.repeat(online_y,8)]
      else:X=online_X;y=online_y
      path=directory/'models'/f'candidate_after_rep_{repetition:02d}.npz'
-     pending=pool.submit(train_update,X.copy(),y.copy(),names,kind,path,{'mode':mode,'condition':condition,'after_repetition':repetition,'online_rows':len(online_X),'prior_rows':len(X_prior) if mode=='PRIOR' else 0,'continuation_policy_provenance_retained':True})
+     pending=pool.submit(train_update,X.copy(),y.copy(),names,kind,path,{'mode':mode,'condition':condition,'after_repetition':repetition,'online_rows':len(online_X),'prior_rows':len(X_prior) if mode=='PRIOR' else 0,'continuation_policy_provenance_retained':True,'ridge_regularization_alpha':latency_configuration.get('ridge_regularization_alpha',10.)})
      try:
       result=pending.result(timeout=2.);updates.append({**result,'stage':'update_prepared','after_repetition':repetition,'ready_within_bound':True})
       # Promotion still occurs only at the NEXT explicit settled boundary.
      except TimeoutError:updates.append({'stage':'update_pending','after_repetition':repetition,'wait_bound_s':2.,'continue_with_previous_validated_model':True})
+     except Exception as error:
+      updates.append({'stage':'update_failed_previous_model_retained','after_repetition':repetition,'error':str(error)});pending=None
    else:
     rows.append({'session_id':output_tag,'repetition_index':repetition,'condition_id':condition,'mode':mode,'run_id':run_id,'status':record['status'],'failure_reason':record.get('failure_reason'),'failure_transition_not_a_low_cost_return':True})
     # Preserve failed session and continue on a fresh development session only
@@ -110,12 +119,15 @@ def run_mode(mode,condition,kind,prior_data,output_tag):
     except Exception as error:
      rows[-1]['continuous_session_ended_reason']=str(error);context={};runner.SESSION_CONTEXT=context
    archive_outputs(out,RAW)
+   rows[-1]['scientific_harness_inter_rep_processing_wall_s']=time.perf_counter()-processing_start
+   rows[-1]['processing_scope']='return extraction, checkpoint, bounded model readiness wait, scientific artifact archival; safe boundary and next runtime initialization separate'
    save(directory/'per_repetition.json',rows);save(directory/'training_updates.json',updates)
    print(json.dumps({'pilot':output_tag,'rep':repetition,'status':rows[-1]['status'],'cost':rows[-1].get('J_F_task_n_s'),'descriptor':rows[-1].get('selected_continuation'),'model':rows[-1].get('model_version_used')}),flush=True)
  finally:
   pool.shutdown(wait=True)
   if pending is not None and pending.done():
-   updates.append({**pending.result(),'stage':'final_prepared_not_promoted_without_next_boundary'})
+   try:updates.append({**pending.result(),'stage':'final_prepared_not_promoted_without_next_boundary'})
+   except Exception as error:updates.append({'stage':'final_update_failed_previous_model_retained','error':str(error)})
   save(directory/'training_updates.json',updates);runner.SESSION_CONTEXT=None
  return {'session':output_tag,'mode':mode,'condition':condition,'rows':rows,'training_updates':updates,'path':str(directory.relative_to(R)),'continuous_context_persisted':True,'scope':provenance['scope']}
 
@@ -127,12 +139,13 @@ def main(condition='sync_120',tag='v1'):
  manifest=json.loads((D/'VALUE_DATASET_MANIFEST.json').read_text())
  with np.load(R/manifest['dataset_path']/'data.npz',allow_pickle=False) as f:
   mask=(f['split']=='train')&(f['condition']!=condition);prior_data=(f['X'][mask].copy(),f['y_full'][mask].copy())
- kind=load_model(gate['chosen_model']).kind
+ chosen_model=load_model(gate['chosen_model']);kind=chosen_model.kind
+ latency.setdefault('pilot_configuration',{})['ridge_regularization_alpha']=chosen_model.metadata.get('regularization_alpha',10.)
  plan={'schema':'small_online_pilot_plan_v1','status':'FROZEN_BEFORE_PILOT','condition':condition,'initialization_modes':['SCRATCH','PRIOR'],'prior_training_excludes':condition,'value_model':kind,'proposal_bank':BANK,'max_repetitions':8,'active_model_immutable_within_rep':True,'promotion_only_at_explicit_settled_repetition_boundary':True,'update_wait_bound_s':2.,'convergence_thresholds':'derive only after this pilot; no forced rep5 freeze','scope':'one next-target decision commits temporally coherent explicit continuation; all later targets execute with live state/reference/controller/safety'}
  save(D/'ONLINE_PILOT_PLAN.json',plan)
  results=[]
  for mode in ('SCRATCH','PRIOR'):
-  result=run_mode(mode,condition,kind,prior_data,mode.lower()+'_'+tag);results.append(result)
+  result=run_mode(mode,condition,kind,prior_data,mode.lower()+'_'+tag,latency.get('pilot_configuration',{}));results.append(result)
   save(D/'ONLINE_POLICY_IMPROVEMENT_PILOT.json',{'schema':'small_online_pilot_v1','status':'RUNNING','sessions':results})
  output={'schema':'small_online_pilot_v1','status':'COMPLETE','sessions':results,'maximum_repetitions':8,'no_final_30rep_experiment':True,'no_hardware_or_realtime_qualification':True}
  save(D/'ONLINE_POLICY_IMPROVEMENT_PILOT.json',output)

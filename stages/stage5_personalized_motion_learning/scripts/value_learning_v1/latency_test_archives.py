@@ -79,5 +79,13 @@ class ArchiveAccountingTest(unittest.TestCase):
             path.write_text(json.dumps(artifact(10,feature_start=30_000_000)))
             with self.assertRaises(ValueError):analyze_artifacts([path])
 
+    def test_unrelated_json_does_not_claim_complete_timing_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'runtime_artifacts.json'
+            path.write_text('{"status":"PASS"}')
+            result=analyze_artifacts([path])
+            self.assertFalse(result['source_complete'])
+            self.assertIn('missing required request evidence',result['input_read_failures'][0]['error'])
+
 
 if __name__=='__main__':unittest.main()

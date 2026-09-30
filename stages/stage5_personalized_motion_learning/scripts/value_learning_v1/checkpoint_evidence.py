@@ -21,8 +21,14 @@ def checkpoint(phase, push=True):
  for p in sorted((RAW/'runs').glob('*/rollout_result.json')):
   r=json.loads(p.read_text())
   if r.get('status')=='RUNNING':continue
-  results.append({'run_id':r['run_id'],'status':r['status'],'result_sha256':sha(p),'raw_files_sha256':r.get('raw_files_sha256',{}),'source_commit':r.get('source_commit')})
- save(D/'RAW_DATA_MANIFEST.json',{'schema':'value_research_raw_manifest_v1','phase':phase,'rollouts':results,'raw_directory':str(RAW.relative_to(R)),'raw_directory_git_ignored':True,'historical_source_manifest_sha256':source['frozen_evidence_sha256'].get('stages/stage5_personalized_motion_learning/docs/coordination_pacing_exploration_v1/RAW_DATA_MANIFEST.json')})
+  results.append({'run_id':r['run_id'],'status':r['status'],'result_sha256':sha(p),'raw_files_sha256':r.get('raw_files_sha256',{}),
+   'lossless_archives':r.get('lossless_archives',[]),'research_source_files_sha256':r.get('research_source_files_sha256',{}),'source_commit':r.get('source_commit')})
+ auxiliary={str(p.relative_to(RAW)):sha(p) for p in sorted(RAW.rglob('*')) if p.is_file() and
+  'runs' not in p.relative_to(RAW).parts and p.suffix not in ('.log','.tmp') and not p.name.startswith('REMOTE_VERIFICATION_')}
+ save(D/'RAW_DATA_MANIFEST.json',{'schema':'value_research_raw_manifest_v1','phase':phase,'rollouts':results,
+  'auxiliary_files_sha256':auxiliary,'live_log_hashing_deferred_to_final_verification':True,
+  'host_archive_manifest_sha256':sha(D/'HOST_ARCHIVE_MANIFEST.json') if (D/'HOST_ARCHIVE_MANIFEST.json').exists() else None,
+  'raw_directory':str(RAW.relative_to(R)),'raw_directory_git_ignored':True,'historical_source_manifest_sha256':source['frozen_evidence_sha256'].get('stages/stage5_personalized_motion_learning/docs/coordination_pacing_exploration_v1/RAW_DATA_MANIFEST.json')})
  # Stage only explicitly enumerated approved research files, one path per add.
  candidates=[R/'.gitignore']+[p for folder in (D,S/'scripts/value_learning_v1') for p in sorted(folder.rglob('*')) if p.is_file() and '__pycache__' not in p.parts and p.suffix not in ('.pyc','.tmp')]
  for p in candidates:subprocess.run(['git','-C',str(R),'add','--',str(p.relative_to(R))],check=True)
