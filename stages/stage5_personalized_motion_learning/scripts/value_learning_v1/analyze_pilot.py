@@ -24,6 +24,7 @@ def main():
  matched=json.loads((D/'KNOWN_BENEFIT_CAPTURE.json').read_text())
  absolute=json.loads((D/'PRIMARY_OBJECTIVE_KNOWN_BENEFIT_CAPTURE.json').read_text())
  offline=json.loads((D/'OFFLINE_VALUE_MODEL_COMPARISON.json').read_text())
+ latency_gate=json.loads((D/'ONLINE_LATENCY_PROMOTION_GATE.json').read_text())
  ranges=[g['true_return_range_n_s'] for m in offline['selected_models'].values()
   for g in m['validation_full_action_ranking']['groups']]
  local_scale=float(np.median(ranges)) if ranges else None
@@ -39,6 +40,9 @@ def main():
   'required_rank_spearman_in_recent_window':.9,'required_targeted_probe_at_evaluated_repetition':True,
   'required_conditional_reference_regret_at_most_tolerance':True,
   'required_all_recent_valid':True,'five_repetition_forced_freeze':False,
+  'required_scientific_computation_plausible_gate':True,
+  'first_stationary_adapter_ceiling_ms':100.,
+  'computation_limit':'initial adapter timing and separate full-profile plausible-path gate; no wall-causal/hardware realtime qualification',
   'future_use':'must be prospectively frozen and independently evaluated; current triggers are retrospective only'}
  save(D/'PROVISIONAL_CONVERGENCE_THRESHOLDS.json',threshold)
  sessions=[]
@@ -68,7 +72,9 @@ def main():
    plateau=gain_span is not None and tolerance is not None and gain_span<=tolerance
    regret=anchor.get('reference_regret_n_s')
    strong=regret is not None and tolerance is not None and regret<=tolerance
-   trigger=valid and descriptor_stable and rank_stable and plateau and no_probe_improvement and strong
+   computation_plausible=(latency_gate.get('status')=='PASS' and valid and all(
+    r.get('first_decision_latency',{}).get('decision_total_ms',float('inf'))<100. for r in recent))
+   trigger=valid and descriptor_stable and rank_stable and plateau and no_probe_improvement and strong and computation_plausible
    if trigger and first_trigger is None:first_trigger=rep
    evaluated.append({'repetition':rep,'status':row['status'],'executed_J_F_n_s':row.get('J_F_task_n_s'),
     'baseline_adjusted_recent_benefit_span_n_s':gain_span,'conditional_reference_regret_n_s':regret,
@@ -79,6 +85,7 @@ def main():
     'recent_rank_stable':rank_stable,'baseline_adjusted_performance_plateau':plateau,
     'valid_targeted_probe_count':len(valid_probes),'maximum_targeted_probe_improvement_n_s':max_probe_gain,
     'no_large_targeted_probe_improvement':no_probe_improvement,'near_conditional_best_known':strong,
+    'scientific_computation_plausible':computation_plausible,
     'retrospective_convergence_candidate':trigger,
     'missing_probe_cannot_be_claimed_convergence':not bool(valid_probes)})
   unique_updates={u['path']:u for u in session['training_updates'] if u.get('path') and u.get('wall_s') is not None}
