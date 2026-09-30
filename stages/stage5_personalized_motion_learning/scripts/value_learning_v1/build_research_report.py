@@ -50,7 +50,7 @@ def main():
   text.append(f'|{m["condition"]}|{m["previous_best_J_F_n_s"]:.6f} → {m["best_known_J_F_n_s"]:.6f}|{n["previous_best_J_F_n_s"]:.6f} → {n["best_known_J_F_n_s"]:.6f}|{m["evaluations"]}/{n["evaluations"]}|')
  text+=['','新赢家通过独立同起点再执行确认；这是确定性复现，不是独立受试者泛化。见 BEST_KNOWN_REFERENCE_CONFIRMATION.json、NATIVE_BEST_KNOWN_REFERENCE_CONFIRMATION.json。',
   '', '## 3. 更多路径自由度是否继续降低成本？','',
-  '至少 variable_start_120 的 MATCHED 层级从 L0 1482.176759、L2 1481.931124 降至 L3 1473.789827 N·s，增加平滑控制点仍有益。其他条件增加自由度未必改善。L1/L2/L3 的连续系数分别为 2/5/7，另有离散 horizon/return 选择；层级包络继承旧参考，不能把不同评估数量当作公平复杂度消融。L4 未执行。',
+  'variable_start_120 的 MATCHED 搜索包络从 L0 1482.176759、L2 1481.931124 降至 L3 1473.789827 N·s。但该 L3 赢家的两个新增系数为零，实际上仍可由 L2 表达。因此更大搜索确实继续改善，尚未证明额外自由度本身带来因果收益。L1/L2/L3 的连续系数分别为 2/5/7，另有离散 horizon/return 选择；各层评估数量不同，也不能当作公平复杂度消融。其他条件未必改善，L4 未执行。',
   '', '## 4. 有证据接近平台吗？','',
   '不足。部分条件的有限预算包络变平，但有效评估、重启和代数覆盖不同，尚无充分重复优化或下界。CEM 保留基线、已知有益初始化、多个重启和均匀探索；每个提议使用真实冻结科学栈评价。见各条件 level_evaluations、restart_generation_evaluations、restart_best 和完整收敛曲线。',
   '', '## 5. 最佳协调有多强的条件依赖？','',
@@ -75,7 +75,7 @@ def main():
  for s in convergence.get('sessions',[]):text.append(f'- {s["mode"]}：首次回溯收敛候选={s.get("retrospective_first_trigger_repetition")}；有效轮数={s["valid_repetitions"]}。')
  text+=['','稳定性同时检查最近三轮 baseline-adjusted 收益、精确模式、Q 排名、目标替代探针、安全和计算门槛。阈值仅在开发试验后冻结；本轮回溯，不用于提前强制停学。',
   '', '## 11. 五轮收敛现实吗？','',
-  '当前不能确认。Rep5 没有同轮替代探针，即使成本/模式平稳也不能声称触发完整收敛准则。八轮预算并非“5 learn + 25 exploit”；后续应预注册所需探针与阈值并按证据停学。',
+  '见完整回溯准则与 rep1/3/5/8 的同轮替代探针。即使成本/模式平稳，若 Q 排名、替代动作改善、安全或计算门槛不满足，也不能认定收敛。八轮预算并非“5 learn + 25 exploit”；后续应前瞻冻结开发所得阈值并按证据停学。',
   '', '## 12. Rep1/3/5/8 的已知收益捕获？','',
   '|会话/轮|MATCHED baseline / learned / reference (N·s)|条件化 capture|NATIVE 主目标 capture|','|---|---:|---:|---:|']
  for r in capture.get('rows',[]):
@@ -94,6 +94,7 @@ def main():
   '推荐一个版本化、原生调度条件化的轻量 ridge critic：保留 NATIVE 基线作真实 fallback/incumbent；用少量连贯安全模板提议下一 hip/knee 目标，原始安全筛选后独立 Q 排名，已承诺续行复用已验证的筛选结果。先针对原生调度构建共同状态/共同续行分支数据，验证 held-out 排名与主目标收益；把模型在明确安全轮边界切换，并在 rep1/3/5/8 预注册替代探针。完成完整提交链预算验证后，才进入更大的 learn-until-converged → exploit 研究。本轮不启动最终30轮、硬件或 realtime qualification。',
   '', '这是一个下一步方法，包含必需的原生主目标与提交链验证门槛；当前 MATCHED critic 不能直接晋升为部署策略。推理已很快，优先削减重复安全计算和提交开销；只有少量候选仍无法满足预算时，才考虑轻量 proposal policy，安全筛选继续权威。',
   '', '## 证据、修复与 Git 状态','',
+  'SCRATCH rep1 的物理任务有效，但在后来被撤销的静止续行代理门槛下提前执行，构成计算门槛的流程偏差。该轮保留，不追认成真实运动门槛通过；后续轮只能在单独冻结并复测的计算版本通过科学门槛后，从原始检查点安全边界恢复。见 PILOT_PROTOCOL_DEVIATIONS.json 与 boundary_computation_amendment_v3.json。不同计算版本不能合并成一份部署实时通过证据。',
   f'起点分支 codex/coordination-pacing-exploration-v1，HEAD {state.get("source_head")}；研究分支 codex/value-learning-research-v1。原始控制/估计/Human dynamics/历史证据哈希保持冻结；hidden truth 仅评估使用，未进入选择。修复上限6，已用 {state.get("repair_cycles_used")}，逐项见修复与基础设施记录。',
   '', '本轮改动位于新研究 scripts/value_learning_v1 与 docs/value_learning_research_v1，另新增 git-ignore 规则；大型原始轨迹忽略于 Git，lossless 压缩及 D 盘逐字节校验转存有清单/哈希。未 reset、stash、clean、merge、force push 或 git add -A。所有分阶段提交逐文件 stage。',
   '', 'RAW_DATA_MANIFEST.json、FINGERPRINTS.json、SOURCE_RAW_VERIFICATION.json、FINAL_EVIDENCE_VERIFICATION.json、Git checkpoint/REMOTE_VERIFICATION 记录用于复现。总时间与逐类别 launch 耗时见 REFERENCE_AND_TRAINING_WALL_TIME.json；并发工作时间求和不是经过的 wall time。',

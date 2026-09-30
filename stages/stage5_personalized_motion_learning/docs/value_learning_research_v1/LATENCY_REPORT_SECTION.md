@@ -6,13 +6,13 @@
 
 | 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
 |---|---:|---:|---:|---:|---:|
-| 原始传感捕获 → 参考验证完成 | 13 | 44.057 | 60.552 | 71.118 | 73.759 |
-| 原始传感捕获 → 实际命令激活 | 13 | 44.361 | 61.027 | 71.513 | 74.134 |
-| 研究决策开始 → 参考验证完成 | 12 | 42.310 | 58.184 | 67.760 | 70.153 |
-| 研究决策开始 → 实际命令激活 | 12 | 42.638 | 58.650 | 68.153 | 70.529 |
-| 首个特征开始 → 参考验证完成 | 12 | 29.831 | 44.205 | 52.595 | 54.692 |
-| 首个特征开始 → 实际命令激活 | 12 | 30.210 | 44.671 | 52.988 | 55.067 |
-| 选定参考 → 实际命令激活 | 12 | 29.599 | 35.276 | 35.871 | 36.019 |
+| 原始传感捕获 → 参考验证完成 | 13 | 41.966 | 57.172 | 69.532 | 72.622 |
+| 原始传感捕获 → 实际命令激活 | 13 | 42.381 | 57.654 | 69.947 | 73.020 |
+| 研究决策开始 → 参考验证完成 | 12 | 40.051 | 55.605 | 66.436 | 69.143 |
+| 研究决策开始 → 实际命令激活 | 12 | 40.433 | 56.080 | 66.849 | 69.542 |
+| 首个特征开始 → 参考验证完成 | 12 | 30.992 | 42.964 | 51.245 | 53.316 |
+| 首个特征开始 → 实际命令激活 | 12 | 31.374 | 43.439 | 51.659 | 53.714 |
+| 选定参考 → 实际命令激活 | 12 | 30.685 | 34.084 | 34.744 | 34.910 |
 
 单位：ms。
 
@@ -32,9 +32,9 @@
 
 | 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
 |---|---:|---:|---:|---:|---:|
-| 首个 pattern 选择：捕获 → 激活 | 1 | 74.134 | 74.134 | 74.134 | 74.134 |
-| 已提交 continuation：捕获 → 激活 | 11 | 44.361 | 51.578 | 52.146 | 52.288 |
-| 其中 moving handoff：捕获 → 激活 | 10 | 44.945 | 51.649 | 52.161 | 52.288 |
+| 首个 pattern 选择：捕获 → 激活 | 1 | 73.020 | 73.020 | 73.020 | 73.020 |
+| 已提交 continuation：捕获 → 激活 | 11 | 42.381 | 45.923 | 47.113 | 47.410 |
+| 其中 moving handoff：捕获 → 激活 | 10 | 42.538 | 46.072 | 47.142 | 47.410 |
 
 单位：ms。
 
@@ -42,13 +42,14 @@
 
 | 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
 |---|---:|---:|---:|---:|---:|
-| 原始 planner 比较候选 | 12 | 5.115 | 5.922 | 6.032 | 6.060 |
-| 研究 proposal 枚举 | 12 | 0.185 | 0.481 | 0.711 | 0.768 |
-| 研究候选调度/硬筛选 | 12 | 7.236 | 20.246 | 32.196 | 35.184 |
-| 特征构建 | 12 | 0.060 | 0.153 | 0.231 | 0.250 |
-| 批量 Q 推断和选择 | 12 | 0.046 | 0.066 | 0.073 | 0.074 |
-| worker 完成到主线程收集 | 13 | 12.623 | 14.934 | 15.448 | 15.577 |
-| 当前状态参考验证及命令构建 | 13 | 10.797 | 12.811 | 12.925 | 12.954 |
+| 原始 planner 比较候选 | 12 | 0.000 | 2.716 | 5.371 | 6.035 |
+| 继承 terminal/input guard 与 committed 原硬筛选 | 12 | 5.054 | 6.542 | 6.876 | 6.960 |
+| 研究 proposal 枚举 | 12 | 0.170 | 0.455 | 0.701 | 0.762 |
+| 研究候选调度/硬筛选 | 12 | 3.598 | 18.058 | 31.942 | 35.413 |
+| 特征构建 | 12 | 0.060 | 0.157 | 0.222 | 0.238 |
+| 批量 Q 推断和选择 | 12 | 0.049 | 0.065 | 0.075 | 0.078 |
+| worker 完成到主线程收集 | 13 | 11.803 | 14.873 | 15.409 | 15.543 |
+| 当前状态参考验证及命令构建 | 13 | 10.972 | 11.818 | 11.856 | 11.865 |
 
 单位：ms。
 
@@ -114,21 +115,23 @@ batch 8：CPU 输入复制 p95 0.001 ms；逐候选不批处理总推断中位 0
 
 | 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
 |---|---:|---:|---:|---:|---:|
-| moving 非 producer 实际配对跨度 | 10 | 25.849 | 31.251 | 32.132 | 32.352 |
+| moving 非 producer 实际配对跨度 | 10 | 27.337 | 29.103 | 29.156 | 29.170 |
 
 单位：ms。
 
-按其中已观察最大值，若其余开销保持现状，35 ms fork 留给 producer 的最小观察余量只有 2.648 ms。此余量不是 WCET 保证，也不是各组件分位数之和；它进一步说明仅有算法 max <35 ms 不能满足完整主机 moving 窗口。
+按其中已观察最大值，若其余开销保持现状，35 ms fork 留给 producer 的最小观察余量只有 5.830 ms。此余量不是 WCET 保证，也不是各组件分位数之和；它进一步说明仅有算法 max <35 ms 不能满足完整主机 moving 窗口。
 
-当前计算门状态：`ALGORITHM_PROFILE_EXCEEDS_PRELIMINARY_OPPORTUNITY`；algorithm plausible-path=False；正常模型 rollout 验证=True；观察到的完整主机跨度均在对应机会内=False。原 epoch replay 不含实时队列、新观察 handoff 复验和实际写入，故算法预算可行不等于完整主机 deadline 达标。
+当前计算门状态：`SCIENTIFIC_PILOT_COMPUTATION_PLAUSIBLE_WALL_BUDGET_UNDEMONSTRATED`；algorithm plausible-path=True；正常模型 rollout 验证=True；观察到的完整主机跨度均在对应机会内=False。原 epoch replay 不含实时队列、新观察 handoff 复验和实际写入，故算法预算可行不等于完整主机 deadline 达标。
 
 所选配置为首决策实际 4 候选，captured BANK 来源索引 [0, 2, 3, 6]，后续一个已提交 continuation，legacy proposal limit=1。这是 development capture 的有界 proposal prior；原硬筛选保留，既有 baseline/fallback 仍为迟到结果的权威处理路径。
+
+版本 v3 仅已提交 MATCHED continuation 延迟计算 legacy comparator：原 terminal/input guard 及 committed 候选 _evaluate 先执行，其结果复用于原 matched 硬筛选；候选拒绝时才调用原 legacy diagnostics 并保留原 research failure。初始/HOLD/native/branch 继续 eager。成功 continuation 的 comparator 未计算，日志 0 ms 表示未执行该阶段，不代表 baseline 的目标代价为零。原 escape 与 authority/epoch activation validator 未变。
 
 实际移动 committed continuation 参考速度 [0.20943951023931934, 0.349065850398866] rad/s；算法原 epoch 验证重复测量如下：
 
 | 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
 |---|---:|---:|---:|---:|---:|
-| 实际 moving committed continuation 算法 | 30 | 27.975 | 31.997 | 35.491 | 36.773 |
+| 实际 moving committed continuation 算法 | 30 | 19.591 | 20.426 | 20.820 | 20.953 |
 
 单位：ms。
 
@@ -136,13 +139,11 @@ batch 8：CPU 输入复制 p95 0.001 ms；逐候选不批处理总推断中位 0
 
 | 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
 |---|---:|---:|---:|---:|---:|
-| adapter 决策到选择 | 30 | 13.446 | 15.797 | 15.944 | 15.990 |
-| 选择返回 → 已认证 escape preparation | 30 | 7.603 | 9.079 | 9.345 | 9.445 |
-| 原 epoch activation validator | 30 | 6.272 | 7.589 | 11.147 | 12.495 |
+| adapter 决策到选择 | 30 | 7.972 | 8.471 | 8.522 | 8.527 |
+| 选择返回 → 已认证 escape preparation | 30 | 6.183 | 6.598 | 6.736 | 6.770 |
+| 原 epoch activation validator | 30 | 5.265 | 5.523 | 5.631 | 5.672 |
 
 单位：ms。
-
-当前计算门关闭，不能据此启动要求该门通过的在线改善 pilot；30 次 actual-moving 最大值超过严格 35 ms 机会。静止代理曾得到的 preliminary PASS 已保留并被版本化实际移动门取代；不删除离群值，也不通过重测挑选更小最大值。
 
 RETURN 冻结快照参考速度为 [0,0]，属于静止已提交 continuation 代理；保留其缩放数据，但不将其用于实际移动算法门。
 
@@ -150,42 +151,45 @@ RETURN 冻结快照参考速度为 [0,0]，属于静止已提交 continuation �
 
 | 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
 |---|---:|---:|---:|---:|---:|
-| OUTBOUND prefix requested 1 / actual [1] / legacy default | 30 | 64.910 | 69.954 | 70.032 | 70.042 |
-| OUTBOUND prefix requested 3 / actual [3] / legacy default | 30 | 82.315 | 93.785 | 104.123 | 107.639 |
-| OUTBOUND prefix requested 4 / actual [4] / legacy default | 30 | 91.213 | 97.819 | 98.576 | 98.862 |
-| OUTBOUND prefix requested 6 / actual [6] / legacy default | 30 | 110.381 | 116.690 | 118.616 | 119.393 |
-| OUTBOUND prefix requested 10 / actual [10] / legacy default | 30 | 175.607 | 203.129 | 216.660 | 222.167 |
-| OUTBOUND prefix requested 1 / actual [1] / legacy 1 | 30 | 30.945 | 33.131 | 37.284 | 38.930 |
-| OUTBOUND prefix requested 3 / actual [3] / legacy 1 | 30 | 46.549 | 52.283 | 54.795 | 55.623 |
-| OUTBOUND prefix requested 4 / actual [4] / legacy 1 | 30 | 56.795 | 66.361 | 73.132 | 74.952 |
-| OUTBOUND prefix requested 6 / actual [6] / legacy 1 | 30 | 80.876 | 95.593 | 116.684 | 124.459 |
-| OUTBOUND prefix requested 10 / actual [10] / legacy 1 | 30 | 115.537 | 122.257 | 123.485 | 123.771 |
-| OUTBOUND prefix requested 1 / actual [1] / legacy 3 | 30 | 34.725 | 39.348 | 43.707 | 45.176 |
-| OUTBOUND prefix requested 3 / actual [3] / legacy 3 | 30 | 55.988 | 62.661 | 65.699 | 66.272 |
-| OUTBOUND prefix requested 4 / actual [4] / legacy 3 | 30 | 64.916 | 70.478 | 72.315 | 73.022 |
-| OUTBOUND prefix requested 6 / actual [6] / legacy 3 | 30 | 83.061 | 90.859 | 92.915 | 93.646 |
-| OUTBOUND prefix requested 10 / actual [10] / legacy 3 | 30 | 130.587 | 144.742 | 147.201 | 147.348 |
-| OUTBOUND subset [0, 2, 3, 6] requested 4 / actual [4] / legacy 1 | 30 | 50.637 | 55.601 | 56.094 | 56.148 |
-| RETURN prefix requested 1 / actual [1] / legacy default | 30 | 68.033 | 72.470 | 74.891 | 75.710 |
-| RETURN prefix requested 3 / actual [1] / legacy default | 30 | 62.945 | 67.052 | 67.596 | 67.816 |
-| RETURN prefix requested 4 / actual [1] / legacy default | 30 | 68.982 | 74.869 | 75.922 | 76.265 |
-| RETURN prefix requested 6 / actual [1] / legacy default | 30 | 63.993 | 68.101 | 69.458 | 69.921 |
-| RETURN prefix requested 10 / actual [1] / legacy default | 30 | 68.345 | 72.310 | 74.054 | 74.707 |
-| RETURN prefix requested 1 / actual [1] / legacy 1 | 30 | 26.877 | 27.896 | 28.425 | 28.602 |
-| RETURN prefix requested 3 / actual [1] / legacy 1 | 30 | 27.668 | 29.204 | 30.364 | 30.802 |
-| RETURN prefix requested 4 / actual [1] / legacy 1 | 30 | 28.988 | 30.869 | 31.206 | 31.244 |
-| RETURN prefix requested 6 / actual [1] / legacy 1 | 30 | 29.817 | 31.929 | 33.202 | 33.669 |
-| RETURN prefix requested 10 / actual [1] / legacy 1 | 30 | 29.444 | 36.614 | 40.001 | 40.688 |
-| RETURN prefix requested 1 / actual [1] / legacy 3 | 30 | 36.237 | 39.246 | 41.684 | 42.637 |
-| RETURN prefix requested 3 / actual [1] / legacy 3 | 30 | 35.776 | 36.725 | 37.025 | 37.134 |
-| RETURN prefix requested 4 / actual [1] / legacy 3 | 30 | 36.804 | 39.692 | 40.885 | 40.951 |
-| RETURN prefix requested 6 / actual [1] / legacy 3 | 30 | 36.161 | 39.696 | 41.195 | 41.656 |
-| RETURN prefix requested 10 / actual [1] / legacy 3 | 30 | 35.729 | 37.933 | 39.294 | 39.769 |
-| OUTBOUND prefix requested 1 / actual [1] / legacy 1 | 30 | 27.975 | 31.997 | 35.491 | 36.773 |
+| eager 保留 OUTBOUND captured BANK requested 1 / actual [1] / legacy default | 30 | 64.910 | 69.954 | 70.032 | 70.042 |
+| eager 保留 OUTBOUND captured BANK requested 3 / actual [3] / legacy default | 30 | 82.315 | 93.785 | 104.123 | 107.639 |
+| eager 保留 OUTBOUND captured BANK requested 4 / actual [4] / legacy default | 30 | 91.213 | 97.819 | 98.576 | 98.862 |
+| eager 保留 OUTBOUND captured BANK requested 6 / actual [6] / legacy default | 30 | 110.381 | 116.690 | 118.616 | 119.393 |
+| eager 保留 OUTBOUND captured BANK requested 10 / actual [10] / legacy default | 30 | 175.607 | 203.129 | 216.660 | 222.167 |
+| eager 保留 OUTBOUND captured BANK requested 1 / actual [1] / legacy 1 | 30 | 30.945 | 33.131 | 37.284 | 38.930 |
+| eager 保留 OUTBOUND captured BANK requested 3 / actual [3] / legacy 1 | 30 | 46.549 | 52.283 | 54.795 | 55.623 |
+| eager 保留 OUTBOUND captured BANK requested 4 / actual [4] / legacy 1 | 30 | 56.795 | 66.361 | 73.132 | 74.952 |
+| eager 保留 OUTBOUND captured BANK requested 6 / actual [6] / legacy 1 | 30 | 80.876 | 95.593 | 116.684 | 124.459 |
+| eager 保留 OUTBOUND captured BANK requested 10 / actual [10] / legacy 1 | 30 | 115.537 | 122.257 | 123.485 | 123.771 |
+| eager 保留 OUTBOUND captured BANK requested 1 / actual [1] / legacy 3 | 30 | 34.725 | 39.348 | 43.707 | 45.176 |
+| eager 保留 OUTBOUND captured BANK requested 3 / actual [3] / legacy 3 | 30 | 55.988 | 62.661 | 65.699 | 66.272 |
+| eager 保留 OUTBOUND captured BANK requested 4 / actual [4] / legacy 3 | 30 | 64.916 | 70.478 | 72.315 | 73.022 |
+| eager 保留 OUTBOUND captured BANK requested 6 / actual [6] / legacy 3 | 30 | 83.061 | 90.859 | 92.915 | 93.646 |
+| eager 保留 OUTBOUND captured BANK requested 10 / actual [10] / legacy 3 | 30 | 130.587 | 144.742 | 147.201 | 147.348 |
+| eager 保留 RETURN captured BANK requested 1 / actual [1] / legacy default | 30 | 68.033 | 72.470 | 74.891 | 75.710 |
+| eager 保留 RETURN captured BANK requested 3 / actual [1] / legacy default | 30 | 62.945 | 67.052 | 67.596 | 67.816 |
+| eager 保留 RETURN captured BANK requested 4 / actual [1] / legacy default | 30 | 68.982 | 74.869 | 75.922 | 76.265 |
+| eager 保留 RETURN captured BANK requested 6 / actual [1] / legacy default | 30 | 63.993 | 68.101 | 69.458 | 69.921 |
+| eager 保留 RETURN captured BANK requested 10 / actual [1] / legacy default | 30 | 68.345 | 72.310 | 74.054 | 74.707 |
+| eager 保留 RETURN captured BANK requested 1 / actual [1] / legacy 1 | 30 | 26.877 | 27.896 | 28.425 | 28.602 |
+| eager 保留 RETURN captured BANK requested 3 / actual [1] / legacy 1 | 30 | 27.668 | 29.204 | 30.364 | 30.802 |
+| eager 保留 RETURN captured BANK requested 4 / actual [1] / legacy 1 | 30 | 28.988 | 30.869 | 31.206 | 31.244 |
+| eager 保留 RETURN captured BANK requested 6 / actual [1] / legacy 1 | 30 | 29.817 | 31.929 | 33.202 | 33.669 |
+| eager 保留 RETURN captured BANK requested 10 / actual [1] / legacy 1 | 30 | 29.444 | 36.614 | 40.001 | 40.688 |
+| eager 保留 RETURN captured BANK requested 1 / actual [1] / legacy 3 | 30 | 36.237 | 39.246 | 41.684 | 42.637 |
+| eager 保留 RETURN captured BANK requested 3 / actual [1] / legacy 3 | 30 | 35.776 | 36.725 | 37.025 | 37.134 |
+| eager 保留 RETURN captured BANK requested 4 / actual [1] / legacy 3 | 30 | 36.804 | 39.692 | 40.885 | 40.951 |
+| eager 保留 RETURN captured BANK requested 6 / actual [1] / legacy 3 | 30 | 36.161 | 39.696 | 41.195 | 41.656 |
+| eager 保留 RETURN captured BANK requested 10 / actual [1] / legacy 3 | 30 | 35.729 | 37.933 | 39.294 | 39.769 |
+| eager 保留 OUTBOUND captured BANK requested 1 / actual [1] / legacy 1 | 30 | 27.975 | 31.997 | 35.491 | 36.773 |
+| lazy v3 OUTBOUND captured BANK requested 4 / actual [4] / legacy 1 | 30 | 52.191 | 56.069 | 56.590 | 56.614 |
+| lazy v3 OUTBOUND captured BANK requested 1 / actual [1] / legacy 1 | 30 | 19.591 | 20.426 | 20.820 | 20.953 |
 
 单位：ms。
 
 RETURN 已提交 continuation 实际始终为一个候选；requested BANK 大小不代表该状态执行了同等候选数。首决策完整 10 个候选加 legacy1 的最大耗时超过 100 ms，因此不能用它宣称当前预算可行。所选四候选保留实际 development 已选优 descriptor，而不是未经测量地固定 prefix4。
+
+协议偏差已保留：SCRATCH rep1 物理状态 VALID，但执行时使用后来被取代的静止 continuation proxy gate，不能追溯标为 actual-moving v3 gate PASS。该次日志在 NumPy 边界 JSON 序列化处失败，原 repetition、checkpoint 和 gate publication 保留。后续若由验证的原 checkpoint 恢复，rep2+ 的 lazy 计算修订仅在边界另行冻结；这是混合计算版本的 development pilot，物理状态不重置、不替代原 rep1 provenance。
 
 **19．显式候选搜索 + Q 排序够快吗，是否需要 actor/distillation？**
 

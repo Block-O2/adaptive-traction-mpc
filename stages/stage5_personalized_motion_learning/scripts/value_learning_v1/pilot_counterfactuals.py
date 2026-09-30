@@ -18,13 +18,18 @@ def main():
   ref=next(r for r in table['rows'] if r['condition']==session['condition'])
   for row in session['rows']:
    rep=row['repetition_index']
-   if row['status']!='VALID' or rep not in (1,3,5,6,7,8):continue
+   if rep not in range(1,9):continue
+   if row['status']!='VALID':
+    results.append({'session':session['session'],'mode':session['mode'],'repetition':rep,'status':'LEARNED_REPETITION_INVALID','learned_run_id':row['run_id'],'known_benefit_capture':None,'reason':row.get('failure_reason'),'truncated_failure_never_a_good_return':True});continue
    spec={'mode':'PATH','matched_duration_factor':1.3}
+   starting_scope='original immutable fresh development condition'
    if rep>1:
     prev=next((r for r in session['rows'] if r['repetition_index']==rep-1),{})
-    if not prev.get('end_checkpoint'):
+    if not prev.get('end_checkpoint') and row.get('start_native_state_evaluation_only') is not None:
      results.append({'session':session['session'],'repetition':rep,'status':'NO_COMMON_CONTINUOUS_CHECKPOINT'});continue
-    spec['source_checkpoint']=prev['end_checkpoint']
+    if prev.get('end_checkpoint'):
+     spec['source_checkpoint']=prev['end_checkpoint'];starting_scope='verified previous-repetition checkpoint + original safe boundary'
+    else:starting_scope='fresh development segment after failed native continuation; original immutable condition, not continuous carryover'
    baseline=launch({'condition':session['condition'],'run_id':f'counterfactual_{session["session"]}_rep{rep:02d}_baseline',
     'spec':{**spec,'descriptor':{'parameters':[0.,.5],'horizon':'H4'}}})
    reference=launch({'condition':session['condition'],'run_id':f'counterfactual_{session["session"]}_rep{rep:02d}_reference',
@@ -33,7 +38,7 @@ def main():
     task_initial_state(row['run_id'])==task_initial_state(baseline['run_id'])==task_initial_state(reference['run_id']))
    item={'session':session['session'],'mode':session['mode'],'repetition':rep,'status':'VALID' if source_equal else 'COMPARISON_INVALID',
     'same_native_initial_task_state_evaluation_check':source_equal,'source_checkpoint':spec.get('source_checkpoint'),
-    'learned_run_id':row['run_id'],'baseline_run_id':baseline['run_id'],'reference_run_id':reference['run_id'],
+    'learned_run_id':row['run_id'],'baseline_run_id':baseline['run_id'],'reference_run_id':reference['run_id'],'starting_state_scope':starting_scope,
     'reference_policy_discovery_run_id':ref['best_run_id'],'comparison':'matched declared-duration paths replayed from same pre-repetition checkpoint; reference transferred to current adaptation state',
     'learned_J_F_n_s':row['J_F_task_n_s'],'baseline_J_F_n_s':baseline.get('J_F_task_n_s'),'reference_J_F_n_s':reference.get('J_F_task_n_s')}
    if source_equal:
@@ -52,13 +57,13 @@ def main():
       item['known_benefit_capture_after_confirmed_update']=1.
    results.append(item)
    save(D/'KNOWN_BENEFIT_CAPTURE.json',{'status':'RUNNING','rows':results,'metric':'KNOWN-BENEFIT CAPTURE; not global-optimality percentage'})
-   if rep==8:
+   if rep in (1,3,5,8):
     probes=[]
     descriptor=row['selected_continuation'];parameters=list(descriptor['parameters'])
     for index,delta in enumerate((-.03,.03)):
      alternative=parameters.copy();alternative[0]=float(np.clip(alternative[0]+delta,-.2,.2))
      proposal={**descriptor,'parameters':alternative}
-     result=launch({'condition':session['condition'],'run_id':f'alternate_probe_{session["session"]}_rep08_P{index}',
+     result=launch({'condition':session['condition'],'run_id':f'alternate_probe_{session["session"]}_rep{rep:02d}_P{index}',
       'spec':{**spec,'descriptor':proposal}})
      probes.append({'run_id':result['run_id'],'descriptor':proposal,'status':result['status'],'J_F_n_s':result.get('J_F_task_n_s'),
       'improvement_over_selected_n_s':None if result['status']!='VALID' else row['J_F_task_n_s']-result['J_F_task_n_s'],

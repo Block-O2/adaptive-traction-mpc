@@ -72,5 +72,18 @@ class GateScopeTest(unittest.TestCase):
         self.assertFalse(gate['ready_for_small_scientific_pilot'])
         self.assertEqual(gate['status'],'PENDING_ACTUAL_COMPUTATION_EVIDENCE')
 
+    def test_mixed_eager_lazy_profiles_cannot_gate_one_configuration(self):
+        cpu,offline,replays,profile,normal=fixtures()
+        replays[1]['captured_lazy_legacy_comparator_on_committed']=True
+        gate=build_gate(cpu,offline,replays,normal_profile=profile,normal_run=normal)
+        self.assertFalse(gate['captured_computation_configuration_consistent'])
+        self.assertFalse(gate['ready_for_small_scientific_pilot'])
+
+    def test_normal_run_must_match_lazy_revision_used_for_benchmarks(self):
+        cpu,offline,replays,profile,normal=fixtures()
+        for replay in replays:replay['captured_lazy_legacy_comparator_on_committed']=True
+        gate=build_gate(cpu,offline,replays,normal_profile=profile,normal_run=normal)
+        self.assertFalse(gate['clean_normal_model_rollout_validated'])
+
 
 if __name__=='__main__':unittest.main()

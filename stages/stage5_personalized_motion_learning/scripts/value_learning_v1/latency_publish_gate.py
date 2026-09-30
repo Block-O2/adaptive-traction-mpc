@@ -29,6 +29,7 @@ def publish(source,output,archive_previous=None):
     if not indices:raise ValueError('explicit actually profiled proposal subset required')
     result['pilot_configuration']={'legacy_candidate_limit':config['legacy_candidate_limit'],
                                    'proposal_indices':indices,
+                                   'proposal_bank_source_indices':indices,
                                    'lazy_legacy_comparator_on_committed':config.get('lazy_legacy_comparator_on_committed',False)}
     result['detailed_gate_source']={'path':str(source),'original_content_sha256':file_sha(source)}
     result['automatic_hard_deadline_qualification']=False

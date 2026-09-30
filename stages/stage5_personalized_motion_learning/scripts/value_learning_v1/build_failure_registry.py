@@ -29,7 +29,9 @@ def main():
       'action':chosen,'continuation_context':chosen.get('execution_screen',{}).get('research_context'),
       'failure_after_screening':kind=='post_screen_task_or_scientific_failure','return_target':None}
     item['logged_rejected_candidates']=[{'phase':d['phase'],'label':e['label'],'target':e.get('target_q_rad'),'reason':e.get('rejection_reason')} for d in summary.get('decisions',[]) for e in d.get('evaluations',[]) if not e.get('feasible')]
-   except (FileNotFoundError,StopIteration) as error:item['partial_summary_unavailable']=str(error)
+   except (FileNotFoundError,StopIteration,json.JSONDecodeError) as error:
+    item['partial_summary_unavailable']=str(error)
+    item['partial_artifact_preserved_not_dropped']=True
   rows.append(item)
  save(D/'FAILURE_TRANSITIONS_REGISTRY.json',{'schema':'separate_failure_transitions_v1','rows':rows,
   'counts':{k:sum(r['failure_class']==k for r in rows) for k in ('pre_execution_screen_rejection','post_screen_task_or_scientific_failure','infrastructure_interruption')},

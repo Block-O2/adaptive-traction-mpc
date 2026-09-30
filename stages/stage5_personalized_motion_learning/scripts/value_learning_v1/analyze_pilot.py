@@ -56,7 +56,8 @@ def main():
    qmaps.append(None if q is None or labels is None else dict(zip(labels,q)))
   for index,row in enumerate(rows):
    rep=row['repetition_index'];recent=rows[max(0,index-2):index+1]
-   valid=(len(recent)==3 and all(r['status']=='VALID' for r in recent))
+   same_continuous_segment=(len(recent)==3 and all(r.get('start_native_state_evaluation_only') is not None for r in recent[1:]))
+   valid=(len(recent)==3 and all(r['status']=='VALID' for r in recent) and same_continuous_segment)
    recent_anchors=[anchors.get(r['repetition_index']) for r in recent]
    comparable=valid and all(a and a['status']=='VALID' for a in recent_anchors)
    gains=[] if not comparable else [a['baseline_J_F_n_s']-a['learned_J_F_n_s'] for a in recent_anchors]
@@ -86,11 +87,13 @@ def main():
     'valid_targeted_probe_count':len(valid_probes),'maximum_targeted_probe_improvement_n_s':max_probe_gain,
     'no_large_targeted_probe_improvement':no_probe_improvement,'near_conditional_best_known':strong,
     'scientific_computation_plausible':computation_plausible,
-    'retrospective_convergence_candidate':trigger,
+    'retrospective_convergence_candidate':trigger,'recent_three_valid_in_same_continuous_segment':valid,
     'missing_probe_cannot_be_claimed_convergence':not bool(valid_probes)})
   unique_updates={u['path']:u for u in session['training_updates'] if u.get('path') and u.get('wall_s') is not None}
   sessions.append({'session':session['session'],'mode':session['mode'],'retrospective_first_trigger_repetition':first_trigger,
    'rows':evaluated,'five_rep_target_supported':any(r['retrospective_convergence_candidate'] and r['repetition']<=5 for r in evaluated),
+   'fresh_development_segments':sum(r['status']=='VALID' and r.get('start_native_state_evaluation_only') is None for r in rows),
+   'continuous_8_valid_repetitions_demonstrated':len(rows)==8 and all(r['status']=='VALID' for r in rows) and all(r.get('start_native_state_evaluation_only') is not None for r in rows[1:]),
    'model_update_wall_s':summary([u['wall_s'] for u in unique_updates.values()]),
    'scientific_harness_inter_rep_processing_wall_s':summary([r.get('scientific_harness_inter_rep_processing_wall_s') for r in rows]),
    'prediction_error_n_s':summary([r.get('first_decision_prediction_error_n_s') for r in rows]),
@@ -99,8 +102,8 @@ def main():
  output={'status':'COMPLETE','thresholds':threshold,'sessions':sessions,
   'pilot_scope':'conditional matched scheduling and initial next-target/declared-continuation ranking; later execution stays closed loop',
   'absolute_objective_evidence':'see PRIMARY_OBJECTIVE_KNOWN_BENEFIT_CAPTURE.json; a conditional plateau alone does not establish primary-objective competitiveness',
-  'inference_limits':['two single-condition sessions, eight attempted repetitions each; not a subject-level sample',
-   'probes only at rep8; absence of earlier probes prevents asserting a rep5 convergence trigger',
+  'inference_limits':['two single-condition development attempts, at most eight attempted repetitions each; native start failures and fresh segments are not eight continuous valid repetitions or a subject-level sample',
+   'targeted probes at rep1/3/5/8; other repetitions with no probe cannot trigger convergence',
    'candidate sets and continuations are bounded; reference remains best-known, not globally optimal',
    'observed timing does not qualify hardware or realtime behavior']}
  save(D/'CONVERGENCE_ANALYSIS.json',output)

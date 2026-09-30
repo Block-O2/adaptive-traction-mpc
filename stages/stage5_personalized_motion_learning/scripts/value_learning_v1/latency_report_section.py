@@ -27,7 +27,7 @@ def unique_updates(updates):
     return list(unique.values()),pending,failed
 
 
-def render_section(profile,cpu,*,gate=None,updates=None,pilot=None,scaling=None,capture_profile=None):
+def render_section(profile,cpu,*,gate=None,updates=None,pilot=None,scaling=None,capture_profile=None,protocol=None):
     if not profile.get('source_artifacts') or not cpu.get('models'):
         raise ValueError('actual full host profile and actual CPU models required')
     full_rows=[('原始传感捕获 → 参考验证完成',profile['sample_capture_to_reference_validated_ms']),
@@ -56,7 +56,7 @@ def render_section(profile,cpu,*,gate=None,updates=None,pilot=None,scaling=None,
         ('其中 moving handoff：捕获 → 激活',roles.get('moving_continuation',{}).get('capture_to_activation_ms',{}))]),
         '**16．哪部分主导延迟？**']
     component_rows=[]
-    for key,label in [('legacy_planner_ms','原始 planner 比较候选'),('proposal_ms','研究 proposal 枚举'),('feasibility_scheduling_ms','研究候选调度/硬筛选'),
+    for key,label in [('legacy_planner_ms','原始 planner 比较候选'),('inherited_committed_precheck_ms','继承 terminal/input guard 与 committed 原硬筛选'),('proposal_ms','研究 proposal 枚举'),('feasibility_scheduling_ms','研究候选调度/硬筛选'),
                       ('feature_ms','特征构建'),('inference_selection_ms','批量 Q 推断和选择')]:
         component_rows.append((label,profile.get('research_components_ms',{}).get(key,{})))
     for key,label in [('worker_to_main_scheduling_ms','worker 完成到主线程收集'),
@@ -100,6 +100,8 @@ def render_section(profile,cpu,*,gate=None,updates=None,pilot=None,scaling=None,
         text.append('当前计算门状态：`'+gate.get('detailed_computation_status',gate['status'])+'`；algorithm plausible-path='+str(gate.get('algorithm_profile_within_preliminary_ceilings'))+'；正常模型 rollout 验证='+str(gate.get('clean_normal_model_rollout_validated'))+'；观察到的完整主机跨度均在对应机会内='+str(gate.get('observed_full_host_spans_within_architecture_opportunity'))+'。原 epoch replay 不含实时队列、新观察 handoff 复验和实际写入，故算法预算可行不等于完整主机 deadline 达标。')
         chosen=gate.get('selected_configuration',{})
         text.append('所选配置为首决策实际 '+str(chosen.get('first_pattern_candidate_count','未记录'))+' 候选，captured BANK 来源索引 '+str(chosen.get('proposal_source_indices','未记录'))+'，后续一个已提交 continuation，legacy proposal limit='+str(chosen.get('legacy_candidate_limit','未记录'))+'。这是 development capture 的有界 proposal prior；原硬筛选保留，既有 baseline/fallback 仍为迟到结果的权威处理路径。')
+        if chosen.get('lazy_legacy_comparator_on_committed'):
+            text.append('版本 v3 仅已提交 MATCHED continuation 延迟计算 legacy comparator：原 terminal/input guard 及 committed 候选 _evaluate 先执行，其结果复用于原 matched 硬筛选；候选拒绝时才调用原 legacy diagnostics 并保留原 research failure。初始/HOLD/native/branch 继续 eager。成功 continuation 的 comparator 未计算，日志 0 ms 表示未执行该阶段，不代表 baseline 的目标代价为零。原 escape 与 authority/epoch activation validator 未变。')
         if gate.get('moving_handoff_algorithm_directly_measured'):
             text+=['实际移动 committed continuation 参考速度 '+str(gate['continuation_snapshot_context'].get('captured_reference_velocity_rad_s'))+' rad/s；算法原 epoch 验证重复测量如下：',
                    stat_table([('实际 moving committed continuation 算法',gate['continuation_algorithm_profile']['algorithm_through_original_epoch_reference_validation_ms'])])]
@@ -118,7 +120,7 @@ def render_section(profile,cpu,*,gate=None,updates=None,pilot=None,scaling=None,
             text.append('RETURN 冻结快照参考速度为 [0,0]，属于静止已提交 continuation 代理；保留其缩放数据，但不将其用于实际移动算法门。')
         scaling_rows=[]
         for replay in scaling:
-            label_prefix=str(replay.get('captured_phase'))+' '+('subset '+str(replay.get('proposal_source_indices')) if replay.get('proposal_source_indices') is not None else 'prefix')
+            label_prefix=('lazy v3 ' if replay.get('captured_lazy_legacy_comparator_on_committed') else 'eager 保留 ')+str(replay.get('captured_phase'))+' '+('subset '+str(replay.get('proposal_source_indices')) if replay.get('proposal_source_indices') is not None else 'captured BANK')
             for row in replay.get('rows',[]):
                 actual=sorted(set(row.get('observed_research_candidate_count',[])))
                 label=label_prefix+' requested '+str(row['requested_research_candidate_count'])+' / actual '+str(actual)+' / legacy '+str(row.get('legacy_limit_label'))
@@ -126,6 +128,8 @@ def render_section(profile,cpu,*,gate=None,updates=None,pilot=None,scaling=None,
         text+=['真实冻结快照的算法缩放（每项 30 次；原 epoch 参考验证，失败项另存原始结果；不含完整实时激活链）：',stat_table(scaling_rows),
                'RETURN 已提交 continuation 实际始终为一个候选；requested BANK 大小不代表该状态执行了同等候选数。首决策完整 10 个候选加 legacy1 的最大耗时超过 100 ms，因此不能用它宣称当前预算可行。所选四候选保留实际 development 已选优 descriptor，而不是未经测量地固定 prefix4。']
     if not gate:text.append('完整选型/正常运行计算门尚未生成；此处不制造 PASS。')
+    if (protocol or {}).get('deviations'):
+        text.append('协议偏差已保留：SCRATCH rep1 物理状态 VALID，但执行时使用后来被取代的静止 continuation proxy gate，不能追溯标为 actual-moving v3 gate PASS。该次日志在 NumPy 边界 JSON 序列化处失败，原 repetition、checkpoint 和 gate publication 保留。后续若由验证的原 checkpoint 恢复，rep2+ 的 lazy 计算修订仅在边界另行冻结；这是混合计算版本的 development pilot，物理状态不重置、不替代原 rep1 provenance。')
     text+=['**19．显式候选搜索 + Q 排序够快吗，是否需要 actor/distillation？**',
            '本轮优先依据实际正常运行与候选数缩放选择有限的多样首决策 proposal，以及后续一个已提交 continuation candidate。单候选 continuation 已不能继续通过减少研究候选数解决成本。若 Q 推断很小而硬筛选、原始候选比较、escape preparation、主线程收集或最终验证占主要时间，单纯增加 actor 不能解决这些成本。只有实际完整决策证据持续超出机会、且 proposal 数缩减仍不足时，再评价轻量 proposal policy，随后仍执行原有硬筛选；当前证据更支持先剖析这些调度/验证开销，不自动启动 actor。',
            '`RUNTIME_ASSURANCE_REQUIRED_BEFORE_HARDWARE_EXPERIMENTS`。以上不构成硬件安全、WCET 或实时资格。']
@@ -138,12 +142,14 @@ def main():
     parser.add_argument('--updates',type=Path);parser.add_argument('--pilot',type=Path)
     parser.add_argument('--scaling-profile',type=Path,action='append',default=[])
     parser.add_argument('--capture-profile',type=Path)
+    parser.add_argument('--protocol',type=Path)
     parser.add_argument('--output',type=Path,required=True);args=parser.parse_args()
     section=render_section(read_json(args.profile),read_json(args.cpu),
         gate=read_json(args.gate) if args.gate else None,updates=read_json(args.updates) if args.updates else None,
         pilot=read_json(args.pilot) if args.pilot else None,
         scaling=[read_json(path) for path in args.scaling_profile],
-        capture_profile=read_json(args.capture_profile) if args.capture_profile else None)
+        capture_profile=read_json(args.capture_profile) if args.capture_profile else None,
+        protocol=read_json(args.protocol) if args.protocol else None)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(section,encoding='utf-8')
     print(str(args.output))
