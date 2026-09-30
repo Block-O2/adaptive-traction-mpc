@@ -1,0 +1,3 @@
+# Coordination & Pacing Exploration Contract v2
+
+The preserved v1 pilot showed that exact shortest baseline segment durations cannot execute a mild changed path within the original acceleration limit. Before any formal sweep, this v2 protocol freezes a common 1.3× duration for the original matched baseline and each matched candidate. Durations stay on the 5 ms grid. All v1 scientific questions, safety screens, condition roles, metrics and stop rules remain in force. Matched benefit is assessed only against each condition's separate common-duration baseline, and realized phase timing residuals are reported.

@@ -1,0 +1,43 @@
+{
+  "active_confidence_pacing": false,
+  "fixed_duration_validation_scope": "The fixed-duration scheduler validates grid, velocity, acceleration, ROM and continuous clearance; scientific closed-loop matching and governor residuals still require pilot evidence.",
+  "schema": "current_timing_path_audit_v1",
+  "source_commit": "b8a3989f7bd2d96938d0012857499a0321f05d5e",
+  "source_findings": [
+    {
+      "component": "waypoint segment duration",
+      "finding": "Shortest feasible 5 ms registered-grid quintic duration under phase timeout, fixed fractional velocity and acceleration limits, ROM and continuous clearance; endpoint velocity and current emitted reference state enter the polynomial.",
+      "source": "human_waypoint_scheduler.py:_plan"
+    },
+    {
+      "component": "reference velocity/acceleration fractions",
+      "finding": "0.5 velocity and 0.25 acceleration multiply original task joint limits; same fractions bound pass-through terminal velocity.",
+      "source": "incremental_clearance_terminal_v9.json:11-12; human_waypoint_scheduler.py:629-632"
+    },
+    {
+      "component": "mechanics duration search",
+      "finding": "After mechanics screen rejects shortest reference-feasible schedule, if enabled, search longer 5 ms grid durations until a mechanics-feasible fixed-duration schedule is found.",
+      "source": "human_waypoint_feedback_mpc.py:305-347"
+    },
+    {
+      "component": "receipt reference governor",
+      "finding": "Selects only receipt-history acceleration-feasible progress; deferred progress delays realized segment completion; runtime completion checks governor is_complete.",
+      "source": "receipt_reference_governor.py:select/commit; runtime.py:3372-3444"
+    },
+    {
+      "component": "RSS/fallback",
+      "finding": "Rolling splice, prefetch, fallback and pass-through can alter realized timing while preserving certified reference and safety semantics.",
+      "source": "runtime.py:2745-3144; safe_fallback.py"
+    },
+    {
+      "component": "terminal/HOLD/recovery",
+      "finding": "Measured-state phase transitions, HOLD dwell, terminal commit, recovery and safe fallback can change total task time.",
+      "source": "runtime.py:2609-2846,3602-3644"
+    },
+    {
+      "component": "confidence/trust",
+      "finding": "No confidence/trust gamma variable enters this active zero-value/safe-action scientific path; historical confidence pacing is outside it.",
+      "source": "active runtime, planner, scheduler and v9 options source search"
+    }
+  ]
+}

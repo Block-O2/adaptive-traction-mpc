@@ -1,0 +1,85 @@
+{
+  "amplitudes_fraction_of_span": [
+    0.0,
+    0.02,
+    0.06,
+    0.12,
+    0.18
+  ],
+  "arms": {
+    "MATCHED": "exact fixed-duration quintic at 1.3\u00d7 each original baseline segment duration, rounded to the registered 5 ms grid, for both original and deformed paths; all original screens active; record realized phase residuals; reject infeasible schedules",
+    "NATIVE": "deform relative coordination and let all production scheduling, mechanics, governor, RSS and safety act normally"
+  },
+  "baseline_rule": "two identical unmodified scientific runs per condition row; checkpoint rows must also match official V3 J_F_task within 1e-6 N s; exclude individual failed rows with evidence",
+  "branch": "codex/coordination-pacing-exploration-v1",
+  "catch_up_peaks": [
+    0.3,
+    0.5,
+    0.7
+  ],
+  "condition_matrix_sha256": "61118074f2b717313c6a3ac5cd29ca5a96f7666d54965b48e48f946ab22baa83",
+  "coordination_benefit": "matched baseline J_F_task minus matched candidate J_F_task, only interpret as coordination-isolated when realized OUTBOUND and RETURN duration residuals each <= 0.025 s and same segment count/phase sequence; otherwise label timing-confounded",
+  "decision_rule": "No claim of exact additive timing/path decomposition; report matched residual and native timing associations. No force-intensity claim from integral alone.",
+  "formal_attempt_minimum": 300,
+  "formal_attempt_target": [
+    500,
+    800
+  ],
+  "held_out_rule": "validation-role conditions are not used to select/refine patterns; reused states are not called held out",
+  "horizons": [
+    "H1",
+    "H2",
+    "H3",
+    "H4"
+  ],
+  "individual_outcomes": [
+    "VALID",
+    "INFEASIBLE",
+    "INVALID"
+  ],
+  "lead_values": [
+    -1,
+    0,
+    1
+  ],
+  "learning": "no RL, supervised policy or value training; no production objective or value-hook modification",
+  "matched_baseline_rule": "Each condition receives a separate original-path matched baseline under the same 1.3\u00d7 registered-grid segment durations; compare matched candidates against this baseline only",
+  "matched_duration_factor": 1.3,
+  "maximum_wall_hours": 8,
+  "native_benefit": "native baseline J_F_task minus native candidate J_F_task",
+  "path_family": "baseline phase waypoint sequence plus smooth endpoint-zero normalized-progress relative hip/knee deformation; common start and endpoint retained; separate synchronous comparator; no equal instantaneous velocity assumption",
+  "plan": "freeze coarse pattern list before formal sweep; paired arms where legal; refine informative regions after coarse; validate selected patterns only on validation-role conditions",
+  "primary_cost": "J_F_task = integral norm(measured cuff force) dt for OUTBOUND + HOLD + RETURN",
+  "progress_interval_attempts": 50,
+  "question_primary": "Does relative hip-knee path coordination reduce interaction cost after nominal pacing is matched?",
+  "question_secondary": "How does native scheduling alter that benefit?",
+  "repair_limit": 6,
+  "safety": "Original ROM, velocity, acceleration, continuous clearance, mechanics force/moment, controller, RSS, scientific validity and task semantics remain authoritative; no offline time stretching or artificial idle time",
+  "schema": "coordination_pacing_exploration_contract_v2",
+  "secondary_metrics": [
+    "J_F_session",
+    "task duration",
+    "mean/RMS/peak cuff force",
+    "moment integral/peak",
+    "minimum clearance",
+    "q/dq/ddq",
+    "phase durations",
+    "planned/realized segment durations",
+    "governor delays",
+    "duration search",
+    "RSS/fallback/terminal effects",
+    "0.5 s/1.5 s/outbound/full cost"
+  ],
+  "source_commit": "b8a3989f7bd2d96938d0012857499a0321f05d5e",
+  "status": "FROZEN_AFTER_PILOT_BEFORE_FORMAL_SWEEP",
+  "supersedes": "COORDINATION_PACING_EXPLORATION_CONTRACT.json (v1 shortest-duration pilot rejected by original acceleration limit)",
+  "systemic_stop": [
+    "majority baseline-replay failure",
+    "matching requires weakening safety",
+    "controller/Human/planner/scientific semantics change",
+    "unrecoverable raw corruption",
+    "repeated infrastructure failure after six bounded repairs",
+    "eight-hour cap"
+  ],
+  "truth_firewall": "case physical parameters are hidden plant inputs; candidate selection sees only deployable runtime state and frozen baseline path/timing; no evaluation-only truth enters planning"
+}
