@@ -1,5 +1,5 @@
 """Known-benefit comparisons from the SAME pre-repetition immutable state."""
-import json
+import argparse,json
 import numpy as np
 from research_campaign import D,RAW,RUNS,launch,save
 from confirm_references import normalize_descriptor
@@ -10,11 +10,13 @@ def task_initial_state(run_id):
  ix=np.flatnonzero(trace['stage']=='TASK')[0]
  return trace['evaluation_only_human_state_rad_rad_s'][ix].tolist()
 
-def main():
+def main(mode=None):
  pilot=json.loads((D/'ONLINE_POLICY_IMPROVEMENT_PILOT.json').read_text())
  table=json.loads((D/'BEST_KNOWN_REFERENCE_TABLE.json').read_text())
  results=[]
+ output_path=D/('KNOWN_BENEFIT_CAPTURE.json' if mode is None else f'KNOWN_BENEFIT_CAPTURE_{mode}.json')
  for session in pilot['sessions']:
+  if mode is not None and session['mode']!=mode:continue
   ref=next(r for r in table['rows'] if r['condition']==session['condition'])
   for row in session['rows']:
    rep=row['repetition_index']
@@ -56,7 +58,7 @@ def main():
       item['updated_state_specific_best_known_J_F_n_s']=confirmation['J_F_task_n_s']
       item['known_benefit_capture_after_confirmed_update']=1.
    results.append(item)
-   save(D/'KNOWN_BENEFIT_CAPTURE.json',{'status':'RUNNING','rows':results,'metric':'KNOWN-BENEFIT CAPTURE; not global-optimality percentage'})
+   save(output_path,{'status':'RUNNING','rows':results,'metric':'KNOWN-BENEFIT CAPTURE; not global-optimality percentage'})
    if rep in (1,3,5,8):
     probes=[]
     descriptor=row['selected_continuation'];parameters=list(descriptor['parameters'])
@@ -69,5 +71,6 @@ def main():
       'improvement_over_selected_n_s':None if result['status']!='VALID' else row['J_F_task_n_s']-result['J_F_task_n_s'],
       'same_checkpoint':spec.get('source_checkpoint')})
     item['targeted_safe_alternatives']=probes
- save(D/'KNOWN_BENEFIT_CAPTURE.json',{'status':'COMPLETE','rows':results,'metric':'KNOWN-BENEFIT CAPTURE; not global-optimality percentage','same_checkpoint_required':True,'negative_or_zero_denominator_not_reported_as_fraction':True})
-if __name__=='__main__':main()
+ save(output_path,{'status':'COMPLETE','rows':results,'metric':'KNOWN-BENEFIT CAPTURE; not global-optimality percentage','same_checkpoint_required':True,'negative_or_zero_denominator_not_reported_as_fraction':True})
+if __name__=='__main__':
+ p=argparse.ArgumentParser();p.add_argument('--mode',choices=['SCRATCH','PRIOR']);a=p.parse_args();main(a.mode)

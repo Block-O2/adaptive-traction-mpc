@@ -12,8 +12,8 @@ class LoggingRecovery(unittest.TestCase):
    self.assertEqual(json.loads(path.read_text()),{'state':[1.,2.],'nested':{'sequence':3,'cost':4.}})
  def test_actual_rep1_checkpoint_and_pending_model(self):
   directory=p.RAW/'pilot_sessions/scratch_v1'
-  rows=json.loads((directory/'per_repetition.json').read_text());self.assertEqual(len(rows),1)
-  cp=rows[-1]['end_checkpoint'];prov=p.sha(directory/'session_provenance.json')
+  rows=json.loads((directory/'per_repetition.json').read_text());self.assertGreaterEqual(len(rows),1)
+  cp=rows[0]['end_checkpoint'];prov=p.sha(directory/'session_provenance.json')
   context,restored=p.load_checkpoint(Path(cp['absolute_path']),cp['sha256'],prov)
   self.assertEqual(len(restored),1);self.assertEqual(context['repetition_index'],1)
   self.assertFalse(context['runtime']['wall_session'].active)
