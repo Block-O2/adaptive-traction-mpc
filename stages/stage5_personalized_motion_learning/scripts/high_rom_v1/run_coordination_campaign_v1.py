@@ -194,27 +194,58 @@ def execute(stage, entries):
 
 
 def choose_refinement():
-    coarse = [x for x in rows() if x["stage"] == "COARSE" and x["status"] == "VALID" and x["condition_role"] == "discovery"]
+    source = [x for x in rows() if x["stage"] == "COARSE" and x["condition_role"] == "discovery"]
+    coarse = [x for x in source if x["status"] == "VALID" and not x["synchronous"]]
     matched = sorted((x for x in coarse if x["timing_isolated"]), key=lambda x: -x["benefit_n_s"])
     native = sorted((x for x in coarse if x["arm"] == "NATIVE"), key=lambda x: -x["benefit_n_s"])
+    seeds = []
+    def add(row, reason):
+        if row is not None and pattern_key(row["pattern"]) not in {pattern_key(x[0]["pattern"]) for x in seeds}:
+            seeds.append((row, reason))
+    add(matched[0] if matched else None, "best_timing_isolated_matched")
+    add(native[0] if native else None, "best_native")
+    grouped = defaultdict(list)
+    for x in matched: grouped[pattern_key(x)].append(x)
+    consistent = [v for v in grouped.values() if len({x["condition_id"] for x in v}) >= 2 and all(x["benefit_n_s"] > 0 for x in v)]
+    if consistent:
+        add(max(consistent, key=lambda v: sum(x["benefit_n_s"] for x in v) / len(v))[0], "consistent_positive_across_conditions")
+    switches = [v for v in grouped.values() if any(x["benefit_n_s"] > 0 for x in v) and any(x["benefit_n_s"] < 0 for x in v)]
+    if switches:
+        add(max(switches, key=lambda v: max(x["benefit_n_s"] for x in v) - min(x["benefit_n_s"] for x in v))[0], "benefit_sign_switch_across_conditions")
+    boundary = defaultdict(list)
+    for x in source:
+        if not x["synchronous"]: boundary[pattern_key(x)].append(x)
+    boundary_groups = [v for v in boundary.values() if any(x["status"] == "VALID" for x in v) and
+                       any(x["status"] == "INFEASIBLE" for x in v)]
+    if boundary_groups:
+        group = max(boundary_groups, key=lambda v: (v[0]["amplitude"], len(v)))
+        add(next(x for x in group if x["status"] == "VALID"), "cross_condition_feasibility_boundary")
+    conflicts = [x for x in matched if x["short_benefit_1p5_n_s"] * x["benefit_n_s"] < 0]
+    if conflicts:
+        add(max(conflicts, key=lambda x: abs(x["benefit_n_s"] - x["short_benefit_1p5_n_s"])), "short_full_credit_conflict")
+    add(min(coarse, key=lambda x: abs(x["benefit_n_s"])) if coarse else None, "near_neutral")
+    add(min(coarse, key=lambda x: x["benefit_n_s"]) if coarse else None, "safe_worse")
+    for row in matched + native:
+        if len(seeds) >= 8: break
+        add(row, "promising_fallback")
     selection = []
-    for group in (matched[:3], native[:3],
-                  sorted(coarse, key=lambda x: abs(x["benefit_n_s"]))[:1],
-                  sorted(coarse, key=lambda x: x["benefit_n_s"])[:1]):
-        for row in group:
-            p = dict(row["pattern"])
-            if p["synchronous"]: continue
-            p["amplitude"] = round(min(.2, max(.005, p["amplitude"] + (.015 if p["amplitude"] < .12 else -.015))), 3)
-            p["peak"] = {.3: .5, .5: .7, .7: .3}[p["peak"]]
-            if pattern_key(p) not in {pattern_key(x) for x in selection}:
-                selection.append(p)
-    # A bounded, interpretable set even when the same optimum repeats.
-    for p in coarse_patterns():
-        if len(selection) >= 8: break
-        if p["synchronous"]: continue
-        q = dict(p); q["amplitude"] = round(min(.2, max(.005, q["amplitude"] + .015)), 3)
-        if pattern_key(q) not in {pattern_key(x) for x in selection}: selection.append(q)
-    return selection[:8]
+    audit = []
+    for row, reason in seeds[:8]:
+        p = dict(row["pattern"])
+        p["amplitude"] = round(min(.2, max(.005, p["amplitude"] + (.015 if p["amplitude"] < .12 else -.015))), 3)
+        p["peak"] = {.3: .5, .5: .7, .7: .3}[p["peak"]]
+        selection.append(p)
+        audit.append({"source_run_id": row["run_id"], "reason": reason,
+                      "source_benefit_n_s": row["benefit_n_s"], "variant": p})
+    selection_path = DOC / "REFINEMENT_SELECTION.json"
+    selection_record = {"schema": "coordination_refinement_selection_v1",
+                        "source": "discovery-role coarse attempts only", "selected": audit}
+    if selection_path.exists():
+        if json.loads(selection_path.read_text()) != selection_record:
+            raise RuntimeError("frozen refinement selection changed")
+    else:
+        save(selection_path, selection_record)
+    return selection
 
 
 def choose_validation():
