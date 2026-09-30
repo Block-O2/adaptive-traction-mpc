@@ -1,0 +1,20 @@
+from pathlib import Path
+R=Path('/home/hank/coding/adaptive-traction-mpc-learning')
+S=R/'stages/stage5_personalized_motion_learning'
+target=S/'scripts/value_learning_v1/run_research_rollout.py'
+source=(S/'scripts/high_rom_v1/run_coordination_rollout_v1.py').read_text()
+source=source.replace('"""One recoverable scientific coordination rollout; production runtime is authoritative."""','"""Versioned research wrapper copied from frozen coordination runner; production unchanged."""')
+source=source.replace('RUNS = STAGE / "results/coordination_pacing_exploration_v1/runs"','OLD_RUNS = STAGE / "results/coordination_pacing_exploration_v1/runs"\nRUNS = STAGE / "results/value_learning_research_v1/runs"\nSESSION_CONTEXT = None\nLAST_CAPTURE = None')
+source=source.replace('def source_context(condition):\n','def source_context(condition):\n    if SESSION_CONTEXT is not None:\n        return SESSION_CONTEXT, None\n')
+source=source.replace('    capture = {}','    capture = {}')
+source=source.replace('        capture = {}','        capture = {}\n        global LAST_CAPTURE\n        LAST_CAPTURE = capture')
+source=source.replace('from coordination_pacing_adapter_v1 import (\n                CoordinationPacingPlannerV1, SPEC_ENV, snapshot_coordination_task_call,\n            )','from research_adapter import (\n                ResearchPlanner, SPEC_ENV, snapshot_research_task_call,\n            )')
+source=source.replace('(RUNS / condition["baseline_run_id"] / "rollout_result.json")','(OLD_RUNS / condition["baseline_run_id"] / "rollout_result.json")')
+source=source.replace('runtime.TerminalSetHumanWaypointPlannerV1 = CoordinationPacingPlannerV1','runtime.TerminalSetHumanWaypointPlannerV1 = ResearchPlanner')
+source=source.replace('runtime.snapshot_task_call = snapshot_coordination_task_call','runtime.snapshot_task_call = snapshot_research_task_call')
+source=source.replace('"schema": "coordination_pacing_rollout_v1"','"schema": "value_learning_research_rollout_v1"')
+source=source.replace('("COORDINATION_INFEASIBLE", "MATCHED_PACING_INFEASIBLE", "NO_FEASIBLE_WAYPOINT")','("RESEARCH_INFEASIBLE", "COORDINATION_INFEASIBLE", "MATCHED_PACING_INFEASIBLE", "NO_FEASIBLE_WAYPOINT")')
+source=source.replace('    print(json.dumps({k: record.get(k)','    print(json.dumps({k: record.get(k)')
+source=source.replace('\n\nif __name__ == "__main__":','\n    return record\n\n\nif __name__ == "__main__":')
+target.write_text(source)
+print(target)
