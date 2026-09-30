@@ -10,7 +10,8 @@ def fixtures():
         algorithm_through_original_epoch_reference_validation_ms={'count':3,'maximum':maximum})
     replays=[dict(captured_phase='OUTBOUND',captured_path_index=0,captured_continuation_committed=False,
                   captured_reference_stationary=True,model_file_sha256='ridge',rows=[row(4,70)]),
-             dict(captured_phase='RETURN',captured_path_index=0,captured_continuation_committed=True,
+             dict(captured_phase='OUTBOUND',captured_path_index=1,captured_continuation_committed=True,
+                  captured_reference_stationary=False,
                   model_file_sha256='ridge',rows=[row(1,20)])]
     normal={'status':'VALID','active_model_file_immutable_during_rep':True,'model_sha256_at_start':'ridge',
             'pattern':{'mode':'VALUE_PATTERN','legacy_candidate_limit':1,'proposal_descriptors':[{}]*4}}
@@ -56,6 +57,20 @@ class GateScopeTest(unittest.TestCase):
         cpu,offline,replays,profile,normal=fixtures()
         replays[0]['captured_reference_stationary']=False
         self.assertEqual(build_gate(cpu,offline,replays)['status'],'PENDING_ACTUAL_COMPUTATION_EVIDENCE')
+
+    def test_normal_run_must_match_exact_profiled_proposal_descriptors(self):
+        cpu,offline,replays,profile,normal=fixtures()
+        replays[0]['rows'][0]['proposed_descriptor_content_sha256']='different_bank'
+        self.assertFalse(build_gate(cpu,offline,replays,normal_profile=profile,normal_run=normal)['clean_normal_model_rollout_validated'])
+
+    def test_stationary_committed_proxy_never_claims_direct_moving_measurement(self):
+        cpu,offline,replays,profile,normal=fixtures()
+        replays[1]['captured_reference_stationary']=True
+        replays[1]['captured_reference_velocity_rad_s']=[0.,0.]
+        gate=build_gate(cpu,offline,replays,normal_profile=profile,normal_run=normal)
+        self.assertFalse(gate['moving_handoff_algorithm_directly_measured'])
+        self.assertFalse(gate['ready_for_small_scientific_pilot'])
+        self.assertEqual(gate['status'],'PENDING_ACTUAL_COMPUTATION_EVIDENCE')
 
 
 if __name__=='__main__':unittest.main()

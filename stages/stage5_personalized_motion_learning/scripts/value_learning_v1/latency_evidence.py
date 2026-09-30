@@ -11,7 +11,7 @@ from evidence_io import read_json,file_sha
 COMPONENTS=('acquisition_to_request_ms','snapshot_ms','queue_ms','queue_and_snapshot_ms',
             'compute_ms','worker_to_main_scheduling_ms','validation_scheduling_ms',
             'validation_and_command_construction_ms','validation_to_activation_ms')
-RESEARCH_COMPONENTS=('legacy_planner_ms','proposal_ms','feasibility_scheduling_ms','feature_ms',
+RESEARCH_COMPONENTS=('legacy_planner_ms','inherited_committed_precheck_ms','proposal_ms','feasibility_scheduling_ms','feature_ms',
                      'inference_ms','selection_ms','inference_selection_ms','decision_total_ms')
 
 

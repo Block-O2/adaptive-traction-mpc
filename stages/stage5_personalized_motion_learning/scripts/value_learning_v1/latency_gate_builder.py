@@ -18,6 +18,8 @@ def _row(replays,*,first,legacy_limit,count):
                   and not replay.get('captured_continuation_committed'))
         if is_first!=first:continue
         if first and not replay.get('captured_reference_stationary'):continue
+        if not first and (not replay.get('captured_continuation_committed') or
+                          replay.get('captured_reference_stationary') is not False):continue
         for row in replay.get('rows',[]):
             observed=row.get('observed_research_candidate_count',[])
             if row.get('legacy_candidate_limit')==legacy_limit and row.get('requested_research_candidate_count')==count:
@@ -34,6 +36,10 @@ def _inside(row,ceiling):
 def build_gate(cpu,offline,replays,*,legacy_limit=1,first_count=4,normal_profile=None,normal_run=None):
     first=_row(replays,first=True,legacy_limit=legacy_limit,count=first_count)
     continuation=_row(replays,first=False,legacy_limit=legacy_limit,count=1)
+    continuation_replay=next((replay for replay in replays if continuation is not None and any(row is continuation for row in replay.get('rows',[]))),{})
+    continuation_context={key:continuation_replay.get(key) for key in ('captured_phase','captured_path_index','captured_continuation_committed','captured_reference_stationary','captured_reference_velocity_rad_s')}
+    moving_algorithm_direct=bool(continuation and continuation_context['captured_reference_stationary'] is False)
+    lazy=bool(continuation_replay.get('captured_lazy_legacy_comparator_on_committed',False))
     # These derive from the existing registered architecture, not a new 5 ms rule.
     budgets={'strict_original_source_age_ceiling_ms':100.,'moving_bridge_duration_ms':40.,
              'observed_certified_moving_fork_progress_ms':35.,
@@ -45,6 +51,7 @@ def build_gate(cpu,offline,replays,*,legacy_limit=1,first_count=4,normal_profile
     benchmark_hashes=set(cpu.get('model_file_sha256',{}).values())
     replay_hashes={replay.get('model_file_sha256') for replay in replays}
     model_match=bool(len(replay_hashes)==1 and None not in replay_hashes and replay_hashes<=benchmark_hashes)
+    configuration_match=len({bool(replay.get('captured_lazy_legacy_comparator_on_committed',False)) for replay in replays})==1
     clean=bool(normal_profile and normal_run and normal_run.get('status')=='VALID'
                and normal_run.get('active_model_file_immutable_during_rep')
                and not (normal_run.get('pattern') or {}).get('capture_snapshot_dir')
@@ -54,16 +61,22 @@ def build_gate(cpu,offline,replays,*,legacy_limit=1,first_count=4,normal_profile
     if clean and (normal_model not in benchmark_hashes or normal_model not in replay_hashes):clean=False
     config=(normal_run or {}).get('pattern') or {}
     if clean and (config.get('mode')!='VALUE_PATTERN' or config.get('legacy_candidate_limit')!=legacy_limit
-                  or len(config.get('proposal_descriptors',[]))!=first_count):clean=False
+                  or len(config.get('proposal_descriptors',[]))!=first_count
+                  or bool(config.get('lazy_legacy_comparator_on_committed',False))!=lazy):clean=False
+    expected_descriptors=(first or {}).get('proposed_descriptor_content_sha256')
+    if clean and expected_descriptors:
+        actual_descriptors=hashlib.sha256(json.dumps(config.get('proposal_descriptors',[]),sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+        if actual_descriptors!=expected_descriptors:clean=False
     roles=(normal_profile or {}).get('clean_role_timings_ms',{})
     first_live=roles.get('first_pattern_selection',{}).get('capture_to_activation_ms',{})
     moving_live=roles.get('moving_continuation',{}).get('capture_to_activation_ms',{})
     live_measured=bool(first_live.get('count') and moving_live.get('count'))
     observed_live_fits=bool(clean and live_measured and first_live['maximum']<100. and moving_live['maximum']<35.)
-    ready=bool(ranking and cpu_measured and model_match and algorithm_fits and clean)
+    ready=bool(ranking and cpu_measured and model_match and configuration_match and algorithm_fits and clean)
     if not (first and continuation and cpu_measured):status='PENDING_ACTUAL_COMPUTATION_EVIDENCE'
     elif not ranking:status='OFFLINE_RANKING_GATE_FAILED'
     elif not model_match:status='MODEL_PROVENANCE_MISMATCH'
+    elif not configuration_match:status='COMPUTATION_CONFIGURATION_PROVENANCE_MISMATCH'
     elif not algorithm_fits:status='ALGORITHM_PROFILE_EXCEEDS_PRELIMINARY_OPPORTUNITY'
     elif not clean:status='PENDING_CLEAN_NORMAL_MODEL_RUN'
     elif observed_live_fits:status='SCIENTIFIC_PILOT_COMPUTATION_PLAUSIBLE_OBSERVED_HOST_SPANS_WITHIN_OPPORTUNITY'
@@ -71,17 +84,25 @@ def build_gate(cpu,offline,replays,*,legacy_limit=1,first_count=4,normal_profile
     return dict(schema='value_learning_prospective_computation_gate_v1',status=status,
         ready_for_small_scientific_pilot=ready,architecture_budget_ms=budgets,
         selected_configuration=dict(legacy_candidate_limit=legacy_limit,first_pattern_candidate_count=first_count,
-                                    committed_continuation_candidate_count=1),
+                                    committed_continuation_candidate_count=1,
+                                    lazy_legacy_comparator_on_committed=lazy,
+                                    proposal_source_indices=(first or {}).get('proposal_source_indices'),
+                                    proposed_descriptor_content_sha256=expected_descriptors),
         offline_ranking_gate=offline.get('ranking_gate'),actual_cpu_models_measured=cpu_measured,
         immutable_model_hashes_match=model_match,algorithm_profile_within_preliminary_ceilings=algorithm_fits,
+        captured_computation_configuration_consistent=configuration_match,
         clean_normal_model_rollout_validated=clean,clean_normal_model_run_id=(normal_run or {}).get('run_id'),
         first_pattern_algorithm_profile=first,continuation_algorithm_profile=continuation,
+        continuation_snapshot_context=continuation_context,
+        moving_handoff_algorithm_directly_measured=moving_algorithm_direct,
+        algorithm_comparison_scope='stationary first selection plus directly captured nonzero-velocity committed continuation; stationary RETURN proxy excluded from gate',
         measured_clean_role_timings_ms=roles,observed_full_host_spans_within_architecture_opportunity=observed_live_fits,
         first_decision_context='stationary initial OUTBOUND boundary; moving-first use must be reevaluated against its actual fork',
         model_scope='MATCHED timing-context Q under declared continuation; native absolute-objective extension excluded from fitting',
         hardware_realtime_qualified=False,
         runtime_assurance_status='RUNTIME_ASSURANCE_REQUIRED_BEFORE_HARDWARE_EXPERIMENTS',
         limitations=['Offline replay includes original-epoch activation validation, excludes live queue, fresh-state handoff checks and command write',
+                     'A stationary committed RETURN snapshot is only a continuation proxy and cannot establish moving-handoff algorithm timing',
                      'Algorithm opportunity is plausible-path evidence, not full latency deadline compliance',
                      'Scientific Simulation freezes producer epoch; host profile cannot establish wall-causal execution',
                      'No marginal p95/p99 sums are reported as observed end-to-end quantiles',

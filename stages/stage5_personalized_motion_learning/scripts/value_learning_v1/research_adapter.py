@@ -104,16 +104,21 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
    self.research_model=load_model(self.research_spec['model_path'])
 
  def candidate_actions(self,current_q_rad,phase):
+  committed=getattr(self,'_research_committed_candidate_action',None)
+  if committed is not None:return (committed.copy(),)
   actions=super().candidate_actions(current_q_rad,phase)
   count=self.research_spec.get('legacy_candidate_limit')
   # Optional latency ablation: proposal count only; every retained proposal
   # still uses the original scheduler, mechanics and clearance checks.
   return actions if count is None else actions[:max(1,int(count))]
 
- def screen_target(self,target,item,label,kwargs):
+ def screen_target(self,target,item,label,kwargs,prechecked=None):
   state=np.asarray(kwargs['current_deployable_state'],float)
   reference=np.asarray(kwargs['current_reference_state'],float)
-  alternative=self._evaluate(label=label,state=state,reference_state=reference,
+  if prechecked is not None:
+   if not np.array_equal(prechecked.proposed_delta_q_rad,np.asarray(target)-state[:2]):raise ValueError('committed precheck action mismatch')
+   alternative=replace(prechecked,label=label)
+  else:alternative=self._evaluate(label=label,state=state,reference_state=reference,
     phase=kwargs['phase'],phase_elapsed_s=kwargs['phase_elapsed_s'],phase_remaining_s=kwargs['phase_remaining_s'],
     action=np.asarray(target)-state[:2],execution_feasibility_checker=kwargs.get('execution_feasibility_checker'),
     value_state_or_belief=kwargs.get('value_state_or_belief'),candidate_value_evaluator=None)
@@ -150,10 +155,39 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
  def decide(self,**kwargs):
   adapter_start_ns=time.monotonic_ns()
   started=time.perf_counter(); previous=self.previous_executed_delta_q_rad.copy()
-  # Existing production proposals/scores remain available as logged comparator.
-  original=super().decide(**kwargs)
+  spec=self.research_spec; phase=kwargs['phase'].value
+  before_decisions=len(self.decisions)
+  pre_index=getattr(self,'research_phase_index',sum(d.phase is kwargs['phase'] for d in self.decisions))
+  lazy=bool(spec.get('lazy_legacy_comparator_on_committed',False) and spec.get('mode')=='VALUE_PATTERN'
+            and spec.get('committed_descriptor') and phase in ('OUTBOUND','RETURN')
+            and not spec.get('branch') and spec.get('timing_policy')!='NATIVE_SCHEDULER')
+  prechecked=None
+  if lazy:
+   desc={**spec['committed_descriptor'],'matched_duration_factor':spec.get('matched_duration_factor',1.3)}
+   declared=spec.get('replay_targets') or make_path(spec['baseline_waypoints'],self.start_rad,self.goal_rad,desc)
+   if pre_index>=len(declared.get(phase,[])):raise ValueError('RESEARCH_INFEASIBLE:baseline waypoint count exhausted')
+   target=np.asarray(declared[phase][pre_index]['target_q_rad'],float)
+   self._research_committed_candidate_action=target-np.asarray(kwargs['current_deployable_state'],float)[:2]
+   try:
+    # Retain original terminal-reference selection, cache revalidation, input
+    # guards and _evaluate. Only its proposal is the committed research target.
+    original=super().decide(**kwargs)
+    prechecked=original.executed
+   except ValueError as error:
+    if not str(error).startswith('state-feedback Human-waypoint MPC has no feasible candidate:'):raise
+    self._research_committed_candidate_action=None
+    self.previous_executed_delta_q_rad=previous.copy()
+    # A rejected committed target still obtains inherited baseline diagnostics;
+    # it never silently replaces the declared continuation with another target.
+    super().decide(**kwargs)
+    self.previous_executed_delta_q_rad=previous.copy()
+    raise ValueError('RESEARCH_INFEASIBLE:'+str(error).split(':',1)[1].strip()) from error
+   finally:self._research_committed_candidate_action=None
+  else:
+   # Initial ranking, HOLD, native and uncommitted modes remain eager.
+   original=super().decide(**kwargs)
   self.previous_executed_delta_q_rad=previous.copy()
-  legacy_finish=time.perf_counter(); spec=self.research_spec; phase=kwargs['phase'].value
+  legacy_finish=time.perf_counter()
   if spec.get('mode')=='NATIVE_BASELINE':
    self.previous_executed_delta_q_rad=original.executed.proposed_delta_q_rad.copy()
    return original
@@ -200,7 +234,7 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
    cid=digest({'descriptor':desc,'baseline':baseline,'rule':continuation_rule})
    if spec.get('replay_targets'):
     cid=digest({'descriptor':desc,'baseline':baseline,'replay_targets':declared_path,'rule':'frozen_declared_path_after_current_action'})
-   ev=self.screen_target(q,proposed_item,f'research_{phase.lower()}_{index:02d}_{label}',kwargs)
+   ev=self.screen_target(q,proposed_item,f'research_{phase.lower()}_{index:02d}_{label}',kwargs,prechecked=prechecked)
    if ev.feasible:
     if first_feature_start_ns is None:first_feature_start_ns=time.monotonic_ns()
     before=time.perf_counter()
@@ -222,7 +256,13 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
    evaluations.append(ev)
   screen_finish=time.perf_counter()
   admissible=[i for i,e in enumerate(evaluations) if e.feasible]
-  if not admissible: raise ValueError('RESEARCH_INFEASIBLE:'+';'.join(str(e.rejection_reason) for e in evaluations))
+  if not admissible:
+   if lazy:
+    del self.decisions[before_decisions:]
+    self.previous_executed_delta_q_rad=previous.copy()
+    super().decide(**kwargs) # unchanged legacy diagnostics only after failure
+    self.previous_executed_delta_q_rad=previous.copy()
+   raise ValueError('RESEARCH_INFEASIBLE:'+';'.join(str(e.rejection_reason) for e in evaluations))
   predicted=None
   if self.research_model is not None and spec.get('mode') in ('VALUE_RANK','VALUE_PATTERN'):
    predicted=self.research_model.predict(np.stack([x for _,x in features]))
@@ -240,11 +280,15 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
   targets=np.stack([q for _,q in proposals]); dists=np.linalg.norm(targets[:,None]-targets[None,:],axis=-1)
   safe_targets=np.stack([evaluations[i].target_q_rad for i in admissible])
   safe_dists=np.linalg.norm(safe_targets[:,None]-safe_targets[None,:],axis=-1)
-  latency={'legacy_planner_ms':1000*(legacy_finish-started),'proposal_ms':1000*(proposal_finish-legacy_finish),
+  latency={'legacy_planner_ms':0. if lazy else 1000*(legacy_finish-started),
+   'inherited_committed_precheck_ms':1000*(legacy_finish-started) if lazy else 0.,
+   'legacy_comparator_policy':'lazy_only_after_committed_screen_rejection' if lazy else 'eager',
+   'legacy_comparator_computed':not lazy,
+   'proposal_ms':1000*(proposal_finish-legacy_finish),
    'feature_ms':feature_ms,'feasibility_scheduling_ms':max(0.,1000*(screen_finish-proposal_finish)-feature_ms),
    'inference_selection_ms':1000*(inference_finish-screen_finish),'decision_total_ms':1000*(inference_finish-started),
    'candidate_count':len(proposals),'feasible_count':len(admissible),
-   'legacy_candidate_count':len(original.evaluations),'adapter_start_ns':adapter_start_ns,
+   'legacy_candidate_count':0 if lazy else len(original.evaluations),'adapter_start_ns':adapter_start_ns,
    'first_feature_start_ns':first_feature_start_ns,'reference_selected_ns':reference_selected_ns,
    'target_pairwise_max_distance_rad':float(np.max(dists)),'target_pairwise_mean_distance_rad':float(np.mean(dists)),
    'safe_target_pairwise_max_distance_rad':float(np.max(safe_dists)),
@@ -257,7 +301,8 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
    'all_admissible_action_labels':[evaluations[i].execution_screen['research_context']['action_provenance'] for i in admissible]})
   evaluations[chosen_index]=chosen
   decision=replace(original,executed=chosen,selection_mode='research_separate_value_ranking' if predicted is not None else 'research_declared_path',
-   evaluations=original.evaluations+tuple(evaluations),runtime_ms=1000*(time.perf_counter()-started))
+   greedy=chosen if lazy else original.greedy,
+   evaluations=tuple(evaluations) if lazy else original.evaluations+tuple(evaluations),runtime_ms=1000*(time.perf_counter()-started))
   self.decisions[-1]=decision; self.previous_executed_delta_q_rad=chosen.proposed_delta_q_rad.copy()
   return decision
 

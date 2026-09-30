@@ -19,7 +19,7 @@ import gzip
 from evidence_io import read_json,file_sha
 
 
-def configure_replay(planner,*,count,legacy_limit=None,mode=None):
+def configure_replay(planner,*,count,legacy_limit=None,mode=None,proposal_indices=None):
     """A pure proposal-count ablation; never bypass the inherited screens."""
     if count<1:raise ValueError('research candidate count must be positive')
     if legacy_limit is not None and legacy_limit<1:raise ValueError('legacy limit must be positive or default')
@@ -35,14 +35,21 @@ def configure_replay(planner,*,count,legacy_limit=None,mode=None):
         if not descriptors:raise ValueError('VALUE_PATTERN replay requires actual captured proposal descriptors')
         if count>len(descriptors):
             raise ValueError('requested pattern count exceeds captured actual descriptor set')
-        spec['proposal_descriptors']=descriptors[:count]
+        if proposal_indices is not None:
+            if len(proposal_indices)!=count or len(set(proposal_indices))!=count:
+                raise ValueError('proposal indices must be unique and match requested count')
+            if any(index<0 or index>=len(descriptors) for index in proposal_indices):
+                raise ValueError('proposal index outside actual captured descriptor bank')
+            spec['proposal_descriptors']=[descriptors[index] for index in proposal_indices]
+        else:spec['proposal_descriptors']=descriptors[:count]
     else:
+        if proposal_indices is not None:raise ValueError('proposal indices require actual VALUE_PATTERN descriptors')
         spec['candidate_offsets']=[0.] if count==1 else np.linspace(-.04,.06,count).tolist()
     return selected_mode
 
 
 def benchmark_snapshot(payload, *, counts=(1,3,6), legacy_limits=(None,1,3),
-                       repeats=30,warmup=2,model=None,mode=None):
+                       repeats=30,warmup=2,model=None,mode=None,proposal_indices=None):
     from traction_mpc_stage5.full3d_adaptive_integration_v1.activation_validation import (
         validate_activation,clearance_geometry_signature)
     from traction_mpc_stage5.full3d_adaptive_integration_v1.safe_fallback import prepare_decision
@@ -53,6 +60,7 @@ def benchmark_snapshot(payload, *, counts=(1,3,6), legacy_limits=(None,1,3),
     for legacy_limit,count in ((limit,count) for limit in legacy_limits for count in counts):
         samples=[];errors=[];components={};feasible=[];legacy_counts=[]
         observed_counts=[];observed_modes=[];cold=None
+        observed_legacy_computed=[]
         for repetition in range(repeats+warmup):
             start=perf_counter_ns()
             adaptive,arguments=pickle.loads(payload)
@@ -62,7 +70,7 @@ def benchmark_snapshot(payload, *, counts=(1,3,6), legacy_limits=(None,1,3),
                 raise TypeError('expected actual ResearchPlanner snapshot')
             if model is not None:planner.research_model=model
             try:
-                selected_mode=configure_replay(planner,count=count,legacy_limit=legacy_limit,mode=mode)
+                selected_mode=configure_replay(planner,count=count,legacy_limit=legacy_limit,mode=mode,proposal_indices=proposal_indices)
                 observed_modes.append(selected_mode)
                 workload_start=perf_counter_ns()
                 decision=adaptive.decide(**arguments)
@@ -93,6 +101,7 @@ def benchmark_snapshot(payload, *, counts=(1,3,6), legacy_limits=(None,1,3),
                     feasible.append(latency.get('feasible_count',0))
                     legacy_counts.append(len(decision.evaluations)-latency.get('candidate_count',0))
                     observed_counts.append(latency.get('candidate_count',0))
+                    observed_legacy_computed.append(latency.get('legacy_comparator_computed'))
                     for name,value in latency.items():
                         if name.endswith('_ms'):components.setdefault(name,[]).append(value)
                     for name,value in {'snapshot_unpickle_ms':(restored-start)/1e6,
@@ -103,9 +112,12 @@ def benchmark_snapshot(payload, *, counts=(1,3,6), legacy_limits=(None,1,3),
             except Exception as error:
                 if repetition>=warmup:errors.append(dict(repetition=repetition-warmup,error=f'{type(error).__name__}:{error}',elapsed_ms=(perf_counter_ns()-restored)/1e6))
         rows.append(dict(candidate_count=count,requested_research_candidate_count=count,
+                         proposal_source_indices=[frozen_spec.get('proposal_bank_source_indices',list(range(len(frozen_spec.get('proposal_descriptors',[])))))[i] for i in (proposal_indices if proposal_indices is not None else range(count))] if frozen_spec.get('mode')=='VALUE_PATTERN' else None,
+                         proposed_descriptor_content_sha256=(hashlib.sha256(json.dumps(planner.research_spec.get('proposal_descriptors',[]),sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest() if selected_mode=='VALUE_PATTERN' else None),
                          legacy_candidate_limit=legacy_limit,legacy_limit_label='default' if legacy_limit is None else str(legacy_limit),
                          observed_research_modes=sorted(set(observed_modes)),
                          observed_research_candidate_count=observed_counts,
+                         observed_legacy_comparator_computed=observed_legacy_computed,
                          first_call_original_epoch_validated_ms=cold,
                          measured_repeats=repeats,warmup=warmup,
                          admitted_completed_count=len(samples),failed_count=len(errors),failures=errors,
@@ -118,10 +130,14 @@ def benchmark_snapshot(payload, *, counts=(1,3,6), legacy_limits=(None,1,3),
                 captured_phase=getattr(frozen_arguments['phase'],'value',str(frozen_arguments['phase'])),
                 captured_path_index=getattr(frozen_planner.planner,'research_phase_index',None),
                 captured_research_mode=frozen_spec.get('mode'),
+                captured_lazy_legacy_comparator_on_committed=bool(frozen_spec.get('lazy_legacy_comparator_on_committed',False)),
                 captured_continuation_committed=bool(frozen_spec.get('committed_descriptor')),
+                captured_committed_descriptor=frozen_spec.get('committed_descriptor'),
                 captured_reference_velocity_rad_s=np.asarray(frozen_arguments['current_reference_state'])[2:].tolist(),
                 captured_reference_stationary=bool(not np.any(np.abs(np.asarray(frozen_arguments['current_reference_state'])[2:])>1e-12)),
                 legacy_limits=list(legacy_limits),research_counts=list(counts),
+                proposal_source_indices=list(proposal_indices) if proposal_indices is not None else None,
+                proposal_subset_scope='explicit captured descriptor subset from development capture; no fabricated template or test-label tuning' if proposal_indices is not None else 'captured bank prefix count ablation',
                 full_live_decision_latency_measured=False,
                 excluded=['capture/observation construction','worker transport and main scheduling',
                           'snapshot unpickle and benchmark proposal configuration',
@@ -140,6 +156,7 @@ def main():
     parser.add_argument('--model',type=Path,help='actual trained model; otherwise replay frozen snapshot model')
     parser.add_argument('--counts',default='1,3,6')
     parser.add_argument('--legacy-limits',default='default,1,3')
+    parser.add_argument('--proposal-indices',help='explicit unique captured descriptor indices; count must match length')
     parser.add_argument('--mode',choices=('VALUE_RANK','VALUE_PATTERN'),help='otherwise preserve captured value mode')
     args=parser.parse_args()
     if args.output.exists():raise FileExistsError(args.output)
@@ -157,8 +174,9 @@ def main():
         from value_models import load_model
         model=load_model(args.model)
     limits=tuple(None if x=='default' else int(x) for x in args.legacy_limits.split(','))
+    indices=tuple(map(int,args.proposal_indices.split(','))) if args.proposal_indices else None
     result=benchmark_snapshot(payload,counts=tuple(map(int,args.counts.split(','))),legacy_limits=limits,
-                              repeats=args.repeats,model=model,mode=args.mode)
+                              repeats=args.repeats,model=model,mode=args.mode,proposal_indices=indices)
     result['model_file_sha256']=hashlib.sha256(args.model.read_bytes()).hexdigest() if args.model else None
     result['model_source']='explicit actual trained model' if args.model else 'original frozen snapshot model, possibly zero/no learner'
     result['snapshot_source_metadata']=metadata
