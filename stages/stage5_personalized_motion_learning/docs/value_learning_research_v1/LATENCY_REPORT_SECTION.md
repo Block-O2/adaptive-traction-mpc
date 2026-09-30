@@ -93,11 +93,23 @@ batch 8：CPU 输入复制 p95 0.001 ms；逐候选不批处理总推断中位 0
 
 | 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
 |---|---:|---:|---:|---:|---:|
-| 按模型 SHA/路径去重的实际模型生成 wall time | 0 | 未测量 | 未测量 | 未测量 | 未测量 |
+| 按模型 SHA/路径去重的实际模型生成 wall time | 8 | 0.004 | 0.007 | 0.007 | 0.007 |
 
 单位：s。
 
-当前尚无 pilot 更新；离线训练各候选的耗时不能替代这一项。
+共 8 个唯一在线模型生成任务；offline prior 初始化不计入，update_prepared、下一边界 promotion 和 final_prepared 的重复日志不重复计数。pending 事件 0，失败/拒绝事件 0。
+
+SCRATCH 的实际在线模型生成：| 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
+|---|---:|---:|---:|---:|---:|
+| 唯一模型任务 | 4 | 0.002 | 0.002 | 0.002 | 0.002 |
+
+单位：s。
+
+PRIOR 的实际在线模型生成：| 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
+|---|---:|---:|---:|---:|---:|
+| 唯一模型任务 | 4 | 0.006 | 0.007 | 0.007 | 0.007 |
+
+单位：s。
 
 **18．学习/更新会阻塞连续执行吗？**
 
@@ -105,11 +117,15 @@ batch 8：CPU 输入复制 p95 0.001 ms；逐候选不批处理总推断中位 0
 
 | 范围 | 样本数 | 中位数 | p95 | p99 | 最大值 |
 |---|---:|---:|---:|---:|---:|
-| 科学 harness 的 inter-rep processing | 0 | 未测量 | 未测量 | 未测量 | 未测量 |
+| 科学 harness 的 inter-rep processing | 16 | 5.953 | 12.004 | 12.063 | 12.078 |
 
 单位：s。
 
 预算来源：5 ms 是原控制/采样周期，不是 learner deadline；已选 waypoint 通常持续远长于该周期。原 moving endpoint 有 40 ms bridge，并在观察到的 35 ms 已认证 fork 前决定接入主参考或不可逆制动；原始 source age 必须严格小于 100 ms。初始静止 OUTBOUND 首决策与 moving continuation 应分别分析。
+
+本轮连续执行验证失败：最终状态 `COMPLETE_ATTEMPT_BUDGET_NATIVE_CONTINUITY_FAILED`。SCRATCH 和 PRIOR 各用完 8 次尝试，其中各 4 次 VALID、4 次启动拒绝；VALID 来自尝试 1/3/5/7 的独立新 development segment，不能写成连续 8 个有效 repetition。模型就绪和 boundary promotion 发生过，并未证明后继 episode 能启动。失败尝试不进入正收益或低代价 return。
+
+只读原始边界诊断：SCRATCH 尝试 2 在 29.605 s 通过旧参考静止门，随后原 fresh-epoch bootstrap 保留上一命令 5 ms、再执行注册起点 TRACK 5 ms；参考从 [5.5°,9.5°] 切为 [5°,10°]。到 29.615 s，新 start_episode 检查的估计 dq=[0.040139,0.040864] rad/s，均超过原 2°/s（0.034907 rad/s），truth hip dq=0.035112 也超限。位置仍在原 1° 容差内；observer 及 belief 1303 被保留，拒绝前 planner decision 数为 0。证据支持原跨 epoch bootstrap/settling 不兼容，未通过隔离反事实证明参考跳变是唯一原因，也没有修改守卫。
 
 同一请求逐项计算的 moving 非 producer 跨度（capture → activation 减去该请求实际 producer compute，保留采集/收集/最终验证等开销）：
 
@@ -181,6 +197,8 @@ RETURN 冻结快照参考速度为 [0,0]，属于静止已提交 continuation �
 | eager 保留 RETURN captured BANK requested 4 / actual [1] / legacy 3 | 30 | 36.804 | 39.692 | 40.885 | 40.951 |
 | eager 保留 RETURN captured BANK requested 6 / actual [1] / legacy 3 | 30 | 36.161 | 39.696 | 41.195 | 41.656 |
 | eager 保留 RETURN captured BANK requested 10 / actual [1] / legacy 3 | 30 | 35.729 | 37.933 | 39.294 | 39.769 |
+| eager 保留 OUTBOUND subset [0, 2, 3, 9] requested 4 / actual [4] / legacy 1 | 30 | 51.052 | 55.794 | 56.294 | 56.459 |
+| eager 保留 OUTBOUND subset [0, 2, 3, 6] requested 4 / actual [4] / legacy 1 | 30 | 50.637 | 55.601 | 56.094 | 56.148 |
 | eager 保留 OUTBOUND captured BANK requested 1 / actual [1] / legacy 1 | 30 | 27.975 | 31.997 | 35.491 | 36.773 |
 | lazy v3 OUTBOUND captured BANK requested 4 / actual [4] / legacy 1 | 30 | 52.191 | 56.069 | 56.590 | 56.614 |
 | lazy v3 OUTBOUND captured BANK requested 1 / actual [1] / legacy 1 | 30 | 19.591 | 20.426 | 20.820 | 20.953 |
@@ -189,7 +207,7 @@ RETURN 冻结快照参考速度为 [0,0]，属于静止已提交 continuation �
 
 RETURN 已提交 continuation 实际始终为一个候选；requested BANK 大小不代表该状态执行了同等候选数。首决策完整 10 个候选加 legacy1 的最大耗时超过 100 ms，因此不能用它宣称当前预算可行。所选四候选保留实际 development 已选优 descriptor，而不是未经测量地固定 prefix4。
 
-协议偏差已保留：SCRATCH rep1 物理状态 VALID，但执行时使用后来被取代的静止 continuation proxy gate，不能追溯标为 actual-moving v3 gate PASS。该次日志在 NumPy 边界 JSON 序列化处失败，原 repetition、checkpoint 和 gate publication 保留。后续若由验证的原 checkpoint 恢复，rep2+ 的 lazy 计算修订仅在边界另行冻结；这是混合计算版本的 development pilot，物理状态不重置、不替代原 rep1 provenance。
+协议偏差已保留：SCRATCH rep1 物理状态 VALID，但执行时使用后来被取代的静止 continuation proxy gate，不能追溯标为 actual-moving v3 gate PASS。该次日志在 NumPy 边界 JSON 序列化处失败，原 repetition、checkpoint 和 gate publication 保留。原 checkpoint 的验证恢复不重置物理状态；rep2+ 的 lazy 计算修订在边界另行冻结，构成混合计算版本。随后原连续启动失败结束该 segment，后续 VALID 是另行标记的新 segment，不能将这些重新初始化解释为连续物理状态。
 
 **19．显式候选搜索 + Q 排序够快吗，是否需要 actor/distillation？**
 

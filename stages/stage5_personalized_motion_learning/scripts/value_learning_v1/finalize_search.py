@@ -44,19 +44,20 @@ def main(intermediate_native=False):
  save(curve_path,adjusted_curve)
  with (D/'REFERENCE_SEARCH_CONVERGENCE.csv').open('w',newline='') as f:
   writer=csv.DictWriter(f,fieldnames=list(adjusted_curve[0]));writer.writeheader();writer.writerows(adjusted_curve)
- discoveries_path=D/'VALUE_SELECTED_REFERENCE_DISCOVERIES.json'
- if discoveries_path.exists():
+ for discovery_file in ('VALUE_SELECTED_REFERENCE_DISCOVERIES.json','POST_PILOT_PROBE_REFERENCE_DISCOVERIES.json'):
+  discoveries_path=D/discovery_file
+  if not discoveries_path.exists():continue
   for discovery in json.loads(discoveries_path.read_text())['rows']:
    if not discovery['independent_confirmation_pass']:continue
    row=next(r for r in matched['rows'] if r['condition']==discovery['condition'])
-   row['confirmed_non_cem_value_discoveries']=[discovery]
+   row.setdefault('confirmed_non_cem_value_discoveries',[]).append(discovery)
    if discovery['J_F_task_n_s']>=row['best_known_J_F_n_s']:continue
-   row['cem_search_only_best_J_F_n_s']=row['best_known_J_F_n_s']
+   row.setdefault('cem_search_only_best_J_F_n_s',row['best_known_J_F_n_s'])
    baseline=json.loads((OLD/f'matched_baseline_{row["condition"]}_certified/rollout_result.json').read_text())
    record=json.loads((RUNS/discovery['confirmation_run_id']/'rollout_result.json').read_text())
    residual={p:record[p.lower()+'_duration_s']-baseline[p.lower()+'_duration_s'] for p in ('OUTBOUND','RETURN')}
    same_count=all(len(record['planned_segments'][p])==len(baseline['planned_segments'][p]) for p in ('OUTBOUND','RETURN'))
-   row.update(best_known_J_F_n_s=discovery['J_F_task_n_s'],best_source='confirmed_offline_value_selection',
+   row.update(best_known_J_F_n_s=discovery['J_F_task_n_s'],best_source='confirmed_post_pilot_probe' if discovery_file.startswith('POST_') else 'confirmed_offline_value_selection',
     best_run_id=discovery['confirmation_run_id'],best_parameters=discovery['descriptor'],
     benefit_n_s=row['baseline_J_F_n_s']-discovery['J_F_task_n_s'],
     improvement_over_previous_n_s=row['previous_best_J_F_n_s']-discovery['J_F_task_n_s'],

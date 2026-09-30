@@ -20,8 +20,8 @@ def main():
     'independent_confirmation_pass':diff is not None and abs(diff)<=1e-6,
     'meaning':'separate exact frozen-state deterministic rerun; no subject/generalization independence claim'}
    results.append(check)
-  elif row['best_source']=='confirmed_offline_value_selection':
-   discovery=row['confirmed_non_cem_value_discoveries'][0]
+  elif row['best_source'] in ('confirmed_offline_value_selection','confirmed_post_pilot_probe'):
+   discovery=next(d for d in row['confirmed_non_cem_value_discoveries'] if d['confirmation_run_id']==row['best_run_id'])
    results.append({'condition':row['condition'],'discovery_run_id':discovery['discovery_run_id'],'confirmation_run_id':discovery['confirmation_run_id'],'independent_confirmation_pass':discovery['independent_confirmation_pass'],'status':'VALUE_DISCOVERY_ALREADY_INDEPENDENTLY_CONFIRMED'})
   else:results.append({'condition':row['condition'],'discovery_run_id':row['best_run_id'],'independent_confirmation_pass':None,'status':'PREVIOUS_REFERENCE_RETAINED'})
   save(D/'BEST_KNOWN_REFERENCE_CONFIRMATION.json',{'status':'RUNNING','rows':results})

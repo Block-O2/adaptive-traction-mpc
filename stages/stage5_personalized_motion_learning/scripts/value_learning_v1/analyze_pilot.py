@@ -25,17 +25,23 @@ def main():
  absolute=json.loads((D/'PRIMARY_OBJECTIVE_KNOWN_BENEFIT_CAPTURE.json').read_text())
  offline=json.loads((D/'OFFLINE_VALUE_MODEL_COMPARISON.json').read_text())
  latency_gate=json.loads((D/'ONLINE_LATENCY_PROMOTION_GATE.json').read_text())
- ranges=[g['true_return_range_n_s'] for m in offline['selected_models'].values()
-  for g in m['validation_full_action_ranking']['groups']]
+ ranges=[];range_sources=[]
+ for row in matched['rows']:
+  values=[p['J_F_n_s'] for p in row.get('targeted_safe_alternatives',[]) if p['status']=='VALID']
+  if len(values)>=2:
+   width=float(np.ptp(values));ranges.append(width)
+   range_sources.append({'session':row['session'],'attempt':row['repetition'],'range_n_s':width})
  local_scale=float(np.median(ranges)) if ranges else None
  # This is development-derived and retrospective. No decisions in this pilot
  # use these thresholds. A later experiment must freeze them before execution.
  tolerance=None if local_scale is None else .1*local_scale
  threshold={'schema':'provisional_after_development_v1','status':'FROZEN_AFTER_PILOT',
   'timestamp_utc':datetime.now(timezone.utc).isoformat(),'pilot_sha256':sha(D/'ONLINE_POLICY_IMPROVEMENT_PILOT.json'),
-  'source':'median validation common-state safe-action full-return range',
+  'source':'observed post-pilot common-start safe-alternative full-task cost ranges; not held-out test tuning',
+  'source_probe_ranges':range_sources,'repeated_fresh_states_not_independent_subjects':True,
+  'continuous_learning_threshold_calibration':'NOT_ESTABLISHED_NATIVE_START_GUARD_BLOCKER',
   'observed_local_action_range_median_n_s':local_scale,'performance_tolerance_n_s':tolerance,
-  'tolerance_rule':'10% of observed local action range, provisional sensitivity scale; not a statistical confidence bound',
+  'tolerance_rule':'10% of observed post-pilot alternate-action range, exploratory sensitivity scale; not a statistically calibrated continuous-convergence threshold',
   'recent_window':3,'required_same_selected_descriptor_in_recent_window':True,
   'required_rank_spearman_in_recent_window':.9,'required_targeted_probe_at_evaluated_repetition':True,
   'required_conditional_reference_regret_at_most_tolerance':True,
@@ -90,9 +96,12 @@ def main():
     'retrospective_convergence_candidate':trigger,'recent_three_valid_in_same_continuous_segment':valid,
     'missing_probe_cannot_be_claimed_convergence':not bool(valid_probes)})
   unique_updates={u['path']:u for u in session['training_updates'] if u.get('path') and u.get('wall_s') is not None}
+  valid_indexes=[j for j,r in enumerate(rows) if r['status']=='VALID']
+  valid_rank_changes=[{'from_attempt':rows[a]['repetition_index'],'to_attempt':rows[b]['repetition_index'],'spearman':q_stability(qmaps[a],qmaps[b]),'different_fresh_segments_cannot_establish_continuous_ranking_stability':rows[b].get('start_native_state_evaluation_only') is None} for a,b in zip(valid_indexes,valid_indexes[1:])]
   sessions.append({'session':session['session'],'mode':session['mode'],'retrospective_first_trigger_repetition':first_trigger,
    'rows':evaluated,'five_rep_target_supported':any(r['retrospective_convergence_candidate'] and r['repetition']<=5 for r in evaluated),
    'fresh_development_segments':sum(r['status']=='VALID' and r.get('start_native_state_evaluation_only') is None for r in rows),
+   'successive_valid_attempt_Q_rank_correlations':valid_rank_changes,
    'continuous_8_valid_repetitions_demonstrated':len(rows)==8 and all(r['status']=='VALID' for r in rows) and all(r.get('start_native_state_evaluation_only') is not None for r in rows[1:]),
    'model_update_wall_s':summary([u['wall_s'] for u in unique_updates.values()]),
    'scientific_harness_inter_rep_processing_wall_s':summary([r.get('scientific_harness_inter_rep_processing_wall_s') for r in rows]),

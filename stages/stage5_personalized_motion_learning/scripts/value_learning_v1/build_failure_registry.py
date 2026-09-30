@@ -14,6 +14,7 @@ def main():
   reason=result.get('failure_reason','') or ''
   kind=('infrastructure_interruption' if result['status']=='INTERRUPTED_HOST_RESOURCE' else
    'pre_execution_screen_rejection' if result['status']=='INFEASIBLE' or 'NO_FEASIBLE_WAYPOINT' in reason else 'post_screen_task_or_scientific_failure')
+  if reason.startswith(('REPETITION_START_NOT_SETTLED','COMMISSIONING_HANDOFF_NOT_SETTLED')):kind='episode_start_guard_rejection'
   item={'run_id':result['run_id'],'condition_id':result['condition_id'],'status':result['status'],'failure_class':kind,
    'reason':reason,'result_sha256':sha(folder/'rollout_result.json'),'never_a_regression_target':True,
    'truncated_force_integral_never_an_attractive_action_label':True,'last_activated_action_not_automatically_causal':True}
@@ -34,6 +35,6 @@ def main():
     item['partial_artifact_preserved_not_dropped']=True
   rows.append(item)
  save(D/'FAILURE_TRANSITIONS_REGISTRY.json',{'schema':'separate_failure_transitions_v1','rows':rows,
-  'counts':{k:sum(r['failure_class']==k for r in rows) for k in ('pre_execution_screen_rejection','post_screen_task_or_scientific_failure','infrastructure_interruption')},
+  'counts':{k:sum(r['failure_class']==k for r in rows) for k in ('pre_execution_screen_rejection','episode_start_guard_rejection','post_screen_task_or_scientific_failure','infrastructure_interruption')},
   'all_failed_and_truncated_runs_excluded_from_value_regression':True})
 if __name__=='__main__':main()

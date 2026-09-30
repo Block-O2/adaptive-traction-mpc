@@ -70,10 +70,10 @@ def main():
  for s in pilot.get('sessions',[]):
   rows=s['rows'];valid=[r for r in rows if r['status']=='VALID'];cv=next((x for x in convergence.get('sessions',[]) if x['session']==s['session']),{})
   text.append(f'|{s["mode"]}|{len(valid)}/{len(rows)}|{fmt(valid[0].get("J_F_task_n_s") if valid else None)} → {fmt(valid[-1].get("J_F_task_n_s") if valid else None)}|{cv.get("retrospective_first_trigger_repetition")}|')
- text+=['','成本变化同时包含持续 Human/adaptation 状态演变；同一轮前检查点的 baseline/ref 对照用于消除直接跨轮比较的混淆。只有一个条件的两个会话，没有 PRIOR 优势的独立样本效应估计。具体预测误差、排名、选择和更新版本见 SCRATCH_VS_PRIOR_ANALYSIS.json。',
+ text+=['','本轮连续启动失败后，后续有效尝试来自新的开发片段，并未保留连续 Human/adaptation 状态。PRIOR 的有效片段均选基线，未显示先验改善；SCRATCH 在第1/3/5/7次尝试的成本分别为1509.460/1529.600/1478.874/1478.874 N·s。它利用前两个已完成回报，在第三个有效片段（第5次尝试）选中预先存在候选库中的0.15/H3。该有限冷起点选择结果不能当作连续个性化、完整从零学习或人群样本。共同起点对照仅在精确状态核验后计算，具体预测误差、排名、选择、失败和更新版本见 SCRATCH_VS_PRIOR_ANALYSIS.json。',
   '', '## 10. 小试验几轮稳定？','']
  for s in convergence.get('sessions',[]):text.append(f'- {s["mode"]}：首次回溯收敛候选={s.get("retrospective_first_trigger_repetition")}；有效轮数={s["valid_repetitions"]}。')
- text+=['','稳定性同时检查最近三轮 baseline-adjusted 收益、精确模式、Q 排名、目标替代探针、安全和计算门槛。阈值仅在开发试验后冻结；本轮回溯，不用于提前强制停学。',
+ text+=['','稳定性同时检查同一连续片段内最近三次有效任务的 baseline-adjusted 收益、精确模式、Q 排名、目标替代探针、安全和计算门槛。本轮未得到这种连续窗口，因此没有收敛触发。开发后冻结的数值尺度仅为探索性诊断，尚未由连续学习数据校准。',
   '', '## 11. 五轮收敛现实吗？','',
   '见完整回溯准则与 rep1/3/5/8 的同轮替代探针。即使成本/模式平稳，若 Q 排名、替代动作改善、安全或计算门槛不满足，也不能认定收敛。八轮预算并非“5 learn + 25 exploit”；后续应前瞻冻结开发所得阈值并按证据停学。',
   '', '## 12. Rep1/3/5/8 的已知收益捕获？','',
@@ -84,14 +84,14 @@ def main():
   text.append(f'|{r["session"]}/{r["repetition"]}|{fmt(r.get("baseline_J_F_n_s"))} / {fmt(r.get("learned_J_F_n_s"))} / {fmt(r.get("reference_J_F_n_s"))}|{fmt(r.get("known_benefit_capture"))}|{fmt(n.get("known_benefit_capture"))}|')
  text+=['','capture=(baseline−learned)/(baseline−best-known)，仅正且可辨的分母计算。保留负值或超过 1 的结果；超过参考需独立确认后更新该状态 best-known。两种调度范围各用同轮前不可变检查点，不能把 MATCHED capture 当作绝对全局最优百分比。',
   '', '## 13. 本轮最佳有效成本/参考是什么？','',
-  '见上方逐条件表与 ABSOLUTE_PRIMARY_REFERENCE_TABLE.json；跨条件 J_F 不直接排序性能。sync 的已确认 MATCHED 参考为 1478.873547 N·s，NATIVE 参考明显更低，说明匹配时长学习问题仍有范围限制。各参考同时保存时长、相位差、参数、可行比例与原始实验 ID。',
+  '见上方逐条件表与 ABSOLUTE_PRIMARY_REFERENCE_TABLE.json；跨条件 J_F 不直接排序性能。sync 的后试验0.18/H3探针独立确认成本1468.421258 N·s，更新条件化 best-known；此前0.15/H3的1478.873547 N·s参考保留为初始冻结比较。NATIVE 参考明显更低，说明匹配时长学习问题仍有范围限制。各参考同时保存时长、相位差、参数、可行比例与原始实验 ID。',
   '', '## 14. 学习器是否发现并确认更好行为？','',
-  '离线训练 Q 在延迟采集中选择 amp=0.15、peak=0.5、H3 的路径；独立重新执行得到完全相同的 1478.873547 N·s，低于 sync CEM 1485.999765。这是离线 Q 的条件化新发现，不能称为在线少样本个性化发现，更不能称为 NATIVE 主目标新最优。在线超过同状态参考的结果仅按 KNOWN_BENEFIT_CAPTURE.json 中确认记录报告。',
+  '离线 Q 在延迟采集中选择0.15/H3路径并独立确认1478.873547 N·s，低于 sync CEM 1485.999765；其train包含sync，不是held-out泛化。SCRATCH后续选到同一已知参考，未选择比它更好的路径；PRIOR未选中该路径。第5次的预声明替代探针0.18/H3得到1468.421258 N·s并独立确认，这是后试验探针的新发现，不能归为在线学习器的选择。本次最佳条件化参考因而更新，原参考capture另存。首次确认把嵌套配置误作为descriptor而实际复跑了基线，成本差异检查正确判FAIL并保留；随后使用原探针完整配置逐字复跑，差异为零。',
   '', '## 15–19. 完整在线计算、瓶颈、更新与策略加速','']
  section=D/'LATENCY_REPORT_SECTION.md'
  text.append(section.read_text() if section.exists() else '延迟并行工作流尚未形成最终报告，不能补造数据。')
  text+=['','## 20. 下一次更大实验具体用什么方法？','',
-  '推荐一个版本化、原生调度条件化的轻量 ridge critic：保留 NATIVE 基线作真实 fallback/incumbent；用少量连贯安全模板提议下一 hip/knee 目标，原始安全筛选后独立 Q 排名，已承诺续行复用已验证的筛选结果。先针对原生调度构建共同状态/共同续行分支数据，验证 held-out 排名与主目标收益；把模型在明确安全轮边界切换，并在 rep1/3/5/8 预注册替代探针。完成完整提交链预算验证后，才进入更大的 learn-until-converged → exploit 研究。本轮不启动最终30轮、硬件或 realtime qualification。',
+  '推荐“续行一致的原生调度模板＋版本化轻量 ridge critic”这一方法。先在独立开发版本验证接受终点到下一轮起点的参考连续性/安全桥接，保留原始1°/2°s启动门槛；再保留 NATIVE 基线作实际 fallback/incumbent，用少量连贯安全模板提议下一 hip/knee 目标，原始安全筛选后独立 Q 排名，已承诺续行复用已验证筛选。原生调度数据必须有共同状态/共同续行分支对照并通过新的 held-out 排名、主目标收益与完整提交链预算验证；安全轮边界切换模型，rep1/3/5/8 前瞻冻结探针和收敛准则。验证完成后才进入更大的 learn-until-converged → exploit 研究。本轮不启动最终30轮、硬件或 realtime qualification。',
   '', '这是一个下一步方法，包含必需的原生主目标与提交链验证门槛；当前 MATCHED critic 不能直接晋升为部署策略。推理已很快，优先削减重复安全计算和提交开销；只有少量候选仍无法满足预算时，才考虑轻量 proposal policy，安全筛选继续权威。',
   '', '## 证据、修复与 Git 状态','',
   'SCRATCH rep1 的物理任务有效，但在后来被撤销的静止续行代理门槛下提前执行，构成计算门槛的流程偏差。该轮保留，不追认成真实运动门槛通过；后续轮只能在单独冻结并复测的计算版本通过科学门槛后，从原始检查点安全边界恢复。见 PILOT_PROTOCOL_DEVIATIONS.json 与 boundary_computation_amendment_v3.json。不同计算版本不能合并成一份部署实时通过证据。',
