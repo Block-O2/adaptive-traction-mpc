@@ -1,8 +1,8 @@
 # Learning Research v1：性能上限、学习效率与在线计算
 
-生成时间：2026-09-30T20:42:14.157622+00:00。当前状态：`VALUE_LEARNING_RESEARCH_V1_BLOCKED`，科学工作状态：`COMPLETED_BOUNDED_STUDY_WITH_NATIVE_CONTINUITY_BLOCKER`。
+生成时间：2026-09-30T21:34:31.866433+00:00。当前状态：`VALUE_LEARNING_RESEARCH_V1_BLOCKED`，科学工作状态：`COMPLETED_BOUNDED_STUDY_WITH_NATIVE_CONTINUITY_BLOCKER`。
 
-累计运行 6.59 小时；9 小时上限为 2026-09-30T23:07:00+00:00。新研究已关闭记录 858 个：{"VALID": 711, "INFEASIBLE": 128, "INVALID": 11, "INTERRUPTED_HOST_RESOURCE": 8}。历史 518 次探索、63.77 GB 原始来源另行冻结验证，不计为本轮新增实验。
+累计运行 7.46 小时；9 小时上限为 2026-09-30T23:07:00+00:00。新研究已关闭记录 858 个：{"VALID": 711, "INFEASIBLE": 128, "INVALID": 11, "INTERRUPTED_HOST_RESOURCE": 8}。历史 518 次探索、63.77 GB 原始来源另行冻结验证，不计为本轮新增实验。
 
 主指标为完成有效任务的实测袖套力模积分 J_F_task，单位 N·s。安全与任务有效性始终为硬门槛；均值/RMS/峰值力、力矩积分/峰值、时长、clearance 和 smoothness 分别保存于逐次结果，不重新加权成奖励。
 
@@ -340,7 +340,7 @@ RETURN 已提交 continuation 实际始终为一个候选；requested BANK 大�
 ## 证据、修复与 Git 状态
 
 SCRATCH rep1 的物理任务有效，但在后来被撤销的静止续行代理门槛下提前执行，构成计算门槛的流程偏差。该轮保留，不追认成真实运动门槛通过；后续轮只能在单独冻结并复测的计算版本通过科学门槛后，从原始检查点安全边界恢复。见 PILOT_PROTOCOL_DEVIATIONS.json 与 boundary_computation_amendment_v3.json。不同计算版本不能合并成一份部署实时通过证据。
-起点分支 codex/coordination-pacing-exploration-v1，HEAD 8654cf0b6704fdecce3b4ccf1f00eb599aa5248c；研究分支 codex/value-learning-research-v1。原始控制/估计/Human dynamics/历史证据哈希保持冻结；hidden truth 仅评估使用，未进入选择。修复上限6，已用 6，逐项见修复与基础设施记录。
+起点分支 codex/coordination-pacing-exploration-v1，HEAD 8654cf0b6704fdecce3b4ccf1f00eb599aa5248c；研究分支 codex/value-learning-research-v1。原始控制/估计/Human dynamics/历史证据哈希保持冻结；hidden truth 仅评估使用，未进入选择。科学运行管线记录 6 次有界修订，逐项见修复与基础设施记录。收尾核验工具的首次实现路径解析与读取缓冲修正另存于 FINAL_VERIFICATION_METHOD_NOTES.json，未追加科学再实验或控制/安全修订。
 
 本轮改动位于新研究 scripts/value_learning_v1 与 docs/value_learning_research_v1，另新增 git-ignore 规则；大型原始轨迹忽略于 Git，lossless 压缩及 D 盘逐字节校验转存有清单/哈希。未 reset、stash、clean、merge、force push 或 git add -A。所有分阶段提交逐文件 stage。
 
@@ -359,3 +359,5 @@ CEM 曲线仅包含搜索评估，不包含后续 Q 选择或替代探针的新�
 ![路径自由度包络](PATH_FREEDOM_FIGURE.png)
 
 ![两种目标范围的已知收益捕获](KNOWN_BENEFIT_CAPTURE_FIGURE.png)
+
+最终证据核验：PASS；核验 858 个 rollout、13938 个文件，耗时 2240.422 s。

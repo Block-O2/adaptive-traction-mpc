@@ -96,7 +96,7 @@ def main():
   '', '这是一个下一步方法，包含必需的原生主目标与提交链验证门槛；当前 MATCHED critic 不能直接晋升为部署策略。推理已很快，优先削减重复安全计算和提交开销；只有少量候选仍无法满足预算时，才考虑轻量 proposal policy，安全筛选继续权威。',
   '', '## 证据、修复与 Git 状态','',
   'SCRATCH rep1 的物理任务有效，但在后来被撤销的静止续行代理门槛下提前执行，构成计算门槛的流程偏差。该轮保留，不追认成真实运动门槛通过；后续轮只能在单独冻结并复测的计算版本通过科学门槛后，从原始检查点安全边界恢复。见 PILOT_PROTOCOL_DEVIATIONS.json 与 boundary_computation_amendment_v3.json。不同计算版本不能合并成一份部署实时通过证据。',
-  f'起点分支 codex/coordination-pacing-exploration-v1，HEAD {state.get("source_head")}；研究分支 codex/value-learning-research-v1。原始控制/估计/Human dynamics/历史证据哈希保持冻结；hidden truth 仅评估使用，未进入选择。修复上限6，已用 {state.get("repair_cycles_used")}，逐项见修复与基础设施记录。',
+  f'起点分支 codex/coordination-pacing-exploration-v1，HEAD {state.get("source_head")}；研究分支 codex/value-learning-research-v1。原始控制/估计/Human dynamics/历史证据哈希保持冻结；hidden truth 仅评估使用，未进入选择。科学运行管线记录 {state.get("repair_cycles_used")} 次有界修订，逐项见修复与基础设施记录。收尾核验工具的首次实现路径解析与读取缓冲修正另存于 FINAL_VERIFICATION_METHOD_NOTES.json，未追加科学再实验或控制/安全修订。',
   '', '本轮改动位于新研究 scripts/value_learning_v1 与 docs/value_learning_research_v1，另新增 git-ignore 规则；大型原始轨迹忽略于 Git，lossless 压缩及 D 盘逐字节校验转存有清单/哈希。未 reset、stash、clean、merge、force push 或 git add -A。所有分阶段提交逐文件 stage。',
   '', 'RAW_DATA_MANIFEST.json、FINGERPRINTS.json、SOURCE_RAW_VERIFICATION.json、FINAL_EVIDENCE_VERIFICATION.json、Git checkpoint/REMOTE_VERIFICATION 记录用于复现。总时间与逐类别 launch 耗时见 REFERENCE_AND_TRAINING_WALL_TIME.json；并发工作时间求和不是经过的 wall time。',
   '', 'Git push 的自动审批已拒绝，理由是 GitHub 目的地/外发研究载荷授权未获确认。先完成可审查科学证据与本地提交，最后向用户请求向 https://github.com/Block-O2/adaptive-traction-mpc 的 codex/value-learning-research-v1 分支推送。未验证 local HEAD == remote HEAD 前，不宣称用户要求的整体 COMPLETE。',
@@ -110,6 +110,7 @@ def main():
  print(json.dumps({'report':str(D/'LEARNING_RESEARCH_V1_REPORT.md'),'closed_runs':len(closed),'elapsed_h':elapsed/3600}),flush=True)
 
 if __name__=='__main__':main()
+
 
 
 

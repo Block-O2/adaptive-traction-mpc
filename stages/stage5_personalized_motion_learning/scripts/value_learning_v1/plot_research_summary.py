@@ -42,7 +42,7 @@ def main():
   for mode,color in [('SCRATCH','#2563eb'),('PRIOR','#d97706')]:
    points=[r for r in rows if r.get('mode')==mode and r.get('repetition') in (1,3,5,8) and r.get('known_benefit_capture') is not None]
    points.sort(key=lambda r:r['repetition'])
-   ax.plot([r['repetition'] for r in points],[r['known_benefit_capture'] for r in points],'o',label=mode,color=color)
+   ax.plot([r['repetition'] for r in points],[r['known_benefit_capture'] for r in points],linestyle='None',marker='o' if mode=='SCRATCH' else 'x',markersize=7,label=mode,color=color)
   ax.axhline(0,color='#6b7280',lw=.8);ax.axhline(1,color='#9ca3af',ls='--',lw=.8)
   ax.set_xticks([1,3,5,8]);ax.set_title(title);ax.set_xlabel('Development attempt index (fresh segments)');ax.set_ylabel('Known-benefit capture (fraction)');ax.grid(alpha=.2);ax.legend()
  fig.suptitle('Verified same initial state; negative capture retained; invalid rep8 unavailable')
@@ -51,3 +51,4 @@ def main():
   ('BEST_KNOWN_REFERENCE_TABLE.json','NATIVE_BEST_KNOWN_REFERENCE_TABLE.json','ALL_REFERENCE_SEARCH_CONVERGENCE.json','KNOWN_BENEFIT_CAPTURE.json','PRIMARY_OBJECTIVE_KNOWN_BENEFIT_CAPTURE.json')},
   'matplotlib_version':matplotlib.__version__,'figures_sha256':{p.name:sha(p) for p in D.glob('*_FIGURE.*')}})
 if __name__=='__main__':main()
+

@@ -6,9 +6,17 @@ from research_campaign import R,S,D,RAW,RUNS,sha,save
 
 def content_sha(path):
  h=hashlib.sha256()
- with gzip.open(path,'rb') as stream:
+ with path.open('rb',buffering=1024*1024) as compressed, gzip.GzipFile(fileobj=compressed,mode='rb') as stream:
   for block in iter(lambda:stream.read(1024*1024),b''):h.update(block)
  return h.hexdigest()
+
+def artifact_path(root,reference):
+ path=Path(reference)
+ if path.is_absolute():result=path
+ elif path.parts and path.parts[0]=='stages':result=R/path
+ else:result=root/path
+ result.relative_to(root)
+ return result
 
 def main():
  started=time.perf_counter();failures=[];checked=0;bytes_checked=0;rollouts=0;archived=0
@@ -33,24 +41,25 @@ def main():
    failures.append({'run_id':record['run_id'],'kind':'raw_manifest_metadata_mismatch'})
   root=rp.parent
   for entry in record.get('lossless_archives',[]):
-   archive=root/entry['archive_path'];checked+=1
+   archive=artifact_path(root,entry['archive_path']);checked+=1
    if sha(archive)!=entry['gzip_sha256']:
     failures.append({'run_id':record['run_id'],'path':entry['archive_path'],'kind':'archive_byte_hash_mismatch'})
-  virtual={e['original_path']:e for e in record.get('lossless_archives',[])}
+  virtual={str(artifact_path(root,e['original_path']).relative_to(root)):e for e in record.get('lossless_archives',[])}
+  normalized_raw={str(artifact_path(root,k).relative_to(root)) for k in record.get('raw_files_sha256',{})}
   for relative,expected in record.get('raw_files_sha256',{}).items():
-   path=root/relative
+   path=artifact_path(root,relative);relative_key=str(path.relative_to(root))
    try:
     if path.exists():actual=sha(path);bytes_checked+=path.stat().st_size
-    elif relative in virtual:
-     entry=virtual[relative];actual=content_sha(root/entry['archive_path']);bytes_checked+=entry['original_bytes'];archived+=1
+    elif relative_key in virtual:
+     entry=virtual[relative_key];actual=content_sha(artifact_path(root,entry['archive_path']));bytes_checked+=entry['original_bytes'];archived+=1
     else:raise FileNotFoundError(path)
     checked+=1
     if actual!=expected:failures.append({'run_id':record['run_id'],'path':relative,'kind':'raw_hash_mismatch'})
    except Exception as error:failures.append({'run_id':record['run_id'],'path':relative,'error':str(error)})
   # Entries may include an archived file not listed under the original name.
   for relative,entry in virtual.items():
-   if relative not in record.get('raw_files_sha256',{}):
-    actual=content_sha(root/entry['archive_path']);checked+=1;archived+=1;bytes_checked+=entry['original_bytes']
+   if relative not in normalized_raw:
+    actual=content_sha(artifact_path(root,entry['archive_path']));checked+=1;archived+=1;bytes_checked+=entry['original_bytes']
     if actual!=entry['original_sha256']:failures.append({'run_id':record['run_id'],'path':relative,'kind':'lossless_content_mismatch'})
   if rollouts%100==0:print(json.dumps({'verified_rollouts':rollouts,'verified_files':checked,'failures':len(failures)}),flush=True)
  manifest=json.loads((D/'RAW_DATA_MANIFEST.json').read_text())
@@ -81,4 +90,6 @@ def main():
  print(json.dumps({k:v for k,v in output.items() if k not in ('closed_log_hashes','historical_raw_verification_preserved')},indent=2),flush=True)
  if failures:raise RuntimeError('Final evidence verification failed')
 if __name__=='__main__':main()
+
+
 
