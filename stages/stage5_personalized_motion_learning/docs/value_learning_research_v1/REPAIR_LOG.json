@@ -1,0 +1,66 @@
+{
+  "cycles": [
+    {
+      "concurrency_change": "cap total scientific simulations at 3; search2 + branch1; no scientific/safety change",
+      "cycle": 1,
+      "evidence": "Prior boot kernel swap-device read errors, Ubuntu STOPPED, CreateInstance/E_UNEXPECTED",
+      "interrupted_attempts": [
+        {
+          "interrupted_run_id": "branch_low_ordinary_early_outbound_00_A2",
+          "original_record_sha256": "d310a77c13c1654de0091f174a3360a035113207a7afeeef894cf35ca1524f2f",
+          "retry_run_id": "branch_low_ordinary_early_outbound_00_A2_retry1"
+        },
+        {
+          "interrupted_run_id": "branch_low_ordinary_early_outbound_00_A3",
+          "original_record_sha256": "fbadddbb1e82a14f39a4b791f2c53a469bc030f3cabcbf3e90083303b6aca49b",
+          "retry_run_id": "branch_low_ordinary_early_outbound_00_A3_retry1"
+        },
+        {
+          "interrupted_run_id": "search_sync_120_L1_R0_G2_C00",
+          "original_record_sha256": "d47142cfb9f29e32cb3ed311d25d79745fb7875a7822230c7fb533349d500fb9",
+          "retry_run_id": "search_sync_120_L1_R0_G2_C00_retry1"
+        },
+        {
+          "interrupted_run_id": "search_sync_120_L1_R0_G2_C01",
+          "original_record_sha256": "16571b699be515dd1a9ac267268e84e700c9732919b7bdb4cab73044e36a7957",
+          "retry_run_id": "search_sync_120_L1_R0_G2_C01_retry1"
+        },
+        {
+          "interrupted_run_id": "search_sync_120_L1_R0_G2_C02",
+          "original_record_sha256": "d9a0d9b607b311a052c40a5bca4bc9ab42af675d3b94e42778a5aea8608b73b1",
+          "retry_run_id": "search_sync_120_L1_R0_G2_C02_retry1"
+        }
+      ],
+      "kind": "scientific_host_infrastructure",
+      "prior_boot_log_sha256": "ff897d35c44d583df4e2c8b097fa7474f4d7a06176c7e12bc10add96a4f3916b",
+      "recovered_utc": "2026-09-30T14:54:55.940056+00:00",
+      "repair": "wsl --shutdown then restart Ubuntu; all distributions were already stopped",
+      "root_cause": "swap IO failure observed; precise underlying host failure not established"
+    },
+    {
+      "cycle": 2,
+      "diagnosis": "Host C free space 318828544 bytes (WSL internal df still 810GB), repeated WSL termination and prior kernel swap read errors",
+      "historical_evidence_modified": false,
+      "kind": "storage_recovery",
+      "new_storage": "gzip runtime_artifacts.json, summary.json, learning_transitions.jsonl immediately after each completed unit; original SHA and archive SHA retained; new readers support archives",
+      "newly_marked_interrupted": [
+        "branch_low_ordinary_early_outbound_00_A4"
+      ],
+      "repair": "Lossless gzip of only NEW raw logs with original-content SHA verification, remove verified redundant originals, sudo -n fstrim -v /; host C free space restored >6GB"
+    }
+  ],
+  "logging_cycle_accounting": "One comparator/provenance logging cycle plus two infrastructure cycles; all three have bounded fixes and regression checks.",
+  "logging_repairs": [
+    {
+      "change": "restore previous executed delta before logging research candidate legacy score; only dimensionless comparator logging affected, no force/safety/execution change",
+      "replay_regression_required": true
+    },
+    {
+      "change": "add opt-in deployable snapshot capture and exact research-source hashes per rollout",
+      "scope": "provenance/profiling only"
+    }
+  ],
+  "push_block": "Automatic approval review rejected GitHub upload to unverified destination. Local-only commits continue; final explicit destination approval required.",
+  "repair_cycles_used": 3,
+  "schema": "bounded_repair_log_v1"
+}

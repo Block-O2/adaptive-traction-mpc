@@ -85,7 +85,11 @@ def snapshot_research_task_call(adaptive_planner,arguments):
  snapshot=copy(adaptive_planner); snapshot.planner=copy(adaptive_planner.planner)
  snapshot.planner.research_phase_index=sum(d.phase is arguments['phase'] for d in adaptive_planner.planner.decisions)
  snapshot.planner.decisions=[]; snapshot.belief_sequences_used=[]
- return pickle.dumps((snapshot,arguments),protocol=pickle.HIGHEST_PROTOCOL)
+ payload=pickle.dumps((snapshot,arguments),protocol=pickle.HIGHEST_PROTOCOL)
+ if os.environ.get('VALUE_LATENCY_SNAPSHOT_DIR'):
+  from latency_capture import capture_payload
+  capture_payload(payload,arguments)
+ return payload
 
 class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
  def __init__(self,*args,**kwargs):
@@ -95,6 +99,13 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
   if self.research_spec.get('model_path'):
    from value_models import load_model
    self.research_model=load_model(self.research_spec['model_path'])
+
+ def candidate_actions(self,current_q_rad,phase):
+  actions=super().candidate_actions(current_q_rad,phase)
+  count=self.research_spec.get('legacy_candidate_limit')
+  # Optional latency ablation: proposal count only; every retained proposal
+  # still uses the original scheduler, mechanics and clearance checks.
+  return actions if count is None else actions[:max(1,int(count))]
 
  def screen_target(self,target,item,label,kwargs):
   state=np.asarray(kwargs['current_deployable_state'],float)
@@ -133,13 +144,15 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
   return replace(alternative,schedule=fixed,execution_screen=screen)
 
  def decide(self,**kwargs):
+  adapter_start_ns=time.monotonic_ns()
   started=time.perf_counter(); previous=self.previous_executed_delta_q_rad.copy()
   # Existing production proposals/scores remain available as logged comparator.
   original=super().decide(**kwargs)
+  self.previous_executed_delta_q_rad=previous.copy()
   legacy_finish=time.perf_counter(); spec=self.research_spec; phase=kwargs['phase'].value
   if phase=='HOLD': return original
   index=getattr(self,'research_phase_index',sum(d.phase is kwargs['phase'] for d in self.decisions)-1)
-  descriptor=spec.get('descriptor',{'parameters':[0,.5],'horizon':'H4'})
+  descriptor=spec.get('committed_descriptor') or spec.get('descriptor',{'parameters':[0,.5],'horizon':'H4'})
   descriptor={**descriptor,'matched_duration_factor':spec.get('matched_duration_factor',1.3)}
   baseline=spec['baseline_waypoints']
   path=spec.get('replay_targets') or make_path(baseline,self.start_rad,self.goal_rad,descriptor)
@@ -152,25 +165,41 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
    span=(self.goal_rad-self.start_rad)*(1 if phase=='OUTBOUND' else -1)
    target+=span*np.array([branch['offset'],-branch['offset']])
   proposals=[('declared_path',target)]
+  proposal_contexts={}
+  if spec.get('mode')=='VALUE_PATTERN' and phase=='OUTBOUND' and index==0 and not spec.get('committed_descriptor'):
+   proposals=[]
+   for j,desc in enumerate(spec['proposal_descriptors']):
+    desc={**desc,'matched_duration_factor':spec.get('matched_duration_factor',1.3)}
+    proposed_path=make_path(baseline,self.start_rad,self.goal_rad,desc)
+    pi=proposed_path[phase][index];label=f'pattern_{j}'
+    proposals.append((label,np.asarray(pi['target_q_rad'],float)))
+    proposal_contexts[label]=(desc,proposed_path,pi)
   if spec.get('mode')=='VALUE_RANK' and index<len(source)-1:
    span=(self.goal_rad-self.start_rad)*(1 if phase=='OUTBOUND' else -1)
    offsets=spec.get('candidate_offsets',[-.04,-.02,0.,.02,.04,.06])
    proposals=[(f'local_{j}',base+span*np.array([delta,-delta])) for j,delta in enumerate(offsets)]
   proposal_finish=time.perf_counter()
-  evaluations=[]; feature_ms=0.; features=[]
+  evaluations=[]; feature_ms=0.; features=[]; first_feature_start_ns=None
   continuation_id=digest({'descriptor':descriptor,'baseline':baseline,'rule':'frozen_declared_path_after_current_action'})
   for label,q in proposals:
-   ev=self.screen_target(q,item,f'research_{phase.lower()}_{index:02d}_{label}',kwargs)
+   desc,declared_path,proposed_item=proposal_contexts.get(label,(descriptor,path,item))
+   cid=digest({'descriptor':desc,'baseline':baseline,'rule':'frozen_declared_path_after_current_action'})
+   if spec.get('replay_targets'):
+    cid=digest({'descriptor':desc,'baseline':baseline,'replay_targets':declared_path,'rule':'frozen_declared_path_after_current_action'})
+   ev=self.screen_target(q,proposed_item,f'research_{phase.lower()}_{index:02d}_{label}',kwargs)
    if ev.feasible:
+    if first_feature_start_ns is None:first_feature_start_ns=time.monotonic_ns()
     before=time.perf_counter()
     x,names=context_features(state=kwargs['current_deployable_state'],reference=kwargs['current_reference_state'],belief=kwargs.get('value_state_or_belief') or {},
      phase=phase,elapsed=kwargs['phase_elapsed_s'],remaining=kwargs['phase_remaining_s'],start=self.start_rad,goal=self.goal_rad,previous=previous,
-     descriptor=descriptor,index=index,path=path,target=q,schedule=ev.schedule)
+     descriptor=desc,index=index,path=declared_path,target=q,schedule=ev.schedule)
     feature_ms+=1000*(time.perf_counter()-before)
     context={'schema':'research_decision_context_v1','features':x.tolist(),'feature_names':names,
       'belief':kwargs.get('value_state_or_belief'),'previous_executed_action':previous.tolist(),
-      'continuation_id':continuation_id,'continuation_descriptor':descriptor,'continuation_rule':'frozen_declared_path_after_current_action',
-      'path_index':index,'declared_remaining_targets':source[index+1:],
+      'continuation_id':cid,'continuation_descriptor':desc,'continuation_rule':'frozen_declared_path_after_current_action',
+      'path_index':index,'declared_remaining_targets':declared_path.get(phase,[])[index+1:],
+      'execution_policy': 'receding_value_ranking' if spec.get('mode')=='VALUE_RANK' else 'committed_declared_continuation',
+      'critic_target_continuation':'frozen_declared_path_after_current_action',
       'active_value_version':spec.get('model_version','ZERO'),'branch':branch,'action_provenance':label,'safety_truth_consumed':False}
     ev=replace(ev,execution_screen={**ev.execution_screen,'research_context':context})
     features.append((len(evaluations),x))
@@ -179,26 +208,43 @@ class ResearchPlanner(TerminalSetHumanWaypointPlannerV1):
   admissible=[i for i,e in enumerate(evaluations) if e.feasible]
   if not admissible: raise ValueError('RESEARCH_INFEASIBLE:'+';'.join(str(e.rejection_reason) for e in evaluations))
   predicted=None
-  if self.research_model is not None and spec.get('mode')=='VALUE_RANK':
+  if self.research_model is not None and spec.get('mode') in ('VALUE_RANK','VALUE_PATTERN'):
    predicted=self.research_model.predict(np.stack([x for _,x in features]))
    if not np.all(np.isfinite(predicted)): raise ValueError('nonfinite learned cost ranking')
    selected=min(range(len(features)),key=lambda j:(float(predicted[j]),float(evaluations[features[j][0]].total_cost)))
    chosen_index=features[selected][0]
   else: chosen_index=admissible[0]
+  if spec.get('mode')=='VALUE_PATTERN' and phase=='OUTBOUND' and index==0 and spec.get('force_descriptor_index') is not None:
+   desired=f'pattern_{spec["force_descriptor_index"]}'
+   matching=[i for i in admissible if evaluations[i].execution_screen['research_context']['action_provenance']==desired]
+   if matching:chosen_index=matching[0]
   inference_finish=time.perf_counter()
+  reference_selected_ns=time.monotonic_ns()
   chosen=evaluations[chosen_index]
   targets=np.stack([q for _,q in proposals]); dists=np.linalg.norm(targets[:,None]-targets[None,:],axis=-1)
   latency={'legacy_planner_ms':1000*(legacy_finish-started),'proposal_ms':1000*(proposal_finish-legacy_finish),
    'feature_ms':feature_ms,'feasibility_scheduling_ms':max(0.,1000*(screen_finish-proposal_finish)-feature_ms),
    'inference_selection_ms':1000*(inference_finish-screen_finish),'decision_total_ms':1000*(inference_finish-started),
    'candidate_count':len(proposals),'feasible_count':len(admissible),
+   'legacy_candidate_count':len(original.evaluations),'adapter_start_ns':adapter_start_ns,
+   'first_feature_start_ns':first_feature_start_ns,'reference_selected_ns':reference_selected_ns,
    'target_pairwise_max_distance_rad':float(np.max(dists)),'target_pairwise_mean_distance_rad':float(np.mean(dists)),
    'scope':'research adapter through selected scheduled reference; downstream production command and activation validation measured by request lifecycle'}
   chosen=replace(chosen,execution_screen={**chosen.execution_screen,'research_latency':latency,
    'predicted_remaining_cost_n_s':None if predicted is None else float(predicted[admissible.index(chosen_index)]),
-   'all_admissible_Q_n_s':None if predicted is None else predicted.tolist()})
+   'all_admissible_Q_n_s':None if predicted is None else predicted.tolist(),
+   'all_admissible_action_labels':[evaluations[i].execution_screen['research_context']['action_provenance'] for i in admissible]})
   evaluations[chosen_index]=chosen
   decision=replace(original,executed=chosen,selection_mode='research_separate_value_ranking' if predicted is not None else 'research_declared_path',
    evaluations=original.evaluations+tuple(evaluations),runtime_ms=1000*(time.perf_counter()-started))
   self.decisions[-1]=decision; self.previous_executed_delta_q_rad=chosen.proposed_delta_q_rad.copy()
   return decision
+
+ def note_accepted_decision(self,decision):
+  super().note_accepted_decision(decision)
+  if self.research_spec.get('mode')=='VALUE_PATTERN' and decision.phase is TaskPhase.OUTBOUND:
+   context=decision.executed.execution_screen.get('research_context',{})
+   if context.get('path_index')==0:
+    # Only the accepted next target commits the causal continuation plan.
+    # No future observation, no active-model parameter mutation is involved.
+    self.research_spec['committed_descriptor']=context['continuation_descriptor']

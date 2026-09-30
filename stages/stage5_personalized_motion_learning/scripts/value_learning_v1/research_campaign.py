@@ -3,8 +3,9 @@ from __future__ import annotations
 from pathlib import Path
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import argparse, csv, hashlib, json, os, subprocess, sys, time
+import argparse, csv, hashlib, json, os, subprocess, sys, time, shutil
 import numpy as np
+from evidence_io import read_json,archive_outputs
 R=Path(__file__).resolve().parents[4]
 S=R/'stages/stage5_personalized_motion_learning'
 D=S/'docs/value_learning_research_v1'; RAW=S/'results/value_learning_research_v1'; RUNS=RAW/'runs'
@@ -17,7 +18,7 @@ START=datetime.fromisoformat(C['campaign_start_utc']).timestamp()
 
 def save(p,v):
  p.parent.mkdir(parents=True,exist_ok=True)
- tmp=p.with_suffix(p.suffix+'.tmp'); tmp.write_text(json.dumps(v,indent=2,sort_keys=True,allow_nan=False)+'\n'); tmp.replace(p)
+ tmp=p.with_suffix(p.suffix+'.'+str(os.getpid())+'.tmp'); tmp.write_text(json.dumps(v,indent=2,sort_keys=True,allow_nan=False)+'\n'); tmp.replace(p)
 def sha(p):
  h=hashlib.sha256()
  with p.open('rb') as stream:
@@ -30,20 +31,24 @@ def launch(e):
  p=RUNS/e['run_id']/'rollout_result.json'
  if p.exists():
   old=json.loads(p.read_text())
+  if old['status']=='INTERRUPTED_HOST_RESOURCE':
+   return launch({**e,'run_id':old['retry_run_id'],'original_run_id':e['run_id']})
   if old['status']!='RUNNING':return old
   # A partial unit is evidence. Never overwrite it or treat as completed.
   raise RuntimeError('interrupted unit requires separately named retry:'+e['run_id'])
  spec=RAW/'specs'/(e['run_id']+'.json'); save(spec,e.get('spec'))
+ if shutil.disk_usage('/mnt/c').free<1024**3:
+  raise RuntimeError('SYSTEMIC_HOST_STORAGE_RESERVE_EXHAUSTED; no new rollout launched')
  command=[sys.executable,str(RUNNER),'--condition',e['condition'],'--arm',e.get('arm','MATCHED'),'--run-id',e['run_id']]
  if e.get('spec') is not None:command+=['--pattern-file',str(spec)]
  t=time.monotonic()
  proc=subprocess.run(command,env=ENV,capture_output=True,text=True,timeout=300)
  save(RAW/'launches'/(e['run_id']+'.json'),{'entry':e,'command':command,'returncode':proc.returncode,'wall_s':time.monotonic()-t,'stdout':proc.stdout[-3000:],'stderr':proc.stderr[-6000:]})
  if proc.returncode or not p.exists():raise RuntimeError('rollout infrastructure:'+e['run_id']+':'+proc.stderr[-1000:])
- row=json.loads(p.read_text());print(json.dumps({k:row.get(k) for k in ('run_id','condition_id','status','J_F_task_n_s','elapsed_host_s','failure_reason')}),flush=True)
+ row=archive_outputs(p.parent,RAW);print(json.dumps({k:row.get(k) for k in ('run_id','condition_id','status','J_F_task_n_s','elapsed_host_s','failure_reason')}),flush=True)
  return row
 def targets(p):
- a=json.loads(next(p.glob('rep_*/runtime_artifacts.json')).read_text())
+ a=read_json(next(p.glob('rep_*'))/'runtime_artifacts.json')
  return [[x['target_q_rad'] for x in d['evaluations'] if x['label']==d['executed_label']][0] for d in a['task_decisions'] if 'evaluations'in d]
 def gate():
  if json.loads((D/'SOURCE_RAW_VERIFICATION.json').read_text())['status']!='PASS':raise RuntimeError('invalid provenance')
@@ -85,14 +90,19 @@ def reference_records():
   entry=json.loads(p.read_text());rp=RUNS/entry['run_id']/'rollout_result.json'
   if not rp.exists():continue
   r=json.loads(rp.read_text())
+  if r['status']=='INTERRUPTED_HOST_RESOURCE' and r.get('retry_run_id'):
+   rp=RUNS/r['retry_run_id']/'rollout_result.json'
+   if not rp.exists():continue
+   r=json.loads(rp.read_text())
+   entry={**entry,'original_run_id':entry['run_id'],'run_id':r['run_id']}
   if r['status']=='RUNNING':continue
-  rows.append({**entry,'status':r['status'],'J_F_task_n_s':r.get('J_F_task_n_s'),'elapsed_host_s':r.get('elapsed_host_s'),'failure_reason':r.get('failure_reason'),'duration_s':r.get('duration_s'),'outbound_duration_s':r.get('outbound_duration_s'),'return_duration_s':r.get('return_duration_s'),'planned_segments':r.get('planned_segments')})
+  rows.append({**entry,'completion_epoch_s':rp.stat().st_mtime,'status':r['status'],'J_F_task_n_s':r.get('J_F_task_n_s'),'elapsed_host_s':r.get('elapsed_host_s'),'failure_reason':r.get('failure_reason'),'duration_s':r.get('duration_s'),'outbound_duration_s':r.get('outbound_duration_s'),'return_duration_s':r.get('return_duration_s'),'planned_segments':r.get('planned_segments')})
  return rows
 def summarize_reference():
  rows=reference_records();curve=[];tables=[]
  oldrows=json.loads((OD/'ALL_COORDINATION_ROLLOUTS.json').read_text())
  for condition in C['reference_search']['conditions']:
-  selected=sorted([x for x in rows if x['condition']==condition],key=lambda x:x['evaluation_index'])
+  selected=sorted([x for x in rows if x['condition']==condition],key=lambda x:x['completion_epoch_s'])
   previous=[x for x in oldrows if x['condition_id']==condition and x.get('timing_isolated')]
   best_old=min(previous,key=lambda x:x['J_F_task_n_s'])
   baseline=json.loads((OLD/f'matched_baseline_{condition}_certified/rollout_result.json').read_text())
@@ -133,6 +143,9 @@ def search(workers=3):
      prior=[r for r in reference_records() if r['condition']==condition and r['status']=='VALID']
      warm=min(prior,key=lambda x:x['J_F_task_n_s'])['spec']['descriptor']['parameters'] if prior else [.12,.5]
      mean=np.asarray((warm+[0]*dimension)[:dimension]);scale=np.array([.08,.16]+[.035]*(dimension-2))
+     initial_path=RAW/'search_proposals'/f'search_{condition}_L{level}_R{restart}_G0_C02.json'
+     if initial_path.exists():
+      mean=np.asarray(json.loads(initial_path.read_text())['spec']['descriptor']['parameters'],float)
      lower=np.array([-.20,.20]+[-.10]*(dimension-2));upper=np.array([.20,.80]+[.10]*(dimension-2))
      rng=np.random.default_rng(20260930+ci*1000+level*100+restart*10)
      history=[]
@@ -167,6 +180,60 @@ def search(workers=3):
  finally:pool.shutdown(wait=True)
  summarize_reference();state('REFERENCE_SEARCH_COMPLETE',next_action='targeted immutable-state one-step branch data')
 
+def search_coverage(workers=2):
+ """Same frozen CEM populations/budget, coverage-first execution ordering.
+
+ Prior proposals and optimizer states are immutable. The host-resource repair
+ interleaves conditions/levels/restarts before later generations so a resource
+ cutoff cannot consume every evaluation on L1 and leave no L3 evidence.
+ """
+ if json.loads((D/'ACTION_EXPRESSIVITY_GATE.json').read_text())['status']!='PASS':raise RuntimeError('expressivity gate')
+ cutoff=START+4.75*3600
+ save(D/'REFERENCE_SEARCH_EXECUTION_ORDER_V2.json',{'reason':'WSL swap IO host interruption requires total concurrency <=3; coverage-first ordering ensures nested freedom and adaptation-state coverage under unchanged cutoff','changed':'execution order only; all completed/proposed old units reused, no safety/controller/data split/budget change','ordering':'generation -> level -> restart -> condition','workers':workers,'seed_generation_rule':'20260930 + condition_index*1000 + level*100 + restart*10 + generation*10000 for new unsaved proposals; saved proposals reused exactly','maximum_evaluations':864,'resource_cutoff_epoch':cutoff})
+ with ThreadPoolExecutor(max_workers=workers) as pool:
+  for generation in range(3):
+   for level,dimension in ((1,2),(2,5),(3,7)):
+    for restart in (0,1):
+     for ci,condition in enumerate(C['reference_search']['conditions']):
+      if time.time()>=cutoff:summarize_reference();state('REFERENCE_SEARCH_RESOURCE_CHECKPOINT',next_action='analyze completed search and continue learning stages');return
+      prefix=f'{condition}_L{level}_R{restart}'
+      if generation:
+       last=json.loads((RAW/'optimizer_states'/f'{prefix}_G{generation-1}.json').read_text())
+       mean=np.asarray(last['mean']);scale=np.asarray(last['std'])
+      else:
+       previous=[r for r in reference_records() if r['condition']==condition and r['level']<level and r['status']=='VALID']
+       warm=min(previous,key=lambda x:x['J_F_task_n_s'])['spec']['descriptor']['parameters'] if previous else [.12,.5]
+       mean=np.asarray((warm+[0]*dimension)[:dimension]);scale=np.array([.08,.16]+[.035]*(dimension-2))
+       old_init=RAW/'search_proposals'/f'search_{prefix}_G0_C02.json'
+       if old_init.exists():mean=np.asarray(json.loads(old_init.read_text())['spec']['descriptor']['parameters'])
+      lower=np.array([-.20,.20]+[-.10]*(dimension-2));upper=np.array([.20,.80]+[.10]*(dimension-2))
+      rng=np.random.default_rng(20260930+ci*1000+level*100+restart*10+generation*10000)
+      vectors=np.clip(rng.normal(mean,scale,size=(8,dimension)),lower,upper);vectors[-2:]=rng.uniform(lower,upper,size=(2,dimension))
+      if generation==0:
+       vectors[0]=np.array([0,.5]+[0]*(dimension-2));vectors[1]=np.array([.12,.5]+[0]*(dimension-2));vectors[2]=mean;vectors[3]=np.array([-.02,.3]+[0]*(dimension-2))
+      entries=[]
+      for j,vector in enumerate(vectors):
+       horizon='H3' if j in (0,1,2) else ('H1','H2','H4','H3')[int(rng.integers(4))]
+       descriptor={'parameters':vector.tolist(),'horizon':horizon,'return_reverse':False,'level':level}
+       run_id=f'search_{prefix}_G{generation}_C{j:02d}'
+       entry={'condition':condition,'run_id':run_id,'level':level,'restart':restart,'generation':generation,'candidate_index':j,'evaluation_index':generation*10000+level*1000+restart*100+j,'spec':{'mode':'PATH','descriptor':descriptor,'matched_duration_factor':1.3}}
+       pp=RAW/'search_proposals'/(run_id+'.json')
+       if pp.exists():entry=json.loads(pp.read_text())
+       else:save(pp,entry)
+       entries.append(entry)
+      futures={pool.submit(launch,e):e for e in entries}
+      for f in as_completed(futures):f.result()
+      statefile=RAW/'optimizer_states'/f'{prefix}_G{generation}.json'
+      if not statefile.exists():
+       history=[r for r in reference_records() if r['condition']==condition and r['level']==level and r['restart']==restart and r['generation']<=generation]
+       valid=sorted([r for r in history if r['status']=='VALID'],key=lambda r:r['J_F_task_n_s'])
+       if valid:
+        elite=np.asarray([r['spec']['descriptor']['parameters'] for r in valid[:3]])
+        mean=.3*mean+.7*np.mean(elite,axis=0);scale=np.maximum(.3*scale+.7*np.std(elite,axis=0),np.array([.012,.04]+[.01]*(dimension-2)))
+       save(statefile,{'mean':mean.tolist(),'std':scale.tolist(),'valid_elites':[r['run_id'] for r in valid[:3]],'all_attempts':[r['run_id'] for r in history]})
+      summarize_reference()
+ state('REFERENCE_SEARCH_COMPLETE',next_action='finalize branch/dataset/model/timing/pilot evidence')
+
 def branches(workers=3):
  if json.loads((D/'ACTION_EXPRESSIVITY_GATE.json').read_text())['status']!='PASS':raise RuntimeError('expressivity gate')
  conditions=[x['id'] for x in json.loads((OD/'CONDITION_MATRIX.json').read_text())['conditions']]
@@ -191,5 +258,5 @@ def branches(workers=3):
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('phase',choices=['gate','search','branches']);p.add_argument('--workers',type=int,default=3);args=p.parse_args()
  if args.phase=='gate':gate()
- elif args.phase=='search':search(args.workers)
+ elif args.phase=='search':search_coverage(args.workers)
  else:branches(args.workers)

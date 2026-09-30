@@ -38,6 +38,7 @@ DOC = STAGE / "docs/coordination_pacing_exploration_v1"
 OLD_RUNS = STAGE / "results/coordination_pacing_exploration_v1/runs"
 RUNS = STAGE / "results/value_learning_research_v1/runs"
 SESSION_CONTEXT = None
+SOURCE_CHECKPOINT_SPEC = None
 LAST_CAPTURE = None
 OPTIONS = STAGE / "configs/full3d_adaptive_integration_v1/autonomous_closed_loop_recovery_v1/incremental_clearance_terminal_v9.json"
 CPBASE = STAGE / "results/zero_value_30rep_baseline_v3/formal_session_01"
@@ -59,6 +60,11 @@ def save(path, value):
 def source_context(condition):
     if SESSION_CONTEXT is not None:
         return SESSION_CONTEXT, None
+    if SOURCE_CHECKPOINT_SPEC is not None:
+        cp = SOURCE_CHECKPOINT_SPEC
+        context, rows = load_checkpoint(Path(cp["absolute_path"]), cp["sha256"], cp["provenance_sha256"])
+        boundary = advance_inter_rep_boundary(context, max_wait_s=2.0)
+        return context, {"checkpoint": cp, "boundary": boundary}
     cp_rep = condition.get("checkpoint_rep")
     if cp_rep is None:
         return {}, None
@@ -133,6 +139,10 @@ def trace_metrics(trace, case):
 
 
 def run(condition_id, arm, pattern, run_id):
+    global SOURCE_CHECKPOINT_SPEC
+    SOURCE_CHECKPOINT_SPEC = None if pattern is None else pattern.get("source_checkpoint")
+    if pattern and pattern.get("capture_snapshot_dir"):
+        os.environ["VALUE_LATENCY_SNAPSHOT_DIR"] = pattern["capture_snapshot_dir"]
     for key in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
         if os.environ.get(key) != "1":
             raise RuntimeError(f"{key} must be one")
@@ -152,6 +162,7 @@ def run(condition_id, arm, pattern, run_id):
         "case_path": condition["case_path"], "case_sha256": condition["case_sha256"],
         "options_sha256": matrix["options_sha256"], "execution_mode": "SCIENTIFIC_SIMULATION",
         "command": sys.argv, "host": platform.node(), "python": sys.version,
+        "research_source_files_sha256": {str(p.relative_to(ROOT)): sha(p) for p in sorted((STAGE / "scripts/value_learning_v1").glob("*.py"))},
         "source_commit": subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip(),
     }
     save(out / "rollout_result.json", record)

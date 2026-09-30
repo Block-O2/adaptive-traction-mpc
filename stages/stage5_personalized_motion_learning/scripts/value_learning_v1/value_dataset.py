@@ -8,6 +8,7 @@ R=Path(__file__).resolve().parents[4];S=R/'stages/stage5_personalized_motion_lea
 for sub in ('stage5_personalized_motion_learning','stage4_adaptive_control','stage3_full3d'):sys.path.insert(0,str(R/'stages'/sub/'src'))
 sys.path.insert(0,str(S/'scripts/high_rom_v1'))
 from research_adapter import context_features, make_path, digest
+from evidence_io import read_json,file_sha
 D=S/'docs/value_learning_research_v1';RAW=S/'results/value_learning_research_v1'
 OLD=S/'results/coordination_pacing_exploration_v1/runs';OD=S/'docs/coordination_pacing_exploration_v1'
 C=json.loads((D/'LEARNING_RESEARCH_V1_CONTRACT.json').read_text())
@@ -16,14 +17,14 @@ conditions={c['id']:c for c in M['conditions']}
 
 def save(p,v):
  p.parent.mkdir(parents=True,exist_ok=True);tmp=p.with_suffix(p.suffix+'.tmp');tmp.write_text(json.dumps(v,indent=2,sort_keys=True,allow_nan=False)+'\n');tmp.replace(p)
-def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def sha(p):return file_sha(p)
 def split(condition):
  for name,ids in C['splits'].items():
   if isinstance(ids,list) and condition in ids:return name
  raise ValueError('condition missing split:'+condition)
 
 def extract_run(out,record,source_category, *, branch_entry=None):
- rep=next(out.glob('rep_*'));summary=json.loads((rep/'summary.json').read_text())
+ rep=next(out.glob('rep_*'));summary=read_json(rep/'summary.json')
  decisions=summary['decisions'];transitions=summary['learning_records'];trace=np.load(rep/'trace.npz')
  mask=trace['stage']=='TASK';times=trace['time_s'][mask]
  norms=np.linalg.norm(trace['physical_cuff_force_world_n'][mask],axis=1)
@@ -106,7 +107,8 @@ def extract_dataset(output_name='dataset_v1'):
    # Active study uses matched timing; native historical trajectories remain
    # separate to avoid pooling materially different scheduler continuations.
    continue
-  extracted=extract_run(out,record,category,branch_entry=entries.get(record['run_id']))
+  branch_key=record['run_id'].split('_retry')[0]
+  extracted=extract_run(out,record,category,branch_entry=entries.get(branch_key))
   rows+=extracted;sources.append({'run_id':record['run_id'],'result_sha256':sha(rp),'rows':len(extracted),'category':category,'split':split(record['condition_id'])})
   if len(sources)%30==0:print(json.dumps({'dataset_runs':len(sources),'rows':len(rows)}),flush=True)
  names=rows[0]['feature_names']
