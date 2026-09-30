@@ -1,3 +1,5 @@
+# 实际在线决策延迟与更新证据
+
 ### 在线计算与更新（问题 15–19）
 
 以下是 Scientific Simulation 的实际主机剖析。模型属于固定 MATCHED pacing（1.3 倍注册段时长）和明确 continuation context；native 绝对目标补充研究未混入拟合。主机时间不会推进冻结的生产者仿真 epoch，因此这些数据不能认证硬件实时行为。
@@ -218,3 +220,6 @@ RETURN 已提交 continuation 实际始终为一个候选；requested BANK 大�
 本轮优先依据实际正常运行与候选数缩放选择有限的多样首决策 proposal，以及后续一个已提交 continuation candidate。单候选 continuation 已不能继续通过减少研究候选数解决成本。若 Q 推断很小而硬筛选、原始候选比较、escape preparation、主线程收集或最终验证占主要时间，单纯增加 actor 不能解决这些成本。只有实际完整决策证据持续超出机会、且 proposal 数缩减仍不足时，再评价轻量 proposal policy，随后仍执行原有硬筛选；当前证据更支持先剖析这些调度/验证开销，不自动启动 actor。
 
 `RUNTIME_ASSURANCE_REQUIRED_BEFORE_HARDWARE_EXPERIMENTS`。以上不构成硬件安全、WCET 或实时资格。
+
+
+原始数字、组成项、候选数量、预算来源及 SHA 见 `ONLINE_DECISION_LATENCY.json`。训练更新完整事件保留于 `TRAINING_UPDATE_LATENCY.json`；去重与生命周期审计见 `LATENCY_PILOT_UPDATE_LIFECYCLE_AUDIT.json`。

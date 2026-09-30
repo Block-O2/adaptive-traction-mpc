@@ -21,18 +21,19 @@ def model_table(models):
 def main():
  now=datetime.now(timezone.utc);state=read('STATE.json');reference=read('BEST_KNOWN_REFERENCE_TABLE.json');native=read('NATIVE_BEST_KNOWN_REFERENCE_TABLE.json')
  offline=read('OFFLINE_VALUE_MODEL_COMPARISON.json');models=offline.get('selected_models',{})
+ variable_levels=next(r for r in reference['rows'] if r['condition']=='variable_start_120')['best_vs_level']
  pilot=read('ONLINE_POLICY_IMPROVEMENT_PILOT.json');convergence=read('CONVERGENCE_ANALYSIS.json')
  capture=read('KNOWN_BENEFIT_CAPTURE.json');absolute=read('PRIMARY_OBJECTIVE_KNOWN_BENEFIT_CAPTURE.json')
  manifest=read('VALUE_DATASET_MANIFEST.json');latency=read('ONLINE_LATENCY_PROMOTION_GATE.json')
  records=[json.loads(p.read_text()) for p in RUNS.glob('*/rollout_result.json')]
  closed=[r for r in records if r.get('status')!='RUNNING'];counts=dict(Counter(r.get('status') for r in closed))
  times={}
- for category,prefixes in [('matched_reference',('search_',)),('native_reference',('native_search_',)),('local_branch',('branch_',)),('counterfactual',('counterfactual_','native_counterfactual_','alternate_probe_')),('other',())]:
+ for category,prefixes in [('matched_reference',('search_',)),('native_reference',('native_search_',)),('local_branch',('branch_',)),('counterfactual',('counterfactual_','absolute_counterfactual_','alternate_probe_')),('other',())]:
   values=[]
   for p in (RAW/'launches').glob('*.json'):
    entry=json.loads(p.read_text())
    if prefixes and not p.stem.startswith(prefixes):continue
-   if not prefixes and p.stem.startswith(('search_','native_search_','branch_','counterfactual_','native_counterfactual_','alternate_probe_')):continue
+   if not prefixes and p.stem.startswith(('search_','native_search_','branch_','counterfactual_','absolute_counterfactual_','alternate_probe_')):continue
    values.append(entry.get('wall_s'))
   times[category]=distribution(values)
  elapsed=(now-datetime.fromisoformat(C['campaign_start_utc'])).total_seconds()
@@ -50,7 +51,7 @@ def main():
   text.append(f'|{m["condition"]}|{m["previous_best_J_F_n_s"]:.6f} → {m["best_known_J_F_n_s"]:.6f}|{n["previous_best_J_F_n_s"]:.6f} → {n["best_known_J_F_n_s"]:.6f}|{m["evaluations"]}/{n["evaluations"]}|')
  text+=['','新赢家通过独立同起点再执行确认；这是确定性复现，不是独立受试者泛化。见 BEST_KNOWN_REFERENCE_CONFIRMATION.json、NATIVE_BEST_KNOWN_REFERENCE_CONFIRMATION.json。',
   '', '## 3. 更多路径自由度是否继续降低成本？','',
-  'variable_start_120 的 MATCHED 搜索包络从 L0 1482.176759、L2 1481.931124 降至 L3 1473.789827 N·s。但该 L3 赢家的两个新增系数为零，实际上仍可由 L2 表达。因此更大搜索确实继续改善，尚未证明额外自由度本身带来因果收益。L1/L2/L3 的连续系数分别为 2/5/7，另有离散 horizon/return 选择；各层评估数量不同，也不能当作公平复杂度消融。其他条件未必改善，L4 未执行。',
+  f'variable_start_120 的 MATCHED 搜索包络从 L0 {variable_levels["0"]:.6f}、L2 {variable_levels["2"]:.6f} 降至 L3 {variable_levels["3"]:.6f} N·s。但该 L3 赢家的两个新增系数为零，实际上仍可由 L2 表达。因此更大搜索确实继续改善，尚未证明额外自由度本身带来因果收益。L1/L2/L3 的连续系数分别为 2/5/7，另有离散 horizon/return 选择；各层评估数量不同，也不能当作公平复杂度消融。其他条件未必改善，L4 未执行。',
   '', '## 4. 有证据接近平台吗？','',
   '不足。部分条件的有限预算包络变平，但有效评估、重启和代数覆盖不同，尚无充分重复优化或下界。CEM 保留基线、已知有益初始化、多个重启和均匀探索；每个提议使用真实冻结科学栈评价。见各条件 level_evaluations、restart_generation_evaluations、restart_best 和完整收敛曲线。',
   '', '## 5. 最佳协调有多强的条件依赖？','',
@@ -75,7 +76,7 @@ def main():
  for s in convergence.get('sessions',[]):text.append(f'- {s["mode"]}：首次回溯收敛候选={s.get("retrospective_first_trigger_repetition")}；有效轮数={s["valid_repetitions"]}。')
  text+=['','稳定性同时检查同一连续片段内最近三次有效任务的 baseline-adjusted 收益、精确模式、Q 排名、目标替代探针、安全和计算门槛。本轮未得到这种连续窗口，因此没有收敛触发。开发后冻结的数值尺度仅为探索性诊断，尚未由连续学习数据校准。',
   '', '## 11. 五轮收敛现实吗？','',
-  '见完整回溯准则与 rep1/3/5/8 的同轮替代探针。即使成本/模式平稳，若 Q 排名、替代动作改善、安全或计算门槛不满足，也不能认定收敛。八轮预算并非“5 learn + 25 exploit”；后续应前瞻冻结开发所得阈值并按证据停学。',
+  '当前证据不支持五次连续重复收敛：原生续行启动失败，且第5次替代探针仍找到更优路径。见完整回溯准则与 rep1/3/5/8 的同轮替代探针。即使成本/模式平稳，若 Q 排名、替代动作改善、安全或计算门槛不满足，也不能认定收敛。八轮预算并非“5 learn + 25 exploit”；后续应前瞻冻结开发所得阈值并按证据停学。',
   '', '## 12. Rep1/3/5/8 的已知收益捕获？','',
   '|会话/轮|MATCHED baseline / learned / reference (N·s)|条件化 capture|NATIVE 主目标 capture|','|---|---:|---:|---:|']
  for r in capture.get('rows',[]):
@@ -100,9 +101,15 @@ def main():
   '', 'RAW_DATA_MANIFEST.json、FINGERPRINTS.json、SOURCE_RAW_VERIFICATION.json、FINAL_EVIDENCE_VERIFICATION.json、Git checkpoint/REMOTE_VERIFICATION 记录用于复现。总时间与逐类别 launch 耗时见 REFERENCE_AND_TRAINING_WALL_TIME.json；并发工作时间求和不是经过的 wall time。',
   '', 'Git push 的自动审批已拒绝，理由是 GitHub 目的地/外发研究载荷授权未获确认。先完成可审查科学证据与本地提交，最后向用户请求向 https://github.com/Block-O2/adaptive-traction-mpc 的 codex/value-learning-research-v1 分支推送。未验证 local HEAD == remote HEAD 前，不宣称用户要求的整体 COMPLETE。',
   '', '`RUNTIME_ASSURANCE_REQUIRED_BEFORE_HARDWARE_EXPERIMENTS`。科学算法耗时、冻结物理仿真和确定性复现均不构成硬件实时或临床安全资格。']
+ text+=['','## 实测结果图表','','CEM 曲线仅包含搜索评估，不包含后续 Q 选择或替代探针的新发现。复杂度曲线为累计 best-known 包络，各层覆盖不等；收益捕获图的有效点来自新开发片段，未连成连续学习曲线。','','![有限预算搜索](REFERENCE_SEARCH_FIGURE.png)','','![路径自由度包络](PATH_FREEDOM_FIGURE.png)','','![两种目标范围的已知收益捕获](KNOWN_BENEFIT_CAPTURE_FIGURE.png)']
+ verification=read('FINAL_EVIDENCE_VERIFICATION.json')
+ if verification:text+=['',f'最终证据核验：{verification.get("status")}；核验 {verification.get("verified_rollouts")} 个 rollout、{verification.get("verified_files")} 个文件，耗时 {fmt(verification.get("wall_s"))} s。']
  (D/'LEARNING_RESEARCH_V1_REPORT.md').write_text('\n'.join(text)+'\n')
  sources={p.name:sha(p) for p in D.glob('*.json') if p.name not in ('REPORT_PROVENANCE.json','RAW_DATA_MANIFEST.json','FINGERPRINTS.json')}
  save(D/'REPORT_PROVENANCE.json',{'timestamp_utc':now.isoformat(),'report_sha256':sha(D/'LEARNING_RESEARCH_V1_REPORT.md'),'source_evidence_sha256':sources,'20_questions_answered_or_explicitly_unavailable':True,'unmeasured_results_not_fabricated':True})
  print(json.dumps({'report':str(D/'LEARNING_RESEARCH_V1_REPORT.md'),'closed_runs':len(closed),'elapsed_h':elapsed/3600}),flush=True)
 
 if __name__=='__main__':main()
+
+
+

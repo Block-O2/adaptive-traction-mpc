@@ -116,9 +116,19 @@ def main():
    'candidate sets and continuations are bounded; reference remains best-known, not globally optimal',
    'observed timing does not qualify hardware or realtime behavior']}
  save(D/'CONVERGENCE_ANALYSIS.json',output)
- (D/'CONVERGENCE_ANALYSIS.md').write_text('# Development convergence evidence\n\n'+json.dumps(output,indent=2)+'\n')
+ lines=['# 开发试验收敛分析','','本轮没有连续收敛触发，当前证据不支持五次重复收敛。两个初始化会话各尝试8次、4次有效；有效尝试1/3/5/7来自新的开发片段。原生下一轮启动守卫拒绝保留，未绕过安全门槛。','',
+  f'事后开发诊断尺度：替代动作完整成本范围中位数 {local_scale:.6f} N·s；10%容差 {tolerance:.6f} N·s。此尺度在试验完成后冻结，未用于本轮决策，也未由连续学习数据校准。','',
+  '收敛须同时满足同一连续片段内最近三次任务有效、baseline-adjusted收益变化≤容差、精确续行模式稳定、Q排序相关≥0.9、已测安全替代探针改善≤容差、接近条件化参考，以及科学计算门槛。缺少探针或有效连续窗口不能触发。','',
+  '|会话|有效/尝试|连续有效窗口|首次收敛候选|五次目标支持|','|---|---:|---|---|---|']
+ for session in sessions:
+  lines.append(f'|{session["mode"]}|{session["valid_repetitions"]}/{session["attempted_repetitions"]}|无|{session["retrospective_first_trigger_repetition"]}|否|')
+ lines+=['','第5次SCRATCH选择0.15/H3，成本1478.873547 N·s；其预声明0.18/H3替代探针仍降至1468.421258 N·s，并经独立确认。因此有限候选上的成本重复不能作为已经最优或收敛的证明。PRIOR有效片段均选择基线，没有观察到先验优势。','',
+  '完整逐次成本、预测误差、Q排名变化、替代动作改善、更新版本及两个目标范围capture见 `CONVERGENCE_ANALYSIS.json`。rep8因启动失败不可用；失败截断回报未进入训练或正收益。MATCHED plateau即使出现，也不能证明NATIVE主目标竞争力。','',
+  '下一轮须先验证跨epoch起点参考与settling一致性，再前瞻冻结阈值、探针和停学规则；本轮不进入最终30轮、硬件或实时资格试验。']
+ (D/'CONVERGENCE_ANALYSIS.md').write_text('\n'.join(lines)+'\n')
  scratch=json.loads((D/'SCRATCH_VS_PRIOR_ANALYSIS.json').read_text())
  scratch['observed_convergence_and_update_summary']=sessions
  scratch['no_independent_subject_effect_estimate']=True
  save(D/'SCRATCH_VS_PRIOR_ANALYSIS.json',scratch)
 if __name__=='__main__':main()
+

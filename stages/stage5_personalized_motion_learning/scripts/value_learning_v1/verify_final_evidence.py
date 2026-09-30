@@ -20,11 +20,22 @@ def main():
  supplement=json.loads((D/'OBJECTIVE_SCOPE_SUPPLEMENT.json').read_text())
  if sha(D/'LEARNING_RESEARCH_V1_CONTRACT.json')!=supplement['original_contract_sha256']:
   failures.append({'kind':'original_contract_changed'})
+ manifest=json.loads((D/'RAW_DATA_MANIFEST.json').read_text())
+ frozen_rollouts={r['run_id']:r for r in manifest['rollouts']}
  for rp in sorted(RUNS.glob('*/rollout_result.json')):
   record=json.loads(rp.read_text());rollouts+=1
   if record.get('status')=='RUNNING':
    failures.append({'run_id':record['run_id'],'kind':'rollout_not_closed'});continue
+  frozen=frozen_rollouts.get(record['run_id'])
+  if frozen is None or sha(rp)!=frozen['result_sha256']:
+   failures.append({'run_id':record['run_id'],'kind':'frozen_result_header_hash_mismatch'})
+  elif record.get('raw_files_sha256',{})!=frozen['raw_files_sha256'] or record.get('lossless_archives',[])!=frozen['lossless_archives']:
+   failures.append({'run_id':record['run_id'],'kind':'raw_manifest_metadata_mismatch'})
   root=rp.parent
+  for entry in record.get('lossless_archives',[]):
+   archive=root/entry['archive_path'];checked+=1
+   if sha(archive)!=entry['gzip_sha256']:
+    failures.append({'run_id':record['run_id'],'path':entry['archive_path'],'kind':'archive_byte_hash_mismatch'})
   virtual={e['original_path']:e for e in record.get('lossless_archives',[])}
   for relative,expected in record.get('raw_files_sha256',{}).items():
    path=root/relative
@@ -70,3 +81,4 @@ def main():
  print(json.dumps({k:v for k,v in output.items() if k not in ('closed_log_hashes','historical_raw_verification_preserved')},indent=2),flush=True)
  if failures:raise RuntimeError('Final evidence verification failed')
 if __name__=='__main__':main()
+
