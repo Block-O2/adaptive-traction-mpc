@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime,timezone
 from pathlib import Path
 import numpy as np
+from functools import lru_cache
 from coordination_space import DIMENSIONS,NAMES,LOW,HIGH,neutral,known_good,test_space
 
 R=Path(__file__).resolve().parents[4]; S=R/'stages/stage5_personalized_motion_learning'
@@ -31,11 +32,24 @@ def check_frozen():
     if bad:raise RuntimeError('PROTECTED_FINGERPRINT_CHANGED:'+str(bad))
     return len(F['protected_files'])
 def baseline(cond,arm):return read(RUNS/f'A_{cond}_{arm}_baseline_0/rollout_result.json')
+@lru_cache(None)
+def condition_span(cond):
+    c=next(c for c in CONDITIONS if c['id']==cond);task=read(R/c['case_path'])['task']
+    return np.radians(np.asarray(task['goal_deg'])-np.asarray(task['start_deg']))
+def common_progress_residual(record,base):
+    values=[];span=condition_span(record['condition_id'])
+    for phase in ('OUTBOUND','RETURN'):
+        xs=record.get('planned_segments',{}).get(phase,[]);ys=base.get('planned_segments',{}).get(phase,[])
+        if len(xs)!=len(ys):return None
+        direction=span if phase=='OUTBOUND' else -span
+        values += [float(np.mean((np.asarray(x['target_q_rad'])-np.asarray(y['target_q_rad']))/direction)) for x,y in zip(xs,ys)]
+    return max(map(abs,values),default=0.)
 def eligible(record,base,arm):
     if record.get('status')!='VALID':return False,False,None
     residual={p:record[p.lower()+'_duration_s']-base[p.lower()+'_duration_s'] for p in ('OUTBOUND','RETURN')}
     same=all(len(record.get('planned_segments',{}).get(p,[]))==len(base.get('planned_segments',{}).get(p,[])) for p in residual)
-    isolated=same and max(abs(x) for x in residual.values())<=C['matched_tolerance_s']+1e-9
+    common=common_progress_residual(record,base) if same else None
+    isolated=same and max(abs(x) for x in residual.values())<=C['matched_tolerance_s']+1e-9 and common is not None and common<=1e-9
     return arm=='NATIVE' or isolated,isolated,residual
 def compress_raw(out,record):
     storage=record.get('raw_storage',{})
@@ -91,6 +105,8 @@ def execute(entry):
     save(path,r);compress_raw(out,r)
     print(json.dumps({'phase':entry['phase'],'run':ident,'status':r['status'],'J_F':r.get('J_F_task_n_s'),'rollout_s':r.get('elapsed_host_s')}),flush=True)
     return r
+def pure_matched(p):
+    p=p.copy();p[1]=p[0];p[5]=p[4];return p
 def entry(cond,arm,ident,spec,phase,**extra):return {'condition':cond,'arm':arm,'run_id':ident,'spec':spec,'phase':phase,**extra}
 def spec(level,p):return {'level':level,'parameters':list(map(float,p)),'matched_duration_factor':1.3}
 
@@ -149,6 +165,7 @@ def search_pair(pair):
                 randoms=[v for v in rankable_entries(cond,arm) if v[1].get('initialization') in ('small','diverse')]
                 if randoms:mean[:6]=randoms[0][1]['spec']['parameters']
                 else:mean[:2]=rng.uniform(-.01,.01,2)
+            if arm=='MATCHED':mean=pure_matched(mean)
             std=span*.15;memory=[]
             for generation in range(2):
                 points=[mean.copy()]
@@ -159,6 +176,7 @@ def search_pair(pair):
                         candidate=neutral(level);prev=prior[0][1]['spec']['parameters'];candidate[:min(dim,len(prev))]=prev[:dim]
                         points.append(candidate)
                 while len(points)<3:points.append(draw(rng,mean,std))
+                if arm=='MATCHED':points=[pure_matched(p) for p in points]
                 scored=[]
                 for j,p in enumerate(points):
                     ident=f'B_{cond}_{arm}_L{level}_R{restart}_G{generation}_C{j}'
@@ -179,7 +197,7 @@ def collect():
     return data
 def persist(status,phase,next_action=None):
     data=collect();count=Counter(r['status'] for _,r in data)
-    save(D/'STATE.json',{'status':status,'phase':phase,'updated_utc':stamp(),'completed':len(data),'counts':dict(count),
+    save(D/'STATE.json',{'status':status,'phase':phase,'updated_utc':stamp(),'completed':sum(r['status']!='RUNNING' for _,r in data),'started':len(data),'counts':dict(count),
        'phase_counts':dict(Counter(e['phase'] for e,_ in data)),'elapsed_wall_s':time.time()-read(START_FILE)['epoch'],
        'next_action':next_action,'branch':C['branch'],'no_training':True,'source_commit':C['source_commit']})
     return data
@@ -264,9 +282,11 @@ def analyze():
                     restart.append({'level':level,'restart':rr,'initialization':('baseline','known_hip_leading','diverse_safe')[rr],
                                     'evaluations':len(rs),'best_J_F':min(costs) if costs else None})
                 space.append({'condition':c['id'],'arm':arm,'level':level,'dimension':DIMENSIONS[level],
+                              'independent_dimension':DIMENSIONS[level]-2 if arm=='MATCHED' else DIMENSIONS[level],
                               'evaluations':len(xs),'rankable_count':len(good),'best_level_J_F':perlevel[str(level)]})
             cp=c.get('checkpoint_rep')
-            human={'case_sha256':c['case_sha256'],'case_model_configuration':case.get('research_model',case.get('human',{})),
+            human={'case_sha256':c['case_sha256'],'case_model_identifier':case.get('research_model','low_rom_registered'),
+                   'physical_model_configuration':case.get('physical',{}),
                    'physical_case_file':c['case_path'],'checkpoint_rep':cp,'source_checkpoint_sha256':bestrecord.get('source_checkpoint_sha256'),
                    'allowed_online_model':'receipt-owned deployable estimated state/belief; hidden case physics for plant and reproduction only'}
             metrics={k:bestrecord.get(k) for k in ('mean_force_n','rms_force_n','peak_force_n','moment_integral_nm_s','moment_peak_nm',
