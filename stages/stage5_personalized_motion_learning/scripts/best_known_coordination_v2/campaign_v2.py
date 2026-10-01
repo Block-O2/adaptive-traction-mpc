@@ -21,6 +21,10 @@ def save(path,x):
     temp=path.with_suffix(path.suffix+'.tmp')
     temp.write_text(json.dumps(x,indent=2,sort_keys=True,allow_nan=False)+'\n');temp.replace(path)
 def read(path):return json.loads(path.read_text())
+def load_result(ident):
+    path=RUNS/ident/'rollout_result.json';r=read(path)
+    retry=RUNS/(ident+'_recovery_01')/'rollout_result.json'
+    return read(retry) if r['status']=='INTERRUPTED' and retry.exists() else r
 def sha(path):
     h=hashlib.sha256()
     with path.open('rb') as stream:
@@ -53,6 +57,11 @@ def eligible(record,base,arm):
     return arm=='NATIVE' or isolated,isolated,residual
 def compress_raw(out,record):
     storage=record.get('raw_storage',{})
+    originals=record.setdefault('raw_files_sha256',{})
+    for p in sorted(out.rglob('*')):
+        if p.is_file() and p.name not in ('rollout_result.json','process_log.json') and p.suffix not in ('.gz','.tmp'):
+            name=str(p.relative_to(out))
+            if name not in originals:originals[name]=sha(p)
     for name,h in record.get('raw_files_sha256',{}).items():
         path=out/name
         if name in storage:
@@ -126,7 +135,7 @@ def gate_a():
             a=baseline(c['id'],arm);b=read(RUNS/f'A_{c["id"]}_{arm}_baseline_1/rollout_result.json')
             h=next(x for x in hist['rows'] if x['condition_id']==c['id'])
             expected=h['matched_baseline_J_F_task_n_s' if arm=='MATCHED' else 'native_baseline_J_F_task_n_s']
-            fixed=read(RUNS/f'A_{c["id"]}_{arm}_fixed_0/rollout_result.json');replay=read(RUNS/f'A_{c["id"]}_{arm}_fixed_1/rollout_result.json')
+            fixed=load_result(f'A_{c["id"]}_{arm}_fixed_0');replay=load_result(f'A_{c["id"]}_{arm}_fixed_1')
             error=abs(a.get('J_F_task_n_s',-1)-b.get('J_F_task_n_s',-2))
             historical=abs(a.get('J_F_task_n_s',-1)-expected)
             good,iso,residual=eligible(fixed,a,arm)
@@ -161,6 +170,9 @@ def search_pair(pair):
         for restart in range(3):
             rng=np.random.default_rng(20261001+1000*ci+100*ai+10*level+restart)
             mean=neutral(level) if restart==0 else known_good(level) if restart==1 else neutral(level)
+            if restart==1:
+                candidate=prior_seed(cond,arm,level)
+                if candidate is not None and candidate[0]>=0:mean=candidate
             if restart==2:
                 randoms=[v for v in rankable_entries(cond,arm) if v[1].get('initialization') in ('small','diverse')]
                 if randoms:mean[:6]=randoms[0][1]['spec']['parameters']
@@ -191,7 +203,7 @@ def search_pair(pair):
 
 def collect():
     data=[]
-    for p in sorted(PROPOSALS.glob('*.json')):
+    for p in sorted(PROPOSALS.glob('*.json'),key=lambda p:(p.stat().st_mtime_ns,p.name)):
         e=read(p);rp=RUNS/e['run_id']/'rollout_result.json'
         if rp.exists():data.append((e,read(rp)))
     return data
@@ -210,6 +222,11 @@ def best_prior(cond,arm):
             except Exception:continue
             if r.get('condition_id')!=cond or r.get('status')!='VALID':continue
             a=r.get('arm');patt=r.get('pattern') or {}
+            if r.get('case_sha256')!=b.get('case_sha256') or r.get('options_sha256')!=b.get('options_sha256'):continue
+            if r.get('source_checkpoint_sha256')!=b.get('source_checkpoint_sha256'):continue
+            if root.name=='runs' and root.parent.name=='value_learning_research_v1' and r['run_id'].startswith('pilot'):continue
+            if patt.get('timing_policy')=='NATIVE_SCHEDULER' or patt.get('mode') in ('NATIVE_PATH','NATIVE_BASELINE'):a='NATIVE'
+            elif patt.get('timing_policy')=='FIXED_MATCHED_DURATION':a='MATCHED'
             if a=='BASELINE':a='NATIVE'
             if a!=arm:continue
             good,iso,res=eligible(r,b,arm)
@@ -219,29 +236,50 @@ def best_prior(cond,arm):
                 if anymatched is None or row['J_F_task_n_s']<anymatched['J_F_task_n_s']:anymatched=row
             if good and (best is None or row['J_F_task_n_s']<best['J_F_task_n_s']):best=row
     return best,anymatched
+@lru_cache(None)
+def prior_seed(cond,arm,level):
+    prior,_=best_prior(cond,arm)
+    if prior is None or not prior['pattern']:return None
+    d=prior['pattern'];d=d.get('descriptor',d)
+    if d.get('synchronous') or d.get('horizon','H3') not in ('H3','H4'):return None
+    if 'parameters' in d:
+        old=list(d['parameters']);old += [0]*max(0,7-len(old))
+        if any(abs(v)>1e-14 for v in old[5:7]):return None # distinct smooth basis, cannot claim exact mapping
+        amount,peak=.5*old[0],old[1];basis=.5*np.asarray(old[2:5])
+    else:amount,peak=.5*d.get('lead',0)*d.get('amplitude',0),d.get('peak',.5);basis=np.zeros(3)
+    if level==1 and np.any(basis):return None
+    p=neutral(level);p[:2]=amount;p[2]=peak
+    sign=-1 if d.get('return_reverse') else 1
+    if d.get('horizon')=='H4':p[4:6]=sign*amount
+    if level>=2:
+        p[6:9]=basis
+        if d.get('horizon')=='H4':p[9:12]=sign*basis
+    return p if np.all(p>=LOW[:len(p)]) and np.all(p<=HIGH[:len(p)]) else None
 
 def final_comparisons():
     candidates={};all_data=collect()
     for e,r in all_data:
         if e['phase'] not in ('A','B') or e['spec'] is None or r.get('status')!='VALID':continue
         candidates[json.dumps(e['spec'],sort_keys=True)]=e['spec']
-    coverage=[]
-    for key,p in candidates.items():
-        values=[]
-        for c in CONDITIONS:
-            for arm in ARMS:
+    fixed_by_arm={};selections={}
+    for arm in ARMS:
+        coverage=[]
+        for key,p in candidates.items():
+            values=[]
+            for c in CONDITIONS:
                 matches=[r for e,r in all_data if e['condition']==c['id'] and e['arm']==arm and e['spec']==p and eligible(r,baseline(c['id'],arm),arm)[0]]
                 if matches:values.append(1-min(r['J_F_task_n_s'] for r in matches)/baseline(c['id'],arm)['J_F_task_n_s'])
-        coverage.append((len(values),float(np.mean(values)) if values else -1,key))
-    winner=max(coverage);fixed=candidates[winner[2]]
-    save(D/'FIXED_PATTERN_SELECTION.json',{'descriptor':fixed,'coverage_before_reexecution':winner[0],'mean_fractional_benefit':winner[1],
-                                         'selection':'coverage first, mean relative benefit second, in-sample', 'frozen_before_final_cross_execution':True})
+            coverage.append((len(values),float(np.mean(values)) if values else -1,key))
+        winner=max(coverage);fixed_by_arm[arm]=candidates[winner[2]]
+        selections[arm]={'descriptor':fixed_by_arm[arm],'coverage_before_reexecution':winner[0],'mean_fractional_benefit':winner[1]}
+    save(D/'FIXED_PATTERN_SELECTION.json',{'arms':selections,
+        'selection':'per arm independently: coverage first, mean relative benefit second, in-sample', 'frozen_before_final_cross_execution':True})
     tasks=[]
     for c in CONDITIONS:
         for arm in ARMS:
             ranks=rankable_entries(c['id'],arm);best=ranks[0]
             tasks.append(entry(c['id'],arm,f'F_{c["id"]}_{arm}_confirm',best[1]['spec'],'CONFIRM',discovery_run_id=best[1]['run_id'],expected_J_F=best[0]))
-            tasks.append(entry(c['id'],arm,f'F_{c["id"]}_{arm}_fixed',fixed,'FIXED'))
+            tasks.append(entry(c['id'],arm,f'F_{c["id"]}_{arm}_fixed',fixed_by_arm[arm],'FIXED'))
     with ThreadPoolExecutor(max_workers=2) as pool:list(pool.map(execute,tasks))
 
 def analyze():
@@ -255,7 +293,7 @@ def analyze():
             confirm=read(RUNS/f'F_{c["id"]}_{arm}_confirm/rollout_result.json')
             confirmation=(confirm['status']=='VALID' and abs(confirm['J_F_task_n_s']-bestcost)<=1e-6)
             fixed=read(RUNS/f'F_{c["id"]}_{arm}_fixed/rollout_result.json')
-            oldfixed=read(RUNS/f'A_{c["id"]}_{arm}_fixed_0/rollout_result.json')
+            oldfixed=load_result(f'A_{c["id"]}_{arm}_fixed_0')
             fixedlegal,fixediso,fixedres=eligible(fixed,b,arm)
             previous=prior['J_F_task_n_s'] if prior else b['J_F_task_n_s']
             v2only=bestcost;selected_prior=prior is not None and previous<bestcost
@@ -343,7 +381,7 @@ def analyze():
     report=['# Best-Known Coordination Reference Search v2','',
       'Finite-budget teacher generation complete. No RL or value model was trained. Original source, controller, Human dynamics, safety thresholds, planner objective and Scientific Mode remain fingerprint-identical.',
       '',*table,'',
-      f'Executed {len(data)} rollouts: '+str(dict(Counter(r['status'] for _,r in data)))+'. Phase A 60, CEM Phase B 540, confirmation/fixed comparison 20. Signed hip/knee, width/catch-up, per-phase offsets and smooth control coefficients have dimensions 6/12/20. Each of three initializations has two generations of three candidates. This sparse finite envelope does not establish convergence.',
+      f'Recorded {len(data)} attempted rollouts: '+str(dict(Counter(r['status'] for _,r in data)))+'. Planned Phase A 60, CEM Phase B 540, confirmation/fixed comparison 20; separately preserved interrupted attempt and replacement are identified in the recovery log. Signed hip/knee, width/catch-up, per-phase offsets and smooth control coefficients have nominal dimensions 6/12/20. MATCHED independent dimensions are 4/10/18 because hip-lead and knee-lag are tied to preserve common progress; NATIVE dimensions remain 6/12/20. Each of three initializations has two generations of three candidates. This sparse finite envelope does not establish convergence.',
       '',f'Wall time {elapsed/3600:.3f} h; mean rollout {np.mean(timings):.3f} s, median {np.median(timings):.3f} s; two concurrent simulations. Runtime includes offline search, not online latency optimization.',
       '', '## Direct answers','',
       '1. Absolute best-known J_F is condition/arm specific; use the table. Comparing minima across different tasks is not meaningful.',
@@ -359,7 +397,7 @@ def analyze():
       'State: deployable q/dq estimate and receipt-owned reference; phase/progress, start/goal/remaining ROM, previous declared chunk, estimated Human dynamics/geometry belief and confidence/residual/sample history, causal adaptation state, scheduler/governor and pacing context. Frozen physical condition ids and simulation Human truth are reproduction metadata, not deployable features.',
       'Action: signed hip lead/knee lag, lead peak/width, phase offsets and optional smooth basis coefficients. Target: full remaining-task absolute J_F conditioned on declared continuation and timing; paired delta J against same-state/same-arm baseline is useful for ranking. Keep moment/clearance/intensity as separate constrained diagnostics, not a mixed reward. Full-task outcome cannot be replaced by first-waypoint force.',
       '', '## Limits and evidence','',
-      'All five conditions were previously used and are in-sample teacher-generation conditions, not fresh held-out patients. low_ordinary_early is an adaptation checkpoint of one session. Deterministic baseline/replay/confirmation is reproducibility, not independent subjects. MATCHED physically valid timing-confounded outcomes remain in raw results and are excluded from isolated ranking. NATIVE effects may include timing. Initializations with infeasible candidates are retained.',
+      'All five conditions were previously used and are in-sample teacher-generation conditions, not fresh held-out patients. low_ordinary_early is an adaptation checkpoint of one session. Deterministic baseline/replay/confirmation is reproducibility, not independent subjects. MATCHED requires same segment count, each phase residual<=25ms, and declared target common-progress residual<=1e-9; valid pacing/common-progress-confounded outcomes remain in raw results and are excluded from isolated ranking. NATIVE effects may include timing. Initializations with infeasible candidates are retained.',
       'Database entries may retain a stronger historical VALID reference. Such entries are separately sourced and never represented as a new v2 CEM discovery. Prior all-valid timing-confounded matched minima are preserved in CONDITION_COMPARISON.json, separate from isolated references.',
       'CEM design context: [Pinneri et al., 2021](https://proceedings.mlr.press/v155/pinneri21a.html); smoothed diagonal CEM/elite memory used here, not a full iCEM implementation or a convergence guarantee.',
       'RAW_DATA_MANIFEST.json records stored and original content hashes; raw JSON is losslessly compressed. Database manifest_hash is the rollout-result digest containing raw hashes. SEARCH_CONVERGENCE.csv includes new-only and prior-incumbent envelopes. Source fingerprints and contract fix all production/config/scientific semantics.']
