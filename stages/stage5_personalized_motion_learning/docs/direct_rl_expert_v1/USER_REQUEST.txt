@@ -1,0 +1,925 @@
+开始 adaptive-traction-mpc 的 Direct RL Expert Search v1。
+
+Scientific / training host:
+Y9000P / Ubuntu 24.04 WSL2
+RTX 4060 Laptop GPU
+
+本轮目标：
+
+建立一个真正可训练、动作自由度明显高于现有 waypoint/template planner 的
+Direct-RL environment，并完成第一条严肃的 SAC 学习曲线。
+
+这不是最终 RL qualification。
+这不是 few-shot personalization。
+这不是 hardware experiment。
+
+最高目标：
+
+DIRECT_RL_SAC_V1_COMPLETE
+
+本轮核心问题：
+
+在保持相同 robot–cuff–Human physical task 和独立评价标准的前提下，
+一个充分放开高层动作自由度的成熟 RL policy，
+是否能够找到明显优于现有 controller / fixed coordination / CEM best-known
+的合法行为？
+
+==================================================
+0. Source / branch / evidence
+==================================================
+
+先读取并冻结当前相关证据：
+
+- zero-value baseline
+- coordination-pacing exploration
+- value-learning-research-v1
+- best-known-coordination-search-v2
+- latest best-known reference database
+- runtime/resource audit conclusions
+
+确认：
+
+- current Git clean
+- latest relevant branches pushed/reachable
+- production controller / Human model / safety evidence unchanged
+
+创建：
+
+codex/direct-rl-expert-v1
+
+Do not merge.
+Do not overwrite historical evidence.
+
+==================================================
+1. Resource preflight
+==================================================
+
+当前机器最近做过资源治理。
+
+要求：
+
+- 默认只使用 1 个 environment / rollout worker
+- 不允许 3+ environment 并行
+- 先测 RSS 后才允许尝试 2 env
+- 启动前要求 C: / WSL 空间健康
+- 训练 raw data 使用紧凑格式
+- 不保存每个 training episode 的完整 5 ms JSON/NPZ trace
+
+记录：
+
+RAM
+swap
+CPU
+GPU
+disk
+process count
+
+如果内存压力异常：
+降低并发，不停止科学任务。
+
+==================================================
+2. GPU / CUDA preflight
+==================================================
+
+必须检查：
+
+nvidia-smi
+
+以及训练 Python 环境中的：
+
+torch.__version__
+torch.cuda.is_available()
+torch.cuda.get_device_name(0)
+
+如果 CUDA 可用：
+
+SAC actor / critic neural training 使用 CUDA。
+
+记录：
+
+- GPU model
+- CUDA runtime
+- PyTorch CUDA version
+- GPU memory total/free
+- training device
+
+Do NOT assume GPU means physics is GPU accelerated.
+
+Current MuJoCo physics remains on the existing validated CPU path.
+
+Do NOT migrate to:
+- MJWarp
+- Isaac Gym
+- other physics backend
+
+in this workflow.
+
+If CUDA unexpectedly unavailable:
+diagnose environment first.
+Do not silently train the main SAC campaign on CPU.
+
+==================================================
+3. Freeze direct-RL scientific contract
+==================================================
+
+创建：
+
+DIRECT_RL_V1_CONTRACT.md/json
+
+明确：
+
+Primary scientific score:
+
+J_F_task =
+integral ||F_cuff_measured|| dt
+
+over a COMPLETE:
+
+OUTBOUND
+→ HOLD
+→ RETURN
+
+task.
+
+Safety/task validity remains a hard acceptance gate.
+
+Separately record:
+
+- mean cuff force
+- RMS cuff force
+- peak cuff force
+- moment integral
+- peak moment
+- task duration
+- minimum clearance
+- smoothness
+- success/failure
+- safety intervention count
+
+Do NOT combine all metrics into a post-hoc weighted “paper score”.
+
+Training reward may use shaping,
+but final scientific ranking uses the frozen external evaluator.
+
+==================================================
+4. Build a NEW Gymnasium environment adapter
+==================================================
+
+Use:
+
+Gymnasium
+Stable-Baselines3
+SB3-Contrib where needed
+PyTorch
+
+Do NOT reimplement SAC manually.
+
+The new environment must reuse the same:
+
+- MuJoCo robot
+- Human model
+- cuff/contact model
+- task endpoints
+- observation generation
+- CR12 physical execution pathway
+- independent evaluation metrics
+
+The agent must NOT directly set Human joint state.
+
+The agent must NOT apply fictitious Human joint torques.
+
+All Human motion must still occur through the CR12/cuff physical interaction.
+
+==================================================
+5. First direct action representation
+==================================================
+
+Primary v1 action:
+
+continuous normalized 2-D action:
+
+a_t ∈ [-1,1]^2
+
+mapped to a bounded change / target for:
+
+hip target
+knee target
+
+at the high-level RL policy rate.
+
+The action representation must permit:
+
+- synchronous motion
+- hip-leading
+- knee-leading
+- one joint temporarily progressing less
+- changing lead relation during movement
+- catch-up behavior
+- different OUTBOUND / RETURN coordination
+
+Do NOT clip actions back into the old narrow candidate lattice.
+
+Do NOT force the policy to follow known H1/H2/H3/H4 patterns.
+
+However:
+
+preserve actual:
+- ROM
+- velocity
+- acceleration
+- robot/interface feasibility
+- geometric clearance
+- required task completion
+
+Separate:
+
+PHYSICAL / SAFETY constraint
+
+from
+
+OLD PLANNER design preference.
+
+Document every retained constraint.
+
+==================================================
+6. Policy update rate study
+==================================================
+
+The underlying simulation/control rate remains unchanged.
+
+Test at least:
+
+20 ms policy period
+
+and
+
+50 ms policy period
+
+with deterministic simple/reference policies.
+
+Measure:
+
+- controllability
+- task completion
+- path smoothness
+- simulation throughput
+- action saturation
+- compute cost
+
+Choose ONE policy period for the SAC v1 campaign.
+
+Do not choose only because it is faster.
+
+Record rationale.
+
+==================================================
+7. Observation design
+==================================================
+
+Use deployable / causal information only for the main actor.
+
+Candidate observation groups:
+
+- estimated Human q / dq
+- current Human target / reference
+- robot state required for action realization
+- measured cuff force / moment
+- phase
+- task goal
+- normalized progress
+- remaining phase/task time
+- previous executed RL action
+- required deployable belief/context
+- relevant validity flags
+
+Normalize features.
+
+Do NOT include:
+
+- hidden true Human parameters
+- future states
+- future force
+- simulation oracle geometry unavailable to deployment
+- CEM winner identity
+
+If a short observation history is needed,
+use a bounded stack.
+
+Do NOT introduce an RNN in v1 unless Markov/observability diagnostics strongly require it.
+
+==================================================
+8. Environment correctness gates
+==================================================
+
+Before training, verify:
+
+A. known baseline/replay behavior can be reproduced through the environment
+
+B. known beneficial coordination behavior can be represented by the action interface
+
+C. action actually changes CR12/cuff/Human physical behavior
+
+D. zero action / conservative action semantics are understood
+
+E. task COMPLETE requires real OUTBOUND/HOLD/RETURN
+
+F. early abort cannot obtain artificially low cost
+
+G. truncated and terminated semantics are correct
+
+H. observation contains no hidden truth
+
+I. same seed/reset is deterministic where expected
+
+Save:
+
+DIRECT_RL_ENV_VALIDATION.md/json
+
+Do not train main SAC until these gates PASS.
+
+==================================================
+9. Reward v1
+==================================================
+
+The scientific objective is still J_F_task.
+
+Training reward may include structured task shaping.
+
+Construct reward from:
+
+- negative physical cuff force integral over the RL step
+- task/progress potential shaping
+- explicit valid task-completion reward if needed
+- clear failure penalty
+
+Do NOT reward:
+- “large action”
+- “hip leading”
+- deviation from baseline
+- similarity to CEM winner
+
+The policy must be free to discover its own coordination.
+
+Run explicit reward-hacking tests:
+
+- do nothing
+- abort early
+- stall before HOLD
+- skip RETURN
+- exploit timeout
+- cause safety rejection repeatedly
+- shift load to moment
+
+None may outperform a successful complete task under the training return in an unintended way.
+
+Keep moment metrics independent.
+Do not hide moment increases using an arbitrary reward weight.
+
+==================================================
+10. Discount / horizon calibration
+==================================================
+
+Do not blindly use gamma=0.99.
+
+Compute expected number of RL decisions per full repetition
+for the selected policy period.
+
+Select and document gamma candidates appropriate for full-task credit.
+
+Include at least one setting whose effective horizon spans most of the repetition.
+
+If episodic undiscounted / near-undiscounted cost is technically appropriate,
+evaluate it carefully.
+
+Document:
+
+gamma
+episode decision count
+effective horizon
+
+==================================================
+11. SAC implementation
+==================================================
+
+Use Stable-Baselines3 SAC.
+
+Start from a mature/default or RL-Zoo-informed configuration,
+then make only bounded task-relevant changes.
+
+Initial policy/critic network:
+
+2 hidden layers
+256 units each
+
+unless a strong implementation reason suggests another standard size.
+
+Use CUDA for actor/critic training.
+
+Record:
+
+- learning rate
+- batch size
+- replay buffer
+- learning starts
+- train frequency
+- gradient steps
+- gamma
+- tau
+- entropy configuration
+- network architecture
+- action scale
+- observation normalization
+
+No silent hyperparameter drift.
+
+==================================================
+12. Training curriculum
+==================================================
+
+Do not immediately judge SAC on random-policy full hard task.
+
+Use a bounded two-stage curriculum if needed:
+
+Stage A:
+learn reliable complete task execution
+
+Stage B:
+optimize interaction cost under the final full task
+
+Curriculum may change:
+- initialization difficulty
+- shaping strength
+
+but NOT:
+- physical model
+- final task goal
+- scientific evaluator
+
+Before final evaluation,
+freeze the final reward/task configuration.
+
+==================================================
+13. Representative tasks
+==================================================
+
+For v1 train/evaluate two conditions:
+
+A. HIGH-HEADROOM:
+sync_120
+
+B. LOW-HEADROOM:
+low-ROM ordinary
+
+Purpose:
+
+sync_120:
+test whether direct RL can substantially exceed the existing coordination framework
+
+low-ROM:
+test whether previously small headroom is due to framework restriction or the task itself
+
+Do NOT expand to every condition yet.
+
+==================================================
+14. Throughput benchmark before long training
+==================================================
+
+Run short benchmarks:
+
+- environment stepping only
+- SAC learning with CUDA
+- evaluation without training
+
+Measure:
+
+- environment steps/s
+- simulation seconds/s
+- CPU utilization
+- GPU utilization
+- GPU VRAM
+- RAM RSS
+- peak RSS
+- disk write rate
+
+Compare:
+
+1 env
+
+and ONLY if memory evidence supports it:
+
+2 env
+
+Do not test 3+ env in this workflow.
+
+Select configuration based on stable throughput,
+not maximum instantaneous speed.
+
+Create:
+
+DIRECT_RL_THROUGHPUT_BENCHMARK.md/json
+
+Estimate wall time for:
+
+100k
+300k
+1M
+2M
+
+agent steps.
+
+==================================================
+15. SAC pilot
+==================================================
+
+Run an initial SAC pilot.
+
+Target:
+
+minimum:
+100k steps
+
+preferred:
+200k–300k steps
+
+subject to wall-time budget.
+
+During training:
+
+evaluate deterministic policy periodically,
+for example every suitable fixed step interval.
+
+Evaluation episodes use:
+- no exploration noise
+- frozen independent evaluator
+- no training update
+
+Track:
+
+- task success
+- J_F
+- force metrics
+- moment metrics
+- duration
+- clearance
+- safety interventions
+- action saturation
+- actual hip/knee path
+
+Save model checkpoints.
+
+Do not select final model by training reward alone.
+
+==================================================
+16. Known reference comparison
+==================================================
+
+Compare evaluated SAC checkpoints against:
+
+1. original controller
+
+2. strong fixed coordination comparator
+
+3. current CEM / best-known reference
+   under genuinely comparable condition and protocol
+
+Do not call CEM “global optimum”.
+
+For each:
+
+report:
+
+J_F
+success
+force intensity
+moment
+duration
+clearance
+
+Define:
+
+known-benefit capture =
+(baseline - RL)
+/
+(baseline - best-known)
+
+only where denominator is meaningful.
+
+Do not call this global-optimality percentage.
+
+==================================================
+17. Action/path inspection
+==================================================
+
+For best SAC checkpoints:
+
+plot / save:
+
+hip vs time
+knee vs time
+hip-knee coordination path
+normalized lead/lag
+force vs time
+moment vs time
+safety intervention timeline
+
+Question:
+
+Did SAC discover:
+
+- known hip-leading structure?
+- a modified version?
+- completely new coordination?
+- timing exploitation?
+- safety-filter exploitation?
+
+Do not rely only on scalar reward.
+
+==================================================
+18. Safety treatment in v1
+==================================================
+
+This first main RL campaign may use the existing authoritative
+physical/safety screening layer,
+but the agent must experience its effect during training.
+
+Log:
+
+raw RL action
+executed action
+modification/rejection
+fallback/intervention
+
+Do not hide the difference.
+
+If current safety layer is demonstrably tied to the old action representation
+and cannot correctly screen the expanded RL action:
+
+STOP main training
+and report the exact incompatibility.
+
+Do not silently bypass it.
+
+A small simulation-only unfiltered diagnostic may be used ONLY to understand
+whether the safety layer suppresses policy freedom.
+
+Unsafe/unfiltered runs cannot become official best candidates.
+
+==================================================
+19. Training robustness
+==================================================
+
+For the SAC v1 pilot:
+
+at least 2 training seeds if time permits.
+
+If only one full seed fits the wall-time:
+run one full seed plus one shorter independent seed.
+
+Do not claim algorithm reliability from one seed.
+
+Preserve learning curves separately.
+
+==================================================
+20. Runtime / deployment measurement
+==================================================
+
+For evaluated policy measure:
+
+actor inference time on CPU
+actor inference time on GPU
+
+and full:
+
+observation ready
+→ actor
+→ safety/action realization
+→ command/reference ready
+
+Do not report only NN inference latency.
+
+This is scientific timing characterization,
+not realtime qualification.
+
+==================================================
+21. Data lifecycle
+==================================================
+
+Do NOT recreate the previous 100 GB problem.
+
+Training stores:
+
+- compact replay buffer as needed
+- model checkpoints
+- scalar metrics
+- compact episode summaries
+
+Full high-frequency trajectory only for:
+
+- baseline validation
+- periodic evaluation
+- best checkpoint
+- major failure/forensic example
+
+Every large training artifact must have a retention class:
+
+KEEP
+ARCHIVE
+DISCARDABLE
+
+At workflow end:
+perform closeout but do NOT run a destructive bulk cleanup without necessity.
+
+==================================================
+22. Autonomous repair
+==================================================
+
+Allowed:
+
+diagnose
+→ minimal fix
+→ regression test
+→ continue
+
+for:
+
+- Gym adapter
+- SB3 integration
+- CUDA setup within existing env
+- logging
+- reward implementation
+- evaluation
+- serialization
+- plotting
+
+Do NOT:
+
+- change Human physics to make RL easier
+- relax safety thresholds
+- change task endpoint
+- silently omit HOLD/RETURN
+- migrate physics backend
+- install a fundamentally different simulator
+
+==================================================
+23. Wall-time budget
+==================================================
+
+Target:
+5–8 hours
+
+Hard maximum:
+10 hours
+
+Priority order:
+
+1. valid direct-RL environment
+2. CUDA/throughput benchmark
+3. SAC learning curve
+4. independent evaluation
+5. second seed
+6. extended steps
+
+If throughput is too slow to reach preferred steps:
+
+do not fake completion.
+
+Save the valid partial learning curve and report:
+
+observed steps/s
+
+estimated time for:
+300k / 1M / 2M
+
+Then stop cleanly.
+
+==================================================
+24. Required outputs
+==================================================
+
+At minimum:
+
+DIRECT_RL_V1_CONTRACT.md/json
+
+DIRECT_RL_ENV_VALIDATION.md/json
+
+DIRECT_RL_OBSERVATION_ACTION_SPEC.md
+
+DIRECT_RL_REWARD_AUDIT.md/json
+
+DIRECT_RL_THROUGHPUT_BENCHMARK.md/json
+
+SAC_TRAINING_CONFIG.json
+
+SAC_LEARNING_CURVE.csv/json
+
+SAC_CHECKPOINT_EVALUATION.csv/json
+
+SAC_BEST_POLICY_ANALYSIS.md/json
+
+SAC_VS_CONTROLLER_VS_CEM.md/json
+
+DIRECT_RL_RUNTIME_PROFILE.md/json
+
+DIRECT_RL_V1_REPORT.md
+
+RAW_DATA_MANIFEST.json
+STATE.json
+
+==================================================
+25. Final questions
+==================================================
+
+Final report must answer:
+
+1. Is the new RL environment physically equivalent enough for fair comparison?
+
+2. Does the RL action interface express materially more coordination freedom?
+
+3. Can SAC reliably complete the full task?
+
+4. What best VALID J_F did SAC achieve?
+
+5. How does it compare with:
+   original controller,
+   fixed coordination,
+   CEM best-known?
+
+6. Does SAC produce a genuinely different hip/knee coordination path?
+
+7. Is its gain due to coordination,
+   timing,
+   or both?
+
+8. What happens to moment metrics?
+
+9. How often does safety modify/reject SAC actions?
+
+10. Is the safety layer suppressing a large fraction of RL behavior?
+
+11. Is the learning curve still improving at the end?
+
+12. Does more training appear justified?
+
+13. What is environment/training throughput?
+
+14. Is GPU actually utilized?
+
+15. What appears to be the CPU bottleneck?
+
+16. Estimated wall time for 1M / 2M steps?
+
+17. What is online inference / full action latency?
+
+18. Should the next serious campaign prioritize:
+    more SAC training,
+    TQC,
+    PPO,
+    reward/action redesign,
+    or environment/safety redesign?
+
+==================================================
+26. Git
+==================================================
+
+Branch:
+
+codex/direct-rl-expert-v1
+
+Stage individually.
+
+No git add -A.
+No merge.
+No force push.
+
+Push the research branch if authorization already exists;
+otherwise finish local evidence and request explicit push authorization.
+
+==================================================
+27. Final states
+==================================================
+
+Allowed:
+
+DIRECT_RL_SAC_V1_COMPLETE
+
+DIRECT_RL_SAC_V1_PARTIAL
+
+DIRECT_RL_SAC_V1_BLOCKED
+
+COMPLETE does NOT require SAC to beat CEM.
+
+It requires:
+- valid environment
+- valid training
+- independent evaluation
+- throughput/timing characterization
+- scientifically interpretable result
+
+Then STOP.
+
+Do not automatically launch:
+- TQC
+- PPO
+- million-step multi-day campaign
+- hardware tests
+- few-shot personalization

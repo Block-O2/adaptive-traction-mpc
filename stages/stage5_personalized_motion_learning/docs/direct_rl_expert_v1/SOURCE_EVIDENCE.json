@@ -1,0 +1,52 @@
+{
+  "excerpts": [
+    {
+      "claim": "Quintic origin is q/dq only, initial ddq is zero",
+      "end_line": 208,
+      "excerpt": "def _quintic_coefficients(\n    start_q: np.ndarray,\n    start_dq: np.ndarray,\n    target_q: np.ndarray,\n    target_dq: np.ndarray,\n    duration_s: float,\n) -> np.ndarray:\n    coefficients = np.zeros((2, 6), dtype=float)\n    coefficients[:, 0] = start_q\n    coefficients[:, 1] = duration_s * start_dq\n    system = np.asarray(\n        [\n            [1.0, 1.0, 1.0],\n            [3.0, 4.0, 5.0],\n            [6.0, 12.0, 20.0],\n        ]\n    )\n    right_hand_side = np.column_stack(\n        [\n            target_q - coefficients[:, 0] - coefficients[:, 1],\n            duration_s * target_dq - coefficients[:, 1],\n            np.zeros(2),\n        ]\n    )\n    coefficients[:, 3:] = np.linalg.solve(system, right_hand_side.T).T\n    return coefficients\n\n\ndef _real_unit_roots(coefficients_descending: np.ndarray) -> list[float]:",
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "sha256": "3dcd536fa9befed9720a365814d0581fa2ae01201ef9f1d13c8dabffb4e2037a",
+      "start_line": 180
+    },
+    {
+      "claim": "Rolling splice uses original segment endpoint",
+      "end_line": 33,
+      "excerpt": "    def __post_init__(self) -> None:\n        if not np.isfinite(self.prefix_start_s) or not (0 <= self.prefix_start_s < self.prefix.duration_s):\n            raise ValueError(\"rolling prefix start must precede its endpoint\")\n        old = self.prefix.sample(self.prefix.duration_s)\n        new = self.suffix.sample(0.0)\n        if any(np.max(np.abs(a-b)) > 1e-10 for a, b in (\n                (old.q_rad, new.q_rad),\n                (old.dq_rad_s, new.dq_rad_s),\n                (old.ddq_rad_s2, new.ddq_rad_s2))):\n            raise ValueError(\"rolling suffix is not C2 at the original prefix endpoint\")\n\n    @property\n    def splice_elapsed_s(self) -> float:",
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/rolling_suffix_splice.py",
+      "sha256": "2fbaf830393009bf96fdd52c2e217db197d705ec48fb268e4e31f6cf00fb5ea1",
+      "start_line": 21
+    },
+    {
+      "claim": "Activation includes zero-initial-ddq convention",
+      "end_line": 154,
+      "excerpt": "def validate_activation(*, belief, request_sequence, schedule, clearance,\n                        phase, request_phase, remaining_s, reference_state, now_physics_s=0.,\n                        future_handoff=None, certificate_geometry_at_request=None):\n    first = schedule.sample(0.)\n    continuity = bool(np.max(np.abs(np.r_[first.q_rad, first.dq_rad_s]-reference_state)) <= 1e-10\n                      and np.max(np.abs(first.ddq_rad_s2)) <= 1e-10)\n    mechanics = AdaptiveMechanicsScreenV22().evaluate(belief, schedule.candidate, schedule)\n    lower, original_certificate, reused_certificate = certified_original_schedule_lower(\n        schedule, clearance, certificate_geometry_at_request)\n    record = {\"request_model_sequence\": request_sequence, \"activation_model_sequence\": belief.sequence,\n              \"request_phase\": request_phase.value, \"activation_phase\": phase.value,",
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "sha256": "574792b8753119d3fa84a97b972d70639e6f69125260be5a6567097b2b0c7e72",
+      "start_line": 144
+    },
+    {
+      "claim": "Live handoff compares reference acceleration",
+      "end_line": 212,
+      "excerpt": "        live_c2 = bool(continuity and np.max(np.abs(first.ddq_rad_s2-reference_ddq)) <= 1e-10)",
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py",
+      "sha256": "574792b8753119d3fa84a97b972d70639e6f69125260be5a6567097b2b0c7e72",
+      "start_line": 212
+    },
+    {
+      "claim": "Runtime task requests occur at endpoints",
+      "end_line": 3154,
+      "excerpt": "        if online_timing and async_pending is None and (\n                active_schedule is None or (schedule_done and waypoint_reached\n                                            and not stationary_terminal_reference) or prefetch_due):\n            if pending is not None and not prefetch_due:\n                pending.update(next_observation=state.copy(), next_adaptive_state=belief.value_state_record(),\n                               end_time_s=float(truth.time_s),\n                               duration_s=max(0.0, float(truth.time_s) - pending[\"start_time_s\"]),\n                               selected_plan_activated=bool(decisions[pending[\"decision_index\"]][\"plan_activated\"]),\n                               completion=\"SEGMENT_COMPLETE\")\n                learning_records.append(pending)\n                pending = None\n            # Requests occur only at an old segment endpoint (or phase start).\n            # Hold that emitted boundary under the existing supervisor while",
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "sha256": "091e839bf4a5496c65c66cdb6e3ded33dc99f10ce9edaba7cf8da4b9937079ee",
+      "start_line": 3142
+    },
+    {
+      "claim": "No-regression rule is old planner preference",
+      "end_line": 277,
+      "excerpt": "        if np.any(reference_remaining * (target - reference_state[:2]) < -1.0e-12) or np.any(\n            np.abs(target_remaining) > np.abs(reference_remaining) + 1.0e-12\n        ):\n            return FeedbackCandidateEvaluationV1(\n                label,\n                action,\n                target,\n                False,\n                \"candidate would regress the emitted reference away from the phase goal\",\n                None,\n                {},\n                None,\n                {\"evaluated\": False},\n            )\n        candidate = HumanWaypointCandidate(",
+      "file": "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "sha256": "c57003923ce97fb6b668f39176a47a918f31eee75920fe4d45357771ab2820a4",
+      "start_line": 263
+    }
+  ]
+}
