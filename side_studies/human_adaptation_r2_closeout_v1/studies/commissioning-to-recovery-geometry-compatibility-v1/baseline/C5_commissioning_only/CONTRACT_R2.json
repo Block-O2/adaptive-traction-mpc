@@ -1,0 +1,777 @@
+{
+  "title": "Lab-Relevant Human Adaptation Contrast v1",
+  "version": "R2",
+  "status": "FROZEN_BEFORE_DYNAMIC",
+  "frozen_initial_utc": "2026-10-02T17:37:42.214350+00:00",
+  "questions": [
+    "Value of causal individual commissioning over fixed nominal for fixed-length mass/inertia, stiffness, and cuff-location variation",
+    "Incremental task-time adaptation value over commissioning-only",
+    "Control-effective prediction, actual model consumption, full trajectory reliability and quality"
+  ],
+  "source_commit": "41cdddef117caa4b191a52129c4ff83e481fd5a8",
+  "source_snapshot": "<SIDE_STUDIES_ROOT>/lab-human-adaptation-contrast-v1/snapshot",
+  "source_provenance_sha256": "c63d8184e0cd9a836f75128cbc01146560be3625682ff54566a2771c1f9646b4",
+  "conditions": [
+    {
+      "id": "C0",
+      "label": "nominal",
+      "case": {
+        "case_key": "C0_lab_human_R2",
+        "cell": {
+          "family": "nominal",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 75.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            10.0,
+            10.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.72,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.72,
+      "case_path": "<SIDE_STUDIES_ROOT>/commissioning-to-recovery-geometry-compatibility-v1/cases_R2/C0.json",
+      "case_sha256": "32031fa5303af1b6f928f01ef16e333fdf192001cfd2d6fa75255414403926e4"
+    },
+    {
+      "id": "C1",
+      "label": "mass_low",
+      "case": {
+        "case_key": "C1_lab_human_R2",
+        "cell": {
+          "family": "mass_low",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 60.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            10.0,
+            10.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.72,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.72,
+      "case_path": "<SIDE_STUDIES_ROOT>/commissioning-to-recovery-geometry-compatibility-v1/cases_R2/C1.json",
+      "case_sha256": "9aab557d34882f2825c45eb7ce7f287dd267672cd1604c01251b6d591f57c4bb"
+    },
+    {
+      "id": "C2",
+      "label": "mass_high",
+      "case": {
+        "case_key": "C2_lab_human_R2",
+        "cell": {
+          "family": "mass_high",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 90.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            10.0,
+            10.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.72,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.72,
+      "case_path": "<SIDE_STUDIES_ROOT>/commissioning-to-recovery-geometry-compatibility-v1/cases_R2/C2.json",
+      "case_sha256": "0aaa290b24d694dce93155430e2a8aa35dae184f25d31ad864db5fbb74627adb"
+    },
+    {
+      "id": "C3",
+      "label": "stiffness_low",
+      "case": {
+        "case_key": "C3_lab_human_R2",
+        "cell": {
+          "family": "stiffness_low",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 75.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            7.0,
+            7.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.72,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.72,
+      "case_path": "<SIDE_STUDIES_ROOT>/commissioning-to-recovery-geometry-compatibility-v1/cases_R2/C3.json",
+      "case_sha256": "afb36ee0a6b81bc0e65e81c521d306f4cd62205bc72b6ed860d4f2f48852215c"
+    },
+    {
+      "id": "C4",
+      "label": "stiffness_high",
+      "case": {
+        "case_key": "C4_lab_human_R2",
+        "cell": {
+          "family": "stiffness_high",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 75.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            13.0,
+            13.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.72,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.72,
+      "case_path": "<SIDE_STUDIES_ROOT>/commissioning-to-recovery-geometry-compatibility-v1/cases_R2/C4.json",
+      "case_sha256": "6a9b31003a5a7ca04775ebcbceb376b8b6620cc7ecdafab5a7ea1a048c03fa90"
+    },
+    {
+      "id": "C5",
+      "label": "cuff_proximal",
+      "case": {
+        "case_key": "C5_lab_human_R2",
+        "cell": {
+          "family": "cuff_proximal",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 75.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            10.0,
+            10.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.6,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.6,
+      "case_path": "<SIDE_STUDIES_ROOT>/commissioning-to-recovery-geometry-compatibility-v1/cases_R2/C5.json",
+      "case_sha256": "feb697f52631a2903fd7db996f496f3c67da16cbd68829ae9d786ddcb7ab2a1b"
+    },
+    {
+      "id": "C6",
+      "label": "cuff_intermediate",
+      "case": {
+        "case_key": "C6_lab_human_R2",
+        "cell": {
+          "family": "cuff_intermediate",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 75.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            10.0,
+            10.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.66,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.66,
+      "case_path": "<SIDE_STUDIES_ROOT>/commissioning-to-recovery-geometry-compatibility-v1/cases_R2/C6.json",
+      "case_sha256": "90084dfea877253e71c23dde442efb2d947e01bcabb966796ea0c84e42b8ed32"
+    }
+  ],
+  "arms": {
+    "A": "fixed_population",
+    "B": "commissioning_only",
+    "C": "continual_adaptive"
+  },
+  "primary_budget": 21,
+  "oracle_budget": 3,
+  "optional_combined_case_max": 0,
+  "optional_combined_budget": 0,
+  "optional_repetitions": "Not authorized in R2",
+  "no_RL": true,
+  "no_GPU": true,
+  "no_hardware": true,
+  "numerical_threads": 1,
+  "side_physics_owners_max": 1,
+  "nice": 19,
+  "active_time_hours_target": [
+    2,
+    5
+  ],
+  "hard_active_hours": 6,
+  "resource_waiting_is_not_failure": true,
+  "fixed_geometry": {
+    "height_m": 1.72,
+    "thigh_length_m": 0.43688,
+    "shank_length_m": 0.40076,
+    "length_scales": [
+      1.0,
+      1.0
+    ],
+    "bed_robot_hip": "Same nominal fixture placement, including inherited hip offset [0,.0001] m; no hand relocation"
+  },
+  "levels": {
+    "mass_kg": [
+      60,
+      75,
+      90
+    ],
+    "passive_stiffness_nm_rad": [
+      [
+        7,
+        7
+      ],
+      [
+        10,
+        10
+      ],
+      [
+        13,
+        13
+      ]
+    ],
+    "cuff_rho_prospective": [
+      0.6,
+      0.66,
+      0.72
+    ],
+    "cuff_rho_final": [
+      0.6,
+      0.66,
+      0.72
+    ]
+  },
+  "fixed_independent_parameters": {
+    "height_m": 1.72,
+    "q_rest_deg": [
+      5.0,
+      10.0
+    ],
+    "passive_damping_nms_rad": [
+      5.0,
+      5.0
+    ],
+    "thigh_length_scale": 1.0,
+    "shank_length_scale": 1.0,
+    "thigh_mass_scale": 1.0,
+    "shank_mass_scale": 1.0,
+    "thigh_com_fraction": 0.433,
+    "shank_com_fraction": 0.43,
+    "thigh_inertia_radius_fraction": 0.3,
+    "shank_inertia_radius_fraction": 0.3,
+    "hip_translation_xz_m": [
+      0.0,
+      0.0001
+    ]
+  },
+  "task": {
+    "start_deg": [
+      5.0,
+      10.0
+    ],
+    "goal_deg": [
+      120.0,
+      120.0
+    ],
+    "commissioning_waypoints_deg": [
+      [
+        5.0,
+        10.0
+      ],
+      [
+        14.0,
+        19.0
+      ],
+      [
+        9.0,
+        27.0
+      ],
+      [
+        16.0,
+        22.0
+      ],
+      [
+        5.0,
+        10.0
+      ]
+    ]
+  },
+  "runtime": "traction_mpc_stage5.full3d_adaptive_integration_v1.runtime",
+  "reference": "Original four-Human waypoint qualification path; same semantics in all arms",
+  "runtime_options": {
+    "simulate_planning_latency": true,
+    "formal_qualification": false,
+    "dev_a_recovery": true,
+    "dev_c_bumpless_transfer": false,
+    "dev_d_rigid_table_reference": true,
+    "task_timeout_s": 30.0,
+    "execution_mode": "SCIENTIFIC_SIMULATION",
+    "scientific_host_delay_s": 0.0
+  },
+  "options_path": "stages/stage5_personalized_motion_learning/configs/full3d_adaptive_integration_v1/autonomous_closed_loop_recovery_v1/incremental_clearance_terminal_v9.json",
+  "options_sha256": "d11bb72950f9f74e451548f57ff509e89f92e10aa18f8c62f78bd7a4b7f4c6bb",
+  "pacing": "Frozen options fractions .5 velocity/.25 acceleration",
+  "measurement_seed_semantics": "Inherited CausalMeasurementLayer/MeasurementCase defaults; fresh per-arm process and identical case/probes/noise semantics within triplet. No cross-arm data/checkpoint handoff.",
+  "truth_firewall": "Full case truth only hidden plant construction/evaluation. B/C fit existing causal measured robot/cuff pose/twist/wrench; no truth mass/stiffness/rho/beta/state injection.",
+  "arm_freezing": {
+    "A": "Nominal geometry, beta and zero/nominal residual fixed; physically execute same commissioning probes without fitting.",
+    "B": "Measured effective hip/thigh/knee-to-cuff fit and commissioning beta/residual; freeze for TASK.",
+    "C": "Identical commissioning protocol; task geometry remains frozen; existing validated legal beta/residual update law unchanged."
+  },
+  "pre_run_setup_exclusion": "PHYSICAL_SETUP_OUT_OF_SCOPE for invalid installation/model/initial pose/static IK/current safety prior; not identifier failure",
+  "metrics": [
+    "setup/commissioning/task status",
+    "COMPLETE",
+    "independent physical/scientific verdict",
+    "outbound/HOLD/true RETURN",
+    "q RMSE/peak error",
+    "J_F_task",
+    "mean/RMS/peak force",
+    "moment integral/peak",
+    "duration",
+    "deployable/evaluation clearance",
+    "fallback/rejection/safety counts",
+    "commissioning geometry/beta",
+    "final beta/residual",
+    "accepted/rejected updates/reasons",
+    "planner/mechanics/execution numerical consumption",
+    "held-out-from-commissioning TASK torque prediction residual with data range",
+    "parent+children resource peaks/overlap"
+  ],
+  "evaluation": "Frozen scorer-v2 common physical predicates plus evaluate_execution_mode scientific state/version/source validity; wall plan-age characterization retained separately",
+  "primary_ranking": [
+    "valid complete physical/scientific task",
+    "tracking/safety",
+    "interaction among comparable successful complete tasks"
+  ],
+  "contrasts": [
+    "B-A per condition",
+    "C-B per condition"
+  ],
+  "claims_excluded": [
+    "C-A alone attribution",
+    "beta version or mixed-unit L2 alone learning",
+    "full shank/rho separate anatomical identification",
+    "21 independent humans",
+    "clinical validation",
+    "separated geometry/dynamics benefit without ablation",
+    "failed short integral wins",
+    "clean wall benchmark under SAC overlap"
+  ],
+  "geometry_interpretation": "Evaluate effective knee-to-cuff distance directly; cuff calibration may be automatically performed although manual measurement can be possible in lab.",
+  "prediction_evaluation": "Frozen commissioning model evaluated on causal TASK torque observations not used for commissioning. For continual online model, label prequential predictions before current sample update; no static truth regressor used as evidence of learning.",
+  "oracle_policy": "At most 3 diagnostics only after all 21 primary attempts; excluded from primary counts",
+  "combined_policy": "Do not launch; at most recommend next study after primary matrix",
+  "resource_gate": {
+    "policy": "Observed memory pressure plus ONE C0-A resource qualification; no peak+4GiB Windows rule",
+    "first_run": "C0/fixed_population counts in primary if frozen protocol followed",
+    "monitor_period_s": 30,
+    "SAC_heavy_action": "Finish current side run safely and pause before next",
+    "memory_instability_action": "Side-owned cooperative callback only; preserve partial capture",
+    "no_SAC_signals": true,
+    "no_memory_or_swap_reconfiguration": true,
+    "Windows_launch_min_GiB": 2,
+    "WSL_launch_min_GiB": 3,
+    "Windows_run_critical_GiB": 1,
+    "WSL_run_critical_GiB": 1,
+    "sustained_swap_growth_definition": "two consecutive sampled increases >64 MiB each",
+    "interpretation": "Operational pressure guards for this synthetic campaign; not physical safety thresholds or performance proof"
+  },
+  "retention": "Full traces only nominal, key adaptation benefit, important failure, targeted oracle and final representative combined. All runs retain compact metrics/model hashes/handoff and TASK prediction summaries; immutable manifests classify unique evidence. No historical/raw training copy.",
+  "frozen_final_utc": "2026-10-02T17:37:42.214350+00:00",
+  "cuff_selection_rule_sha256": "bbf6369fadf6e76f8ef27aea803e0f2ee1e975a31febd048f3bb54a8357e50d0",
+  "supersedes_dynamic_contract_only": "CONTRACT.json",
+  "prior_contract_sha256": "64de55d1a025cf87c75c97f05869dbc6b1641c5f852104a51eee4630e8de89eb",
+  "static_boundary_only_rho": [
+    0.77,
+    0.85
+  ]
+}

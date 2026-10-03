@@ -1,0 +1,54 @@
+{
+  "status": "STATIC_DATAFLOW_ONLY_NO_EXECUTED_MODEL_HASHES",
+  "source_hashes": {
+    "runtime": {
+      "path": "<SIDE_STUDIES_ROOT>/human-size-contrast-v1/snapshot/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py",
+      "sha256": "091e839bf4a5496c65c66cdb6e3ded33dc99f10ce9edaba7cf8da4b9937079ee"
+    },
+    "effective_model": {
+      "path": "<SIDE_STUDIES_ROOT>/human-size-contrast-v1/snapshot/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/effective_model.py",
+      "sha256": "512b50ec30b901788c26dfeda7377a25b0ac8176d2cfaf6cf7b172e81505427f"
+    },
+    "belief": {
+      "path": "<SIDE_STUDIES_ROOT>/human-size-contrast-v1/snapshot/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/architecture_recovery_v2/phase3_human_waypoint.py",
+      "sha256": "d9fd9da167a9c5545055c787f3344c6ef9d43c4d1b2aab0fb8bd2e97cc1e9869"
+    },
+    "execution": {
+      "path": "<SIDE_STUDIES_ROOT>/human-size-contrast-v1/snapshot/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_shadow.py",
+      "sha256": "574da44264c6e24e03dc82d5d55d4eb57b9275809894c47b4c7d1af59a91c8fc"
+    },
+    "plant": {
+      "path": "<SIDE_STUDIES_ROOT>/human-size-contrast-v1/snapshot/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/cr12_plant.py",
+      "sha256": "4416d908f507bb3f66f2d1c30d79af119f13bb1f7618f0993f6945ee704a42cf"
+    },
+    "hidden_fixture": {
+      "path": "<SIDE_STUDIES_ROOT>/human-size-contrast-v1/snapshot/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/fresh_qualification_v1/scenario.py",
+      "sha256": "816db5badbda7c8d16ae40859fa44ec6eba6f3c5304839c25593337fc512127c"
+    },
+    "physical_builder": {
+      "path": "<SIDE_STUDIES_ROOT>/human-size-contrast-v1/snapshot/stages/stage3_full3d/src/traction_mpc_stage3/coupled.py",
+      "sha256": "a1620883c8ba74941f8315ccc610a7cf76ad19d477b7298efa74da38c4e62272"
+    },
+    "scorer": {
+      "path": "<SIDE_STUDIES_ROOT>/human-size-contrast-v1/snapshot/stages/stage5_personalized_motion_learning/scripts/high_rom_v1/summarize_phase_b.py",
+      "sha256": "4cba8ff75bdbd5fbdf0a1a2501ae7d54f2a8f583fe208054c0e68ea66a4c6dc3"
+    },
+    "mode_evaluator": {
+      "path": "<SIDE_STUDIES_ROOT>/human-size-contrast-v1/snapshot/stages/stage5_personalized_motion_learning/scripts/high_rom_v1/evaluate_execution_mode.py",
+      "sha256": "cb9c8a995edff3a7e5af83ba751ef5b6d3818b5fc63dd4d9e9a8e5948e93ed63"
+    }
+  },
+  "static_arm_semantics": {
+    "fixed_population": "Physical commissioning probes run but observations never fitted. New nominal updater; geometry/beta/residual fixed in TASK. State observer still observes causal measurements. No individual fit/update.",
+    "commissioning_only": "Individual measured geometry fit and dynamic/residual commissioning replay. All frozen during TASK.",
+    "continual_adaptive": "Same commissioning replay; geometry frozen; beta and residual update at existing 20ms opportunities under existing acceptance constraints."
+  },
+  "model_numeric_hash_schema": "SHA256 little-endian f64 beta + residual; geometry signature recorded separately. Planner worker payload must be reconstructed from retained adaptive_state rather than trusting wrapper counters. Mechanics belief_sequence cross-linked to payload hash. Execution command wrappers record actual self.human_model.",
+  "observed_planner_numeric_hashes": [],
+  "observed_mechanics_numeric_hashes": [],
+  "observed_execution_numeric_hashes": [],
+  "prediction_evidence": null,
+  "prediction_definition": "Observed transmitted torque minus regressor prediction before residual correction is in-sample characterization, not held-out forecast; also record after-residual prediction on same causal samples and q/dq/ddq/torque/time ranges. No extra diagnostic data or cross-arm observations allowed.",
+  "truth_firewall": "HiddenHumanV2 passed only to plant setup and static evaluation; controller prior via high_rom_deployable_prior. No frozen truth handoff to planner/model fit.",
+  "no_learning_claim": true
+}

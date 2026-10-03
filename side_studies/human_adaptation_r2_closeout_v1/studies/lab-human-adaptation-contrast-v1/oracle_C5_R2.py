@@ -1,0 +1,42 @@
+"""D1: C5 known true effective model FROM START; diagnostic only."""
+import os,sys,json,time,types,hashlib,resource
+from pathlib import Path
+from dataclasses import replace
+from datetime import datetime,timezone
+W=Path('<SIDE_STUDIES_ROOT>/lab-human-adaptation-contrast-v1')
+sys.path.insert(0,str(W));sys.dont_write_bytecode=True
+# Child spawn executes these same observational wrappers; no production source edits.
+module=types.ModuleType('oracle_observer_R2');module.__file__=str(W/'human_qualification_R2.py');sys.modules[module.__name__]=module
+exec(compile((W/'human_qualification_R2.py').read_text(),module.__file__,'exec'),module.__dict__)
+rt=module.rt;np=module.np
+from traction_mpc_stage5.fresh_qualification_v1.scenario import hidden_plant
+from traction_mpc_stage4.estimator_v2 import nominal_base_parameters
+from lab_resource_guard_R2 import verify_release,ResourceStop
+c=json.loads((W/'CONTRACT_R2.json').read_text());condition=c['conditions'][5]
+human,fixture,spec,probes=hidden_plant(condition['case'])
+original_geometry=rt.nominal_control_geometry()
+oracle_geometry=replace(original_geometry,origin_world_m=fixture.world_from_human.translation.copy(),hip_plane_m=np.zeros(2),thigh_length_m=human.thigh_length_m,knee_to_cuff_in_cuff_m=np.array([human.sleeve_center_m,0.]))
+# C5 alters cuff only: the fixed nominal dynamics already equals synthetic true beta.
+population=json.loads((W/'runs_R2/C5__fixed_population/qualification.json').read_text())['initial_beta']
+true_beta=nominal_base_parameters(human);assert np.allclose(true_beta,population,rtol=0,atol=1e-12)
+rt.nominal_control_geometry=lambda:oracle_geometry
+root=W/'diagnostics_R2/D1_C5_TRUE_MODEL_FROM_START'
+module.D=root;module.OUT=root/'runs'
+if __name__=='__main__':
+ s=json.loads((W/'STATE_R2.json').read_text());assert s['primary_runs_completed']==21 and s['oracle_attempts']<3 and s['active_seconds']<6*3600
+ assert not (root/'runs').exists(), 'never repeat an executed diagnostic';root.mkdir(parents=True,exist_ok=True)
+ protocol=json.loads((W/'DIAGNOSTIC_PROTOCOL_R2.json').read_text());assert protocol['D1']['condition']=='C5'
+ (root/'CONTRACT_R2.json').write_bytes((W/'CONTRACT_R2.json').read_bytes())
+ (root/'STATE_R2.json').write_text(json.dumps({'status':'DIAGNOSTIC_ONLY','primary_attempts':0,'active_seconds':0},indent=2)+'\n')
+ module.save(root/'TRUTH_MODEL_INJECTION.json',dict(scope='ORACLE_DIAGNOSTIC_NOT_PRIMARY',injection='True effective geometry from initialization, no commissioning/task fit or update; dynamics nominal already exactly equals true C5 beta. True ROM/soft limit same frozen prior.',true_beta=true_beta,nominal_beta=population,beta_exact_match=True,true_geometry=vars(oracle_geometry),physical_case_sha256=condition['case_sha256'],controller_reference_safety_options_unchanged=True))
+ resources=verify_release(module.sha(module.S/'src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime.py'))
+ fd=os.open(W/'OWNER_R2.lock',os.O_CREAT|os.O_EXCL|os.O_WRONLY);os.write(fd,str(os.getpid()).encode());os.close(fd)
+ run=root/'runs/C5__fixed_population';os.environ['LAB_RUN_DIR']=str(run);os.environ['LAB_STUDY_ARM']='fixed_population'
+ module.resource_stop=ResourceStop(resources);sys.argv=[__file__,'C5']
+ s['oracle_attempts']+=1;(W/'STATE_R2.json').write_text(json.dumps(s,indent=2)+'\n');start=time.monotonic()
+ print('ORACLE_D1_START_TRUE_MODEL_NOT_PRIMARY',flush=True)
+ try:
+  module.main()
+  q=json.loads((run/'qualification.json').read_text());q.update(evidence_category='ORACLE_DIAGNOSTIC_NOT_PRIMARY',oracle_protocol='D1_C5_true_geometry_from_start_true_beta_equals_nominal',row_scope='diagnostic',children_peak_RSS_KiB=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss);module.save(run/'qualification.json',q)
+ finally:
+  s=json.loads((W/'STATE_R2.json').read_text());s['active_seconds']+=time.monotonic()-start;(W/'STATE_R2.json').write_text(json.dumps(s,indent=2)+'\n');(W/'OWNER_R2.lock').unlink(missing_ok=True)

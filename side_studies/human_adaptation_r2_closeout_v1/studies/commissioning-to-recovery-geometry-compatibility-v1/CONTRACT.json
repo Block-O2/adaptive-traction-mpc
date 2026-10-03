@@ -1,0 +1,27 @@
+{
+  "schema": "commissioning-to-recovery-geometry-compatibility-v1",
+  "frozen_utc": "2026-10-03T19:06:26.758429+00:00",
+  "parent_contract_sha256": "ca4c3f6df353e7f3456eeb9db077e67f839f9beebea23740a891cbf77e840d8e",
+  "scope": "rho=.60 failure causal diagnosis; no expanded matrix",
+  "baseline_reproductions": [
+    "C5 commissioning_only",
+    "C5 continual_adaptive",
+    "C5 existing oracle from initialization"
+  ],
+  "same_state_diagnostics": "one factor at a time; explicit known-truth diagnostic only",
+  "fix_policy": "At most ONE causal deployable minimal fix after software/interface cause demonstrated; otherwise preserve exact blocker and STOP. No threshold relaxation or deletion of checks.",
+  "conditional_regression": [
+    "rho=.60 commissioning_only",
+    "rho=.60 continual_adaptive",
+    "rho=.72 commissioning_only",
+    "rho=.66 commissioning_only"
+  ],
+  "runtime_contract_unchanged": true,
+  "physics_owners": 1,
+  "threads": 1,
+  "GPU": false,
+  "RL": false,
+  "SAC_writes": false,
+  "resource_policy": "low-frequency evidence; prior observed peak supports serial run; current run finishes before heavy SAC pause; critical pressure cooperative own stop",
+  "hard_hours": 6
+}

@@ -1,0 +1,21 @@
+{
+  "utc": "2026-10-03T18:10:06.330556+00:00",
+  "status": "FROZEN_AFTER_21_PRIMARY_BEFORE_DIAGNOSTIC_RESULTS",
+  "primary_count": 21,
+  "primary_contract_unchanged": true,
+  "D1": {
+    "condition": "C5",
+    "question": "Can the unchanged full chain complete rho.60 if true effective geometry/dynamics are known from initialization?",
+    "control": "Reuse fixed_population execution chain, no fitting/online updates. Replace only nominal effective geometry factory with true evaluation geometry explicitly labeled oracle; nominal dynamics equals C5 true beta checked1e-12.",
+    "physical_initial_state_task_probes_options_limits": "Same frozen C5 case, no prior/shank bound/threshold changes",
+    "exclusion": "Not primary A; no cross-arm handoff; diagnostic only",
+    "dynamic_budget_slots": 1
+  },
+  "D2": {
+    "kind": "STATIC_NO_INTEGRATION",
+    "question": "At actual C5 B/C commissioning handoff, does exact truth geometry remain outside unchanged conservative shank prior?",
+    "controls": "Use original envelope with its unchanged .46m shank prior and original capsule/sleeve dimensions; inspect actual post-commissioning estimated and truth state",
+    "claim_limit": "Handoff geometric necessary condition only; not a full-task oracle or proof of general physical infeasibility."
+  },
+  "additional_diagnostics": "None planned unless D1 serialization/interface fails; never count repeats as human samples."
+}
