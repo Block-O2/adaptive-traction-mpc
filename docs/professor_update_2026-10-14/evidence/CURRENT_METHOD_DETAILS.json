@@ -1,0 +1,104 @@
+{
+  "revision": "professor_requested_method_detail_v2",
+  "timing": [
+    {
+      "label": "Baseline B",
+      "case": "development_repair2_B0_original",
+      "source_path": "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/results/development_repair2_B0_original/summary.json",
+      "source_sha256": "c0d5f7faac24b9f1a77a65b391aa2c856faf143d038a806ea68b7bb8a1a35b33",
+      "field": "timing.high_level_planning_runtime_ms",
+      "calls": 14,
+      "raw_ms": [
+        44.387521,
+        37.969809,
+        40.827806,
+        37.9994,
+        57.026061,
+        4.588583,
+        4.762042,
+        4.286257,
+        44.944179,
+        39.213735,
+        39.130232,
+        37.044619,
+        30.202665,
+        7.853532
+      ],
+      "mean_ms": 30.731174357142855,
+      "p95_ms": 49.172837699999995,
+      "maximum_ms": 57.026061,
+      "recorded_request_stage": "TASK",
+      "execution_mode": "SCIENTIFIC_SIMULATION",
+      "scope": "planning-worker compute_ms; not sensor-to-activation age, not pure quintic linear solve, not a new hardware benchmark"
+    },
+    {
+      "label": "18D development best",
+      "case": "development_repair2_quality_NATIVE_SCALAR_18_063",
+      "source_path": "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/results/development_repair2_quality_NATIVE_SCALAR_18_063/summary.json",
+      "source_sha256": "54a6fe1a5581c09e8cdb90a1b5280b86f3a1c80fc9258993705778293f779fd7",
+      "field": "timing.high_level_planning_runtime_ms",
+      "calls": 14,
+      "raw_ms": [
+        51.599232,
+        42.890377,
+        42.584514,
+        40.614592,
+        37.947058,
+        4.392243,
+        4.343356,
+        4.281602,
+        47.204693,
+        46.238509,
+        45.178742,
+        38.78105,
+        38.263033,
+        4.420176
+      ],
+      "mean_ms": 32.05279835714286,
+      "p95_ms": 48.74278165,
+      "maximum_ms": 51.599232,
+      "recorded_request_stage": "TASK",
+      "execution_mode": "SCIENTIFIC_SIMULATION",
+      "scope": "planning-worker compute_ms; not sensor-to-activation age, not pure quintic linear solve, not a new hardware benchmark"
+    }
+  ],
+  "solver": "finite candidate enumeration and deterministic sorting; quintic coefficients via numpy.linalg.solve; constrained quadratic cuff allocation via linear algebra",
+  "source_files": [
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+      "lines": "32-47,214-238,259-374,394-453",
+      "sha256": "c57003923ce97fb6b668f39176a47a918f31eee75920fe4d45357771ab2820a4"
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+      "lines": "180-205",
+      "sha256": "3dcd536fa9befed9720a365814d0581fa2ae01201ef9f1d13c8dabffb4e2037a"
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/controller_interface.py",
+      "lines": "145-262",
+      "sha256": "104e4219432fea8875c790423c790ac110d07d3a0c363cbf3ba657091dbdfb0b"
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_shadow.py",
+      "lines": "399-406,475-477",
+      "sha256": "574da44264c6e24e03dc82d5d55d4eb57b9275809894c47b4c7d1af59a91c8fc"
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/loaded_execution.py",
+      "lines": "303-403",
+      "sha256": "b6d1615d5bed2b4fa8c1b70e13573b554ccf972da2bb1f00ec30a786e5388668"
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime_coordination_residual_v2.py",
+      "lines": "2370-2425,3796",
+      "sha256": "74d0f6b97b35671111bdd86bb4dfff845c90f2a12ee1cd9518de9445de99de79"
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage4_adaptive_control/src/traction_mpc_stage4/cuff_allocator.py",
+      "lines": "226-255,321",
+      "sha256": "f6ca86a087d2675df72ab8b6f8961d029b3e071a9ea95e0d6bf6e2a54c371a5e"
+    }
+  ],
+  "note": "Read-only source inspection and recomputation of saved timings; no new simulation, tuning or benchmark"
+}
