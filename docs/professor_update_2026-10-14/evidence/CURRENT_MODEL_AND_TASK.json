@@ -1,0 +1,263 @@
+{
+  "generated_unix": 1791915509.9958472,
+  "case": {
+    "case_key": "high_rom_nominal_sync_120_v1",
+    "cell": {
+      "family": "nominal_reference",
+      "range": "ordinary",
+      "replicate": 1
+    },
+    "evidence_category": "high_rom_v1_development_exposed",
+    "physical": {
+      "height_m": 1.72,
+      "body_mass_kg": 75.0,
+      "q_rest_deg": [
+        5.0,
+        10.0
+      ],
+      "passive_stiffness_nm_rad": [
+        10.0,
+        10.0
+      ],
+      "passive_damping_nms_rad": [
+        5.0,
+        5.0
+      ],
+      "cuff_fraction_of_shank": 0.72,
+      "thigh_length_scale": 1.0,
+      "shank_length_scale": 1.0,
+      "thigh_mass_scale": 1.0,
+      "shank_mass_scale": 1.0,
+      "thigh_com_fraction": 0.433,
+      "shank_com_fraction": 0.43,
+      "thigh_inertia_radius_fraction": 0.3,
+      "shank_inertia_radius_fraction": 0.3,
+      "hip_translation_xz_m": [
+        0.0,
+        0.0001
+      ]
+    },
+    "task": {
+      "start_deg": [
+        5.0,
+        10.0
+      ],
+      "goal_deg": [
+        120.0,
+        120.0
+      ],
+      "commissioning_waypoints_deg": [
+        [
+          5.0,
+          10.0
+        ],
+        [
+          14.0,
+          19.0
+        ],
+        [
+          9.0,
+          27.0
+        ],
+        [
+          16.0,
+          22.0
+        ],
+        [
+          5.0,
+          10.0
+        ]
+      ]
+    },
+    "research_model": "high_rom_v1",
+    "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+  },
+  "task_contract": {
+    "schema": "stage5_goal_task_v1",
+    "name": "high_rom_120_120_research_only",
+    "provisional_not_hardware_or_clinically_calibrated": true,
+    "source_fixture": "Stage-5 low/moderate cold-start prefix endpoints",
+    "start_return_target_deg": [
+      5.0,
+      10.0
+    ],
+    "outbound_goal_target_deg": [
+      120.0,
+      120.0
+    ],
+    "q_bounds_deg": [
+      [
+        0.0,
+        125.0
+      ],
+      [
+        0.0,
+        125.0
+      ]
+    ],
+    "joint_angle_completion_tolerance_deg": [
+      1.0,
+      1.0
+    ],
+    "joint_velocity_completion_tolerance_deg_s": [
+      2.0,
+      2.0
+    ],
+    "hold_duration_s": 0.5,
+    "phase_timeout_s": 10.0,
+    "task_joint_velocity_limit_deg_s": [
+      45.0,
+      75.0
+    ],
+    "task_joint_acceleration_limit_deg_s2": [
+      300.0,
+      600.0
+    ],
+    "controller_completion_margin": {
+      "joint_angle_margin_deg": [
+        0.05,
+        0.1
+      ],
+      "joint_velocity_margin_deg_s": [
+        0.75,
+        1.5
+      ],
+      "source_evidence": "goal_mpc_complete_v1/attempt_05_final exact phase-transition estimator-minus-truth errors plus a small deterministic guard"
+    },
+    "trajectory_contract": {
+      "full_joint_trajectory_provided": false,
+      "fixed_joint_coordination_ratio": false,
+      "path_corridor_active": false
+    },
+    "status_note": "Provisional Stage-5 engineering limits only; not hardware- or clinically calibrated. They constrain each joint independently and do not define a trajectory, coordination ratio, or path corridor. The controller completion margin only tightens online decisions; the original 1 deg and 2 deg/s tolerances remain the actual task definition.",
+    "source_task": "configs/stage5_goal_task_v1.json",
+    "model_status": "ENGINEERING_HYPOTHESIS_NOT_PHYSICALLY_VALIDATED",
+    "rom_rationale": "125 deg is the minimum 5 deg soft-limit-offset hard bound that places the 120 deg goal at the original soft-limit onset. It is a simulation research hypothesis, not a measured human hard limit.",
+    "goal_near_limit_margin_deg": {
+      "to_soft_onset": [
+        0.0,
+        0.0
+      ],
+      "to_hard_limit": [
+        5.0,
+        5.0
+      ]
+    },
+    "qualification_status": "NONE",
+    "research_schema": "high_rom_120_model_and_task_v1",
+    "human_model": {
+      "hard_rom_deg": [
+        [
+          0.0,
+          125.0
+        ],
+        [
+          0.0,
+          125.0
+        ]
+      ],
+      "soft_limit_margin_deg": 5.0,
+      "passive_stiffness_nm_rad": [
+        10.0,
+        10.0
+      ],
+      "passive_damping_nms_rad": [
+        5.0,
+        5.0
+      ],
+      "model_authority": "ENGINEERING_HYPOTHESIS_ONLY"
+    }
+  },
+  "options": {
+    "duration_lower_bound": true,
+    "clearance_feedback": true,
+    "clearance_response_s": 0.08,
+    "clearance_adverse_acceleration_m_s2": 1.5,
+    "monotonic_async_planning": true,
+    "terminal_set_reference": true,
+    "fitted_coordinate_handoff": true,
+    "startup_execution_pose_alignment": true,
+    "reference_pacing": true,
+    "reference_velocity_fraction": 0.5,
+    "reference_acceleration_fraction": 0.25,
+    "whole_session_wall_physics": true,
+    "exact_cached_plant": true,
+    "planner_process_worker": true,
+    "fixed_command_ready": true,
+    "defer_cyclic_gc": true,
+    "monotonic_clearance_certificate": true,
+    "robust_terminal_center": true,
+    "receipt_reference_governor": true,
+    "incremental_acceleration_fraction": 0.9,
+    "incremental_clearance_response": true,
+    "commissioning_terminal_center": true,
+    "recovery_terminal_center": true,
+    "robust_hold_reference": true,
+    "causal_return_projection": true,
+    "causal_terminal_commit": true,
+    "commissioning_cuff_reference_origin": true,
+    "causal_tracking_offset_clearance": true,
+    "incremental_window_wrench_baseline": true,
+    "causal_dwell_projection": true
+  },
+  "sources": {
+    "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_nominal_sync_120_v1.json": {
+      "sha256": "d9f4d636b98db5792cf4b50915f4509bf2274c1c80764d6d8629bf22e3ae9b96",
+      "bytes": 1306
+    },
+    "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/docs/adaptive_human_online_interface_v1/EXPERIMENT_CONTRACT.json": {
+      "sha256": "b46bb87fafd37042837ba50c3535f093480b371877a4e627dd254a32fae211f0",
+      "bytes": 10045
+    },
+    "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/configs/high_rom_v1/stage5_goal_task_120_v1.json": {
+      "sha256": "40b445813ec7df9d5db3b95b31a338f5d158058cdbd62449e330af949585f986",
+      "bytes": 2494
+    },
+    "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/configs/full3d_adaptive_integration_v1/autonomous_closed_loop_recovery_v1/incremental_clearance_terminal_v9.json": {
+      "sha256": "d11bb72950f9f74e451548f57ff509e89f92e10aa18f8c62f78bd7a4b7f4c6bb",
+      "bytes": 1116
+    },
+    "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/high_rom_v1.py": {
+      "sha256": "9075c3d80e587ca91da4d892bd459639a00ff31f0d877ff8861abd90c8edcbde",
+      "bytes": 1264
+    },
+    "/home/hank/coding/adaptive-traction-mpc-side-studies/ihear_overnight_research_retrospective_v1/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/cr12_plant.py": {
+      "sha256": "4416d908f507bb3f66f2d1c30d79af119f13bb1f7618f0993f6945ee704a42cf",
+      "bytes": 16722
+    }
+  },
+  "baseline_actual": {
+    "initial_estimated_state": [
+      0.09599036815079943,
+      0.165802032891143,
+      1.3078498364782635e-05,
+      1.2299870248589384e-05
+    ],
+    "initial_reference": [
+      0.09599310885968812,
+      0.16580627893946132
+    ],
+    "phase_durations": {
+      "HOLD": 1.0200000000048703,
+      "OUTBOUND": 9.005000000000718,
+      "RETURN": 9.005000000042997
+    },
+    "J_F": 1438.6134984674875,
+    "moment_integral": 100.41725111044204,
+    "physical_clearance": 0.011888025805910692,
+    "force_peak": 115.47911864309106,
+    "moment_peak": 15.711377245106318
+  },
+  "roles": {
+    "physical_case_parameters": "SIMULATION_TRUTH for plant creation and evaluation only",
+    "ROM_and_task_goals": "STRUCTURAL_PRIOR / fixed engineering task contract",
+    "deployed_human_state": "MEASURED robot/cuff plus reconstructed current estimate",
+    "geometry_and_effective_dynamics": "CALIBRATED commissioning estimate; not full anatomical truth",
+    "reference_q_dq_ddq": "planned emitted causal reference, not actual Human state",
+    "true_human_q_dq": "EVALUATION_ONLY",
+    "robot_actuator_authority": "existing six CR12 motor torques; original constraints",
+    "free_intent_parameters": "OFFLINE fixed scientific action, not native B or adaptation"
+  },
+  "hardware_or_clinical_calibration": false,
+  "model_changed_this_study": false
+}
