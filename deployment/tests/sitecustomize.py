@@ -1,7 +1,8 @@
 """Opt-in fresh-clone audit hook, including subprocesses in the fresh venv.
 
 Set IHEAR_FORBIDDEN_ROOTS to a JSON list, IHEAR_ACCESS_GUARD_LOG to a new log.
-The validation harness installs this file only in its disposable environments.
+install_access_guard.py installs this file under a unique .pth module name
+to avoid system sitecustomize shadowing. Use only disposable environments.
 This is a Python file-access guard, not an OS filesystem sandbox.
 """
 import json

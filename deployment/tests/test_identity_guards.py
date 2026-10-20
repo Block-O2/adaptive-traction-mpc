@@ -1,5 +1,8 @@
 """Integrity failure tests; no synthetic scientific scoring and no physics."""
 import json
+import os
+import subprocess
+import venv
 from pathlib import Path
 import shutil
 import sys
@@ -11,6 +14,24 @@ from reproducibility import REPO, DEFAULT_CONFIG, check_rows, digest, load_confi
 
 
 class IdentityGuards(unittest.TestCase):
+    def test_access_guard_activates_in_fresh_child_venv(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            blocked = root / 'blocked'
+            blocked.mkdir()
+            child = root / 'venv'
+            venv.EnvBuilder(with_pip=False).create(child)
+            python = child / 'bin/python'
+            helper = Path(__file__).with_name('install_access_guard.py')
+            subprocess.run([str(python), str(helper)], check=True, capture_output=True)
+            env = os.environ.copy()
+            roots = json.loads(env.get('IHEAR_FORBIDDEN_ROOTS', '[]')) + [str(blocked)]
+            env.update(IHEAR_FORBIDDEN_ROOTS=json.dumps(roots), IHEAR_ACCESS_GUARD_LOG=str(root / 'guard.log'))
+            probe = "import os,sys;assert '_ihear_fresh_clone_guard' in sys.modules;os.scandir(sys.argv[1])"
+            result = subprocess.run([str(python), '-B', '-c', probe, str(blocked)], env=env, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('FRESH_CLONE_FORBIDS_LEGACY_ROOT:', result.stderr)
+
     def test_repository_paths_cannot_escape(self):
         with self.assertRaises(ValueError):
             repository_path('../outside')

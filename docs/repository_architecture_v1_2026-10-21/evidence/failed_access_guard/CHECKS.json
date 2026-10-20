@@ -1,0 +1,70 @@
+[
+  {
+    "check": "network_clone",
+    "command": [
+      "git",
+      "clone",
+      "--depth",
+      "1",
+      "--single-branch",
+      "--branch",
+      "codex/local-research-sync-20261020",
+      "git@github.com:Block-O2/adaptive-traction-mpc.git",
+      "/home/hank/repository-architecture-v1-validation/github-clone"
+    ],
+    "returncode": 0,
+    "status": "PASS",
+    "elapsed_s": 115.164,
+    "log": "/home/hank/repository-architecture-v1-validation/logs/network_clone.log"
+  },
+  {
+    "check": "checkout_fixed_commit",
+    "command": [
+      "git",
+      "checkout",
+      "--detach",
+      "789da788f504400451b388ec30eae24241e31626"
+    ],
+    "returncode": 0,
+    "status": "PASS",
+    "elapsed_s": 0.618,
+    "log": "/home/hank/repository-architecture-v1-validation/logs/checkout_fixed_commit.log"
+  },
+  {
+    "check": "install_offline",
+    "command": [
+      "bash",
+      "deployment/install_offline.sh",
+      "/home/hank/repository-architecture-v1-validation/offline-env"
+    ],
+    "returncode": 0,
+    "status": "PASS",
+    "elapsed_s": 5.536,
+    "log": "/home/hank/repository-architecture-v1-validation/logs/install_offline.log"
+  },
+  {
+    "check": "install_rl_b",
+    "command": [
+      "bash",
+      "deployment/install_rl_b.sh",
+      "/home/hank/repository-architecture-v1-validation/rl-b-env"
+    ],
+    "returncode": 0,
+    "status": "PASS",
+    "elapsed_s": 23.042,
+    "log": "/home/hank/repository-architecture-v1-validation/logs/install_rl_b.log"
+  },
+  {
+    "check": "guard_probe",
+    "command": [
+      "/home/hank/repository-architecture-v1-validation/offline-env/bin/python",
+      "-B",
+      "-c",
+      "import os\nfor path in ('/home/hank/coding/adaptive-traction-mpc-learning/README.md','/home/hank/coding/adaptive-traction-mpc-side-studies'):\n try:\n  if path.endswith('.md'):open(path).read()\n  else:os.scandir(path)\n except PermissionError:pass\n else:raise RuntimeError('ACCESS_GUARD_NOT_ACTIVE')\nprint('GUARD_PROBE_PASS')\n"
+    ],
+    "returncode": 1,
+    "status": "FAIL",
+    "elapsed_s": 0.008,
+    "log": "/home/hank/repository-architecture-v1-validation/logs/guard_probe.log"
+  }
+]
