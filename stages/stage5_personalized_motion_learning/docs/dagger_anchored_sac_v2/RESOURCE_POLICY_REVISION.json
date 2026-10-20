@@ -1,0 +1,81 @@
+{
+  "unix": 1791139752.1590087,
+  "user_authorized": "Continue same v2 from paused state21283 to total50000; only resource stopping criterion may change",
+  "old_resource_source_sha256": "85a35bd52b89e85d6df63e13d24cc5ae083f9d6ffb5d1b481e80d46892c77225",
+  "old_policy": {
+    "new_swap_over_128_MiB": "STOP alone",
+    "WSL_available_GiB": 1.5,
+    "commit_headroom_GiB": 2
+  },
+  "new_policy": {
+    "version": "RESOURCE_POLICY_V2_CONTINUATION_21283",
+    "scope": "operational resource stop criterion only",
+    "scientific_changes": [],
+    "system_configuration_changes": [],
+    "old_policy": "new swap >128 MiB alone stops; MemAvailable<1.5GiB and commit headroom<2GiB also stop",
+    "reason": "prior swap-only pause occurred at 146.105MiB, WSL available2.654GiB, Windows commit headroom4.849GiB; distinguish stable swapping and evaluation working sets from sustained degradation",
+    "sample_interval_s": 45,
+    "trend_min_samples": 3,
+    "trend_min_span_s": 90,
+    "same_lifecycle_only": true,
+    "stable_swap_level_alone_never_stops": true,
+    "immediate": {
+      "WSL_available_below_GiB": 0.75,
+      "Windows_commit_headroom_below_GiB": 0.75,
+      "oom_kill_counter_increase": true,
+      "allocation_warning_or_process_error": "existing exception handler preserves complete state",
+      "other_heavy_simulation": true
+    },
+    "persistent": {
+      "low_WSL_available_GiB": 1.5,
+      "low_commit_headroom_GiB": 2.0,
+      "process_tree_PSS_GiB": 6.0,
+      "owned_process_count_over": 12,
+      "system_count_growth_over": 100
+    },
+    "trends": {
+      "swap_per_interval_min_MiB": 16,
+      "swap_net_min_MiB": 96,
+      "rapid_swap_net_min_MiB": 256,
+      "available_per_interval_decline_min_MiB": 64,
+      "available_net_decline_min_MiB": 256,
+      "PSS_net_abnormal_growth_MiB": 1024,
+      "PSS_growth_with_low_memory_MiB": 512
+    },
+    "throughput": {
+      "reference_steps_per_s": 12.906312346315916,
+      "warning_fraction": 0.5,
+      "severe_fraction": 0.25,
+      "requires_three_online_progress_samples_over_90s": true,
+      "warning_needs_swap_or_memory_pressure": true
+    },
+    "stop_action": "set append-only evidence and pause-request flag; policy boundary saves full state. Already-running independent evaluation finishes evidence before next dispatch. No resource expansion, cache dropping, budget reset or new algorithm.",
+    "prior_wall_deadline_unchanged": true
+  },
+  "scientific_config_sha256": "c5a41a4d6a481458c5f299b318c5226a278d2d733c0ca1eadac3cf2fe09c6a2c",
+  "train_source_unchanged": true,
+  "evaluate_source_unchanged": true,
+  "budget_initial": 21283,
+  "budget_target": 50000,
+  "pending_10k_confirmation_before_updates": true,
+  "old_lock": {
+    "config": "c5a41a4d6a481458c5f299b318c5226a278d2d733c0ca1eadac3cf2fe09c6a2c",
+    "sources": {
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/common.py": "85a35bd52b89e85d6df63e13d24cc5ae083f9d6ffb5d1b481e80d46892c77225",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/diagnose_prediction.py": "da9048419d4d0e0eafed375393e75e01cd7ef009958967204dc0f2c2db36f525",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/evaluate.py": "d38953662b3492eb295b42ffcc4b986bf41e3cd13b8cae9bd84d3f23638e3d20",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/external_monitor.py": "c7661b6dc39bfb5c14f890400bcbe456d6da562cf785278c3a32c4d456ccaccd",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/finish.py": "a133c1f75cc0cf7462c893ea0140284a0766d1cf00adc14d8ac620f1c88b4d68",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/freeze_best_repair.py": "ba7673c89738f3091d2daac5e7baaba08b207134a115067ab86412b5257679cf",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/freeze_loader_repair.py": "bedc6d97839b0400c36d52633fd2ef18451a9468bab1ee4b9a0a7b6e53df25b0",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/freeze_progress_repair.py": "5847cd706947bd1f5b877c1bfd883df9af6b1864aedc7db836efc411bd42f047",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/gradient_audit.py": "ed5a9363a1ec05054317035cefe753acca44202111961dfc94448631e0b4b03d",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/inspect_sources.py": "5a3177aa73a632c0a88a1fbf04b19b1cad3fa876befc4ac1a472ec524b5229df",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/mechanical.py": "26fb76d3c24b732e5410361c9b418ff143e05ff9a180e9e5a0eb4d11dfa8028e",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/prepare.py": "ae05326a384b85fcc3b4b93e0968c630a56520168c10151a7a97059a8d3d093f",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/repair_prediction_path.py": "c96297d0e6e291a1d07b562e7f1a2efeac714e543f36ed84065ba9e1a0d4f005",
+      "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/dagger_anchored_sac_v2/train.py": "c2cc23533afb6c0cbed1d58d6cce0fb504ca5fb1a2091bdc7ddf57846b7cb5aa"
+    }
+  },
+  "original_started_and_wall_deadline_unchanged": true
+}

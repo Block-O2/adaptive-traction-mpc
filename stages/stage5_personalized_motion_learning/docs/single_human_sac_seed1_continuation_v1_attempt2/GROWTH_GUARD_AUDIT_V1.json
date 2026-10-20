@@ -1,0 +1,136 @@
+{
+  "checks": [
+    {
+      "corrected_trigger": false,
+      "cumulative_mib": 133.11328125,
+      "elapsed_s": 6837.936597918,
+      "old_comparison_mib": 155.513671875,
+      "old_hits": 1,
+      "old_trigger": false,
+      "prior_hour_change_mib": 155.513671875,
+      "prior_hour_hits": 1,
+      "recorded_reasons": [],
+      "step": 82251
+    },
+    {
+      "corrected_trigger": false,
+      "cumulative_mib": 214.63671875,
+      "elapsed_s": 10443.520963656,
+      "old_comparison_mib": 153.15360471491203,
+      "old_hits": 2,
+      "old_trigger": false,
+      "prior_hour_change_mib": 23.81613581730744,
+      "prior_hour_hits": 0,
+      "recorded_reasons": [],
+      "step": 110833
+    },
+    {
+      "corrected_trigger": false,
+      "cumulative_mib": 439.3671875,
+      "elapsed_s": 14069.904379137,
+      "old_comparison_mib": 332.79381975446404,
+      "old_hits": 3,
+      "old_trigger": false,
+      "prior_hour_change_mib": 238.83671874999982,
+      "prior_hour_hits": 1,
+      "recorded_reasons": [],
+      "step": 140086
+    },
+    {
+      "corrected_trigger": false,
+      "cumulative_mib": 358.37109375,
+      "elapsed_s": 17693.486358603,
+      "old_comparison_mib": 255.25927940898828,
+      "old_hits": 4,
+      "old_trigger": false,
+      "prior_hour_change_mib": -9.556119791666333,
+      "prior_hour_hits": 0,
+      "recorded_reasons": [],
+      "step": 168615
+    },
+    {
+      "corrected_trigger": false,
+      "cumulative_mib": 419.34765625,
+      "elapsed_s": 21309.108525805,
+      "old_comparison_mib": 97.81335655120483,
+      "old_hits": 0,
+      "old_trigger": false,
+      "prior_hour_change_mib": -20.485066105768965,
+      "prior_hour_hits": 0,
+      "recorded_reasons": [],
+      "step": 193432
+    },
+    {
+      "corrected_trigger": false,
+      "cumulative_mib": 630.45703125,
+      "elapsed_s": 24939.794581805003,
+      "old_comparison_mib": 180.11491392215567,
+      "old_hits": 1,
+      "old_trigger": false,
+      "prior_hour_change_mib": 166.20333533653866,
+      "prior_hour_hits": 1,
+      "recorded_reasons": [],
+      "step": 216806
+    },
+    {
+      "corrected_trigger": false,
+      "cumulative_mib": 636.44140625,
+      "elapsed_s": 28564.235026518003,
+      "old_comparison_mib": 186.9998488653273,
+      "old_hits": 2,
+      "old_trigger": false,
+      "prior_hour_change_mib": 70.77766927083348,
+      "prior_hour_hits": 0,
+      "recorded_reasons": [],
+      "step": 240847
+    },
+    {
+      "corrected_trigger": false,
+      "cumulative_mib": 767.515625,
+      "elapsed_s": 32187.885719453003,
+      "old_comparison_mib": 257.25818219866096,
+      "old_hits": 3,
+      "old_trigger": true,
+      "prior_hour_change_mib": 126.85273437500018,
+      "prior_hour_hits": 0,
+      "recorded_reasons": [
+        "SUSTAINED_ANONYMOUS_MEMORY_GROWTH"
+      ],
+      "step": 260886
+    }
+  ],
+  "cumulative_growth_is_real_but_not_a_leak_proof": true,
+  "fix": "Compare latest5min with a3500\u20133900s-old window; retain128MiB/hour, three consecutive checks,512MiB cumulative and all absolute resource guards unchanged.",
+  "latest_resources": {
+    "commit_headroom_gib": 5.080047607421875,
+    "other_heavy_python": [],
+    "pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=0\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=0\n",
+    "step": 260886,
+    "swap_bytes": 0,
+    "tree_pss_gib": 3.587156295776367,
+    "wsl_available_gib": 3.7059402465820312
+  },
+  "limitations": "The cumulative native/anonymous high-water increase is genuine; this audit fixes classification arithmetic, not an established allocator/resource leak.500k/1M remain unqualified.",
+  "recorded_stop_is_three_real_prior_hour_increases": false,
+  "synthetic_regression_pass": true,
+  "synthetic_triggers": {
+    "linear_growth": [
+      false,
+      false,
+      true,
+      true
+    ],
+    "plateau": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "single_step": [
+      false,
+      false,
+      false,
+      false
+    ]
+  }
+}

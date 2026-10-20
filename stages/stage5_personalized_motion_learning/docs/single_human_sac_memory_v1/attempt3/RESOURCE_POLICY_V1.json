@@ -1,0 +1,25 @@
+{
+  "buffer_capacity_change": false,
+  "evaluation": "original deterministic NATIVE and MATCHED at25k plus final30k; learning frozen",
+  "guard": [
+    "WSL MemAvailable >=1.5 GiB",
+    "Windows commit headroom >=2 GiB",
+    "new WSL swap <=128 MiB",
+    "STOP joint Windows Available <256 MiB and WSL MemAvailable <2 GiB",
+    "no other heavy Python simulation"
+  ],
+  "milestones": [
+    15000,
+    20000,
+    25000,
+    30000
+  ],
+  "resource_configuration_unchanged": true,
+  "scientific_changes": [],
+  "scope": "memory diagnostics only",
+  "startup_pressure": "park before updates for at most60 seconds, 10-second rechecks, then preserve/STOP if still unsafe",
+  "stop_after_target": true,
+  "version": "SAC_MEMORY_POLICY_V1",
+  "wall_cap_hours": 6,
+  "windows_available_alone": "warning, not a leak or pressure diagnosis"
+}

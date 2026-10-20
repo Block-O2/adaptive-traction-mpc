@@ -1,0 +1,36 @@
+{
+  "authorization": "Latest user amendment: if 30k memory qualification passes, directly continue the same Seed 1 checkpoint/replay/optimizer to 300000 total steps, unchanged R2, resource priority, no Human side-study, no automatic extension beyond300k.",
+  "memory_qualification_status": "SAC_MEMORY_QUALIFIED",
+  "start_step": 30000,
+  "start_updates": 24997,
+  "start_replay_size": 29997,
+  "source_checkpoint_sha256": "1ac0c2122d4fcb1c8886f3323fae09d7c3d009b697ceeb604e17d78ec78c9b50",
+  "source_replay_sha256": "cc57b374601ed6ddd017f72162dac88d101f45e522528a99fb174b4922d805e3",
+  "source_rng_sha256": "5f90858e70cade5c947824f063881b192d4700424e4842e2d29f527482b7d6d6",
+  "command": "/home/hank/envs/adaptive-online-rl-v1/bin/python -u /mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/single_human_sac_seed1_continuation/continue_seed1_v2.py",
+  "stdout_stderr": "run_attempt2.log",
+  "failed_start": {
+    "source": "continue_seed1_v1.py",
+    "log": "run.log",
+    "training_updates": 0,
+    "reason": "Startup memory accounting accessed TR.LEARNING_ROWS while TR was None, before importing SAC or loading the checkpoint.",
+    "fix": "Only bind helper TR after the training module exists; preserve failed source, outputs and log."
+  },
+  "checks": [
+    "Python AST syntax PASS",
+    "Healthy resource guard PASS",
+    "Windows Available-only reduction remains allowed PASS",
+    "New swap17MiB triggers stop PASS",
+    "Windows commit headroom1GiB triggers stop PASS",
+    "All saved input bundle hashes match memory closeout manifest",
+    "Actor/critic/entropy optimizer state hashes match saved30k state",
+    "Replay size29997 and100000 capacity;46000000 allocated bytes",
+    "RNG restored, reset_num_timesteps=False, immutable source lock PASS"
+  ],
+  "scientific_changes": [],
+  "git_mutations": [],
+  "hardware_actuation": false,
+  "new_heavy_experiments": false,
+  "training_hyperparameters_changed": false,
+  "resources_expanded": false
+}

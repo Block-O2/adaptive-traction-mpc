@@ -1,0 +1,5 @@
+本轮 hard wall-clock cap 设为 4 小时。取消原来的 50k residual-interaction SAC budget，不要尝试在4小时内硬跑50k。
+保留已完成的 K=2 action contract、B/fixed/CEM reevaluation、BC qualification、Gym/reward qualification 和 checkpoint-0 evidence。
+接下来优先转为当前统一 residual action space 上的 bounded CEM/iCEM expert search，在4小时内尽可能建立强 E_search。
+根据实际单 rollout 时间自主决定 population/generation，总完整 rollout 预算建议约100–150，连续若干generation无meaningful improvement可提前停止。
+不要启动长时间 SAC rescue。最终保存 best-known expert 和完整计算预算后 STOP。

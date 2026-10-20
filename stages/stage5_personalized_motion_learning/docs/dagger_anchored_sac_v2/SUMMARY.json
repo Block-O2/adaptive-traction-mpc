@@ -1,0 +1,1072 @@
+{
+  "STATUS": "PAUSED_RESOURCE_RISK",
+  "pause_reason": "NEW_SWAP_OVER_128_MIB",
+  "RNG_ISOLATION": "PASS",
+  "TRANSITIONS": "PASS",
+  "PRESERVATION": "PASS",
+  "configuration": {
+    "method": "DAgger-Anchored SAC Fine-Tuning v2",
+    "seed": 20261005,
+    "initial_condition_seed": 20261003,
+    "period_s": 0.02,
+    "gamma": 0.9998666755551605,
+    "tau": 0.005,
+    "actor_lr": 1e-06,
+    "critic_lr": 0.0003,
+    "batch_size": 256,
+    "anchor_batch_per_phase": 96,
+    "anchor_lambda": 10000.0,
+    "critic_only_updates": 20000,
+    "critic_per_step": 1,
+    "actor_every_critic": 10,
+    "alpha": 0.001,
+    "exploration_log_std_candidates": [
+      -8.0,
+      -10.0
+    ],
+    "exploration_selection": "first candidate with two complete independent NATIVE stochastic rollouts; otherwise lower candidate, report failures; no further search",
+    "log_std_frozen": true,
+    "uniform_warmup": 0,
+    "current_policy_seed_episodes": 2,
+    "maximum_total_online_steps": 50000,
+    "evaluation_points": [
+      0,
+      1000,
+      2000,
+      5000,
+      10000,
+      15000,
+      20000,
+      25000,
+      30000,
+      35000,
+      40000,
+      45000,
+      50000
+    ],
+    "checkpoint_repeats": 2,
+    "stochastic_checkpoint_repeats": 1,
+    "history_fraction": 0.25,
+    "history_samples": 64,
+    "online_samples": 192,
+    "lambda_schedule": {
+      "first_20000": 10000.0,
+      "requires_two_consecutive_native_checkpoints": true,
+      "every_5000_after_20000_multiplier": 0.9,
+      "floor": 5000.0
+    },
+    "rescue": {
+      "maximum": 1,
+      "actor_lr_multiplier": 0.1,
+      "std_multiplier": 0.25,
+      "anchor_multiplier": 4.0,
+      "lambda_decay": false,
+      "restore": "actor critics targets optimizers fixed alpha replay sampler Python NumPy CPU/CUDA RNG; fresh cold environment from saved env RNG; global consumed budget and failures never restored"
+    },
+    "small_actor_test_updates": 10,
+    "ability_loss": "deterministic NATIVE invalid then independent confirmation invalid triggers rescue; stochastic failure recorded, not silently converted to deterministic success",
+    "pause": [
+      "real data mismatch",
+      "unresolved physics/evaluation bug",
+      "NaN",
+      "resource risk",
+      "12h hard cutoff"
+    ],
+    "claim": "method development; components not independently causally identified; deterministic repeated replay is not independent training seed",
+    "budget_semantics": "all new data-collection steps including calibration, warm-start rollouts and failed attempts count toward 50000; evaluation-only steps separately ledgered and never used for training",
+    "high_frequency": "key evaluations and all failures; online success keeps compact actions/transitions only"
+  },
+  "configuration_sha256": "c5a41a4d6a481458c5f299b318c5226a278d2d733c0ca1eadac3cf2fe09c6a2c",
+  "TOTAL_ONLINE_STEPS": 21283,
+  "initial_frozen_collection_steps": 11283,
+  "actor_online_collection_steps": 10000,
+  "EVALUATION_ONLY_STEPS": 51892,
+  "rescues": 0,
+  "attempts": 1,
+  "critic_updates": 30010,
+  "actor_updates": 1010,
+  "best": {
+    "NATIVE": {
+      "row": {
+        "name": "legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1",
+        "scope": "NATIVE",
+        "status": "COMPLETE",
+        "valid": true,
+        "physical_audit": {
+          "pass_": true,
+          "unchanged_evaluator": {
+            "schema": "mode_aware_execution_result_v1",
+            "execution_mode": "SCIENTIFIC_SIMULATION",
+            "physical_task_result": {
+              "status": "PASS",
+              "reasons": [],
+              "scorer_v2_common_conditions": {
+                "summary_complete": true,
+                "transition_order": true,
+                "true_goal_dwell": true,
+                "true_return": true,
+                "phase_timeouts": true,
+                "force": true,
+                "moment": true,
+                "torque": true,
+                "human_speed": true,
+                "human_acceleration": true,
+                "robot_speed": true,
+                "session_clearance": true,
+                "true_clearance": true,
+                "measured_sleeve_clearance": true,
+                "no_shank_table_contact": true,
+                "no_human_rom_violation": true,
+                "case_hash": true
+              },
+              "finite_trace": true,
+              "finite_native": true,
+              "activation_certificates_valid": true,
+              "reference_boundary_C2": true
+            },
+            "scientific_validity": {
+              "status": "PASS",
+              "reasons": [],
+              "request_checks": [
+                {
+                  "request_id": 0,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 80,
+                    "reference_version": "5",
+                    "sim_time_s": 0.020000000000000014,
+                    "state_version": 85
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 80,
+                    "reference_version": "5",
+                    "sim_time_s": 0.020000000000000014,
+                    "state_version": 85
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 80,
+                    "reference_version": "6",
+                    "sim_time_s": 0.020000000000000014,
+                    "state_version": 85
+                  }
+                },
+                {
+                  "request_id": 1,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 6080,
+                    "reference_version": "305",
+                    "sim_time_s": 1.5200000000000913,
+                    "state_version": 6385
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 6080,
+                    "reference_version": "305",
+                    "sim_time_s": 1.5200000000000913,
+                    "state_version": 6385
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 6080,
+                    "reference_version": "306",
+                    "sim_time_s": 1.5200000000000913,
+                    "state_version": 6385
+                  }
+                },
+                {
+                  "request_id": 2,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 12100,
+                    "reference_version": "606",
+                    "sim_time_s": 3.0249999999996833,
+                    "state_version": 12706
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 12100,
+                    "reference_version": "606",
+                    "sim_time_s": 3.0249999999996833,
+                    "state_version": 12706
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 12100,
+                    "reference_version": "607",
+                    "sim_time_s": 3.0249999999996833,
+                    "state_version": 12706
+                  }
+                },
+                {
+                  "request_id": 3,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 18100,
+                    "reference_version": "906",
+                    "sim_time_s": 4.5249999999997845,
+                    "state_version": 19006
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 18100,
+                    "reference_version": "906",
+                    "sim_time_s": 4.5249999999997845,
+                    "state_version": 19006
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 18100,
+                    "reference_version": "907",
+                    "sim_time_s": 4.5249999999997845,
+                    "state_version": 19006
+                  }
+                },
+                {
+                  "request_id": 4,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 28100,
+                    "reference_version": "1406",
+                    "sim_time_s": 7.02500000000284,
+                    "state_version": 29506
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 28100,
+                    "reference_version": "1406",
+                    "sim_time_s": 7.02500000000284,
+                    "state_version": 29506
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 28100,
+                    "reference_version": "1407",
+                    "sim_time_s": 7.02500000000284,
+                    "state_version": 29506
+                  }
+                },
+                {
+                  "request_id": 5,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 34100,
+                    "reference_version": "1706",
+                    "sim_time_s": 8.525000000002807,
+                    "state_version": 35806
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 34100,
+                    "reference_version": "1706",
+                    "sim_time_s": 8.525000000002807,
+                    "state_version": 35806
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 34100,
+                    "reference_version": "1707",
+                    "sim_time_s": 8.525000000002807,
+                    "state_version": 35806
+                  }
+                }
+              ]
+            },
+            "realtime_execution_validity": {
+              "status": "N/A",
+              "reasons": [],
+              "wall_age_ms": null,
+              "strict_age_limit_ms": 100
+            },
+            "wall_runtime_characterization": {
+              "maximum_plan_source_to_activation_age_ms": null,
+              "maximum_planner_compute_ms": 6.413307,
+              "maximum_validation_to_activation_ms": 0.258071,
+              "injected_host_delay_ms": 0.0,
+              "host_elapsed_s": 116.59845946200221,
+              "realtime_stale_counterfactual": true
+            },
+            "overall_result_for_mode": "PASS",
+            "raw_scorer_v2": {
+              "case_key": "high_rom_nominal_sync_120_v1",
+              "physical_variant": "nominal_reference",
+              "candidate": "synchronous_diagnostic_only_feedback_replanning_active",
+              "output": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001",
+              "registered_case_sha256": "d9f4d636b98db5792cf4b50915f4509bf2274c1c80764d6d8629bf22e3ae9b96",
+              "case_hash_valid": true,
+              "status": "COMPLETE",
+              "abort_reason": null,
+              "host_elapsed_s": 116.59845946200221,
+              "conditions": {
+                "summary_complete": true,
+                "transition_order": true,
+                "true_goal_dwell": true,
+                "true_return": true,
+                "phase_timeouts": true,
+                "force": true,
+                "moment": true,
+                "torque": true,
+                "human_speed": true,
+                "human_acceleration": true,
+                "robot_speed": true,
+                "session_clearance": true,
+                "true_clearance": true,
+                "measured_sleeve_clearance": true,
+                "no_shank_table_contact": true,
+                "no_human_rom_violation": true,
+                "plan_age": false,
+                "case_hash": true
+              },
+              "true_goal_continuous_dwell_s": 14.295000000065981,
+              "true_return": true,
+              "final_true_q_deg": [
+                5.542317559348652,
+                9.383929389761501
+              ],
+              "final_true_dq_deg_s": [
+                0.14921566759274615,
+                0.07247867520057469
+              ],
+              "maximum_estimation_error_deg": [
+                0.0019967649746758485,
+                0.00439021544945916
+              ],
+              "peak_force_n": 118.71838621895105,
+              "peak_moment_nm": 16.957608569842513,
+              "peak_robot_torque_fraction": 0.3922767412173197,
+              "peak_human_speed_deg_s": [
+                26.035841473347602,
+                41.827392726334025
+              ],
+              "peak_human_acceleration_deg_s2": [
+                112.66102970053016,
+                192.19041896448107
+              ],
+              "peak_robot_speed_deg_s": [
+                32.171236334793235,
+                31.318165526078108,
+                12.600709012845556,
+                43.52986422575103,
+                28.82461043062223,
+                51.46025824470629
+              ],
+              "minimum_session_shank_clearance_m": 0.0072172795730863605,
+              "minimum_true_shank_clearance_m": 0.0123309500632186,
+              "minimum_measured_sleeve_gap_m": 0.0044694383028480895,
+              "maximum_plan_activation_age_ms": null,
+              "task_physics_duration_s": 29.38500000009803,
+              "phase_durations_s": [
+                9.970000000005326,
+                9.955000000047534,
+                9.46000000004517
+              ],
+              "pass": false
+            },
+            "historical_runtime_status": "RSS_RUNTIME_QUALIFICATION_NOT_MET"
+          },
+          "online_certificates_valid": true
+        },
+        "matched_timing_valid": true,
+        "phase_durations": {
+          "OUTBOUND": 9.970000000005326,
+          "HOLD": 9.955000000047534,
+          "RETURN": 9.46000000004517
+        },
+        "J_F": 1907.1726931624994,
+        "force_mean": 64.90528941444394,
+        "force_rms": 67.44574528338262,
+        "force_peak": 118.71838621895105,
+        "moment_integral": 138.91446543433324,
+        "moment_peak": 16.957608569842513,
+        "duration_s": 29.38500000009803,
+        "clearance": 0.0072172795730863605,
+        "physical_clearance": 0.0123309500632186,
+        "model_updates_task": 0,
+        "model_beta": [
+          1.4451233039097302,
+          0.20161343448443397,
+          0.33970720234971163,
+          33.481194688226964,
+          7.74851971731362,
+          10.159575041330715,
+          9.987000154964967,
+          1.4653489446915828,
+          1.598634522909194,
+          5.241074508782824,
+          4.969099460375576
+        ],
+        "model_residual": [
+          [
+            0.012653188793919502,
+            -0.0051336216765736345,
+            -0.006099410209382203,
+            0.01070013625201122,
+            0.01487399401243008
+          ],
+          [
+            -0.001760747453369063,
+            0.001784680524449029,
+            0.00029423100439591305,
+            -0.0032114623696964106,
+            -0.0030138804564074782
+          ]
+        ],
+        "initial_estimated_state": [
+          0.09599036815079943,
+          0.165802032891143,
+          1.3078498364782635e-05,
+          1.2299870248589384e-05
+        ],
+        "initial_reference": [
+          0.09599310885968812,
+          0.16580627893946132
+        ],
+        "host_s": 120.3668799740044,
+        "trace": "stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001/trace.npz",
+        "trace_sha256": "7a31612987f278ebb6391898afe687b73fdbecdadd3641017b0f0728ada8a155",
+        "rejections": 4,
+        "modification_fraction": 0.0027210884353741495,
+        "task_valid": true,
+        "matched_eligible": false,
+        "timing_contract": "SAC_MATCHED_TIMING_CONTRACT_R2",
+        "gates": {
+          "settled_OUTBOUND": true,
+          "completed_HOLD": true,
+          "completed_RETURN": true
+        },
+        "termination": "COMPLETE",
+        "safety_mode_counts": {
+          "TRACK": 5877
+        },
+        "reward_total": 478.34349341363315,
+        "reward_totals": {
+          "force": -19.071726931625044,
+          "shaping": -1.7847796547417154,
+          "completion": 500.0,
+          "failure": 0.0,
+          "rejection": -0.8
+        },
+        "teacher_queries": 0,
+        "teacher_execution": 0,
+        "normalization_updates": 0,
+        "transitions": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p2000_NATIVE_1/episode_00001/TRANSITIONS.npz",
+        "steps": 1470,
+        "stochastic": false,
+        "evaluation_rng_seed": 20490656,
+        "process_pid": 51127,
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0"
+      },
+      "confirmation": {
+        "name": "legacy_predict_revision/best_confirmation/a1_p2000_NATIVE",
+        "scope": "NATIVE",
+        "status": "COMPLETE",
+        "valid": true,
+        "physical_audit": {
+          "pass_": true,
+          "unchanged_evaluator": {
+            "schema": "mode_aware_execution_result_v1",
+            "execution_mode": "SCIENTIFIC_SIMULATION",
+            "physical_task_result": {
+              "status": "PASS",
+              "reasons": [],
+              "scorer_v2_common_conditions": {
+                "summary_complete": true,
+                "transition_order": true,
+                "true_goal_dwell": true,
+                "true_return": true,
+                "phase_timeouts": true,
+                "force": true,
+                "moment": true,
+                "torque": true,
+                "human_speed": true,
+                "human_acceleration": true,
+                "robot_speed": true,
+                "session_clearance": true,
+                "true_clearance": true,
+                "measured_sleeve_clearance": true,
+                "no_shank_table_contact": true,
+                "no_human_rom_violation": true,
+                "case_hash": true
+              },
+              "finite_trace": true,
+              "finite_native": true,
+              "activation_certificates_valid": true,
+              "reference_boundary_C2": true
+            },
+            "scientific_validity": {
+              "status": "PASS",
+              "reasons": [],
+              "request_checks": [
+                {
+                  "request_id": 0,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 80,
+                    "reference_version": "5",
+                    "sim_time_s": 0.020000000000000014,
+                    "state_version": 85
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 80,
+                    "reference_version": "5",
+                    "sim_time_s": 0.020000000000000014,
+                    "state_version": 85
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 80,
+                    "reference_version": "6",
+                    "sim_time_s": 0.020000000000000014,
+                    "state_version": 85
+                  }
+                },
+                {
+                  "request_id": 1,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 6080,
+                    "reference_version": "305",
+                    "sim_time_s": 1.5200000000000913,
+                    "state_version": 6385
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 6080,
+                    "reference_version": "305",
+                    "sim_time_s": 1.5200000000000913,
+                    "state_version": 6385
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 6080,
+                    "reference_version": "306",
+                    "sim_time_s": 1.5200000000000913,
+                    "state_version": 6385
+                  }
+                },
+                {
+                  "request_id": 2,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 12100,
+                    "reference_version": "606",
+                    "sim_time_s": 3.0249999999996833,
+                    "state_version": 12706
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 12100,
+                    "reference_version": "606",
+                    "sim_time_s": 3.0249999999996833,
+                    "state_version": 12706
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 12100,
+                    "reference_version": "607",
+                    "sim_time_s": 3.0249999999996833,
+                    "state_version": 12706
+                  }
+                },
+                {
+                  "request_id": 3,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 18100,
+                    "reference_version": "906",
+                    "sim_time_s": 4.5249999999997845,
+                    "state_version": 19006
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 18100,
+                    "reference_version": "906",
+                    "sim_time_s": 4.5249999999997845,
+                    "state_version": 19006
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "population_prior_v1",
+                    "phase_version": 0,
+                    "physics_step": 18100,
+                    "reference_version": "907",
+                    "sim_time_s": 4.5249999999997845,
+                    "state_version": 19006
+                  }
+                },
+                {
+                  "request_id": 4,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 28100,
+                    "reference_version": "1406",
+                    "sim_time_s": 7.02500000000284,
+                    "state_version": 29506
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 28100,
+                    "reference_version": "1406",
+                    "sim_time_s": 7.02500000000284,
+                    "state_version": 29506
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 28100,
+                    "reference_version": "1407",
+                    "sim_time_s": 7.02500000000284,
+                    "state_version": 29506
+                  }
+                },
+                {
+                  "request_id": 5,
+                  "reasons": [],
+                  "source": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 34100,
+                    "reference_version": "1706",
+                    "sim_time_s": 8.525000000002807,
+                    "state_version": 35806
+                  },
+                  "receipt": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 34100,
+                    "reference_version": "1706",
+                    "sim_time_s": 8.525000000002807,
+                    "state_version": 35806
+                  },
+                  "activation": {
+                    "episode_epoch": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+                    "human_model_version": "351",
+                    "phase_version": 1,
+                    "physics_step": 34100,
+                    "reference_version": "1707",
+                    "sim_time_s": 8.525000000002807,
+                    "state_version": 35806
+                  }
+                }
+              ]
+            },
+            "realtime_execution_validity": {
+              "status": "N/A",
+              "reasons": [],
+              "wall_age_ms": null,
+              "strict_age_limit_ms": 100
+            },
+            "wall_runtime_characterization": {
+              "maximum_plan_source_to_activation_age_ms": null,
+              "maximum_planner_compute_ms": 6.767531,
+              "maximum_validation_to_activation_ms": 0.204453,
+              "injected_host_delay_ms": 0.0,
+              "host_elapsed_s": 114.69828918499843,
+              "realtime_stale_counterfactual": true
+            },
+            "overall_result_for_mode": "PASS",
+            "raw_scorer_v2": {
+              "case_key": "high_rom_nominal_sync_120_v1",
+              "physical_variant": "nominal_reference",
+              "candidate": "synchronous_diagnostic_only_feedback_replanning_active",
+              "output": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001",
+              "registered_case_sha256": "d9f4d636b98db5792cf4b50915f4509bf2274c1c80764d6d8629bf22e3ae9b96",
+              "case_hash_valid": true,
+              "status": "COMPLETE",
+              "abort_reason": null,
+              "host_elapsed_s": 114.69828918499843,
+              "conditions": {
+                "summary_complete": true,
+                "transition_order": true,
+                "true_goal_dwell": true,
+                "true_return": true,
+                "phase_timeouts": true,
+                "force": true,
+                "moment": true,
+                "torque": true,
+                "human_speed": true,
+                "human_acceleration": true,
+                "robot_speed": true,
+                "session_clearance": true,
+                "true_clearance": true,
+                "measured_sleeve_clearance": true,
+                "no_shank_table_contact": true,
+                "no_human_rom_violation": true,
+                "plan_age": false,
+                "case_hash": true
+              },
+              "true_goal_continuous_dwell_s": 14.295000000065981,
+              "true_return": true,
+              "final_true_q_deg": [
+                5.542317559348652,
+                9.383929389761501
+              ],
+              "final_true_dq_deg_s": [
+                0.14921566759274615,
+                0.07247867520057469
+              ],
+              "maximum_estimation_error_deg": [
+                0.0019967649746758485,
+                0.00439021544945916
+              ],
+              "peak_force_n": 118.71838621895105,
+              "peak_moment_nm": 16.957608569842513,
+              "peak_robot_torque_fraction": 0.3922767412173197,
+              "peak_human_speed_deg_s": [
+                26.035841473347602,
+                41.827392726334025
+              ],
+              "peak_human_acceleration_deg_s2": [
+                112.66102970053016,
+                192.19041896448107
+              ],
+              "peak_robot_speed_deg_s": [
+                32.171236334793235,
+                31.318165526078108,
+                12.600709012845556,
+                43.52986422575103,
+                28.82461043062223,
+                51.46025824470629
+              ],
+              "minimum_session_shank_clearance_m": 0.0072172795730863605,
+              "minimum_true_shank_clearance_m": 0.0123309500632186,
+              "minimum_measured_sleeve_gap_m": 0.0044694383028480895,
+              "maximum_plan_activation_age_ms": null,
+              "task_physics_duration_s": 29.38500000009803,
+              "phase_durations_s": [
+                9.970000000005326,
+                9.955000000047534,
+                9.46000000004517
+              ],
+              "pass": false
+            },
+            "historical_runtime_status": "RSS_RUNTIME_QUALIFICATION_NOT_MET"
+          },
+          "online_certificates_valid": true
+        },
+        "matched_timing_valid": true,
+        "phase_durations": {
+          "OUTBOUND": 9.970000000005326,
+          "HOLD": 9.955000000047534,
+          "RETURN": 9.46000000004517
+        },
+        "J_F": 1907.1726931624994,
+        "force_mean": 64.90528941444394,
+        "force_rms": 67.44574528338262,
+        "force_peak": 118.71838621895105,
+        "moment_integral": 138.91446543433324,
+        "moment_peak": 16.957608569842513,
+        "duration_s": 29.38500000009803,
+        "clearance": 0.0072172795730863605,
+        "physical_clearance": 0.0123309500632186,
+        "model_updates_task": 0,
+        "model_beta": [
+          1.4451233039097302,
+          0.20161343448443397,
+          0.33970720234971163,
+          33.481194688226964,
+          7.74851971731362,
+          10.159575041330715,
+          9.987000154964967,
+          1.4653489446915828,
+          1.598634522909194,
+          5.241074508782824,
+          4.969099460375576
+        ],
+        "model_residual": [
+          [
+            0.012653188793919502,
+            -0.0051336216765736345,
+            -0.006099410209382203,
+            0.01070013625201122,
+            0.01487399401243008
+          ],
+          [
+            -0.001760747453369063,
+            0.001784680524449029,
+            0.00029423100439591305,
+            -0.0032114623696964106,
+            -0.0030138804564074782
+          ]
+        ],
+        "initial_estimated_state": [
+          0.09599036815079943,
+          0.165802032891143,
+          1.3078498364782635e-05,
+          1.2299870248589384e-05
+        ],
+        "initial_reference": [
+          0.09599310885968812,
+          0.16580627893946132
+        ],
+        "host_s": 118.46735760699812,
+        "trace": "stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001/trace.npz",
+        "trace_sha256": "7a31612987f278ebb6391898afe687b73fdbecdadd3641017b0f0728ada8a155",
+        "rejections": 4,
+        "modification_fraction": 0.0027210884353741495,
+        "task_valid": true,
+        "matched_eligible": false,
+        "timing_contract": "SAC_MATCHED_TIMING_CONTRACT_R2",
+        "gates": {
+          "settled_OUTBOUND": true,
+          "completed_HOLD": true,
+          "completed_RETURN": true
+        },
+        "termination": "COMPLETE",
+        "safety_mode_counts": {
+          "TRACK": 5877
+        },
+        "reward_total": 478.34349341363315,
+        "reward_totals": {
+          "force": -19.071726931625044,
+          "shaping": -1.7847796547417154,
+          "completion": 500.0,
+          "failure": 0.0,
+          "rejection": -0.8
+        },
+        "teacher_queries": 0,
+        "teacher_execution": 0,
+        "normalization_updates": 0,
+        "transitions": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/best_confirmation/a1_p2000_NATIVE/episode_00001/TRANSITIONS.npz",
+        "steps": 1470,
+        "stochastic": false,
+        "evaluation_rng_seed": 20530251,
+        "process_pid": 51952,
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0"
+      },
+      "checkpoint": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/checkpoints/candidate_attempt_1_point_002000_budget_013283",
+      "point": 2000,
+      "total_online_steps": 13283
+    }
+  },
+  "latest_native_candidate": {
+    "name": "legacy_predict_revision/checkpoint/a1_p10000_NATIVE_1",
+    "scope": "NATIVE",
+    "stochastic": false,
+    "valid": true,
+    "task_valid": true,
+    "matched_eligible": false,
+    "termination": "COMPLETE",
+    "gates": {
+      "settled_OUTBOUND": true,
+      "completed_HOLD": true,
+      "completed_RETURN": true
+    },
+    "phase_durations": {
+      "OUTBOUND": 9.97500000000535,
+      "HOLD": 6.5800000000314185,
+      "RETURN": 9.9900000000477
+    },
+    "J_F": 1768.6785380664414,
+    "duration_s": 26.54500000008447,
+    "force_peak": 118.6663030364175,
+    "moment_integral": 141.57122879232185,
+    "moment_peak": 16.957115892154455,
+    "clearance": 0.007192801993158413,
+    "rejections": 5,
+    "modification_fraction": 0.0037650602409638554,
+    "safety_mode_counts": {
+      "TRACK": 5309
+    },
+    "steps": 1328,
+    "teacher_queries": 0,
+    "teacher_execution": 0,
+    "normalization_updates": 0,
+    "evaluation_rng_seed": 20577765,
+    "trace": "stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p10000_NATIVE_1/episode_00001/trace.npz",
+    "trace_sha256": "b78f2e6486c1618887ce93ab85f2f5d2ca9fd02ac77bae2a7852c6c540a267fb",
+    "transitions": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p10000_NATIVE_1/episode_00001/TRANSITIONS.npz"
+  },
+  "latest_matched": {
+    "name": "legacy_predict_revision/checkpoint/a1_p10000_MATCHED_1",
+    "scope": "MATCHED",
+    "stochastic": false,
+    "valid": false,
+    "task_valid": true,
+    "matched_eligible": false,
+    "termination": "COMPLETE",
+    "gates": {
+      "settled_OUTBOUND": true,
+      "completed_HOLD": true,
+      "completed_RETURN": true
+    },
+    "phase_durations": {
+      "OUTBOUND": 9.97500000000535,
+      "HOLD": 6.5800000000314185,
+      "RETURN": 9.9900000000477
+    },
+    "J_F": 1768.6785380664414,
+    "duration_s": 26.54500000008447,
+    "force_peak": 118.6663030364175,
+    "moment_integral": 141.57122879232185,
+    "moment_peak": 16.957115892154455,
+    "clearance": 0.007192801993158413,
+    "rejections": 5,
+    "modification_fraction": 0.0037650602409638554,
+    "safety_mode_counts": {
+      "TRACK": 5309
+    },
+    "steps": 1328,
+    "teacher_queries": 0,
+    "teacher_execution": 0,
+    "normalization_updates": 0,
+    "evaluation_rng_seed": 20593603,
+    "trace": "stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p10000_MATCHED_1/episode_00001/trace.npz",
+    "trace_sha256": "b78f2e6486c1618887ce93ab85f2f5d2ca9fd02ac77bae2a7852c6c540a267fb",
+    "transitions": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p10000_MATCHED_1/episode_00001/TRANSITIONS.npz"
+  },
+  "latest_stochastic": {
+    "name": "legacy_predict_revision/checkpoint/a1_p10000_STOCHASTIC",
+    "scope": "NATIVE",
+    "stochastic": true,
+    "valid": true,
+    "task_valid": true,
+    "matched_eligible": false,
+    "termination": "COMPLETE",
+    "gates": {
+      "settled_OUTBOUND": true,
+      "completed_HOLD": true,
+      "completed_RETURN": true
+    },
+    "phase_durations": {
+      "OUTBOUND": 10.00000000000547,
+      "HOLD": 9.9900000000477,
+      "RETURN": 9.9900000000477
+    },
+    "J_F": 1952.0784747972605,
+    "duration_s": 29.980000000100873,
+    "force_peak": 118.41200671034557,
+    "moment_integral": 145.81449664012283,
+    "moment_peak": 16.9573445723928,
+    "clearance": 0.007227400139946075,
+    "rejections": 9,
+    "modification_fraction": 0.006,
+    "safety_mode_counts": {
+      "TRACK": 5996
+    },
+    "steps": 1500,
+    "teacher_queries": 0,
+    "teacher_execution": 0,
+    "normalization_updates": 0,
+    "evaluation_rng_seed": 20609441,
+    "trace": "stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p10000_STOCHASTIC/episode_00001/trace.npz",
+    "trace_sha256": "ded843535898f4e51115407c89bd433f0a2e0fb1c672194594a12c5abf7d5567",
+    "transitions": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/legacy_predict_revision/checkpoint/a1_p10000_STOCHASTIC/episode_00001/TRANSITIONS.npz"
+  },
+  "latest_best_confirmation_pending": true,
+  "claim_levels": {
+    "preserved_complete_native_ability": true,
+    "confirmed_improved_inefficient_student": true,
+    "latest_complete_candidate_improved": true,
+    "latest_best_confirmation_pending": true,
+    "exceeded_strong_teacher": false,
+    "matched_valid_exists": false,
+    "independent_training_seeds": 1
+  },
+  "confirmed_best_jf": 1907.1726931624994,
+  "latest_candidate_jf": 1768.6785380664414,
+  "confirmed_improvement_percent": 2.199272052457547,
+  "candidate_improvement_percent": 9.301318570549256,
+  "confirmed_gap_to_strong_native": 1029.4501399545088,
+  "candidate_gap_to_strong_native": 890.955984858451,
+  "complete_online_episodes": 5,
+  "failed_online_episodes": 2,
+  "negative_evaluations": 15,
+  "resources": {
+    "checks": 19,
+    "main_PSS_max_GiB": 2.236269950866699,
+    "swap_peak_MiB": 146.10546875,
+    "WSL_available_min_GiB": 2.6542701721191406,
+    "host_commit_headroom_min_GiB": 4.8485870361328125,
+    "GPU_total_device_memory_used_max_MiB": 185.0,
+    "online_steps_per_s_median": 12.906312346315916,
+    "online_steps_per_s_range": [
+      11.21374393200451,
+      16.810750845435468
+    ],
+    "all_checks_safe": false,
+    "wall_hours": 9.269340212212668
+  },
+  "wall_hours_at_evidence_closeout": 9.406474531624053,
+  "training_pause_wall_hours": 9.2065014405383,
+  "resumable_checkpoint": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/checkpoints/paused_exception_1791138081"
+}

@@ -1,0 +1,396 @@
+{
+  "best": {
+    "MATCHED": null,
+    "NATIVE": null
+  },
+  "demo_effect": "No completed task or settled phase progression benefit demonstrated at 50k; do not extend the budget automatically.",
+  "first": {
+    "A": {
+      "deterministic_by_scope": {
+        "MATCHED": {
+          "hold_completed": null,
+          "hold_entry": null,
+          "return_entry": null,
+          "settled_outbound": null,
+          "valid_complete": null
+        },
+        "NATIVE": {
+          "hold_completed": null,
+          "hold_entry": null,
+          "return_entry": null,
+          "settled_outbound": null,
+          "valid_complete": null
+        }
+      },
+      "hold_completed": null,
+      "hold_entry": null,
+      "return_entry": null,
+      "settled_outbound": null,
+      "valid_complete": null
+    },
+    "B": {
+      "deterministic_by_scope": {
+        "MATCHED": {
+          "hold_completed": null,
+          "hold_entry": null,
+          "return_entry": null,
+          "settled_outbound": null,
+          "valid_complete": null
+        },
+        "NATIVE": {
+          "hold_completed": null,
+          "hold_entry": null,
+          "return_entry": null,
+          "settled_outbound": null,
+          "valid_complete": null
+        }
+      },
+      "hold_completed": null,
+      "hold_entry": null,
+      "return_entry": null,
+      "settled_outbound": null,
+      "valid_complete": null
+    }
+  },
+  "historical_scratch300k": "Separate historical negative control; not the paired A50k arm",
+  "limitations": [
+    "one previously exposed Human and one paired seed",
+    "Q counterfactual preference does not establish physical validity",
+    "demo train sampling changes data distribution, not original SAC objective"
+  ],
+  "next": "Analyze value propagation and absolute-target settling with these preserved checkpoints before any new training budget",
+  "resource": {
+    "GPU_VRAM_MiB": 160.0,
+    "min_WSL_available_bytes": 2448580608,
+    "min_Windows_available_bytes": 405798912,
+    "min_Windows_commit_headroom_bytes": 5763436544,
+    "steps_s": {
+      "A": 7.606251904177645,
+      "B": 7.662603495131954
+    },
+    "stop_reasons": [
+      [
+        "TRAINING_TREE_OVER_4_5_GIB"
+      ]
+    ],
+    "swap_bytes": 0,
+    "tree_PSS_bytes": 5363565568,
+    "tree_RSS_bytes": 5908512768,
+    "windows_available_only_never_a_stop_gate": true
+  },
+  "results": {
+    "A": {
+      "all_collected_phase": {
+        "HOLD": 0,
+        "OUTBOUND": 50000,
+        "RETURN": 0
+      },
+      "arm": "A",
+      "completion_rewards": 0,
+      "episodes": 129,
+      "final_bundle": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/demo_assisted_sac_task_acquisition_v1/A/step_0050000_final",
+      "online_action_mean": [
+        0.08671976625919342,
+        0.010794240981340408
+      ],
+      "online_action_std": [
+        0.6981329917907715,
+        0.6318155527114868
+      ],
+      "online_near_bound_action_rate": 0.25102,
+      "online_phase": {
+        "HOLD": 0,
+        "OUTBOUND": 50000,
+        "RETURN": 0
+      },
+      "optimizer": {
+        "actor": {
+          "sha256": "3695515f0b5e279db6ab6e0df03ba361e7e1337a95a37d693754834eacb878b2",
+          "state_count": 8,
+          "steps": [
+            45000.0
+          ]
+        },
+        "critic": {
+          "sha256": "96109857b4f23898b808861ad4b890490ae408a0965402f62bbcd77829966fdf",
+          "state_count": 12,
+          "steps": [
+            45000.0
+          ]
+        },
+        "entropy": {
+          "sha256": "490b174504dc3c2e64131d468934ac1d2ff4d605285d7fe73515bc969110c803",
+          "state_count": 1,
+          "steps": [
+            45000.0
+          ]
+        }
+      },
+      "previous_rejection_rate": 0.39758,
+      "sampling": {
+        "batches": 45000,
+        "demo_phase": {
+          "HOLD": 0,
+          "OUTBOUND": 0,
+          "RETURN": 0
+        },
+        "demo_samples": 0,
+        "online_phase": {
+          "HOLD": 0,
+          "OUTBOUND": 11520000,
+          "RETURN": 0
+        },
+        "online_samples": 11520000
+      },
+      "steps": 50000,
+      "steps_s": 7.606251904177645,
+      "updates": 45000,
+      "wall_accounting": "sum of A process segments; repair downtime excluded, campaign 9h cap unchanged",
+      "wall_s": 6573.539848503646
+    },
+    "B": {
+      "all_collected_phase": {
+        "HOLD": 0,
+        "OUTBOUND": 50000,
+        "RETURN": 0
+      },
+      "arm": "B",
+      "completion_rewards": 0,
+      "episodes": 128,
+      "final_bundle": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/demo_assisted_sac_task_acquisition_v1/B/step_0050000_final",
+      "online_action_mean": [
+        0.10611157864332199,
+        0.06281456351280212
+      ],
+      "online_action_std": [
+        0.7256295680999756,
+        0.7116008400917053
+      ],
+      "online_near_bound_action_rate": 0.34604,
+      "online_phase": {
+        "HOLD": 0,
+        "OUTBOUND": 50000,
+        "RETURN": 0
+      },
+      "optimizer": {
+        "actor": {
+          "sha256": "a78c0c7a20a1e444ffd630a1152ad9e93604d4580ca8850f9a0dbb2c7732b5a7",
+          "state_count": 8,
+          "steps": [
+            45000.0
+          ]
+        },
+        "critic": {
+          "sha256": "d5a94ef4aae9c102d1b588edf9e17fb4b5256fc52f548e3dddc9e101868abbad",
+          "state_count": 12,
+          "steps": [
+            45000.0
+          ]
+        },
+        "entropy": {
+          "sha256": "7254614c0a31fba49714ecd577ce4928401be382d56e5d18c9a3b14918bec252",
+          "state_count": 1,
+          "steps": [
+            45000.0
+          ]
+        }
+      },
+      "previous_rejection_rate": 0.37248,
+      "sampling": {
+        "batches": 45000,
+        "demo_phase": {
+          "HOLD": 339523,
+          "OUTBOUND": 2643574,
+          "RETURN": 2776903
+        },
+        "demo_samples": 5760000,
+        "online_phase": {
+          "HOLD": 0,
+          "OUTBOUND": 5760000,
+          "RETURN": 0
+        },
+        "online_samples": 5760000
+      },
+      "steps": 50000,
+      "steps_s": 7.662603495131954,
+      "updates": 45000,
+      "wall_s": 6525.197345237
+    }
+  },
+  "scientific_changes": [],
+  "status": "PAIRED_50K_COMPLETE_STOP",
+  "success_then_regression": {
+    "A": false,
+    "B": false
+  },
+  "monitor_repair": {
+    "RNG_restored": true,
+    "cold_physics_reset_avoided": true,
+    "first_5000_A_B_actions_equal": true,
+    "hard_cutoff_unchanged": 1791092017.601372,
+    "new_online_steps_during_reconstruction": 0,
+    "new_updates_during_reconstruction": 0,
+    "observation_reward_done_comparison": "BITWISE_ARRAY_EQUAL_EVERY_TRANSITION",
+    "optimizer_restored": true,
+    "original_episode": 37,
+    "own_campaign_checkpoint": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/demo_assisted_sac_task_acquisition_v1/A/paused_0010000_1791068239131108660",
+    "reconstructed_prior_actor_steps": 419,
+    "replay_restored": true,
+    "scientific_changes": [],
+    "source_lock_verified": true,
+    "status": "PASS"
+  },
+  "settling_diagnostics_final_NATIVE": {
+    "A": {
+      "arm": "A",
+      "training_step": 50000,
+      "scope": "NATIVE",
+      "tag": "final",
+      "trace": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/demo_assisted_sac_task_acquisition_v1/evaluation/A_0050000_NATIVE_final/episode_00001/trace.npz",
+      "trace_sha256": "cc4bea4c9cc1abac212dde5e8c78bcd1433b9e6181f724cfe56738effaec2b7a",
+      "termination": "TIMEOUT_OUTBOUND",
+      "max_synchronized_position_progress": 0.5980589508921432,
+      "entered_HOLD": false,
+      "independent_VALID": false,
+      "position_box_samples": 0,
+      "position_and_velocity_samples": 0,
+      "position_velocity_and_zero_reference_proxy_samples": 0,
+      "closest_max_joint_goal_error_deg": 44.21351540186424,
+      "closest_goal_sample": {
+        "task_s": 3.829999999991074,
+        "q_deg": [
+          86.32629300890345,
+          75.78648459813576
+        ],
+        "dq_deg_s": [
+          22.83829860601086,
+          -0.004267488729972827
+        ],
+        "reference_q_deg": [
+          87.12965081504396,
+          74.90312500010982
+        ],
+        "reference_dq_deg_s": [
+          22.5,
+          -12.749999998662577
+        ]
+      },
+      "final_q_deg": [
+        85.82541420903124,
+        39.518981140832096
+      ],
+      "final_dq_deg_s": [
+        -0.11692540606059507,
+        -0.1511643484548098
+      ],
+      "final_reference_q_deg": [
+        85.87026596069337,
+        39.5454578101635
+      ],
+      "final_reference_dq_deg_s": [
+        -5.367186024969684e-15,
+        1.987846675914698e-15
+      ],
+      "last50_policy_target_mean_deg": [
+        36.047183990478516,
+        58.58387756347656
+      ],
+      "last50_policy_target_range_deg": [
+        [
+          0.4290826618671417,
+          0.5922503471374512
+        ],
+        [
+          115.10650634765625,
+          124.72132110595703
+        ]
+      ],
+      "last50_near_bound_action_rate": 0.62
+    },
+    "B": {
+      "arm": "B",
+      "training_step": 50000,
+      "scope": "NATIVE",
+      "tag": "final",
+      "trace": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/demo_assisted_sac_task_acquisition_v1/evaluation/B_0050000_NATIVE_final/episode_00001/trace.npz",
+      "trace_sha256": "1b0184683ddcd093dfc851ea52e2a3deff832a180ae93a60824675dc3cf1ff74",
+      "termination": "TIMEOUT_OUTBOUND",
+      "max_synchronized_position_progress": 1.0,
+      "entered_HOLD": false,
+      "independent_VALID": false,
+      "position_box_samples": 0,
+      "position_and_velocity_samples": 0,
+      "position_velocity_and_zero_reference_proxy_samples": 0,
+      "closest_max_joint_goal_error_deg": 1.7906980377976254,
+      "closest_goal_sample": {
+        "task_s": 8.24499999999709,
+        "q_deg": [
+          118.22384497670103,
+          121.79069803779763
+        ],
+        "dq_deg_s": [
+          6.742321879470409,
+          17.004855285181176
+        ],
+        "reference_q_deg": [
+          118.40401271896408,
+          122.4397744470541
+        ],
+        "reference_dq_deg_s": [
+          7.255255626248924,
+          13.683400741699087
+        ]
+      },
+      "final_q_deg": [
+        120.61227169058888,
+        124.6595510322457
+      ],
+      "final_dq_deg_s": [
+        0.059035635748650665,
+        0.05858874642960132
+      ],
+      "final_reference_q_deg": [
+        120.67727744579315,
+        124.68399107456209
+      ],
+      "final_reference_dq_deg_s": [
+        1.987846675914698e-16,
+        1.1927080055488188e-15
+      ],
+      "last50_policy_target_mean_deg": [
+        59.63591384887695,
+        124.17884063720703
+      ],
+      "last50_policy_target_range_deg": [
+        [
+          4.953216552734375,
+          123.29991149902344
+        ],
+        [
+          122.8918685913086,
+          124.76306915283203
+        ]
+      ],
+      "last50_near_bound_action_rate": 1.0
+    }
+  },
+  "campaign_wall_s_including_repair": 15140.405378103256,
+  "phase_value_and_actor_interpretation": {
+    "B_OUTBOUND_teacher_minus_online_Q": 2.296038866043091,
+    "B_RETURN_teacher_minus_online_Q": 194.20689392089844,
+    "B_OUTBOUND_teacher_preferred_rate": 0.5735294117647058,
+    "B_RETURN_teacher_preferred_rate": 0.9615384615384616,
+    "B_OUTBOUND_actor_teacher_MAE": [
+      0.7966334819793701,
+      0.806891679763794
+    ],
+    "B_RETURN_actor_teacher_MAE": [
+      0.08146673440933228,
+      0.1409217119216919
+    ],
+    "A_RETURN_actor_teacher_MAE": [
+      1.678821086883545,
+      0.3496297299861908
+    ]
+  }
+}

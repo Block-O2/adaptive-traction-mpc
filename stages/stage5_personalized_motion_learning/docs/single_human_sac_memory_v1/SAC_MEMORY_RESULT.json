@@ -1,0 +1,331 @@
+{
+  "status": "SAC_MEMORY_QUALIFIED",
+  "root_cause": "one-time Python/PyTorch/CUDA/MuJoCo startup/first-update allocations and evaluation high-water plus a Windows-Available-only guard; contemporary host video rendering separately caused real commit pressure",
+  "leak_observed": false,
+  "allocation_rows": [
+    {
+      "tag": "before_imports",
+      "rss_mib": 28.265625,
+      "pss_mib": 26.23828125,
+      "anonymous_pss_mib": 19.19140625,
+      "file_pss_mib": 7.046875,
+      "gpu_allocated_mib": null,
+      "gpu_reserved_mib": null
+    },
+    {
+      "tag": "after_torch_mujoco_imports",
+      "rss_mib": 585.859375,
+      "pss_mib": 583.767578125,
+      "anonymous_pss_mib": 330.17578125,
+      "file_pss_mib": 253.591796875,
+      "gpu_allocated_mib": null,
+      "gpu_reserved_mib": null
+    },
+    {
+      "tag": "after_checkpoint_optimizer_load",
+      "rss_mib": 844.296875,
+      "pss_mib": 841.95703125,
+      "anonymous_pss_mib": 449.45703125,
+      "file_pss_mib": 316.5,
+      "gpu_allocated_mib": 3.416015625,
+      "gpu_reserved_mib": 6.0
+    },
+    {
+      "tag": "after_replay_load",
+      "rss_mib": 890.39453125,
+      "pss_mib": 888.052734375,
+      "anonymous_pss_mib": 493.43359375,
+      "file_pss_mib": 316.619140625,
+      "gpu_allocated_mib": 3.416015625,
+      "gpu_reserved_mib": 6.0
+    },
+    {
+      "tag": "after_initial_reset",
+      "rss_mib": 1466.8671875,
+      "pss_mib": 1437.525390625,
+      "anonymous_pss_mib": 1063.2734375,
+      "file_pss_mib": 296.24609375,
+      "gpu_allocated_mib": 3.416015625,
+      "gpu_reserved_mib": 6.0
+    },
+    {
+      "tag": "milestone_12195",
+      "rss_mib": 1669.59375,
+      "pss_mib": 1640.25,
+      "anonymous_pss_mib": 1243.3515625,
+      "file_pss_mib": 318.892578125,
+      "gpu_allocated_mib": 11.54248046875,
+      "gpu_reserved_mib": 26.0
+    },
+    {
+      "tag": "milestone_12196",
+      "rss_mib": 1943.84375,
+      "pss_mib": 1914.474609375,
+      "anonymous_pss_mib": 1488.9453125,
+      "file_pss_mib": 347.5234375,
+      "gpu_allocated_mib": 20.5966796875,
+      "gpu_reserved_mib": 28.0
+    }
+  ],
+  "stability": {
+    "Rss": {
+      "early_mean_mib": 2201.483203125,
+      "late_mean_mib": 2686.9016927083335,
+      "late_minus_early_mib": 485.41848958333367,
+      "min_mib": 2178.0546875,
+      "max_mib": 2771.94140625
+    },
+    "Pss": {
+      "early_mean_mib": 2172.2025390625,
+      "late_mean_mib": 2656.75,
+      "late_minus_early_mib": 484.5474609375001,
+      "min_mib": 2148.654296875,
+      "max_mib": 2741.8544921875
+    },
+    "Pss_Anon": {
+      "early_mean_mib": 1746.526171875,
+      "late_mean_mib": 2231.8196614583335,
+      "late_minus_early_mib": 485.29348958333344,
+      "min_mib": 1723.09765625,
+      "max_mib": 2316.859375
+    },
+    "Pss_File": {
+      "early_mean_mib": 347.6705078125,
+      "late_mean_mib": 346.9244791666667,
+      "late_minus_early_mib": -0.7460286458332916,
+      "min_mib": 346.5048828125,
+      "max_mib": 347.8740234375
+    }
+  },
+  "post_evaluation_anonymous_drift_mib": 22.610677083333485,
+  "repeated_evaluation": {
+    "first_evaluation_peak_tree_mib": 3537.056640625,
+    "repeat_evaluation_peak_tree_mib": 3420.53125,
+    "final_gc_pss_mib": 2589.2021484375,
+    "final_gc_callbacks": 0,
+    "final_gc_enabled": true
+  },
+  "logging_accounting": {
+    "parsed_training_heap_bytes": 115321,
+    "approx_bytes_per_episode": 3494.5757575757575,
+    "approx_bytes_per_eval": 449607.5,
+    "observed_episodes_per_step": 0.0019606678153407404,
+    "note": "Parsed JSON/CSV graph approximation; NumPy action arrays and shared interned keys differ. Not direct live heap measurement. One-step abort scenario is a conservative sensitivity case, not an observed claim."
+  },
+  "milestones": [
+    {
+      "step": 15000,
+      "main_rss_mib": 2178.0546875,
+      "main_pss_mib": 2148.654296875,
+      "tree_pss_mib": 2267.1689453125,
+      "windows_available_gib": 2.311046600341797,
+      "windows_commit_gib": 25.63227081298828,
+      "windows_commit_headroom_gib": 7.0980682373046875,
+      "wsl_available_gib": 5.143760681152344,
+      "wsl_cached_gib": 1.7994956970214844,
+      "wsl_buffers_mib": 80.98828125,
+      "wsl_sreclaimable_mib": 54.71484375,
+      "swap_mib": 0.0,
+      "gpu": {
+        "allocated": 21597184,
+        "max_allocated": 24431616,
+        "max_reserved": 29360128,
+        "reserved": 29360128
+      },
+      "owned_processes": 3,
+      "wsl_processes": 28,
+      "windows_processes": 449,
+      "episodes": 3,
+      "resets": 4,
+      "training_episodes_since_original": 4,
+      "training_resets_since_original": 8,
+      "evaluation_resets_so_far": 0,
+      "cumulative_continuation_steps_s": 8.860390394005016,
+      "segment_steps_s": 8.860390480400774,
+      "replay_size": 14996,
+      "replay_allocated_mib": 43.8690185546875
+    },
+    {
+      "step": 20000,
+      "main_rss_mib": 2236.43359375,
+      "main_pss_mib": 2207.205078125,
+      "tree_pss_mib": 2325.7470703125,
+      "windows_available_gib": 2.2594070434570312,
+      "windows_commit_gib": 25.337749481201172,
+      "windows_commit_headroom_gib": 7.392589569091797,
+      "wsl_available_gib": 5.067279815673828,
+      "wsl_cached_gib": 1.7999343872070312,
+      "wsl_buffers_mib": 81.89453125,
+      "wsl_sreclaimable_mib": 55.75,
+      "swap_mib": 0.0,
+      "gpu": {
+        "allocated": 21597184,
+        "max_allocated": 24431616,
+        "max_reserved": 29360128,
+        "reserved": 29360128
+      },
+      "owned_processes": 3,
+      "wsl_processes": 28,
+      "windows_processes": 442,
+      "episodes": 13,
+      "resets": 14,
+      "training_episodes_since_original": 14,
+      "training_resets_since_original": 18,
+      "evaluation_resets_so_far": 0,
+      "cumulative_continuation_steps_s": 8.769445091909766,
+      "segment_steps_s": 8.737124866202057,
+      "replay_size": 19996,
+      "replay_allocated_mib": 43.8690185546875
+    },
+    {
+      "step": 25000,
+      "main_rss_mib": 2771.94140625,
+      "main_pss_mib": 2741.8544921875,
+      "tree_pss_mib": 2859.130859375,
+      "windows_available_gib": 2.3434371948242188,
+      "windows_commit_gib": 26.918991088867188,
+      "windows_commit_headroom_gib": 5.811347961425781,
+      "wsl_available_gib": 4.521263122558594,
+      "wsl_cached_gib": 1.8626976013183594,
+      "wsl_buffers_mib": 82.73828125,
+      "wsl_sreclaimable_mib": 59.03125,
+      "swap_mib": 0.0,
+      "gpu": {
+        "allocated": 21596672,
+        "max_allocated": 24431616,
+        "max_reserved": 29360128,
+        "reserved": 29360128
+      },
+      "owned_processes": 3,
+      "wsl_processes": 33,
+      "windows_processes": 444,
+      "episodes": 23,
+      "resets": 24,
+      "training_episodes_since_original": 24,
+      "training_resets_since_original": 28,
+      "evaluation_resets_so_far": 2,
+      "cumulative_continuation_steps_s": 7.848002829541719,
+      "segment_steps_s": 6.863033864367436,
+      "replay_size": 24996,
+      "replay_allocated_mib": 43.8690185546875
+    },
+    {
+      "step": 30000,
+      "main_rss_mib": 2678.8828125,
+      "main_pss_mib": 2648.79296875,
+      "tree_pss_mib": 2766.13671875,
+      "windows_available_gib": 3.2268753051757812,
+      "windows_commit_gib": 25.897808074951172,
+      "windows_commit_headroom_gib": 6.832530975341797,
+      "wsl_available_gib": 4.609432220458984,
+      "wsl_cached_gib": 1.863250732421875,
+      "wsl_buffers_mib": 83.3359375,
+      "wsl_sreclaimable_mib": 60.56640625,
+      "swap_mib": 0.0,
+      "gpu": {
+        "allocated": 21597184,
+        "max_allocated": 24431616,
+        "max_reserved": 29360128,
+        "reserved": 29360128
+      },
+      "owned_processes": 3,
+      "wsl_processes": 31,
+      "windows_processes": 444,
+      "episodes": 33,
+      "resets": 34,
+      "training_episodes_since_original": 34,
+      "training_resets_since_original": 38,
+      "evaluation_resets_so_far": 2,
+      "cumulative_continuation_steps_s": 8.009463260357126,
+      "segment_steps_s": 8.419818311654717,
+      "replay_size": 29996,
+      "replay_allocated_mib": 43.8690185546875
+    }
+  ],
+  "peak_main_rss_mib": 3449.8671875,
+  "peak_tree_pss_mib": 3537.056640625,
+  "peak_gpu_reserved_mib": 28.0,
+  "estimates": {
+    "300000": {
+      "replay_capacity_bytes": 46000000,
+      "hypothetical_uncapped_replay_bytes": 138000000,
+      "sac_tree_ram_budget_bytes": 4831838208,
+      "whole_wsl_ram_budget_bytes": 6442450944,
+      "expected_logging_bytes": 13745305,
+      "one_step_episode_logging_bytes": 1048372727,
+      "windows_commit_reserve_bytes": 2147483648,
+      "qualification": "same100k replay, observed episode cadence, sequential evaluation, no competing heavy host workload; extrapolation, not a long-run measurement; source logging remains linear in episodes"
+    },
+    "500000": {
+      "replay_capacity_bytes": 46000000,
+      "hypothetical_uncapped_replay_bytes": 230000000,
+      "sac_tree_ram_budget_bytes": 4831838208,
+      "whole_wsl_ram_budget_bytes": 6442450944,
+      "expected_logging_bytes": 22309366,
+      "one_step_episode_logging_bytes": 1747287878,
+      "windows_commit_reserve_bytes": 2147483648,
+      "qualification": "same100k replay, observed episode cadence, sequential evaluation, no competing heavy host workload; extrapolation, not a long-run measurement; source logging remains linear in episodes"
+    },
+    "1000000": {
+      "replay_capacity_bytes": 46000000,
+      "hypothetical_uncapped_replay_bytes": 460000000,
+      "sac_tree_ram_budget_bytes": 4831838208,
+      "whole_wsl_ram_budget_bytes": 6442450944,
+      "expected_logging_bytes": 43719517,
+      "one_step_episode_logging_bytes": 3494575757,
+      "windows_commit_reserve_bytes": 2147483648,
+      "qualification": "same100k replay, observed episode cadence, sequential evaluation, no competing heavy host workload; extrapolation, not a long-run measurement; source logging remains linear in episodes"
+    }
+  },
+  "final": {
+    "checkpoint": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/single_human_sac_memory_v1/attempt5/seed_20261003/step_0030000.zip",
+    "episodes": 33,
+    "error": null,
+    "optimizers": {
+      "actor": {
+        "sha256": "e2024edb37deee4edb16949807f710cbc770294c7eb52e6a50cca138f1dcb7e5",
+        "state_count": 8,
+        "steps": [
+          24997.0
+        ]
+      },
+      "critic": {
+        "sha256": "cb0629da353ed7e96ca82789eb2c4e6bb01d23258a8a4301c1cd01f5fc6fc014",
+        "state_count": 12,
+        "steps": [
+          24997.0
+        ]
+      },
+      "entropy": {
+        "sha256": "2998dfebbd6506e2bc19803a914ac268f0e99ddcf01159a441010b68f64fc684",
+        "state_count": 1,
+        "steps": [
+          24997.0
+        ]
+      }
+    },
+    "replay": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/single_human_sac_memory_v1/attempt5/seed_20261003/final_replay_buffer.pkl",
+    "resets": 34,
+    "step": 30000,
+    "stop_reason": "BOUNDED_30000_COMPLETE",
+    "updates": 24997,
+    "wall_s": 2260.262891063
+  },
+  "total_training_episodes_since_original": 34,
+  "total_training_resets_since_original": 38,
+  "total_evaluation_resets": 4,
+  "preservation": {
+    "head_unchanged": true,
+    "index_unchanged": true,
+    "pass_": true,
+    "preexisting_files_checked": 4076,
+    "scientific_lock_pass": true
+  },
+  "limitations": [
+    "30k is a bounded leak screen, not proof that every future policy/evaluation workload cannot leak",
+    "Original12k samples omitted commit/PSS/cache, so their exact Windows-memory composition cannot be reconstructed",
+    "Video rendering pressure was real during this diagnostic; it was awaited, never terminated",
+    "Original checkpoint lacked RNG; later pressure-stop checkpoint RNG was restored",
+    "SAC checkpoints precede current callback transition storage; original and diagnostic stop offsets are preserved, not fabricated"
+  ]
+}

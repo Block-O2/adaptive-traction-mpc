@@ -1,0 +1,126 @@
+{
+  "question": "Can unchanged 55-D/2-D imitation -> SAC reliably complete and improve task?",
+  "category": "formal, previously exposed nominal Human; deterministic repeats are not robustness holdouts",
+  "development_split": "Expert development uses archived causal teacher and three fixed BC-prefix states; no tuning after gate",
+  "heldout_split": "Pure-student rollouts exclude teacher execution, dataset reads and expert queries; same exposed nominal case",
+  "truth_firewall": "Expert accepts only observation(55), reference q/dq/ddq contained therein, phase and elapsed clocks; no plant/env/trajectory/index argument",
+  "expert": {
+    "kind": "causal state/reference-gated hip-leading terminal controller",
+    "estimated_hip_release_rad": 0.6158464443493726,
+    "reference_hip_release_rad": 0.6241733740565614,
+    "knee_preview_rad": 0.02,
+    "calibration_source": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/demo_assisted_sac_task_acquisition_v1/NATIVE_DEMO.npz",
+    "calibration_sha256": "f72ab31d635833f7dd15ad9d3128dd28f6289da6f0bc8030270ec466c8c58ac2",
+    "calibration": "causal posture at existing fixed teacher release; no trajectory lookup during query",
+    "gate_prefixes": [
+      {
+        "seed": 20261004,
+        "index": 75
+      },
+      {
+        "seed": 20261005,
+        "index": 150
+      },
+      {
+        "seed": 20261006,
+        "index": 300
+      }
+    ],
+    "gate": "All 3 exact archived BC prefixes: legal labels, first action certified, positive synchronized progress within next 2s unless already terminal, and complete independent VALID continuation. Nominal expert also VALID."
+  },
+  "task": {
+    "start_deg": [
+      5,
+      10
+    ],
+    "goal_deg": [
+      120,
+      120
+    ],
+    "phases": [
+      "OUTBOUND",
+      "HOLD",
+      "RETURN"
+    ],
+    "period_s": 0.02,
+    "Human": "nominal",
+    "mode": "commissioning_only",
+    "science_unchanged": true
+  },
+  "seed": 20261004,
+  "initial_condition_seed": 20261003,
+  "dagger": {
+    "max_rounds": 8,
+    "collection_rollouts": 3,
+    "evaluation_rollouts": 3,
+    "beta": [
+      0.5,
+      0.25,
+      0.1,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "qualification": "Two consecutive rounds each >=3/3 pure deterministic independent VALID; no teacher execution/intervention",
+    "architecture": [
+      55,
+      256,
+      256,
+      2
+    ],
+    "initial_teacher_dataset": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/demo_assisted_sac_task_acquisition_v1/NATIVE_DEMO.npz",
+    "optimizer": "Adam",
+    "learning_rate": 0.0003,
+    "initial_updates": 18000,
+    "round_updates": 18000,
+    "batch_size": 288,
+    "phase_sampling": "96 samples each phase, with replacement; all difficult states retained",
+    "selection": "fixed final-update checkpoint; no offline fit gate; never select using qualification results"
+  },
+  "sac": {
+    "max_online_steps": 100000,
+    "eval_interval": 10000,
+    "eval_rollouts": 3,
+    "initial_random_warmup_steps": 0,
+    "replay": "all executed DAgger transitions plus successful pure student evaluation transitions; actions are actually executed raw policy commands, never counterfactual expert labels",
+    "actor_init": "qualified native actor weights; exact deterministic identity verified; fresh critics/targets/optimizers",
+    "demo_fraction_first_50k": 0.25,
+    "demo_fraction_after_50k_if_stable": 0.1,
+    "stable": "Previous two NATIVE checkpoints each >=3/3 VALID; otherwise keep .25",
+    "success_loss": "Two consecutive NATIVE checkpoints <=1/3 VALID: save last good, freeze actor, STOP",
+    "log_std_init": -4.0,
+    "learning_rate": 0.0003,
+    "batch_size": 256,
+    "buffer_size": 100000,
+    "gamma": 0.9998666755551605,
+    "tau": 0.005,
+    "ent_coef": "auto",
+    "target_entropy": "auto",
+    "train_freq": 1,
+    "gradient_steps": 1,
+    "extra_losses": [],
+    "timeout_bootstrap": false,
+    "comparator": "qualified DAgger / fixed hip-leading / CEM / original controller, separate NATIVE and MATCHED; VALID only J_F rank; new best independently replayed at 1e-6 J_F tolerance"
+  },
+  "exclusions": "none; all failures and difficult states retained",
+  "budget": {
+    "target_wall_hours": [
+      6,
+      10
+    ],
+    "hard_wall_hours": 12,
+    "physics_owners": 1,
+    "physics": "MuJoCo CPU",
+    "NN": "CUDA"
+  },
+  "stopping": [
+    "EXPERT_QUERY_INTERFACE_BLOCKED",
+    "SCIENTIFIC_CONTRACT_OR_SAFETY_BROKEN",
+    "DAGGER_8_ROUNDS_UNQUALIFIED",
+    "SAC_ABILITY_LOST",
+    "NAN_RESOURCE_EVIDENCE_CORRUPTION",
+    "HARD_WALL_CAP"
+  ]
+}

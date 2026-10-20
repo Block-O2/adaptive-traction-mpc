@@ -1,0 +1,72 @@
+{
+  "method": "DAgger-Anchored SAC Fine-Tuning v2",
+  "seed": 20261005,
+  "initial_condition_seed": 20261003,
+  "period_s": 0.02,
+  "gamma": 0.9998666755551605,
+  "tau": 0.005,
+  "actor_lr": 1e-06,
+  "critic_lr": 0.0003,
+  "batch_size": 256,
+  "anchor_batch_per_phase": 96,
+  "anchor_lambda": 10000.0,
+  "critic_only_updates": 20000,
+  "critic_per_step": 1,
+  "actor_every_critic": 10,
+  "alpha": 0.001,
+  "exploration_log_std_candidates": [
+    -8.0,
+    -10.0
+  ],
+  "exploration_selection": "first candidate with two complete independent NATIVE stochastic rollouts; otherwise lower candidate, report failures; no further search",
+  "log_std_frozen": true,
+  "uniform_warmup": 0,
+  "current_policy_seed_episodes": 2,
+  "maximum_total_online_steps": 50000,
+  "evaluation_points": [
+    0,
+    1000,
+    2000,
+    5000,
+    10000,
+    15000,
+    20000,
+    25000,
+    30000,
+    35000,
+    40000,
+    45000,
+    50000
+  ],
+  "checkpoint_repeats": 2,
+  "stochastic_checkpoint_repeats": 1,
+  "history_fraction": 0.25,
+  "history_samples": 64,
+  "online_samples": 192,
+  "lambda_schedule": {
+    "first_20000": 10000.0,
+    "requires_two_consecutive_native_checkpoints": true,
+    "every_5000_after_20000_multiplier": 0.9,
+    "floor": 5000.0
+  },
+  "rescue": {
+    "maximum": 1,
+    "actor_lr_multiplier": 0.1,
+    "std_multiplier": 0.25,
+    "anchor_multiplier": 4.0,
+    "lambda_decay": false,
+    "restore": "actor critics targets optimizers fixed alpha replay sampler Python NumPy CPU/CUDA RNG; fresh cold environment from saved env RNG; global consumed budget and failures never restored"
+  },
+  "small_actor_test_updates": 10,
+  "ability_loss": "deterministic NATIVE invalid then independent confirmation invalid triggers rescue; stochastic failure recorded, not silently converted to deterministic success",
+  "pause": [
+    "real data mismatch",
+    "unresolved physics/evaluation bug",
+    "NaN",
+    "resource risk",
+    "12h hard cutoff"
+  ],
+  "claim": "method development; components not independently causally identified; deterministic repeated replay is not independent training seed",
+  "budget_semantics": "all new data-collection steps including calibration, warm-start rollouts and failed attempts count toward 50000; evaluation-only steps separately ledgered and never used for training",
+  "high_frequency": "key evaluations and all failures; online success keeps compact actions/transitions only"
+}

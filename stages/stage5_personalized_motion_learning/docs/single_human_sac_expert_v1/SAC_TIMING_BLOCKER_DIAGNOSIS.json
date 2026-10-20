@@ -1,0 +1,44 @@
+{
+  "actual_hold_s": 1.0200000000048703,
+  "classification": [
+    "scheduler/reference semantics",
+    "expected discrete execution ownership"
+  ],
+  "control_reference_sensor_transition_dt_s": 0.005,
+  "diagnostic_failed_attempt": "diagnosis_old_MATCHED worker startup failed because diagnostic harness omitted main guard; preserved; repaired harness only and independently reran attempt2",
+  "exit_decision_s": 20.07500000000484,
+  "extra_seconds_formula": "2 * (one 0.005s activation wait + one 0.005s receipt-owned endpoint recognition) = 0.020s",
+  "first_credited_valid_interval_endpoint_s": 19.06500000000002,
+  "first_endpoint_emitted_s": 19.560000000002383,
+  "first_endpoint_recognized_s": 19.565000000002406,
+  "first_schedule_activation_s": 19.059999999999995,
+  "first_valid_sample_s": 19.059999999999995,
+  "hold_entry_s": 19.05499999999997,
+  "implementation_bug": false,
+  "matched_required_phase_clock_s": 1.0,
+  "old_controller_policy_cadence": "event-driven planner requests at phase/segment boundaries; no 20ms SAC callback",
+  "original_dwell_first_satisfied_s": 19.560000000002383,
+  "physical_required_contiguous_valid_dwell_s": 0.5,
+  "physics_dt_s": 0.0005,
+  "policy_dt_s": 0.02,
+  "probe": "stages/stage5_personalized_motion_learning/docs/single_human_sac_expert_v1/SAC_HOLD_PROBE_R2.json",
+  "probe_sha256": "7468ec860abf8fbeb1c15364d2f816f494d29195a733c0ea2475c803f940913a",
+  "second_endpoint_emitted_s": 20.070000000004818,
+  "second_schedule_activation_s": 19.57000000000243,
+  "source_chain": [
+    "task.py hold_complete/transition_phase: .5 s minimum contiguous dwell",
+    "activation_validation.py SensorSupportedTaskClock: two valid contiguous post-entry captures; entry capture never credits pre-entry time",
+    "receipt_reference_governor.py is_complete: only committed emitted progress can be complete; select/commit happens after transition check",
+    "runtime_sac_expert_v1.py: control tick transition then plan/references; continuous_hold guards reference ownership; asynchronous worker activation needs one execution interval"
+  ],
+  "source_hashes": {
+    "stages/stage5_personalized_motion_learning/configs/high_rom_v1/stage5_goal_task_120_v1.json": "40b445813ec7df9d5db3b95b31a338f5d158058cdbd62449e330af949585f986",
+    "stages/stage5_personalized_motion_learning/scripts/single_human_sac_expert_v1/sac_env.py": "229ff0d4eb3a59e88bdef0740fee1da5ac5e4ee363ce20de8ec4cf58018f4d02",
+    "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py": "574792b8753119d3fa84a97b972d70639e6f69125260be5a6567097b2b0c7e72",
+    "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/receipt_reference_governor.py": "eac8361e9f9ab623e8226072b4ba732e7affefa91da1b520651cbf089658bd26",
+    "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime_sac_expert_v1.py": "6d795dd802249a0248f4f917b5f45e62fee12fdca3c4e529deb85c5432fcb058",
+    "stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/task.py": "d5ee754402a19918885bdd65cfdca945eb2b35fc4bb7176ba5f9d2e630b26bef"
+  },
+  "status": "SOURCE_AND_TRANSPARENT_RUNTIME_CONFIRMED",
+  "time_measurement": "HOLD = RETURN transition timestamp minus HOLD transition timestamp; costs include every physical waiting interval"
+}

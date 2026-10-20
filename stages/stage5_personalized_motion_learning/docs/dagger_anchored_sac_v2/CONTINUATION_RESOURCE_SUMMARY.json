@@ -1,0 +1,119 @@
+{
+  "policy": {
+    "version": "RESOURCE_POLICY_V2_2_PROCESS_WORKSET_FIX",
+    "scope": "operational resource stop criterion only",
+    "scientific_changes": [],
+    "system_configuration_changes": [],
+    "old_policy": "new swap >128 MiB alone stops; MemAvailable<1.5GiB and commit headroom<2GiB also stop",
+    "reason": "prior swap-only pause occurred at 146.105MiB, WSL available2.654GiB, Windows commit headroom4.849GiB; distinguish stable swapping and evaluation working sets from sustained degradation",
+    "sample_interval_s": 45,
+    "trend_min_samples": 3,
+    "trend_min_span_s": 90,
+    "same_lifecycle_only": true,
+    "stable_swap_level_alone_never_stops": true,
+    "immediate": {
+      "WSL_available_below_GiB": 0.75,
+      "Windows_commit_headroom_below_GiB": 0.75,
+      "oom_kill_counter_increase": true,
+      "allocation_warning_or_process_error": "existing exception handler preserves complete state",
+      "other_heavy_simulation": true
+    },
+    "persistent": {
+      "low_WSL_available_GiB": 1.5,
+      "low_commit_headroom_GiB": 2.0,
+      "process_tree_PSS_GiB": 6.0,
+      "owned_process_count_over": 12,
+      "system_count_growth_over": 100
+    },
+    "trends": {
+      "swap_per_interval_min_MiB": 16,
+      "swap_net_min_MiB": 96,
+      "rapid_swap_net_min_MiB": 256,
+      "available_per_interval_decline_min_MiB": 64,
+      "available_net_decline_min_MiB": 256,
+      "PSS_net_abnormal_growth_MiB": 1024,
+      "PSS_growth_with_low_memory_MiB": 512
+    },
+    "throughput": {
+      "reference_steps_per_s": 12.906312346315916,
+      "warning_fraction": 0.5,
+      "severe_fraction": 0.25,
+      "requires_three_online_progress_samples_over_90s": true,
+      "warning_needs_swap_or_memory_pressure": true
+    },
+    "stop_action": "set append-only evidence and pause-request flag; policy boundary saves full state. Already-running independent evaluation finishes evidence before next dispatch. No resource expansion, cache dropping, budget reset or new algorithm.",
+    "prior_wall_deadline_unchanged": true,
+    "lifecycle_definition": "EVALUATION when evaluate.py child exists; TRAINING_ACTIVE only when multiprocessing spawn physics/planner child exists; otherwise RESTORED_IDLE. Do not compare initial physical allocation with restored-idle working sets.",
+    "implementation_correction": "v2.1 compared different cold evaluation process identities. At26283 swap remained7.328MiB and available2.671GiB while tree4.584GiB was within measured normal cold evaluation workload. PSS-only abnormal growth now requires the same root/worker identities and exceeding5.25GiB, or concurrent low headroom for the existing512MiB rule. Global low-memory, OOM, swap-growth and throughput rules unchanged. All spent interactions and saved states preserved.",
+    "PSS_same_process_identity_required": true,
+    "PSS_isolated_growth_requires_tree_above_GiB": 5.25,
+    "normal_measured_evaluation_tree_GiB": 4.584
+  },
+  "samples": 92,
+  "tree_PSS_peak_GiB": 5.3626708984375,
+  "main_PSS_peak_GiB": 2.507284164428711,
+  "swap_start_MiB": 7.328125,
+  "swap_peak_MiB": 12.5703125,
+  "swap_last_MiB": 12.5703125,
+  "min_WSL_available_GiB": 1.8866043090820312,
+  "min_commit_headroom_GiB": 4.543628692626953,
+  "GPU_peak_MiB": 187.0,
+  "steps_per_s_median": 13.185743210484281,
+  "steps_per_s_range": [
+    11.523485078819519,
+    17.307520753203097
+  ],
+  "risk_samples": [
+    {
+      "unix": 1791140127.0149627,
+      "tag": "CONTINUOUS_OWNER_TREE",
+      "lifecycle": "TRAINING",
+      "reasons": [
+        "SUSTAINED_ABNORMAL_PSS_GROWTH"
+      ],
+      "trend": {
+        "span_s": 92.1735155582428,
+        "swap_deltas_MiB": [
+          0.0,
+          0.0
+        ],
+        "available_decline_MiB": 1355.6484375,
+        "PSS_growth_MiB": 1390.8310546875
+      }
+    },
+    {
+      "unix": 1791141051.3753116,
+      "tag": "CONTINUOUS_OWNER_TREE",
+      "lifecycle": "EVALUATION",
+      "reasons": [
+        "SUSTAINED_ABNORMAL_PSS_GROWTH"
+      ],
+      "trend": {
+        "span_s": 93.13087940216064,
+        "swap_deltas_MiB": [
+          0.0,
+          0.0
+        ],
+        "available_decline_MiB": 1093.7578125,
+        "PSS_growth_MiB": 1086.6142578125
+      }
+    },
+    {
+      "unix": 1791143498.056573,
+      "tag": "CONTINUOUS_OWNER_TREE",
+      "lifecycle": "EVALUATION",
+      "reasons": [
+        "SUSTAINED_ABNORMAL_PSS_GROWTH"
+      ],
+      "trend": {
+        "span_s": 93.2626326084137,
+        "swap_deltas_MiB": [
+          0.0,
+          0.0
+        ],
+        "available_decline_MiB": 1970.609375,
+        "PSS_growth_MiB": 1962.0419921875
+      }
+    }
+  ]
+}

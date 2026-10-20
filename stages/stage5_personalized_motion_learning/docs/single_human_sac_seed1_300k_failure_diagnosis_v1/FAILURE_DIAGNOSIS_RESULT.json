@@ -1,0 +1,283 @@
+{
+  "checkpoint": "KEEP as preserved negative control/partial-learning reference; do not blindly extend or overwrite it",
+  "classification": [
+    {
+      "code": "A",
+      "finding": "Not supported as primary cause: same-wrapper fixed comparator VALID in both scopes;300k reproducible; independent physics agrees. No exact R2 source defect established."
+    },
+    {
+      "code": "B",
+      "finding": "Secondary acquisition difficulty/scale, not demonstrated complete-task reward misranking. Success +485..491 vs failures around-1000; absorbing potential gives tiny net shaping and no settled-arrival bonus; all-failure replay offers weak sequence credit."
+    },
+    {
+      "code": "C",
+      "finding": "Secondary representation difficulty, not mapping/units bug: broad0..125deg independent targets, near-bound proposals, changing knee direction, and settling a target/reference before phase transition."
+    },
+    {
+      "code": "D",
+      "finding": "Strong early distortion (random40.76%,50k deterministic37.8% rejection), but not current dominant cause: final training0.984%,275k/300k deterministic0%."
+    },
+    {
+      "code": "E",
+      "finding": "Primary: scratch exploration/task acquisition never produced HOLD/RETURN/completion evidence; final replay entirely OUTBOUND,873 successful training episodes=0."
+    },
+    {
+      "code": "F",
+      "finding": "No positive explosion/nonfinite evidence; finite Adam/network, Q about-995, final frozen TD/loss small, entropy near target. Historical loss time series not retained, so cannot exclude earlier instability."
+    },
+    {
+      "code": "G",
+      "finding": "Limited partial motion and rejection-avoidance learning, but no sustained complete-task acquisition.225k passes near goal at excessive speed;300k regresses. Blind budget extension not justified."
+    },
+    {
+      "code": "H",
+      "finding": "Mean clipped q progress can report1.0 during overshoot; it is not settled arrival, HOLD, valid success, or a policy-ranking score."
+    }
+  ],
+  "diagnostic_rollouts": 5,
+  "early_anchor": 12194,
+  "entered_hold": 0,
+  "exact10k_evaluation_available": false,
+  "git_mutations": [],
+  "historical_training_losses_unavailable": true,
+  "main_evaluations": 22,
+  "new_diagnostics": [
+    {
+      "J_F": 425.22934534341124,
+      "discounted_return": -964.6102778437075,
+      "discounted_reward_parts": {
+        "completion": 0.0,
+        "failure": -960.4052002295712,
+        "force": -4.194211462637404,
+        "rejection": 0.0,
+        "shaping": -0.01086615149886283
+      },
+      "duration_s": 6.074999999986728,
+      "force_peak": 125.94082833728814,
+      "minimum_clearance": 0.013780182927236314,
+      "minimum_true_clearance": 0.0190058021431696,
+      "moment_peak": 18.091821985843197,
+      "name": "SAC300k",
+      "phase_durations": {
+        "HOLD": 0.0,
+        "OUTBOUND": 6.074999999986728,
+        "RETURN": 0.0
+      },
+      "policy_phase_counts": {
+        "OUTBOUND": 304
+      },
+      "reward_parts": {
+        "completion": 0.0,
+        "failure": -1000.0,
+        "force": -4.252293453434117,
+        "rejection": 0.0,
+        "shaping": -0.08993245195170818
+      },
+      "reward_total": -1004.3422259053858,
+      "scope": "NATIVE",
+      "status": "ABORTED",
+      "steps": 304,
+      "success_physical_audit": false,
+      "termination_reason": "Q_BOUNDS",
+      "trace": "stages/stage5_personalized_motion_learning/results/single_human_sac_seed1_300k_failure_diagnosis_v1/diagnostic_rollouts/SAC300k_NATIVE/episode_00001/trace.npz",
+      "trace_sha256": "b13af5d6be8a690b27eb7de7a7aa6d923629a643d074f32affc9a19d8feb5309",
+      "transition_archive_sha256": "5ea56ee297852364d8fc8e0573793a9c2b6833eca5d97b3cca6f77f3cdae80d7",
+      "transitions": "stages/stage5_personalized_motion_learning/results/single_human_sac_seed1_300k_failure_diagnosis_v1/diagnostic_rollouts/SAC300k_NATIVE/episode_00001/DIAGNOSTIC_TRANSITIONS.npz",
+      "valid": false
+    },
+    {
+      "J_F": 0.0,
+      "discounted_return": -1000.2108661514989,
+      "discounted_reward_parts": {
+        "completion": 0.0,
+        "failure": -1000.0,
+        "force": 0.0,
+        "rejection": -0.2,
+        "shaping": -0.010866151498865311
+      },
+      "duration_s": 0.0,
+      "force_peak": 78.8942429673745,
+      "minimum_clearance": 0.013883156560032358,
+      "minimum_true_clearance": 0.019015424312302475,
+      "moment_peak": 12.648187077245707,
+      "name": "early_failure",
+      "phase_durations": {
+        "HOLD": 0.0,
+        "OUTBOUND": 0.0,
+        "RETURN": 0.0
+      },
+      "policy_phase_counts": {
+        "OUTBOUND": 1
+      },
+      "reward_parts": {
+        "completion": 0.0,
+        "failure": -1000.0,
+        "force": 0.0,
+        "rejection": -0.2,
+        "shaping": -0.010866151498865311
+      },
+      "reward_total": -1000.2108661514989,
+      "scope": "NATIVE",
+      "status": "ABORTED",
+      "steps": 1,
+      "success_physical_audit": false,
+      "termination_reason": "ONLINE_NO_CURRENT_CERTIFIED_CONTINUATION",
+      "trace": "stages/stage5_personalized_motion_learning/results/single_human_sac_seed1_300k_failure_diagnosis_v1/diagnostic_rollouts/early_failure_NATIVE/episode_00001/trace.npz",
+      "trace_sha256": "86aa4e26004a4fac06d5bfd55366a9e96c102264b7883537358c3b3f374d595e",
+      "transition_archive_sha256": "d5c0ee7867d24bf601754a12fb8a2f24f1efcbb5469a70ff8196643ce49cf94c",
+      "transitions": "stages/stage5_personalized_motion_learning/results/single_human_sac_seed1_300k_failure_diagnosis_v1/diagnostic_rollouts/early_failure_NATIVE/episode_00001/DIAGNOSTIC_TRANSITIONS.npz",
+      "valid": false
+    },
+    {
+      "J_F": 1344.8967959511835,
+      "discounted_return": 427.7088146881847,
+      "discounted_reward_parts": {
+        "completion": 440.3961950662815,
+        "failure": 0.0,
+        "force": -12.676514226597984,
+        "rejection": 0.0,
+        "shaping": -0.010866151498877485
+      },
+      "duration_s": 19.015000000048516,
+      "force_peak": 118.42539837555772,
+      "minimum_clearance": 0.006532101498540788,
+      "minimum_true_clearance": 0.011819359619169838,
+      "moment_peak": 17.018578508696926,
+      "name": "fixed_hip_lead",
+      "phase_durations": {
+        "HOLD": 1.0050000000047987,
+        "OUTBOUND": 9.005000000000718,
+        "RETURN": 9.005000000042997
+      },
+      "policy_phase_counts": {
+        "HOLD": 51,
+        "OUTBOUND": 451,
+        "RETURN": 451
+      },
+      "reward_parts": {
+        "completion": 500.0,
+        "failure": 0.0,
+        "force": -13.448967959511867,
+        "rejection": 0.0,
+        "shaping": -1.1134070857657434
+      },
+      "reward_total": 485.43762495472237,
+      "scope": "MATCHED",
+      "status": "COMPLETE",
+      "steps": 953,
+      "success_physical_audit": true,
+      "termination_reason": null,
+      "trace": "stages/stage5_personalized_motion_learning/results/single_human_sac_seed1_300k_failure_diagnosis_v1/diagnostic_rollouts/fixed_hip_lead_MATCHED/episode_00001/trace.npz",
+      "trace_sha256": "3e3db28bde68bf07ba42ebd37cb0f6ff7eb94d825de1481eab0e44d6002cb4e7",
+      "transition_archive_sha256": "cab7701baf1376aff6de9c334d691d7f7644da659ace6e20b5114247fb94ca00",
+      "transitions": "stages/stage5_personalized_motion_learning/results/single_human_sac_seed1_300k_failure_diagnosis_v1/diagnostic_rollouts/fixed_hip_lead_MATCHED/episode_00001/DIAGNOSTIC_TRANSITIONS.npz",
+      "valid": true
+    },
+    {
+      "J_F": 877.7225532079905,
+      "discounted_return": 453.56144452331654,
+      "discounted_reward_parts": {
+        "completion": 462.05076458009324,
+        "failure": 0.0,
+        "force": -8.478453905277831,
+        "rejection": 0.0,
+        "shaping": -0.010866151498865051
+      },
+      "duration_s": 11.835000000014231,
+      "force_peak": 118.42539837555772,
+      "minimum_clearance": 0.006532101493002315,
+      "minimum_true_clearance": 0.01181935960998513,
+      "moment_peak": 17.018578508696926,
+      "name": "fixed_hip_lead",
+      "phase_durations": {
+        "HOLD": 0.6999999999996458,
+        "OUTBOUND": 5.429999999987345,
+        "RETURN": 5.7050000000272405
+      },
+      "policy_phase_counts": {
+        "HOLD": 35,
+        "OUTBOUND": 272,
+        "RETURN": 286
+      },
+      "reward_parts": {
+        "completion": 500.0,
+        "failure": 0.0,
+        "force": -8.777225532079905,
+        "rejection": 0.0,
+        "shaping": -0.6366555716919295
+      },
+      "reward_total": 490.58611889622813,
+      "scope": "NATIVE",
+      "status": "COMPLETE",
+      "steps": 593,
+      "success_physical_audit": true,
+      "termination_reason": null,
+      "trace": "stages/stage5_personalized_motion_learning/results/single_human_sac_seed1_300k_failure_diagnosis_v1/diagnostic_rollouts/fixed_hip_lead_NATIVE/episode_00001/trace.npz",
+      "trace_sha256": "54d5f4811dab489bf6731b5a02917047b539a040e477df0e27d90abb280b33f6",
+      "transition_archive_sha256": "f72ab31d635833f7dd15ad9d3128dd28f6289da6f0bc8030270ec466c8c58ac2",
+      "transitions": "stages/stage5_personalized_motion_learning/results/single_human_sac_seed1_300k_failure_diagnosis_v1/diagnostic_rollouts/fixed_hip_lead_NATIVE/episode_00001/DIAGNOSTIC_TRANSITIONS.npz",
+      "valid": true
+    },
+    {
+      "J_F": 788.9404243589238,
+      "discounted_return": -943.2754833449142,
+      "discounted_reward_parts": {
+        "completion": 0.0,
+        "failure": -935.6317276122778,
+        "force": -7.632889581137534,
+        "rejection": 0.0,
+        "shaping": -0.010866151498865429
+      },
+      "duration_s": 10.00000000000547,
+      "force_peak": 78.8942429673745,
+      "minimum_clearance": 0.013883156560032358,
+      "minimum_true_clearance": 0.019015424312302475,
+      "moment_peak": 12.648187077245707,
+      "name": "no_motion",
+      "phase_durations": {
+        "HOLD": 0.0,
+        "OUTBOUND": 10.00000000000547,
+        "RETURN": 0.0
+      },
+      "policy_phase_counts": {
+        "OUTBOUND": 500
+      },
+      "reward_parts": {
+        "completion": 0.0,
+        "failure": -1000.0,
+        "force": -7.8894042435895955,
+        "rejection": 0.0,
+        "shaping": -0.011589188871494358
+      },
+      "reward_total": -1007.9009934324611,
+      "scope": "NATIVE",
+      "status": "ABORTED",
+      "steps": 500,
+      "success_physical_audit": false,
+      "termination_reason": "TIMEOUT_OUTBOUND",
+      "trace": "stages/stage5_personalized_motion_learning/results/single_human_sac_seed1_300k_failure_diagnosis_v1/diagnostic_rollouts/no_motion_NATIVE/episode_00001/trace.npz",
+      "trace_sha256": "630ea175f5b5230ba8540f09c2aa657eca11319f4bbcc6a2419d064d4769ce23",
+      "transition_archive_sha256": "273b554432df8f31bb3521bfbdb9e685a4a2415786f6f45c2d11ccbd54221a6b",
+      "transitions": "stages/stage5_personalized_motion_learning/results/single_human_sac_seed1_300k_failure_diagnosis_v1/diagnostic_rollouts/no_motion_NATIVE/episode_00001/DIAGNOSTIC_TRANSITIONS.npz",
+      "valid": false
+    }
+  ],
+  "next_recommended_experiment": "Teacher/demo replay initialization, prospectively versioned task-acquisition study; use same-wrapper independently VALID fixed_hip_lead full OUTBOUND/HOLD/RETURN demonstrations, preserve R2 science, fresh SAC initialization as acquisition test; no current checkpoint500k extension and no execution this round",
+  "optimizer_updates": 0,
+  "primary_root_cause": "E",
+  "science_changes": [],
+  "secondary_root_causes": [
+    "B: acquisition credit/scale",
+    "C: target/settling difficulty",
+    "D: early only"
+  ],
+  "simulation_truth": "post-run diagnostics only; original policies and teacher use causal deployable observations",
+  "started_return": 0,
+  "status": "SAC_SEED1_300K_FAILURE_DIAGNOSED",
+  "termination_counts": {
+    "Q_BOUNDS": 12,
+    "TIMEOUT_OUTBOUND": 10
+  },
+  "training_steps": 0,
+  "valid_evaluations": 0
+}

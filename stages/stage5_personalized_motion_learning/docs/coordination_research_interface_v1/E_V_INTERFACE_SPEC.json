@@ -1,0 +1,29 @@
+{
+  "HOLD": "no actions accepted; no schedule modulation; B settle/dwell/hold/transition ownership",
+  "RETURN": "same action class, independent schedule",
+  "V": "same representation/certificate/execution route as E; process-scoped quiescent full-state fork; no portable disk restore claim",
+  "action": "ResidualAction: phase, current progress, residual C2 state, future PWL knots, horizon, version/provenance; explicit quintic C2 realization",
+  "continuation_policy_id": "B_pacing_zero_residual_after_declared_C2_chunk_v1",
+  "decision_period_s": 0.02,
+  "dimension": "configurable K residual amplitudes for fixed knot locations; optional locations/horizon metadata; scalar convenience action supported; RL output dimension not frozen",
+  "envelope": "max(-p_h_B,p_k_B-1) <= Delta_d <= min(1-p_h_B,p_k_B); whole residual+ROM+derivative+geometry+mechanics certificate required; explicit rejection, no clipping",
+  "horizon": "arbitrary normalized phase locations; candidate chunk returns C2 residual to zero, then B continuation",
+  "label_fields": [
+    "start_snapshot_hash",
+    "candidate",
+    "candidate_horizon",
+    "continuation_policy_id",
+    "Human_model_hash",
+    "timing_mode",
+    "complete_task_validity",
+    "J_F/force/moment/duration",
+    "candidate_acceptance_status"
+  ],
+  "label_interpretation": "remaining cost under Q^{pi_cont}(b,a); no optimal-value claim",
+  "math": "p_h=p_h_B+Delta_d; p_k=p_k_B-Delta_d; m_B=(p_h_B+p_k_B)/2; d_B=(p_h_B-p_k_B)/2",
+  "normalization": "per movement phase, retained B reference start and end; original physical task/arrival boxes are separately unchanged",
+  "reference_control_grid_s": 0.005,
+  "schema": "coordination_research_interface_v1",
+  "status": "implementation present, execution not promotable",
+  "units": "Delta_d dimensionless normalized differential progress; derivative state is w.r.t. normalized phase clock; q rad, dq rad/s, ddq rad/s^2"
+}

@@ -1,0 +1,113 @@
+{
+  "comparisons": {},
+  "confirmed_policies": {},
+  "fixed_reference_timing_analysis": {
+    "causal_scope": "Native contrast contains timing; matched contrast still combines coordination and within-phase pacing. Residual 15ms total-time difference alone is bounded by 3 N s under unchanged 200N limit; cannot explain the full ~93.7 N s matched contrast. No pure-coordination causal effect or generalization claim.",
+    "matched_J_F_difference": 93.71670251630394,
+    "matched_improvement_percent": 6.514376697850922,
+    "matched_residual_duration_s": 0.015000000000071623,
+    "maximum_cost_from_that_extra_time_given_200N_limit": 3.0000000000143245,
+    "native_fixed_force_peak_change_percent": 2.5513528048067835,
+    "native_fixed_moment_peak_change_percent": 8.32009341509361,
+    "native_improvement_percent": 29.07221551816848
+  },
+  "invalid_evaluation_count": 2,
+  "learning_still_improving": null,
+  "no_algorithm_reliability_or_global_optimum_claim": true,
+  "questions": [
+    {
+      "answer": "Two .5s stationary certified schedules, each with one 5ms asynchronous activation wait and one 5ms receipt-owned endpoint recognition. Phase transitions are checked every 5ms, before reference progress commit. No controller bug or SAC-period quantization.",
+      "question": "What caused 1.020s HOLD?"
+    },
+    {
+      "answer": "Physical .5s contiguous valid HOLD unchanged; MATCHED minima 9/1/9s, each upper bound +max(.020 policy tick, 2*(.005 activation+.005 receipt recognition))+.000000001s. Same range for every method, source-derived before SAC training.",
+      "question": "What timing protocol is frozen and why?"
+    },
+    {
+      "answer": "PASS",
+      "detail": "Unchanged physical evaluator and model/initial conditions; old controller is fairly represented without modifying its planner. CEM is an archived descriptor transferred through this interface, not reproduction of its historical number.",
+      "question": "Do original controller and strong comparators qualify fairly?"
+    },
+    {
+      "answer": "Native reduction includes substantial duration effects. After common timing eligibility, a smaller matched benefit remains. Coordination versus within-phase pacing is unresolved as a causal decomposition.",
+      "detail": {
+        "causal_scope": "Native contrast contains timing; matched contrast still combines coordination and within-phase pacing. Residual 15ms total-time difference alone is bounded by 3 N s under unchanged 200N limit; cannot explain the full ~93.7 N s matched contrast. No pure-coordination causal effect or generalization claim.",
+        "matched_J_F_difference": 93.71670251630394,
+        "matched_improvement_percent": 6.514376697850922,
+        "matched_residual_duration_s": 0.015000000000071623,
+        "maximum_cost_from_that_extra_time_given_200N_limit": 3.0000000000143245,
+        "native_fixed_force_peak_change_percent": 2.5513528048067835,
+        "native_fixed_moment_peak_change_percent": 8.32009341509361,
+        "native_improvement_percent": 29.07221551816848
+      },
+      "question": "Is fixed hip-leading ~877.7 primarily timing, coordination, or unresolved?"
+    },
+    {
+      "answer": "Formal CUDA optimization executed with finite logged losses; the resource stop prevented the meaningful >=300k campaign. No valid learned expert is confirmed.",
+      "formal_started": true,
+      "gradient_updates": 7193,
+      "meaningful_campaign_completed": false,
+      "question": "Did SAC train successfully?",
+      "seeds": [
+        {
+          "checkpoint": "stages/stage5_personalized_motion_learning/results/single_human_sac_expert_v1_r2/seed_20261003/step_0012194.zip",
+          "completed_steps": 12194,
+          "error": null,
+          "formal": true,
+          "gradient_updates": 7193,
+          "planned_steps": 300000,
+          "seed": 20261003,
+          "steps_s": 7.174509576262272,
+          "stop_reason": "RESOURCE_RISK",
+          "wall_s": 1699.6283676790001
+        }
+      ],
+      "steps": 12194
+    },
+    {
+      "answer": null,
+      "qualification_references_never_counted": true,
+      "question": "Best SAC NATIVE J_F?"
+    },
+    {
+      "answer": null,
+      "independent_two_reload_confirmation_required": true,
+      "question": "Best SAC MATCHED J_F?"
+    },
+    {
+      "answer": "No confirmed valid SAC candidate, so no beating claim.",
+      "question": "Does SAC beat original, fixed, CEM?"
+    },
+    {
+      "answer": "No confirmed valid SAC trajectory exists for this claim.",
+      "limit": "Lead/lag descriptives do not establish novelty or a global optimum.",
+      "question": "Does SAC discover different coordination?"
+    },
+    {
+      "answer": "No SAC result. Fixed comparator reduces cost while its force/moment peaks exceed old nominal.",
+      "fixed_reference": {
+        "causal_scope": "Native contrast contains timing; matched contrast still combines coordination and within-phase pacing. Residual 15ms total-time difference alone is bounded by 3 N s under unchanged 200N limit; cannot explain the full ~93.7 N s matched contrast. No pure-coordination causal effect or generalization claim.",
+        "matched_J_F_difference": 93.71670251630394,
+        "matched_improvement_percent": 6.514376697850922,
+        "matched_residual_duration_s": 0.015000000000071623,
+        "maximum_cost_from_that_extra_time_given_200N_limit": 3.0000000000143245,
+        "native_fixed_force_peak_change_percent": 2.5513528048067835,
+        "native_fixed_moment_peak_change_percent": 8.32009341509361,
+        "native_improvement_percent": 29.07221551816848
+      },
+      "question": "Does integral reduction increase peaks?"
+    },
+    {
+      "answer": null,
+      "limit": "Requires valid deterministic periodic evaluation evidence; episode reward alone is insufficient.",
+      "question": "Is learning still improving at stop?"
+    },
+    {
+      "answer": "Review measured warmup/reset throughput and valid independent checkpoint trend on this unchanged contract first. Do not switch algorithms to bypass an unresolved resource, throughput or valid-task limitation.",
+      "question": "Is more SAC justified before TQC/PPO?"
+    }
+  ],
+  "single_fixed_exposed_Human_only": true,
+  "status": "NO_CONFIRMED_VALID_SAC",
+  "valid_evaluation_count": 0
+}

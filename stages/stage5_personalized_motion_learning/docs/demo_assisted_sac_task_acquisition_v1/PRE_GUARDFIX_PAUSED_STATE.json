@@ -1,0 +1,83 @@
+{
+  "arm": "A",
+  "branch": "codex/demo-assisted-sac-task-acquisition-v1",
+  "checkpoint": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/demo_assisted_sac_task_acquisition_v1/A/step_0010000_periodic",
+  "elapsed_s": 8622.682522296906,
+  "episodes": 36,
+  "error": {
+    "reason": "RESOURCE: ['TRAINING_TREE_OVER_4_5_GIB']",
+    "traceback": "Traceback (most recent call last):\n  File \"/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/demo_assisted_sac_task_acquisition_v1/run_paired.py\", line 218, in run\n    MODEL.learn(total_timesteps=TARGET,callback=cb,reset_num_timesteps=True)\n  File \"/home/hank/envs/adaptive-online-rl-v1/lib/python3.10/site-packages/stable_baselines3/sac/sac.py\", line 308, in learn\n    return super().learn(\n  File \"/home/hank/envs/adaptive-online-rl-v1/lib/python3.10/site-packages/stable_baselines3/common/off_policy_algorithm.py\", line 328, in learn\n    rollout = self.collect_rollouts(\n  File \"/home/hank/envs/adaptive-online-rl-v1/lib/python3.10/site-packages/stable_baselines3/common/off_policy_algorithm.py\", line 598, in collect_rollouts\n    callback.on_rollout_end()\n  File \"/home/hank/envs/adaptive-online-rl-v1/lib/python3.10/site-packages/stable_baselines3/common/callbacks.py\", line 123, in on_rollout_end\n    self._on_rollout_end()\n  File \"/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/demo_assisted_sac_task_acquisition_v1/run_paired.py\", line 195, in _on_rollout_end\n    guard()\n  File \"/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/demo_assisted_sac_task_acquisition_v1/run_paired.py\", line 45, in guard\n    if PRESSURE and PRESSURE['stop_reasons']:raise StopCampaign('RESOURCE: '+str(PRESSURE['stop_reasons']))\nStopCampaign: RESOURCE: ['TRAINING_TREE_OVER_4_5_GIB']\n"
+  },
+  "hard_cutoff_unix": 1791092017.601372,
+  "initialization_verified": true,
+  "latest_health": {
+    "Q_scale": {
+      "max": 137.3970947265625,
+      "mean": -16.36628570483299,
+      "min": -349.3205871582031,
+      "rms": 99.35436525467053
+    },
+    "TD_error": {
+      "max": 726.9016723632812,
+      "mean": 7.354402140248567,
+      "min": -190.51507568359375,
+      "rms": 79.45198299348826
+    },
+    "actor_on_teacher_Q_mean": 43.031620025634766,
+    "actor_teacher_action_MAE": [
+      0.7122105360031128,
+      0.5737192034721375
+    ],
+    "actor_teacher_near_bound_rate": 0.05227655917406082,
+    "alpha": 0.31820395588874817,
+    "arm": "A",
+    "critic_comparison_limit": "Counterfactual raw actions sampled from online replay at identical teacher states; Q ranking alone is not physical success",
+    "demo_sample_phase": {
+      "HOLD": 0,
+      "OUTBOUND": 0,
+      "RETURN": 0
+    },
+    "finite": true,
+    "losses": {
+      "train/actor_loss": 14.70400619506836,
+      "train/critic_loss": 6325.7001953125,
+      "train/ent_coef": 0.31827738881111145,
+      "train/ent_coef_loss": -0.8018231987953186,
+      "train/learning_rate": 0.0003,
+      "train/n_updates": 4999.0
+    },
+    "online_phase": {
+      "HOLD": 0,
+      "OUTBOUND": 9999,
+      "RETURN": 0
+    },
+    "online_sample_phase": {
+      "HOLD": 0,
+      "OUTBOUND": 1279744,
+      "RETURN": 0
+    },
+    "same_teacher_states_online_action_Q_mean": 38.77203369140625,
+    "sample_entropy": -1.235771656036377,
+    "step": 10000,
+    "td_abs_mean": 21.723344802856445,
+    "teacher_Q_mean": 40.440818786621094,
+    "teacher_minus_online_action_Q_mean": 1.6687843799591064,
+    "teacher_preferred_rate": 0.6779089570045471,
+    "updates": 4999
+  },
+  "next": "Run finish.py: verify preservation, audit sampling, select VALID only, write required comparison, individually stage compact artifacts, STOP. No new training.",
+  "order": [
+    "B",
+    "A"
+  ],
+  "phase": "training",
+  "source_head": "41cdddef117caa4b191a52129c4ff83e481fd5a8",
+  "started_unix": 1791059617.601372,
+  "status": "PAUSED_PRESERVED",
+  "steps": {
+    "A": 10000,
+    "B": 50000
+  },
+  "steps_s": 7.756896862896198,
+  "target_per_arm": 50000
+}

@@ -1,0 +1,23 @@
+{
+  "direct_vs_predict_max_difference": 5.960464477539063e-08,
+  "direct_vs_predict_different_values": 946,
+  "first_direct": [
+    0.9207293391227722,
+    -0.8326305747032166
+  ],
+  "first_predict": [
+    0.920729398727417,
+    -0.8326305747032166
+  ],
+  "archived_first_action": [
+    0.920729398727417,
+    -0.8326305747032166
+  ],
+  "failed_new_first_action": [
+    0.9207293391227722,
+    -0.8326305747032166
+  ],
+  "initial_observation_equal": true,
+  "first_new_vs_archive_diff": 5.960464477539063e-08,
+  "explanation": "BasePolicy.predict unscale_action for [-1,1] still applies low + .5*(scaled+1)*(high-low); mathematically identity but float32 cancellation changes proposal at a few ulps. Reuse exact legacy prediction path; no physical/interface change."
+}
