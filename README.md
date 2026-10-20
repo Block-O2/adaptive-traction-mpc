@@ -167,3 +167,9 @@ The [repository audit](docs/repository_sync_2026-10-20/REPOSITORY_AUDIT.md) and
 [B/H150 source inventory](docs/repository_sync_2026-10-20/B_H150_EVALUATOR_SOURCE_INVENTORY.md)
 record tested scope, external evidence and missing cloud identities. These additions do not
 promote archived variants to formal B, hardware readiness or clinical validation.
+
+## GitHub source baseline — 2026-10-21
+
+The audited research source is on `codex/local-research-sync-20261020`. Tested source payload: `a60686f30aaee5e950fa7e9ae7e802cd74df4cc2`. See [cleanup acceptance](docs/repository_cleanup_v2_2026-10-21/REPOSITORY_CLEANUP_REPORT.md), [GitHub audit](docs/repository_cleanup_v2_2026-10-21/GITHUB_SOURCE_AUDIT.md), [deployment guide](docs/repository_cleanup_v2_2026-10-21/CLOUD_GITHUB_DEPLOYMENT_GUIDE.md), and [original B/H150 scorer readiness](docs/repository_cleanup_v2_2026-10-21/B_H150_EVALUATOR_READINESS.md).
+
+Current Stage3–5 source/assets, the sealed RL-B CPU capsule, hash-locked dependencies, and original offline scorer recovery have been checked locally. Complete native fixtures require the separately hashed archive. Full fork replay and the current server deployment remain unverified; original READINESS and training gates are unchanged. Historical snapshots are preserved by identity, not merged into active scientific code.
