@@ -158,3 +158,12 @@ corrected Phase-3A High-ROM engineering baseline is now the current repository
 interpretation; historical history-derived-velocity BRAKE results remain
 diagnostic evidence. The next phase is robot-only commissioning and hardware
 safety-interface validation.
+
+## Local Stage-5 research preservation (2026-10-20)
+
+The current research boundary is recorded in [CURRENT_RESEARCH_BASELINE.md](CURRENT_RESEARCH_BASELINE.md).
+[Source archives](research/README.md) preserve local Stage-5/control/learning variants separately.
+The [repository audit](docs/repository_sync_2026-10-20/REPOSITORY_AUDIT.md) and
+[B/H150 source inventory](docs/repository_sync_2026-10-20/B_H150_EVALUATOR_SOURCE_INVENTORY.md)
+record tested scope, external evidence and missing cloud identities. These additions do not
+promote archived variants to formal B, hardware readiness or clinical validation.
