@@ -1,0 +1,21 @@
+{
+  "max_new_rollouts": 6,
+  "optimization": "read-only checkpoint metrics; no optimizer step",
+  "planned_rollouts": [
+    "fixed_hip_lead NATIVE same wrapper",
+    "fixed_hip_lead MATCHED same wrapper",
+    "300k deterministic NATIVE with reward/observation logging",
+    "early_failure NATIVE",
+    "no_motion NATIVE"
+  ],
+  "question": "Seed1/300k full-task acquisition and failure diagnosis",
+  "ranking": "complete independently physical VALID trajectories only; INVALID J_F never ranked",
+  "replay_coverage": "offline sample of saved final replay only",
+  "resource_guard": "WSL available>=1.5GiB, Windows commit headroom>=2GiB, no sustained/new swap, no other heavy experiment",
+  "scientific_changes": [],
+  "seeds": [
+    20261003
+  ],
+  "training_steps_authorized_and_run": 0,
+  "truth": "evaluation-only post-run diagnosis; policy remains causal"
+}

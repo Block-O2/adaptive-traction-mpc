@@ -1,0 +1,52 @@
+{
+  "action_audit": {
+    "K": [
+      1,
+      2,
+      3
+    ],
+    "path_rms_preference": 0.01,
+    "smallest_expressive_K": true
+  },
+  "bc": {
+    "JF_ratio_max": 1.03,
+    "max_correction_rounds": 2
+  },
+  "checkpoints": [
+    0,
+    10000,
+    25000,
+    50000
+  ],
+  "extension": "only reproducible >1% teacher improvement and downward last-25k trend with valid capability, no timing/safety loophole",
+  "forbidden": [
+    "V training",
+    "formal V dataset",
+    "multi-Human",
+    "hardware",
+    "B/plant/safety/timing edits",
+    "mixed/anchored SAC",
+    "full-task DAgger"
+  ],
+  "gamma": 1.0,
+  "human": "nominal sync_120 commissioning_only frozen during TASK",
+  "initial_interactions": 50000,
+  "interface": "unchanged Native-Scheduler Coordination Residual Realization v2",
+  "maximum_interactions": 100000,
+  "objective": "negative complete-task cuff force integral only",
+  "physics_owners": 1,
+  "question": "Best coordination for exposed nominal 120deg Human under unchanged native B and R2 MATCHED",
+  "request_sha256": "4cb91af821b26620d8c946e2383afa3065ed6bbfd5521333c02c07f168851efa",
+  "resource_stop": [
+    "OOM",
+    "persistent memory growth",
+    "process leak",
+    "checkpoint corruption"
+  ],
+  "reward_scale": 100.0,
+  "scope": "single exposed Human; no held-out/generalization claim",
+  "seed": 1,
+  "started_unix": 1791193584.3798375,
+  "terminal_invalid_penalty": -1000.0,
+  "version": "single_human_expert_e_v1"
+}

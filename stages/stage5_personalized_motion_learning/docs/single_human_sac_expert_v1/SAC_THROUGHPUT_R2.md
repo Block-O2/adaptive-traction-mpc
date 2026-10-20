@@ -1,0 +1,3 @@
+# Final environment throughput
+
+Environment stepping, actual SAC collection with CUDA gradient updates, deterministic physical evaluation and 100k/300k/500k/1M/2M estimates are in JSON. Final environment is fixed; only the nonformal benchmark learning-start threshold is 32 rather than formal 5000, to measure optimization within a bounded check. Benchmark checkpoints/data never initialize or count toward formal learning. One active environment, no parallel collection. Native physics is CPU MuJoCo. CPU, GPU/VRAM, RAM/peak RSS, write rate and completed episode wall times are separately recorded. Extrapolations are estimates, not promises.

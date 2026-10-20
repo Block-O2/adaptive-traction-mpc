@@ -1,0 +1,7 @@
+# Isolated CUDA training environment
+
+CUDA_READY. Environment `/home/hank/envs/adaptive-online-rl-v1/bin/python`; Python 3.10.21. PyTorch 2.7.1+cu128, torch.version.cuda=12.8, torch.cuda.is_available()=True, device `NVIDIA GeForce RTX 4060 Laptop GPU`. A 64×64 GPU tensor multiplication/sum succeeds (262144). Package versions: {'torch': '2.7.1+cu128', 'gymnasium': '1.1.1', 'stable-baselines3': '2.6.0', 'sb3-contrib': '2.6.0', 'ruckig': '0.12.2', 'numpy': '2.2.6', 'mujoco': '3.10.0'}.
+
+Pip check passes; NVIDIA_SMI.txt, RL_ENV_FREEZE.txt and installation logs are retained. RTX 4060 Laptop GPU has 8188 MiB reported memory. nvidia-smi reports driver 560.94 / 560.35.02 WSL and CUDA 12.6; the installed cu128 build nevertheless passes the recorded availability and tensor smoke. This limited check is not a broad CUDA-kernel/driver compatibility qualification. [Official PyTorch version installs](https://pytorch.org/get-started/previous-versions/), [SB3 2.6 installation](https://stable-baselines3.readthedocs.io/en/v2.6.0/guide/install.html).
+
+New venv `/home/hank/envs/adaptive-online-rl-v1` inherits physical dependencies via system-site-packages. Only the new environment receives torch/Gym/SB3/SB3-Contrib/Ruckig; the frozen `/home/hank/envs/adaptive-traction-mpc` is untouched. No GPU physics acceleration: MuJoCo remains CPU. Training steps = 0. Reproduction commands are in cuda_prepare.sh and cuda_check.py.

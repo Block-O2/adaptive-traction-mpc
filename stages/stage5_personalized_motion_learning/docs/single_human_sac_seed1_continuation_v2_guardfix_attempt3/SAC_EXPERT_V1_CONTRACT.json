@@ -1,0 +1,756 @@
+{
+  "Human": "high_rom_nominal_sync_120_v1",
+  "action": {
+    "dimensions": 2,
+    "mapping": "absolute independent joint target: q_min + (a+1)/2*(q_max-q_min)",
+    "range": [
+      -1,
+      1
+    ],
+    "reason": "Development Gym repair: terminal +/-0.05 rad smoke mapping cannot express no/minimal motion or full lead/lag. Same certified acceleration-aware target interface, no plant/torque/state changes.",
+    "safety": "unchanged online_reference.py realization and full continuation certification, then unchanged CR12 receipt/physical safety"
+  },
+  "adaptation": "commissioning_only; deterministic cold reset + identical commissioning each episode; no task updates; hash beta/residual/estimated geometry every decision",
+  "budget": {
+    "absolute_hard_cutoff_utc": "2026-10-03T03:55:00Z",
+    "checkpoint_interval_steps": 25000,
+    "conservative_campaign_start_utc": "2026-10-02T15:55:00Z",
+    "desired_seed1_steps": [
+      300000,
+      500000,
+      1000000
+    ],
+    "hard_additional_hours": 12,
+    "hard_hours": 12,
+    "independent_confirmation_J_F_tolerance_n_s": 1e-06,
+    "max_steps": 2000000,
+    "minimum_seed1_steps": 300000,
+    "minimum_seed2_steps": 50000,
+    "phase_policy": "Fresh initialization, no benchmark replay/weights, no curriculum; Seed 1 priority; no second seed unless >=50k independent budget fits. Preserve ordinary failed episodes; partial if hard time/resource stop prevents minimum.",
+    "planned_seed_steps": [
+      300000
+    ],
+    "seed2": "independent meaningful run or comparable if measured time permits",
+    "seeds": [
+      20261003,
+      20261004
+    ],
+    "selected_feasible_steps": 287026,
+    "target_hours": [
+      4,
+      10
+    ],
+    "throughput_time_estimates_steps": [
+      100000,
+      300000,
+      500000,
+      1000000,
+      2000000
+    ],
+    "workers": 1
+  },
+  "chosen_period_s": 0.02,
+  "development_revision": 2,
+  "discount": {
+    "candidates": {
+      "0.01": {
+        "0.99": 8.416082914616353e-09,
+        "0.995": 9.390730553450962e-05,
+        "0.999": 0.15709169223612307,
+        "0.9995": 0.39643970121576455,
+        "0.9999": 0.8310965956605245,
+        "0.9999333355555061": 0.8839689571268469
+      },
+      "0.02": {
+        "0.99": 9.17392114344589e-05,
+        "0.995": 0.009690578183705532,
+        "0.999": 0.39634794339837703,
+        "0.9995": 0.6296345775255394,
+        "0.9998666755551605": 0.8839689571269385,
+        "0.9999": 0.911644994315509
+      },
+      "0.05": {
+        "0.99": 0.024267330287830763,
+        "0.995": 0.15650920157696743,
+        "0.999": 0.6906064713669132,
+        "0.9995": 0.8310658333508212,
+        "0.9996667222160499": 0.8839689571269385,
+        "0.9999": 0.963674352430994
+      }
+    },
+    "chosen_gamma": 0.9998666755551605,
+    "matched_reference_decisions": 953,
+    "native_reference_decisions": 594,
+    "selected_complete_task_weights": {
+      "matched": 0.8806749589761298,
+      "native": 0.9238551349397666
+    },
+    "time_constant_s": 150
+  },
+  "evaluation": {
+    "deterministic": true,
+    "holdout": "none; fixed previously exposed development Human only",
+    "interval_steps": 25000,
+    "matched": "SAC_MATCHED_TIMING_CONTRACT_R2; physical .5s contiguous HOLD unchanged; common phase minima 9/1/9, upper slack .020s + 1e-9 per phase.",
+    "native": "natural complete OUTBOUND/HOLD/RETURN",
+    "normalization_frozen": true
+  },
+  "formal_frozen_utc": "2026-10-02T17:43:36.850998+00:00",
+  "gates": [
+    "source integrity",
+    "causal observation/normalization",
+    "action authority and 10/20/50 ms physics",
+    "reward adversaries",
+    "20 sequential resets",
+    "independent complete-task physical evaluator",
+    "CUDA",
+    "final throughput incl CUDA collection/optimization",
+    "prospective timing comparator validity"
+  ],
+  "model_selection": "valid deterministic independently replayed complete-task J_F; native and matched rankings separate; never training return; no global optimum",
+  "normalization": {
+    "mode": "fixed physical scales; no clipping, no evaluation statistics; finite/outlier audit",
+    "statistics_updates": false
+  },
+  "observation": [
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 0,
+      "name": "estimated_hip_q",
+      "offset": 0.0,
+      "scale": 2.181661564992912,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 1,
+      "name": "estimated_knee_q",
+      "offset": 0.0,
+      "scale": 2.181661564992912,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 2,
+      "name": "estimated_hip_dq",
+      "offset": 0.0,
+      "scale": 0.7853981633974483,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 3,
+      "name": "estimated_knee_dq",
+      "offset": 0.0,
+      "scale": 1.3089969389957472,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 4,
+      "name": "reference_hip_q",
+      "offset": 0.0,
+      "scale": 2.181661564992912,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 5,
+      "name": "reference_knee_q",
+      "offset": 0.0,
+      "scale": 2.181661564992912,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 6,
+      "name": "reference_hip_dq",
+      "offset": 0.0,
+      "scale": 0.7853981633974483,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 7,
+      "name": "reference_knee_dq",
+      "offset": 0.0,
+      "scale": 1.3089969389957472,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 8,
+      "name": "reference_hip_ddq",
+      "offset": 0.0,
+      "scale": 5.235987755982989,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 9,
+      "name": "reference_knee_ddq",
+      "offset": 0.0,
+      "scale": 10.471975511965978,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 10,
+      "name": "estimated_beta_0",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 11,
+      "name": "estimated_beta_1",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 12,
+      "name": "estimated_beta_2",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 13,
+      "name": "estimated_beta_3",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 14,
+      "name": "estimated_beta_4",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 15,
+      "name": "estimated_beta_5",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 16,
+      "name": "estimated_beta_6",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 17,
+      "name": "estimated_beta_7",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 18,
+      "name": "estimated_beta_8",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 19,
+      "name": "estimated_beta_9",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 20,
+      "name": "estimated_beta_10",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 21,
+      "name": "estimated_residual_0_0",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 22,
+      "name": "estimated_residual_0_1",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 23,
+      "name": "estimated_residual_0_2",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 24,
+      "name": "estimated_residual_0_3",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 25,
+      "name": "estimated_residual_0_4",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 26,
+      "name": "estimated_residual_1_0",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 27,
+      "name": "estimated_residual_1_1",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 28,
+      "name": "estimated_residual_1_2",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 29,
+      "name": "estimated_residual_1_3",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 30,
+      "name": "estimated_residual_1_4",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 31,
+      "name": "measured_force_world_x",
+      "offset": 0.0,
+      "scale": 200.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 32,
+      "name": "measured_force_world_y",
+      "offset": 0.0,
+      "scale": 200.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 33,
+      "name": "measured_force_world_z",
+      "offset": 0.0,
+      "scale": 200.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 34,
+      "name": "measured_moment_world_x",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 35,
+      "name": "measured_moment_world_y",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 36,
+      "name": "measured_moment_world_z",
+      "offset": 0.0,
+      "scale": 20.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 37,
+      "name": "estimated_hip_x",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 38,
+      "name": "estimated_hip_z",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 39,
+      "name": "estimated_thigh_length",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 40,
+      "name": "estimated_cuff_distance",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 41,
+      "name": "phase_outbound",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 42,
+      "name": "phase_hold",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 43,
+      "name": "phase_return",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 44,
+      "name": "elapsed_task_s",
+      "offset": 0.0,
+      "scale": 30.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 45,
+      "name": "soft_terminal_hip_q",
+      "offset": 0.0,
+      "scale": 2.181661564992912,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 46,
+      "name": "soft_terminal_knee_q",
+      "offset": 0.0,
+      "scale": 2.181661564992912,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 47,
+      "name": "elapsed_phase_s",
+      "offset": 0.0,
+      "scale": 10.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 48,
+      "name": "hold_elapsed_s",
+      "offset": 0.0,
+      "scale": 0.5,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 49,
+      "name": "previous_raw_hip_action",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 50,
+      "name": "previous_raw_knee_action",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 51,
+      "name": "previous_executed_hip_target",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 52,
+      "name": "previous_executed_knee_target",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 53,
+      "name": "previous_rejected",
+      "offset": 0.0,
+      "scale": 1.0,
+      "source": "causal observer/reference/model/task history"
+    },
+    {
+      "clip": null,
+      "evaluation_statistics_update": false,
+      "index": 54,
+      "name": "remaining_task_s",
+      "offset": 0.0,
+      "scale": 30.0,
+      "source": "causal observer/reference/model/task history"
+    }
+  ],
+  "only_scientific_change": "common timing eligibility bounds; original runtime earliest clocks unchanged",
+  "period_candidates_s": [
+    0.01,
+    0.02,
+    0.05
+  ],
+  "period_selection_reason": "Fresh physical action tests pass at all rates. 50 ms recorded 249 steps/55.405s including logging: 300k estimate 18.54 h exceeds hard cap. 20 ms recorded 617 steps/57.102s: 300k estimate 7.71 h. Prefer slowest cadence compatible with a useful bounded expert campaign; final compact/CUDA benchmark decides exact budget, not cadence.",
+  "previous_contract_sha256": "ed744af443a64711344d3b884da8e9328089afb24861900a50c4f879df14ecf2",
+  "reset": "fresh single physics owner/plant/observer/updater/reference queues; repeated commissioning then frozen task; no prior session context",
+  "retained_pass_evidence": {
+    "CUDA_READINESS.json": "f31f27546acb216c0a4ab34bbafe899bb2609397256b12994c03b12301381c65",
+    "SAC_ACTION_PERIOD_QUALIFICATION.json": "4b0aed682953cd3fe8a0363116fa0f861b2026aeb28261b689bc3c20dace3b26",
+    "SAC_OBSERVATION_NORMALIZATION.json": "81f989742c4e3ebb5d9c27120ba78869eeed2bcadb4c337497f177b2142da747",
+    "SAC_RESET_STRESS.json": "a14b8785a35b3d9a5ad2d3d47fa68aabb356f57003129b9ad7eac3c8a26917e1",
+    "SAC_REWARD_AUDIT.json": "cf692167846b432282b99ec43faa7bef59866d4f67689e400e58e2249ce5c537"
+  },
+  "reward": {
+    "completion": 500,
+    "deadline_replay": "handle_timeout_termination=False: finite-horizon task failure has no bootstrap; Gym truncated=True remains explicit",
+    "early_bonus": 0,
+    "failure": -1000,
+    "force": "negative measured 5ms left quadrature /100 N s",
+    "moment_weight": 0,
+    "phase_potential": "OUTBOUND normalized mean q progress; HOLD 1+valid dwell fraction; RETURN 2+return progress",
+    "rejection": -0.2,
+    "shaping": "5*(gamma*Phi_next-Phi_current), Phi in [0,3], absorbing terminal Phi=0"
+  },
+  "safety_limits": {
+    "ROM_deg": [
+      [
+        0,
+        125
+      ],
+      [
+        0,
+        125
+      ]
+    ],
+    "force_n": 200,
+    "moment_nm": 60,
+    "no_oracle_actor": true,
+    "source": "frozen config + scientific evaluator"
+  },
+  "schema": "SAC_EXPERT_V1_CONTRACT_R2",
+  "status": "FROZEN_FORMAL",
+  "stop_before_training": "Any unresolved qualification gate fails. Preserve negative evidence and STOP without training.",
+  "task": {
+    "global_timeout_s": 30,
+    "goal_deg": [
+      120,
+      120
+    ],
+    "hold_s": 0.5,
+    "phase_timeout_s": 10,
+    "start_deg": [
+      5,
+      10
+    ]
+  },
+  "termination": {
+    "failure": "existing physical/task/safety abort",
+    "success": "unchanged causal physical/task state machine; independent unchanged scientific evaluator gates promotion",
+    "truncation": "TIMEOUT failure; no success; absorbing observation"
+  },
+  "timing_contract": {
+    "allowance_formula": "max(policy_period, ceil(T_matched_HOLD / T_physical_HOLD) * (control_activation_tick + control_receipt_confirmation_tick)) = max(.020, 2*(.005+.005)) = .020 s",
+    "decision_allowance_s": 0.02,
+    "eligibility_formula": "for every phase p: T_min[p]-1e-9 <= actual T[p] <= T_min[p]+.020+1e-9 AND unchanged independent complete-task physical evaluator PASS",
+    "fairness": "identical physical task, commissioned Human, initial condition and common earliest phase clocks; identical upper timing allowance for all methods; no waypoint/segment imitation; actual waiting cost always included",
+    "formal_training_steps_at_freeze": 0,
+    "frozen_utc": "2026-10-02T17:31:56.244742+00:00",
+    "matched_phase_minimum_s": {
+      "HOLD": 1.0,
+      "OUTBOUND": 9.0,
+      "RETURN": 9.0
+    },
+    "methods": [
+      "old_nominal",
+      "online_reference",
+      "fixed_hip_lead",
+      "cem_reference_transfer",
+      "future SAC"
+    ],
+    "native": "original free-duration complete task; unchanged .5s contiguous valid physical HOLD minimum; never pooled with matched ranking",
+    "numerical_epsilon_s": 1e-09,
+    "physical_task": {
+      "original_angle_velocity_safety_phase_deadline_and_global_deadline_unchanged": true,
+      "required_contiguous_valid_hold_s": 0.5,
+      "unchanged_task_config_sha256": "40b445813ec7df9d5db3b95b31a338f5d158058cdbd62449e330af949585f986"
+    },
+    "preserve_R1": true,
+    "schema": "SAC_MATCHED_TIMING_CONTRACT_R2",
+    "scope_limit": "Matched clocks leave within-phase pacing and up to 60ms total residual duration variation. Do not infer pure coordination from native differences, or perfect timing isolation from eligibility alone.",
+    "status": "FROZEN_PROSPECTIVE_BEFORE_SAC",
+    "total_duration_bounds_s": [
+      19.0,
+      19.06
+    ]
+  },
+  "training": {
+    "action_scaling": "Box[-1,1]^2 to absolute existing-ROM target",
+    "activation": "ReLU",
+    "algorithm": "Stable-Baselines3 SAC",
+    "batch_size": 256,
+    "benchmark_rate": 7.801758629526692,
+    "benchmark_warmup_rate": 5.706964851112056,
+    "buffer_size": 100000,
+    "device": "cuda",
+    "ent_coef": "auto",
+    "gamma": 0.9998666755551605,
+    "gradient_steps": 1,
+    "hard_wall_cutoff_unix": 1791004902.100011,
+    "hard_wall_cutoff_utc": "2026-10-03T05:21:42.100011+00:00",
+    "learning_rate": 0.0003,
+    "learning_starts": 5000,
+    "measured_feasible_steps": 287026,
+    "minimum_meaningful_seed1_steps": 300000,
+    "network": [
+      256,
+      256
+    ],
+    "observation_normalization": "fixed 55-element scale vector",
+    "optimizer": "Adam",
+    "partial_if_wall_cap_before_minimum": true,
+    "planned_steps": [
+      300000
+    ],
+    "policy_period_s": 0.02,
+    "replay_buffer_kwargs": {
+      "handle_timeout_termination": false
+    },
+    "seed2_reserved_wall_s": 0.0,
+    "seeds": [
+      20261003
+    ],
+    "status": "FROZEN_FORMAL",
+    "target_entropy": "auto",
+    "tau": 0.005,
+    "torch_num_threads": 1,
+    "train_freq": 1,
+    "training_cutoff_utc": "2026-10-03T04:36:42.100011+00:00",
+    "version": "SB3_2.6.0_R2_timing_only"
+  },
+  "version": 2
+}

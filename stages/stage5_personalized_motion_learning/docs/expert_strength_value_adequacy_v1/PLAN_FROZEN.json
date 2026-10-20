@@ -1,0 +1,111 @@
+{
+  "A1": {
+    "bound": [
+      -1,
+      1
+    ],
+    "elite": 3,
+    "generations": 4,
+    "population": 4,
+    "restarts": [
+      "E_centered",
+      "zero_broad",
+      "LHS_broad"
+    ],
+    "rollouts_each": 16,
+    "seeds": [
+      202610051,
+      202610052,
+      202610053
+    ],
+    "smoothing": 0.5,
+    "std": [
+      0.12,
+      0.3,
+      0.3
+    ],
+    "std_floor": 0.02
+  },
+  "A2": {
+    "K": 3,
+    "knot_fractions": [
+      0.1,
+      0.4,
+      0.7
+    ],
+    "projection": "nested piecewise linear graph, exact old .1/.7 curve; middle coefficient average",
+    "restarts": 2,
+    "rollouts_each": 16,
+    "scope": "RICH_DIFF_K3",
+    "seeds": [
+      202610054,
+      202610055
+    ]
+  },
+  "A3": {
+    "reason": "native planner exclusively preserves nominal common target; adding common authority requires new planner/serialization/runtime compatibility and certification, estimated >40 min; do not change B law",
+    "scope": "TASKWIDE_SAME_DURATION_DIAGNOSTIC",
+    "status": "COMMON_MODE_DIAGNOSTIC_NOT_RUN"
+  },
+  "B": {
+    "DESIGN_DIAGNOSTIC_ONLY": true,
+    "benefit_sign_tolerance_Ns": 1e-06,
+    "not_target_few_shot_data": true,
+    "optional_alternate_snapshots": 2,
+    "parent_rollouts": 1,
+    "prefix_lengths": [
+      0,
+      1,
+      2,
+      3,
+      "FULL"
+    ],
+    "ranking_flip_tolerance_Ns": 0.1,
+    "snapshots": [
+      [
+        "OUTBOUND",
+        1
+      ],
+      [
+        "OUTBOUND",
+        3
+      ],
+      [
+        "RETURN",
+        0
+      ],
+      [
+        "RETURN",
+        2
+      ]
+    ]
+  },
+  "deadline_unix": 1791220950.0,
+  "forbidden": [
+    "V training",
+    "SAC training",
+    "multi-Human",
+    "hardware",
+    "B/physics/safety/timing/objective changes",
+    "historical overwrite"
+  ],
+  "human": "same previously exposed nominal commissioning_only Human; no held-out claim",
+  "initialization_sensitive_best_spread_fraction": 0.005,
+  "material_improvement_fraction": 0.005,
+  "maximum_new_complete_rollouts": 120,
+  "physics_owners": 1,
+  "primary_objective": "complete J_F only",
+  "questions": [
+    "expert strength under independent initialization and richer representation",
+    "one native chunk then B vs coherent expert suffix"
+  ],
+  "reserved_confirmation_rollouts": 2,
+  "source_hashes": {
+    "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/expert_strength_value_adequacy_v1/bootstrap.py": "b5e5bba161558d863e68ae615f7d68a129f6d4c34002bbfddbc3a97588c1f743",
+    "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/expert_strength_value_adequacy_v1/campaign.py": "584131a6ac36219655efbc50c8384babe1298caf1b244a2931d4ac0e8be4cdd2",
+    "/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/expert_strength_value_adequacy_v1/preflight.py": "0fb3408d7b39495e6bb7ae477896d451d7f52372ef8c0a3bd5eda3ca06e7d2e6"
+  },
+  "start_unix": 1791206550.0,
+  "truth_firewall": "candidate inputs unchanged causal native planner context; full hidden state used only for fork equality and evaluation",
+  "version": "Expert Strength Challenge & Multi-Step Value Adequacy Audit v1"
+}

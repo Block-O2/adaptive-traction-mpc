@@ -1,0 +1,35 @@
+{
+  "allowance_formula": "max(policy_period, ceil(T_matched_HOLD / T_physical_HOLD) * (control_activation_tick + control_receipt_confirmation_tick)) = max(.020, 2*(.005+.005)) = .020 s",
+  "decision_allowance_s": 0.02,
+  "eligibility_formula": "for every phase p: T_min[p]-1e-9 <= actual T[p] <= T_min[p]+.020+1e-9 AND unchanged independent complete-task physical evaluator PASS",
+  "fairness": "identical physical task, commissioned Human, initial condition and common earliest phase clocks; identical upper timing allowance for all methods; no waypoint/segment imitation; actual waiting cost always included",
+  "formal_training_steps_at_freeze": 0,
+  "frozen_utc": "2026-10-02T17:31:56.244742+00:00",
+  "matched_phase_minimum_s": {
+    "HOLD": 1.0,
+    "OUTBOUND": 9.0,
+    "RETURN": 9.0
+  },
+  "methods": [
+    "old_nominal",
+    "online_reference",
+    "fixed_hip_lead",
+    "cem_reference_transfer",
+    "future SAC"
+  ],
+  "native": "original free-duration complete task; unchanged .5s contiguous valid physical HOLD minimum; never pooled with matched ranking",
+  "numerical_epsilon_s": 1e-09,
+  "physical_task": {
+    "original_angle_velocity_safety_phase_deadline_and_global_deadline_unchanged": true,
+    "required_contiguous_valid_hold_s": 0.5,
+    "unchanged_task_config_sha256": "40b445813ec7df9d5db3b95b31a338f5d158058cdbd62449e330af949585f986"
+  },
+  "preserve_R1": true,
+  "schema": "SAC_MATCHED_TIMING_CONTRACT_R2",
+  "scope_limit": "Matched clocks leave within-phase pacing and up to 60ms total residual duration variation. Do not infer pure coordination from native differences, or perfect timing isolation from eligibility alone.",
+  "status": "FROZEN_PROSPECTIVE_BEFORE_SAC",
+  "total_duration_bounds_s": [
+    19.0,
+    19.06
+  ]
+}

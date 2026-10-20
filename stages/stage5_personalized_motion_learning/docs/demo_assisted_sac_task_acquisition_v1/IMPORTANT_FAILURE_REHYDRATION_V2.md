@@ -1,0 +1,3 @@
+# Important A50k failure retention
+
+The original compact-retention job pruned the A50k periodic high-frequency trace before the one-update positional discontinuity was selected as important. The stored actor actions and full policy-rate transitions were retained. A single Native archival replay recreates that already recorded trajectory and checks every observation, next observation, reward and done flag, plus force cost and force/moment peaks against the original evaluation. It adds zero training steps, zero updates and no new formal evaluation row. The original results remain unchanged. Full reconstructed physics artifacts are separately labeled and their own hashes are recorded; deleted original raw hashes are not presented as copies.

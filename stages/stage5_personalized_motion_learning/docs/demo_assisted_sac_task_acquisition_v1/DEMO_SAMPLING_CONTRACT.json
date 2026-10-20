@@ -1,0 +1,51 @@
+{
+  "actor": "fully autonomous, no teacher intervention/BC/HER/pretraining/curriculum",
+  "algorithm": "unmodified installed SB3 SAC.train",
+  "batch_logging": "every update: exact count/fraction and each source phase counts",
+  "batch_size": 256,
+  "demo_count": 593,
+  "demo_per_batch": 128,
+  "endpoint_order": "actual causal phase transition/independent VALID; position100% never sufficient",
+  "endpoints": [
+    "settled_outbound",
+    "hold_entry",
+    "hold_completed",
+    "return_entry",
+    "valid_complete"
+  ],
+  "excluded": "resource/OOM/simulation runtime/source-corruption pause, never omit failure cases",
+  "formal_initialization": 0,
+  "gradient_steps": 1,
+  "holdout": "none: previously exposed fixed Human, single paired seed; not a robustness study",
+  "immutable_demo": true,
+  "learning_starts_online_only": 5000,
+  "no_extra_updates": true,
+  "online_capacity": 100000,
+  "online_per_batch": 128,
+  "order": [
+    "B",
+    "A"
+  ],
+  "question": "Does full legal causal successful replay help independent long-horizon task acquisition?",
+  "ratio_fixed_entire_50k": true,
+  "replacement_sampling": true,
+  "resource_policy": "existing corrected WSL + Windows commit headroom and joint low-memory; no Windows-only gate",
+  "scientific_changes": [],
+  "seed": 20261003,
+  "selection": "VALID only, separately per NATIVE/MATCHED scope; retain first/best/final",
+  "source_head": "41cdddef117caa4b191a52129c4ff83e481fd5a8",
+  "status": "FROZEN_BEFORE_TRAINING",
+  "targets": {
+    "A": 50000,
+    "B": 50000
+  },
+  "threads": {
+    "MKL_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "train_freq": 1,
+  "training_mode": "NATIVE only",
+  "truth_firewall": "only unchanged causal observation and raw actor action in replay; evaluator truth is diagnostic only",
+  "wall_hours": 9
+}

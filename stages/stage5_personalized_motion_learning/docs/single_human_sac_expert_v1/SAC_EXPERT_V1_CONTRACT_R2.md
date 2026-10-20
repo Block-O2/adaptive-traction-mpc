@@ -1,0 +1,3 @@
+# Single-Human SAC Expert contract R2
+
+Timing eligibility is the only scientific revision from preserved blocked R1. Observation 55-D, independent 2-D absolute online target, fixed normalization, reward, .020s policy period, commissioned frozen Human, physical task/safety and protected runtime remain byte-identical. Full unchanged definitions and evidence hashes are in JSON. Timing rule is frozen before any SAC learning; all affected comparator/task gates must pass before throughput and formal training. Additional wall cap is 12 hours from R2 preflight, one active environment, Seed 1 priority with meaningful Seed 2 only if budget permits.

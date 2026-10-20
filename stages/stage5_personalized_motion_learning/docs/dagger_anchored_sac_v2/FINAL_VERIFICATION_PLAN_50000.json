@@ -1,0 +1,39 @@
+{
+  "total_collection_steps": 50000,
+  "strategy_plan": [
+    {
+      "name": "frozen_DAgger_student",
+      "actor": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/final_verification_50000/frozen_student.pt",
+      "actor_sha256": "54d8292b0a1a06c8d8a36e120ccacd0c6ce78daa627d80483830c7146a6b8827"
+    },
+    {
+      "name": "confirmed_best",
+      "actor": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/checkpoints/candidate_attempt_1_point_020000_budget_031283/actor.pt",
+      "actor_sha256": "530024ae7864f6b105ab05b9cbd7ff91d5b2df21284dd8689d9948ac24e9c87d"
+    },
+    {
+      "name": "final_50000",
+      "actor": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/checkpoints/final_attempt_state/actor.pt",
+      "actor_sha256": "0de1fe06229abdc7be0cf724aa63e6a20b8b4d96519ac29d5e70fa1d84522233"
+    },
+    {
+      "name": "intermediate_a1_p10000",
+      "actor": "/home/hank/coding/adaptive-traction-mpc-learning/stages/stage5_personalized_motion_learning/results/dagger_anchored_sac_v2/checkpoints/candidate_attempt_1_point_010000_budget_021283/actor.pt",
+      "actor_sha256": "7c768b8b3e321aa0f927f46676ace508e0a53f53cd890bbbab7663287be3c9c9"
+    }
+  ],
+  "repeats_per_scope": 2,
+  "scopes": [
+    "NATIVE",
+    "MATCHED"
+  ],
+  "stochastic_native_per_learner": 1,
+  "comparators": [
+    "original_controller",
+    "CEM",
+    "fixed_hip_leading"
+  ],
+  "evaluation_only": true,
+  "training_updates": 0,
+  "scientific_changes": []
+}
