@@ -82,9 +82,19 @@ def main():
         shutil.copyfile(inputs / row['path'], dest)
     sys.meta_path.insert(0, OfflineOnly())
     sys.path[:0] = [str(root / 'code'), str(root / 'control')]
+    # attribution/explore_common historically insert their canonical absolute code
+    # path at import time. Preload the byte-verified original stream reader from
+    # scratch, then remove those legacy search paths before any later imports.
+    stream = importlib.import_module('stream_runtime_evidence')
     am = importlib.import_module('analyze_matched')
     ec = importlib.import_module('explore_common')
+    attribution = importlib.import_module('attribution')
+    legacy = Path('/home/hank/coding/adaptive-traction-mpc-side-studies')
+    sys.path[:] = [p for p in sys.path if not Path(p).is_relative_to(legacy)]
     independent = importlib.import_module('independent_recompute')
+    modules = (stream, am, ec, attribution, independent)
+    for module in modules:
+        assert Path(module.__file__).resolve().is_relative_to(root), 'NONPORTABLE_IMPORT:' + module.__name__
     am.S = ec.S = root
     independent.P = root
     measurements = {}
@@ -108,6 +118,7 @@ def main():
                   full_fork_replay='NOT_RUN_NO_PORTABLE_PARENT_CHECKPOINT',
                   metadata_path_binding={'analyze_matched.S': str(root), 'explore_common.S': str(root), 'independent_recompute.P': str(root)},
                   original_code_sha256=expected_code, inputs_verified=len(manifest['files']),
+                  original_module_bindings={m.__name__: m.__file__ for m in modules},
                   historical_numeric_tolerance=1e-8, independent_checks=checks, comparison=comparison)
     (root / 'OFFLINE_SCORER_RESULT.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n')
     print(json.dumps(dict(status=report['status'], result=str(root / 'OFFLINE_SCORER_RESULT.json'),
