@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import importlib
 import importlib.abc
+import importlib.util
 import json
 import math
 import os
@@ -82,17 +83,23 @@ def main():
         shutil.copyfile(inputs / row['path'], dest)
     sys.meta_path.insert(0, OfflineOnly())
     sys.path[:0] = [str(root / 'code'), str(root / 'control')]
-    # attribution/explore_common historically insert their canonical absolute code
-    # path at import time. Preload the byte-verified original stream reader from
-    # scratch, then remove those legacy search paths before any later imports.
-    stream = importlib.import_module('stream_runtime_evidence')
-    bootstrap = importlib.import_module('task_bootstrap')
-    am = importlib.import_module('analyze_matched')
-    ec = importlib.import_module('explore_common')
-    attribution = importlib.import_module('attribution')
+    # Load the exact frozen dependency closure by file, in dependency order.
+    # Historical modules insert canonical absolute paths during import. Clear
+    # those paths after each import, before importing the next original module.
     legacy = Path('/home/hank/coding/adaptive-traction-mpc-side-studies')
-    sys.path[:] = [p for p in sys.path if not Path(p).is_relative_to(legacy)]
-    independent = importlib.import_module('independent_recompute')
+    def original_module(name, folder='code'):
+        spec = importlib.util.spec_from_file_location(name, root / folder / (name + '.py'))
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+        sys.path[:] = [p for p in sys.path if not Path(p).is_relative_to(legacy)]
+        return module
+    bootstrap = original_module('task_bootstrap')
+    stream = original_module('stream_runtime_evidence')
+    attribution = original_module('attribution')
+    ec = original_module('explore_common')
+    am = original_module('analyze_matched')
+    independent = original_module('independent_recompute', 'control')
     modules = (bootstrap, stream, am, ec, attribution, independent)
     for module in modules:
         assert Path(module.__file__).resolve().is_relative_to(root), 'NONPORTABLE_IMPORT:' + module.__name__
