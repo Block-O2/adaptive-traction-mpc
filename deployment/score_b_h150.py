@@ -86,13 +86,14 @@ def main():
     # path at import time. Preload the byte-verified original stream reader from
     # scratch, then remove those legacy search paths before any later imports.
     stream = importlib.import_module('stream_runtime_evidence')
+    bootstrap = importlib.import_module('task_bootstrap')
     am = importlib.import_module('analyze_matched')
     ec = importlib.import_module('explore_common')
     attribution = importlib.import_module('attribution')
     legacy = Path('/home/hank/coding/adaptive-traction-mpc-side-studies')
     sys.path[:] = [p for p in sys.path if not Path(p).is_relative_to(legacy)]
     independent = importlib.import_module('independent_recompute')
-    modules = (stream, am, ec, attribution, independent)
+    modules = (bootstrap, stream, am, ec, attribution, independent)
     for module in modules:
         assert Path(module.__file__).resolve().is_relative_to(root), 'NONPORTABLE_IMPORT:' + module.__name__
     am.S = ec.S = root
