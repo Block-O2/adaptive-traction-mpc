@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "verification_kind": "PUSHED_AND_TESTED_PAYLOAD_RECEIPT_BEFORE_DOCUMENTATION_COMMIT",
+  "status": "PASS",
+  "verified_at": "2026-10-20T17:58:03.257277+00:00",
+  "branch": "codex/local-research-sync-20261020",
+  "tested_payload_commit": "fc0dc94d417a83caf8453070173ee08ad5b929fb",
+  "local_head": "fc0dc94d417a83caf8453070173ee08ad5b929fb",
+  "github_head": "fc0dc94d417a83caf8453070173ee08ad5b929fb",
+  "local_remote_equal": true,
+  "main_before": "2c2140deac8ef91aa69c57af886243f68df485ec",
+  "main_after": "2c2140deac8ef91aa69c57af886243f68df485ec",
+  "main_unchanged": true,
+  "fresh_clone": {
+    "status": "GITHUB_ONLY_PASS",
+    "verified_at": "2026-10-20T17:56:54.433319+00:00",
+    "remote": "git@github.com:Block-O2/adaptive-traction-mpc.git",
+    "branch": "codex/local-research-sync-20261020",
+    "commit": "fc0dc94d417a83caf8453070173ee08ad5b929fb",
+    "fresh_network_clone": true,
+    "clone": "/home/hank/repository-architecture-v1-validation-v2/github-clone",
+    "checkout_detached": true,
+    "fresh_python_environments": [
+      "/home/hank/repository-architecture-v1-validation-v2/offline-env",
+      "/home/hank/repository-architecture-v1-validation-v2/rl-b-env"
+    ],
+    "python": "3.12.3",
+    "dependency_install": "new isolated CPython3.12 environments; public URL wheels with --require-hashes; modern local pip bootstrap only",
+    "fixture_source": "32 original native files from GitHub clone; no original archive or prior roots accessed",
+    "legacy_access_guard": {
+      "kind": "Python sys.addaudithook from uniquely named fresh venv .pth module (not OS/C file sandbox)",
+      "probe_blocks": 2,
+      "unexpected_blocked_attempts": 0,
+      "subprocess_inheritance": true
+    },
+    "checks": [
+      {
+        "check": "network_clone",
+        "command": [
+          "git",
+          "clone",
+          "--depth",
+          "1",
+          "--single-branch",
+          "--branch",
+          "codex/local-research-sync-20261020",
+          "git@github.com:Block-O2/adaptive-traction-mpc.git",
+          "/home/hank/repository-architecture-v1-validation-v2/github-clone"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 119.588,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/network_clone.log"
+      },
+      {
+        "check": "checkout_fixed_commit",
+        "command": [
+          "git",
+          "checkout",
+          "--detach",
+          "fc0dc94d417a83caf8453070173ee08ad5b929fb"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 0.132,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/checkout_fixed_commit.log"
+      },
+      {
+        "check": "install_offline",
+        "command": [
+          "bash",
+          "deployment/install_offline.sh",
+          "/home/hank/repository-architecture-v1-validation-v2/offline-env"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 7.094,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/install_offline.log"
+      },
+      {
+        "check": "install_rl_b",
+        "command": [
+          "bash",
+          "deployment/install_rl_b.sh",
+          "/home/hank/repository-architecture-v1-validation-v2/rl-b-env"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 32.986,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/install_rl_b.log"
+      },
+      {
+        "check": "install_guard_offline",
+        "command": [
+          "/home/hank/repository-architecture-v1-validation-v2/offline-env/bin/python",
+          "-B",
+          "deployment/tests/install_access_guard.py"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 0.139,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/install_guard_offline.log"
+      },
+      {
+        "check": "install_guard_rl_b",
+        "command": [
+          "/home/hank/repository-architecture-v1-validation-v2/rl-b-env/bin/python",
+          "-B",
+          "deployment/tests/install_access_guard.py"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 0.068,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/install_guard_rl_b.log"
+      },
+      {
+        "check": "guard_probe",
+        "command": [
+          "/home/hank/repository-architecture-v1-validation-v2/offline-env/bin/python",
+          "-B",
+          "-c",
+          "import os,sys\nassert '_ihear_fresh_clone_guard' in sys.modules, 'ACCESS_GUARD_MODULE_NOT_LOADED'\nfor path in ('/home/hank/coding/adaptive-traction-mpc-learning/README.md','/home/hank/coding/adaptive-traction-mpc-side-studies'):\n try:\n  if path.endswith('.md'):open(path).read()\n  else:os.scandir(path)\n except PermissionError:pass\n else:raise RuntimeError('ACCESS_GUARD_NOT_ACTIVE')\nprint('GUARD_PROBE_PASS')\n"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 0.034,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/guard_probe.log"
+      },
+      {
+        "check": "source_static",
+        "command": [
+          "/home/hank/repository-architecture-v1-validation-v2/offline-env/bin/python",
+          "-B",
+          "deployment/verify_repository.py",
+          "--expected-commit",
+          "fc0dc94d417a83caf8453070173ee08ad5b929fb",
+          "--output",
+          "/home/hank/repository-architecture-v1-validation-v2/STATIC_SOURCE.json"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 5.886,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/source_static.log"
+      },
+      {
+        "check": "fixtures_and_contracts",
+        "command": [
+          "/home/hank/repository-architecture-v1-validation-v2/offline-env/bin/python",
+          "-B",
+          "deployment/verify_b_h150.py",
+          "--config",
+          "deployment/configs/b_h150_original_v1.json",
+          "--output",
+          "/home/hank/repository-architecture-v1-validation-v2/FIXTURE_IDENTITY.json"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 0.926,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/fixtures_and_contracts.log"
+      },
+      {
+        "check": "identity_failure_tests",
+        "command": [
+          "/home/hank/repository-architecture-v1-validation-v2/offline-env/bin/python",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "deployment/tests",
+          "-v"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 0.318,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/identity_failure_tests.log"
+      },
+      {
+        "check": "models_compile",
+        "command": [
+          "/home/hank/repository-architecture-v1-validation-v2/rl-b-env/bin/python",
+          "-B",
+          "deployment/check_models.py",
+          "--output",
+          "/home/hank/repository-architecture-v1-validation-v2/MODEL_CHECK.json"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 1.319,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/models_compile.log"
+      },
+      {
+        "check": "original_offline_scorer",
+        "command": [
+          "/home/hank/repository-architecture-v1-validation-v2/offline-env/bin/python",
+          "-B",
+          "deployment/score_b_h150.py",
+          "--config",
+          "deployment/configs/b_h150_original_v1.json",
+          "--work-dir",
+          "/home/hank/repository-architecture-v1-validation-v2/original-score"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 15.362,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/original_offline_scorer.log"
+      },
+      {
+        "check": "rl_b_import_and_units",
+        "command": [
+          "/home/hank/repository-architecture-v1-validation-v2/rl-b-env/bin/python",
+          "-B",
+          "deployment/check_rl_b.py",
+          "--config",
+          "deployment/configs/rl_b_cpu_handoff_v1.json",
+          "--python",
+          "/home/hank/repository-architecture-v1-validation-v2/rl-b-env/bin/python",
+          "--work-dir",
+          "/home/hank/repository-architecture-v1-validation-v2/rl-b-check"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 6.237,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/rl_b_import_and_units.log"
+      },
+      {
+        "check": "shell_syntax",
+        "command": [
+          "bash",
+          "-n",
+          "deployment/install_offline.sh",
+          "deployment/install_rl_b.sh"
+        ],
+        "returncode": 0,
+        "status": "PASS",
+        "elapsed_s": 0.038,
+        "log": "/home/hank/repository-architecture-v1-validation-v2/logs/shell_syntax.log"
+      }
+    ],
+    "output_manifest_files_verified": 53,
+    "source_dirty": false,
+    "OFFLINE_SCORER_READY": "PASS",
+    "FULL_FORK_REPLAY_READY": "NOT_RUN_NO_COMPLETE_PARENT_CHECKPOINT",
+    "MATCHED_EVALUATOR_READY": "NOT_RUN_NEW_LIVE_MATCHED_EXPERIMENT",
+    "archived_D01R_W1_matched_comparison": "PASS",
+    "current_stage3_5_assets": "PASS_IDENTITY_AND_ROBOT_MODEL_COMPILE",
+    "legacy_stage1": "FAIL_40_MISSING_HISTORICAL_MESH_REFERENCES",
+    "rl_b": "PASS_STATIC_IMPORT_AND_UNIT_ONLY",
+    "physics_steps": 0,
+    "training": "NOT_RUN",
+    "checkpoint_restore": "NOT_RUN",
+    "server": "UNVERIFIED_NO_CONNECTION"
+  },
+  "final_head_resolution": "See independent FINAL_POST_PUSH_RECEIPT delivered as GIT_SYNC_VERIFICATION.json; in-tree file cannot self-reference containing commit SHA",
+  "ordinary_fast_forward_push": true,
+  "force_push": false,
+  "history_rewrite": false,
+  "scientific_source_model_checkpoint_contract_changes": 0,
+  "physics_steps": 0,
+  "training": "NOT_RUN",
+  "server": "UNVERIFIED_NO_CONNECTION"
+}

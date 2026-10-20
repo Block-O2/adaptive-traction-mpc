@@ -54,3 +54,5 @@ RL-B 通过包内 common.py 将 SOURCE 绑定到自身 source/，显式引入同
 源码 clone、依赖 import、模型编译、动态物理、原 scorer 重算、新 live matched 资格及硬件/临床资格必须分项验收，不能共享一个 PASS。
 
 历史Stage1的两份Mac/UR5e XML仍有40处缺失mesh引用，静态报告明确FAIL；不属于本轮Stage3–5/RL-B/B-H150通过范围，未伪造补齐。
+
+起始Side Studies快照47852文件、8552种唯一内容、39300个额外相同路径；逻辑934192096bytes、唯一179480822bytes，见evidence/DUPLICATION_SUMMARY.json。该规模是后续治理负担；本轮保留历史闭包并禁止继续复制源码快照作为新开发默认。
