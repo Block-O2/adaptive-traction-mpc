@@ -1,0 +1,250 @@
+{
+  "frozen_unix": 1792347204.21432,
+  "split_unit": "complete cold parent / prefix family; repeats grouped together",
+  "conditions": [
+    {
+      "name": "D01",
+      "seed": 2026102001,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.08,
+            0.04,
+            0.03
+          ]
+        ],
+        "RETURN": [
+          [
+            0.04,
+            0.02,
+            0.03
+          ]
+        ]
+      },
+      "split": "train",
+      "role": "historical W1 exposed"
+    },
+    {
+      "name": "D02",
+      "seed": 2026102002,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.11,
+            -0.035,
+            0.045
+          ]
+        ],
+        "RETURN": [
+          [
+            -0.04,
+            0.025,
+            -0.035
+          ]
+        ]
+      },
+      "split": "train",
+      "role": "historical W2 now exposed"
+    },
+    {
+      "name": "D03",
+      "seed": 2026102103,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.03,
+            -0.06,
+            0.08
+          ]
+        ],
+        "RETURN": [
+          [
+            0.07,
+            -0.035,
+            0.02
+          ]
+        ]
+      },
+      "split": "train",
+      "role": "prospective development"
+    },
+    {
+      "name": "D04",
+      "seed": 2026102104,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.04,
+            0.075,
+            0.025
+          ]
+        ],
+        "RETURN": [
+          [
+            -0.07,
+            0.045,
+            0.015
+          ]
+        ]
+      },
+      "split": "train",
+      "role": "prospective development"
+    },
+    {
+      "name": "D05",
+      "seed": 2026102105,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.1,
+            -0.065,
+            -0.035
+          ]
+        ],
+        "RETURN": [
+          [
+            0.025,
+            -0.06,
+            0.065
+          ]
+        ]
+      },
+      "split": "train",
+      "role": "prospective development"
+    },
+    {
+      "name": "D06",
+      "seed": 2026102106,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.06,
+            0.025,
+            0.07
+          ]
+        ],
+        "RETURN": [
+          [
+            -0.025,
+            -0.045,
+            0.075
+          ]
+        ]
+      },
+      "split": "train",
+      "role": "prospective development"
+    },
+    {
+      "name": "V01",
+      "seed": 2026102201,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.055,
+            -0.045,
+            0.06
+          ]
+        ],
+        "RETURN": [
+          [
+            0.055,
+            0.035,
+            -0.025
+          ]
+        ]
+      },
+      "split": "validation",
+      "role": "model selection; never final blind test"
+    },
+    {
+      "name": "V02",
+      "seed": 2026102202,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.025,
+            0.065,
+            0.045
+          ]
+        ],
+        "RETURN": [
+          [
+            -0.055,
+            -0.025,
+            0.05
+          ]
+        ]
+      },
+      "split": "validation",
+      "role": "model selection; never final blind test"
+    },
+    {
+      "name": "U01",
+      "seed": 2026102301,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.095,
+            0.015,
+            -0.055
+          ]
+        ],
+        "RETURN": [
+          [
+            0.065,
+            -0.025,
+            0.045
+          ]
+        ]
+      },
+      "split": "test",
+      "role": "unseen until model freeze"
+    },
+    {
+      "name": "U02",
+      "seed": 2026102302,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.045,
+            0.055,
+            0.035
+          ]
+        ],
+        "RETURN": [
+          [
+            -0.065,
+            0.035,
+            -0.025
+          ]
+        ]
+      },
+      "split": "test",
+      "role": "unseen until model freeze"
+    },
+    {
+      "name": "U03",
+      "seed": 2026102303,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.045,
+            -0.055,
+            0.065
+          ]
+        ],
+        "RETURN": [
+          [
+            0.035,
+            -0.055,
+            0.055
+          ]
+        ]
+      },
+      "split": "test",
+      "role": "unseen until model freeze"
+    }
+  ],
+  "historical_start_conditions_scanned": 37,
+  "test_consumption_rule": "Freeze model and all selection rules before U01/U02/U03. Report all failures; never retune on test."
+}

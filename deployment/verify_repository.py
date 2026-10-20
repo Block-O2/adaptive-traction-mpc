@@ -64,6 +64,10 @@ def main():
     for rel, expected in anchors.items():
         if not (canonical / rel).is_file() or sha(canonical / rel) != expected:
             errors.append(dict(check='historical_frozen_source', path=rel))
+    execution = json.loads((canonical / 'EXECUTION_CODE_MANIFEST_v6.json').read_text())['files']
+    for rel, expected in execution.items():
+        if not (canonical / rel).is_file() or sha(canonical / rel) != expected:
+            errors.append(dict(check='original_execution_v6_identity', path=rel))
     package = ROOT / 'research/rl_b_cpu_handoff_v1'
     sealed = json.loads((package / 'SHA256_MANIFEST.json').read_text())['files']
     for rel, info in sealed.items():
@@ -73,6 +77,7 @@ def main():
     report = dict(status='FAIL' if errors else 'PASS', scope='STATIC_SOURCE_AND_ASSET_IDENTITY',
                   head=head, files=len(manifest['files']), python_syntax=syntax,
                   frozen_source_anchors=len(anchors), rl_b_sealed_files=len(sealed), vendor_assets=len(vendors),
+                  original_execution_v6_files=len(execution),
                   stage3_to_5_xml_asset_references=asset_references,
                   historical_stage1_asset_status='FAIL' if legacy_unresolved else 'PASS', historical_stage1_missing=legacy_unresolved,
                   errors=errors, physics='NOT_RUN', training='NOT_RUN', cloud='UNVERIFIED',
