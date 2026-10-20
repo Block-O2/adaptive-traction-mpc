@@ -1,0 +1,666 @@
+{
+  "parent_manifest_sha256": "ac09c8fd0ad0e8c8e784ecd9a712037d5c9036af21e4fbffc8c48aaa96612bad",
+  "parent_candidate": {
+    "id": "ER110_R4_120",
+    "base": "T",
+    "posture": [
+      {
+        "phase": "RETURN",
+        "slot": 2,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      },
+      {
+        "phase": "RETURN",
+        "slot": 3,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      }
+    ],
+    "early": [
+      {
+        "phase": "RETURN",
+        "slot": 1,
+        "duration_factor": 1.1
+      },
+      {
+        "phase": "RETURN",
+        "slot": 4,
+        "duration_factor": 1.2
+      }
+    ],
+    "changes": []
+  },
+  "hypothesis": "Lower RETURN3 knee pass speed reduces state entering RETURN4 deceleration and may reduce true knee undershoot; opposite effects on mid-segment speed, hip coupling, replan duration and force are falsifiers",
+  "prechecks": [
+    {
+      "id": "AV090",
+      "factor": 0.9,
+      "feasible": true,
+      "reason": null,
+      "fixture": "historical ER RETURN3; causal belief/reference only",
+      "old_duration_s": 1.245,
+      "old_velocity_deg_s": [
+        -12.702599640775764,
+        -19.83266945717342
+      ],
+      "new_velocity_deg_s": [
+        -12.702599640775764,
+        -17.849402511456077
+      ],
+      "status": "PASS",
+      "current_admission": {
+        "request_model_sequence": 351,
+        "activation_model_sequence": 351,
+        "request_phase": "RETURN",
+        "activation_phase": "RETURN",
+        "phase_deadline_physics_s": 30.035000000004864,
+        "remaining_phase_time_s": 5.939999999980829,
+        "schedule_duration_s": 1.2850000000000001,
+        "reference_continuity": true,
+        "current_model_mechanics": {
+          "evaluated": true,
+          "feasible": true,
+          "rejection_reason": null,
+          "belief_sequence": 351,
+          "candidate_label": "archived_exact_selected_target",
+          "model": "frozen_v2_2_state_residual_human_model",
+          "sample_count": 21,
+          "peak_force_n": 77.16377280680464,
+          "peak_moment_nm": 13.487718595829975,
+          "peak_state_residual_nm": 0.012964744024632472,
+          "force_limit_n": 200.0,
+          "moment_limit_nm": 60.0,
+          "deployable_truth_consumed": false
+        },
+        "current_geometry_continuous_lower_m": 0.0001,
+        "current_geometry_certificate": {
+          "general_certificate": {
+            "feasible": true,
+            "minimum_sampled_m": {
+              "proximal_thigh_m": 0.0001,
+              "distal_shank_m": 0.2416960505242572,
+              "sleeve_m": 0.25097389385665814,
+              "cuff_bar_m": 0.2968083234523962,
+              "cuff_adapter_m": 0.3684212831803598
+            },
+            "conservative_continuous_lower_m": {
+              "proximal_thigh_m": 0.0001,
+              "distal_shank_m": 0.24157629396813513,
+              "sleeve_m": 0.2508541373005361,
+              "cuff_bar_m": 0.29668856689627415,
+              "cuff_adapter_m": 0.36830152662423776
+            },
+            "adjacent_lipschitz_bound_m": 0.00011975655612206025,
+            "sample_count": 1201,
+            "duration_s": 1.245
+          },
+          "monotonic_certificate": {
+            "method": "outward_interval_common_progress_v2",
+            "eligible": false,
+            "lowers": {},
+            "body_proofs": {},
+            "proof_scope": "model reference geometry only; no physical invariance or state-estimation guarantee"
+          },
+          "combined_body_lowers_m": {
+            "proximal_thigh_m": 0.0001,
+            "distal_shank_m": 0.24157629396813513,
+            "sleeve_m": 0.2508541373005361,
+            "cuff_bar_m": 0.29668856689627415,
+            "cuff_adapter_m": 0.36830152662423776
+          }
+        },
+        "original_geometry_certificate_reused": false,
+        "truth_consumed": false,
+        "feasible": true,
+        "safe_escape": {
+          "feasible": true,
+          "geometry_valid": true,
+          "bridge_mechanics": {
+            "evaluated": true,
+            "feasible": true,
+            "rejection_reason": null,
+            "belief_sequence": 351,
+            "candidate_label": "safe_fallback_bridge",
+            "model": "frozen_v2_2_state_residual_human_model",
+            "sample_count": 21,
+            "peak_force_n": 75.70006541660855,
+            "peak_moment_nm": 13.305539887807983,
+            "peak_state_residual_nm": 0.013076155972648133,
+            "force_limit_n": 200.0,
+            "moment_limit_nm": 60.0,
+            "deployable_truth_consumed": false
+          },
+          "stop_mechanics": {
+            "evaluated": true,
+            "feasible": true,
+            "rejection_reason": null,
+            "belief_sequence": 351,
+            "candidate_label": "safe_fallback_stop",
+            "model": "frozen_v2_2_state_residual_human_model",
+            "sample_count": 21,
+            "peak_force_n": 82.92147259504054,
+            "peak_moment_nm": 16.446097661110283,
+            "peak_state_residual_nm": 0.018892160775007605,
+            "force_limit_n": 200.0,
+            "moment_limit_nm": 60.0,
+            "deployable_truth_consumed": false
+          },
+          "stop_horizon_s": 1.5350000000000001
+        },
+        "future_handoff_revalidation": {
+          "original_request_sample_s": 24.090000000024013,
+          "original_request_capture_ns": 100000000,
+          "original_request_age_ms": 5.000000000023874,
+          "original_request_host_age_ms_profile": 5.0,
+          "revalidation_sample_s": 24.095000000024037,
+          "revalidation_capture_ns": 105000000,
+          "revalidation_sample_age_ms": 0.0,
+          "revalidation_host_age_ms_profile": 0.0,
+          "age_policy": "simulation",
+          "request_model_sequence": 351,
+          "current_model_sequence": 351,
+          "request_plan_version": "human_waypoint_quintic_scheduler_reference_motion_governor_v2",
+          "current_plan_version": "human_waypoint_quintic_scheduler_reference_motion_governor_v2",
+          "model_changed_and_rescreened": false,
+          "q_deviation_rad": [
+            0.004501555076499075,
+            0.00897307981321882
+          ],
+          "dq_deviation_rad_s": [
+            0.00606125269766894,
+            0.00687297449810953
+          ],
+          "observation_reference_state_rad_rad_s": [
+            0.9733824178168301,
+            0.8657714476821652,
+            -0.24148683121621858,
+            -0.34014145058217593
+          ],
+          "state_rom_valid": true,
+          "state_and_shifted_path_motion_valid": true,
+          "shifted_path_rom_valid": true,
+          "current_clearance_m": 0.0001,
+          "shifted_continuous_clearance_lower_m": 0.0001,
+          "live_reference_c2": true,
+          "version_valid": true,
+          "task_goal_valid": true,
+          "both_ages_valid": true,
+          "current_model_force_moment_feasible": true
+        },
+        "rolling_composite": {
+          "prefix_c2": true,
+          "prefix_shifted_rom_valid": true,
+          "prefix_shifted_continuous_clearance_m": 0.0001,
+          "prefix_current_model_mechanics": {
+            "evaluated": true,
+            "feasible": true,
+            "rejection_reason": null,
+            "belief_sequence": 351,
+            "candidate_label": "safe_fallback_bridge",
+            "model": "frozen_v2_2_state_residual_human_model",
+            "sample_count": 21,
+            "peak_force_n": 71.85371029498693,
+            "peak_moment_nm": 11.185460028504417,
+            "peak_state_residual_nm": 0.008729381537056012,
+            "force_limit_n": 200.0,
+            "moment_limit_nm": 60.0,
+            "deployable_truth_consumed": false
+          },
+          "prefix_motion_limit_valid": true,
+          "prefix_duration_remaining_s": 0.04,
+          "composite_duration_s": 1.2850000000000001,
+          "suffix_boundary_c2": true,
+          "composite_version": "rolling_suffix_splice_v1/human_waypoint_quintic_scheduler_reference_motion_governor_v2",
+          "request_id": 17
+        }
+      },
+      "safe_escape": true,
+      "certificate": {
+        "general_certificate": {
+          "feasible": true,
+          "minimum_sampled_m": {
+            "proximal_thigh_m": 0.0001,
+            "distal_shank_m": 0.2416960505242572,
+            "sleeve_m": 0.25097389385665814,
+            "cuff_bar_m": 0.2968083234523962,
+            "cuff_adapter_m": 0.3684212831803598
+          },
+          "conservative_continuous_lower_m": {
+            "proximal_thigh_m": 0.0001,
+            "distal_shank_m": 0.24157629396813513,
+            "sleeve_m": 0.2508541373005361,
+            "cuff_bar_m": 0.29668856689627415,
+            "cuff_adapter_m": 0.36830152662423776
+          },
+          "adjacent_lipschitz_bound_m": 0.00011975655612206025,
+          "sample_count": 1201,
+          "duration_s": 1.245
+        },
+        "monotonic_certificate": {
+          "method": "outward_interval_common_progress_v2",
+          "eligible": false,
+          "lowers": {},
+          "body_proofs": {},
+          "proof_scope": "model reference geometry only; no physical invariance or state-estimation guarantee"
+        },
+        "combined_body_lowers_m": {
+          "proximal_thigh_m": 0.0001,
+          "distal_shank_m": 0.24157629396813513,
+          "sleeve_m": 0.2508541373005361,
+          "cuff_bar_m": 0.29668856689627415,
+          "cuff_adapter_m": 0.36830152662423776
+        }
+      },
+      "new_ref_vmax_deg_s": [
+        21.94166816781035,
+        19.48866955581634
+      ],
+      "new_ref_amax_deg_s2": [
+        22.339849704730366,
+        10.659127583401798
+      ],
+      "coefficient_sha256": "7963c11c28ede51697664a93554aaab186865686b060e57b47681ef997fb2307",
+      "unchanged_target_max_rad": 1.1102230246251565e-16
+    },
+    {
+      "id": "AV080",
+      "factor": 0.8,
+      "feasible": true,
+      "reason": null,
+      "fixture": "historical ER RETURN3; causal belief/reference only",
+      "old_duration_s": 1.245,
+      "old_velocity_deg_s": [
+        -12.702599640775764,
+        -19.83266945717342
+      ],
+      "new_velocity_deg_s": [
+        -12.702599640775764,
+        -15.866135565738736
+      ],
+      "status": "PASS",
+      "current_admission": {
+        "request_model_sequence": 351,
+        "activation_model_sequence": 351,
+        "request_phase": "RETURN",
+        "activation_phase": "RETURN",
+        "phase_deadline_physics_s": 30.035000000004864,
+        "remaining_phase_time_s": 5.939999999980829,
+        "schedule_duration_s": 1.2850000000000001,
+        "reference_continuity": true,
+        "current_model_mechanics": {
+          "evaluated": true,
+          "feasible": true,
+          "rejection_reason": null,
+          "belief_sequence": 351,
+          "candidate_label": "archived_exact_selected_target",
+          "model": "frozen_v2_2_state_residual_human_model",
+          "sample_count": 21,
+          "peak_force_n": 77.2433742042154,
+          "peak_moment_nm": 13.679619500867723,
+          "peak_state_residual_nm": 0.013272173286746057,
+          "force_limit_n": 200.0,
+          "moment_limit_nm": 60.0,
+          "deployable_truth_consumed": false
+        },
+        "current_geometry_continuous_lower_m": 0.0001,
+        "current_geometry_certificate": {
+          "general_certificate": {
+            "feasible": true,
+            "minimum_sampled_m": {
+              "proximal_thigh_m": 0.0001,
+              "distal_shank_m": 0.2416960505242572,
+              "sleeve_m": 0.250973893856658,
+              "cuff_bar_m": 0.2968083234523961,
+              "cuff_adapter_m": 0.3684212831803597
+            },
+            "conservative_continuous_lower_m": {
+              "proximal_thigh_m": 0.0001,
+              "distal_shank_m": 0.2415801768534679,
+              "sleeve_m": 0.2508580201858687,
+              "cuff_bar_m": 0.2966924497816068,
+              "cuff_adapter_m": 0.3683054095095704
+            },
+            "adjacent_lipschitz_bound_m": 0.00011587367078930619,
+            "sample_count": 1201,
+            "duration_s": 1.245
+          },
+          "monotonic_certificate": {
+            "method": "outward_interval_common_progress_v2",
+            "eligible": false,
+            "lowers": {},
+            "body_proofs": {},
+            "proof_scope": "model reference geometry only; no physical invariance or state-estimation guarantee"
+          },
+          "combined_body_lowers_m": {
+            "proximal_thigh_m": 0.0001,
+            "distal_shank_m": 0.2415801768534679,
+            "sleeve_m": 0.2508580201858687,
+            "cuff_bar_m": 0.2966924497816068,
+            "cuff_adapter_m": 0.3683054095095704
+          }
+        },
+        "original_geometry_certificate_reused": false,
+        "truth_consumed": false,
+        "feasible": true,
+        "safe_escape": {
+          "feasible": true,
+          "geometry_valid": true,
+          "bridge_mechanics": {
+            "evaluated": true,
+            "feasible": true,
+            "rejection_reason": null,
+            "belief_sequence": 351,
+            "candidate_label": "safe_fallback_bridge",
+            "model": "frozen_v2_2_state_residual_human_model",
+            "sample_count": 21,
+            "peak_force_n": 76.09248686954673,
+            "peak_moment_nm": 13.577381977191521,
+            "peak_state_residual_nm": 0.013375843309221471,
+            "force_limit_n": 200.0,
+            "moment_limit_nm": 60.0,
+            "deployable_truth_consumed": false
+          },
+          "stop_mechanics": {
+            "evaluated": true,
+            "feasible": true,
+            "rejection_reason": null,
+            "belief_sequence": 351,
+            "candidate_label": "safe_fallback_stop",
+            "model": "frozen_v2_2_state_residual_human_model",
+            "sample_count": 21,
+            "peak_force_n": 83.21668486360238,
+            "peak_moment_nm": 16.48102158444486,
+            "peak_state_residual_nm": 0.01886070920250034,
+            "force_limit_n": 200.0,
+            "moment_limit_nm": 60.0,
+            "deployable_truth_consumed": false
+          },
+          "stop_horizon_s": 1.5350000000000001
+        },
+        "future_handoff_revalidation": {
+          "original_request_sample_s": 24.090000000024013,
+          "original_request_capture_ns": 100000000,
+          "original_request_age_ms": 5.000000000023874,
+          "original_request_host_age_ms_profile": 5.0,
+          "revalidation_sample_s": 24.095000000024037,
+          "revalidation_capture_ns": 105000000,
+          "revalidation_sample_age_ms": 0.0,
+          "revalidation_host_age_ms_profile": 0.0,
+          "age_policy": "simulation",
+          "request_model_sequence": 351,
+          "current_model_sequence": 351,
+          "request_plan_version": "human_waypoint_quintic_scheduler_reference_motion_governor_v2",
+          "current_plan_version": "human_waypoint_quintic_scheduler_reference_motion_governor_v2",
+          "model_changed_and_rescreened": false,
+          "q_deviation_rad": [
+            0.004501555076499075,
+            0.00897307981321882
+          ],
+          "dq_deviation_rad_s": [
+            0.00606125269766894,
+            0.00687297449810953
+          ],
+          "observation_reference_state_rad_rad_s": [
+            0.9733824178168301,
+            0.8657714476821652,
+            -0.24148683121621858,
+            -0.34014145058217593
+          ],
+          "state_rom_valid": true,
+          "state_and_shifted_path_motion_valid": true,
+          "shifted_path_rom_valid": true,
+          "current_clearance_m": 0.0001,
+          "shifted_continuous_clearance_lower_m": 0.0001,
+          "live_reference_c2": true,
+          "version_valid": true,
+          "task_goal_valid": true,
+          "both_ages_valid": true,
+          "current_model_force_moment_feasible": true
+        },
+        "rolling_composite": {
+          "prefix_c2": true,
+          "prefix_shifted_rom_valid": true,
+          "prefix_shifted_continuous_clearance_m": 0.0001,
+          "prefix_current_model_mechanics": {
+            "evaluated": true,
+            "feasible": true,
+            "rejection_reason": null,
+            "belief_sequence": 351,
+            "candidate_label": "safe_fallback_bridge",
+            "model": "frozen_v2_2_state_residual_human_model",
+            "sample_count": 21,
+            "peak_force_n": 71.85371029498693,
+            "peak_moment_nm": 11.185460028504417,
+            "peak_state_residual_nm": 0.008729381537056012,
+            "force_limit_n": 200.0,
+            "moment_limit_nm": 60.0,
+            "deployable_truth_consumed": false
+          },
+          "prefix_motion_limit_valid": true,
+          "prefix_duration_remaining_s": 0.04,
+          "composite_duration_s": 1.2850000000000001,
+          "suffix_boundary_c2": true,
+          "composite_version": "rolling_suffix_splice_v1/human_waypoint_quintic_scheduler_reference_motion_governor_v2",
+          "request_id": 17
+        }
+      },
+      "safe_escape": true,
+      "certificate": {
+        "general_certificate": {
+          "feasible": true,
+          "minimum_sampled_m": {
+            "proximal_thigh_m": 0.0001,
+            "distal_shank_m": 0.2416960505242572,
+            "sleeve_m": 0.250973893856658,
+            "cuff_bar_m": 0.2968083234523961,
+            "cuff_adapter_m": 0.3684212831803597
+          },
+          "conservative_continuous_lower_m": {
+            "proximal_thigh_m": 0.0001,
+            "distal_shank_m": 0.2415801768534679,
+            "sleeve_m": 0.2508580201858687,
+            "cuff_bar_m": 0.2966924497816068,
+            "cuff_adapter_m": 0.3683054095095704
+          },
+          "adjacent_lipschitz_bound_m": 0.00011587367078930619,
+          "sample_count": 1201,
+          "duration_s": 1.245
+        },
+        "monotonic_certificate": {
+          "method": "outward_interval_common_progress_v2",
+          "eligible": false,
+          "lowers": {},
+          "body_proofs": {},
+          "proof_scope": "model reference geometry only; no physical invariance or state-estimation guarantee"
+        },
+        "combined_body_lowers_m": {
+          "proximal_thigh_m": 0.0001,
+          "distal_shank_m": 0.2415801768534679,
+          "sleeve_m": 0.2508580201858687,
+          "cuff_bar_m": 0.2966924497816068,
+          "cuff_adapter_m": 0.3683054095095704
+        }
+      },
+      "new_ref_vmax_deg_s": [
+        21.94166816781035,
+        19.48866955581634
+      ],
+      "new_ref_amax_deg_s2": [
+        22.339849704730366,
+        7.8849139970567235
+      ],
+      "coefficient_sha256": "0aa2ab7c7fe6a0f176fcc541d3f5d8a2383bc89aa137c38fd469a35d1c2e6eef",
+      "unchanged_target_max_rad": 1.6653345369377348e-16
+    }
+  ],
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "approach": []
+    },
+    {
+      "id": "T",
+      "base": "T",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "approach": []
+    },
+    {
+      "id": "D",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [],
+      "changes": [],
+      "approach": []
+    },
+    {
+      "id": "ER",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "approach": []
+    },
+    {
+      "id": "AV090",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "approach": [
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "knee_velocity_factor": 0.9
+        }
+      ]
+    },
+    {
+      "id": "AV080",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "approach": [
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "knee_velocity_factor": 0.8
+        }
+      ],
+      "conditional_second": true
+    }
+  ],
+  "frozen_unix": 1792310744.8995821
+}

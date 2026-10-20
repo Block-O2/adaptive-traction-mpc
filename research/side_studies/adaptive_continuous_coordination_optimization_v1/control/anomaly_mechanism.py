@@ -1,0 +1,23 @@
+from pathlib import Path
+import sys,json,os
+os.environ.update(OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1')
+P=Path('/home/hank/coding/adaptive-traction-mpc-side-studies/adaptive_continuous_coordination_optimization_v1');sys.path.insert(0,str(P/'code'))
+from stream_runtime_evidence import array_items
+import numpy as np
+def main():
+ ident='development_legacy005';b='development_B0';a=np.load(P/'motion_series'/(ident+'.npz'));base=np.load(P/'motion_series'/(b+'.npz'));t=a['time_s'];peak=int(np.argmax(abs(a['acceleration_rad_s2'][:,0])));now=float(t[peak]);ta=np.load(P/'source/results'/ident/'trace.npz');tb=np.load(P/'source/results'/b/'trace.npz');assert np.array_equal(ta['time_s'],tb['time_s']);near=abs(ta['time_s']-now)<.05;ix=int(np.argmin(abs(ta['time_s']-now)));components={}
+ for key in ['cr12_actuator_command_nm','robot_torque_component_base_nm','robot_torque_component_position_nm','robot_torque_component_velocity_nm','robot_torque_component_allocator_nm','robot_torque_component_clipping_nm','physical_cuff_force_world_n','physical_cuff_moment_world_nm','reference_q_rad','reference_dq_rad_s','estimated_human_state_rad_rad_s','evaluation_only_human_state_rad_rad_s']:
+  delta=ta[key]-tb[key];components[key]=dict(at_nearest_trace_delta=delta[ix].tolist(),max_window_delta_norm=float(np.max(np.linalg.norm(delta[near],axis=1))),candidate_max_window_norm=float(np.max(np.linalg.norm(ta[key][near],axis=1))),B_max_window_norm=float(np.max(np.linalg.norm(tb[key][near],axis=1))))
+ summary=json.loads((P/'source/results'/ident/'summary.json').read_text());events=[]
+ for d in summary['decisions']:
+  for key in ['decision_request_time_s','actual_schedule_start_physics_s']:
+   if d.get(key) is not None:events.append(dict(kind=key,time_s=d[key],distance_to_peak_s=d[key]-now,request_id=d['timing_request_id'],phase=d['phase'],activation_outcome=d.get('activation_outcome')))
+ splices=[]
+ for e in array_items(P/'source/results'/ident/'runtime_artifacts.json.gz','rolling_splice_events'):
+  if e.get('actual_splice_physics_s') is not None:splices.append(dict(time_s=e['actual_splice_physics_s'],distance_to_peak_s=e['actual_splice_physics_s']-now,request_id=e.get('request_id'),outcome=e.get('outcome')))
+ receipts=[r for r in array_items(P/'source/results'/ident/'runtime_artifacts.json.gz','command_receipts') if r.get('applied') and r.get('native_steps',0)>0 and r['start_physics_s']<=now<r['end_physics_s']]
+ keys=['base','position','velocity','allocator','clipping'];closure={name:float(np.max(abs(sum(z['robot_torque_component_'+k+'_nm'][near] for k in keys)-z['cr12_actuator_command_nm'][near]))) for name,z in [('candidate',ta),('B',tb)]};assert max(closure.values())<1e-9
+ out=dict(absolute_physics_peak_s=now,task_elapsed_peak_s=now-float(ta['time_s'][ta['stage']=='TASK'][0]),candidate_hip_acceleration_deg_s2=float(np.degrees(a['acceleration_rad_s2'][peak,0])),B_acceleration_at_same_native_time_deg_s2=np.degrees(base['acceleration_rad_s2'][peak]).tolist(),component_differences=components,nearest_planning_events=sorted(events,key=lambda e:abs(e['distance_to_peak_s']))[:6],nearest_splice_events=sorted(splices,key=lambda e:abs(e['distance_to_peak_s']))[:3],active_receipt=[{k:r.get(k) for k in ['receipt_index','start_physics_s','end_physics_s','command_kind','plan_request_id','reference_version','native_steps','command_torque_nm']} for r in receipts],observed='Same initial parent and bounded local reference intervention precede reproducible later derivative and torque differences. All intervening closed-loop state/estimation/reference changes remain endogenous.',unresolved='A large component difference does not identify that component as the cause. State-dependent robot geometry, feedback/allocator and replan coupling remain candidate mechanisms. No gains/contact/dynamics ablation was performed.')
+ out.update(additive_torque_component_closure_error_Nm=closure,source_semantics='runtime_coordination_residual_v2._apply_*. torque_components: base=unclipped-total_wrench@J; position/velocity/allocator are separate corresponding wrench@J; clipping=command-unclipped. Sum checked against applied command in anomaly window.',mechanism_inference='Allocator torque contribution is the largest observed component difference; no clipping difference. This narrows a robustness diagnostic target but does not prove allocator-specific causation.')
+ (P/'ANOMALY_MECHANISM_DIAGNOSTIC.json').write_text(json.dumps(out,indent=2));print(json.dumps(dict(peak=now,task=out['task_elapsed_peak_s'],closure=closure,components={k:v['max_window_delta_norm'] for k,v in components.items()},nearest=out['nearest_planning_events'][:2]),indent=2))
+if __name__=='__main__':main()

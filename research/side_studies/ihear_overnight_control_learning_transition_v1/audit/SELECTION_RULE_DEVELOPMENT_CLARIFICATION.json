@@ -1,0 +1,19 @@
+{
+  "unix": 1792349182.0651233,
+  "status": "DEVELOPMENT_RULE_CLARIFICATION_BEFORE_TRAINING_AND_TEST",
+  "evidence_seen": [
+    "D01R",
+    "D02",
+    "D03"
+  ],
+  "motivation": "D03 ZERO passes while H150/HIP/KNEE fail excursion; qualification first requires allowing predicted qualification recovery even when force is higher than unqualified H150.",
+  "rule": "If supported and H150 conservative predicted margin is not positive, choose minimum cost among candidates with all conservative margins positive. If none, keep H150 as unqualified reference fallback. Otherwise require force advantage greater than empirical error. Original safety/admission always rechecks.",
+  "test_conditions_changed": false,
+  "motion_limits_changed": false,
+  "force_gain_and_qualification_recovery_reported_separately": true,
+  "files": {
+    "learning/value_model.py": "30e91f6a7514d24b60bc06a30c80afe7677e36c13e187a5a838bf2b15388b9e1",
+    "control/frozen_selector.py": "82af621b2c170a39fae24eadfdd74718ed39d5d65cc882cdca693a691c8b2295",
+    "control/feedback_selector.py": "c97d28f38009a3fab18fb5eb818e11ff99a5e10368af95923f557e1e277eaf51"
+  }
+}

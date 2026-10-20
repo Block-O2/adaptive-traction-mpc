@@ -1,0 +1,21 @@
+# MultiSegmentReference V1合同
+
+对象字段为frozen dataclass、嵌套tuple/float/str；NumPy coefficients、candidate向量和certificate访问器都返回独立对象，外部写入不改变payload。pickle往返后相同值身份仍有效。普通object.__setattr__强行篡改不是不可实现的内存攻击，运行准入的digest核验会拒绝；完整性hash不是远端密码学身份认证。
+
+reference_id覆盖：每段真实系数、duration及原metadata；全部knots；整体candidate label/phase/goal/目标q/dq；原曲线身份与canonical_zero模式；request ID、原source_sample_time/capture_ns、request model sequence/signature；任务ROM/起止锚点、原速度/加速度fraction后的限制、reference周期；tracking offset；冻结bridge/stop的系数、时间、candidate和原escape certificate。代码/模型/配置/权重hash还由START的EXECUTION_CODE_MANIFEST绑定。
+
+certificate_id覆盖reference_id与完整path certificate JSON。certificate记录current model和geometry签名、实际解析极值、跨节点C2/20ms量、各段原continuous geometry下界、tracking-offset路径、整体+逐段原mechanics和future escape。实际激活会重新使用当前model/geometry检查，而非沿用旧曲线proof；当前证书ID也记录于应用receipt。
+
+外部q/dq/ddq及duration不改变，内部允许非零通过dq/ddq。边界选择右侧段并钳制合法末端；所有内部q/dq/ddq差≤原1e-10容差。插入knots不是planner请求。原governor保留一条20ms receipt历史，不能在内部节点重置。
+
+零修改identity求值：仅当所有segment系数与原多项式的精确仿射限制逐系数相同，才使用原采样核；不能因仅外部端点相同使用此路径。修改内部点而伪造canonical_zero会被拒绝。非零路径使用真正局部时间和子段系数。
+
+请求source capture/sample保持原始值，重试不刷新。新类型额外核对original source、模型序列、同序列模型内容与reference version；原PlanLifecycle的100ms/phase/version与fresh command规则继续执行。100ms是计划准入/新命令年龄合同，不是强制每条已激活长轨迹100ms重规划。
+
+原40ms桥、stop/commit/latch、carry/braking/HOLD保留。内部节点无需新激活；整条suffix进入原rolling外壳，实际splice时再验。末端moving状态必须已有合法escape，当前剩余phase预算覆盖primary+commit+stop。
+
+实际issued样本必须由同一reference_id对象sample得出。原reference_progress_commit成功写receipt后，日志只附加reference/certificate ID、子段索引、局部progress、q/dq/ddq及原source，不改command。只有receipt applied且native_steps>0，才能称APPLIED_COMMAND；每native行再以唯一receipt区间、完全一致torque和steps数量审核。真正人体运动另由原物理q/dq证明。
+
+等级边界：MATH_VERIFIED/INTERFACE_CERTIFIED仅为声明测试和reference认证范围；物理成功须另过P0/P1/P2。本包不自动获得正式B Native LEVEL2、host LEVEL3、硬件或临床资格。
+
+最终版本：首批.05° motion失败，按预先声明顺序减为.02°通过；最终版仅重复.02°，不依force选择。子段record局部时长摘要修复、完整identity_payload和新增序列化测试见audit/SERIALIZATION_REPAIR.json；首版源码、测试和manifest在versions/interface1。

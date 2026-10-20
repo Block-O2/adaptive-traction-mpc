@@ -1,0 +1,19 @@
+{
+  "id": "C5_COMMITTED_HOLD_ENDPOINT_ACTUAL_SERVICE",
+  "registered_unix": 1791375644.0398226,
+  "configs": [
+    "/home/hank/coding/adaptive-traction-mpc-side-studies/b_fast_runtime_completion_v1/queue/081_N13_S2_C5_science_nominal.json",
+    "/home/hank/coding/adaptive-traction-mpc-side-studies/b_fast_runtime_completion_v1/queue/082_N13_S2_C5_host_nominal.json",
+    "/home/hank/coding/adaptive-traction-mpc-side-studies/b_fast_runtime_completion_v1/queue/083_N13_S2_C5_science_deviation.json",
+    "/home/hank/coding/adaptive-traction-mpc-side-studies/b_fast_runtime_completion_v1/queue/084_N13_S2_C5_host_deviation.json"
+  ],
+  "thresholds_unchanged": true,
+  "service_population": "All original and additional real services; same frozen missed-grid/backlog checks; no past callbacks.",
+  "basis": "C4 reduced no HOLD collection waits. Observed first segment end to second request plus final endpoint to phase check adds approximately12ms of actual service quantization.",
+  "scope": "Only already activated nonrolling original .5s HOLD plans; original actual_activation_hook runs first. Register current native step+2000 as a timer opportunity. Original completion, sensor dwell, current safety, planner requests, and .5s duration remain unchanged.",
+  "no_pre_activation_dwell_credit": true,
+  "no_new_planner_authority": true,
+  "no_Q_or_training": true,
+  "local_clock_long_time_negative": "At10000s iterativefloat original completion may be delayed; C5 neither changes nor bypasses this test, and is not a long-time integer-clock repair.",
+  "physics_budget": 120
+}

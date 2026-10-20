@@ -1,0 +1,8 @@
+from task_bootstrap import *
+import ast
+def main():
+ src=STUDY/'code/certified_snapshot.py';text=src.read_text();text=text.replace('import shared_nominal','import shared_nominal\nfrom copy import copy')
+ old=" clone,args=pickle.loads(snapshot_task_call(b['adaptive_planner'],b['arguments']));phase=c['phase'];i=count[phase];a=table[('OUTBOUND','RETURN').index(phase),i] if i<5 else np.zeros(3)\n clone.planner.residual_spec={phase:graph_action(a*.2,c['start_m'])}\n pre=snapshot_task_call(clone,args);key=hashlib.sha256(pre).hexdigest();t=time.monotonic();decision=clone.decide(**args);e=decision.executed;meta=e.execution_screen.get('coordination_residual_v2',{})"
+ new=" phase=c['phase'];i=count[phase];a=table[('OUTBOUND','RETURN').index(phase),i] if i<5 else np.zeros(3)\n shadow=copy(b['adaptive_planner']);shadow.planner=copy(b['adaptive_planner'].planner);shadow.planner.residual_spec={phase:graph_action(a*.2,c['start_m'])}\n # Serialize the exact original object graph with only this candidate spec,\n # rather than reserializing a prior unpickled graph (aliasing may differ).\n pre=snapshot_task_call(shadow,b['arguments']);key=hashlib.sha256(pre).hexdigest();clone,args=pickle.loads(pre);t=time.monotonic();decision=clone.decide(**args);e=decision.executed;meta=e.execution_screen.get('coordination_residual_v2',{})"
+ assert old in text;text=text.replace(old,new);ast.parse(text);p=STUDY/'code/certified_snapshot_v2.py';p.write_text(text);shutil.copy2(p,Path('/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/b_native_q_realtime_integration_v1/certified_snapshot_v2.py'));print('EXACT_ORIGINAL_OBJECT_GRAPH_CERTIFICATE_V2_CREATED')
+if __name__=='__main__':main()

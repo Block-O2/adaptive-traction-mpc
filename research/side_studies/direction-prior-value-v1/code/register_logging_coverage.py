@@ -1,0 +1,6 @@
+from freeze import *
+def main():
+ path=STUDY/'PLAN_AMENDMENT_10_LOGGING_COVERAGE.json';assert not path.exists()
+ save(path,dict(unix=time.time(),heldout_testing_started=True,logging_only=True,physics_changes=[],policy_changes=[],hyperparameter_changes=[],training_target_changes=[],changes=['Supplemental 45s observer monitors both existing runner/controller process trees; original live runner resource thresholds unchanged','Subsequent separate fits record host peak RSS, CUDA peak allocations and exact training/inference script hashes','Original v1 fit lasted5.3s and lacks sampled training peak; no retrospective peak invented','Three already-completed B fork parent/child NPZ traces checked offline for13 physical/reference/estimated/evaluation-only fields: every element exact; no new physics attempts'],source_of_original_v1_train=str(STUDY/'code_history/1c22a4075906c959009715dda55a1df49dc40520f5b7f985433d171ea387f582/code/train.py'),original_start_unix=1791222386,global_physics_cap=300))
+ print('LOGGING_COVERAGE_AMENDMENT_RECORDED')
+if __name__=='__main__':main()

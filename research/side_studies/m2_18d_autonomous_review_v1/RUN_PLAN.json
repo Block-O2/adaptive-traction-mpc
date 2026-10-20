@@ -1,0 +1,78 @@
+{
+  "t0_unix": 1792214779.0,
+  "hard_stop_unix": 1792229179.0,
+  "dispatch_cutoff_unix": 1792225579.0,
+  "physics_hard_stop_unix": 1792226779.0,
+  "physical_timeout_s": 600,
+  "physics_budget": 40,
+  "seed": 2026101303,
+  "validation_conditions": [
+    {
+      "name": "N2",
+      "seed": 2026101702,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.06,
+            -0.06,
+            -0.06
+          ]
+        ]
+      },
+      "role": "exposed mechanism development"
+    },
+    {
+      "name": "U1",
+      "seed": 2026101801,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.075,
+            -0.045,
+            -0.05
+          ]
+        ]
+      },
+      "role": "unseen fixed validation"
+    },
+    {
+      "name": "U2",
+      "seed": 2026101802,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.08,
+            0.03,
+            0.04
+          ]
+        ]
+      },
+      "role": "unseen fixed validation"
+    },
+    {
+      "name": "U3",
+      "seed": 2026101803,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.12,
+            -0.08,
+            0.025
+          ]
+        ]
+      },
+      "role": "unseen fixed validation"
+    }
+  ],
+  "single_physics_owner": true,
+  "candidate": "CANDIDATE.json",
+  "primary_question": "Does removal of OUTBOUND terminal-velocity bias reduce N2 knee acceleration burden while retaining force gains and unchanged full-task constraints?",
+  "development_gate": "B/E exact historical reproduction; N2 C all task/safety/motion/causal PASS, gain vs B >=1%, knee acceleration maximum <=1.10 matched B; exact C repeat.",
+  "validation_gate": "Frozen C, no reselection: all 3 unseen lawful prefixes full motion/safety/task/causal PASS, force gain >=1% each; development full C also passes.",
+  "repair": "Only if C scientific motion hypothesis fails: one predeclared O_all_half_v1 development test; do not per-state tune. A failed repair stops physical search.",
+  "meaningful_force": "No new force milestone claimed unless >=1 N s additional gain vs E and >=0.1% matched B, reproducible and all qualification PASS. Motion reliability is separate value.",
+  "no_training": true,
+  "truth_firewall": "No evaluation truth enters candidate choice; fixed global parameters only. Original live fork and causal B preserved.",
+  "limits": "Same Human; shared native prefix full JF included; unconsumed policy suffix validation only; PHYSICAL_LEVEL1, no host/clinical claims.",
+  "stop": "Any task/safety/causal/matched-state failure stops new physics. Motion failure retained. No threshold changes. No commit/push/merge."
+}

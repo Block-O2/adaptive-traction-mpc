@@ -1,0 +1,33 @@
+{
+  "question": "Does actual Human motion variation stably precede/coincide with instantaneous cuff-force change and explain cumulative burden?",
+  "evidence": "archive-only exploratory diagnosis; existing same-Human development traces; repeats are not independent samples",
+  "time_basis": "absolute physics time and task time t_abs-10.05, independently confirmed per case; never host wall time",
+  "metrics": "5ms left force integral; native raw dq gradients edge_order=2; combined Euclidean TV, acceleration variation, jerk RMS/p95/max; phase-local independent aggregation",
+  "lag_convention": "corr(motion[t],force[t+lag]); positive lag means motion leads force; ±1s; no crossing phase boundaries",
+  "sensitivity": {
+    "bin_width_s": [
+      0.05,
+      0.1,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "native_velocity_SG_windows_samples": [
+      0,
+      21,
+      101
+    ],
+    "detrend": [
+      "none",
+      "linear per phase",
+      "first difference per phase"
+    ],
+    "null": "within-phase circular shifts excluding ±2s; maximum absolute lag correlation; descriptive only"
+  },
+  "phase2_gate": "Only stable time-local correspondence with consistent direction/lag across B/18D and OUTBOUND/RETURN plus contrasts may motivate bounded physical sensitivity. Pooled correlation, cumulative slope, or isolated peak cannot pass this gate. Otherwise branch D; unsupported exact temporal interface additionally branch E.",
+  "physics_starts_authorized_conditionally": true,
+  "physics_started": 0,
+  "learning": false,
+  "thresholds": "all original qualification thresholds unchanged; no new diagnostic score used for candidate promotion",
+  "stop": "No stable coupling -> stop waypoint/speed expansion, preserve all outcomes, study tracking/allocator/replan mechanisms."
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "stage5_architecture_recovery_identifiability_audit_v1",
+  "evidence_category": "analytical_audit",
+  "question": "Can full shank length L2 and cuff fraction f be separately recovered when they appear as sc=f*L2, and can the absolute in-plane q1 zero be recovered without a calibrated Human sagittal basis or known-q pose?",
+  "allowed_observations": [
+    "causal cuff pose and twist",
+    "causal cuff force and moment",
+    "calibrated world vertical and motion-plane normal, but no calibrated in-plane sagittal zero"
+  ],
+  "hidden_evaluation_quantities": ["L2", "f"],
+  "structural_equivalence_rule": "Hold sc=f*L2 fixed while varying L2 and f inside (0,1).",
+  "q1_deg": [5.0, 20.0, 40.0, 60.0, 75.0],
+  "q2_deg": [10.0, 35.0, 60.0, 90.0, 100.0],
+  "comparison_shank_length_m": 0.46,
+  "in_plane_gauge_rotation_deg": 17.0,
+  "wrench_xz_n": [37.0, -21.0],
+  "pass_rule": "SEPARATELY_IDENTIFIABLE only if the stacked observation Jacobian with respect to [L2,f] has rank 2, no distinct legal pair reproduces all cuff kinematics/generalized effects, and no rotated-basis/shifted-q gauge reproduces the world cuff pose and Jacobian.",
+  "failure_rule": "NON_IDENTIFIABLE if either exact gauge exists and changes a control-critical downstream quantity or absolute Human state convention.",
+  "exclusions": [],
+  "randomness": null
+}

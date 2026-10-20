@@ -1,0 +1,28 @@
+{
+  "question": "What delays the actual scored HOLD boundary, and can authorized implementation changes eliminate the excess?",
+  "required_original_conditions": {
+    "sensor_dwell_s": 0.5,
+    "shared_HOLD_minimum_s": 1.0,
+    "R2_HOLD_upper_s": 1.020000001,
+    "completion_tolerance_s": 1e-12,
+    "control_dt_s": 0.005,
+    "native_dt_s": 0.00025,
+    "K3": "unchanged",
+    "planner_authority": "unchanged",
+    "truth_firewall": "unchanged"
+  },
+  "stages": [
+    "Read-only same-transition reconstruction >=4 nominal +2 legal +slow tail",
+    "A/B/C dependency classification and saved-input equivalence",
+    "Each substantive version full SCI nominal and legal before host",
+    "Development two-run host smoke; expand only if justified",
+    "Qualification >=4 cold +4 reused interpreter +2 legal; each fresh plant/commission",
+    "Transition delay/stale/current-mismatch/reject only after nominal PASS",
+    "Freeze only all required gates, otherwise NOT_FROZEN"
+  ],
+  "split": "Prior traces are development evidence; all new trials preregistered by immutable queue inputs; no held-out claim for development smoke",
+  "inputs": "Original deployable B inputs only; no future state, no truth injected",
+  "seeds": "Original nominal/deviation seeds preserved; cold/reused are timing replicates, not new Human families",
+  "exclusions": "No failed attempt is removed; failed export is distinct from physical completion",
+  "stop": "Five hours or 80 new physical starts or required forbidden scientific change or full freeze"
+}

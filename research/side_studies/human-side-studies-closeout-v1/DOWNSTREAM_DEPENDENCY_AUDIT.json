@@ -1,0 +1,330 @@
+{
+  "status": "KNOWN_DEPENDENCIES_RESOLVED_BY_BYTE_IDENTICAL_ORIGINAL_PATH_ARCHIVE_LINKS",
+  "known_side_consumers": [
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/human_qualification_R2.py",
+      "source_sha256": "060ae8aea6243eff6b53d61313b0ac12a01fd608de58fa79b5930bd7c8407be9",
+      "references": [
+        {
+          "line": 10,
+          "text": "D=W; OUT=W/'runs_R2'"
+        },
+        {
+          "line": 74,
+          "text": "                z=np.load(out/'trace.npz'); mask=z['stage']=='TASK'; t=z['time_s'][mask]; dt=np.diff(t)"
+        },
+        {
+          "line": 79,
+          "text": "                artifact=json.loads((out/'runtime_artifacts.json').read_text())"
+        },
+        {
+          "line": 101,
+          "text": "                for name in ('runtime_artifacts.json','summary.json','learning_transitions.jsonl'):"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/serial_campaign_R2.py",
+      "source_sha256": "f8df07d81f890c301881ac4c18b41ecc4c3018f501773a1ab9e0fae63bd25e91",
+      "references": [
+        {
+          "line": 17,
+          "text": "   p=W/'runs_R2'/f\"{e['id']}__{arm}\"/'PRIMARY_RESULT.json'"
+        },
+        {
+          "line": 46,
+          "text": " dest=W/'runs_R2'/f'{condition}__{arm}'"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/postprocess_lab_run.py",
+      "source_sha256": "f2709c2070ab57d75190594255dc5274dd654ee6c233ec6638d94dc4da78729a",
+      "references": [
+        {
+          "line": 35,
+          "text": " summary=load(path/'summary.json');artifacts=load(path/'runtime_artifacts.json')"
+        },
+        {
+          "line": 38,
+          "text": "  tmp=Path(temp);save(tmp/'summary.json',summary);save(tmp/'runtime_artifacts.json',artifacts)"
+        },
+        {
+          "line": 40,
+          "text": "  (tmp/'trace.npz').symlink_to(path/'trace.npz')"
+        },
+        {
+          "line": 48,
+          "text": " with np.load(path/'trace.npz') as z:"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/aggregate_dynamic_R2.py",
+      "source_sha256": "1c3ffdf646b7aa9a37a7941768b471d96e8b9c58b729578ae6d0065d9ff59c2d",
+      "references": [
+        {
+          "line": 17,
+          "text": "   d=W/'runs_R2'/f\"{e['id']}__{arm}\";p=d/'PRIMARY_RESULT.json'"
+        },
+        {
+          "line": 22,
+          "text": "    ident.append(dict(condition=e['id'],arm=arm,setup_status=r.get('setup_status'),commissioning_status=r.get('commissioning_status'),task_status=r.get('task_status'),geometry_estimate=r.get('geometry_estimate'),geometry_used=r.get('geometry_used'),e"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/oracle_C5_R2.py",
+      "source_sha256": "bb49054a62e17dd7d56ad60e041ffff87fefd4694fc6ebd60eb50d8a2989071d",
+      "references": [
+        {
+          "line": 20,
+          "text": "population=json.loads((W/'runs_R2/C5__fixed_population/qualification.json').read_text())['initial_beta']"
+        },
+        {
+          "line": 23,
+          "text": "root=W/'diagnostics_R2/D1_C5_TRUE_MODEL_FROM_START'"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/human_qualification.py",
+      "source_sha256": "63a97e16c6457c17f15124b458dcbd25488d8696b6db056484d13e5c315aa775",
+      "references": [
+        {
+          "line": 67,
+          "text": "                z=np.load(out/'trace.npz'); mask=z['stage']=='TASK'; t=z['time_s'][mask]; dt=np.diff(t)"
+        },
+        {
+          "line": 72,
+          "text": "                artifact=json.loads((out/'runtime_artifacts.json').read_text())"
+        },
+        {
+          "line": 94,
+          "text": "                for name in ('runtime_artifacts.json','summary.json','learning_transitions.jsonl'):"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/postprocess_lab_run_R2.py",
+      "source_sha256": "1c5d5dd6c5a402ac35185122a9b1fcf7b706c1c2afd47903c446e8ac38996210",
+      "references": [
+        {
+          "line": 35,
+          "text": " summary=load(path/'summary.json');artifacts=load(path/'runtime_artifacts.json')"
+        },
+        {
+          "line": 38,
+          "text": "  tmp=Path(temp);save(tmp/'summary.json',summary);save(tmp/'runtime_artifacts.json',artifacts)"
+        },
+        {
+          "line": 40,
+          "text": "  (tmp/'trace.npz').symlink_to(path/'trace.npz')"
+        },
+        {
+          "line": 48,
+          "text": " with np.load(path/'trace.npz') as z:"
+        },
+        {
+          "line": 72,
+          "text": "  path=Path(sys.argv[1]).resolve();assert path.parent==W/'runs_R2'"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/audit_lab_static_R2.py",
+      "source_sha256": "49045535e294945dcb2d25960e95984a8b51cd3e63a034746c1a7d861a5d7e47",
+      "references": [
+        {
+          "line": 31,
+          "text": " assert not (W/'runs_R2').exists()"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/compact_retention_R2.py",
+      "source_sha256": "4b3cd2f9fc9d4d558a1625aca802e2a2d4aa6d049b2a3acecfc42fb00356abcf",
+      "references": [
+        {
+          "line": 63,
+          "text": "  d=W/'runs_R2'/f\"{r['condition']}__{r['arm']}\";src=d/'runtime_artifacts.json.gz'"
+        },
+        {
+          "line": 65,
+          "text": "  row={'run':d.name,'original_sha256':digest(src),'original_bytes':src.stat().st_size,'trace_npz_sha256':digest(d/'trace.npz'),'trace_npz_bytes':(d/'trace.npz').stat().st_size}"
+        },
+        {
+          "line": 75,
+          "text": "    tmp=Path(temp);(tmp/'runtime_artifacts.json').write_text(compact);(tmp/'summary.json').write_text(json.dumps(summary))"
+        },
+        {
+          "line": 77,
+          "text": "    (tmp/'trace.npz').symlink_to(d/'trace.npz')"
+        },
+        {
+          "line": 82,
+          "text": "   new=src.with_name('runtime_artifacts.compact_pending.json.gz')"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/supplement_run_evidence_R2.py",
+      "source_sha256": "4047654f480159956e0a617f8c04b749a32f3790af3ef603b200967e1b2ed7c1",
+      "references": [
+        {
+          "line": 26,
+          "text": " for d in sorted((W/'runs_R2').iterdir()):"
+        },
+        {
+          "line": 29,
+          "text": "  if not (d/'trace.npz').exists():continue"
+        },
+        {
+          "line": 31,
+          "text": "  with np.load(d/'trace.npz') as z:"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/human-size-contrast-v1/verify_closeout.py",
+      "source_sha256": "93b0590e1b2d8290cf0f2b4e2630e3dcd391a4e8f8952992c103e2cbd6e65a37",
+      "references": [
+        {
+          "line": 23,
+          "text": "5. Postprocess every actual attempt with the frozen evaluate_execution_mode/summarize_phase_b path. Use own temporary directory to expose compressed summary/runtime artifacts and trace.npz, registered absolute case path/hash, original PHASE_B_MATRIX "
+        },
+        {
+          "line": 24,
+          "text": "6. Retain key NPZ traces and handoff beliefs; derive task metrics only from actual TASK intervals. Reconstruct planner worker numerical payload hashes from learning_transitions adaptive_state; link mechanics belief sequences to those hashes and actua"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/human-size-contrast-v1/human_qualification.py",
+      "source_sha256": "85a6f543e8c2e9e3553bc0e6297e775735f8bd450429ae075675ecb98e2a19d9",
+      "references": [
+        {
+          "line": 61,
+          "text": "                z=np.load(out/'trace.npz'); mask=z['stage']=='TASK'; t=z['time_s'][mask]; dt=np.diff(t)"
+        },
+        {
+          "line": 66,
+          "text": "                artifact=json.loads((out/'runtime_artifacts.json').read_text())"
+        },
+        {
+          "line": 87,
+          "text": "                for name in ('runtime_artifacts.json','summary.json','learning_transitions.jsonl'):"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/commissioning-to-recovery-geometry-compatibility-v1/human_qualification_R2.py",
+      "source_sha256": "e9317a27e1fb2954681f14263e03508b79dbbe580811ecb713ed6bb29aad2738",
+      "references": [
+        {
+          "line": 10,
+          "text": "D=W; OUT=W/'runs_R2'"
+        },
+        {
+          "line": 74,
+          "text": "                z=np.load(out/'trace.npz'); mask=z['stage']=='TASK'; t=z['time_s'][mask]; dt=np.diff(t)"
+        },
+        {
+          "line": 79,
+          "text": "                artifact=json.loads((out/'runtime_artifacts.json').read_text())"
+        },
+        {
+          "line": 101,
+          "text": "                for name in ('runtime_artifacts.json','summary.json','learning_transitions.jsonl'):"
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/commissioning-to-recovery-geometry-compatibility-v1/closeout.py",
+      "source_sha256": "2de2d21e9d91ab76a2880f846dd8d1fe1b4e4835e371b59ecce0067435fb1eb5",
+      "references": [
+        {
+          "line": 12,
+          "text": "pairs=[('A_reproduction',W/'baseline/C5_commissioning_only/runs/C5__commissioning_only',L/'runs_R2/C5__commissioning_only'),('B_reproduction',W/'baseline/C5_continual_adaptive/runs/C5__continual_adaptive',L/'runs_R2/C5__continual_adaptive'),('C_exist"
+        },
+        {
+          "line": 16,
+          "text": " with np.load(p/'trace.npz') as z:"
+        },
+        {
+          "line": 21,
+          "text": " with np.load(p/'trace.npz') as a,np.load(old/'trace.npz') as b:"
+        },
+        {
+          "line": 53,
+          "text": " p=L/'runs_R2'/(cond+'__commissioning_only')/'PRIMARY_RESULT.json';r=load(p);fix['unmodified_parent_reference_results'].append(dict(path=str(p),sha256=sha(p),rho=.72 if cond=='C0' else .66,status=r['status'],physical=r['physical_verdict'],scientific="
+        }
+      ],
+      "retained": true
+    },
+    {
+      "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/commissioning-to-recovery-geometry-compatibility-v1/postprocess_lab_run_R2.py",
+      "source_sha256": "581869f0f975e95f98c322780ff3a942205b49632e44bc33781e2eab4a112792",
+      "references": [
+        {
+          "line": 35,
+          "text": " summary=load(path/'summary.json');artifacts=load(path/'runtime_artifacts.json')"
+        },
+        {
+          "line": 38,
+          "text": "  tmp=Path(temp);save(tmp/'summary.json',summary);save(tmp/'runtime_artifacts.json',artifacts)"
+        },
+        {
+          "line": 40,
+          "text": "  (tmp/'trace.npz').symlink_to(path/'trace.npz')"
+        },
+        {
+          "line": 48,
+          "text": " with np.load(path/'trace.npz') as z:"
+        },
+        {
+          "line": 72,
+          "text": "  path=Path(sys.argv[1]).resolve();assert path.parent==W/'runs_R2'"
+        }
+      ],
+      "retained": true
+    }
+  ],
+  "tracked_main_references": [],
+  "main_grep_returncode": 1,
+  "unknown_or_unvalidated_files_not_selected": true,
+  "chosen_archive_files": 30,
+  "key_trace_runs": [
+    "C0__commissioning_only",
+    "C0__continual_adaptive",
+    "C0__fixed_population",
+    "C1__commissioning_only",
+    "C1__fixed_population",
+    "C2__fixed_population",
+    "C3__fixed_population",
+    "C4__commissioning_only",
+    "C4__continual_adaptive",
+    "C4__fixed_population",
+    "C5__commissioning_only",
+    "C5__continual_adaptive",
+    "C5__fixed_population",
+    "C6__commissioning_only",
+    "C6__continual_adaptive",
+    "C6__fixed_population"
+  ],
+  "all_summary_cases_config_parameters_models_reports_manifests_retained": true,
+  "all_height_static_and_rho_77_85_negative_evidence_retained": true
+}

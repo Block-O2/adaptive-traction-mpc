@@ -1,0 +1,16 @@
+from pathlib import Path
+import json,time
+S=Path('/home/hank/coding/adaptive-traction-mpc-side-studies/b_fast_runtime_completion_v1')
+base=json.loads((S/'queue/062_N13_S2_science_nominal.json').read_text());configs=[]
+for n,kind in [(87,'C5b_science_nominal'),(88,'C5b_host_nominal'),(89,'C5b_science_deviation'),(90,'C5b_host_deviation'),(91,'D2_science_nominal'),(92,'D2_TASK7_worker_delay'),(93,'D2_TASK7_expired_result')]:
+ c5=kind.startswith('C5b');legal='deviation' in kind;science='science' in kind;fault='TASK7' in kind;ident=f'{n:03d}_N13_S2_{kind}'
+ cfg=base|dict(id=ident,seed=2026100700+n,fast_version='N13_N12_N11_V3_W1_A1_D2_C1d_C2b_S2'+('_C5b' if c5 else ''),bidirectional_transport_warm=True,committed_endpoint_service=c5,committed_endpoint_precatch=c5,readiness_service=False,completed_result_service=False,execution_mode='SCIENTIFIC_SIMULATION' if science else 'REALTIME_CHARACTERIZATION',prefix={'OUTBOUND':[[.2,.1,-.1],[.05,.15,.25]]} if legal else {},dependencies=['062_N13_S2_science_nominal'],required_gates=['output/D2_TRANSPORT_WARM_LOCAL_REGRESSION.json'])
+ if c5:cfg['required_gates'].append('output/C5b_COMMITTED_ENDPOINT_LOCAL_REGRESSION.json')
+ if fault:
+  cfg['fault_injection']=dict(stage='TASK',kind='expired_result' if n==93 else 'worker_delay',delay_ms=120 if n==93 else 30,request_id=7,packet_identity=2)
+  cfg['required_gates']+=['output/FAULT_INJECTION_LOCAL_REGRESSION.json','versions/091_N13_S2_D2_science_nominal_SCI_GATE.json'];cfg['dependencies']=['091_N13_S2_D2_science_nominal']
+ elif not science:
+  sid='089_N13_S2_C5b_science_deviation' if legal else '087_N13_S2_C5b_science_nominal';cfg['required_gates'].append('versions/'+sid+'_SCI_GATE.json');cfg['dependencies']=[sid]
+ p=S/'queue'/(ident+'.json');assert not p.exists();p.write_text(json.dumps(cfg,indent=2)+'\n');configs.append(str(p))
+out=dict(id='D2_STARTUP_AND_C5b_PRE_ENDPOINT_PRECATCH',registered_unix=time.time(),configs=configs,physics_budget=120,thresholds_unchanged=True,D2=dict(basis='085 first main-to-worker SOCK_SEQPACKET send133.676ms wall133.624ms threadCPU; pickle5.222us, GCdisabled; original first TASK aborted beforefault. Root syscall cost not established, preserved negative.',intervention='One64KiB exact bidirectional packet0 transport echo before the physical epoch. No TASK request, model inference or plant state.120s finite startup guard.',known_frozen_prewarm_source='Existing original process warm occurs before epoch; verify D2 actual finish vs epoch for every run.'),C5b=dict(basis='082 actual endpoint service first catch-up took4.43ms; HOLD1.025 remainsR2FAIL.',intervention='Catch up only realelapsed past with original oldcommand before endpoint sleep; original native substeps/sensors/safety. Regular overrun gets onecurrent regular service. No duration/phase/dwell/expiry change.'),oldC5_legal_not_dispatched='083/084 retained unstarted queue, superseded by measured endpointcatch-up refinement; no automatic uninformative repeat.',old_moving_fault_not_replayed='085 preserved pre-injection source expiry;086 retained unstarted oldD1queue, newD2 version and seeds92/93 are distinct registered tests.',no_Q_or_training=True)
+p=S/'versions/D2_C5b_PROSPECTIVE_PROTOCOL.json';assert not p.exists();p.write_text(json.dumps(out,indent=2)+'\n');print('D2_C5b_REGISTERED',len(configs))

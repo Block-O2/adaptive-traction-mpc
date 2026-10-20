@@ -1,0 +1,59 @@
+{
+  "calls": {
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_forward": 2000,
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_fwdPosition": 2000,
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_fwdVelocity": 2000,
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_step1": 2000,
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_step2": 2000,
+    "native_interface_adapter.install.<locals>.apply": 4000,
+    "native_interface_adapter.install.<locals>.value": 4000,
+    "traction_mpc_stage3.coupled.CoupledUR10eHumanV2._apply_soft_limit": 4000,
+    "traction_mpc_stage3.spring_damper_interface.SpringDamperCoupledUR10eHumanV2._refresh": 2000
+  },
+  "exclusive_mean_per_step_ms": {
+    "interface_apply": 0.0025268215,
+    "interface_value": 0.0118374725,
+    "mujoco_mj_forward": 0.007120588,
+    "mujoco_mj_fwdPosition": 0.0064187855,
+    "mujoco_mj_fwdVelocity": 0.0006076805,
+    "mujoco_mj_step1": 0.006814243,
+    "mujoco_mj_step2": 0.0008506014999999999,
+    "refresh_native": 0.0034265165000000003,
+    "soft_limit": 0.0114559785,
+    "unwrapped_step_and_measurement": 0.0080898435
+  },
+  "id": "007_N3_plant_cost",
+  "inputs": {
+    "budget_attempts": 1,
+    "dependencies": [
+      "005_N2_C1_science_nominal"
+    ],
+    "entry": "plant_cost.py",
+    "fast_version": "N3_EXACT_SO3",
+    "id": "007_N3_plant_cost",
+    "native_backend": true,
+    "native_so3": true,
+    "native_steps": 2000,
+    "qualification_role": "same model wrapper attribution",
+    "required_gates": [
+      "output/N3_NATIVE_LOCAL_REGRESSION.json",
+      "output/N3_SO3_VECTOR_LOCAL_REGRESSION.json"
+    ]
+  },
+  "metric": {
+    "main_model_inverse_dynamics_api_calls": 3,
+    "native_physics_steps": 2000,
+    "native_worker_model_inverse_dynamics_api_calls": 0,
+    "simulation_seconds": 0.49999999999997263
+  },
+  "native_step_ms": {
+    "max": 0.20743,
+    "p50": 0.0533585,
+    "p95": 0.0651725,
+    "p99": 0.07779708
+  },
+  "qualification": "PLANT_COST_ATTRIBUTION_ONLY_CONSTANT_VALIDATED_INITIAL_SUPPORT; no closed-loop/task claim",
+  "same_model_case_key": "high_rom_nominal_sync_120_v1",
+  "status": "COMPLETE",
+  "wall_seconds": 1.5302202701568604
+}

@@ -1,0 +1,25 @@
+{
+  "schema": "architecture_recovery_v2_phase3_hwmpc_v1",
+  "status": "FROZEN_MECHANICAL_INTERFACE_VALIDATION",
+  "evidence_category": "mechanical_interface_smoke",
+  "recovered_model": "V2.2 five-feature state-conditioned residual with continual beta",
+  "planner": "direct two-joint state-feedback Human-waypoint HWMPC",
+  "task_semantics": "actual arrival and settling trigger HOLD; actual return and settling trigger COMPLETE",
+  "mechanics_screen": {
+    "force_limit_n": 200.0,
+    "moment_limit_nm": 60.0,
+    "deterministic_schedule_samples": 21
+  },
+  "value_hook": {
+    "signature": "V(state_or_belief, candidate_next_waypoint)",
+    "default": 0.0,
+    "training_authorized": false
+  },
+  "forbidden": {
+    "fixed_r_or_path_template": true,
+    "historical_detailed_robot_interface_predictor": true,
+    "hidden_truth_in_deployable_belief": true,
+    "rl_value_or_imitation_training": true,
+    "physical_hardware_actuation": true
+  }
+}

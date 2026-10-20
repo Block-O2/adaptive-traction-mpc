@@ -1,0 +1,77 @@
+{
+  "version": "SEQUENTIAL_TEACHER_ORACLE_v1",
+  "t0_unix": 1791872262.0,
+  "t0_local": "2026-10-13T14:17:42+08:00",
+  "registered_unix": 1791872525.5008492,
+  "hard_stop_unix": 1791883062.0,
+  "dispatch_cutoff_unix": 1791881262.0,
+  "search_cutoff_unix": 1791879462.0,
+  "physics_budget": 90,
+  "search_cap": 72,
+  "validation_reserved": 18,
+  "seed": 2026101201,
+  "clock": "SCIENTIFIC_SIMULATION",
+  "search_bound": [
+    -0.2,
+    0.2
+  ],
+  "issued_slots_per_phase": 5,
+  "milestones_percent": [
+    2,
+    5
+  ],
+  "motion_protocol_sha256": "0f41463cab96b71ea39cc06f9fe86f432de07efe307bd486bc1c4df6cc196ece",
+  "selection_rule": "highest full-task gain with unchanged motion and physical gates; retain at most two diverse feasible leaders and one informative infeasible diagnostic; freeze before V",
+  "methods": [
+    "full-task OUTBOUND intervention",
+    "legal later-boundary live fork from replayed leader prefix",
+    "bounded suffix coordinate improvement",
+    "strong seed slot redistribution"
+  ],
+  "continuation": "original B native physical segments; fixed registered PWL or frozen historical M2 reference",
+  "validation_conditions": [
+    {
+      "name": "V1",
+      "seed": 2026101317,
+      "prefix": {
+        "RETURN": [
+          [
+            0.025,
+            0.025,
+            0.025
+          ]
+        ]
+      }
+    },
+    {
+      "name": "V2",
+      "seed": 2026101318,
+      "prefix": {
+        "RETURN": [
+          [
+            -0.025,
+            -0.025,
+            -0.025
+          ]
+        ]
+      }
+    }
+  ],
+  "validation_generation": "existing legal shared RETURN slot0 K3 prefix, +/-0.005 graph; root at OUTBOUND0, all candidates share prefix; audit actual state at RETURN1, no synthetic state",
+  "stop_conditions": [
+    "parent mutation or fork mismatch",
+    "absolute safety or ownership failure",
+    "3 incomplete tasks per family",
+    "90 total starts,72 prevalidation",
+    "D free<40GiB",
+    "package>=6GiB",
+    "available memory<1GiB",
+    "150min no new physics",
+    "180min all children joined"
+  ],
+  "storage_target_GiB": 4,
+  "storage_hard_GiB": 6,
+  "truth_firewall": "current causal observation/model/history logged separately; full future trajectory and J_F only offline teacher labels; no Q training",
+  "clinical_thresholds": false,
+  "optional_oracle": "only if native stages insufficient and a reusable solver is available within reserved wall/attempt quota"
+}

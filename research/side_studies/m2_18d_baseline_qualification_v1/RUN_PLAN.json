@@ -1,0 +1,77 @@
+{
+  "t0_unix": 1792211791.3659656,
+  "hard_stop_unix": 1792233391.3659656,
+  "dispatch_cutoff_unix": 1792229791.3659656,
+  "physics_hard_stop_unix": 1792229791.3659656,
+  "physical_timeout_s": 600,
+  "physics_budget": 40,
+  "seed": 2026101303,
+  "validation_conditions": [
+    {
+      "name": "N1",
+      "seed": 2026101701,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.06,
+            0.06,
+            0.06
+          ]
+        ]
+      }
+    },
+    {
+      "name": "N2",
+      "seed": 2026101702,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.06,
+            -0.06,
+            -0.06
+          ]
+        ]
+      }
+    },
+    {
+      "name": "N3",
+      "seed": 2026101703,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.15,
+            -0.05,
+            0.05
+          ]
+        ]
+      }
+    },
+    {
+      "name": "N4",
+      "seed": 2026101704,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.05,
+            0.15,
+            -0.025
+          ]
+        ]
+      }
+    }
+  ],
+  "expected_starts": 15,
+  "single_physics_owner": true,
+  "question": "Does the frozen complete historical 18D intent reproduce, then retain full-task force gains and original motion/safety under lawful native prefix states?",
+  "reproduction_gate": "full trace exact identity against original B/18D archives; original complete task/safety/motion/ownership; exact complete live-state fork restored; parent unchanged; full JF and phase closure",
+  "validation_gate": "each matched pair complete task, lower full J_F (positive gain), original frozen motion/safety/causal receipt. No selection or parameter update.",
+  "fork_rule": "development at first OUTBOUND request; validation at next OUTBOUND request after one actual causal native prefix slot. B/18D inherit identical complete live parent. Prefix integral included in full TASK J_F. Frozen E resumes unconsumed slots; this tests remaining policy, not its consumed O0 slot.",
+  "exclusions": "partial tasks never rank; deterministic same state repeats never add independent state count; this is one exposed Human/model only",
+  "truth_firewall": "fixed registered intents; only causal B observations online. qpos/qvel read for evaluation/fork auditing only; no direct assignment/replay by qualification code",
+  "stop": "absolute safety, task invalidity, fork mutation, ownership/integral error or reproduction gate failure stop all new starts. Motion failure is retained and permits remaining preregistered validation pairs. No tuning.",
+  "protected": "B/plant/Human/robot/contact/gravity/actuator/ROM/torques/goals/HOLD/duration/bridge40ms/lifecycle100ms/admission/age/receipts/native ownership/carry/fallback unchanged",
+  "no_training": true,
+  "no_waypoint_smoothing": true,
+  "no_optimization": true,
+  "history_motion_primary": "0/4 PASS retained, separate from current study"
+}

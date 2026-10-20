@@ -1,0 +1,24 @@
+from common import *
+import numpy as np
+def main():
+ assert not (NEW/'ORACLE_GATE.json').exists(),'PRIMARY_MUST_BE_SELECTED_BEFORE_ORACLE'
+ p=read(NEW/'PROTOCOL.json');a=read(AUDIT/'SCORE_DECOMPOSITION.json');proof=read(AUDIT/'FIRST_SEGMENT_PAIR_VERIFICATION.json');continuation=read(AUDIT/'CONTINUATION_DIAGNOSIS.json')
+ assert a['complete'] and proof['status']=='PASS' and proof['pairs']==30
+ rows=[]
+ for s in a['states']:
+  replay=read(AUDIT/'output'/(s['state']+'_REPLAY_PROOF.json'));pool=read(AUDIT/'output'/(s['state']+'_POOL.json'));case=next(c for c in read(AUDIT/'AUDIT_CONTRACT.json')['cases'] if c['state']==s['state'])
+  assert replay['context_equal'] and s['reuse_proof']['qualified']
+  for r in s['rows']:
+   original=next(x for x in pool['rows'] if x['item']['identity']==r['identity']);plan=np.array(r['plan']);mask=np.ones((2,5,3),bool)
+   for i,phase in enumerate(('OUTBOUND','RETURN')):mask[i,:original['counts'][phase]]=False
+   carry=np.asarray(replay['snapshot']['audit_interface']['table']);prev=np.asarray(replay['current']['richer_previous_residual']);rng=np.random.default_rng(case['post_forcing_search_seed']).bit_generator.state
+   c=replay['current'];phase_elapsed=float(c['observation'][47])*10.
+   causal=dict(native_observation=c['observation'],reference_estimated_state_from_observation=c['observation'][4:8],phase=c['phase'],task_elapsed_s=c['task_s'],phase_elapsed_s=phase_elapsed,phase_timing_reserve_s=max(0.,9.020-phase_elapsed),nominal_request=dict(d=c['nominal_d'],m=c['nominal_m'],target=c['nominal_target'],start_m=c['start_m']),previous_issued_K3=prev.tolist(),previous_pending_masked=np.where(mask,carry,0.).tolist(),candidate_pending_masked=np.where(mask,plan,0.).tolist(),issued_counts=original['counts'],valid_mask=mask[:,:,0].tolist(),commissioned_beta=pool['estimated_beta'],commissioned_geometry=pool['estimated_geometry'],research_beta=pool['known_parameters']['beta'],research_geometry=pool['known_parameters']['geometry'],model_version=c['model_hash'],P_continuation_ownership=dict(method='P',post_forcing_seed=case['post_forcing_search_seed'],rng_at_next_search=rng,previous_plan_after_first_row='candidate U',carry_in_both_generations=True,has_previous_search=True,first_row_native_certification=True))
+   checks=dict(mask_exact=bool(np.all(np.asarray(causal['candidate_pending_masked'])[~mask]==0)),all_metrics_qualified=all(m['qualified'] for m in r['mode_metrics'].values()),same_first_segment=True,carry_present_in_both_generations=all(x['all_carry_present'] for x in continuation['rows'] if x['identity']==r['identity']),proposal_history_consistent=np.array_equal(prev,np.asarray(replay['snapshot']['audit_interface']['previous'])))
+   assert all(checks.values()),(r['identity'],checks)
+   rows.append(dict(state=s['state'],identity=r['identity'],parent_hash=replay['snapshot']['audit_hash'],candidate_plan_hash=digest(r['plan']),causal_input=causal,checks=checks,provenance=dict(replay=str(AUDIT/'output'/(s['state']+'_REPLAY_PROOF.json')),pool=str(AUDIT/'output'/(s['state']+'_POOL.json')),source_sha256=sha(AUDIT/'output'/(s['state']+'_POOL.json')))))
+ save(NEW/'CAUSAL_INPUT_PROTOTYPES.json',dict(rows=rows,role='pre-fit scientific input/provenance audit, not a training dataset; no truth target included',snapshot_hashes_not_network_inputs=True,normalized_observation_spec=str(AUDIT/'code/planning.py')))
+ assessments={'COMMITTED':dict(A='PASS: fixed requested suffix with native rejection/fallback; stored qualified outcomes',B='not current rolling deployment; future performance replan forbidden by definition',C='ground-truth outcome defines committed ranking; alignment with rolling ranking not assumed',D='PASS: causal inputs; future cost only in offline target',E='PASS: issued masks/proposal history explicitly tracked'), 'ROLLING_P':dict(A='PASS: same forced first row and exact seeded future-P ownership, qualified complete outcomes',B='closer to current receding-P algorithm; no V/G/V2 in continuation',C='ground-truth outcome directly defines seeded rolling ranking; optimizer RNG dependence explicit',D='PASS: seed/RNG and carry causal; future costs only offline',E='PASS: carry U after first row; updated counts/history; same-prefix proof and carry logs')}
+ result=dict(unix=time.time(),status='PASS',PRIMARY_V2_CONTRACT='ROLLING_P',SECONDARY_DIAGNOSTIC='COMMITTED',reason='preregistered suitability rule selects deployment consistency, not oracle reward; both stable contracts; explicit seeded P state is conditional policy ownership, not historical optimizer RNG recovery',assessments=assessments,input_rows=len(rows),conditions='This gate applies to 5 frozen native parent states and prescribed post-forcing P seeds. Different RNG ownership or full CEM populations require separate evidence; no unseeded Q-star/general Human claim.',no_training=True)
+ save(NEW/'SEMANTIC_SUITABILITY.json',result);print(json.dumps(result))
+if __name__=='__main__':main()

@@ -1,0 +1,232 @@
+{
+  "frozen_unix": 1792222620.8693078,
+  "condition": {
+    "name": "dev",
+    "seed": 2026101901,
+    "prefix": {
+      "OUTBOUND": [
+        [
+          -0.045,
+          -0.075,
+          -0.055
+        ]
+      ]
+    }
+  },
+  "fork_after_prefix": 1,
+  "archive_condition": "V1",
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "changes": []
+    },
+    {
+      "id": "E",
+      "base": "E",
+      "posture": [],
+      "changes": []
+    },
+    {
+      "id": "T",
+      "base": "T",
+      "posture": [],
+      "changes": []
+    },
+    {
+      "id": "T_zero",
+      "base": "T",
+      "zero": true,
+      "posture": [],
+      "changes": [
+        {
+          "phase": "OUTBOUND",
+          "slot": 1,
+          "spec": {
+            "fractions": [
+              0.25,
+              0.5,
+              0.75
+            ],
+            "deltas_deg": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          },
+          "purpose": "reduce early outbound actual velocity variation and following knee response",
+          "expected_force_window": [
+            1.57,
+            3.2
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 5,
+          "spec": {
+            "fractions": [
+              0.25,
+              0.5,
+              0.75
+            ],
+            "deltas_deg": [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ]
+          },
+          "purpose": "flatten return terminal hip acceleration without changing outer duration or state",
+          "expected_force_window": [
+            16.54,
+            17.2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P_more",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "changes": [],
+      "purpose": "test stronger hip-leading/knee-leading spatial separation aligned with the prior low-force RETURN posture; opposite control identifies direction",
+      "expected_force_window": [
+        13.9,
+        16.6
+      ],
+      "expected_motion": "alter actual intermediate posture while preserving full variation; not assumed smoother",
+      "offline_certificate": {
+        "status": "PASS",
+        "reason": null
+      },
+      "unchanged": "18D coefficients/plateau; changed segment duration and pass velocity; phase/task endpoints; T1.5; all safety and execution contracts"
+    },
+    {
+      "id": "S_O",
+      "base": "T",
+      "changes": [
+        {
+          "phase": "OUTBOUND",
+          "slot": 1,
+          "spec": {
+            "fractions": [
+              0.25,
+              0.5,
+              0.75
+            ],
+            "deltas_deg": [
+              [
+                0.04710650233429643,
+                -0.049999999999999996
+              ],
+              [
+                0.049999999999999996,
+                -0.007299908580407966
+              ],
+              [
+                -0.04563709639274683,
+                0.05
+              ]
+            ]
+          },
+          "purpose": "reduce early outbound actual velocity variation and following knee response",
+          "expected_force_window": [
+            1.57,
+            3.2
+          ]
+        }
+      ],
+      "posture": [],
+      "objective_before": 0.44122926480821223,
+      "objective_after": 0.43816877582624303,
+      "optimizer": {
+        "method": "offline reference-only SLSQP; no physical force objective",
+        "nfev": 119
+      },
+      "success": "original full gates plus full motion/force preregistered selection criteria",
+      "failure": "certificate reject, gates fail, absent actual motion response, or full/downstream burden offsets local improvement",
+      "offline_certificate": {
+        "status": "PASS",
+        "reference_id": "5c41808d94c71e23f691e48207ceb345081a22ff98a128be8668f4aeeac3aa33",
+        "certificate_id": "49fddc65a9aedec12f0cc6d1c5a7438c5560a3af99389806d048f2ff39728274"
+      }
+    },
+    {
+      "id": "S_R",
+      "base": "T",
+      "changes": [
+        {
+          "phase": "RETURN",
+          "slot": 5,
+          "spec": {
+            "fractions": [
+              0.25,
+              0.5,
+              0.75
+            ],
+            "deltas_deg": [
+              [
+                -0.004256479002212895,
+                0.0
+              ],
+              [
+                -0.002829321891669232,
+                0.0
+              ],
+              [
+                0.0028293218878150915,
+                0.0
+              ]
+            ]
+          },
+          "purpose": "flatten return terminal hip acceleration without changing outer duration or state",
+          "expected_force_window": [
+            16.54,
+            17.2
+          ]
+        }
+      ],
+      "posture": [],
+      "objective_before": 1.3506580216185686,
+      "objective_after": 1.3477174072195348,
+      "optimizer": {
+        "method": "offline reference-only SLSQP; no physical force objective",
+        "nfev": 17
+      },
+      "success": "original full gates plus full motion/force preregistered selection criteria",
+      "failure": "certificate reject, gates fail, absent actual motion response, or full/downstream burden offsets local improvement",
+      "offline_certificate": {
+        "status": "PASS",
+        "reference_id": "b4da90808ad651f4b02134a44d4f2c51c137fb78df337d7fa2e46d36dcdb3d6a",
+        "certificate_id": "ba9d454776bb0b9759c1688b34da3c3768deaaa8cb7d692009377b086d4aeaf6"
+      }
+    }
+  ]
+}

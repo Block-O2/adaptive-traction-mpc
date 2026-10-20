@@ -1,0 +1,52 @@
+{
+  "conditions": [
+    [
+      "idle",
+      "T0"
+    ],
+    [
+      "main",
+      "T0"
+    ],
+    [
+      "thread",
+      "T0"
+    ],
+    [
+      "process",
+      "T0"
+    ],
+    [
+      "process_duplicate",
+      "T0"
+    ],
+    [
+      "main",
+      "C2"
+    ],
+    [
+      "thread",
+      "C2"
+    ],
+    [
+      "process",
+      "C2"
+    ],
+    [
+      "process_duplicate",
+      "C2"
+    ]
+  ],
+  "independent_sessions": 4,
+  "states_per_session": 22,
+  "condition_order": "Rotated by session; each condition executes in a fresh spawn process so C2 never leaks into T0.",
+  "service_period_ms": 5,
+  "service_policy": "Sample once at first service opportunity; retain fixed schedule, count skipped periods, never issue synthetic catchup callbacks.",
+  "timer_only": true,
+  "physical_feedback_cost_included": false,
+  "native_physics_steps_added": 0,
+  "physics_attempts_added": 0,
+  "Q_updates": 0,
+  "max_job_wall_s": 1200,
+  "unprofiled_timing": true
+}

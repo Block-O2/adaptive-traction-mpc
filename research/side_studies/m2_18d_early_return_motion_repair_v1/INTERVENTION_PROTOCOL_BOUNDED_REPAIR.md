@@ -1,0 +1,55 @@
+# 一次有界开发修复（运行前注册）
+
+{
+  "version": "bounded_repair_v1",
+  "frozen_unix": 1792306985.5235455,
+  "candidate": {
+    "id": "ER110_R4_120",
+    "base": "T",
+    "posture": [
+      {
+        "phase": "RETURN",
+        "slot": 2,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      },
+      {
+        "phase": "RETURN",
+        "slot": 3,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      }
+    ],
+    "early": [
+      {
+        "phase": "RETURN",
+        "slot": 1,
+        "duration_factor": 1.1
+      },
+      {
+        "phase": "RETURN",
+        "slot": 4,
+        "duration_factor": 1.2
+      }
+    ],
+    "changes": []
+  },
+  "base_candidate": "W1dev_ER110",
+  "single_added_factor": "RETURN4 selected duration x1.20, ceil5ms; original live selected target and pass velocity unchanged",
+  "reason": "Both early RETURN1 candidates clear velocity p95/amax/jerk gates but retain a95/excursion. ER110 late RETURN4 interval16.09325–16.5445 contributes1806 high acceleration samples; irreversible crossing16.417; excursion crossing16.57375. Added intervention takes effect near15.380, before either.",
+  "selection": "Use ER110 as smaller early factor, not minimum J_F. One added duration factor1.20 selected before this physics; no sweep, no second repair.",
+  "mathematical_limits": "Reference peaks and current-model checks are predictions, not physical qualification.",
+  "budgets": {
+    "development_starts_after_repair": 13,
+    "remaining_validation_START": 11,
+    "total_cap": 24
+  },
+  "validation_rule": "Only if every original gate and gain criteria passes, freeze this new composite identity before deterministic repeat and unused W2; validation never reselects primary",
+  "code_identity": "same frozen EarlyReturnPlanner, already bounded factors1..1.30 and slot-intent interface; no source changes or certificate reuse"
+}
+
+初始两个失败候选全部保留。原INTERVENTION_PROTOCOL.md、原控制代码manifest及B/T/D身份均不改。新参数由repair_PLAN.json SHA随每次START记录。

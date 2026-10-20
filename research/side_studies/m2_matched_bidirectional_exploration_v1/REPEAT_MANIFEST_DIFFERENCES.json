@@ -1,0 +1,20 @@
+{
+  "differences": [
+    {
+      "path": "root.manifest.lifecycle.state.session.state.gc_events",
+      "length_a": 2,
+      "length_b": 4
+    },
+    {
+      "path": "root.hash",
+      "a": "daca9533cd80899780352f642d3e23d41f74c9970a98766e032482788d94d341",
+      "b": "9497603feec290a85468d04b7ab27d84074acd689debc13832503f5dfc4eeb54"
+    },
+    {
+      "path": "root.native_hash",
+      "a": "b44a5ca3ac98fcd5961d4b408f89d149d3882cad24ba9ff898412cf04af7f15d",
+      "b": "669379cfe3c563ede030730d8768cd602d1a96bdde07c544138efa6b9a9a1dba"
+    }
+  ],
+  "explanation": "only parent diagnostic gc_events list grew due to explicit collect between forks; every immediate fork restore hash and after-child parent hash matched; all physics/controller/RNG/reference state equal. Continuation collects once per fork boundary to avoid extra diagnostic state changes. No logger state scrub or physics restore."
+}

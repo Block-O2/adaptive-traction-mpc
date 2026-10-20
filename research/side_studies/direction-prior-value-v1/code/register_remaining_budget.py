@@ -1,0 +1,7 @@
+from freeze import *
+def main():
+ path=STUDY/'PLAN_AMENDMENT_09_REMAINING_BUDGET.json';assert not path.exists()
+ events=[json.loads(x) for x in (STUDY/'ATTEMPTS.jsonl').read_text().splitlines()];attempts=sum(r['event']=='START' for r in events);assert attempts==90
+ save(path,dict(unix=time.time(),before_first_fit_and_heldout_tests=True,original_start_unix=1791222386,already_started_including_failures=90,remaining=dict(v1_core=16,one_development_extension=33,v2_final=16,two_snapshot_audits_max=57,known_multistep_design_replay=6,independent_and_fresh_closed_loop=64),required_total_max=282,pilot_priority_additional_max=15,total_if_pilot=297,if_no_pilot_unused_four_arm_tests=16,total_if_extra_tests=298,global_hard_cap=300,audit_bound='Each 16-candidate P/PG pool repeats B and K3 carry across generations; union <=26 per state plus3 normal prefix designs and two parents =>57. Every actual attempt counted, not waived as a duplicate.',failure_budget='All subsequent failed/retry attempts consume spare budget; conditional extra/pilot omitted if insufficient. No development/test result changes candidate budget, metric, task, physics, safety or action authority.',extra_test_rule='If pilot not promoted and >=16 physical attempts plus >=1 hour before dispatch cutoff, use four untouched groups with frozen independent weights, new search seeds and legal prefixes; no new fitting. Never use those outcomes to restart development or retroactively promote pilot.'))
+ print('REMAINING_BUDGET_PREREGISTERED')
+if __name__=='__main__':main()

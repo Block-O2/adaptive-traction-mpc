@@ -1,0 +1,17 @@
+# 真实跨重复反馈pilot
+
+真实连续plant完成第一次H150、原settle/hold边界、第二次任务的同父B/H150/MEMORY分支。第一次测得force积分用于一次有界value记忆更新，online kernel weight=-1.553142 N·s；第二次选择=H150，实际动作改变=False，相对合格固定H150收益=0.000000 N·s。 首次REP在第二次调用的序列化所有权检查中失败，未推进第二次physics；另保留一次零物理启动日志命名失败。随后以新代码身份修复并完整重跑，原失败、权重与门槛均保留。详见REPETITION_SERIALIZER_REPAIR.md。
+
+FEW_REPETITION_LEARNING_PASS=NOT_DEMONSTRATED。更新一个数值记忆并不等于有用个体化；若保持H150或没有后续完整合格收益，就不能称少重复学习成功。
+
+采用已暴露W2 prefix作接口pilot，不能称未见测试或跨Human验证。第一次完成任务的测得force积分和当时合法状态用于下一次value修正；native truth与未来matched B仅用于离线审计。原plant、measurement layer、RNG和updater连续保留，原物理时钟不清零；没有设置或回放Human qpos/qvel。第二次动作仍通过原planner/certificate/current-state admission和机器人执行链。记忆在第二次START前冻结，主Q权重不变。
+
+first raw reproduction、continuity、boundary native observation及反馈权重SHA分别保存在audit/REPETITION_RETRY_FIRST_REPRODUCTION.json、output/REPETITION_RETRY_CONTINUITY_BEFORE_SECOND.json、output/REPR_BOUNDARY_NATIVE.json、models/REPETITION_RETRY_MEMORY_FREEZE.json（未到达的阶段不虚构文件）。边界与新epoch bootstrap的native成本都单独或在parent增量内记账。完整状态与错误见derived/REPETITION_EVALUATION.json。
+
+该pilot采用很保守的更新：反馈修正被absolute-value LOO误差限制，力优势门又包含该误差。因此，当其他动作原先预测成本更高时，一次反馈不能凭空制造有置信度的降力切换。它首先验证实际反馈/连续执行接口；不能用未切换的结果证明所有少重复学习都无效。下一轮需要在重复数据支持下更新不确定性，而不是强迫动作变化。
+
+第一与第二次起始物理状态不同，因此跨次J_F数值的直接变化不能作为学习因果收益。唯一公平收益来自第二次相同live parent的MEMORY与固定H150比较；父进程等待串行fork并保持状态不变。
+
+该pilot用一个已执行H150的完整任务成本修正其绝对价值，不能识别其他动作的反事实回报。残差也可能包含决策前共同prefix的成本变化，不能全部归因于后续协调动作。下一轮应记录已发生的prefix成本，区分剩余cost-to-go与完整任务总成本，并用重复数据估计动作差值及其不确定性；本轮没有把这项记忆更新解释为已识别个体动力学。
+
+![实际重复表现](figures/06_actual_repetition.png)

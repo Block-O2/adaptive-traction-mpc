@@ -1,0 +1,28 @@
+from pathlib import Path
+R=Path('/home/hank/coding/adaptive-traction-mpc-side-studies/m2_18d_t_second_round_coordination_v1/source')
+S=R/'stages/stage5_personalized_motion_learning'
+target=S/'scripts/value_learning_v1/run_research_rollout.py'
+source=(S/'scripts/high_rom_v1/run_coordination_rollout_v1.py').read_text()
+source=source.replace('"""One recoverable scientific coordination rollout; production runtime is authoritative."""','"""Versioned research wrapper copied from frozen coordination runner; production unchanged."""')
+source=source.replace('RUNS = STAGE / "results/coordination_pacing_exploration_v1/runs"','OLD_RUNS = STAGE / "results/coordination_pacing_exploration_v1/runs"\nRUNS = STAGE / "results/value_learning_research_v1/runs"\nSESSION_CONTEXT = None\nSOURCE_CHECKPOINT_SPEC = None\nLAST_CAPTURE = None')
+source=source.replace('def source_context(condition):\n','def source_context(condition):\n    if SESSION_CONTEXT is not None:\n        return SESSION_CONTEXT, None\n')
+source=source.replace('    cp_rep = condition.get("checkpoint_rep")','    if SOURCE_CHECKPOINT_SPEC is not None:\n        cp = SOURCE_CHECKPOINT_SPEC\n        context, rows = load_checkpoint(Path(cp["absolute_path"]), cp["sha256"], cp["provenance_sha256"])\n        boundary = advance_inter_rep_boundary(context, max_wait_s=2.0)\n        return context, {"checkpoint": cp, "boundary": boundary}\n    cp_rep = condition.get("checkpoint_rep")')
+source=source.replace('def run(condition_id, arm, pattern, run_id):','def run(condition_id, arm, pattern, run_id):\n    global SOURCE_CHECKPOINT_SPEC\n    SOURCE_CHECKPOINT_SPEC = None if pattern is None else pattern.get("source_checkpoint")\n    if pattern and pattern.get("capture_snapshot_dir"):\n        os.environ["VALUE_LATENCY_SNAPSHOT_DIR"] = pattern["capture_snapshot_dir"]')
+source=source.replace('    capture = {}','    capture = {}')
+source=source.replace('        capture = {}','        capture = {}\n        global LAST_CAPTURE\n        LAST_CAPTURE = capture')
+source=source.replace('from coordination_pacing_adapter_v1 import (\n                CoordinationPacingPlannerV1, SPEC_ENV, snapshot_coordination_task_call,\n            )','from research_adapter import (\n                ResearchPlanner, SPEC_ENV, snapshot_research_task_call,\n            )')
+source=source.replace('(RUNS / condition["baseline_run_id"] / "rollout_result.json")','(OLD_RUNS / condition["baseline_run_id"] / "rollout_result.json")')
+source=source.replace('runtime.TerminalSetHumanWaypointPlannerV1 = CoordinationPacingPlannerV1','runtime.TerminalSetHumanWaypointPlannerV1 = ResearchPlanner')
+source=source.replace('runtime.snapshot_task_call = snapshot_coordination_task_call','runtime.snapshot_task_call = snapshot_research_task_call')
+source=source.replace('runtime.snapshot_task_call = snapshot_research_task_call','runtime.snapshot_task_call = snapshot_research_task_call\n            if pattern.get("mode") == "VALUE_PATTERN":\n                from research_activation import install\n                install(runtime)')
+source=source.replace('"schema": "coordination_pacing_rollout_v1"','"schema": "value_learning_research_rollout_v1"')
+source=source.replace('    save(out / "rollout_result.json", record)\n    started = time.monotonic()',
+ '    model_path = None if pattern is None or not pattern.get("model_path") else Path(pattern["model_path"])\n    record["research_learning_used"] = model_path is not None and pattern.get("mode") in ("VALUE_PATTERN", "VALUE_RANK")\n    record["production_legacy_value_hook_still_zero"] = True\n    if model_path is not None:\n        record["model_sha256_at_start"] = sha(model_path)\n    save(out / "rollout_result.json", record)\n    started = time.monotonic()')
+source=source.replace('        record["elapsed_host_s"] = time.monotonic() - started',
+ '        if model_path is not None:\n            record["model_sha256_at_end"] = sha(model_path)\n            record["active_model_file_immutable_during_rep"] = record["model_sha256_at_start"] == record["model_sha256_at_end"]\n            if not record["active_model_file_immutable_during_rep"]:\n                record.update(status="INVALID", failure_reason="ACTIVE_VALUE_MODEL_MUTATED_DURING_REPETITION")\n        record["elapsed_host_s"] = time.monotonic() - started')
+source=source.replace('"command": sys.argv, "host": platform.node(), "python": sys.version,','"command": sys.argv, "host": platform.node(), "python": sys.version,\n        "research_source_files_sha256": {str(p.relative_to(ROOT)): sha(p) for p in sorted((STAGE / "scripts/value_learning_v1").glob("*.py"))},')
+source=source.replace('("COORDINATION_INFEASIBLE", "MATCHED_PACING_INFEASIBLE", "NO_FEASIBLE_WAYPOINT")','("RESEARCH_INFEASIBLE", "COORDINATION_INFEASIBLE", "MATCHED_PACING_INFEASIBLE", "NO_FEASIBLE_WAYPOINT")')
+source=source.replace('    print(json.dumps({k: record.get(k)','    print(json.dumps({k: record.get(k)')
+source=source.replace('\n\nif __name__ == "__main__":','\n    return record\n\n\nif __name__ == "__main__":')
+target.write_text(source)
+print(target)

@@ -1,0 +1,52 @@
+{
+  "schema": "stage5_human_model_frozen_successor_replication_v1",
+  "evidence_category": "small_independent_paired_replication",
+  "status": "PREREGISTERED_BEFORE_NEW_OUTCOMES",
+  "research_question": "does the already-qualified frozen theta_1 repeatedly improve genuinely later deployable-domain prediction without closed-loop degradation",
+  "model_pair": {
+    "theta_0": [1.0, 1.0, 1.0],
+    "theta_1": [1.0000584390985465, 1.0010424686528112, 1.0193479803467633],
+    "theta_1_source": "C-B one-step study commit 130f16e; never refit in this replication",
+    "human_truth_scales_evaluation_only": [1.0, 1.0, 1.2]
+  },
+  "replications": {
+    "unit": "one independently seeded paired A/B rollout",
+    "fixed_cem_seeds": [20260825, 20260826, 20260827],
+    "seed_selection_rule": "exclude deterministic original seed 20260824, then take the next three consecutive Stage-5 controller-search seeds before outcomes",
+    "same_seed_within_pair": true,
+    "within_rollout_blocks_are_not_between_run_replications": true
+  },
+  "transition": {
+    "arm_a": "theta_0 for entire episode",
+    "arm_b": "theta_0 then exactly one switch to frozen theta_1",
+    "causal_trigger": "first OUTBOUND deployable sample with episode_time_s >= 3.045",
+    "trigger_time_s": 3.045,
+    "post_transition_embargo_s": 0.2,
+    "second_update_allowed": false,
+    "human_identification_active": false
+  },
+  "controller": {
+    "gamma": 0.5,
+    "gamma_dynamic": false,
+    "base_planning_joint_velocity_ceiling_deg_s": [15.0, 25.0],
+    "planning_physical_force_ceiling_n": 180.0,
+    "maximum_duration_s": 25.5,
+    "goal_mpc_configuration_changed": false,
+    "acceleration_monitor_changed": false,
+    "runtime_optimization": false
+  },
+  "decision": {
+    "RPL_A": "all three independent rollout means favor theta_1, no rollout is formally NEGATIVE, moving-phase direction is repeated, and no matched closed-loop or registered-safety regression occurs",
+    "RPL_B": "two or more rollout means favor theta_1 without degradation, but direction or phase evidence remains inconsistent or too weak",
+    "RPL_C": "one or fewer rollout means favor theta_1, a formal NEGATIVE occurs, or a meaningful matched closed-loop regression occurs",
+    "percentage_improvement_threshold": null,
+    "pooled_block_level_independence_claim": false
+  },
+  "fixed_authorities": {
+    "interface": "stage5_controller_nominal_kelvin_voigt_v1",
+    "task_limits_hold_support_safety_filter_brake_gate": "unchanged",
+    "acceleration_monitor": "A-MONITOR-UNRESOLVED and unchanged",
+    "trust_driven_gamma": false,
+    "value_or_rl_learning": false
+  }
+}

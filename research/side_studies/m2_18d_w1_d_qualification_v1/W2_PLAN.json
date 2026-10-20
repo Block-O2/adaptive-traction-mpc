@@ -1,0 +1,87 @@
+{
+  "frozen_unix": 1792230295.4110954,
+  "condition": {
+    "name": "W2",
+    "seed": 2026102002,
+    "prefix": {
+      "OUTBOUND": [
+        [
+          0.11,
+          -0.035,
+          0.045
+        ]
+      ],
+      "RETURN": [
+        [
+          -0.04,
+          0.025,
+          -0.035
+        ]
+      ]
+    },
+    "role": "new legal prefix only if W1 D and repeat fully qualify and retain force advantage"
+  },
+  "fork_after_prefix": 1,
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "changes": []
+    },
+    {
+      "id": "T",
+      "base": "T",
+      "posture": [],
+      "changes": []
+    },
+    {
+      "id": "D",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "changes": [],
+      "purpose": "sustain the beneficial spatial separation over adjacent RETURN targets, testing whether a corridor avoids isolated-target compensation",
+      "expected_force_window": [
+        12.8,
+        16.6
+      ],
+      "expected_motion": "full TV_v/TV_a/jerk no worse than T; less pulse compensation than single-slot P_more",
+      "unchanged": "same 0.3deg amplitude; all 18D parameters/plateau/T1.5; each live selected segment duration/pass velocity; task endpoints/duration/safety",
+      "success": "unchanged SELECTION_RULE.json; not merely crossing a force threshold; mechanism and magnitude separately reported",
+      "failure": "any original qualification fail, either posture intent rejected/not actually executed, or no full-task gain",
+      "offline_checks": [
+        {
+          "index": 10,
+          "status": "PASS",
+          "reason": null,
+          "scope": "each archived causal fixture separately; actual corridor receives fresh complete runtime checks"
+        },
+        {
+          "index": 11,
+          "status": "PASS",
+          "reason": null,
+          "scope": "each archived causal fixture separately; actual corridor receives fresh complete runtime checks"
+        }
+      ]
+    }
+  ],
+  "D_frozen_source_sha256": "8a7f0f05e957270755bafea499b0c9a3216c5af1d0af0d89856a3aae07210399",
+  "no_reselection": true
+}

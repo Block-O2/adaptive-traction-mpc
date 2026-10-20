@@ -1,0 +1,5027 @@
+{
+  "P_performance_calls": 0,
+  "coordinator_location": "existing native task worker, current immutable request",
+  "delay_replay": false,
+  "method": "M2",
+  "network_G_calls": 0,
+  "network_Q_calls": 74,
+  "rows": [
+    {
+      "G_calls": 0,
+      "P_performance_calls": 0,
+      "Q_calls": 8,
+      "Q_inference_s": 1.8405000446364284e-05,
+      "applied_plan": [
+        [
+          [
+            0.18602097827002456,
+            0.45892433069959054,
+            0.5262922966414226
+          ],
+          [
+            0.11855060525541769,
+            0.14839720118265956,
+            0.06512240022055249
+          ],
+          [
+            0.03823908099839143,
+            0.1383889685793015,
+            -0.19622724522778884
+          ],
+          [
+            0.18839831702883908,
+            0.021732669799570767,
+            -0.3406672371141302
+          ],
+          [
+            0.15009798622374018,
+            0.11186510449929882,
+            -0.3050212060811161
+          ]
+        ],
+        [
+          [
+            -0.24012768381580651,
+            0.009666032523028306,
+            -0.19045564410304727
+          ],
+          [
+            0.04408836536039393,
+            -0.2479570864571605,
+            -0.19461410447041294
+          ],
+          [
+            -0.08506449707537628,
+            -0.46196861595847116,
+            -0.4391686523667809
+          ],
+          [
+            -0.0961388321667266,
+            -0.258243940640421,
+            -0.4126682955107288
+          ],
+          [
+            0.13375690078160304,
+            -0.09637835828543845,
+            -0.2565284041406722
+          ]
+        ]
+      ],
+      "candidate_count": 4,
+      "candidate_records": [
+        {
+          "Q": 1324.2948065154656,
+          "S": 1.5319615019285626,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.595,
+          "feasible": true,
+          "native_wall_s": 0.0010975789919029921,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "greedy",
+          "source": "B",
+          "target": [
+            0.4974160961094952,
+            0.5497744683298955
+          ]
+        },
+        {
+          "Q": 1263.6008823026004,
+          "S": 1.5392030477505685,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 2.035,
+          "feasible": true,
+          "native_wall_s": 0.006534836982609704,
+          "plan": [
+            [
+              [
+                0.18602097827002456,
+                0.45892433069959054,
+                0.5262922966414226
+              ],
+              [
+                0.11855060525541769,
+                0.14839720118265956,
+                0.06512240022055249
+              ],
+              [
+                0.03823908099839143,
+                0.1383889685793015,
+                -0.19622724522778884
+              ],
+              [
+                0.18839831702883908,
+                0.021732669799570767,
+                -0.3406672371141302
+              ],
+              [
+                0.15009798622374018,
+                0.11186510449929882,
+                -0.3050212060811161
+              ]
+            ],
+            [
+              [
+                -0.24012768381580651,
+                0.009666032523028306,
+                -0.19045564410304727
+              ],
+              [
+                0.04408836536039393,
+                -0.2479570864571605,
+                -0.19461410447041294
+              ],
+              [
+                -0.08506449707537628,
+                -0.46196861595847116,
+                -0.4391686523667809
+              ],
+              [
+                -0.0961388321667266,
+                -0.258243940640421,
+                -0.4126682955107288
+              ],
+              [
+                0.13375690078160304,
+                -0.09637835828543845,
+                -0.2565284041406722
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "historical_design",
+          "target": [
+            0.6085697747674634,
+            0.4434535583092303
+          ]
+        },
+        {
+          "Q": 1349.0374495921901,
+          "S": 1.533920415616557,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.805,
+          "feasible": true,
+          "native_wall_s": 0.005811701994389296,
+          "plan": [
+            [
+              [
+                0.10426530879646351,
+                0.1955602476539707,
+                0.20185927421230854
+              ],
+              [
+                0.13734877802918993,
+                0.23173286390403022,
+                0.2325000336600825
+              ],
+              [
+                0.20345752544197548,
+                0.2702119800864824,
+                0.3021339711887748
+              ],
+              [
+                0.1750211181532379,
+                0.23214836228053776,
+                0.2766681564517774
+              ],
+              [
+                0.1922854361656877,
+                0.3524419588724288,
+                0.23831413919073663
+              ]
+            ],
+            [
+              [
+                0.17500778646446563,
+                0.1934095532560952,
+                0.22695996889829642
+              ],
+              [
+                0.1795494309082621,
+                0.1808719307924268,
+                0.21026108172653865
+              ],
+              [
+                0.21775247903611494,
+                0.1711285379014391,
+                0.20457901893829067
+              ],
+              [
+                0.2949919471737859,
+                0.24481474136138398,
+                0.2884649140341657
+              ],
+              [
+                0.33170172197159353,
+                0.24829113951278933,
+                0.26999578534809
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "positive",
+          "target": [
+            0.5514746296738626,
+            0.49806630579006583
+          ]
+        },
+        {
+          "Q": 1307.2247473559578,
+          "S": 1.537266658988578,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.17,
+          "feasible": true,
+          "native_wall_s": 0.005359610018786043,
+          "plan": [
+            [
+              [
+                -0.2943224357693123,
+                -0.2444297747916819,
+                -0.16664248585449493
+              ],
+              [
+                -0.3061624844563098,
+                -0.20543412674398553,
+                -0.1811020101550487
+              ],
+              [
+                -0.2979587415208409,
+                -0.15470548515754137,
+                -0.2388664272015931
+              ],
+              [
+                -0.23671186897572075,
+                -0.2560546122721841,
+                -0.30997533623596835
+              ],
+              [
+                -0.2837250432675093,
+                -0.28592707871860723,
+                -0.30340463422356767
+              ]
+            ],
+            [
+              [
+                -0.16415688584834656,
+                -0.22241735535272428,
+                -0.21488897292964587
+              ],
+              [
+                -0.14366507296344555,
+                -0.23055460343168965,
+                -0.27012969005800097
+              ],
+              [
+                -0.13494742095898843,
+                -0.23039395393431794,
+                -0.3367911899205495
+              ],
+              [
+                -0.25089861572340777,
+                -0.20046199829741865,
+                -0.21096007637648562
+              ],
+              [
+                -0.303736661915473,
+                -0.23937610173547552,
+                -0.2646509266776338
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "negative",
+          "target": [
+            0.3859368476849552,
+            0.6564067929098902
+          ]
+        }
+      ],
+      "close_rank_fallback": false,
+      "context": {
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0",
+        "nominal_d": 0.004447063393628714,
+        "nominal_m": 0.1998993972059174,
+        "nominal_target": [
+          0.4974160961094952,
+          0.5497744683298955
+        ],
+        "observation": [
+          0.04399874433875084,
+          0.07599805295467377,
+          1.6652062186039984e-05,
+          9.396409041073639e-06,
+          0.04399999976158142,
+          0.07599999755620956,
+          7.36239497129547e-19,
+          -4.417437086174858e-19,
+          1.4724790718072764e-19,
+          -7.362395359036382e-20,
+          0.1445123255252838,
+          0.0201613437384367,
+          0.03397072106599808,
+          3.3481194972991943,
+          0.7748519778251648,
+          1.0159574747085571,
+          0.9987000226974487,
+          0.14653488993644714,
+          0.1598634570837021,
+          0.5241074562072754,
+          0.4969099462032318,
+          0.0006326594157144427,
+          -0.0002566810871940106,
+          -0.00030497051193378866,
+          0.0005350068095140159,
+          0.0007436997257173061,
+          -8.80373700056225e-05,
+          8.923402492655441e-05,
+          1.4711550647916738e-05,
+          -0.00016057312313932925,
+          -0.00015069401706568897,
+          -0.15269239246845245,
+          -1.4680019830848323e-06,
+          0.36372044682502747,
+          7.591445410071174e-06,
+          0.6324093341827393,
+          6.558218501595547e-07,
+          -1.0907641808444168e-05,
+          0.06209750100970268,
+          0.4368908703327179,
+          0.28854742646217346,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.227998748421669,
+          0.25199806690216064,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.19989939033985138,
+          0.0,
+          1.0
+        ],
+        "observation_role": "causal 55D plus explicit K3 residual history",
+        "phase": "OUTBOUND",
+        "raw_reference_common_progress": -9.881422924900825e-05,
+        "richer_previous_residual": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "start_m": 0.0,
+        "task_s": 0.0
+      },
+      "context_s": 0.045344051002757624,
+      "coordinator_location": "existing native task worker",
+      "count_before": {
+        "OUTBOUND": 0,
+        "RETURN": 0
+      },
+      "delay_mode": "scientific synchronous",
+      "end_to_end_s": 0.06616747000953183,
+      "fast_coordinator_s": 0.05272853802307509,
+      "fast_evaluated_indices": [
+        1
+      ],
+      "full_worker_elapsed_ms": 74.226585,
+      "generation_s": 0.00032678700517863035,
+      "late": true,
+      "late_discard": false,
+      "native_command_reserve_s": 0.010951999,
+      "native_compute_reserve_s": 0.065567021,
+      "physical_source_s": 10.049999999999253,
+      "plan_changed": true,
+      "q_all": [
+        1324.2948065154656,
+        1263.6008823026004,
+        1349.0374495921901,
+        1307.2247473559578
+      ],
+      "q_first_order": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "request_id": 6,
+      "roundoff_bounds": [
+        0.028122708899917522,
+        0.029977788441862104,
+        0.03115373290500959,
+        0.031006987836158347
+      ],
+      "scientific_full_validation_shadow": true,
+      "selected_index": 1,
+      "selected_source": "historical_design",
+      "selection_budget_s": 0.0,
+      "shadow_s": 0.013135009998222813,
+      "source_age_at_worker_return_ms": 76.150089,
+      "submission_s": 7.420900510624051e-05,
+      "timing_scope": "actual coordinator elapsed includes SCI shadow; fast prefix separately recorded",
+      "validation_and_S_s": 0.020068385027116165
+    },
+    {
+      "G_calls": 0,
+      "P_performance_calls": 0,
+      "Q_calls": 16,
+      "Q_inference_s": 1.617200905457139e-05,
+      "applied_plan": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.11855060525541769,
+            0.14839720118265956,
+            0.06512240022055249
+          ],
+          [
+            0.03823908099839143,
+            0.1383889685793015,
+            -0.19622724522778884
+          ],
+          [
+            0.18839831702883908,
+            0.021732669799570767,
+            -0.3406672371141302
+          ],
+          [
+            0.15009798622374018,
+            0.11186510449929882,
+            -0.3050212060811161
+          ]
+        ],
+        [
+          [
+            -0.24012768381580651,
+            0.009666032523028306,
+            -0.19045564410304727
+          ],
+          [
+            0.04408836536039393,
+            -0.2479570864571605,
+            -0.19461410447041294
+          ],
+          [
+            -0.08506449707537628,
+            -0.46196861595847116,
+            -0.4391686523667809
+          ],
+          [
+            -0.0961388321667266,
+            -0.258243940640421,
+            -0.4126682955107288
+          ],
+          [
+            0.13375690078160304,
+            -0.09637835828543845,
+            -0.2565284041406722
+          ]
+        ]
+      ],
+      "candidate_count": 4,
+      "candidate_records": [
+        {
+          "Q": 1220.403501789166,
+          "S": 0.98579993411064,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.27,
+          "feasible": true,
+          "native_wall_s": 0.0007796489808242768,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "greedy",
+          "source": "B",
+          "target": [
+            1.0068180187411206,
+            0.8179133400551166
+          ]
+        },
+        {
+          "Q": 1159.709577576301,
+          "S": 0.9936370945568862,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.445,
+          "feasible": true,
+          "native_wall_s": 0.004973178991349414,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.11855060525541769,
+                0.14839720118265956,
+                0.06512240022055249
+              ],
+              [
+                0.03823908099839143,
+                0.1383889685793015,
+                -0.19622724522778884
+              ],
+              [
+                0.18839831702883908,
+                0.021732669799570767,
+                -0.3406672371141302
+              ],
+              [
+                0.15009798622374018,
+                0.11186510449929882,
+                -0.3050212060811161
+              ]
+            ],
+            [
+              [
+                -0.24012768381580651,
+                0.009666032523028306,
+                -0.19045564410304727
+              ],
+              [
+                0.04408836536039393,
+                -0.2479570864571605,
+                -0.19461410447041294
+              ],
+              [
+                -0.08506449707537628,
+                -0.46196861595847116,
+                -0.4391686523667809
+              ],
+              [
+                -0.0961388321667266,
+                -0.258243940640421,
+                -0.4126682955107288
+              ],
+              [
+                0.13375690078160304,
+                -0.09637835828543845,
+                -0.2565284041406722
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "carry",
+          "target": [
+            1.0600164602124493,
+            0.7670278742999326
+          ]
+        },
+        {
+          "Q": 1234.7954958710145,
+          "S": 1.0028591702191278,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.595,
+          "feasible": true,
+          "native_wall_s": 0.005035451002186164,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.2854567394675179,
+                0.2068002366988132,
+                0.21980272692764263
+              ],
+              [
+                0.3036294742195397,
+                0.21949737211815215,
+                0.2798799173790204
+              ],
+              [
+                0.2919819701529854,
+                0.31492009156776113,
+                0.2817856898539753
+              ],
+              [
+                0.3110613644817497,
+                0.25119325501407624,
+                0.25815145350846147
+              ]
+            ],
+            [
+              [
+                0.15499174620041448,
+                0.2999793208242047,
+                0.23723581280571518
+              ],
+              [
+                0.14415100753532867,
+                0.2843388114690404,
+                0.22754823834331217
+              ],
+              [
+                0.14189195336787436,
+                0.26850276657698285,
+                0.22698863587584567
+              ],
+              [
+                0.19460774700549777,
+                0.32377174735097036,
+                0.20199858072999405
+              ],
+              [
+                0.18967512823233013,
+                0.3256288483062822,
+                0.062193211204049526
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "positive",
+          "target": [
+            1.1066254978309142,
+            0.7224453165779228
+          ]
+        },
+        {
+          "Q": 1189.2026449868833,
+          "S": 0.9789513318142132,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 0.965,
+          "feasible": true,
+          "native_wall_s": 0.004456774011487141,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.2929702013136509,
+                -0.16890179002535324,
+                -0.21096592054412472
+              ],
+              [
+                -0.2575686030279114,
+                -0.155537567904863,
+                -0.1777900795239547
+              ],
+              [
+                -0.28922533020413455,
+                -0.22007093416466186,
+                -0.1358625506158614
+              ],
+              [
+                -0.36141852853502293,
+                -0.3239682309620877,
+                -0.2119832055180006
+              ]
+            ],
+            [
+              [
+                -0.3371133516122632,
+                -0.39633665325974243,
+                -0.23760791686871918
+              ],
+              [
+                -0.2775321569519919,
+                -0.37565068859413064,
+                -0.26671922375522233
+              ],
+              [
+                -0.1959355251198368,
+                -0.2711212999955607,
+                -0.34803526827745296
+              ],
+              [
+                -0.28974361279962124,
+                -0.2119441922836261,
+                -0.31295788554480625
+              ],
+              [
+                -0.24060569527263,
+                -0.3530601255943896,
+                -0.18677689942692305
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "negative",
+          "target": [
+            0.9125288665708609,
+            0.9081029638701478
+          ]
+        }
+      ],
+      "close_rank_fallback": false,
+      "context": {
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0",
+        "nominal_d": 0.06151239439229608,
+        "nominal_m": 0.396630416143266,
+        "nominal_target": [
+          1.0068180187411206,
+          0.8179133400551166
+        ],
+        "observation": [
+          0.27749139070510864,
+          0.1989038586616516,
+          0.24433192610740662,
+          0.24924223124980927,
+          0.28278782963752747,
+          0.20966413617134094,
+          0.2666666805744171,
+          0.2666666805744171,
+          1.6384483877029032e-16,
+          1.1520340432831191e-17,
+          0.1445123255252838,
+          0.0201613437384367,
+          0.03397072106599808,
+          3.3481194972991943,
+          0.7748519778251648,
+          1.0159574747085571,
+          0.9987000226974487,
+          0.14653488993644714,
+          0.1598634570837021,
+          0.5241074562072754,
+          0.4969099462032318,
+          0.0006326594157144427,
+          -0.0002566810871940106,
+          -0.00030497051193378866,
+          0.0005350068095140159,
+          0.0007436997257173061,
+          -8.80373700056225e-05,
+          8.923402492655441e-05,
+          1.4711550647916738e-05,
+          -0.00016057312313932925,
+          -0.00015069401706568897,
+          -0.4827193319797516,
+          -0.002280773129314184,
+          0.18448172509670258,
+          -0.014334459789097309,
+          0.6020400524139404,
+          -0.001240657060407102,
+          -1.0907641808444168e-05,
+          0.06209750100970268,
+          0.4368908703327179,
+          0.28854742646217346,
+          1.0,
+          0.0,
+          0.0,
+          0.06833333522081375,
+          0.4614913761615753,
+          0.3749038577079773,
+          0.20499999821186066,
+          0.0,
+          0.18602098524570465,
+          0.5262923240661621,
+          0.20562271773815155,
+          0.3966304063796997,
+          0.0,
+          0.9316666722297668
+        ],
+        "observation_role": "causal 55D plus explicit K3 residual history",
+        "phase": "OUTBOUND",
+        "raw_reference_common_progress": 0.20562271736402019,
+        "richer_previous_residual": [
+          0.18602097827002456,
+          0.45892433069959054,
+          0.5262922966414226
+        ],
+        "start_m": 0.20562271736402019,
+        "task_s": 2.0499999999952223
+      },
+      "context_s": 0.039764354994986206,
+      "coordinator_location": "existing native task worker",
+      "count_before": {
+        "OUTBOUND": 1,
+        "RETURN": 0
+      },
+      "delay_mode": "scientific synchronous",
+      "end_to_end_s": 0.05713449700851925,
+      "fast_coordinator_s": 0.04557214700616896,
+      "fast_evaluated_indices": [
+        1
+      ],
+      "full_worker_elapsed_ms": 64.683432,
+      "generation_s": 0.00032977701630443335,
+      "late": true,
+      "late_discard": false,
+      "native_command_reserve_s": 0.010951999,
+      "native_compute_reserve_s": 0.065567021,
+      "physical_source_s": 12.099999999994475,
+      "plan_changed": false,
+      "q_all": [
+        1220.403501789166,
+        1159.709577576301,
+        1234.7954958710145,
+        1189.2026449868833
+      ],
+      "q_first_order": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "request_id": 7,
+      "roundoff_bounds": [
+        0.025141998717468916,
+        0.02699707825941349,
+        0.028282748149022662,
+        0.028359341657267903
+      ],
+      "scientific_full_validation_shadow": true,
+      "selected_index": 1,
+      "selected_source": "carry",
+      "selection_budget_s": 0.0,
+      "shadow_s": 0.011251298012211919,
+      "source_age_at_worker_return_ms": 66.460939,
+      "submission_s": 7.659601396881044e-05,
+      "timing_scope": "actual coordinator elapsed includes SCI shadow; fast prefix separately recorded",
+      "validation_and_S_s": 0.016626065014861524
+    },
+    {
+      "G_calls": 0,
+      "P_performance_calls": 0,
+      "Q_calls": 24,
+      "Q_inference_s": 1.2894015526399016e-05,
+      "applied_plan": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.03823908099839143,
+            0.1383889685793015,
+            -0.19622724522778884
+          ],
+          [
+            0.18839831702883908,
+            0.021732669799570767,
+            -0.3406672371141302
+          ],
+          [
+            0.15009798622374018,
+            0.11186510449929882,
+            -0.3050212060811161
+          ]
+        ],
+        [
+          [
+            -0.24012768381580651,
+            0.009666032523028306,
+            -0.19045564410304727
+          ],
+          [
+            0.04408836536039393,
+            -0.2479570864571605,
+            -0.19461410447041294
+          ],
+          [
+            -0.08506449707537628,
+            -0.46196861595847116,
+            -0.4391686523667809
+          ],
+          [
+            -0.0961388321667266,
+            -0.258243940640421,
+            -0.4126682955107288
+          ],
+          [
+            0.13375690078160304,
+            -0.09637835828543845,
+            -0.2565284041406722
+          ]
+        ]
+      ],
+      "candidate_count": 4,
+      "candidate_records": [
+        {
+          "Q": 1078.5000004944322,
+          "S": 0.5976394442788935,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.27,
+          "feasible": true,
+          "native_wall_s": 0.000719993986422196,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "greedy",
+          "source": "B",
+          "target": [
+            1.4574489198562137,
+            1.1404237001463269
+          ]
+        },
+        {
+          "Q": 1019.4463302607155,
+          "S": 0.6065950666088445,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.415,
+          "feasible": true,
+          "native_wall_s": 0.004385006002848968,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.03823908099839143,
+                0.1383889685793015,
+                -0.19622724522778884
+              ],
+              [
+                0.18839831702883908,
+                0.021732669799570767,
+                -0.3406672371141302
+              ],
+              [
+                0.15009798622374018,
+                0.11186510449929882,
+                -0.3050212060811161
+              ]
+            ],
+            [
+              [
+                -0.24012768381580651,
+                0.009666032523028306,
+                -0.19045564410304727
+              ],
+              [
+                0.04408836536039393,
+                -0.2479570864571605,
+                -0.19461410447041294
+              ],
+              [
+                -0.08506449707537628,
+                -0.46196861595847116,
+                -0.4391686523667809
+              ],
+              [
+                -0.0961388321667266,
+                -0.258243940640421,
+                -0.4126682955107288
+              ],
+              [
+                0.13375690078160304,
+                -0.09637835828543845,
+                -0.2565284041406722
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "carry",
+          "target": [
+            1.5021197671996902,
+            1.0976950635569145
+          ]
+        },
+        {
+          "Q": 1114.72872440098,
+          "S": 0.6182215421665496,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.57,
+          "feasible": true,
+          "native_wall_s": 0.0043844879837706685,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.13318445232683668,
+                0.263966910583414,
+                0.19601767877331425
+              ],
+              [
+                0.12378940855069046,
+                0.2428349552569651,
+                0.26764631932873667
+              ],
+              [
+                0.18087339350242593,
+                0.2203177903629714,
+                0.14656541172152654
+              ]
+            ],
+            [
+              [
+                0.30052749984114246,
+                0.3471208901908872,
+                0.3723238855013529
+              ],
+              [
+                0.3250574780635493,
+                0.29230921079123523,
+                0.3010374188924453
+              ],
+              [
+                0.30373841559567943,
+                0.1715090127057019,
+                0.18554460286369995
+              ],
+              [
+                0.15004753760617015,
+                0.21629302391661334,
+                0.2876480687250237
+              ],
+              [
+                0.29472674150229994,
+                0.2601218993573579,
+                0.2677866977933558
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "positive",
+          "target": [
+            1.5492015227749791,
+            1.052660340832725
+          ]
+        },
+        {
+          "Q": 1038.9064868549908,
+          "S": 0.5851077211827739,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 0.9500000000000001,
+          "feasible": true,
+          "native_wall_s": 0.004401498008519411,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.22434620162836755,
+                -0.24994662553743346,
+                -0.32017974122550646
+              ],
+              [
+                -0.24603661691826506,
+                -0.22651957460340097,
+                -0.2895567032277655
+              ],
+              [
+                -0.269752382842802,
+                -0.07169041720677302,
+                -0.2824460349390749
+              ]
+            ],
+            [
+              [
+                -0.2196878722659247,
+                -0.21069241869528904,
+                -0.2922043334569864
+              ],
+              [
+                -0.28030443532524785,
+                -0.1747664677627292,
+                -0.2860752313636371
+              ],
+              [
+                -0.365192750602674,
+                -0.17562876276541384,
+                -0.27018178652740366
+              ],
+              [
+                -0.22661969556022646,
+                -0.3514466878579738,
+                -0.25448621962331974
+              ],
+              [
+                -0.24717868481897648,
+                -0.2666113959673217,
+                -0.23122989577226105
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "negative",
+          "target": [
+            1.3598955940338584,
+            1.2337355770198841
+          ]
+        }
+      ],
+      "close_rank_fallback": false,
+      "context": {
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0",
+        "nominal_d": 0.08977689546912526,
+        "nominal_m": 0.5928811216061931,
+        "nominal_target": [
+          1.4574489198562137,
+          1.1404237001463269
+        ],
+        "observation": [
+          0.4840453863143921,
+          0.3467317223548889,
+          0.24977871775627136,
+          0.24869075417518616,
+          0.4897157549858093,
+          0.3579796850681305,
+          0.2666666805744171,
+          0.2666666805744171,
+          1.6247849521703033e-16,
+          0.0,
+          0.1445123255252838,
+          0.0201613437384367,
+          0.03397072106599808,
+          3.3481194972991943,
+          0.7748519778251648,
+          1.0159574747085571,
+          0.9987000226974487,
+          0.14653488993644714,
+          0.1598634570837021,
+          0.5241074562072754,
+          0.4969099462032318,
+          0.0006326594157144427,
+          -0.0002566810871940106,
+          -0.00030497051193378866,
+          0.0005350068095140159,
+          0.0007436997257173061,
+          -8.80373700056225e-05,
+          8.923402492655441e-05,
+          1.4711550647916738e-05,
+          -0.00016057312313932925,
+          -0.00015069401706568897,
+          -0.4667845666408539,
+          -0.0038173131179064512,
+          -0.03579413890838623,
+          -0.005462298169732094,
+          0.31227725744247437,
+          -0.005611852277070284,
+          -1.0907641808444168e-05,
+          0.06209750100970268,
+          0.4368908703327179,
+          0.28854742646217346,
+          1.0,
+          0.0,
+          0.0,
+          0.11833333224058151,
+          0.6680454015731812,
+          0.5227317214012146,
+          0.35499998927116394,
+          0.0,
+          0.118550606071949,
+          0.06512240320444107,
+          0.4023537337779999,
+          0.5928811430931091,
+          0.0,
+          0.8816666603088379
+        ],
+        "observation_role": "causal 55D plus explicit K3 residual history",
+        "phase": "OUTBOUND",
+        "raw_reference_common_progress": 0.40235373630136884,
+        "richer_previous_residual": [
+          0.11855060525541769,
+          0.14839720118265956,
+          0.06512240022055249
+        ],
+        "start_m": 0.40235373630136884,
+        "task_s": 3.5499999999917264
+      },
+      "context_s": 0.03777378500672057,
+      "coordinator_location": "existing native task worker",
+      "count_before": {
+        "OUTBOUND": 2,
+        "RETURN": 0
+      },
+      "delay_mode": "scientific synchronous",
+      "end_to_end_s": 0.05359943100484088,
+      "fast_coordinator_s": 0.04286614601733163,
+      "fast_evaluated_indices": [
+        1
+      ],
+      "full_worker_elapsed_ms": 62.224032,
+      "generation_s": 0.0002717059978749603,
+      "late": true,
+      "late_discard": false,
+      "native_command_reserve_s": 0.010951999,
+      "native_compute_reserve_s": 0.065567021,
+      "physical_source_s": 13.59999999999098,
+      "plan_changed": false,
+      "q_all": [
+        1078.5000004944322,
+        1019.4463302607155,
+        1114.72872440098,
+        1038.9064868549908
+      ],
+      "q_first_order": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "request_id": 8,
+      "roundoff_bounds": [
+        0.020168675844726702,
+        0.021978054045252143,
+        0.023150202093373297,
+        0.023080706040334867
+      ],
+      "scientific_full_validation_shadow": true,
+      "selected_index": 1,
+      "selected_source": "carry",
+      "selection_budget_s": 0.0,
+      "shadow_s": 0.01041314800386317,
+      "source_age_at_worker_return_ms": 64.566561,
+      "submission_s": 7.587199797853827e-05,
+      "timing_scope": "actual coordinator elapsed includes SCI shadow; fast prefix separately recorded",
+      "validation_and_S_s": 0.015140206000069156
+    },
+    {
+      "G_calls": 0,
+      "P_performance_calls": 0,
+      "Q_calls": 32,
+      "Q_inference_s": 1.724500907585025e-05,
+      "applied_plan": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.18839831702883908,
+            0.021732669799570767,
+            -0.3406672371141302
+          ],
+          [
+            0.15009798622374018,
+            0.11186510449929882,
+            -0.3050212060811161
+          ]
+        ],
+        [
+          [
+            -0.24012768381580651,
+            0.009666032523028306,
+            -0.19045564410304727
+          ],
+          [
+            0.04408836536039393,
+            -0.2479570864571605,
+            -0.19461410447041294
+          ],
+          [
+            -0.08506449707537628,
+            -0.46196861595847116,
+            -0.4391686523667809
+          ],
+          [
+            -0.0961388321667266,
+            -0.258243940640421,
+            -0.4126682955107288
+          ],
+          [
+            0.13375690078160304,
+            -0.09637835828543845,
+            -0.2565284041406722
+          ]
+        ]
+      ],
+      "candidate_count": 4,
+      "candidate_records": [
+        {
+          "Q": 945.7192331849653,
+          "S": 0.3647749884419956,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.27,
+          "feasible": true,
+          "native_wall_s": 0.0008071470074355602,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "greedy",
+          "source": "B",
+          "target": [
+            1.8997422891688562,
+            1.471252934152039
+          ]
+        },
+        {
+          "Q": 891.503452750562,
+          "S": 0.3589279423433377,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.18,
+          "feasible": true,
+          "native_wall_s": 0.0052972180128563195,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.18839831702883908,
+                0.021732669799570767,
+                -0.3406672371141302
+              ],
+              [
+                0.15009798622374018,
+                0.11186510449929882,
+                -0.3050212060811161
+              ]
+            ],
+            [
+              [
+                -0.24012768381580651,
+                0.009666032523028306,
+                -0.19045564410304727
+              ],
+              [
+                0.04408836536039393,
+                -0.2479570864571605,
+                -0.19461410447041294
+              ],
+              [
+                -0.08506449707537628,
+                -0.46196861595847116,
+                -0.4391686523667809
+              ],
+              [
+                -0.0961388321667266,
+                -0.258243940640421,
+                -0.4126682955107288
+              ],
+              [
+                0.13375690078160304,
+                -0.09637835828543845,
+                -0.2565284041406722
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "carry",
+          "target": [
+            1.8721526991803044,
+            1.4976429767497843
+          ]
+        },
+        {
+          "Q": 974.8584428931206,
+          "S": 0.3853137720644212,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.52,
+          "feasible": true,
+          "native_wall_s": 0.005183576984563842,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.30267962628759654,
+                0.1689725146018693,
+                0.2651506424879632
+              ],
+              [
+                0.22084260744879508,
+                0.21709275014203974,
+                0.19675244373909914
+              ]
+            ],
+            [
+              [
+                0.16949027069214162,
+                0.19216635613687805,
+                0.35102092355919423
+              ],
+              [
+                0.24512314885129452,
+                0.21294538849213482,
+                0.36943797809686
+              ],
+              [
+                0.3869680645160907,
+                0.20613357308621277,
+                0.3297385688593695
+              ],
+              [
+                0.2817812925047619,
+                0.09146915196332575,
+                0.16685746952735991
+              ],
+              [
+                0.27725270171006716,
+                0.19433916056348974,
+                0.2535165822644107
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "positive",
+          "target": [
+            1.977209563331177,
+            1.397153802344602
+          ]
+        },
+        {
+          "Q": 918.8320274596854,
+          "S": 0.3468789105406918,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 0.935,
+          "feasible": true,
+          "native_wall_s": 0.0051880520186387,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.2322489871153332,
+                -0.2845328359007935,
+                -0.1726189022181969
+              ],
+              [
+                -0.31162291121921976,
+                -0.2179474552485375,
+                -0.2925685055936958
+              ]
+            ],
+            [
+              [
+                -0.4136951231606914,
+                -0.18192670673044087,
+                -0.4793409785543251
+              ],
+              [
+                -0.29907130107424595,
+                -0.23026440816635402,
+                -0.3992099756504278
+              ],
+              [
+                -0.0717323614795351,
+                -0.29971303896788215,
+                -0.24335046194777266
+              ],
+              [
+                -0.18491952472678355,
+                -0.1783551647291295,
+                -0.34214427675950626
+              ],
+              [
+                -0.23707411891273086,
+                -0.1350928274492079,
+                -0.3172501288006604
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "negative",
+          "target": [
+            1.7967376265076325,
+            1.5697791332192965
+          ]
+        }
+      ],
+      "close_rank_fallback": false,
+      "context": {
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0",
+        "nominal_d": 0.11379788768167404,
+        "nominal_m": 0.7892213760739528,
+        "nominal_target": [
+          1.8997422891688562,
+          1.471252934152039
+        ],
+        "observation": [
+          0.6867777109146118,
+          0.4983726739883423,
+          0.25125545263290405,
+          0.24962739646434784,
+          0.6923609972000122,
+          0.5095463395118713,
+          0.2666666805744171,
+          0.2666666805744171,
+          0.0,
+          -8.472053978684054e-17,
+          0.1445123255252838,
+          0.0201613437384367,
+          0.03397072106599808,
+          3.3481194972991943,
+          0.7748519778251648,
+          1.0159574747085571,
+          0.9987000226974487,
+          0.14653488993644714,
+          0.1598634570837021,
+          0.5241074562072754,
+          0.4969099462032318,
+          0.0006326594157144427,
+          -0.0002566810871940106,
+          -0.00030497051193378866,
+          0.0005350068095140159,
+          0.0007436997257173061,
+          -8.80373700056225e-05,
+          8.923402492655441e-05,
+          1.4711550647916738e-05,
+          -0.00016057312313932925,
+          -0.00015069401706568897,
+          -0.33005473017692566,
+          0.00010641615517670289,
+          -0.16152653098106384,
+          -0.0008464226848445833,
+          0.14545266330242157,
+          -0.014828409999608994,
+          -1.0907641808444168e-05,
+          0.06209750100970268,
+          0.4368908703327179,
+          0.28854742646217346,
+          1.0,
+          0.0,
+          0.0,
+          0.16733333468437195,
+          0.8707777261734009,
+          0.674372673034668,
+          0.5019999742507935,
+          0.0,
+          0.03823908045887947,
+          -0.19622725248336792,
+          0.5986044406890869,
+          0.7892213463783264,
+          0.0,
+          0.8326666951179504
+        ],
+        "observation_role": "causal 55D plus explicit K3 residual history",
+        "phase": "OUTBOUND",
+        "raw_reference_common_progress": 0.5986044417642957,
+        "richer_previous_residual": [
+          0.03823908099839143,
+          0.1383889685793015,
+          -0.19622724522778884
+        ],
+        "start_m": 0.5986044417642957,
+        "task_s": 5.0199999999883005
+      },
+      "context_s": 0.04457929800264537,
+      "coordinator_location": "existing native task worker",
+      "count_before": {
+        "OUTBOUND": 3,
+        "RETURN": 0
+      },
+      "delay_mode": "scientific synchronous",
+      "end_to_end_s": 0.06341459698160179,
+      "fast_coordinator_s": 0.05077209998853505,
+      "fast_evaluated_indices": [
+        1
+      ],
+      "full_worker_elapsed_ms": 72.21463,
+      "generation_s": 0.0003170229902025312,
+      "late": true,
+      "late_discard": false,
+      "native_command_reserve_s": 0.010951999,
+      "native_compute_reserve_s": 0.065567021,
+      "physical_source_s": 15.069999999987553,
+      "plan_changed": false,
+      "q_all": [
+        945.7192331849653,
+        891.503452750562,
+        974.8584428931206,
+        918.8320274596854
+      ],
+      "q_first_order": [
+        1,
+        3,
+        0,
+        2
+      ],
+      "request_id": 9,
+      "roundoff_bounds": [
+        0.018536771662504364,
+        0.020107980780518432,
+        0.02104499234972633,
+        0.021112991379156138
+      ],
+      "scientific_full_validation_shadow": true,
+      "selected_index": 1,
+      "selected_source": "carry",
+      "selection_budget_s": 0.0,
+      "shadow_s": 0.012283616000786424,
+      "source_age_at_worker_return_ms": 74.34015,
+      "submission_s": 8.655100828036666e-05,
+      "timing_scope": "actual coordinator elapsed includes SCI shadow; fast prefix separately recorded",
+      "validation_and_S_s": 0.01802134097670205
+    },
+    {
+      "G_calls": 0,
+      "P_performance_calls": 0,
+      "Q_calls": 39,
+      "Q_inference_s": 1.5621015336364508e-05,
+      "applied_plan": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            -0.3181521911103031,
+            -0.20622662451159549,
+            -0.38020444651387986
+          ]
+        ],
+        [
+          [
+            -0.3383674492053366,
+            -0.3487648742987286,
+            -0.12783585993742802
+          ],
+          [
+            -0.32096915041185925,
+            -0.3400619829984045,
+            -0.11597537206566344
+          ],
+          [
+            -0.2808490154782096,
+            -0.3121074293670117,
+            -0.20329555850378767
+          ],
+          [
+            -0.2624890125582334,
+            -0.24723506499398745,
+            -0.39921887647435683
+          ],
+          [
+            -0.25700020096363385,
+            -0.18959151149076098,
+            -0.2399612424312986
+          ]
+        ]
+      ],
+      "candidate_count": 4,
+      "candidate_records": [
+        {
+          "Q": 850.0892291970474,
+          "S": 0.2638966473851989,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 0.85,
+          "feasible": true,
+          "native_wall_s": 0.0007171600009314716,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "greedy",
+          "source": "B",
+          "target": [
+            2.0943951023931953,
+            1.8689829807563552
+          ]
+        },
+        {
+          "Q": 805.2141060295454,
+          "S": 0.2572788838925391,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 0.92,
+          "feasible": true,
+          "native_wall_s": 0.004573401995003223,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.15009798622374018,
+                0.11186510449929882,
+                -0.3050212060811161
+              ]
+            ],
+            [
+              [
+                -0.24012768381580651,
+                0.009666032523028306,
+                -0.19045564410304727
+              ],
+              [
+                0.04408836536039393,
+                -0.2479570864571605,
+                -0.19461410447041294
+              ],
+              [
+                -0.08506449707537628,
+                -0.46196861595847116,
+                -0.4391686523667809
+              ],
+              [
+                -0.0961388321667266,
+                -0.258243940640421,
+                -0.4126682955107288
+              ],
+              [
+                0.13375690078160304,
+                -0.09637835828543845,
+                -0.2565284041406722
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "carry",
+          "target": [
+            1.977547395376115,
+            1.9807503526857364
+          ]
+        },
+        {
+          "S": 0.2638966473851989,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 0.85,
+          "feasible": true,
+          "native_wall_s": 0.0007179719978012145,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.33505077372387704,
+                0.2933530278909101,
+                0.1998658412059578
+              ]
+            ],
+            [
+              [
+                0.13787128633767948,
+                0.1845793299079102,
+                0.20772430987329987
+              ],
+              [
+                0.17828337219086854,
+                0.20574410397831827,
+                0.21566583586712085
+              ],
+              [
+                0.27528748900685235,
+                0.23543114487253583,
+                0.2687941426096409
+              ],
+              [
+                0.27716542225905755,
+                0.23994173232867183,
+                0.3032646416804129
+              ],
+              [
+                0.26328312609216603,
+                0.33321954418649535,
+                0.15192304954007088
+              ]
+            ]
+          ],
+          "proposal_accepted": false,
+          "reason": "NORMALIZED_TARGET_OUT_OF_RANGE",
+          "selection_mode": "native_residual_v2_REJECTED",
+          "source": "positive",
+          "target": [
+            2.0943951023931953,
+            1.8689829807563552
+          ]
+        },
+        {
+          "Q": 783.8817623779148,
+          "S": 0.25777191672097916,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 0.975,
+          "feasible": true,
+          "native_wall_s": 0.00471564001054503,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.3181521911103031,
+                -0.20622662451159549,
+                -0.38020444651387986
+              ]
+            ],
+            [
+              [
+                -0.3383674492053366,
+                -0.3487648742987286,
+                -0.12783585993742802
+              ],
+              [
+                -0.32096915041185925,
+                -0.3400619829984045,
+                -0.11597537206566344
+              ],
+              [
+                -0.2808490154782096,
+                -0.3121074293670117,
+                -0.20329555850378767
+              ],
+              [
+                -0.2624890125582334,
+                -0.24723506499398745,
+                -0.39921887647435683
+              ],
+              [
+                -0.25700020096363385,
+                -0.18959151149076098,
+                -0.2399612424312986
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "negative",
+          "target": [
+            1.9487461544278182,
+            2.0082993657667156
+          ]
+        }
+      ],
+      "close_rank_fallback": false,
+      "context": {
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0",
+        "nominal_d": 0.05870528736763858,
+        "nominal_m": 0.9412947126323614,
+        "nominal_target": [
+          2.0943951023931953,
+          1.8689829807563552
+        ],
+        "observation": [
+          0.8561347126960754,
+          0.68067866563797,
+          0.2564762532711029,
+          0.2575882375240326,
+          0.8619715571403503,
+          0.6928689479827881,
+          0.2666666805744171,
+          0.2666666805744171,
+          0.0,
+          3.04563302417819e-17,
+          0.1445123255252838,
+          0.0201613437384367,
+          0.03397072106599808,
+          3.3481194972991943,
+          0.7748519778251648,
+          1.0159574747085571,
+          0.9987000226974487,
+          0.14653488993644714,
+          0.1598634570837021,
+          0.5241074562072754,
+          0.4969099462032318,
+          0.0006326594157144427,
+          -0.0002566810871940106,
+          -0.00030497051193378866,
+          0.0005350068095140159,
+          0.0007436997257173061,
+          -8.80373700056225e-05,
+          8.923402492655441e-05,
+          1.4711550647916738e-05,
+          -0.00016057312313932925,
+          -0.00015069401706568897,
+          -0.22052453458309174,
+          -0.00013526796828955412,
+          -0.20550191402435303,
+          -0.0005059446557424963,
+          0.07794210314750671,
+          -0.016451332718133926,
+          -1.0907641808444168e-05,
+          0.06209750100970268,
+          0.4368908703327179,
+          0.28854742646217346,
+          1.0,
+          0.0,
+          0.0,
+          0.2083333283662796,
+          0.9599999785423279,
+          0.8566786646842957,
+          0.625,
+          0.0,
+          0.1883983165025711,
+          -0.3406672477722168,
+          0.794944703578949,
+          0.9412947297096252,
+          0.0,
+          0.7916666865348816
+        ],
+        "observation_role": "causal 55D plus explicit K3 residual history",
+        "phase": "OUTBOUND",
+        "raw_reference_common_progress": 0.7949446962320555,
+        "richer_previous_residual": [
+          0.18839831702883908,
+          0.021732669799570767,
+          -0.3406672371141302
+        ],
+        "start_m": 0.7949446962320555,
+        "task_s": 6.249999999987564
+      },
+      "context_s": 0.036447074002353474,
+      "coordinator_location": "existing native task worker",
+      "count_before": {
+        "OUTBOUND": 4,
+        "RETURN": 0
+      },
+      "delay_mode": "scientific synchronous",
+      "end_to_end_s": 0.049372176988981664,
+      "fast_coordinator_s": 0.042014462989754975,
+      "fast_evaluated_indices": [
+        3
+      ],
+      "full_worker_elapsed_ms": 57.139141,
+      "generation_s": 0.00033812900073826313,
+      "late": true,
+      "late_discard": false,
+      "native_command_reserve_s": 0.010951999,
+      "native_compute_reserve_s": 0.065567021,
+      "physical_source_s": 16.299999999986817,
+      "plan_changed": true,
+      "q_all": [
+        850.0892291970474,
+        805.2141060295454,
+        888.3792654990743,
+        783.8817623779148
+      ],
+      "q_first_order": [
+        3,
+        1,
+        0,
+        2
+      ],
+      "request_id": 10,
+      "roundoff_bounds": [
+        0.01977540700548869,
+        0.021129611605930635,
+        0.021638893170749615,
+        0.02188218146989656
+      ],
+      "scientific_full_validation_shadow": true,
+      "selected_index": 3,
+      "selected_source": "negative",
+      "selection_budget_s": 0.0,
+      "shadow_s": 0.0070091839879751205,
+      "source_age_at_worker_return_ms": 58.935846,
+      "submission_s": 7.883802754804492e-05,
+      "timing_scope": "actual coordinator elapsed includes SCI shadow; fast prefix separately recorded",
+      "validation_and_S_s": 0.012132076022680849
+    },
+    {
+      "G_calls": 0,
+      "P_performance_calls": 0,
+      "Q_calls": 47,
+      "Q_inference_s": 1.3951008440926671e-05,
+      "applied_plan": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            -0.3383674492053366,
+            -0.3487648742987286,
+            -0.12783585993742802
+          ],
+          [
+            -0.32096915041185925,
+            -0.3400619829984045,
+            -0.11597537206566344
+          ],
+          [
+            -0.2808490154782096,
+            -0.3121074293670117,
+            -0.20329555850378767
+          ],
+          [
+            -0.2624890125582334,
+            -0.24723506499398745,
+            -0.39921887647435683
+          ],
+          [
+            -0.25700020096363385,
+            -0.18959151149076098,
+            -0.2399612424312986
+          ]
+        ]
+      ],
+      "candidate_count": 4,
+      "candidate_records": [
+        {
+          "Q": 621.9208772296325,
+          "S": 1.5308926068184021,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.595,
+          "feasible": true,
+          "native_wall_s": 0.0007591890171170235,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "greedy",
+          "source": "B",
+          "target": [
+            1.692390096016454,
+            1.7101278202216061
+          ]
+        },
+        {
+          "Q": 566.0274036401526,
+          "S": 1.5404095283555956,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.23,
+          "feasible": true,
+          "native_wall_s": 0.0059772550011985,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                -0.3383674492053366,
+                -0.3487648742987286,
+                -0.12783585993742802
+              ],
+              [
+                -0.32096915041185925,
+                -0.3400619829984045,
+                -0.11597537206566344
+              ],
+              [
+                -0.2808490154782096,
+                -0.3121074293670117,
+                -0.20329555850378767
+              ],
+              [
+                -0.2624890125582334,
+                -0.24723506499398745,
+                -0.39921887647435683
+              ],
+              [
+                -0.25700020096363385,
+                -0.18959151149076098,
+                -0.2399612424312986
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "carry",
+          "target": [
+            1.8296138362763572,
+            1.5788703295382205
+          ]
+        },
+        {
+          "Q": 588.8244435564169,
+          "S": 1.532887286554828,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.345,
+          "feasible": true,
+          "native_wall_s": 0.005607913015410304,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                -0.24012768381580651,
+                0.009666032523028306,
+                -0.19045564410304727
+              ],
+              [
+                0.04408836536039393,
+                -0.2479570864571605,
+                -0.19461410447041294
+              ],
+              [
+                -0.08506449707537628,
+                -0.46196861595847116,
+                -0.4391686523667809
+              ],
+              [
+                -0.0961388321667266,
+                -0.258243940640421,
+                -0.4126682955107288
+              ],
+              [
+                0.13375690078160304,
+                -0.09637835828543845,
+                -0.2565284041406722
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "historical_design",
+          "target": [
+            1.7552850852428414,
+            1.649967395744192
+          ]
+        },
+        {
+          "Q": 644.4424791443298,
+          "S": 1.5323428139765753,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.805,
+          "feasible": true,
+          "native_wall_s": 0.005958588008070365,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.09555984649020838,
+                0.2075776255855982,
+                0.2962899632783605
+              ],
+              [
+                0.14178674523700396,
+                0.2013870953616554,
+                0.29123271029983144
+              ],
+              [
+                0.19000477877207428,
+                0.20693230811716445,
+                0.27119357189761595
+              ],
+              [
+                0.08523514104713711,
+                0.24261663785475088,
+                0.2770410657967024
+              ],
+              [
+                0.1944987324266768,
+                0.23094504641030564,
+                0.30319771861213474
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "positive",
+          "target": [
+            1.6390078359581919,
+            1.761189112451248
+          ]
+        }
+      ],
+      "close_rank_fallback": false,
+      "context": {
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0",
+        "nominal_d": 6.7516738991108e-05,
+        "nominal_m": 0.2002210937698526,
+        "nominal_target": [
+          1.692390096016454,
+          1.7101278202216061
+        ],
+        "observation": [
+          0.9597344994544983,
+          0.9598648548126221,
+          -8.542426144231285e-07,
+          -9.494463881765114e-09,
+          0.9599999785423279,
+          0.9599999785423279,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.1445123255252838,
+          0.0201613437384367,
+          0.03397072106599808,
+          3.3481194972991943,
+          0.7748519778251648,
+          1.0159574747085571,
+          0.9987000226974487,
+          0.14653488993644714,
+          0.1598634570837021,
+          0.5241074562072754,
+          0.4969099462032318,
+          0.0006326594157144427,
+          -0.0002566810871940106,
+          -0.00030497051193378866,
+          0.0005350068095140159,
+          0.0007436997257173061,
+          -8.80373700056225e-05,
+          8.923402492655441e-05,
+          1.4711550647916738e-05,
+          -0.00016057312313932925,
+          -0.00015069401706568897,
+          -0.19666796922683716,
+          4.955172698828392e-05,
+          -0.18005026876926422,
+          0.00025586027186363935,
+          0.059736013412475586,
+          0.0007290950743481517,
+          -1.0907641808444168e-05,
+          0.06209750100970268,
+          0.4368908703327179,
+          0.28854742646217346,
+          0.0,
+          0.0,
+          1.0,
+          0.33416667580604553,
+          0.7757344841957092,
+          0.7838648557662964,
+          0.0,
+          0.0,
+          -0.31815218925476074,
+          -0.380204439163208,
+          0.0,
+          0.20022109150886536,
+          0.0,
+          0.6658333539962769
+        ],
+        "observation_role": "causal 55D plus explicit K3 residual history",
+        "phase": "RETURN",
+        "raw_reference_common_progress": 0.0,
+        "richer_previous_residual": [
+          -0.3181521911103031,
+          -0.20622662451159549,
+          -0.38020444651387986
+        ],
+        "start_m": 0.0,
+        "task_s": 10.025000000005589
+      },
+      "context_s": 0.04555433499626815,
+      "coordinator_location": "existing native task worker",
+      "count_before": {
+        "OUTBOUND": 5,
+        "RETURN": 0
+      },
+      "delay_mode": "scientific synchronous",
+      "end_to_end_s": 0.06584658398060128,
+      "fast_coordinator_s": 0.05224280297989026,
+      "fast_evaluated_indices": [
+        1
+      ],
+      "full_worker_elapsed_ms": 73.556758,
+      "generation_s": 0.00026661402080208063,
+      "late": true,
+      "late_discard": false,
+      "native_command_reserve_s": 0.010951999,
+      "native_compute_reserve_s": 0.065567021,
+      "physical_source_s": 20.07500000000484,
+      "plan_changed": false,
+      "q_all": [
+        621.9208772296325,
+        566.0274036401526,
+        588.8244435564169,
+        644.4424791443298
+      ],
+      "q_first_order": [
+        1,
+        2,
+        0,
+        3
+      ],
+      "request_id": 14,
+      "roundoff_bounds": [
+        0.012733855175854902,
+        0.014367302358479593,
+        0.013780423482877306,
+        0.013999613642008869
+      ],
+      "scientific_full_validation_shadow": true,
+      "selected_index": 1,
+      "selected_source": "carry",
+      "selection_budget_s": 0.0,
+      "shadow_s": 0.013297252997290343,
+      "source_age_at_worker_return_ms": 75.282652,
+      "submission_s": 7.670299964956939e-05,
+      "timing_scope": "actual coordinator elapsed includes SCI shadow; fast prefix separately recorded",
+      "validation_and_S_s": 0.019624221982667223
+    },
+    {
+      "G_calls": 0,
+      "P_performance_calls": 0,
+      "Q_calls": 55,
+      "Q_inference_s": 1.5417987015098333e-05,
+      "applied_plan": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            -0.32096915041185925,
+            -0.3400619829984045,
+            -0.11597537206566344
+          ],
+          [
+            -0.2808490154782096,
+            -0.3121074293670117,
+            -0.20329555850378767
+          ],
+          [
+            -0.2624890125582334,
+            -0.24723506499398745,
+            -0.39921887647435683
+          ],
+          [
+            -0.25700020096363385,
+            -0.18959151149076098,
+            -0.2399612424312986
+          ]
+        ]
+      ],
+      "candidate_count": 4,
+      "candidate_records": [
+        {
+          "Q": 560.2554166387816,
+          "S": 0.9884836284728321,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.27,
+          "feasible": true,
+          "native_wall_s": 0.0009727930009830743,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "greedy",
+          "source": "B",
+          "target": [
+            1.4325883576756295,
+            1.2066838671166384
+          ]
+        },
+        {
+          "Q": 513.0558557500183,
+          "S": 1.0145025927660611,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 0.9500000000000001,
+          "feasible": true,
+          "native_wall_s": 0.005529636022401974,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.32096915041185925,
+                -0.3400619829984045,
+                -0.11597537206566344
+              ],
+              [
+                -0.2808490154782096,
+                -0.3121074293670117,
+                -0.20329555850378767
+              ],
+              [
+                -0.2624890125582334,
+                -0.24723506499398745,
+                -0.39921887647435683
+              ],
+              [
+                -0.25700020096363385,
+                -0.18959151149076098,
+                -0.2399612424312986
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "carry",
+          "target": [
+            1.564995457176194,
+            1.0800335980291422
+          ]
+        },
+        {
+          "Q": 530.5628013115629,
+          "S": 0.993930756605959,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.1500000000000001,
+          "feasible": true,
+          "native_wall_s": 0.005277287011267617,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.04408836536039393,
+                -0.2479570864571605,
+                -0.19461410447041294
+              ],
+              [
+                -0.08506449707537628,
+                -0.46196861595847116,
+                -0.4391686523667809
+              ],
+              [
+                -0.0961388321667266,
+                -0.258243940640421,
+                -0.4126682955107288
+              ],
+              [
+                0.13375690078160304,
+                -0.09637835828543845,
+                -0.2565284041406722
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "historical_design",
+          "target": [
+            1.4693721002256457,
+            1.1714994177209708
+          ]
+        },
+        {
+          "Q": 591.5561935518535,
+          "S": 0.980722311088121,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.58,
+          "feasible": true,
+          "native_wall_s": 0.005264690000331029,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.19360227024995877,
+                0.29162895572596786,
+                0.25455526433544595
+              ],
+              [
+                0.16313337518704174,
+                0.29884071290462555,
+                0.16814941908472847
+              ],
+              [
+                0.18720324560807794,
+                0.15024387727220678,
+                0.25683968163122367
+              ],
+              [
+                0.2404810354462164,
+                0.19428255459651494,
+                0.1938951216744137
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "positive",
+          "target": [
+            1.336584255991332,
+            1.2985138774233578
+          ]
+        }
+      ],
+      "close_rank_fallback": false,
+      "context": {
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0",
+        "nominal_d": -0.06632733846117009,
+        "nominal_m": 0.39605545433602585,
+        "nominal_target": [
+          1.4325883576756295,
+          1.2066838671166384
+        ],
+        "observation": [
+          0.8406501412391663,
+          0.729103147983551,
+          -0.26003554463386536,
+          -0.2677280008792877,
+          0.834793210029602,
+          0.7173008322715759,
+          -0.2666666805744171,
+          -0.2666666805744171,
+          0.0,
+          0.0,
+          0.1445123255252838,
+          0.0201613437384367,
+          0.03397072106599808,
+          3.3481194972991943,
+          0.7748519778251648,
+          1.0159574747085571,
+          0.9987000226974487,
+          0.14653488993644714,
+          0.1598634570837021,
+          0.5241074562072754,
+          0.4969099462032318,
+          0.0006326594157144427,
+          -0.0002566810871940106,
+          -0.00030497051193378866,
+          0.0005350068095140159,
+          0.0007436997257173061,
+          -8.80373700056225e-05,
+          8.923402492655441e-05,
+          1.4711550647916738e-05,
+          -0.00016057312313932925,
+          -0.00015069401706568897,
+          -0.21207261085510254,
+          -0.0022057942114770412,
+          -0.11133615672588348,
+          -0.0035731347743421793,
+          0.0899624451994896,
+          0.005205725319683552,
+          -1.0907641808444168e-05,
+          0.06209750100970268,
+          0.4368908703327179,
+          0.28854742646217346,
+          0.0,
+          0.0,
+          1.0,
+          0.37549999356269836,
+          0.6566501259803772,
+          0.5531031489372253,
+          0.12399999797344208,
+          0.0,
+          -0.3383674621582031,
+          -0.12783585488796234,
+          0.20594441890716553,
+          0.3960554599761963,
+          0.0,
+          0.6244999766349792
+        ],
+        "observation_role": "causal 55D plus explicit K3 residual history",
+        "phase": "RETURN",
+        "raw_reference_common_progress": 0.20594441392795515,
+        "richer_previous_residual": [
+          -0.3383674492053366,
+          -0.3487648742987286,
+          -0.12783585993742802
+        ],
+        "start_m": 0.20594441392795515,
+        "task_s": 11.26500000001151
+      },
+      "context_s": 0.04608953100978397,
+      "coordinator_location": "existing native task worker",
+      "count_before": {
+        "OUTBOUND": 5,
+        "RETURN": 1
+      },
+      "delay_mode": "scientific synchronous",
+      "end_to_end_s": 0.06581070902757347,
+      "fast_coordinator_s": 0.05251123302150518,
+      "fast_evaluated_indices": [
+        1
+      ],
+      "full_worker_elapsed_ms": 74.840669,
+      "generation_s": 0.0003038400027435273,
+      "late": true,
+      "late_discard": false,
+      "native_command_reserve_s": 0.010951999,
+      "native_compute_reserve_s": 0.065567021,
+      "physical_source_s": 21.315000000010762,
+      "plan_changed": false,
+      "q_all": [
+        560.2554166387816,
+        513.0558557500183,
+        530.5628013115629,
+        591.5561935518535
+      ],
+      "q_first_order": [
+        1,
+        2,
+        0,
+        3
+      ],
+      "request_id": 15,
+      "roundoff_bounds": [
+        0.009914502049929682,
+        0.011158108461866392,
+        0.01063678101496251,
+        0.011072674674912932
+      ],
+      "scientific_full_validation_shadow": true,
+      "selected_index": 1,
+      "selected_source": "carry",
+      "selection_budget_s": 0.0,
+      "shadow_s": 0.012853114982135594,
+      "source_age_at_worker_return_ms": 76.88034,
+      "submission_s": 8.853498729877174e-05,
+      "timing_scope": "actual coordinator elapsed includes SCI shadow; fast prefix separately recorded",
+      "validation_and_S_s": 0.018860150972614065
+    },
+    {
+      "G_calls": 0,
+      "P_performance_calls": 0,
+      "Q_calls": 63,
+      "Q_inference_s": 1.9094994058832526e-05,
+      "applied_plan": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            -0.2808490154782096,
+            -0.3121074293670117,
+            -0.20329555850378767
+          ],
+          [
+            -0.2624890125582334,
+            -0.24723506499398745,
+            -0.39921887647435683
+          ],
+          [
+            -0.25700020096363385,
+            -0.18959151149076098,
+            -0.2399612424312986
+          ]
+        ]
+      ],
+      "candidate_count": 4,
+      "candidate_records": [
+        {
+          "Q": 493.26774254443774,
+          "S": 0.6181177416960238,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.2650000000000001,
+          "feasible": true,
+          "native_wall_s": 0.0010634159843903035,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "greedy",
+          "source": "B",
+          "target": [
+            1.1691978490607315,
+            0.7085681850645985
+          ]
+        },
+        {
+          "Q": 464.14498272317394,
+          "S": 0.6569779923232772,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 0.93,
+          "feasible": true,
+          "native_wall_s": 0.006809891987359151,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.2808490154782096,
+                -0.3121074293670117,
+                -0.20329555850378767
+              ],
+              [
+                -0.2624890125582334,
+                -0.24723506499398745,
+                -0.39921887647435683
+              ],
+              [
+                -0.25700020096363385,
+                -0.18959151149076098,
+                -0.2399612424312986
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "carry",
+          "target": [
+            1.2910128955815474,
+            0.5920494449142528
+          ]
+        },
+        {
+          "Q": 466.6927327255696,
+          "S": 0.6655000207430228,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 0.97,
+          "feasible": true,
+          "native_wall_s": 0.006448608997743577,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.08506449707537628,
+                -0.46196861595847116,
+                -0.4391686523667809
+              ],
+              [
+                -0.0961388321667266,
+                -0.258243940640421,
+                -0.4126682955107288
+              ],
+              [
+                0.13375690078160304,
+                -0.09637835828543845,
+                -0.2565284041406722
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "historical_design",
+          "target": [
+            1.3127687351124404,
+            0.5712395114499207
+          ]
+        },
+        {
+          "Q": 518.1456797460421,
+          "S": 0.5951106580934942,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.6400000000000001,
+          "feasible": true,
+          "native_wall_s": 0.007245993998367339,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.2188943466870916,
+                0.3150800539592426,
+                0.22281331159201853
+              ],
+              [
+                0.2002458480979859,
+                0.23048337533570612,
+                0.20333203275479725
+              ],
+              [
+                0.1786256061553706,
+                0.3185843751619638,
+                0.24826158752227967
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "positive",
+          "target": [
+            1.0534031356883597,
+            0.8193283456816496
+          ]
+        }
+      ],
+      "close_rank_fallback": false,
+      "context": {
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0",
+        "nominal_d": -0.1304405174189174,
+        "nominal_m": 0.591396150749754,
+        "nominal_target": [
+          1.1691978490607315,
+          0.7085681850645985
+        ],
+        "observation": [
+          0.719920814037323,
+          0.5007837414741516,
+          -0.265733927488327,
+          -0.2739170491695404,
+          0.7135010957717896,
+          0.48865094780921936,
+          -0.2666666805744171,
+          -0.2666666805744171,
+          0.0,
+          1.8795522133230016e-16,
+          0.1445123255252838,
+          0.0201613437384367,
+          0.03397072106599808,
+          3.3481194972991943,
+          0.7748519778251648,
+          1.0159574747085571,
+          0.9987000226974487,
+          0.14653488993644714,
+          0.1598634570837021,
+          0.5241074562072754,
+          0.4969099462032318,
+          0.0006326594157144427,
+          -0.0002566810871940106,
+          -0.00030497051193378866,
+          0.0005350068095140159,
+          0.0007436997257173061,
+          -8.80373700056225e-05,
+          8.923402492655441e-05,
+          1.4711550647916738e-05,
+          -0.00016057312313932925,
+          -0.00015069401706568897,
+          -0.24375498294830322,
+          -0.0016347437631338835,
+          -0.08864663541316986,
+          -0.002341033425182104,
+          0.1306992471218109,
+          0.002030843636021018,
+          -1.0907641808444168e-05,
+          0.06209750100970268,
+          0.4368908703327179,
+          0.28854742646217346,
+          0.0,
+          0.0,
+          1.0,
+          0.4088333249092102,
+          0.5359207987785339,
+          0.3247837424278259,
+          0.2240000069141388,
+          0.0,
+          -0.3209691643714905,
+          -0.11597537249326706,
+          0.40177878737449646,
+          0.591396152973175,
+          0.0,
+          0.5911666750907898
+        ],
+        "observation_role": "causal 55D plus explicit K3 residual history",
+        "phase": "RETURN",
+        "raw_reference_common_progress": 0.4017787744941284,
+        "richer_previous_residual": [
+          -0.32096915041185925,
+          -0.3400619829984045,
+          -0.11597537206566344
+        ],
+        "start_m": 0.4017787744941284,
+        "task_s": 12.265000000016284
+      },
+      "context_s": 0.050403639004798606,
+      "coordinator_location": "existing native task worker",
+      "count_before": {
+        "OUTBOUND": 5,
+        "RETURN": 2
+      },
+      "delay_mode": "scientific synchronous",
+      "end_to_end_s": 0.07506287001888268,
+      "fast_coordinator_s": 0.05822863001958467,
+      "fast_evaluated_indices": [
+        1
+      ],
+      "full_worker_elapsed_ms": 84.860842,
+      "generation_s": 0.0003686150012072176,
+      "late": true,
+      "late_discard": false,
+      "native_command_reserve_s": 0.010951999,
+      "native_compute_reserve_s": 0.065567021,
+      "physical_source_s": 22.315000000015537,
+      "plan_changed": false,
+      "q_all": [
+        493.26774254443774,
+        464.14498272317394,
+        466.6927327255696,
+        518.1456797460421
+      ],
+      "q_first_order": [
+        1,
+        2,
+        0,
+        3
+      ],
+      "request_id": 16,
+      "roundoff_bounds": [
+        0.008697379035890596,
+        0.009444060084404342,
+        0.009230220513708842,
+        0.009440395491841709
+      ],
+      "scientific_full_validation_shadow": true,
+      "selected_index": 1,
+      "selected_source": "carry",
+      "selection_budget_s": 0.0,
+      "shadow_s": 0.016378380998503417,
+      "source_age_at_worker_return_ms": 87.630163,
+      "submission_s": 0.00010887300595641136,
+      "timing_scope": "actual coordinator elapsed includes SCI shadow; fast prefix separately recorded",
+      "validation_and_S_s": 0.02370989296468906
+    },
+    {
+      "G_calls": 0,
+      "P_performance_calls": 0,
+      "Q_calls": 69,
+      "Q_inference_s": 1.975300256162882e-05,
+      "applied_plan": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ]
+      ],
+      "candidate_count": 4,
+      "candidate_records": [
+        {
+          "Q": 423.845400123273,
+          "S": 0.41301613843258556,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.26,
+          "feasible": true,
+          "native_wall_s": 0.0010878439934458584,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "greedy",
+          "source": "B",
+          "target": [
+            0.8957919471132204,
+            0.22153072120748318
+          ]
+        },
+        {
+          "S": 0.41301613843258556,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.26,
+          "feasible": true,
+          "native_wall_s": 0.0012310569873079658,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.2624890125582334,
+                -0.24723506499398745,
+                -0.39921887647435683
+              ],
+              [
+                -0.25700020096363385,
+                -0.18959151149076098,
+                -0.2399612424312986
+              ]
+            ]
+          ],
+          "proposal_accepted": false,
+          "reason": "NORMALIZED_TARGET_OUT_OF_RANGE",
+          "selection_mode": "native_residual_v2_REJECTED",
+          "source": "carry",
+          "target": [
+            0.8957919471132204,
+            0.22153072120748318
+          ]
+        },
+        {
+          "S": 0.41301613843258556,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.26,
+          "feasible": true,
+          "native_wall_s": 0.0012224760139361024,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.0961388321667266,
+                -0.258243940640421,
+                -0.4126682955107288
+              ],
+              [
+                0.13375690078160304,
+                -0.09637835828543845,
+                -0.2565284041406722
+              ]
+            ]
+          ],
+          "proposal_accepted": false,
+          "reason": "NORMALIZED_TARGET_OUT_OF_RANGE",
+          "selection_mode": "native_residual_v2_REJECTED",
+          "source": "historical_design",
+          "target": [
+            0.8957919471132204,
+            0.22153072120748318
+          ]
+        },
+        {
+          "Q": 436.9630605655982,
+          "S": 0.38108490429553277,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.58,
+          "feasible": true,
+          "native_wall_s": 0.006652409996604547,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.31095559465347,
+                0.22982598057835402,
+                0.29472825082163884
+              ],
+              [
+                0.30129272917700184,
+                0.2671233151545486,
+                0.21016297450706417
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "native_residual_v2_ACCEPTED",
+          "source": "positive",
+          "target": [
+            0.7974820556869204,
+            0.3155662695282915
+          ]
+        }
+      ],
+      "close_rank_fallback": false,
+      "context": {
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0",
+        "nominal_d": -0.18917358110357074,
+        "nominal_m": 0.7863466429175379,
+        "nominal_target": [
+          0.8957919471132204,
+          0.22153072120748318
+        ],
+        "observation": [
+          0.5946007966995239,
+          0.27754220366477966,
+          -0.2699623703956604,
+          -0.2777822017669678,
+          0.5879167318344116,
+          0.26497548818588257,
+          -0.2666666805744171,
+          -0.2666666805744171,
+          0.0,
+          0.0,
+          0.1445123255252838,
+          0.0201613437384367,
+          0.03397072106599808,
+          3.3481194972991943,
+          0.7748519778251648,
+          1.0159574747085571,
+          0.9987000226974487,
+          0.14653488993644714,
+          0.1598634570837021,
+          0.5241074562072754,
+          0.4969099462032318,
+          0.0006326594157144427,
+          -0.0002566810871940106,
+          -0.00030497051193378866,
+          0.0005350068095140159,
+          0.0007436997257173061,
+          -8.80373700056225e-05,
+          8.923402492655441e-05,
+          1.4711550647916738e-05,
+          -0.00016057312313932925,
+          -0.00015069401706568897,
+          -0.28304198384284973,
+          -0.0010431610280647874,
+          -0.05126370117068291,
+          -0.0007246854365803301,
+          0.23923078179359436,
+          0.004448206629604101,
+          -1.0907641808444168e-05,
+          0.06209750100970268,
+          0.4368908703327179,
+          0.28854742646217346,
+          0.0,
+          0.0,
+          1.0,
+          0.4415000081062317,
+          0.41060078144073486,
+          0.10154220461845398,
+          0.32199999690055847,
+          0.0,
+          -0.28084900975227356,
+          -0.20329555869102478,
+          0.5971194505691528,
+          0.7863466143608093,
+          0.0,
+          0.5584999918937683
+        ],
+        "observation_role": "causal 55D plus explicit K3 residual history",
+        "phase": "RETURN",
+        "raw_reference_common_progress": 0.5971194709078567,
+        "richer_previous_residual": [
+          -0.2808490154782096,
+          -0.3121074293670117,
+          -0.20329555850378767
+        ],
+        "start_m": 0.5971194709078567,
+        "task_s": 13.245000000020964
+      },
+      "context_s": 0.06131365499459207,
+      "coordinator_location": "existing native task worker",
+      "count_before": {
+        "OUTBOUND": 5,
+        "RETURN": 3
+      },
+      "delay_mode": "scientific synchronous",
+      "end_to_end_s": 0.07489346599322744,
+      "fast_coordinator_s": 0.06712575900019147,
+      "fast_evaluated_indices": [
+        1,
+        2,
+        0
+      ],
+      "full_worker_elapsed_ms": 86.388338,
+      "generation_s": 0.0004457549948710948,
+      "late": true,
+      "late_discard": false,
+      "native_command_reserve_s": 0.010951999,
+      "native_compute_reserve_s": 0.065567021,
+      "physical_source_s": 23.295000000020217,
+      "plan_changed": true,
+      "q_all": [
+        423.84540012327307,
+        410.4595706228508,
+        411.7658150144539,
+        436.96306056559825
+      ],
+      "q_first_order": [
+        1,
+        2,
+        0,
+        3
+      ],
+      "request_id": 17,
+      "roundoff_bounds": [
+        0.009454912225310634,
+        0.009886977746973466,
+        0.009708066448825485,
+        0.009945868990140293
+      ],
+      "scientific_full_validation_shadow": true,
+      "selected_index": 0,
+      "selected_source": "B",
+      "selection_budget_s": 0.0,
+      "shadow_s": 0.0072412589797750115,
+      "source_age_at_worker_return_ms": 89.270687,
+      "submission_s": 0.00011389798601157963,
+      "timing_scope": "actual coordinator elapsed includes SCI shadow; fast prefix separately recorded",
+      "validation_and_S_s": 0.012478138989536092
+    },
+    {
+      "G_calls": 0,
+      "P_performance_calls": 0,
+      "Q_calls": 74,
+      "Q_inference_s": 1.6942998627200723e-05,
+      "applied_plan": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ]
+      ],
+      "candidate_count": 4,
+      "candidate_records": [
+        {
+          "Q": 338.8107620238522,
+          "S": 0.2922541015919124,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.2750000000000001,
+          "feasible": true,
+          "native_wall_s": 0.0006625090027227998,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ]
+          ],
+          "proposal_accepted": true,
+          "reason": null,
+          "selection_mode": "greedy",
+          "source": "B",
+          "target": [
+            0.49686486589327017,
+            0.16580627893946132
+          ]
+        },
+        {
+          "S": 0.2922541015919124,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 22, in choose\n    evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.2750000000000001,
+          "feasible": true,
+          "native_wall_s": 0.017651845002546906,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.13375690078160304,
+                -0.09637835828543845,
+                -0.2565284041406722
+              ]
+            ]
+          ],
+          "proposal_accepted": false,
+          "reason": "NORMALIZED_TARGET_OUT_OF_RANGE",
+          "selection_mode": "native_residual_v2_REJECTED",
+          "source": "historical_design",
+          "target": [
+            0.49686486589327017,
+            0.16580627893946132
+          ]
+        },
+        {
+          "S": 0.2922541015919124,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.2750000000000001,
+          "feasible": true,
+          "native_wall_s": 0.0006029099749866873,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.23514257849534093,
+                0.3102937259632038,
+                0.23469619951073678
+              ]
+            ]
+          ],
+          "proposal_accepted": false,
+          "reason": "candidate would regress the emitted reference away from the phase goal",
+          "selection_mode": "native_residual_v2_REJECTED",
+          "source": "positive",
+          "target": [
+            0.49686486589327017,
+            0.16580627893946132
+          ]
+        },
+        {
+          "S": 0.2922541015919124,
+          "call_stack": [
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/interfaces.py\", line 37, in decision_boundary\n    self.choose(b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/async_native_worker.py\", line 19, in choose\n    def choose(self,b,c):return q_first_method.QFirstInterface.choose(self,b,c)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 35, in choose\n    if j not in evaluated:evaluate(j)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/q_first_method.py\", line 18, in evaluate\n    try:ev=native_local(b,c,pool[j][0],self.count)\n",
+            "  File \"/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/code/certified_snapshot_v2.py\", line 26, in native_local\n    return dict(feasible=bool(e.feasible),proposal_accepted=not meta or meta.get('status')=='ACCEPTED',S=float(e.total_cost),selection_mode=decision.selection_mode,reason=meta.get('reason'),native_wall_s=time.monotonic()-t,duration_s=e.schedule.duration_s if e.schedule else None,target=e.target_q_rad,call_stack=traceback.format_stack(limit=5))\n"
+          ],
+          "duration_s": 1.2750000000000001,
+          "feasible": true,
+          "native_wall_s": 0.0005927309975959361,
+          "plan": [
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                -0.29079895359875435,
+                -0.18144715646749757,
+                -0.09419859266054553
+              ]
+            ]
+          ],
+          "proposal_accepted": false,
+          "reason": "NORMALIZED_TARGET_OUT_OF_RANGE",
+          "selection_mode": "native_residual_v2_REJECTED",
+          "source": "negative",
+          "target": [
+            0.49686486589327017,
+            0.16580627893946132
+          ]
+        }
+      ],
+      "close_rank_fallback": false,
+      "context": {
+        "model_hash": "816252d9cf9bef2767363b65af3d7e9ca638c26e2a43071932598bb16e0f74e0",
+        "nominal_d": -0.10430863946411006,
+        "nominal_m": 0.9002368150813446,
+        "nominal_target": [
+          0.49686486589327017,
+          0.16580627893946132
+        ],
+        "observation": [
+          0.411746084690094,
+          0.10109463334083557,
+          -0.25386807322502136,
+          -0.15253639221191406,
+          0.4067607820034027,
+          0.0974554494023323,
+          -0.2666666805744171,
+          -0.17028135061264038,
+          -2.1369309829312032e-16,
+          0.0,
+          0.1445123255252838,
+          0.0201613437384367,
+          0.03397072106599808,
+          3.3481194972991943,
+          0.7748519778251648,
+          1.0159574747085571,
+          0.9987000226974487,
+          0.14653488993644714,
+          0.1598634570837021,
+          0.5241074562072754,
+          0.4969099462032318,
+          0.0006326594157144427,
+          -0.0002566810871940106,
+          -0.00030497051193378866,
+          0.0005350068095140159,
+          0.0007436997257173061,
+          -8.80373700056225e-05,
+          8.923402492655441e-05,
+          1.4711550647916738e-05,
+          -0.00016057312313932925,
+          -0.00015069401706568897,
+          -0.3148229420185089,
+          -0.000998890958726406,
+          0.10758788138628006,
+          0.0008567775366827846,
+          0.48470455408096313,
+          0.012693609111011028,
+          -1.0907641808444168e-05,
+          0.06209750100970268,
+          0.4368908703327179,
+          0.28854742646217346,
+          0.0,
+          0.0,
+          1.0,
+          0.48516666889190674,
+          0.22774608433246613,
+          0.07599999755620956,
+          0.453000009059906,
+          0.0,
+          0.0,
+          0.0,
+          0.7907556295394897,
+          0.9002367854118347,
+          0.0,
+          0.5148333311080933
+        ],
+        "observation_role": "causal 55D plus explicit K3 residual history",
+        "phase": "RETURN",
+        "raw_reference_common_progress": 0.7907556178812246,
+        "richer_previous_residual": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "start_m": 0.7907556178812246,
+        "task_s": 14.555000000027219
+      },
+      "context_s": 0.020414998987689614,
+      "coordinator_location": "existing native task worker",
+      "count_before": {
+        "OUTBOUND": 5,
+        "RETURN": 4
+      },
+      "delay_mode": "scientific synchronous",
+      "end_to_end_s": 0.0422318049822934,
+      "fast_coordinator_s": 0.040068621980026364,
+      "fast_evaluated_indices": [
+        1,
+        0
+      ],
+      "full_worker_elapsed_ms": 49.794647,
+      "generation_s": 0.00032616598764434457,
+      "late": true,
+      "late_discard": false,
+      "native_command_reserve_s": 0.010951999,
+      "native_compute_reserve_s": 0.065567021,
+      "physical_source_s": 24.60500000002647,
+      "plan_changed": false,
+      "q_all": [
+        338.81076202385213,
+        334.9430138495713,
+        341.26253088671496,
+        338.98645768401775
+      ],
+      "q_first_order": [
+        1,
+        0,
+        3,
+        2
+      ],
+      "request_id": 18,
+      "roundoff_bounds": [
+        0.01338066320520927,
+        0.013414005768363827,
+        0.013531548467288775,
+        0.013459425580717376
+      ],
+      "scientific_full_validation_shadow": true,
+      "selected_index": 0,
+      "selected_source": "B",
+      "selection_budget_s": 0.0,
+      "shadow_s": 0.0018520870071370155,
+      "source_age_at_worker_return_ms": 51.534235,
+      "submission_s": 7.285299943760037e-05,
+      "timing_scope": "actual coordinator elapsed includes SCI shadow; fast prefix separately recorded",
+      "validation_and_S_s": 0.021078550984384492
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "schema": "stage5_geometry_mechanics_v1",
+  "evidence_category": "smoke_engineering_validation_only",
+  "provisional_not_measured": true,
+  "frames": {
+    "convention": "T_PARENT_CHILD maps CHILD coordinates into PARENT",
+    "W": "world/table frame; +X nominal leg longitudinal, +Y lateral toward the opposite side of the robot, +Z up",
+    "B": "robot base frame",
+    "H": "Human hip frame",
+    "E": "robot terminal attachment_site frame",
+    "C": "cuff frame; +X shank/bar, +Y circumferential/tangential, +Z radial/principal contact-force direction; the E +Y stem maps to C -Z",
+    "T_WB": {
+      "rotation": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+      "translation_m": [0.6, -0.62, 0.04]
+    },
+    "T_WH": {
+      "rotation": [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+      "translation_m": [0.0, 0.0, 0.062]
+    },
+    "T_EC": {
+      "rotation": [[1.0, 0.0, 0.0], [0.0, 0.0, -1.0], [0.0, 1.0, 0.0]],
+      "translation_m": [0.0, 0.14, 0.0]
+    }
+  },
+  "geometry": {
+    "base_alignment_fraction_of_shank_from_knee_neutral": 0.4070266493662042,
+    "cuff_center_fraction_of_shank_from_knee": 0.72,
+    "cuff_center_distance_from_knee_m": 0.2885472,
+    "adapter_length_m": 0.14,
+    "cuff_bar_axis_in_C": [1.0, 0.0, 0.0],
+    "terminal_stem_axis_in_E": [0.0, 1.0, 0.0],
+    "cuff_bar_length_m": 0.08,
+    "cuff_bar_radius_m": 0.012,
+    "ik_reference_seed_deg": [94.4, -107.6, -128.0, -124.4, -85.6, -175.0],
+    "thigh_radius_m_unchanged": 0.05,
+    "shank_radius_m_unchanged": 0.045,
+    "cuff_outer_radius_m_unchanged": 0.058
+  },
+  "mechanics": {
+    "stage4_p1_reference": {
+      "translation_stiffness_n_m": [500.0, 500.0, 500.0],
+      "translation_damping_ns_m": [35.63902676526988, 35.63902676526988, 35.63902676526988],
+      "rotation_stiffness_nm_rad": 20.0,
+      "rotation_damping_nms_rad": 1.0
+    },
+    "stage5_stiff_surrogate": {
+      "translation_stiffness_n_m": [2000.0, 2000.0, 2000.0],
+      "translation_damping_ns_m": [71.27805353053976, 71.27805353053976, 71.27805353053976],
+      "rotation_stiffness_nm_rad": 80.0,
+      "rotation_damping_nms_rad": 2.0
+    },
+    "human_joint_passive_stiffness_nm_rad_unchanged": [10.0, 10.0],
+    "human_joint_passive_damping_nms_rad_unchanged": [5.0, 5.0],
+    "nominal_physics_dt_s": 0.00025,
+    "timestep_probe_s": [0.001, 0.0005, 0.00025],
+    "damping_rule": "K is 4x the P1 reference and D is 2x, preserving damping ratio for the same effective mass assumption"
+  },
+  "representative_postures_deg": [
+    [0.0, 5.0],
+    [5.0, 10.0],
+    [20.0, 35.0],
+    [40.0, 60.0],
+    [45.0, 84.0],
+    [60.0, 90.0],
+    [80.0, 100.0],
+    [80.0, 20.0]
+  ],
+  "safety": {
+    "stage4_engineering_force_target_n_unchanged": 200.0,
+    "stage5_exploration_stop_threshold_n": null,
+    "available_existing_layers": ["executable screening", "Safety Filter", "BRAKE"],
+    "monitoring_hooks": ["physical_cuff_force", "physical_cuff_force_slew", "interface_deformation", "cuff_pose_error", "screening_status", "brake_status"]
+  }
+}

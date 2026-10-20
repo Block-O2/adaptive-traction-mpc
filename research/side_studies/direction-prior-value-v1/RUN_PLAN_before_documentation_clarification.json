@@ -1,0 +1,134 @@
+{
+  "version": 2,
+  "start_unix": 1791222386,
+  "deadline_unix": 1791279986,
+  "dispatch_cutoff_unix": 1791277286.0,
+  "target_hours": [
+    12,
+    16
+  ],
+  "max_physics_attempts": 300,
+  "reserved_comparison_attempts": 90,
+  "physics_owners": 1,
+  "information_condition": "KNOWN_MODEL",
+  "known_model_wiring_cutoff_unix": 1791225986,
+  "primary_metric": "complete physical/scientific VALID and R2 MATCHED J_F N s; invalid excluded from cost ranking and retained in failure rates",
+  "engineering_benefit_fraction": 0.005,
+  "moment_tradeoffs": "report integral and peak, no hidden force-only promotion",
+  "groups": {
+    "train": [
+      "parent_train_0",
+      "parent_train_1"
+    ],
+    "dev": [
+      "parent_dev_0"
+    ],
+    "test": [
+      "test_nominal_0",
+      "test_nominal_1",
+      "test_deviation_0",
+      "test_deviation_1"
+    ],
+    "parent_and_all_branches_same_split": true
+  },
+  "data_target_state_groups": [
+    12,
+    18
+  ],
+  "initial_labels": [
+    80,
+    120
+  ],
+  "development_iterations_max": 2,
+  "stages": {
+    "preflight_attempts": 8,
+    "initial_labels_attempts": 96,
+    "small_complete_2x2_attempts": 16,
+    "extension_labels_attempts": 44,
+    "final_comparison_attempts": 64,
+    "diagnostic_attempts": 24,
+    "pilot_attempts": 18,
+    "reserve_attempts": 30
+  },
+  "planner": {
+    "native_authority": "K3 at existing interior B request only; HOLD and phase managed by B",
+    "horizon": "3 native interior opportunities, actual predicted durations recorded",
+    "candidate_budget": 8,
+    "generations": 2,
+    "proposal_fraction_max": 0.5,
+    "retain_B": true,
+    "retain_previous_suffix": true,
+    "structured_temporal_sampling": true,
+    "online_full_physics_rollouts": false
+  },
+  "G": {
+    "hidden": [
+      128,
+      128
+    ],
+    "heads": 3,
+    "role": "candidate proposal only"
+  },
+  "V": {
+    "hidden": [
+      128,
+      128
+    ],
+    "linear_baseline": true,
+    "label": "actual remaining J_F under versioned continuation minus V_base at same terminal",
+    "score": "recent model J_F + V_base(terminal) + deltaV(terminal)",
+    "unit": "N s",
+    "policy_continuation": "committed coordinated suffix then replanning with frozen strong P; all unexecuted suffix included in input"
+  },
+  "resources": {
+    "sample_s": 45,
+    "persistent_span_s": 120,
+    "backoff_s": [
+      300,
+      600,
+      1200
+    ],
+    "recovery_limit_s": 3600,
+    "new_disk_target_bytes": 16106127360,
+    "stable_swap_not_stop": true
+  },
+  "pilot": "only explicit user criteria and >=3 hours remaining",
+  "test_discipline": "no test-driven tuning; revisions need unused test groups",
+  "forbidden": [
+    "Git mutation",
+    "physics/safety/authority/reward changes",
+    "SAC/DAgger/PPO/TQC",
+    "unknown-process kill",
+    "WSL restart/config changes"
+  ],
+  "information_scope": "KNOWN_MODEL research candidate prediction; unchanged frozen estimated B observer, actuator and safety model; no oracle physical initialization",
+  "preflight_gate_sha256": "81404aa0475649eff783ba9da04505b6d90a07872052e639f3a925a9e5925c9b",
+  "forecast_tracking_model": "causal current error, exp(-4 t/duration) internal hypothesis; future nodes labelled prediction-only; no physical receipt fabrication",
+  "horizon_rule": "up to 3 native interior opportunities, terminate at phase endpoint if fewer remain; model continuation handles task HOLD/phase wait and remaining coordinated suffix",
+  "continuation_version": "native-certified-committed-K3-suffix-v1",
+  "continuation_semantics": "reapply remaining K3 table at each actual native B boundary; B revalidates graph against live observations and retains certified continuation on rejection; future suffix and native counts enter V input",
+  "frozen_unix": 1791223675.7855465,
+  "preflight_repair": {
+    "version": 2,
+    "unix": 1791225942.725335,
+    "before_any_learning_or_heldout_comparison": true,
+    "reason": "P smoke returned after 9.385s; its own forecast predicted inadmissible timing. Strengthen common P before learning comparison.",
+    "changes": [
+      "reject forecast plans whose phase arrival + minimum native ownership ticks exceeds unchanged R2 upper bound",
+      "initial carried-plan slot uses verified unlearned K3 design seed when no previous plan exists; future slots retain valid remaining plan",
+      "value input masks already executed table rows, preserves actual causal history and explicit unexecuted suffix; old raw features remapped without changing labels",
+      "count internal inverse-dynamics API calls as well as public prediction calls"
+    ],
+    "unchanged": [
+      "B/physical/init/attachment/preload/safety/ROM/common-mode authority",
+      "online candidate budget 8 x2, G<=3 per generation",
+      "KNOWN_MODEL declared research prediction scope",
+      "V_base arithmetic and native-certified-committed-K3-suffix-v1",
+      "all old results including unmatched P",
+      "original start/deadline and physics attempt budget"
+    ],
+    "data_compatibility": "Only feature remapping, timing eligibility metadata and integer call counters changed; stored Monte Carlo cost and model-base labels retain same continuation definition",
+    "failed_P_source_archive": "source_history/P_SMOKE_FAILED_v0_reconstructed; retrospective reconstruction explicitly disclosed"
+  },
+  "amendment_sha256": "d483696729b3578456e774de59b1aef6ac7dbff8289100cea69075c5cc815881"
+}

@@ -1,0 +1,16 @@
+"""Check recorded proposals and safe actions against the next causal observation echo."""
+from common import *
+def audit(path):
+ z=np.load(path);n=len(z['actions']);done=z['terminated']|z['truncated'];live=~done;assert np.isfinite(z['observations']).all() and np.isfinite(z['next_observations']).all();assert z['observations'].shape==(n,55) and z['actions'].shape==(n,2);assert np.all(np.abs(z['actions'])<=1)
+ raw_error=float(np.max(np.abs(z['next_observations'][live,49:51]-z['actions'][live].astype(z['next_observations'].dtype)))) if live.any() else 0.;safe_error=float(np.max(np.abs(z['next_observations'][live,51:53]-z['executed_actions'][live].astype(z['next_observations'].dtype)))) if live.any() else 0.;assert raw_error==safe_error==0.,'TRANSITION_ACTION_ECHO_MISMATCH:'+str(path)
+ if 'episode' not in z:
+  assert np.array_equal(z['next_observations'][:-1],z['observations'][1:]),'NEXT_OBSERVATION_MISMATCH';assert not done[:-1].any()
+ else:
+  for name in dict.fromkeys(z['episode'].tolist()):
+   ids=np.flatnonzero(z['episode']==name);assert done[ids[-1]] and not done[ids[:-1]].any();assert np.array_equal(z['next_observations'][ids[:-1]],z['observations'][ids[1:]])
+ phase=np.array(['OUTBOUND','HOLD','RETURN'])[np.argmax(z['observations'][:,41:44],1)];assert np.array_equal(phase,z['phase']);return dict(path=str(path),sha256=sha(path),steps=n,terminal=bool(done[-1]),raw_proposal_echo_max_error=raw_error,safe_executed_action_echo_max_error=safe_error,phase_counts={p:int(np.sum(phase==p)) for p in ('OUTBOUND','HOLD','RETURN')})
+def run():
+ paths=[O/'HISTORY_RL.npz']+sorted(O.glob('**/TRANSITIONS.npz'))+sorted((O/'online').glob('**/TRANSITIONS_*.npz'));rows=[audit(p) for p in paths];im=np.load(O/'IMITATION_ONLY.npz');assert set(im.files)=={'observations','expert_actions','phase','expert_label_available'};assert im['expert_label_available'].all();budget=[json.loads(x) for x in (L/'BUDGET.jsonl').read_text().splitlines()];collection=sum(r['data_collection_steps'] for r in budget)+sum(r['steps'] for r in rows if '/online/' in r['path']);expected=read('FINAL_STATUS.json')['total_online_steps'] if (L/'FINAL_STATUS.json').exists() else read('STATE.json')['total_online_steps'];assert collection==expected,'ONLINE_BUDGET_ARCHIVE_MISMATCH'
+ save('FINAL_TRANSITION_EVIDENCE_AUDIT.json',dict(status='PASS',rows=rows,online_collection_budget=collection,expected_total_online_steps=expected,imitation_has_no_rewards_or_next_state=True,mechanism='Nonterminal next causal float32 observation [49:51] echoes the actual upper proposal, [51:53] echoes safety execution cast to the observation dtype. Exact representational equality plus episode observation continuity independently checks indexing and proposal/label substitution. Initial strict float64 comparison exposed only 2.22e-16 safe-action roundtrip precision in six legacy pure episodes; ACTION_ECHO_DIAGNOSIS.json retains that diagnosis. No transition was changed.',scope='all immutable native history, new evaluation episodes and complete/partial/failed online data; evaluation-only scope never enters active replay'))
+ print(json.dumps(dict(status='PASS',files=len(rows),online_steps=collection)),flush=True)
+if __name__=='__main__':run()

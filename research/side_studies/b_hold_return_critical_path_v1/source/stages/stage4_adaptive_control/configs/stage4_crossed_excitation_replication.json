@@ -1,0 +1,363 @@
+{
+  "schema_version": "stage4_crossed_excitation_replication_v1",
+  "study_id": "stage4_crossed_excitation_replication",
+  "design_status": "preregistered_before_structural_wiring_or_formal_execution",
+  "future_evidence_category": "formal_user_run_unreviewed",
+  "canonical_output_directory": "results/stage4_crossed_excitation_replication_formal",
+  "source_contracts": {
+    "baseline_tag": "stage4-baseline-v1",
+    "baseline_commit": "ef1fe90e61c5981df8e934585780ce188d104ea4",
+    "patient_config": {
+      "path": "configs/stage4_patient_mismatch_cases.json",
+      "sha256": "a51d3cb086ebeb21ea01b59c7cb6d7cb8a422fa3e9bab0028d84002cf2ed129b"
+    },
+    "trajectory_config": {
+      "path": "configs/stage4_trajectory_excitation_suite.json",
+      "sha256": "3024919e822297af06f01afa0a775f1453fe08abc0ed12cc313339811706ac14"
+    },
+    "offline_excitation_audit": {
+      "path": "results/stage4_trajectory_excitation_design_audit/audit.json",
+      "sha256": "46e78190ae2802bb8e1f7403680924a7302ffde388af7ad018387f849edba458"
+    },
+    "seed_source": "first_three_entries_in_the_preregistered_stage4_nominal_sensor_multiseed_sequence"
+  },
+  "fixed_contract": {
+    "arms": [
+      "prior_only",
+      "trusted_adaptive"
+    ],
+    "sensor_regime": "noise_bias_drift_200hz",
+    "sensor_magnitudes": "unchanged_existing_noise_bias_drift_200hz_definition",
+    "mpc_seed": 20260824,
+    "wall_time_rule": "trajectory_duration_s_plus_9.0_s",
+    "estimator": "causal_accumulated_integral_11_base_with_existing_bounds",
+    "trust": "primary_single_challenger_hac_lag2_with_existing_embargo_looks_and_alpha_spending",
+    "pacing": "existing_lowpass_hysteretic_model_confidence",
+    "mpc": "frozen_feasible_first_batched_cem_h15_n32_i2_e6_original_objective_and_constraints",
+    "allocator": "registered_1_to_1_cuff_aware",
+    "safety": "existing_force_moment_rom_robot_solver_warning_and_termination_contract",
+    "initialization": "fresh_estimator_trust_pacing_mpc_and_measurement_rng_per_arm_per_case",
+    "paired_common_random_numbers": true,
+    "prior_only_patient_specific_beta_application": false,
+    "trusted_adaptive_requires_valid_causal_promotion": true,
+    "active_excitation": false,
+    "trajectory_retuning": false,
+    "post_hoc_success_threshold": false,
+    "output_overwrite": false
+  },
+  "patient_levels": [
+    {
+      "index": 0,
+      "level": "mild_small_mismatch",
+      "patient_id": "registered_stage2_mild_anchor",
+      "mechanism": "mixed_mass_and_passive_equilibrium",
+      "estimator_span_l2": 0.152789,
+      "geometry_mismatch": false
+    },
+    {
+      "index": 1,
+      "level": "mixed_moderate_mismatch",
+      "patient_id": "registered_moderate_anchor",
+      "mechanism": "mixed_mass_com_stiffness_equilibrium_and_cuff_geometry",
+      "estimator_span_l2": 0.188129,
+      "geometry_mismatch": true
+    },
+    {
+      "index": 2,
+      "level": "stronger_composite_mismatch",
+      "patient_id": "registered_formal_perturbed_anchor",
+      "mechanism": "mixed_height_mass_com_stiffness_equilibrium_and_cuff_geometry",
+      "estimator_span_l2": 0.460384,
+      "geometry_mismatch": true
+    }
+  ],
+  "trajectory_levels": [
+    {
+      "index": 0,
+      "level": "anchor_high_information_baseline",
+      "trajectory_id": "registered_high_flexion_23s",
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "offline_excitation": {
+        "rank_z": 11,
+        "condition_x": 1217.0726692244136,
+        "condition_z": 349.0467428925417,
+        "sigma_min_x": 0.17394306080628003,
+        "information_lambda_min": 0.030256188397657056,
+        "information_trace": 55865.49025291841,
+        "weakest_direction_summary": "b_distal_inertia_plus_rest_offset_and_distal_gravity_combination"
+      }
+    },
+    {
+      "index": 1,
+      "level": "joint_biased_weak_absolute_information",
+      "trajectory_id": "hip_dominant_low_knee_23s",
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "offline_excitation": {
+        "rank_z": 11,
+        "condition_x": 6118.795596277068,
+        "condition_z": 108.64000302530468,
+        "sigma_min_x": 0.034477657644387025,
+        "information_lambda_min": 0.0011887088689436578,
+        "information_trace": 51334.28545728257,
+        "weakest_direction_summary": "distal_inertia_coupling_with_low_knee_rest_stiffness_and_damping_information"
+      }
+    },
+    {
+      "index": 2,
+      "level": "full_rank_practically_poor_conditioning",
+      "trajectory_id": "two_cycle_moderate_23s",
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "offline_excitation": {
+        "rank_z": 11,
+        "condition_x": 95364.89232798603,
+        "condition_z": 19638.86998776213,
+        "sigma_min_x": 0.0023932158345690456,
+        "information_lambda_min": 0.000005727481712835963,
+        "information_trace": 60075.99713081623,
+        "weakest_direction_summary": "distal_inertia_rest_offset_and_distal_gravity_combination_from_repeated_coordinated_cycles"
+      }
+    }
+  ],
+  "measurement_seed_levels": [
+    {
+      "index": 0,
+      "measurement_seed": 44104,
+      "selection_basis": "original_registered_anchor"
+    },
+    {
+      "index": 1,
+      "measurement_seed": 54113,
+      "selection_basis": "second_entry_in_frozen_multiseed_sequence"
+    },
+    {
+      "index": 2,
+      "measurement_seed": 64122,
+      "selection_basis": "third_entry_in_frozen_multiseed_sequence"
+    }
+  ],
+  "fractional_design": {
+    "type": "balanced_incomplete_three_factor_cross",
+    "full_cartesian_paired_cases": 27,
+    "selected_analytical_paired_cases": 18,
+    "selected_analytical_arms": 36,
+    "new_paired_cases_to_execute": 16,
+    "new_arms_to_execute": 32,
+    "read_only_bridge_paired_cases": 2,
+    "read_only_bridge_arms": 4,
+    "block_offsets_modulo_3": [
+      1,
+      2
+    ],
+    "selection_rule": "include seed_index=(patient_index+trajectory_index+offset) mod 3 for offsets 1 and 2",
+    "balance": {
+      "cases_per_patient": 6,
+      "cases_per_trajectory": 6,
+      "cases_per_seed": 6,
+      "third_factor_repeats_per_any_two_factor_cell": 2
+    },
+    "limitation": "supports balanced matched descriptive pairwise interaction contrasts but not an unconstrained full three_way interaction model"
+  },
+  "cases": [
+    {
+      "case_id": "registered_stage2_mild_anchor__registered_high_flexion_23s__seed54113",
+      "block": "offset_1",
+      "patient_id": "registered_stage2_mild_anchor",
+      "trajectory_id": "registered_high_flexion_23s",
+      "measurement_seed": 54113,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_stage2_mild_anchor__registered_high_flexion_23s__seed64122",
+      "block": "offset_2",
+      "patient_id": "registered_stage2_mild_anchor",
+      "trajectory_id": "registered_high_flexion_23s",
+      "measurement_seed": 64122,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_stage2_mild_anchor__hip_dominant_low_knee_23s__seed64122",
+      "block": "offset_1",
+      "patient_id": "registered_stage2_mild_anchor",
+      "trajectory_id": "hip_dominant_low_knee_23s",
+      "measurement_seed": 64122,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_stage2_mild_anchor__hip_dominant_low_knee_23s__seed44104",
+      "block": "offset_2",
+      "patient_id": "registered_stage2_mild_anchor",
+      "trajectory_id": "hip_dominant_low_knee_23s",
+      "measurement_seed": 44104,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_stage2_mild_anchor__two_cycle_moderate_23s__seed44104",
+      "block": "offset_1",
+      "patient_id": "registered_stage2_mild_anchor",
+      "trajectory_id": "two_cycle_moderate_23s",
+      "measurement_seed": 44104,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_stage2_mild_anchor__two_cycle_moderate_23s__seed54113",
+      "block": "offset_2",
+      "patient_id": "registered_stage2_mild_anchor",
+      "trajectory_id": "two_cycle_moderate_23s",
+      "measurement_seed": 54113,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_moderate_anchor__registered_high_flexion_23s__seed64122",
+      "block": "offset_1",
+      "patient_id": "registered_moderate_anchor",
+      "trajectory_id": "registered_high_flexion_23s",
+      "measurement_seed": 64122,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_moderate_anchor__registered_high_flexion_23s__seed44104",
+      "block": "offset_2",
+      "patient_id": "registered_moderate_anchor",
+      "trajectory_id": "registered_high_flexion_23s",
+      "measurement_seed": 44104,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_moderate_anchor__hip_dominant_low_knee_23s__seed44104",
+      "block": "offset_1",
+      "patient_id": "registered_moderate_anchor",
+      "trajectory_id": "hip_dominant_low_knee_23s",
+      "measurement_seed": 44104,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_moderate_anchor__hip_dominant_low_knee_23s__seed54113",
+      "block": "offset_2",
+      "patient_id": "registered_moderate_anchor",
+      "trajectory_id": "hip_dominant_low_knee_23s",
+      "measurement_seed": 54113,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_moderate_anchor__two_cycle_moderate_23s__seed54113",
+      "block": "offset_1",
+      "patient_id": "registered_moderate_anchor",
+      "trajectory_id": "two_cycle_moderate_23s",
+      "measurement_seed": 54113,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_moderate_anchor__two_cycle_moderate_23s__seed64122",
+      "block": "offset_2",
+      "patient_id": "registered_moderate_anchor",
+      "trajectory_id": "two_cycle_moderate_23s",
+      "measurement_seed": 64122,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_formal_perturbed_anchor__registered_high_flexion_23s__seed44104",
+      "block": "offset_1",
+      "patient_id": "registered_formal_perturbed_anchor",
+      "trajectory_id": "registered_high_flexion_23s",
+      "measurement_seed": 44104,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "read_only_existing_formal_bridge",
+      "source_result_directory": "results/stage4_trajectory_excitation_generalization_formal/registered_high_flexion_23s"
+    },
+    {
+      "case_id": "registered_formal_perturbed_anchor__registered_high_flexion_23s__seed54113",
+      "block": "offset_2",
+      "patient_id": "registered_formal_perturbed_anchor",
+      "trajectory_id": "registered_high_flexion_23s",
+      "measurement_seed": 54113,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_formal_perturbed_anchor__hip_dominant_low_knee_23s__seed54113",
+      "block": "offset_1",
+      "patient_id": "registered_formal_perturbed_anchor",
+      "trajectory_id": "hip_dominant_low_knee_23s",
+      "measurement_seed": 54113,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_formal_perturbed_anchor__hip_dominant_low_knee_23s__seed64122",
+      "block": "offset_2",
+      "patient_id": "registered_formal_perturbed_anchor",
+      "trajectory_id": "hip_dominant_low_knee_23s",
+      "measurement_seed": 64122,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_formal_perturbed_anchor__two_cycle_moderate_23s__seed64122",
+      "block": "offset_1",
+      "patient_id": "registered_formal_perturbed_anchor",
+      "trajectory_id": "two_cycle_moderate_23s",
+      "measurement_seed": 64122,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "new_formal_run"
+    },
+    {
+      "case_id": "registered_formal_perturbed_anchor__two_cycle_moderate_23s__seed44104",
+      "block": "offset_2",
+      "patient_id": "registered_formal_perturbed_anchor",
+      "trajectory_id": "two_cycle_moderate_23s",
+      "measurement_seed": 44104,
+      "duration_s": 23.0,
+      "wall_time_limit_s": 32.0,
+      "execution_source": "read_only_existing_formal_bridge",
+      "source_result_directory": "results/stage4_trajectory_excitation_generalization_formal/two_cycle_moderate_23s"
+    }
+  ],
+  "read_only_bridge_artifact_hashes": {
+    "registered_formal_perturbed_anchor__registered_high_flexion_23s__seed44104": {
+      "prior_only.json": "24bbf89475a62784c3aa7dc4640e8365b8c8255ec2a2b3929bf7ef810dddbfc3",
+      "prior_only_trace.npz": "2ef8e9b9b34b20bebed9c02f562e39240cb912424c4ebc24edaa48b81ee981b2",
+      "trusted_adaptive.json": "7637722c46e133950f7958cc0b450ddd2d38d8e17e6bae7bd7ec1c3a4db77dd5",
+      "trusted_adaptive_trace.npz": "7dd4da7fba462912835b5c10fce878b272ac34d0945e5488e3f732932ae55c70",
+      "comparison_summary.json": "256c40765372280e8b3ccbc474768f0525c1c374e8cdf97a7eaf3f367cf5ad6d"
+    },
+    "registered_formal_perturbed_anchor__two_cycle_moderate_23s__seed44104": {
+      "prior_only.json": "b92de200a90c23108bbb93ecfaf4c1aa6f90a28e6b574722006dbde36d01dd19",
+      "prior_only_trace.npz": "2a0840189a6f128be3714fba02918ac4c4dc273c269c3b1b85705abdadd267d1",
+      "trusted_adaptive.json": "bd88f1f843a3ed1c695337d3a29f0e43abd38caa3cf9bc055ffc6ae3bba1181b",
+      "trusted_adaptive_trace.npz": "2c1010c9e55aea25e7c3309e01c9ef60fba38364bd9ec9d3ff305f4ec786b893",
+      "comparison_summary.json": "904aa75d0f3bdcd5a2d28c48912c348ee3941df7d5c75444756536528589c556"
+    }
+  }
+}

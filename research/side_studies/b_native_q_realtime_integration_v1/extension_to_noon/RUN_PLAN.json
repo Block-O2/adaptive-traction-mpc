@@ -1,0 +1,42 @@
+{
+  "status": "CLOSED",
+  "start_unix": 1791333455.7718024,
+  "original_package_start_unix": 1791307140,
+  "deadline_unix": 1791345600,
+  "deadline_local": "2026-10-07 12:00 Asia/Shanghai",
+  "user_authorization": "\u5982\u679c\u65f6\u95f4\u63d0\u524d\u5230\u4e86\u5141\u8bb8\u6267\u884c\u523012\u70b9\u6574",
+  "time_cap_superseded": true,
+  "cumulative_physics_attempt_cap": 160,
+  "attempts_used_at_extension": 159,
+  "public_B_repairs_used": 2,
+  "public_B_repair_cap": 2,
+  "physics_dispatch_disabled": true,
+  "Q_updates": 0,
+  "first_delivery_preserved": true,
+  "resource_cadence_s": 45,
+  "heavy_dispatch_cutoff_unix": 1791342900,
+  "jobs": [
+    {
+      "id": "X01",
+      "script": "extension_timer_service.py",
+      "scope": "Saved-state B decision + a shadow 5ms timer. No plant/physics/activation. No promoted repair."
+    },
+    {
+      "id": "X02",
+      "script": "extension_native_stage_profile.py",
+      "scope": "Saved-state first/warm original B localization; no physics, no controller change."
+    },
+    {
+      "id": "X03",
+      "script": "extension_backlog_audit.py",
+      "scope": "Retained wall-clock prefix accounting, scheduler/receipt critical path and causal stage evidence."
+    }
+  ],
+  "closeout": "Independent extension preservation, hash/link validation, report. Keep original STOP_DISPATCH; never restart original runner.",
+  "explicit_counted_diagnostic": "325_NOON_B_ACTIVATION_CAPTURE",
+  "remaining_physics_after_dispatch": 0,
+  "diagnostic_reason": "Capture exact current-model activation input at original entry, including instrumentation cost, to localize main-thread mechanics/clearance/rolling admission on actual B states. No new control or scheduling repair.",
+  "phase": "CLOSED",
+  "closed_unix": 1791335119.8782501,
+  "auto_resume": false
+}

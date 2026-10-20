@@ -1,0 +1,113 @@
+{
+  "version": "FREE_TRAJECTORY_FEASIBILITY_v1",
+  "question": "Can independent waypoint progress and pass-through velocities improve full-task force with unchanged dynamics and motion gates?",
+  "registered_unix": 1791889626.8888483,
+  "t0_unix": 1791889117.0,
+  "hard_stop_unix": 1791903517.0,
+  "dispatch_cutoff_unix": 1791901717.0,
+  "search_cutoff_unix": 1791899917.0,
+  "physics_budget": 96,
+  "search_cap": 84,
+  "validation_reserved": 12,
+  "seed": 2026101303,
+  "clock": "SCIENTIFIC_SIMULATION",
+  "motion_protocol_sha256": "0f41463cab96b71ea39cc06f9fe86f432de07efe307bd486bc1c4df6cc196ece",
+  "storage_target_GiB": 4,
+  "storage_hard_GiB": 8,
+  "baseline_cap": 12,
+  "initial_cap": 16,
+  "main_cap": 40,
+  "repair_cap": 16,
+  "parameter_names": [
+    "O_common",
+    "O_diff_constant",
+    "O_diff_tilt",
+    "O_velocity_common",
+    "O_velocity_diff",
+    "R_common",
+    "R_diff_constant",
+    "R_diff_tilt",
+    "R_velocity_common",
+    "R_velocity_diff"
+  ],
+  "parameter_scales": [
+    0.015,
+    0.025,
+    0.025,
+    0.2,
+    0.2,
+    0.015,
+    0.025,
+    0.025,
+    0.2,
+    0.2
+  ],
+  "normalized_bounds": [
+    -1.0,
+    1.0
+  ],
+  "parameterization": "At current original nominal waypoint m: envelope sin(pi*m)^2; add common + differential polynomial to normalized targets; multiply existing bounded hip/knee pass-through velocity by 1+envelope*(vcommon +/- vdiff). Original piecewise quintic determines continuous q/dq/ddq. Endpoint and HOLD exactly untouched. No arbitrary continuous raw-v2 PWL claim.",
+  "methods": [
+    "axis probes",
+    "bounded COBYLA with measured full-task constraints and cache",
+    "multi-seed targeted repair"
+  ],
+  "seed_families": [
+    "B0",
+    "NATIVE_SCALAR_18",
+    "M2_fixed_actions",
+    "C2_pair_1_2"
+  ],
+  "baseline": "zero extension must exactly repeat original B and matched historical B before optimization",
+  "tracking": "actual human q minus actually receipt-owned generalized reference; same original task goals/boundaries/dose plus unchanged physical tracking condition; phase shape independent diagnostic",
+  "validation_conditions": [
+    {
+      "name": "W1",
+      "seed": 2026101319,
+      "prefix": {
+        "RETURN": [
+          [
+            0.018,
+            0.018,
+            0.018
+          ]
+        ]
+      }
+    },
+    {
+      "name": "W2",
+      "seed": 2026101320,
+      "prefix": {
+        "RETURN": [
+          [
+            -0.018,
+            -0.018,
+            -0.018
+          ]
+        ]
+      }
+    }
+  ],
+  "validation": "Two new same-Human legal RETURN0 prefix conditions; fork after physical prefix at RETURN1. Compare complete paired tasks; audit actual q/dq difference. Prefix consumes native slot0, so report remaining frozen suffix rather than independent original full action sequence. No validation feedback into selection.",
+  "selection": "highest full-task gain passing original absolute safety, complete task, ownership and ALL frozen motion/dose/tracking/compensation gates; freeze before held-out; no minimum manufactured gain",
+  "truth_firewall": "fixed offline parameters; current native request state only in planner; future trace only in offline objective and diagnosis; no learning",
+  "stop_conditions": [
+    "absolute safety fail",
+    "unknown ownership",
+    "parent mutation",
+    "integral closure fail",
+    "D free <40GiB",
+    "study >=8GiB",
+    "available memory <1GiB",
+    "96 attempts",
+    "dispatch after t0+3.5h",
+    "hard wall t0+4h"
+  ],
+  "levels": {
+    "0": "MATHEMATICAL_CANDIDATE",
+    "1": "DYNAMICS_FEASIBLE only after all task/safety/motion gates",
+    "2": "NATIVE_B_EXECUTABLE only unextended original interface",
+    "3": "HOST_CLOCK_VALIDATED not run"
+  },
+  "clinical_thresholds": false
+}

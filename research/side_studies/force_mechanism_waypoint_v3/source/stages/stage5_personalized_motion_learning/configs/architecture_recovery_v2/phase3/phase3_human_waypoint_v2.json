@@ -1,0 +1,45 @@
+{
+  "schema": "architecture_recovery_v2_phase3_hwmpc_v2",
+  "status": "FROZEN_AFTER_INDEPENDENT_V1_AUDIT_REPAIRS",
+  "evidence_category": "mechanical_interface_smoke",
+  "supersedes_evidence_artifact_only": "phase3_human_waypoint_v1",
+  "repair_scope": [
+    "causal learning-transition finalization",
+    "complete behavior-bearing source manifest",
+    "interrupted-HOLD reset test",
+    "adaptive-mechanics selection test",
+    "fixed structural-prior bed-clearance claim qualification"
+  ],
+  "recovered_model": "V2.2 five-feature state-conditioned residual with continual beta",
+  "planner": "direct two-joint state-feedback Human-waypoint HWMPC",
+  "task_semantics": "actual arrival and settling trigger HOLD; actual return and settling trigger COMPLETE",
+  "mechanics_screen": {
+    "force_limit_n": 200.0,
+    "moment_limit_nm": 60.0,
+    "deterministic_schedule_samples": 21
+  },
+  "scheduler_clearance_semantics": "fixed Stage-5 structural-prior Human geometry and bed plane; adaptive geometry is used by the separate V2.2 wrench mechanics screen",
+  "value_hook": {
+    "signature": "V(state_or_belief, candidate_next_waypoint)",
+    "default": 0.0,
+    "training_authorized": false
+  },
+  "learning_record_contract": [
+    "observation",
+    "adaptive_state",
+    "candidates",
+    "selected_waypoint",
+    "executed_waypoint",
+    "next_observation",
+    "local_cost",
+    "completion",
+    "provenance"
+  ],
+  "forbidden": {
+    "fixed_r_or_path_template": true,
+    "historical_detailed_robot_interface_predictor": true,
+    "hidden_truth_in_deployable_belief": true,
+    "rl_value_or_imitation_training": true,
+    "physical_hardware_actuation": true
+  }
+}

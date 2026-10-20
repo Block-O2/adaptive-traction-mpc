@@ -1,0 +1,13 @@
+# 下一阶段最小研究设计（本轮不执行）
+
+核心问题：能否先把18D中相对独立的RETURN降力能力冻结为更保守的协调方法，并定位OUTBOUND终末响应缺口，而不是继续给每个状态调参。
+
+第一步只做表示合同：增加Side Study的phase-local零意图身份。若某phase的全部位置/速度偏置与native residual为零，必须走原B原调用路径；当前RichFreePlanner只在整向量为零时短路，RETURN参数非零时OUTBOUND全零仍可能重新_evaluate，不能未经测试就声称等价。该改变需零phase数学/调用身份测试和完整新物理B等价检查，仍不改变原B控制模块。
+
+机制臂事前固定为B、原冻结18D、RETURN-only 18D，后者OUTBOUND严格原B，RETURN参数与两个plateau原样。同一个已暴露N2合法活父状态完整配对；RETURN-only一次确定性重复。它只是下一实验候选，不是本轮新方法或物理结果。现有phase积分提示RETURN保留较大收益，不能把分phase加和预测冒充真实完整闭环执行。
+
+若开发门通过，冻结RETURN-only，再从两个或三个本轮未执行的合法prefix条件串行完整验证；不得按验证更换参数。预算预留：开发父+四子约5 START，新prefix每个父+B/E/候选约4 START，总量约13–17；额外失败停止门预先写定，禁止消耗验证预算开发搜索。所有原task/safety/motion/receipt门不变，完整JF包括prefix。再用历史失败V1–V4的明确来源补适用范围，不能只选择容易状态。
+
+若RETURN-only也不稳定，则保持诊断性结论，优先研究接近单关节goal时的边界连续意图与原native末段制动/闭环响应。只有被原证书接纳、实际motion通过且有新prefix证据，才进入第二轮18D+Waypoint联合优化。Waypoint平顺性作为独立目标，不作为force代理。Q-learning此时只准备schema与区间credit assignment，不训练。
+
+本轮完成后STOP；该文档不是自动启动下一包的授权或结果。

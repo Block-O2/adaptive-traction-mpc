@@ -1,0 +1,9 @@
+# Frozen baseline and scope
+
+Formal B J_F=1438.613498467 N s; historical development 18D=1400.697221153 N s (2.635613%). Those scalar values are historical, not the V1 development pairing. All 18 coefficients and RETURN plateau -0.020/-0.022 remain byte-identical in FROZEN_18D.json. T is applied only after the original final OUTBOUND goal selection: ceil((old suffix duration*1.5)/.005-1e-10)*.005. T does not mean a single fixed suffix duration. Four historical legal prefix conditions N2/U1/V1/V2 pass original task/safety/motion/causal gates, same Human only. N2 gain2.410231%, U1 2.417010%, V1 2.405167%, V2 2.422045%; the approximately2.24–2.42% description is conservative, the four named T rows span2.405–2.422%.
+
+The existing MATCHED non-HOLD phase minimum9s and HOLD minimum1s remain; actual OUTBOUND/HOLD/RETURN9.005/1.020/9.005s, TASK19.030s. Extended suffix uses endpoint TRACK waiting, not extra/shortened task time. Bridge40ms, lifecycle100ms, source age, current-state admission, continuous geometry/mechanics, truth firewall, causal receipts, carry/braking/fallback unchanged. B/plant/Human/robot/contact/gravity/actuator/ROM/torque/endpoint/task limits unchanged. Original motion protocol byte-identical.
+
+The additive middle-posture intervention changes one internal target only after frozen T/18D choice, keeping that selected segment duration and pass velocity. All task/phase endpoints stay fixed; subsequent live decisions and T original-duration computation may respond causally. Shape changes only certified internal q knots within original0.05deg path bound, retaining outer q/dq/ddq/duration. Neither changes18D coefficients.
+
+Historical 18D motion failures remain: retrospective0/4, baseline qualification N2 acceleration failure; T repairs the named finite conditions only. No cross-patient, clinical, hardware, Native LEVEL2 or host LEVEL3 qualification is inferred.

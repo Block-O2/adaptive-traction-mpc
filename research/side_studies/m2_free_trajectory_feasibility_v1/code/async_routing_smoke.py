@@ -1,0 +1,15 @@
+"""Saved-context routing smoke only: no physics or activation claims."""
+from task_bootstrap import *
+import pickle,types,numpy as np
+def main():
+ import study_common as sc,native_core as nc,async_native_worker as aw
+ from native_method import NativeInterface
+ from traction_mpc_stage5.full3d_adaptive_integration_v1 import online_planning as op
+ p=next(iter(sorted((STUDY/'output/STATE_SNAPSHOTS/061_E3T_science_M2').glob('*.pkl'))));row=pickle.loads(p.read_bytes());c=row['context'];config=dict(method='M2',mode='select',weights=str(STUDY/'weights/frozen_Q_v1'),weights_sha256=sha(STUDY/'weights/frozen_Q_v1/weights.npz'),seed=2026100621,execution_mode='SCIENTIFIC_SIMULATION',pipeline_batch=True)
+ def make():
+  planner,args=pickle.loads(row['payload']);phase=args['phase'];request=op.PlanRequest(row['request_id'],'TASK',0.,row['sensor_capture_ns'],row['request_ns'],True);b=dict(adaptive_planner=planner,arguments=args,planner=planner.planner,request=request,task_state=types.SimpleNamespace(phase=phase,phase_elapsed_s=args['phase_elapsed_s'],hold_elapsed_s=0.),sac_hooks=types.SimpleNamespace(force_integral=0.,moment_integral=0.),physical_now=c['task_s'],task_start_time=0.,belief=args['belief']);return b
+ b=make();x=NativeInterface(config);x.count=row['count'].copy();x.carry=row['carry'].copy();x.rng.bit_generator.state=row['rng_state'];x.context=lambda bb:(c,None);x.decision_boundary(b);original=op.execute_task_snapshot(nc.snapshot_task_call(b['adaptive_planner'],b['arguments']));selection=x.search_rows[-1]
+ aw.warm(config);aw.COORD.count=row['count'].copy();aw.COORD.carry=row['carry'].copy();aw.COORD.rng.bit_generator.state=row['rng_state'];aw.COORD.context=lambda bb:(c,None);b=make();raw=nc.snapshot_task_call(b['adaptive_planner'],b['arguments']);hint=dict(request=b['request'],base_payload_sha256=sha(pickle_file:=p) if False else __import__('hashlib').sha256(raw).hexdigest(),spec=b['adaptive_planner'].planner.spec,task_state=b['task_state'],physical_now=c['task_s'],task_start_time=0.,observation=np.zeros(4),reference_acceleration=np.zeros(2),measured_force_world_n=np.zeros(3),measured_moment_world_nm=np.zeros(3),force_integral=0.,moment_integral=0.)
+ value=aw.execute(pickle.dumps(('B_NATIVE_Q_EXISTING_TASK_WORKER_V1',raw,hint),protocol=5));evidence=value.executed.execution_screen['_E5_worker_evidence'];same=selection['selected_index']==evidence['selection_row']['selected_index'] and np.array_equal(selection['applied_plan'],evidence['selection_row']['applied_plan']) and np.allclose(original.executed.target_q_rad,value.executed.target_q_rad,atol=1e-10,rtol=0)
+ out=dict(status='PASS' if same else 'FAIL',scope='saved already causal context routing smoke; context acquisition itself deliberately supplied from captured c and proven by later physical regressions',no_physics=True,no_activation=True,candidate_identity_match=same,baseline=selection['selected_index'],worker=evidence['selection_row']['selected_index']);save(STUDY/'reports/E5_ROUTING_SMOKE.json',out);print(json.dumps(out));assert same
+if __name__=='__main__':main()

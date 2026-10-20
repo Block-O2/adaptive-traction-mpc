@@ -1,0 +1,116 @@
+{
+  "version": "LOWFORCE_REPAIR_EXPLORE_10H_v1",
+  "registered_unix": 1791831723.4738176,
+  "t0_unix": 1791831502.0,
+  "t0_local": "2026-10-13T02:58:22+08:00",
+  "timezone": "Asia/Shanghai",
+  "registration_monotonic": 111.610078409,
+  "registration_unix": 1791831611.3595862,
+  "t0_monotonic_aligned": 2.2504937947203416,
+  "t0_monotonic_note": "aligned conservatively from first successful WSL timestamp; monotonic actual captured at registration",
+  "hard_stop_unix": 1791867502.0,
+  "dispatch_cutoff_unix": 1791863902.0,
+  "physics_budget": 300,
+  "validation_reserved": 48,
+  "single_physics_owner": true,
+  "seed": 2026101201,
+  "search_seed": 2026101301,
+  "clock": "SCIENTIFIC_SIMULATION",
+  "budgets": {
+    "baseline": 16,
+    "mechanism": 64,
+    "repair": 96,
+    "reexplore": 64,
+    "validation": 48,
+    "optional_offline": 12
+  },
+  "methods": [
+    "bounded coordinate intervention on slots/amplitudes",
+    "small batches of correlated slot perturbations"
+  ],
+  "primary_gain_percent": 0.5,
+  "milestones_percent": [
+    2,
+    5
+  ],
+  "search_bound": [
+    -0.2,
+    0.2
+  ],
+  "issued_slots_per_phase": 5,
+  "motion_protocol_sha256": "0f41463cab96b71ea39cc06f9fe86f432de07efe307bd486bc1c4df6cc196ece",
+  "validation_conditions": [
+    {
+      "name": "V1",
+      "seed": 2026101311,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.120189,
+            0.133759,
+            0.262312
+          ]
+        ]
+      }
+    },
+    {
+      "name": "V2",
+      "seed": 2026101312,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.27219,
+            -0.093774,
+            0.218485
+          ]
+        ]
+      }
+    },
+    {
+      "name": "V3",
+      "seed": 2026101313,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.250107,
+            -0.138405,
+            -0.178916
+          ]
+        ]
+      }
+    }
+  ],
+  "validation_generation": "random.Random(2026101308), 3 triples uniform[-.28,.28] rounded 6 decimals, legal existing K3 OUTBOUND prefix, distinct from H1/H2; original Human unchanged; parent fork at next lawful request after prefix",
+  "selection_rule": "freeze at most3 new representatives before any V output: highest eligible gain; eligible with lowest continuous worst normalized constraint ratio; near-feasible high gain. If no eligible new candidate, only most informative near-feasible diagnostic. C4_1_5 separately matched on each V; no test reselection",
+  "exposed_development": [
+    "discovery",
+    "H1",
+    "H2",
+    "all previous study conditions"
+  ],
+  "continuation": "fixed registered coordination table/PWL; original B continues selecting physical segments with original carry/fallback, except explicitly marked Frozen_M2 frozen rolling Q reference",
+  "repair_targets": [
+    0.75,
+    0.5,
+    0.25
+  ],
+  "repair_downgrade": "if 12 valid distinct candidates do not reduce worst normalized violation or improve feasible force frontier, change neighborhood/seed and lower retained-gain tier; no threshold change",
+  "reexplore_allocation": {
+    "local_or_cross_slot": 0.6,
+    "undercovered": 0.4
+  },
+  "stop_conditions": [
+    "safety/ownership FAIL stops all physics",
+    "fork mismatch/parent mutation/integral closure stops related experiment",
+    "3 task-incomplete consecutive in action family stops family",
+    "D free <40GiB",
+    "package >=20GiB",
+    "sustained memory/swap pressure",
+    "9h dispatch cutoff",
+    "10h all owned processes joined"
+  ],
+  "truth_firewall": "causal55D + explicit K3 history only; truth and future execution audit are labels; no Q/G/P training or online adaptation",
+  "historical_search_deadline_unix": 1791833302.0,
+  "no_hardware": true,
+  "no_host_clock_qualification": true
+}

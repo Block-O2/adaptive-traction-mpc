@@ -1,0 +1,15 @@
+from task_bootstrap import *
+def main():
+ runner_rows=[json.loads(line) for line in (STUDY/'output/RESOURCE_LOG.jsonl').read_text().splitlines()];assert runner_rows
+ offline_path=STUDY/'output/OFFLINE_RESOURCE_LOG.jsonl';offline_rows=[json.loads(line) for line in offline_path.read_text().splitlines()] if offline_path.exists() else []
+ rows=sorted(runner_rows+offline_rows,key=lambda r:r['unix'])
+ windows=[r['windows'] for r in rows if r.get('windows') and 'commit_headroom' in r['windows']];sizes={};total=0
+ for p in STUDY.rglob('*'):
+  if p.is_file():
+   size=p.stat().st_size;total+=size;part=p.relative_to(STUDY).parts[0];sizes[part]=sizes.get(part,0)+size
+ start_bytes=sum(Path(name).stat().st_size for name in json.loads((STUDY/'SOURCE.json').read_text())['frozen_files'])
+ out=dict(unix=time.time(),sample_count=len(rows),span_s=rows[-1]['unix']-rows[0]['unix'],max_sample_gap_s=max(b['unix']-a['unix'] for a,b in zip(rows,rows[1:])),WSL_mem_available_min_bytes=min(r['mem_available'] for r in rows),owned_PSS_max_bytes=max(r['PSS'] for r in rows),owned_process_count_max=max(r['owned_count'] for r in rows),swap_used_min_bytes=min(r['swap_used'] for r in rows),swap_used_max_bytes=max(r['swap_used'] for r in rows),swap_in_delta_pages=rows[-1]['swap_in']-rows[0]['swap_in'],swap_out_delta_pages=rows[-1]['swap_out']-rows[0]['swap_out'],oom_kill_delta=rows[-1]['oom_kill']-rows[0]['oom_kill'],Windows_commit_headroom_min_bytes=min(r['commit_headroom'] for r in windows),Windows_available_min_bytes=min(r['available'] for r in windows),Windows_disk_C_min_bytes=min(r['disk_c'] for r in windows),study_total_bytes=total,bytes_by_directory=sizes,initial_frozen_source_bytes=start_bytes,added_bytes_conservative=total,startup_copy_included_in_added_data=True,max_new_data_target_bytes=10*2**30,resource_guard_changes=False,unknown_processes_killed=False,WSL_restarted=False,system_settings_changed=False)
+ out.update(runner_sample_count=len(runner_rows),offline_combined_owner_sample_count=len(offline_rows),runner_max_sample_gap_s=max(b['unix']-a['unix'] for a,b in zip(runner_rows,runner_rows[1:])),offline_owner_accounting='Offline sweep samples include itself plus the verified runner and runner descendants. Routine runner samples cover physics owner; brief offline diagnostic jobs are separately logged with wall time. Combined PSS max uses complete-owner samples during the long sweep.',sampling_gap_note='Early runner crash/restart gap is retained; current sampling cadence45s. No interpolation or fabricated samples.')
+ out.update(first_recorded_sample_unix=rows[0]['unix'],last_recorded_sample_unix=rows[-1]['unix'],initial_task_owned_sample_delay_seconds=rows[0]['unix']-START,initial_coverage_note='The first durable task-owned resource row begins after startup. The pre-first-row interval is not represented as45-second samples or interpolated. Extrema/PSS cover the recorded scopes and windows.')
+ save(STUDY/'reports/RESOURCE_COMPUTE_DATA_SUMMARY.json',out);print(json.dumps(out))
+if __name__=='__main__':main()

@@ -1,0 +1,66 @@
+{
+  "frozen_unix": 1792223260.6488204,
+  "stage": "prospective development, before candidate physics; no validation data available",
+  "evidence_trigger": {
+    "id": "dev_P_more",
+    "delta_J_F_vs_T": -0.442449986781412,
+    "delta_vs_T": {
+      "TV_v": -0.0007670820593125294,
+      "TV_a": -0.0007965642322625976,
+      "jerk_RMS": -0.0006123362120459275
+    },
+    "qualified": true
+  },
+  "original_protocol_boundary": "Initial rule allowed a half-size refinement. This explicit prospective addendum substitutes one support-extension mechanism test; original rule and all initial results remain immutable. No amplitude scan and no selection-threshold change.",
+  "rationale": "The single target reduced force and all three full motion variations but fell short of primary criteria. Test sustained coordination instead of tuning amplitude to pass the threshold. Current code already supports multiple registered slots, so code/selection/safety contracts are unchanged.",
+  "max_additional_development_candidates": 1,
+  "no_joint_smoothing_unless_individual_signals": true,
+  "candidate": {
+    "id": "P_corridor",
+    "base": "T",
+    "posture": [
+      {
+        "phase": "RETURN",
+        "slot": 2,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      },
+      {
+        "phase": "RETURN",
+        "slot": 3,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      }
+    ],
+    "changes": [],
+    "purpose": "sustain the beneficial spatial separation over adjacent RETURN targets, testing whether a corridor avoids isolated-target compensation",
+    "expected_force_window": [
+      12.8,
+      16.6
+    ],
+    "expected_motion": "full TV_v/TV_a/jerk no worse than T; less pulse compensation than single-slot P_more",
+    "unchanged": "same 0.3deg amplitude; all 18D parameters/plateau/T1.5; each live selected segment duration/pass velocity; task endpoints/duration/safety",
+    "success": "unchanged SELECTION_RULE.json; not merely crossing a force threshold; mechanism and magnitude separately reported",
+    "failure": "any original qualification fail, either posture intent rejected/not actually executed, or no full-task gain",
+    "offline_checks": [
+      {
+        "index": 10,
+        "status": "PASS",
+        "reason": null,
+        "scope": "each archived causal fixture separately; actual corridor receives fresh complete runtime checks"
+      },
+      {
+        "index": 11,
+        "status": "PASS",
+        "reason": null,
+        "scope": "each archived causal fixture separately; actual corridor receives fresh complete runtime checks"
+      }
+    ]
+  },
+  "selection_rule_sha256": "920a5bcd8740cecc43e7ed6fd588722a73371f5d7f8c370aad947d9c2bc3ae5c",
+  "execution_manifest_sha256": "dfbb84aba8253e27ba4485b5ea979f643196edd7523c5865c3a3c2da578be7ac"
+}

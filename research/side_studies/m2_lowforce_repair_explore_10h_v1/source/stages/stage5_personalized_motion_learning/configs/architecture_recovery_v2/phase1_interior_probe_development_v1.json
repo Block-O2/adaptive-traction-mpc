@@ -1,0 +1,26 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase1_interior_seeking_commissioning_development_v1",
+  "evidence_category": "development",
+  "arms": ["oracle", "adaptive", "fixed_nominal", "no_dynamics_adaptation"],
+  "cases": [
+    {"seed": 1101, "high_rom": false},
+    {"seed": 1102, "high_rom": false},
+    {"seed": 1103, "high_rom": false},
+    {"seed": 1104, "high_rom": false},
+    {"seed": 1105, "high_rom": true},
+    {"seed": 1106, "high_rom": true}
+  ],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 8.0,
+  "hidden_generation": {
+    "continuous": true,
+    "same_ranges_as": "phase1_development_v1",
+    "commissioning": "first measured cuff pose plus population q1 anchor; no hidden initial q"
+  },
+  "held_out_policy": {
+    "is_held_out": false,
+    "seeds_may_inform_repairs": true,
+    "formal_seed_namespace": "not accessed by this config"
+  }
+}

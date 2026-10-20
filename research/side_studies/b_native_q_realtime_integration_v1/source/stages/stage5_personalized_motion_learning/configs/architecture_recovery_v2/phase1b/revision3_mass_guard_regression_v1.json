@@ -1,0 +1,31 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase1b_revision3_mass_guard_regression_v1",
+  "evidence_category": "development_regression",
+  "arms": ["adaptive"],
+  "cases": [
+    {"setup_seed": 111001, "task_seed": 121001, "task_profile": "coordinated", "high_rom": false},
+    {"setup_seed": 111002, "task_seed": 121002, "task_profile": "coordinated", "high_rom": true},
+    {"setup_seed": 111003, "task_seed": 121003, "task_profile": "hip_lead", "high_rom": false},
+    {"setup_seed": 111004, "task_seed": 121004, "task_profile": "hip_lead", "high_rom": true},
+    {"setup_seed": 111005, "task_seed": 121005, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": false},
+    {"setup_seed": 111006, "task_seed": 121006, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": true},
+    {"setup_seed": 111007, "task_seed": 121007, "task_profile": "two_rate", "high_rom": false},
+    {"setup_seed": 111008, "task_seed": 121008, "task_profile": "two_rate", "high_rom": true}
+  ],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 8.0,
+  "probe_control_dt_s": 0.01,
+  "environment_contract": {"scenario": "lying_bed_contact_free_clearance", "bed_height_m": 0.012, "shank_radius_m": 0.045, "minimum_reference_clearance_m": 0.025},
+  "hidden_generation": {
+    "task_profiles": ["coordinated", "hip_lead", "knee_led_clearance_constrained_v1", "two_rate"],
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.025,
+    "generation_static_force_peak_n_maximum": 150.0,
+    "generation_static_moment_peak_nm_maximum": 45.0,
+    "generation_max_attempts": 5000
+  },
+  "revision_contract": {"minimum_mass_matrix_eigenvalue": 0.03, "basis": "0/2000 development truth proposals below 0.03; observed proposal minimum 0.0337339"},
+  "held_out_policy": {"is_held_out": false, "formal_seed_namespace": "not generated or accessed"}
+}

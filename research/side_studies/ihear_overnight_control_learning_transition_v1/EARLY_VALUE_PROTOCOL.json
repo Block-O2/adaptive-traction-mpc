@@ -1,0 +1,34 @@
+{
+  "frozen_design_unix": 1792351518.2858195,
+  "motivation": "V01 H150/HIP/KNEE excursion failure exposes lack of a reliable full-strategy fallback at RETURN2; earlier decision can legitimately choose B before H150-specific execution.",
+  "origin": "latest completed measured TASK row strictly before first OUTBOUND-prefix fork; source age <=10ms",
+  "online_state": "7 measured/estimated/reference quantities plus 3 already prescribed RETURN-prefix coefficients; no Human truth or future outcomes",
+  "actions": [
+    "B",
+    "H150",
+    "HIP",
+    "KNEE",
+    "ZERO"
+  ],
+  "model": "action-specific ridge cost and original margin heads; 6 D parents train, 2 V choose alpha, LOO empirical error buffer; B fallback",
+  "hyperparameters": [
+    0.1,
+    1.0,
+    10.0,
+    100.0
+  ],
+  "primary_experiment_unchanged": true,
+  "test_conditions_unchanged": true,
+  "new_U_policy_branches": 3,
+  "planned_total_P1_starts_including_repetition": 79,
+  "hard_cap": 100,
+  "scope": "secondary pre-test comparison, no sequential feedback or Bellman Q-learning claim",
+  "promotion": "All three tests qualified, nonconstant choices, at least one qualification recovery vs H150, at least one qualified force gain vs B, and lower mean cost than every fixed action that qualifies on all three test parents. Otherwise conditional benefit not demonstrated.",
+  "pure_force_ranking_separate": true,
+  "files": {
+    "control/early_features.py": "10d2ab67bb291033ab419e769f5a0a5723010c2b0aac47b92a7a29b103a12610",
+    "control/early_selector.py": "a0680254f9bba882b9feeb63fd640316c1addd0e76c2bfbc4b3ce9427eb9a7f4",
+    "learning/train_early.py": "7ea529495bc2b7650c2ae29c29e7474cb3fca010e21ca0812cecca94b3b196da",
+    "control/prepare_test.py": "6e8ae0fda7dd7d9c85770d5e0db01723d0f8416ff22db32e0bff13c12a535840"
+  }
+}

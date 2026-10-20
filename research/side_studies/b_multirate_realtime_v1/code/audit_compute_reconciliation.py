@@ -1,0 +1,39 @@
+"""Reconcile explicit same-process children without changing append-only logs."""
+from task_bootstrap import *
+from collections import Counter
+def main():
+ events=[json.loads(x) for x in (STUDY/'ATTEMPTS.jsonl').read_text().splitlines()];starts={r['id']:r for r in events if r['event']=='START'};ends={r['id']:r for r in events if r['event']=='END'};rows=[];last_main={}
+ for id,event in starts.items():
+  if id not in ends:continue
+  cfg=event.get('config',{});rp=STUDY/'output'/(id+'_RESULT.json');dp=STUDY/'output'/(id+'_DATA.json');pp=STUDY/'output'/(id+'_PARTIAL_COMPUTE.json');result=json.loads(rp.read_text()) if rp.exists() else {};data=json.loads(dp.read_text()) if dp.exists() else {};metric=result.get('metric',data.get('metric'));source=rp if result.get('metric') else (dp if data.get('metric') else None)
+  if metric is None and pp.exists():metric=json.loads(pp.read_text());source=pp
+  parent=event.get('same_process_parent');group=parent or id;wall_role='same-process child subset of parent inclusive wall' if parent else ('fork child subset' if 'snapshot' in cfg else 'top-level disjoint inclusive wall');wall=ends[id]['unix']-event['unix'];main=None;native=None;sim=None;steps=None;boundary=0.
+  if metric is not None:
+   sim=metric.get('actual_new_simulation_seconds');steps=metric.get('actual_new_native_physics_steps');main=metric.get('actual_new_main_model_inverse_dynamics_api_calls');native=metric.get('actual_new_native_worker_model_inverse_dynamics_api_calls');boundary=metric.get('inter_rep_physics_seconds',0.)
+   cumulative=metric.get('main_model_inverse_dynamics_api_calls')
+   if cumulative is not None:
+    if parent and not metric.get('continuous_session'):main=cumulative-last_main.get(group,0)
+    last_main[group]=cumulative
+  row=dict(id=id,config=cfg,input_hash=event.get('input_sha256',event.get('input_hash')),same_process_parent=parent,wall_role=wall_role,wall_seconds=wall,result_wall_seconds=result.get('wall_seconds'),result_sha256=sha(rp) if rp.exists() else None,metric_source=str(source) if source else None,metric_sha256=sha(source) if source else None,worker_status=result.get('status',ends[id].get('worker_status')),valid=None if metric is None else metric.get('valid',False),J_F_ranked=None if metric is None or not metric.get('valid') else metric.get('J_F'),failed_cost_unranked=None if metric is None or metric.get('valid') else metric.get('J_F',metric.get('observed_tick_force_integral')),actual_new_physics_seconds=sim,actual_new_native_steps=steps,inter_rep_physics_seconds=boundary,inter_rep_native_steps=round(boundary/.00025),main_model_API_calls=main,native_worker_model_API_calls_separate=native,physics_attempt_count=1,metric_missing=metric is None)
+  rows.append(row)
+ jobs=[json.loads(x) for x in (STUDY/'NONPHYSICS_JOBS.jsonl').read_text().splitlines()] if (STUDY/'NONPHYSICS_JOBS.jsonl').exists() else []
+ out=dict(status='RECONCILED_APPEND_ONLY_ORIGINAL_PRESERVED',attempts=len(starts),ended=len(ends),active_ids=[id for id in starts if id not in ends],rows=rows,total_actual_new_physics_seconds_lower_bound=sum((r['actual_new_physics_seconds'] or 0)+r['inter_rep_physics_seconds'] for r in rows),total_actual_new_native_steps_lower_bound=sum((r['actual_new_native_steps'] or 0)+r['inter_rep_native_steps'] for r in rows),total_main_model_API_calls_lower_bound=sum(r['main_model_API_calls'] or 0 for r in rows),native_worker_model_API_calls_separate_lower_bound=sum(r['native_worker_model_API_calls_separate'] or 0 for r in rows),disjoint_top_level_physics_owner_wall_seconds=sum(r['wall_seconds'] for r in rows if r['wall_role']=='top-level disjoint inclusive wall'),missing_compute_ids=[r['id'] for r in rows if r['metric_missing']],valid_physics_attempts=sum(r['valid'] is True for r in rows),failed_or_invalid_attempts=sum(r['valid'] is not True for r in rows),elapsed_package_seconds=time.time()-START,offline_jobs=jobs,offline_job_recorded_wall_seconds=sum(r['wall_seconds'] for r in jobs),original_append_only_compute_ledger_sha256=sha(STUDY/'COMPUTE_LEDGER.jsonl'),corrections=['Consecutive child result is read directly even though only its parent owns runner TASK_LEDGER.','Inner consecutive wall is a subset of outer inclusive wall, never added to total wall.','Fresh same-interpreter cumulative main model API counters are differenced between actual episodes.','Continuous session physical time is differenced at the real carried start; native inter-repetition settle/hold steps and costs are additional work.'],model_call_warning='Main and native-worker counts are separate API evidence; some thread variants overlap. They are never summed as a unique total.',time_warning='Package elapsed, overlapping offline wall and per-attempt inclusive/child wall are distinct. Original append-only ledger is preserved; this reconciled report is authoritative for totals.')
+ raw_path=STUDY/'reports/RAW_PHYSICS_PROVENANCE_AUDIT.json';raw=json.loads(raw_path.read_text()) if raw_path.exists() else {}
+ checked={r['id']:r for r in raw.get('rows',[]) if r.get('status')=='PASS'};corrected=[]
+ for row in rows:
+  rawrow=checked.get(row['id'])
+  if rawrow is None:continue
+  artifact=STUDY/'source/results'/row['id']/'runtime_artifacts.json.gz'
+  assert sha(artifact)==rawrow['artifact_sha256'],'RAW_ARTIFACT_CHANGED_AFTER_AUDIT:'+row['id']
+  assert rawrow['expected_differential_native_steps']==row['actual_new_native_steps'],'ACCOUNTING_BASE_CHANGED_AFTER_RAW_AUDIT:'+row['id']
+  n=rawrow['native_step_count'];assert n==rawrow['sum_held_receipt_native_steps'] and n==round(rawrow['original_wall_record_physics_elapsed_s']/.00025)
+  row.update(raw_verified_native_steps=n,raw_verified_physics_seconds=n*.00025,raw_verified_additional_terminal_steps=n-(row['actual_new_native_steps'] or 0),raw_artifact_sha256=rawrow['artifact_sha256']);corrected.append(row)
+ complete=raw.get('status')=='PASS' and not raw.get('without_saved_artifact') and set(checked)=={r['id'] for r in rows} and not out['active_ids']
+ out.update(raw_count_verification_complete=complete,raw_provenance_report_sha256=sha(raw_path) if raw_path.exists() else None,total_raw_verified_native_steps=sum(r['raw_verified_native_steps']+r['inter_rep_native_steps'] for r in corrected),total_raw_verified_physics_seconds=sum(r['raw_verified_physics_seconds']+r['inter_rep_physics_seconds'] for r in corrected),raw_verified_additional_terminal_native_steps=sum(r['raw_verified_additional_terminal_steps'] for r in corrected),raw_verified_ids=[r['id'] for r in corrected])
+ out['authoritative_total_actual_new_native_steps']=out['total_raw_verified_native_steps'] if complete else out['total_actual_new_native_steps_lower_bound']
+ out['authoritative_total_actual_new_physics_seconds']=out['total_raw_verified_physics_seconds'] if complete else out['total_actual_new_physics_seconds_lower_bound']
+ if corrected:out['corrections'].append('Original last control/partial snapshot may precede the final native tail. Terminal steps are replaced by independently verified raw state count, held receipt count and original wall record count, then separate inter-repetition steps are added once. Original lower-bound totals remain explicitly preserved.')
+ target=STUDY/'reports/AUDIT_COMPUTE_RECONCILIATION.json'
+ if target.exists():shutil.copy2(target,STUDY/'reports'/('AUDIT_COMPUTE_RECONCILIATION_HISTORY_'+sha(target)+'.json'))
+ save(target,out);print(json.dumps({k:out[k] for k in ('status','attempts','ended','active_ids','total_actual_new_physics_seconds_lower_bound','total_actual_new_native_steps_lower_bound','raw_count_verification_complete','authoritative_total_actual_new_native_steps','authoritative_total_actual_new_physics_seconds','raw_verified_additional_terminal_native_steps','disjoint_top_level_physics_owner_wall_seconds','missing_compute_ids','valid_physics_attempts','failed_or_invalid_attempts','elapsed_package_seconds')}))
+if __name__=='__main__':main()

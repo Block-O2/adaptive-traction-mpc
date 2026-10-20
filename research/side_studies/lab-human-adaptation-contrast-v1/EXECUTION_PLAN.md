@@ -1,0 +1,17 @@
+# Execution checkpoint
+
+Current status READY_WAITING_FOR_RESOURCES. No dynamic invocation authorized by current evidence. No auto restart. All intended physical conditions/arms are already frozen; keep resource waiting separate from experiment failure.
+
+Fresh owner per condition/arm; same exact case/probes/default measurement seed semantics. Each launch must verify 140 source hashes, seven case hashes, options hash, current SAC benchmark exclusion, disk/free memory/swap trend, and conservative aggregate owner+planner peak evidence. Use CPU only, OMP/OPENBLAS/MKL/NUMEXPR=1, no bytecode writes, nice19. Do not edit existing environment or SAC. One OWNER.lock process at a time. No shared STOP.
+
+Check-only: `env PYTHONDONTWRITEBYTECODE=1 ... python human_qualification.py --check`. Passed already. Future per-arm primary launch uses `LAB_STUDY_ARM=fixed_population|commissioning_only|continual_adaptive ... python human_qualification.py --execute C0` (C0–C6). It currently refuses because RESOURCE_RELEASE.json is absent. Never synthesize verified evidence from the planning estimate. Total active-work cap8h; log all attempts/partials. No repeated deterministic primary run under same key. Single arm failure is retained and remaining preregistered arms continue when resources permit.
+
+After actual execution, run `postprocess_lab_run.py <own run dir>`, which adapts compressed inherited artifacts to unchanged evaluate_execution_mode using a registered absolute case/hash and own temporary directory. Keep physical and scientific verdicts independently; wall plan-age characterization only. Compare B-A, C-B within each condition, with completion/reliability first. The postprocessor import passed; dynamic data path remains untested. Own partial/exception data never becomes a fabricated task score.
+
+Model hashes are collected from actual model objects with numeric beta/residual and geometry recorded separately, per process PID. Spawned-worker emissions must be checked; absent emissions are evidence gaps. Model predictions use causal reconstructed torque on TASK data not used by commissioning. Finite-difference acceleration uses future endpoint of the measurement interval retrospectively; do not call this a future-state forecast. Prequential model is captured before that sample can update it. Frozen commissioning prediction checkpoint must not alias evolving beta/residual.
+
+Raw retention review is mandatory after compact scorer/model/prediction/phase evidence is saved and hashed: full trajectories only representative nominal, important failure, key adaptation success, targeted oracle and final representative combined. Record exact own generated artifacts and why retained/discardable. Do not auto-delete unreviewed unique negative evidence. No historical/SAC raw copy or mutation. No huge unclassified trace accumulation; postprocess/retain per triplet before next one.
+
+Oracle≤3 only if nontrivial B/C failure or ambiguous attribution, explicit true-effective-model feasible-if-known purpose and separate diagnostic stats. Combined≤4 triplets only after all21 primary rows have actually been executed and ranges are qualified; freeze challenge before results. No combined protocol was defined in this preparation. No noise repeats or extra sweeps preregistered.
+
+No height dynamics, no RL/multi-Human policy training, no hardware or production controller/identifier/threshold changes. Reusable harness ideas are isolated code candidates for later review, not production patches.

@@ -1,0 +1,30 @@
+{
+  "status": "FROZEN_EXPLORATORY_CHALLENGER_NOT_HOST_QUALIFIED",
+  "model": "/home/hank/coding/adaptive-traction-mpc-side-studies/m2_neural_q_motion_v1/models/Q_32.npz",
+  "sha256": "2f242e87218063fc22ced59434aa85efafc3691e53a718b60b1bdb5fd939716d",
+  "architecture": [
+    120,
+    32,
+    32,
+    1
+  ],
+  "feature_dtype": "float32",
+  "feature_layout": {
+    "0:55": "causal native observation",
+    "55:58": "previous realized K3 residual",
+    "58:88": "masked candidate table (2,5,3)",
+    "88:118": "masked carry table",
+    "118:120": "OUTBOUND/RETURN issued counts divided by 5"
+  },
+  "feature_source_implementation": "/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_learning_matrix_v1/code/native_core.py",
+  "feature_source_sha256": "86f5d72eef08c486c7f567cbe9e87139b9588f1555bb13f2ef10bfd313f92a74",
+  "mask_rule": "zero issued OUTBOUND/RETURN slots 0:min(count,5) before flattening candidate and carry; original K3 normalized semantics, graph_action scale .2",
+  "normalization": "(x-training mean)/max(training std,.02); scalar output * max(training y std,10) + training y mean",
+  "score_contract": "finite batch Nx120 -> remaining J_F N s. Ranking ascending; legal mask/admission/safety/carry remain native caller responsibilities. This scorer has no actuation or state mutation.",
+  "scorer": "offline_score.py",
+  "truth_firewall": "only original deployable observation/history/plan/carry/count inputs; dense native truth solely audit labels",
+  "continuation": "native-certified-committed-K3-suffix-v1 labels; not certified repeated online replanning policy value",
+  "feature_availability": "native120D already available in prior TASK scoring path; no new deployment feature",
+  "frozen_original_Q_sha256": "3be0536a8cd9007e8926fc1f49d97468facd2d09233bd89618d04e683b6d3db9",
+  "host_activation": false
+}

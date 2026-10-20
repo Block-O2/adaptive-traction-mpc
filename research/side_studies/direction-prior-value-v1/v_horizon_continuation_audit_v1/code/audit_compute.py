@@ -1,0 +1,19 @@
+from audit_common import *
+def main():
+ events=[json.loads(s) for s in (STUDY/'ATTEMPTS.jsonl').read_text().splitlines()];ends={e['id']:e for e in events if e['event']=='END'};rows=[]
+ for e in events:
+  if e['event']!='START':continue
+  name=e['id'];p=STUDY/'output'/(name+('_OUTCOME.json' if 'candidate' in e.get('config',{}) else '_RESULT.json'));r=read(p) if p.exists() else {};m=r.get('metric',{});child=r.get('child')
+  row=dict(id=name,start_unix=e['unix'],end_unix=ends.get(name,{}).get('unix'),worker_status=r.get('status','NO_SEPARATE_RESULT'),kind='fork_continuation' if 'candidate' in e.get('config',{}) else 'replay_parent' if e.get('config',{}).get('mode')=='audit_fork' else 'full_validation',metric_available=bool(m),simulation_dt_s=.00025,new_native_physics_steps=m.get('actual_new_native_physics_steps'),new_main_inverse_dynamics_api_calls=m.get('actual_new_main_model_inverse_dynamics_api_calls'),new_native_worker_inverse_dynamics_api_calls=m.get('actual_new_native_worker_model_inverse_dynamics_api_calls'),network_calls=r.get('network_calls'),result_path=str(p) if p.exists() else None)
+  if m:
+   assert m['native_physics_dt_s']==.00025
+   if child:assert abs(row['new_native_physics_steps']*.00025-m['actual_new_simulation_seconds'])<1e-7
+  if row['network_calls'] is None:
+   sr=STUDY/'output'/(name+'_SEARCH.json')
+   if sr.exists():row['network_calls']=read(sr).get('network_calls')
+  row['wall_s_inclusive_children']=None if row['end_unix'] is None else row['end_unix']-row['start_unix'];rows.append(row)
+ resources=[json.loads(s) for s in (STUDY/'output/RESOURCES.jsonl').read_text().splitlines()];metrics=[r for r in rows if r['metric_available']]
+ stats=dict(unix=time.time(),elapsed_wall_h=(time.time()-START)/3600,attempts=len(rows),attempts_with_metric=len(metrics),attempts_without_separate_reliable_metric=[r['id'] for r in rows if not r['metric_available']],new_native_steps_measured_lower_bound=sum(r['new_native_physics_steps'] or 0 for r in metrics),new_native_simulation_seconds_measured_lower_bound=sum(r['new_native_physics_steps'] or 0 for r in metrics)*.00025,new_main_inverse_dynamics_api_calls_measured_lower_bound=sum(r['new_main_inverse_dynamics_api_calls'] or 0 for r in metrics),new_native_worker_inverse_dynamics_api_calls_recorded_lower_bound=sum(r['new_native_worker_inverse_dynamics_api_calls'] or 0 for r in metrics),online_search_network_calls_measured_lower_bound=sum(r['network_calls'] or 0 for r in rows),training_runs=0,resource_samples=len(resources),min_WSL_available_GiB=min(r['mem_available'] for r in resources)/2**30,max_owned_PSS_GiB=max(r['PSS'] for r in resources)/2**30,swap_min_max_MiB=[min(r['swap_used'] for r in resources)/2**20,max(r['swap_used'] for r in resources)/2**20],OOM_delta=resources[-1]['oom_kill']-resources[0]['oom_kill'],new_data_GiB=sum(p.stat().st_size for p in STUDY.rglob('*') if p.is_file())/2**30)
+ notes=['Each parent is counted once for its full new rollout. Each successful fork contributes only physics/model-call increments after fork; inherited trace prefixes are not new compute.','First three adapter-failure attempts lack individually reliable metrics; measured counters are LOWER BOUNDS, not exact total. Misrouted initial traces are retained, not relabeled as another attempt.','Parent wall times include sequential child work: never sum them with children; elapsed wall time uses original START.','Native worker counters are exported native lifecycle counters; not a claim of simulator internal torque/dynamics totals.','Offline label/rescore/alignment analysis uses existing files, no physics and no training. Offline NN evaluations are additional and not exactly counted; online search counter does not include every diagnostic pool rescore.']
+ save(STUDY/'COMPUTE_RESOURCE_LEDGER.json',dict(summary=stats,rows=rows,notes=notes));print(json.dumps(stats))
+if __name__=='__main__':main()

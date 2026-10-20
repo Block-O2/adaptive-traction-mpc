@@ -1,0 +1,5 @@
+from freeze import *
+def main():
+ path=STUDY/'PLAN_AMENDMENT_05_COMPLETION_ALLOWANCE.json';assert not path.exists();save(path,dict(timestamp_unix=time.time(),before_learning_fit=True,before_heldout_tests=True,preflight_version='009 physical COMPLETE but R2 RETURN9.080s, excluded from ranking',repair='Distinguish predicted motion endpoint from task completion: add fixed0.5s completion/estimator-settling allowance to online feasibility metadata. Scale comes from unchanged task hold_duration_s=.5; it is a conservative planning hypothesis, not a physical guarantee.',not_a_new_task_tolerance=True,V_base_arithmetic_changed=False,Monte_Carlo_labels_changed=False,physics_B_safety_authority_unchanged=True,development_parent='qualified012 table if valid, else preregistered halfK3 design',original_start_unix=1791222386,final_preflight='012_P_completion_allowance_regression'))
+ name='012_P_completion_allowance_regression';queue=STUDY/'queue'/(name+'.json');assert not queue.exists();save(queue,dict(id=name,kind='physics',mode='search',method='P',seed=2026100600,split='smoke',result_path=str(STUDY/'output'/(name+'_RESULT.json'))));print(name)
+if __name__=='__main__':main()

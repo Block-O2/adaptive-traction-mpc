@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "registered_unix": 1791474954.8315744,
+  "clinical_thresholds": null,
+  "reference": "Freeze all eight historical B arms before new derived candidate analysis; paired B and same-snapshot zero suffix are different references.",
+  "hard_layer": [
+    "original native physical safety, ROM, force/moment peak and clearance limits",
+    "COMPLETE actual task",
+    "original tracking qualification",
+    "same original goals, timing and prefix",
+    "native legal execution"
+  ],
+  "research_layer": {
+    "profiles": [
+      {
+        "id": "strict",
+        "burden_ratio": 1.0,
+        "excursion_delta_deg": 0.0,
+        "cumulative_ratio": 1.01,
+        "endpoint_delta_deg": 0.5,
+        "phase_shape_delta_deg": 0.5
+      },
+      {
+        "id": "moderate",
+        "burden_ratio": 1.1,
+        "excursion_delta_deg": 0.5,
+        "cumulative_ratio": 1.05,
+        "endpoint_delta_deg": 0.5,
+        "phase_shape_delta_deg": 1.0
+      },
+      {
+        "id": "wide",
+        "burden_ratio": 1.25,
+        "excursion_delta_deg": 1.0,
+        "cumulative_ratio": 1.1,
+        "endpoint_delta_deg": 1.0,
+        "phase_shape_delta_deg": 2.0
+      }
+    ],
+    "duration_abs_delta_s": 0.1,
+    "burden_gate": [
+      "hip/knee real speed max,p95,RMS",
+      "hip/knee real acceleration p95,RMS"
+    ],
+    "diagnostics": [
+      "acceleration peak",
+      "jerk peak,p95,RMS and smoothing sensitivity",
+      "start/stop/turn windows"
+    ],
+    "dose_gate": "absolute change in real excursion; both-joint cumulative angular travel ratio; actual phase-boundary and terminal q; time-normalized phase q shape. Full TASK only; never divide J_F by excursion to hide dose.",
+    "jerk": "Report raw + Savitzky-Golay order3 nominal 1.25ms and5.25ms; optional p95/RMS gate at same profile ratio; not mandatory compound Pareto gate.",
+    "secondary_bounds": {
+      "moment_integral_ratio": 1.25,
+      "tracking_RMS_add_deg": 0.5
+    }
+  },
+  "resolution": {
+    "dense": "native approximately 0.25ms true dq and verified mapping",
+    "sampled": "5ms branch dq finite differences yield screening only; unsampled peaks and validated transition dynamics NOT_EVALUABLE"
+  },
+  "derivatives": "np.gradient(true dq,time,edge_order=2); then second gradient; derivative across phase boundaries; no endpoint deletion",
+  "interpretation": "Research sensitivities chosen on exposed prior evidence, frozen before this package derived analysis; not clinical acceptance or external validated thresholds. All profiles reported, no outcome-driven tolerance change."
+}

@@ -1,0 +1,32 @@
+{
+  "frozen_unix": 1792347157.6290758,
+  "method": "finite-action contextual Monte Carlo cost/value regression; terminal full-task returns, no Bellman bootstrap claim",
+  "state_origin": "causal RETURN slot 2, before first posture intervention",
+  "actions": [
+    "H150",
+    "HIP",
+    "KNEE",
+    "ZERO"
+  ],
+  "feature_policy": "estimated q/dq minus current reference; measured force/moment norms; phase elapsed. All inputs captured live before action.",
+  "reward": "qualification first, then negative complete-task force integral; matched B and native truth are offline labels only",
+  "models": [
+    "global action mean",
+    "ridge with explicit action-specific state slopes"
+  ],
+  "ridge_grid": [
+    0.1,
+    1.0,
+    10.0,
+    100.0
+  ],
+  "qualification": "predict every original margin with same feature map; conservative lower confidence margin and support distance; no future-label runtime mask",
+  "selection": "H150 default; choose alternative only if all predicted original margins positive with development calibrated residual buffer and force advantage exceeds development prediction error; direct Q argmin diagnostic separately",
+  "evaluation": "held-out parent selection regret, action ranking, qualification and costs vs fixed H150 and best train-only global action; independent raw audit",
+  "promotion": "Q_GENERALIZATION_PASS only with qualified physical improvement vs H150 on all test parents, nonconstant selections, and improvement vs globally best fixed action; otherwise not demonstrated",
+  "few_repetition": "requires actual completed repetition feedback and a subsequent actual re-admitted task. Cold fork dataset is not repetition learning.",
+  "p1_planned_starts": 66,
+  "p1_hard_cap": 100,
+  "p2_status": "conditional; separate budget; no starts yet",
+  "limits": "Single Human, PHYSICAL_LEVEL1/SCIENTIFIC_SIMULATION only"
+}

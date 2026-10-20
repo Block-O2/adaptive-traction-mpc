@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "unix": 1792349785.1239433,
+  "runtime_sha256": "55f8c8280fda137a3696fb74490f9dff2c63c1b008e1f8a79669e31509e7e885",
+  "waypoint_contract_sha256": "574da44264c6e24e03dc82d5d55d4eb57b9275809894c47b4c7d1af59a91c8fc",
+  "source_snippets": [
+    "\"cuff_force_world_n\": interface.measured_force_world_n.copy()",
+    "\"cuff_moment_world_nm\": interface.measured_moment_world_nm.copy()",
+    "\"actual_acceleration_rad_s2\": split.human_motion_acceleration_rad_s2.copy()",
+    "estimated_dq_rad_s=state[2:]"
+  ],
+  "trace_name_warning": "physical_cuff_* are recorded from measured interface; actual_human_acceleration is the causal split estimate, not native evaluation truth",
+  "PD_request_formula": "Kp*(q_reference-q_estimated)+Kd*(dq_reference-dq_estimated), no reference-acceleration term in this waypoint execution contract",
+  "validity_checks": [
+    {
+      "id": "Ctrl_B",
+      "all_selected_acceleration_origins_valid": true
+    },
+    {
+      "id": "Ctrl_ER",
+      "all_selected_acceleration_origins_valid": true
+    },
+    {
+      "id": "Ctrl_H150",
+      "all_selected_acceleration_origins_valid": true
+    },
+    {
+      "id": "W2_B",
+      "all_selected_acceleration_origins_valid": true
+    },
+    {
+      "id": "W2_ER",
+      "all_selected_acceleration_origins_valid": true
+    },
+    {
+      "id": "W2_H150",
+      "all_selected_acceleration_origins_valid": true
+    }
+  ],
+  "truth_role": "native accelerations and future q/dq only offline labels/evaluation"
+}

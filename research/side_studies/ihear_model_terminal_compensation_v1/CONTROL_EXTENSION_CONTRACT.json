@@ -1,0 +1,27 @@
+{
+  "version": "terminal_acceleration_intent_v1",
+  "causal_inputs": [
+    "current estimated q/dq",
+    "current issued q/dq/ddq",
+    "registered/internal phase target",
+    "current model mass matrix",
+    "source time",
+    "task phase",
+    "own previous correction"
+  ],
+  "new_action": "u_original + M(q_est)*bounded_delta_accel BEFORE original transfer/projection/clearance/filter/supervisor",
+  "limits": {
+    "acceleration_rad_s2": 0.2,
+    "rate_rad_s3": 1.0,
+    "period_s": 0.005,
+    "stale_max_s": 0.1
+  },
+  "certificates": {
+    "reference": "original newly generated geometry/mechanics/escape/current-state certificate still describes the same reference",
+    "control_output": "old certificate is NOT a certificate for the changed controller; every augmented action is freshly passed through original full executable filter, allocator, supervisor and actual-write checks; full native audit required",
+    "stability": "ideal local PD poles only; no global physical stability claim"
+  },
+  "receipt": "new version/candidate hash/causal source/delta/generalized correction bound to actual positive-step receipt",
+  "no_new_fast_entry": true,
+  "original_B_controller_unmodified": true
+}

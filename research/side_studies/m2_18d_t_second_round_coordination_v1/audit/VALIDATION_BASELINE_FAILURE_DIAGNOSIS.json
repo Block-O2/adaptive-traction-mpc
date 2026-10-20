@@ -1,0 +1,99 @@
+{
+  "status": "FROZEN_BASELINE_MOTION_FAIL",
+  "group": "W1",
+  "failed_requirements": [
+    "velocity_deg_s/p95_abs",
+    "acceleration_deg_s2/p95_abs",
+    "excursion"
+  ],
+  "details": [
+    {
+      "requirement": "velocity_deg_s/p95_abs",
+      "joint": "knee",
+      "T": 22.559290329624897,
+      "B": 20.22590520779325,
+      "ratio": 1.1153661652153184,
+      "limit_ratio": 1.1,
+      "by_phase": {
+        "OUTBOUND": {
+          "samples_over_full_B_limit": 0,
+          "max_abs": 21.035317165884525,
+          "metric": 20.068827439572967
+        },
+        "HOLD": {
+          "samples_over_full_B_limit": 0,
+          "max_abs": 1.6597157630328113e-05,
+          "metric": 1.582383109129152e-05
+        },
+        "RETURN": {
+          "samples_over_full_B_limit": 4547,
+          "max_abs": 23.963422507937782,
+          "metric": 23.162248459639713
+        }
+      },
+      "peak_task_s": 12.231000000016122,
+      "pre_first_candidate_samples_over_limit": 1922,
+      "all_samples_over_limit": 4547,
+      "maximum_samples_with_original_duration_tolerance": 76521,
+      "p95_prefix_irreversible_bound": false,
+      "interpretation": "Phase localization is descriptive. Only the stated lower-bound flag proves that a later RETURN2/3-only action cannot repair this particular whole-task percentile under the original timing gate."
+    },
+    {
+      "requirement": "acceleration_deg_s2/p95_abs",
+      "joint": "knee",
+      "T": 28.552718980275262,
+      "B": 25.247849674876377,
+      "ratio": 1.1308970604608555,
+      "limit_ratio": 1.1,
+      "by_phase": {
+        "OUTBOUND": {
+          "samples_over_full_B_limit": 1698,
+          "max_abs": 72.88095691349334,
+          "metric": 26.535952519332845
+        },
+        "HOLD": {
+          "samples_over_full_B_limit": 0,
+          "max_abs": 0.00014814125859664414,
+          "metric": 0.00011248911880041751
+        },
+        "RETURN": {
+          "samples_over_full_B_limit": 2706,
+          "max_abs": 60.87074992738483,
+          "metric": 31.250332803631544
+        }
+      },
+      "peak_task_s": 3.134749999992694,
+      "pre_first_candidate_samples_over_limit": 2364,
+      "all_samples_over_limit": 4404,
+      "maximum_samples_with_original_duration_tolerance": 76521,
+      "p95_prefix_irreversible_bound": false,
+      "interpretation": "Phase localization is descriptive. Only the stated lower-bound flag proves that a later RETURN2/3-only action cannot repair this particular whole-task percentile under the original timing gate."
+    }
+  ],
+  "first_planned_D_request_physical_s": 22.840000000018044,
+  "first_planned_D_request_task_s": 12.790000000018791,
+  "prefix_excursion_lower_bound_deg": [
+    114.77382180000345,
+    110.56962803062291
+  ],
+  "matched_B_full_excursion_deg": [
+    115.24996336402417,
+    111.2959719756976
+  ],
+  "prefix_excursion_irreversible_upper_failure": [
+    false,
+    false
+  ],
+  "full_T_excursion_deg": [
+    115.4091401650925,
+    111.830855993651
+  ],
+  "task": "PASS",
+  "safety": true,
+  "receipt": "PASS",
+  "force_gain_vs_B_percent": 2.297305099487191,
+  "primary_not_reselected": true,
+  "new_candidate_not_executed_in_W1": true,
+  "reason_for_no_more_physics": "Frozen execution harness prospectively gates D on qualified T. Do not alter the gate/code or choose a different primary after seeing validation. W2 remains a frozen but unstarted condition.",
+  "not_established": "This is a T domain failure, not a physical failure result for the unexecuted D; later-action repair is ruled out only where the explicit prefix lower bound succeeds."
+}

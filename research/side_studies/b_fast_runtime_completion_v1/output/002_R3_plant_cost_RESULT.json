@@ -1,0 +1,59 @@
+{
+  "calls": {
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_applyFT": 8000,
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_forward": 2000,
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_fwdPosition": 2000,
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_fwdVelocity": 2000,
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_objectVelocity": 8000,
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_step1": 2000,
+    "mujoco._functions.pybind11_detail_function_record_v1_system_libcpp_abi1.mj_step2": 2000,
+    "traction_mpc_stage3.coupled.CoupledUR10eHumanV2._apply_soft_limit": 4000,
+    "traction_mpc_stage3.spring_damper_interface.SpringDamperCoupledUR10eHumanV2._attachment_state": 8000,
+    "traction_mpc_stage3.spring_damper_interface.SpringDamperCoupledUR10eHumanV2._refresh": 2000,
+    "traction_mpc_stage5.full3d_adaptive_integration_v1.fast_plant.CachedStage5CR12SensorBoundaryPlant._apply_interface": 4000,
+    "traction_mpc_stage5.full3d_adaptive_integration_v1.fast_plant.CachedStage5CR12SensorBoundaryPlant._evaluate_current_interface_value": 4000
+  },
+  "exclusive_mean_per_step_ms": {
+    "attachment_extract": 0.011772079,
+    "interface_apply": 0.010792348,
+    "interface_value": 0.060380272,
+    "mujoco_mj_applyFT": 0.004166817,
+    "mujoco_mj_forward": 0.008821075000000001,
+    "mujoco_mj_fwdPosition": 0.0070945275,
+    "mujoco_mj_fwdVelocity": 0.000659271,
+    "mujoco_mj_objectVelocity": 0.003090991,
+    "mujoco_mj_step1": 0.0074827075000000005,
+    "mujoco_mj_step2": 0.0012338779999999999,
+    "refresh_native": 0.0039908315,
+    "soft_limit": 0.015402681500000001,
+    "unwrapped_step_and_measurement": 0.0102457905
+  },
+  "id": "002_R3_plant_cost",
+  "inputs": {
+    "budget_attempts": 1,
+    "dependencies": [
+      "001_R3_attribution_corrected"
+    ],
+    "entry": "plant_cost.py",
+    "fast_version": "R3_CONTROL",
+    "id": "002_R3_plant_cost",
+    "native_steps": 2000,
+    "qualification_role": "same native model wrapper cost attribution only"
+  },
+  "metric": {
+    "main_model_inverse_dynamics_api_calls": "traction_mpc_stage5.full3d_adaptive_integration_v1.runtime_coordination_residual_v2",
+    "native_physics_steps": 2000,
+    "native_worker_model_inverse_dynamics_api_calls": 0,
+    "simulation_seconds": 0.49999999999997263
+  },
+  "native_step_ms": {
+    "max": 0.651465,
+    "p50": 0.1350635,
+    "p95": 0.1690683,
+    "p99": 0.24489343
+  },
+  "qualification": "PLANT_COST_ATTRIBUTION_ONLY_CONSTANT_VALIDATED_INITIAL_SUPPORT; no closed-loop/task claim",
+  "same_model_case_key": "high_rom_nominal_sync_120_v1",
+  "status": "COMPLETE",
+  "wall_seconds": 1.7149269580841064
+}

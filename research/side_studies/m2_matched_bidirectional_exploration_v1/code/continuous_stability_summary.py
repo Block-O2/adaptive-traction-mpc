@@ -1,0 +1,13 @@
+from task_bootstrap import *
+from full_native_equivalence import full_compare
+def main():
+ groups=[]
+ for id in ('210_continuous_SCI_B_rep1','220_continuous_SCI_frozen_Q_rep1'):
+  p=STUDY/'output'/(id+'_CONTINUOUS_SESSION.json');groups.append(json.loads(p.read_text()))
+ proof=[full_compare('002_T0_science_B',id) for id in ('210_continuous_SCI_B_rep1','220_continuous_SCI_frozen_Q_rep1')];rows=[]
+ for i,(b,m) in enumerate(zip(groups[0]['rows'],groups[1]['rows'])):
+  br=json.loads((STUDY/'output'/(b['id']+'_RESULT.json')).read_text())['metric'];mr=json.loads((STUDY/'output'/(m['id']+'_RESULT.json')).read_text())['metric']
+  rows.append(dict(repetition=i+1,B_id=b['id'],frozen_id=m['id'],B_valid=br['valid'],frozen_valid=mr['valid'],B_J_F=br['J_F'] if br['valid'] else None,frozen_J_F=mr['J_F'] if mr['valid'] else None,B_failed_R2_cost_unranked=br['J_F'] if not br['valid'] else None,frozen_failed_R2_cost_unranked=mr['J_F'] if not mr['valid'] else None,paired_force_reduction_percent=100*(br['J_F']-mr['J_F'])/br['J_F'] if br['valid'] and mr['valid'] else None,B_moment=br['moment_integral'],frozen_moment=mr['moment_integral'],B_phase_durations=br['phase_durations'],frozen_phase_durations=mr['phase_durations'],Q_sha256=b['frozen_Q_sha256'],Q_updated=False,physical_audit_B=br['physical_audit']['pass_'],physical_audit_frozen=mr['physical_audit']['pass_'],absolute_end_physical_s=b['end']['physical_time_s'],actual_new_B_physics_s=br['actual_new_simulation_seconds'],actual_new_frozen_physics_s=mr['actual_new_simulation_seconds']))
+ out=dict(status='PARTIAL_STABILITY_COMMON_R2_FAILURE',rows=rows,first_rep_complete_B_regression=proof,first_rep_regression_status='PASS' if all(r['status']=='PASS' for r in proof) else 'FAIL',attempts=8,planned_attempts=10,rep5_not_dispatched_after_invalid_R2_rep4=True,same_plant_and_updater_every_rep=all(r['initial'] is None or r['initial']['plant_identity']==r['end']['plant_identity'] and r['initial']['updater_identity']==r['end']['updater_identity'] for g in groups for r in g['rows']),frozen_Human_belief_sequence=351,Q_update=False,actual_clock_qualification=False,adaptation_pilot=False,interpretation='Both groups physically complete and pass original physical/safety audit at Rep4, but HOLD1.030 exceeds unchanged MATCHED_R2 upper1.020. Costs from this failed R2 repetition remain unranked. Native persistent session only supports SCI; no clock reset, free host qualification or tolerance relaxation.')
+ save(STUDY/'reports/CONTINUOUS_FROZEN_STABILITY_SUMMARY.json',out);print(json.dumps({k:out[k] for k in ('status','first_rep_regression_status','attempts','same_plant_and_updater_every_rep','rows')}))
+if __name__=='__main__':main()

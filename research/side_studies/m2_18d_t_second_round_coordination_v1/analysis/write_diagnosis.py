@@ -1,0 +1,10 @@
+from pathlib import Path
+import json
+P=Path('/home/hank/coding/adaptive-traction-mpc-side-studies')/Path(__file__).resolve().parents[1].name
+rows=json.loads((P/'derived/HISTORICAL_WINDOWS.json').read_text());peaks=json.loads((P/'derived/HISTORICAL_PEAKS.json').read_text())
+out=['# 18D-T剩余机制诊断','', '诊断只读取已有V1匹配B/18D/T的trace、0.25ms native motion、summary与receipt来源；未用新physics补历史诊断。四个prefix的完整积分、phase时长、安全/执行轴和来源SHA见derived/FOUR_PREFIX_BASELINE_AUDIT.json。CURRENT_RESEARCH_BASELINE.md只到旧18D状态，较晚的T两个研究包是冻结T适用域的实际证据。','', '|task窗口s|T J_F N·s|T−B N·s|T−18D N·s|T TV_v|T TV_a|T jerk RMS rad/s³|','|---|---:|---:|---:|---:|---:|---:|']
+for win,items in rows.items():
+ t=items['18D-T'];b=items['B'];e=items['18D'];out.append(f"|{win}|{t['J_F']:.6f}|{t['J_F']-b['J_F']:+.6f}|{t['J_F']-e['J_F']:+.6f}|{t['TV_v']:.6f}|{t['TV_a']:.6f}|{t['jerk_RMS']:.6f}|")
+out+=['', '18D的髋先抬、膝先回等空间分配仍在T中保留；T/18D在最终OUTBOUND splice前参考与物理逐字段相同，历史修复包已有独立受控核验。该末段修复不改RETURN意图，V1历史完整RETURN积分差约1.7e-8 N·s，属数值量级。去程末段新增运动时间占用TRACK等待；实际膝加速度峰从末段转移到约2.93975s，完整髋峰在回程终止约16.9475s。不能把T的全程运动称为处处更优：T hip jerk RMS相对B仍略高，tracking和moment也不是全部下降。','', '剩余波动分两类：数秒宽的速度起伏同时存在于reference和actual，与多段通过速度及各段quintic形状有关；更窄的native acceleration/jerk峰与结束、请求/桥接附近的跟踪响应共现。C2接续并不保证全链jerk小。峰时刻共现只定位问题，不能唯一归因FAST、allocator或contact。raw数值导数不等于临床抖动。','', '最多两个方向：①RETURN槽3的有界空间协调分配：在原18D选好中间目标后，叠加[+0.3,-0.3]°，假设更早降膝可减少模型姿态负荷；固定该段duration和通过速度并经过原全部检查。反向对照在数学预检被原速度门拒绝，保留该负结果，不延长duration使其通过。②OUTBOUND槽1与RETURN末段的局部形状：目标分别是2.94s前的运动变化和16.95s附近制动峰，沿用历史认证内部q偏移/0.05°全路径界限、外端q/dq/ddq及duration不变。','', '未继续原18D参数搜索：它会破坏冻结比较基准；未重新扩大去程末段duration：T倍率已冻结且末段amax已不再主导；未重复旧4–6/15–16s的±0.05°网格：上一包已有小收益和下游抵消证据。新的两个平滑窗口分别对应当前T残余响应。reference优化只作数学预选，实际motion是否改变及是否有全程价值必须由新物理检验。','', '统一时间轴：figures/baseline_unified_timeline.png。时间零点使用TASK第一个样本；request用decision_request_time_s，activation用已激活learning_record.start_time_s，splice=activation+既有40ms。完整force用5ms左积分；native0.25ms用于motion及ownership，不混称force采样率。']
+(P/'MECHANISM_DIAGNOSIS.md').write_text('\n'.join(out)+'\n')
+print('DIAGNOSIS_SAVED')

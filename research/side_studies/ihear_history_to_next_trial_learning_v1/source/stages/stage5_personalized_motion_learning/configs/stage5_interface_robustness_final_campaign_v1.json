@@ -1,0 +1,63 @@
+{
+  "schema": "stage5_interface_robustness_final_campaign_v1",
+  "status": "PREREGISTERED_NOT_AUTHORIZED",
+  "authorization_required_before_execution": true,
+  "acceptance_contract": "stage5_interface_robustness_v1.json",
+  "controller_version": "Interface Robustness v1",
+  "controller_changes_after_development_allowed": false,
+  "fixed_random_seeds": [20260824, 20260825, 20260826],
+  "core_box": {
+    "conditions": [
+      {"name": "nominal", "alpha_t": 1.0, "alpha_r": 1.0, "alpha_d": 1.0},
+      {"name": "low_low_low", "alpha_t": 0.9, "alpha_r": 0.9, "alpha_d": 0.8},
+      {"name": "low_low_high", "alpha_t": 0.9, "alpha_r": 0.9, "alpha_d": 1.2},
+      {"name": "low_high_low", "alpha_t": 0.9, "alpha_r": 1.1, "alpha_d": 0.8},
+      {"name": "low_high_high", "alpha_t": 0.9, "alpha_r": 1.1, "alpha_d": 1.2},
+      {"name": "high_low_low", "alpha_t": 1.1, "alpha_r": 0.9, "alpha_d": 0.8},
+      {"name": "high_low_high", "alpha_t": 1.1, "alpha_r": 0.9, "alpha_d": 1.2},
+      {"name": "high_high_low", "alpha_t": 1.1, "alpha_r": 1.1, "alpha_d": 0.8},
+      {"name": "high_high_high", "alpha_t": 1.1, "alpha_r": 1.1, "alpha_d": 1.2}
+    ],
+    "seeds_per_condition": 3,
+    "episode_count": 27,
+    "required_result": "27/27 satisfy the complete engineering acceptance contract and every unchanged hard limit, with no false completion"
+  },
+  "boundary_challenges": {
+    "seed": 20260824,
+    "conditions": [
+      {"name": "Kt_x0p7", "alpha_t": 0.7, "alpha_r": 1.0, "alpha_d": 1.0},
+      {"name": "Kt_x1p3", "alpha_t": 1.3, "alpha_r": 1.0, "alpha_d": 1.0},
+      {"name": "Kr_x0p7", "alpha_t": 1.0, "alpha_r": 0.7, "alpha_d": 1.0},
+      {
+        "name": "progressive_translation_stiffness",
+        "alpha_t": 1.0,
+        "alpha_r": 1.0,
+        "alpha_d": 1.0,
+        "spring_force_model": "F_s=K*x*(1+beta*(norm(x)/x_ref)^2)",
+        "beta": 0.03333333333333333,
+        "x_ref_m": 0.004760026073649988,
+        "radial_tangent_stiffness_at_x_ref_relative_to_nominal": 1.1,
+        "source_of_x_ref": "Interface Robustness v1 nominal development peak interface translation"
+      }
+    ],
+    "required_result": "each boundary is either truth-complete and compliant or detected and conservatively stopped; silent truth violations and false completions are forbidden"
+  },
+  "repeatability": {
+    "seed_stream_initialization": 20260824,
+    "continuous_episode_count": 30,
+    "single_process_no_plant_or_estimator_reconstruction_between_episodes": true,
+    "episode_local_phase_and_warm_start_state_reset": true,
+    "preserve_estimator_interface_history_and_advance_one_continuous_rng_stream": true,
+    "five_second_hold_episodes": [1, 30],
+    "required_truth_complete_count": 30,
+    "silent_violation_or_abnormal_termination_allowed": false,
+    "last5_vs_first5_terminal_drift_abs_max_deg": [1.0, 1.0],
+    "increasing_interface_slip_oscillation_or_force_trend_allowed": false
+  },
+  "scope": {
+    "engineering_research_only": true,
+    "continuous_robustness_guarantee": false,
+    "clinical_validation": false,
+    "hardware_safety_validation": false
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "version": "COMPREHENSIVE_COORDINATION_SEARCH_v1",
+  "registered_unix": 1791811913.856254,
+  "t0_unix": 1791810975.0,
+  "hard_stop_unix": 1791832575.0,
+  "dispatch_cutoff_unix": 1791830775.0,
+  "physics_budget": 160,
+  "single_physics_owner": true,
+  "seed": 2026101201,
+  "random_sampling_seed": 2026101200,
+  "clock": "SCIENTIFIC_MATCHED_EXECUTION",
+  "host_clock_qualification": "NOT_EVALUABLE",
+  "search_bound_normalized_delta": [
+    -0.2,
+    0.2
+  ],
+  "native_bound": "raw graph finite sorted [0,1] endpoints zero; no explicit amplitude clamp; modified normalized targets and native feasibility enforce legality",
+  "K3_knots": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "issued_slots_per_phase": 5,
+  "dimensions": [
+    "phase",
+    "sign",
+    "amplitude",
+    "slot_mask",
+    "remaining_progress_onset",
+    "remaining_progress_support",
+    "PWL_knot_locations",
+    "PWL_shape",
+    "joint_phase_independent_parameters",
+    "within_phase_slot_combination"
+  ],
+  "budgets": {
+    "fork_and_baseline": 8,
+    "C1": 48,
+    "C2": 32,
+    "C3": 24,
+    "C4": 24,
+    "validation": 24,
+    "total_cap": 160
+  },
+  "primary_gain_percent": 0.5,
+  "motion_protocol_sha256": "0f41463cab96b71ea39cc06f9fe86f432de07efe307bd486bc1c4df6cc196ece",
+  "C2_adaptive_rule": "12 joint pairs: O top 3 by valid motion then J_F, R top 4 by same rule; combine independently, no holdout influence",
+  "C4_rule": "after all broad stages: choose best motion-accepted candidate in each of 3 distinct stage/phase regions; if unavailable choose task-valid by least max burden then J_F; 8 factors [.6,.8,.9,1.1,1.2,1.4,-.5,-1] per region; amplitudes clipped to preregistered +/- .2, no hidden evaluations",
+  "selection_rule": "eligible = task/native ownership PASS, nonzero residual in all targeted phases, motion acceptance PASS, J_F gain >=0.5%; freeze max3 representatives: minimum J_F, minimum max raw burden among eligible, most distinct parameter region among eligible; deduplicate; no reselect after validation",
+  "validation_conditions": [
+    {
+      "name": "H1",
+      "seed": 2026101202,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.3,
+            -0.1,
+            0.05
+          ]
+        ]
+      }
+    },
+    {
+      "name": "H2",
+      "seed": 2026101203,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.15,
+            0.25,
+            -0.2
+          ]
+        ]
+      }
+    }
+  ],
+  "validation_scope": "two independent parent processes and legal prefix conditions not used for this search; existing Human and previously exposed prefix family, no population generalization; fork after common prefix at next lawful OUTBOUND request",
+  "validation_rule": "B and Frozen M2 and frozen representatives on both conditions; each representative requires both gain>=0.5% and motion/native PASS; if no discovery eligible skip formal validation",
+  "early_stop": [
+    "same-control fork FAIL",
+    "parent mutated",
+    "native safety or ownership FAIL",
+    "dispatch cutoff",
+    "attempt cap",
+    "D free <20GiB",
+    "Linux available memory <1GiB",
+    "study storage >12GiB",
+    "three consecutive failed attempts"
+  ],
+  "storage": "all compact metrics and parameter rows; compressed native traces retained under 12GiB cap for training-label value; no historical deletions",
+  "truth_firewall": "fixed parameters and measured discovery outcomes only for bounded offline search; candidate context causal planner observation; simulator truth evaluation only",
+  "no_training": true,
+  "no_online_adaptation": true,
+  "no_B_core_semantic_changes": true
+}

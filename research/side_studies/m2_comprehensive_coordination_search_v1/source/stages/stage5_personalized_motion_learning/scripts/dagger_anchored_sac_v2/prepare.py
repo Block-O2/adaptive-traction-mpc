@@ -1,0 +1,41 @@
+from common import *
+import gzip,shutil
+def run():
+ assert not (L/'PREREGISTRATION.json').exists(),'NO_OVERWRITE'
+ for p in (L,D,O,S/'scripts/dagger_anchored_sac_v2'):p.mkdir(parents=True,exist_ok=True)
+ start=time.time();state('PREPARING',started_unix=start,hard_cutoff_unix=start+12*3600,total_online_steps=0,rescues=0)
+ git=dict(head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip(),branch=subprocess.check_output(['git','branch','--show-current'],cwd=R,text=True).strip(),index_sha256=sha(R/'.git/index'),cached_diff_sha256=hashlib.sha256(subprocess.check_output(['git','diff','--cached','--binary'],cwd=R)).hexdigest());save('GIT_BEFORE.json',git)
+ old=json.loads((W/'dagger_to_sac_expert_v1/output/SCIENTIFIC_LOCK.json').read_text());save('BASELINE_LOCK.json',old)
+ preserved={str(R/k):v for k,v in old['files'].items()}
+ for root in (W/'dagger_to_sac_expert_v1',V,S/'docs/dagger_to_sac_expert_v1',S/'scripts/dagger_to_sac_expert_v1'):
+  for p in root.rglob('*'):
+   if p.is_file():preserved[str(p)]=sha(p)
+ for p,h in preserved.items():assert sha(p)==h,'HISTORICAL_DRIFT:'+p
+ save('PRESERVATION_BEFORE.json',preserved)
+ cfg=dict(method='DAgger-Anchored SAC Fine-Tuning v2',seed=20261005,initial_condition_seed=20261003,period_s=.02,gamma=gamma_for(.02),tau=.005,actor_lr=1e-6,critic_lr=3e-4,batch_size=256,anchor_batch_per_phase=96,anchor_lambda=10000.,critic_only_updates=20000,critic_per_step=1,actor_every_critic=10,alpha=.001,exploration_log_std_candidates=[-8.,-10.],exploration_selection='first candidate with two complete independent NATIVE stochastic rollouts; otherwise lower candidate, report failures; no further search',log_std_frozen=True,uniform_warmup=0,current_policy_seed_episodes=2,maximum_total_online_steps=50000,evaluation_points=[0,1000,2000,5000,10000]+list(range(15000,50001,5000)),checkpoint_repeats=2,stochastic_checkpoint_repeats=1,history_fraction=.25,history_samples=64,online_samples=192,lambda_schedule=dict(first_20000=10000.,requires_two_consecutive_native_checkpoints=True,every_5000_after_20000_multiplier=.9,floor=5000.),rescue=dict(maximum=1,actor_lr_multiplier=.1,std_multiplier=.25,anchor_multiplier=4.,lambda_decay=False,restore='actor critics targets optimizers fixed alpha replay sampler Python NumPy CPU/CUDA RNG; fresh cold environment from saved env RNG; global consumed budget and failures never restored'),small_actor_test_updates=10,ability_loss='deterministic NATIVE invalid then independent confirmation invalid triggers rescue; stochastic failure recorded, not silently converted to deterministic success',pause=['real data mismatch','unresolved physics/evaluation bug','NaN','resource risk','12h hard cutoff'],claim='method development; components not independently causally identified; deterministic repeated replay is not independent training seed',budget_semantics='all new data-collection steps including calibration, warm-start rollouts and failed attempts count toward 50000; evaluation-only steps separately ledgered and never used for training',high_frequency='key evaluations and all failures; online success keeps compact actions/transitions only')
+ save('PREREGISTRATION.json',cfg)
+ sources={str(p):sha(p) for p in P.glob('*.py')};save('LOCK.json',dict(config=sha(L/'PREREGISTRATION.json'),sources=sources));resource('PREFLIGHT')
+ z=np.load(V/'qualified_aggregated.npz');assert np.all(z['expert_label_available']);n=len(z['actions']);groups=np.asarray(z['rollout']);episodes=[]
+ for name in dict.fromkeys(groups.tolist()):
+  ids=np.flatnonzero(groups==name);d=z['terminated'][ids]|z['truncated'][ids];assert d[-1] and not d[:-1].any();assert np.array_equal(z['next_observations'][ids[:-1]],z['observations'][ids[1:]])
+  if name!='teacher':
+   phasepath=V/name/'episode_00001/SAC_ACTOR_ACTIONS.npz';a=np.load(phasepath);np.testing.assert_array_equal(z['actions'][ids],a['raw_action']);np.testing.assert_allclose(z['executed_actions'][ids],a['executed_action'],atol=1e-7,rtol=0.)
+  episodes.append(dict(name=name,steps=len(ids),expert_executed=int(z['expert_executed'][ids].sum()),success=bool(z['recovery_success'][ids][0])))
+ # Teacher has no executed-action field in the original dataset. Recover from real paired action evidence, never fill with proposal.
+ teacher=np.load(S/'results/demo_assisted_sac_task_acquisition_v1/teacher_audit_reproduction/episode_00001/SAC_ACTOR_ACTIONS.npz');ids=np.flatnonzero(groups=='teacher');np.testing.assert_array_equal(z['actions'][ids],teacher['raw_action']);executed=np.array(z['executed_actions'],np.float32);executed[ids]=teacher['executed_action']
+ arrays={k:np.asarray(z[k]) for k in ('observations','actions','next_observations','rewards','terminated','truncated','phase')};arrays['executed_actions']=executed;arrays['scope']=np.repeat('NATIVE',n);arrays['episode']=groups
+ pure=[];rd=json.loads((S/'docs/dagger_to_sac_expert_v1/DAGGER_RESULTS.json').read_text())['rounds']
+ for r in rd[-2:]:
+  for row in r['evaluations']:
+   assert row['valid'] and row['teacher_execution_count']==0;p=Path(row['transitions']);q=np.load(p)
+   assert not q['expert_label_available'].any();pure.append(dict(path=str(p),sha256=sha(p),steps=len(q['actions'])))
+   for k in arrays:
+    a=np.repeat('NATIVE',len(q['actions'])) if k=='scope' else np.repeat(row['name'],len(q['actions'])) if k=='episode' else q[k]
+    arrays[k]=np.concatenate([arrays[k],a])
+ np.savez_compressed(O/'HISTORY_RL.npz',**arrays);np.savez_compressed(O/'IMITATION_ONLY.npz',observations=z['observations'],expert_actions=z['expert_actions'],phase=z['phase'],expert_label_available=z['expert_label_available'])
+ unexecuted=~z['expert_executed'];save('TRANSITION_AUDIT.json',dict(status='PASS',actual_proposals_checked_against_real_action_archives=True,counterfactual_expert_labels_never_RL_actions=True,unexecuted_expert_label_records=int(unexecuted.sum()),original_teacher_executed_actions_missing=True,teacher_executed_actions_recovered_from_paired_archive=True,teacher_proposal_vs_execution_difference=float(np.max(np.abs(teacher['raw_action']-teacher['executed_action']))),episodes=episodes,pure_student_success_episodes=pure,total_history=len(arrays['actions']),scope='NATIVE only',history_sha256=sha(O/'HISTORY_RL.npz'),imitation_sha256=sha(O/'IMITATION_ONLY.npz')))
+ # Source-and-trace HOLD proof: actual causal dwell versus reference still moving.
+ ep=V/'round_04/evaluation_1/episode_00001';t=np.load(ep/'trace.npz');mask=(t['stage']=='TASK')&(t['task_phase']=='HOLD');tv=t['time_s'][mask];dq=t['reference_dq_rad_s'][mask];ddq=t['reference_ddq_rad_s2'][mask];q=z['observations'][z['phase']=='HOLD'];summ=json.loads((ep/'summary.json').read_text());rec=[x for x in summ['online_reference_records'] if 'actual_activation_s' in x and tv[0]<=x['actual_activation_s']<=tv[-1]]
+ save('HOLD_DIAGNOSIS.json',dict(classification='policy retargeting / reference completion interaction; no confirmed clock bug',hold_actual_s=float(tv[-1]-tv[0]+.005),causal_dwell_counter_reaches_required_half_second=bool(np.any(q[:,48]*.5>=.5-1e-6)),first_recorded_policy_dwell_threshold_task_s=float(q[np.flatnonzero(q[:,48]*.5>=.5-1e-6)[0],44]*30),fraction_reference_nonzero_velocity=float(np.mean(np.max(np.abs(dq),axis=1)>1e-10)),fraction_reference_nonzero_acceleration=float(np.mean(np.max(np.abs(ddq),axis=1)>1e-10)),records_count=len(rec),last_reference_records=rec[-12:],hold_target_changes=int(np.any(np.diff(z['actions'][z['phase']=='HOLD'],axis=0)!=0,axis=1).sum()),source_chain=['task.py original .5s valid continuous dwell','activation_validation.py reference_safe_task_transition retains proven dwell while deferring','runtime_sac_expert_v1.py requires active schedule complete, terminal reference q, zero dq and ddq','online_reference.py different float targets start new owned OTG; late infeasible offer retains certified continuation'],confirmed=['v1 evaluator resets global training RNG','repeated changing targets / moving reference during HOLD','original phase deadline is respected; no artificial extra wait'],hypotheses=['fresh critic errors may contribute','entropy-driven variance growth may contribute','joint contribution not independently identified'],physical_source_edits=0))
+ state('PREPARED',history_transitions=len(arrays['actions']))
+if __name__=='__main__':run()

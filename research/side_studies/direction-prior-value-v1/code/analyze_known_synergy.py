@@ -1,0 +1,11 @@
+from freeze import *
+def main():
+ spec=json.loads((STUDY/'output/KNOWN_NONMYOPIC_POOL.json').read_text());rows=[]
+ for proposal in spec['rows']:
+  paths=[STUDY/'output'/f'{spec["label"]}_candidate{proposal["index"]}_DATA.json',*sorted((STUDY/'output').glob(f'{spec["label"]}_candidate{proposal["index"]}_retry*_DATA.json'))];path=next(p for p in paths if p.exists());r=json.loads(path.read_text());m=r['metric'];rows.append(dict(label=proposal['label'],id=r['id'],qualified=bool(m['valid'] and m['matched_eligible'] and m['status']=='COMPLETE'),remaining_J_F_Ns=r['remaining_J_F'],remaining_M_Nms=r['remaining_M'],P_score=proposal['P_score'],PV_score=proposal['PV_score'],moment_peak=m['moment_peak'],phase_durations=m['phase_durations']))
+ base=rows[0]['remaining_J_F_Ns']
+ for r,proposal in zip(rows,spec['rows']):
+  r['model_eligible']=proposal['prediction']['matched_model_feasible'];r['benefit_vs_B_remaining_Ns']=base-r['remaining_J_F_Ns'];r['P_predicted_benefit_Ns']=rows[0]['P_score']-r['P_score'];r['PV_predicted_benefit_Ns']=rows[0]['PV_score']-r['PV_score'];r['PV_sign_correct']=((r['benefit_vs_B_remaining_Ns']>1e-6)==(r['PV_predicted_benefit_Ns']>1e-6)) if r['qualified'] else None
+ accepted=[r for r in rows if r['model_eligible']];all_valid=all(r['qualified'] for r in rows);p=min(accepted,key=lambda r:r['P_score']) if accepted else rows[0];pv=min(accepted,key=lambda r:r['PV_score']) if accepted else rows[0];truth=min((r for r in rows if r['qualified']),key=lambda r:r['remaining_J_F_Ns'],default=None)
+ save(STUDY/'KNOWN_NONMYOPIC_ANALYSIS.json',dict(rows=rows,all_qualified=all_valid,first_two_worse_full_better=all_valid and rows[1]['benefit_vs_B_remaining_Ns']<0 and rows[2]['benefit_vs_B_remaining_Ns']<0 and rows[4]['benefit_vs_B_remaining_Ns']>0,P_selected=p['label'],PV_selected=pv['label'],reference_best=None if truth is None else truth['label'],P_selection_regret_Ns=None if truth is None or not p['qualified'] else p['remaining_J_F_Ns']-truth['remaining_J_F_Ns'],PV_selection_regret_Ns=None if truth is None or not pv['qualified'] else pv['remaining_J_F_Ns']-truth['remaining_J_F_Ns'],design_source_only=True,historical_costs_not_used=True,continuation='native-certified-committed-K3-suffix-v1',no_training=True));print(json.dumps(rows,indent=2))
+if __name__=='__main__':main()

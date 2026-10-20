@@ -1,0 +1,17 @@
+identifier_conditions_config: configs/spring2d_identifier_conditions.yaml
+baseline_summary_table: results/figures/spring2d_identifier_conditions/summary_table.csv
+
+adaptive:
+  warmup_steps: 0
+  parameter_smoothing_alpha: 1.0
+  parameter_bounds:
+    m: [0.5, 2.0]
+    k: [150.0, 800.0]
+    b_r: [2.0, 45.0]
+
+outputs:
+  log_dir: results/logs/spring2d_adaptive_mpc_conditions
+  video_dir: results/videos/spring2d_adaptive_mpc_conditions
+  figure: results/figures/spring2d_adaptive_mpc_conditions/adaptive_conditions_comparison.png
+  summary_table: results/figures/spring2d_adaptive_mpc_conditions/summary_table.csv
+  fps: 25

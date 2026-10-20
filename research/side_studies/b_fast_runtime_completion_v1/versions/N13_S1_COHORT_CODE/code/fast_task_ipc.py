@@ -1,0 +1,95 @@
+"""D1: one original TASK worker, atomic immutable packets, no manager thread.
+
+SOCK_SEQPACKET provides complete-message readiness. Runtime polling never
+waits for work, partial payloads or disk. Blocking warm/join occur outside the
+physical epoch. No live plant or half-updated model is sent to this process.
+"""
+import socket,struct,pickle,time,hashlib,multiprocessing,select,os,gc
+MAX_PACKET=1024*1024;HEADER=struct.Struct('!QQ');ROWS=[]
+def packet(sock,identity,value):
+ raw=pickle.dumps(value,protocol=5);ready=time.monotonic_ns();data=HEADER.pack(identity,ready)+raw
+ if len(data)>MAX_PACKET:raise ValueError('TASK_PACKET_LIMIT_EXCEEDED')
+ assert sock.send(data)==len(data),'ATOMIC_TASK_PACKET_INCOMPLETE'
+def worker(sock,fast):
+ import lean_instrumentation;lean_instrumentation.prime()
+ import slow_owner
+ ready=slow_owner.warm()
+ if fast:
+  import fast_task_owner
+  ready=fast_task_owner.warm()
+ packet(sock,0,ready)
+ while True:
+  data=sock.recv(MAX_PACKET)
+  if not data:break
+  identity,kind,payload=pickle.loads(data)
+  if kind=='STOP':break
+  assert kind=='TASK' and isinstance(payload,bytes)
+  result=fast_task_owner.task_with_certificates(payload) if fast else slow_owner.task_with_certificates(payload)
+  try:packet(sock,identity,result)
+  except BaseException as error:
+   now=time.monotonic_ns();packet(sock,identity,dict(worker_exception=f'TASK_TRANSPORT:{type(error).__name__}:{error}',worker_start_ns=now,compute_finish_ns=now))
+ sock.close()
+class ReadyFuture:
+ def __init__(self,executor,identity,warm=False):
+  self.executor=executor;self.identity=identity;self.warm=warm;self.value=None;self.finished=False;self.callbacks=[]
+ def _receive(self,blocking=False):
+  if self.finished:return True
+  sock=self.executor.sock
+  if blocking and not select.select([sock],[],[],120.)[0]:raise TimeoutError('FINITE_TASK_OWNER_WARM_JOIN_TIMEOUT')
+  try:data=sock.recv(MAX_PACKET)
+  except BlockingIOError:return False
+  if not data:raise RuntimeError('TASK_OWNER_CLOSED_WITHOUT_RESULT')
+  identity,ready=HEADER.unpack(data[:HEADER.size]);assert identity==self.identity,'TASK_RESULT_IDENTITY_MISMATCH'
+  self.value=pickle.loads(data[HEADER.size:]);self.finished=True
+  collected=time.monotonic_ns()
+  ROWS.append(dict(event='COLLECT',identity=identity,worker_pid=self.executor.child.pid,packet_ready_ns=ready,collected_ns=collected,packet_bytes=len(data),model_API_calls=self.value.get('research_model_invocations'),no_partial_message_wait=True))
+  for callback in self.callbacks:callback(self)
+  return True
+ def done(self):return self._receive()
+ def result(self,timeout=None):
+  if not self.finished:self._receive(blocking=self.warm or self.executor.scientific)
+  if not self.finished:raise RuntimeError('TASK_RESULT_NOT_READY_NONBLOCKING')
+  return self.value
+ def add_done_callback(self,callback):
+  if self.finished:callback(self)
+  else:self.callbacks.append(callback)
+ def cancel(self):return False # Atomic request was sent to the original worker.
+ def cancelled(self):return False
+class DirectExecutor:
+ fast=True
+ scientific=False
+ def __init__(self,max_workers=1,mp_context=None):
+  assert max_workers==1
+  parent,child=socket.socketpair(socket.AF_UNIX,socket.SOCK_SEQPACKET)
+  for endpoint in (parent,child):
+   endpoint.setsockopt(socket.SOL_SOCKET,socket.SO_SNDBUF,MAX_PACKET*2)
+   endpoint.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF,MAX_PACKET*2)
+  self.sock=parent;self.sock.setblocking(False);self.child=(mp_context or multiprocessing.get_context('spawn')).Process(target=worker,args=(child,self.fast),name='original-task-direct-ipc')
+  self.child.start();child.close();self.current=None;self.sequence=0;self.closed=False;self.warmed=False
+ def submit(self,function,*args):
+  assert not self.closed
+  if self.current is not None and not self.current.done():raise RuntimeError('ONE_OUTSTANDING_ORIGINAL_TASK_REQUEST')
+  if not args:
+   assert not self.warmed,'TASK_OWNER_PREWARM_ONCE';self.warmed=True;self.current=ReadyFuture(self,0,warm=True);return self.current
+  assert len(args)==1 and isinstance(args[0],bytes)
+  assert function.__name__ in ('task_with_certificates','_process_task_snapshot')
+  self.sequence+=1;begin=time.monotonic_ns();cpu_begin=time.thread_time_ns();gc_enabled=gc.isenabled();gc_counts=gc.get_count()
+  data=pickle.dumps((self.sequence,'TASK',args[0]),protocol=5);serialized=time.monotonic_ns();cpu_serialized=time.thread_time_ns()
+  if len(data)>MAX_PACKET:raise ValueError('TASK_INPUT_PACKET_LIMIT_EXCEEDED')
+  assert self.sock.send(data)==len(data),'ATOMIC_TASK_INPUT_INCOMPLETE'
+  sent=time.monotonic_ns();cpu_sent=time.thread_time_ns()
+  ROWS.append(dict(event='SUBMIT',identity=self.sequence,start_ns=begin,serialized_ns=serialized,sent_ns=sent,serialize_wall_ns=serialized-begin,send_wall_ns=sent-serialized,serialize_thread_cpu_ns=cpu_serialized-cpu_begin,send_thread_cpu_ns=cpu_sent-cpu_serialized,gc_enabled=gc_enabled,gc_counts=gc_counts,input_bytes=len(args[0]),input_sha256=hashlib.sha256(args[0]).hexdigest(),worker_pid=self.child.pid))
+  self.current=ReadyFuture(self,self.sequence);return self.current
+ def shutdown(self,wait=True,cancel_futures=True):
+  if self.closed:return
+  try:
+   if self.current is not None and not self.current.finished:self.current._receive(blocking=True)
+   self.sock.send(pickle.dumps((0,'STOP',b''),protocol=5));self.child.join(timeout=30.)
+   if self.child.is_alive():
+    # Exact Process handle created here; no unrelated PID/process is touched.
+    self.child.terminate();self.child.join(timeout=10.);raise RuntimeError('OWNED_TASK_OWNER_JOIN_TIMEOUT')
+   ROWS.append(dict(event='JOIN',worker_pid=self.child.pid,exitcode=self.child.exitcode,joined=True,host_ns=time.monotonic_ns()))
+  finally:self.closed=True;self.sock.close()
+def install(fast=True,scientific=False):
+ from traction_mpc_stage5.full3d_adaptive_integration_v1 import online_planning as op
+ DirectExecutor.fast=bool(fast);DirectExecutor.scientific=bool(scientific);op.ProcessPoolExecutor=DirectExecutor

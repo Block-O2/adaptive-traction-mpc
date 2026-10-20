@@ -1,0 +1,24 @@
+{
+  "schema": "architecture_recovery_v2.phase1b.probe_domain_stress.v2",
+  "study_id": "phase1b_revision1_probe_domain_stress_v2",
+  "evidence_category": "development_diagnostic",
+  "arm": "adaptive",
+  "case_count_per_profile_rom_cell": 12,
+  "setup_seed_start": 91001,
+  "task_seed_start": 101001,
+  "task_profiles": ["coordinated", "hip_lead", "knee_led_clearance_constrained_v1", "two_rate"],
+  "probe_duration_s": 8.0,
+  "probe_control_dt_s": 0.01,
+  "mechanics_domain": {
+    "task_profiles": ["coordinated", "hip_lead", "knee_led_clearance_constrained_v1", "two_rate"],
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.025,
+    "generation_static_force_peak_n_maximum": 150.0,
+    "generation_static_moment_peak_nm_maximum": 45.0,
+    "generation_max_attempts": 5000
+  },
+  "domain_interpretation": "25 mm reference reserve is a commissioning compatibility requirement; 10-25 mm reference-clearance tasks remain physically feasible but are explicitly outside the retained probe operating domain",
+  "held_out_policy": {"is_held_out": false, "formal_seed_namespace": "not generated or accessed"}
+}
+

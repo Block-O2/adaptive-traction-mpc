@@ -1,0 +1,11 @@
+# 连续重复的序列化修复与失败保留
+
+初次REP_FIRST完整完成并复现D02_H150；实际测得force用于一次有界价值更新。原连续边界推进20个native步并通过。在第二次调用中，外层invoke错误地恢复了安装streaming serializer之前的persist_runtime_artifacts；原streaming_reuse.ensure因此触发STREAM_SERIALIZER_OWNER_CHANGED，第二次物理尚未推进。
+
+audit/PARTIAL_COST_RECONCILIATION.json用第二次initial与失败时的同一plant时钟均为29.085000000047863 s，独立核实REP_parent新增native步数为0。该失败START仍计入总数，ATTEMPTS.jsonl原事件未改写。
+
+v5把外层finally改为原streaming_reuse.restore(rt)，恢复已安装的合法序列化器。无物理probe先重现旧错误，再验证连续两次修复调用通过。原code/study_common.py、原plant、控制器、资格门、模型及权重均未修改。v5 owner随后因独占打开旧日志名而在worker创建前失败，保留为REPR_owner_log_failure，计1 START、0 native步；精确墙钟耗时未测量，事件时间明确为事后登记时间。
+
+v6仅修正独立日志名，并以REPR_FIRST、REPR_boundary、REPR_parent及B/H150/MEMORY新身份完整重跑。v4/v5源文件、manifest、错误、第一次raw和初步结案结果均保留；初步报告快照见audit/v4_closeout。最终执行和保护审计在重跑之后重新进行，不将中途快照冒充最终结案。
+
+实际重跑结论：TWO_ACTUAL_REPETITIONS_COMPLETED；FEW_REPETITION_LEARNING_PASS=NOT_DEMONSTRATED。完整错误/修复证据见audit/REPETITION_FAILURE.json、audit/OWNER_LAUNCH_FAILURE_v5.json、audit/SERIALIZER_REPAIR_PREPHYSICAL.json及EXECUTION_CODE_MANIFEST_v4/v5/v6.json。研究没有因该代码修复改变动作选择规则或未见测试条件。

@@ -1,0 +1,317 @@
+{
+  "frozen_unix": 1792317410.7053106,
+  "hypotheses": {
+    "H": "Hip-only terminal time change can causally affect knee stopping, tested with constant knee reference; may be too late to repair pre-stop error",
+    "KD120": "20% bounded increase of existing knee velocity feedback near RETURN terminal improves damping without extra module",
+    "PD": "braking-only bounded final-goal knee PD may have independent value",
+    "FF": "half of known reference ddq, bounded, complements existing inverse dynamics which has no direct reference ddq term",
+    "PDFF": "same PD and FF parameters, shared documented total bound; test additivity and clipping interaction"
+  },
+  "source_hashes": {
+    "campaign.py": "ad7802f547564c720f4876e901436b90e7df8e5b06236030944232ea67765a3e",
+    "terminal_planner.py": "a5b3b16a7b5fc375349f0125b432877bd44097a66878bec576ebe2e9a8df7145",
+    "terminal_control.py": "faeb3ae910bd3ce80889690e0c23a8348fa227b5a15cf2c38ed43297a325af63",
+    "round_planner.py": "4cbb7f77d0685cad19c32b12c838e4778bd50fbf7e333da63b484aa7ce864007",
+    "early_return_planner.py": "696cbea58ef2caa28ee1c0ff17ad5d75c01131f3a22239a0cb37e65fce9ed664"
+  },
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+    },
+    {
+      "id": "T",
+      "base": "T",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "candidate_hash": "2367c88542f60adf4446ac45be992b3b570c7deffe1e4b13df9a6f29164c03ba"
+    },
+    {
+      "id": "D",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [],
+      "changes": [],
+      "candidate_hash": "cf5ee48a3bc59062a499adb85a154a523f0a4b84dd61a7683dfec326800a1762"
+    },
+    {
+      "id": "ER",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "candidate_hash": "caa63b87315c60defa4aedf832f4836cd3bc2a6dcab5db7ce753529c8fad9ab5"
+    },
+    {
+      "id": "H150",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "timing": [
+        {
+          "phase": "RETURN",
+          "slot": 5,
+          "duration_factor": 1.5
+        }
+      ],
+      "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+    },
+    {
+      "id": "KD120",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "controller": {
+        "mode": "DAMPING",
+        "kd_fraction": 0.2,
+        "acceleration_cap_rad_s2": 0.2,
+        "rate_cap_rad_s3": 1.0
+      },
+      "candidate_hash": "b8cb289fee7ee52d67a8e13f2eee385a733b7df8df8f47131cbb8432ff7e77f2"
+    },
+    {
+      "id": "PD",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "controller": {
+        "mode": "PD",
+        "kp_aux": 14.0,
+        "kd_aux": 4.4,
+        "acceleration_cap_rad_s2": 0.2,
+        "rate_cap_rad_s3": 1.0
+      },
+      "candidate_hash": "dc0f38830522ff3d510ec255771ab71c5f5534ea7ba42a85edab048b7709eb8d"
+    },
+    {
+      "id": "FF",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "controller": {
+        "mode": "FF",
+        "ff_fraction": 0.5,
+        "acceleration_cap_rad_s2": 0.2,
+        "rate_cap_rad_s3": 1.0
+      },
+      "candidate_hash": "14d4e078d24c62f448fc5cd53d584183c22ecb78b9db02e10e1e7969cbe0728f"
+    },
+    {
+      "id": "PDFF",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "controller": {
+        "mode": "PDFF",
+        "kp_aux": 14.0,
+        "kd_aux": 4.4,
+        "ff_fraction": 0.5,
+        "acceleration_cap_rad_s2": 0.2,
+        "rate_cap_rad_s3": 1.0
+      },
+      "candidate_hash": "b1e906bd9109c1469fddd54b1f2a2b024da7b6763984c459dc3df7c1f1e00571"
+    }
+  ],
+  "selection": {
+    "eligibility": "Full 19.030s original task/safety/motion/receipt/native ownership; knee excursion difference<=0.5deg; actual intervention applied; J_F saving>=80% of ER saving vs matched B and >=1%; overshoot must improve >=0.05deg vs ER",
+    "priority": "Prefer reference-only H if eligible; then existing DAMPING, FF, PD, PDFF. No tuning on held-out. No sole numerical gate-boundary search.",
+    "stops": "Any task/safety/causal failure stops group for review; motion fail preserved and does not prevent independent next track; no more than one bounded revision per direction; all starts<=80, last60min no physics.",
+    "next": "Freeze selected candidate, deterministic full repeat, then unused W2 with matched B/ER/new candidate. W2 failure never retuned as blind.",
+    "predictions": "Causal rolling offline evaluation does not certify closed-loop prediction; only reuse sufficiently accurate predictor with validated uncertainty; timing contrast may test mechanism independently."
+  }
+}

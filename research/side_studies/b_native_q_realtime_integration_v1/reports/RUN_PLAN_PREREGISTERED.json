@@ -1,0 +1,48 @@
+{
+  "start_unix": 1791307140,
+  "deadline_unix": 1791339540,
+  "dispatch_cutoff_unix": 1791336840.0,
+  "max_physics_attempts": 160,
+  "initial_attempt_budget": 100,
+  "max_new_bytes": 10737418240,
+  "physics_owners": 1,
+  "resource_sample_s": 45,
+  "common_B_repair_max": 2,
+  "Q_retrain": false,
+  "scientific_version": "frozen-B-native-Q-v1",
+  "phase": "A_TIMING_ROOT_CAUSE",
+  "versions": [
+    "T0 baseline trace",
+    "E1 same-boundary shared context",
+    "E2 validation/scoring separation if provable",
+    "E3 batch/reuse if provable",
+    "E4 Q-first exact selection",
+    "E5 research overhead removal",
+    "P1 causal precompute only after B1-B5",
+    "FAST_BUDGET 6/4/2 separately if blocked"
+  ],
+  "equivalence_gate": [
+    "zero B",
+    "frozen M2 nominal",
+    "frozen M2 legal deviation",
+    "candidate acceptance/identity/fallback/command/reference/full physics/cost/phase equality"
+  ],
+  "host_gate": [
+    "complete VALID unchanged R2/safety",
+    "learning action actually executed",
+    "no timestamp hack",
+    "actual wall physics",
+    "native deadlines/expiry respected",
+    "no systematic stale across repeated runs"
+  ],
+  "pilot_gate": [
+    "science equivalence",
+    "host-clock pass",
+    "learning executed",
+    "fresh positive frozen-Q signal",
+    "at least2h remain"
+  ],
+  "pilot": "B Rep1, frozen/adaptive Q Rep2-5 matched session; only continuation-compatible executed labels",
+  "no_new_humans": true,
+  "no_hardware": true
+}

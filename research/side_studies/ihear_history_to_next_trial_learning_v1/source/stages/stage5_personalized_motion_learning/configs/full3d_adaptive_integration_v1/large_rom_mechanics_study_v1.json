@@ -1,0 +1,21 @@
+{
+  "schema": "full3d_adaptive_integration_v1.large_rom_mechanics_study_v1",
+  "status": "FROZEN_BEFORE_EXECUTION",
+  "evidence_category": "kinematic_mechanics_capability_map_not_closed_loop_validation",
+  "hip_flexion_deg": [20.0, 40.0, 60.0, 80.0],
+  "knee_flexion_deg": [100.0, 110.0, 120.0, 125.0, 130.0],
+  "checks": [
+    "inside_original_human_rom",
+    "human_bed_geometric_clearance",
+    "cr12_full_pose_ik",
+    "cr12_joint_limits",
+    "cr12_jacobian_minimum_singular_value",
+    "current_human_soft_limit_generalized_load"
+  ],
+  "interpretation_contract": {
+    "ik_and_clearance_pass_outside_rom": "mechanically_reachable_candidate_but_outside_registered_human_model_contract",
+    "inside_rom_and_all_checks_pass": "registered_kinematic_candidate_only",
+    "closed_loop_claim": false,
+    "permission_to_raise_qmax_from_this_study": false
+  }
+}

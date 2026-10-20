@@ -1,0 +1,57 @@
+identifier_conditions_config: configs/spring2d_identifier_conditions.yaml
+baseline_summary_table: results/figures/spring2d_identifier_conditions/summary_table.csv
+
+mpc_overrides:
+  solver:
+    type: cem
+    horizon: 18
+    prediction_dt: 0.03
+    num_samples: 128
+    num_elites: 16
+    iterations: 3
+    cem_alpha: 0.7
+    init_std_F_tan: 4.0
+    init_std_F_rad: 0.3
+    min_std_F_tan: 0.2
+    min_std_F_rad: 0.05
+    warm_start: true
+
+adaptive:
+  warmup_steps: 0
+  parameter_smoothing_alpha: 1.0
+  parameter_bounds:
+    m: [0.5, 2.0]
+    k: [150.0, 800.0]
+    b_r: [2.0, 45.0]
+
+observation_filter:
+  type: ukf_bias
+  identifier_input: filtered
+
+coupling_ablation:
+  name: safety_filter_filtered_identifier_adaptive
+  mpc_state_input: filtered
+  identifier_input: filtered
+  identifier_mode: adaptive
+  estimator_model_params_source: adaptive
+  mpc_model_params_source: adaptive
+
+safety_filter:
+  enabled: true
+  type: one_step_projection
+  scales: [1.0, 0.8, 0.6, 0.4, 0.2, 0.0]
+  F_tan_offsets: [-2.0, -1.0, 0.0, 1.0, 2.0]
+  F_rad_offsets: [-0.2, -0.1, 0.0, 0.1, 0.2]
+  violation_weights:
+    F_tan: 1.0
+    F_rad: 1.0
+    delta_r: 1.0
+    omega: 1.0
+    alpha: 1.0
+
+outputs:
+  log_dir: results/stage6_safety_filter/logs
+  video_dir: results/stage6_safety_filter/videos
+  figure: results/stage6_safety_filter/figures/safety_filter_comparison.png
+  summary_table: results/stage6_safety_filter/tables/safety_filter_summary.csv
+  fps: 25

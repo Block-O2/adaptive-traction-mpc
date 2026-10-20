@@ -1,0 +1,15 @@
+# Preregistered second-round protocol
+
+{
+  "full_gates": "complete TASK, absolute safety, original motion/fairness vs matched B, receipt/current admission/native ownership; no partial force ranking",
+  "force_gain_signal_N_s": 0.5,
+  "motion_noninferiority_relative": 0.002,
+  "motion_signal_full_relative": 0.005,
+  "force_neutrality_N_s": 0.2,
+  "criteria": "Qualified candidate: either delta J_F <= -0.5 N s and combined full TV_v/TV_a/jerk RMS each <=1.002*T; OR at least one full TV_v/TV_a/jerk RMS improves >=0.5%, other two <=1.002*T and J_F<=T+0.2 N s. Peak-only improvements remain diagnostic. Motion qualification is always original gates vs B, never these scientific selection criteria.",
+  "tie_break": "primary by largest fractional full velocity-TV improvement among eligible; then full acceleration-TV, jerk RMS, J_F; no validation reselection",
+  "conditional": "Combine posture and shape only if each independently eligible; at most one half-size refinement per informative direction; signed control no sweep. Stop after 3 uninformative candidates per direction. Parameters/code frozen before validation.",
+  "validation": "Reserve >=10 START. Selected candidate deterministically repeat from same parent condition; then at least two new registered legal prefixes, paired B/E/T/primary plus primary repeat if budget allows. No primary reselection from validation."
+}
+
+All candidates, purpose, parameters, expected motion/force windows and mathematical screening are in CANDIDATE_PLAN.json. Develop on already observed V1; hold out new legal prefixes until selection/code freeze. Full parent is actual commissioning+prefix, then exact live address-space fork, never Human state assignment or replay. All physics serial. Cap40 START including every parent/fork/failure/repeat; development cap30 retains10. Cutoff45minutes before6h hard limit, with additional15minute completion reserve. Safety/task/causal failure stops physics. Original motion failure excludes ranking and is retained.

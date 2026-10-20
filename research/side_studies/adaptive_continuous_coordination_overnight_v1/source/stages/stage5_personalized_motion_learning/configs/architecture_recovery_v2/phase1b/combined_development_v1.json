@@ -1,0 +1,62 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase1b_combined_development_v1",
+  "evidence_category": "development",
+  "arms": ["oracle", "adaptive", "fixed_nominal", "wrong_geometry_adaptive_dynamics", "no_dynamics_adaptation"],
+  "cases": [
+    {"setup_seed": 141001, "task_seed": 151001, "task_profile": "coordinated", "high_rom": false},
+    {"setup_seed": 141002, "task_seed": 151002, "task_profile": "coordinated", "high_rom": false},
+    {"setup_seed": 141003, "task_seed": 151003, "task_profile": "coordinated", "high_rom": true},
+    {"setup_seed": 141004, "task_seed": 151004, "task_profile": "coordinated", "high_rom": true},
+    {"setup_seed": 141005, "task_seed": 151005, "task_profile": "hip_lead", "high_rom": false},
+    {"setup_seed": 141006, "task_seed": 151006, "task_profile": "hip_lead", "high_rom": false},
+    {"setup_seed": 141007, "task_seed": 151007, "task_profile": "hip_lead", "high_rom": true},
+    {"setup_seed": 141008, "task_seed": 151008, "task_profile": "hip_lead", "high_rom": true},
+    {"setup_seed": 141009, "task_seed": 151009, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": false},
+    {"setup_seed": 141010, "task_seed": 151010, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": false},
+    {"setup_seed": 141011, "task_seed": 151011, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": true},
+    {"setup_seed": 141012, "task_seed": 151012, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": true},
+    {"setup_seed": 141013, "task_seed": 151013, "task_profile": "two_rate", "high_rom": false},
+    {"setup_seed": 141014, "task_seed": 151014, "task_profile": "two_rate", "high_rom": false},
+    {"setup_seed": 141015, "task_seed": 151015, "task_profile": "two_rate", "high_rom": true},
+    {"setup_seed": 141016, "task_seed": 151016, "task_profile": "two_rate", "high_rom": true}
+  ],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 8.0,
+  "probe_control_dt_s": 0.01,
+  "environment_contract": {
+    "scenario": "lying_bed_contact_free_clearance",
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.025,
+    "generation_static_force_peak_n_maximum": 150.0,
+    "generation_static_moment_peak_nm_maximum": 45.0,
+    "actual_clearance_evaluation_step_s_maximum": 0.005
+  },
+  "hidden_generation": {
+    "task_profiles": ["coordinated", "hip_lead", "knee_led_clearance_constrained_v1", "two_rate"],
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.025,
+    "generation_static_force_peak_n_maximum": 150.0,
+    "generation_static_moment_peak_nm_maximum": 45.0,
+    "generation_max_attempts": 5000
+  },
+  "gates": {
+    "expected_case_count_per_arm": 16,
+    "expected_arms": ["oracle", "adaptive", "fixed_nominal", "wrong_geometry_adaptive_dynamics", "no_dynamics_adaptation"],
+    "adaptive_completion_rate_minimum": 0.90,
+    "adaptive_tracking_rmse_deg_median_maximum": 3.0,
+    "adaptive_tracking_rmse_deg_p95_maximum": 5.0,
+    "force_peak_n_maximum": 200.0,
+    "moment_peak_nm_maximum": 60.0,
+    "adaptive_vs_fixed_median_improvement_fraction_minimum": 0.20,
+    "adaptive_vs_fixed_completion_rate_margin_minimum": 0.50,
+    "adaptive_vs_no_dynamics_median_improvement_fraction_minimum": 0.20,
+    "adaptive_vs_no_dynamics_completion_rate_margin_minimum": 0.50,
+    "adaptive_vs_wrong_geometry_median_improvement_fraction_minimum": 0.20,
+    "adaptive_vs_wrong_geometry_completion_rate_margin_minimum": 0.50,
+    "adaptive_minus_oracle_median_gap_deg_maximum": 2.5
+  },
+  "held_out_policy": {"is_held_out": false, "seeds_may_inform_phase1b": true, "formal_seed_namespace": "not generated or accessed"}
+}

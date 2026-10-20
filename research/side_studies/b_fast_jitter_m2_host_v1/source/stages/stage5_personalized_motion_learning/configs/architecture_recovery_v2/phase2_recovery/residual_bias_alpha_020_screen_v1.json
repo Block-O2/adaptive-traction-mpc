@@ -1,0 +1,24 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase2_recovery_residual_bias_alpha_020_screen_v1",
+  "evidence_category": "development",
+  "task_residual_bias_alpha": 0.20,
+  "task_residual_bias_limit_nm": 12.0,
+  "arms": ["adaptive", "commissioning_only_dynamics"],
+  "cases": [
+    {"setup_seed": 311001, "task_seed": 321001, "task_profile": "coordinated", "high_rom": false},
+    {"setup_seed": 311002, "task_seed": 321002, "task_profile": "coordinated", "high_rom": true},
+    {"setup_seed": 311003, "task_seed": 321003, "task_profile": "hip_lead", "high_rom": false},
+    {"setup_seed": 311004, "task_seed": 321004, "task_profile": "hip_lead", "high_rom": true},
+    {"setup_seed": 311005, "task_seed": 321005, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": false},
+    {"setup_seed": 311006, "task_seed": 321006, "task_profile": "knee_led_clearance_constrained_v1", "high_rom": true},
+    {"setup_seed": 311007, "task_seed": 321007, "task_profile": "two_rate", "high_rom": false},
+    {"setup_seed": 311008, "task_seed": 321008, "task_profile": "two_rate", "high_rom": true}
+  ],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 8.0,
+  "probe_control_dt_s": 0.01,
+  "environment_contract": {"scenario": "lying_bed_contact_free_clearance", "bed_height_m": 0.012, "shank_radius_m": 0.045, "minimum_reference_clearance_m": 0.025},
+  "hidden_generation": {"patient_height_scale": [0.88, 1.12], "patient_mass_scale": [0.78, 1.28], "passive_stiffness_scale": [0.65, 1.45], "passive_damping_scale": [0.70, 1.35], "rest_offset_q_deg": [[-4.0, -5.0], [5.0, 6.0]], "thigh_com_scale": [0.88, 1.12], "shank_com_scale": [0.86, 1.14], "hip_placement_x_m": [-0.12, 0.12], "hip_placement_z_m": [0.045, 0.16], "cuff_fraction_of_shank": [0.52, 0.88], "initial_q_deg": [[6.0, 10.0], [18.0, 28.0]], "task_profiles": ["coordinated", "hip_lead", "knee_led_clearance_constrained_v1", "two_rate"], "standard_goal_q_deg": [[35.0, 48.0], [62.0, 78.0]], "high_rom_goal_q_deg": [[66.0, 82.0], [75.0, 95.0]], "standard_duration_s": [9.0, 12.0], "high_rom_duration_s": [12.0, 15.0], "measurement_position_std_m": 0.00015, "measurement_angle_std_deg": 0.03, "bed_height_m": 0.012, "shank_radius_m": 0.045, "minimum_reference_clearance_m": 0.025, "generation_static_force_peak_n_maximum": 150.0, "generation_static_moment_peak_nm_maximum": 45.0, "generation_max_attempts": 5000},
+  "held_out_policy": {"is_held_out": false, "formal_seed_namespace": null}
+}

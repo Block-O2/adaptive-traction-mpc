@@ -1,0 +1,5 @@
+# Next research decision
+
+本轮停止。没有新冻结PRIMARY/SECONDARY，不以同父确定性repeat冒充跨状态验证。
+
+唯一建议：下一包优先以18D历史合法prefix的motion失败为对象，冻结合法配对与原门限，定位reference/allocator/tracking的远期响应；先建立跨prefix运动可靠性，再决定是否扩大平滑自由度。当前两个窗口的微小force信号不足以支持更密waypoint扫描或RL/Q训练。本轮不自动启动下一包。

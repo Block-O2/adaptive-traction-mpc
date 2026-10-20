@@ -1,0 +1,765 @@
+{
+  "title": "Lab-Relevant Human Adaptation Contrast v1",
+  "version": 1,
+  "status": "FROZEN_BEFORE_DYNAMIC",
+  "frozen_initial_utc": "2026-10-02T16:54:36.171499+00:00",
+  "questions": [
+    "Value of causal individual commissioning over fixed nominal for fixed-length mass/inertia, stiffness, and cuff-location variation",
+    "Incremental task-time adaptation value over commissioning-only",
+    "Control-effective prediction, actual model consumption, full trajectory reliability and quality"
+  ],
+  "source_commit": "41cdddef117caa4b191a52129c4ff83e481fd5a8",
+  "source_snapshot": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/snapshot",
+  "source_provenance_sha256": "c63d8184e0cd9a836f75128cbc01146560be3625682ff54566a2771c1f9646b4",
+  "conditions": [
+    {
+      "id": "C0",
+      "label": "nominal",
+      "case": {
+        "case_key": "lab_human_C0_v1",
+        "cell": {
+          "family": "nominal",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 75.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            10.0,
+            10.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.72,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.72,
+      "case_path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/cases/C0.json",
+      "case_sha256": "f4de6f472ebdf1ae1bfbbf2f50b0409aa09577cdedff42bba13648ad1f472daf"
+    },
+    {
+      "id": "C1",
+      "label": "mass_low",
+      "case": {
+        "case_key": "lab_human_C1_v1",
+        "cell": {
+          "family": "mass_low",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 60.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            10.0,
+            10.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.72,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.72,
+      "case_path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/cases/C1.json",
+      "case_sha256": "dd0b626be532f52dd3cecc786ec4f797736199e0b94e7ed27edc34337bacc93e"
+    },
+    {
+      "id": "C2",
+      "label": "mass_high",
+      "case": {
+        "case_key": "lab_human_C2_v1",
+        "cell": {
+          "family": "mass_high",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 90.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            10.0,
+            10.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.72,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.72,
+      "case_path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/cases/C2.json",
+      "case_sha256": "a45602c63ad5bcd5c6a3f62a03501f64055a3edef38b10171d7c0c01afa6f315"
+    },
+    {
+      "id": "C3",
+      "label": "stiffness_low",
+      "case": {
+        "case_key": "lab_human_C3_v1",
+        "cell": {
+          "family": "stiffness_low",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 75.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            7.0,
+            7.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.72,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.72,
+      "case_path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/cases/C3.json",
+      "case_sha256": "44ec61e36830c6f6ae8b4541921a8fa61c85c89da56b3c03e5ada012e4bd08d2"
+    },
+    {
+      "id": "C4",
+      "label": "stiffness_high",
+      "case": {
+        "case_key": "lab_human_C4_v1",
+        "cell": {
+          "family": "stiffness_high",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 75.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            13.0,
+            13.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.72,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.72,
+      "case_path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/cases/C4.json",
+      "case_sha256": "ad9ad793d582a18c211ac186d4fc72cff8ab4bb423298e26540b672b12da04f9"
+    },
+    {
+      "id": "C5",
+      "label": "cuff_proximal",
+      "case": {
+        "case_key": "lab_human_C5_v1",
+        "cell": {
+          "family": "cuff_proximal",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 75.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            10.0,
+            10.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.6,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.6,
+      "case_path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/cases/C5.json",
+      "case_sha256": "d69dccb234f70fc3fbb966cb555a3d8155268c2d441d2925b695a8d1d4bb7994"
+    },
+    {
+      "id": "C6",
+      "label": "cuff_distal",
+      "case": {
+        "case_key": "lab_human_C6_v1",
+        "cell": {
+          "family": "cuff_distal",
+          "range": "ordinary",
+          "replicate": 1
+        },
+        "evidence_category": "mechanistic_development_lab_variation_v1",
+        "physical": {
+          "height_m": 1.72,
+          "body_mass_kg": 75.0,
+          "q_rest_deg": [
+            5.0,
+            10.0
+          ],
+          "passive_stiffness_nm_rad": [
+            10.0,
+            10.0
+          ],
+          "passive_damping_nms_rad": [
+            5.0,
+            5.0
+          ],
+          "cuff_fraction_of_shank": 0.77,
+          "thigh_length_scale": 1.0,
+          "shank_length_scale": 1.0,
+          "thigh_mass_scale": 1.0,
+          "shank_mass_scale": 1.0,
+          "thigh_com_fraction": 0.433,
+          "shank_com_fraction": 0.43,
+          "thigh_inertia_radius_fraction": 0.3,
+          "shank_inertia_radius_fraction": 0.3,
+          "hip_translation_xz_m": [
+            0.0,
+            0.0001
+          ]
+        },
+        "task": {
+          "start_deg": [
+            5.0,
+            10.0
+          ],
+          "goal_deg": [
+            120.0,
+            120.0
+          ],
+          "commissioning_waypoints_deg": [
+            [
+              5.0,
+              10.0
+            ],
+            [
+              14.0,
+              19.0
+            ],
+            [
+              9.0,
+              27.0
+            ],
+            [
+              16.0,
+              22.0
+            ],
+            [
+              5.0,
+              10.0
+            ]
+          ]
+        },
+        "research_model": "high_rom_v1",
+        "coordination_candidate": "synchronous_diagnostic_only_feedback_replanning_active"
+      },
+      "intended_rho": 0.85,
+      "case_path": "/home/hank/coding/adaptive-traction-mpc-side-studies/lab-human-adaptation-contrast-v1/cases/C6.json",
+      "case_sha256": "36c327833590e01e4e4e28cdaf1a5eb4f3302791b58c8a33a1e73c5fe1d64f49"
+    }
+  ],
+  "arms": {
+    "A": "fixed_population",
+    "B": "commissioning_only",
+    "C": "continual_adaptive"
+  },
+  "primary_budget": 21,
+  "oracle_budget": 3,
+  "optional_combined_case_max": 4,
+  "optional_combined_budget": 12,
+  "optional_repetitions": "Only small key cases with independent noise seeds if time/resources remain; exact slots must be preregistered separately, no independent-human sample claim",
+  "no_RL": true,
+  "no_GPU": true,
+  "no_hardware": true,
+  "numerical_threads": 1,
+  "side_physics_owners_max": 1,
+  "nice": 19,
+  "active_time_hours_target": [
+    3,
+    6
+  ],
+  "hard_active_hours": 8,
+  "resource_waiting_is_not_failure": true,
+  "fixed_geometry": {
+    "height_m": 1.72,
+    "thigh_length_m": 0.43688,
+    "shank_length_m": 0.40076,
+    "length_scales": [
+      1.0,
+      1.0
+    ],
+    "bed_robot_hip": "Same nominal fixture placement, including inherited hip offset [0,.0001] m; no hand relocation"
+  },
+  "levels": {
+    "mass_kg": [
+      60,
+      75,
+      90
+    ],
+    "passive_stiffness_nm_rad": [
+      [
+        7,
+        7
+      ],
+      [
+        10,
+        10
+      ],
+      [
+        13,
+        13
+      ]
+    ],
+    "cuff_rho_prospective": [
+      0.6,
+      0.72,
+      0.85
+    ],
+    "cuff_rho_final": [
+      0.6,
+      0.72,
+      0.77
+    ]
+  },
+  "fixed_independent_parameters": {
+    "height_m": 1.72,
+    "q_rest_deg": [
+      5.0,
+      10.0
+    ],
+    "passive_damping_nms_rad": [
+      5.0,
+      5.0
+    ],
+    "thigh_length_scale": 1.0,
+    "shank_length_scale": 1.0,
+    "thigh_mass_scale": 1.0,
+    "shank_mass_scale": 1.0,
+    "thigh_com_fraction": 0.433,
+    "shank_com_fraction": 0.43,
+    "thigh_inertia_radius_fraction": 0.3,
+    "shank_inertia_radius_fraction": 0.3,
+    "hip_translation_xz_m": [
+      0.0,
+      0.0001
+    ]
+  },
+  "task": {
+    "start_deg": [
+      5.0,
+      10.0
+    ],
+    "goal_deg": [
+      120.0,
+      120.0
+    ],
+    "commissioning_waypoints_deg": [
+      [
+        5.0,
+        10.0
+      ],
+      [
+        14.0,
+        19.0
+      ],
+      [
+        9.0,
+        27.0
+      ],
+      [
+        16.0,
+        22.0
+      ],
+      [
+        5.0,
+        10.0
+      ]
+    ]
+  },
+  "runtime": "traction_mpc_stage5.full3d_adaptive_integration_v1.runtime",
+  "reference": "Original four-Human waypoint qualification path; same semantics in all arms",
+  "runtime_options": {
+    "simulate_planning_latency": true,
+    "formal_qualification": false,
+    "dev_a_recovery": true,
+    "dev_c_bumpless_transfer": false,
+    "dev_d_rigid_table_reference": true,
+    "task_timeout_s": 30.0,
+    "execution_mode": "SCIENTIFIC_SIMULATION",
+    "scientific_host_delay_s": 0.0
+  },
+  "options_path": "stages/stage5_personalized_motion_learning/configs/full3d_adaptive_integration_v1/autonomous_closed_loop_recovery_v1/incremental_clearance_terminal_v9.json",
+  "options_sha256": "d11bb72950f9f74e451548f57ff509e89f92e10aa18f8c62f78bd7a4b7f4c6bb",
+  "pacing": "Frozen options fractions .5 velocity/.25 acceleration",
+  "measurement_seed_semantics": "Inherited CausalMeasurementLayer/MeasurementCase defaults; fresh per-arm process and identical case/probes/noise semantics within triplet. No cross-arm data/checkpoint handoff.",
+  "truth_firewall": "Full case truth only hidden plant construction/evaluation. B/C fit existing causal measured robot/cuff pose/twist/wrench; no truth mass/stiffness/rho/beta/state injection.",
+  "arm_freezing": {
+    "A": "Nominal geometry, beta and zero/nominal residual fixed; physically execute same commissioning probes without fitting.",
+    "B": "Measured effective hip/thigh/knee-to-cuff fit and commissioning beta/residual; freeze for TASK.",
+    "C": "Identical commissioning protocol; task geometry remains frozen; existing validated legal beta/residual update law unchanged."
+  },
+  "pre_run_setup_exclusion": "PHYSICAL_SETUP_OUT_OF_SCOPE for invalid installation/model/initial pose/static IK/current safety prior; not identifier failure",
+  "metrics": [
+    "setup/commissioning/task status",
+    "COMPLETE",
+    "independent physical/scientific verdict",
+    "outbound/HOLD/true RETURN",
+    "q RMSE/peak error",
+    "J_F_task",
+    "mean/RMS/peak force",
+    "moment integral/peak",
+    "duration",
+    "deployable/evaluation clearance",
+    "fallback/rejection/safety counts",
+    "commissioning geometry/beta",
+    "final beta/residual",
+    "accepted/rejected updates/reasons",
+    "planner/mechanics/execution numerical consumption",
+    "held-out-from-commissioning TASK torque prediction residual with data range",
+    "parent+children resource peaks/overlap"
+  ],
+  "evaluation": "Frozen scorer-v2 common physical predicates plus evaluate_execution_mode scientific state/version/source validity; wall plan-age characterization retained separately",
+  "primary_ranking": [
+    "valid complete physical/scientific task",
+    "tracking/safety",
+    "interaction among comparable successful complete tasks"
+  ],
+  "contrasts": [
+    "B-A per condition",
+    "C-B per condition"
+  ],
+  "claims_excluded": [
+    "C-A alone attribution",
+    "beta version or mixed-unit L2 alone learning",
+    "full shank/rho separate anatomical identification",
+    "21 independent humans",
+    "clinical validation",
+    "separated geometry/dynamics benefit without ablation",
+    "failed short integral wins",
+    "clean wall benchmark under SAC overlap"
+  ],
+  "geometry_interpretation": "Evaluate effective knee-to-cuff distance directly; cuff calibration may be automatically performed although manual measurement can be possible in lab.",
+  "prediction_evaluation": "Frozen commissioning model evaluated on causal TASK torque observations not used for commissioning. For continual online model, label prequential predictions before current sample update; no static truth regressor used as evidence of learning.",
+  "oracle_policy": "At most 3 targeted diagnostics only after meaningful B/C failure or ambiguous attribution, explicitly labeled true effective model feasible-if-known question; never primary statistics",
+  "combined_policy": "Only after all 21 primary rows actually executed, all included factor levels qualified, time/resources healthy; freeze up to 4 cases before their results, never full factorial",
+  "resource_gate": {
+    "WSL_reserve_beyond_conservative_peak_GiB": 2,
+    "Windows_available_reserve_GiB": 4,
+    "no_SAC_formal_throughput_latency_overlap": true,
+    "aggregate_parent_planner_peak_evidence_required": true,
+    "no_memory_or_swap_reconfiguration": true,
+    "stop_action": "Stop/serialize only this side-study via owned callback, never touch SAC signals/config/STOP",
+    "polling": "Sparse outside-run checks; no busy waiting"
+  },
+  "retention": "Full traces only nominal, key adaptation benefit, important failure, targeted oracle and final representative combined. All runs retain compact metrics/model hashes/handoff and TASK prediction summaries; immutable manifests classify unique evidence. No historical/raw training copy.",
+  "frozen_final_utc": "2026-10-02T16:59:02.717745+00:00",
+  "cuff_selection_rule_sha256": "bbf6369fadf6e76f8ef27aea803e0f2ee1e975a31febd048f3bb54a8357e50d0"
+}

@@ -1,0 +1,83 @@
+{
+  "schema": "stage5_progressive_personalization_longitudinal_v1",
+  "evidence_category": "preregistered_longitudinal_progressive_personalization_ab",
+  "status": "PREREGISTERED_BEFORE_NEW_OUTCOMES",
+  "research_question": "can the frozen reduced Human-ID and repetition-boundary authority produce multiple causally supported bounded successors within five matched repetitions",
+  "human_truth_evaluation_only": {
+    "condition": "damping_plus_20pct",
+    "scales": [1.0, 1.0, 1.2],
+    "available_to_online_fit_validation_update_or_control": false
+  },
+  "initial_active_model": {
+    "name": "theta_1",
+    "scales": [
+      1.0000584390985465,
+      1.0010424686528112,
+      1.0193479803467633
+    ],
+    "support_state": "positive",
+    "source": "RPL-A frozen-successor independent replication"
+  },
+  "arms": {
+    "fixed_theta_1": {
+      "active_model": "theta_1 for every repetition",
+      "human_id_mode": "shadow_only",
+      "control_updates_enabled": false
+    },
+    "progressive": {
+      "active_model": "one fixed authorized model per repetition",
+      "human_id_mode": "shadow_fit_future_validation_and_boundary_queue",
+      "control_updates_enabled": true,
+      "activation": "next valid repetition boundary only",
+      "next_update_gate": "post-update POSITIVE support for current active model"
+    }
+  },
+  "repetitions": {
+    "maximum_per_arm": 5,
+    "matched_cem_seeds": [
+      20260828,
+      20260829,
+      20260830,
+      20260831,
+      20260832
+    ],
+    "seed_selection_rule": "continue the consecutive Stage-5 controller-search sequence immediately after the frozen RPL-A seeds 20260825-20260827, fixed before outcomes",
+    "same_seed_for_both_arms_at_each_repetition": true,
+    "physical_reset_gap_in_session_time_s": 0.25,
+    "regression_windows_cross_reset": false
+  },
+  "controller": {
+    "gamma": 0.5,
+    "gamma_dynamic": false,
+    "base_planning_joint_velocity_ceiling_deg_s": [15.0, 25.0],
+    "planning_physical_force_ceiling_n": 180.0,
+    "maximum_duration_s": 25.5,
+    "terminal_value": 0.0,
+    "goal_mpc_configuration_changed": false,
+    "acceleration_monitor_changed": false,
+    "runtime_optimization": false
+  },
+  "human_identification": {
+    "parameterization": ["alpha_M", "alpha_K", "alpha_D"],
+    "joint_estimation": true,
+    "lower_scales": [0.5, 0.5, 0.5],
+    "upper_scales": [1.5, 1.5, 1.5],
+    "smoothing_alpha": 0.1,
+    "maximum_step_fraction_of_span": 0.03,
+    "regularization_weight": 0.001,
+    "fit_future_validation_and_statistical_thresholds": "unchanged reduced Human-ID v1",
+    "population_prior_scales": [1.0, 1.0, 1.0]
+  },
+  "decision": {
+    "PP2_A": "at least two active bounded corrections beyond theta_1 occur within five repetitions, every next correction follows post-update POSITIVE support, evolution is stable, deployable prediction consistently improves, and no meaningful closed-loop regression appears",
+    "PP2_B": "authority works and at least one correction is applied without closed-loop regression, but fewer than two further supported corrections occur because evidence is neutral or insufficient",
+    "PP2_C": "post-update evidence is negative, parameters materially oscillate or drift, an update causes meaningful closed-loop degradation, or evidence authority becomes inconsistent"
+  },
+  "fixed_authorities": {
+    "interface": "fixed nominal Plant-v1 and controller nominal interface",
+    "acceleration_monitor": "A-MONITOR-UNRESOLVED and unchanged",
+    "task_limits_hold_support_safety_filter_brake_gate": "unchanged",
+    "trust_driven_gamma": false,
+    "value_or_rl_learning": false
+  }
+}

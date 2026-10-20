@@ -1,0 +1,11 @@
+# 方法审计补充
+
+18D更精确的分类是：**离线连续参数优化得到的固定waypoint参考意图，运行时按当前因果B目标作规则映射，再由原B重新规划和执行**。它不是整条固定参考或真实Human轨迹的回放；也不是直接优化整条连续时间曲线的控制器。连续空间系数影响在线生成的quintic及通过速度，但本轮没有增加或优化内部quintic控制点。
+
+18项参数的单位均为无量纲：位姿系数作用于归一化任务进度，速度系数作用于原终端dq的比例。验证prefix是原K3接口的归一化action，乘原合同0.2变成差分进度；K3 knots为remaining progress的[0.1,0.4,0.7]。共享合同文件保留较早K2描述，TableInterface明确将K重设为3，不据文件字段误认本轮prefix为K2。
+
+所有实际定义的精确行号与SHA见audit/METHOD_SOURCE_INDEX.json。数学意图、已激活schedule、issued reference、正native-step applied command及真实Human运动各有来源：derived/*INTENT_TO_EXECUTION列出每个free意图、ACCEPTED/REJECTED、activation和实际步数；native_reference/trace保存真正发出的q/dq/ddq；runtime_artifacts和原receipts保存实际torque与native ownership；motion_series由真实native qpos/qvel提取。参数相同不代表每一目标都被接纳，失败/回退仍由原B决定。
+
+历史1376项manifest均实际核对通过。物理前已完成源文件与参数审阅、保护SHA、接口/数学预检和执行manifest冻结；对历史manifest全部条目的显式汇总核对是在复现运行期间补充完成，未发现差异。这一时序不冒称所有最终汇总文件均在第一START前生成。
+
+数学公式、manifest与独立重算只分别证明对应合同，不能代替本轮新physics，也不能把scientific source-age资格升级为host-clock实时资格。独立计算脚本不等同独立人员或独立agent审查。

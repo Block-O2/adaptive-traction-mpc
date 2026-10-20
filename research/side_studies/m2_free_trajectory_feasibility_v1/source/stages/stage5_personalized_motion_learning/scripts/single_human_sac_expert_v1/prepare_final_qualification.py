@@ -1,0 +1,20 @@
+"""Version pre-training qualification amendments; never alter prior results or contracts."""
+import json,shutil,sys,subprocess
+from pathlib import Path
+R=Path('/home/hank/coding/adaptive-traction-mpc-side-studies/m2_free_trajectory_feasibility_v1/source');S=R/'stages/stage5_personalized_motion_learning';D=S/'docs/single_human_sac_expert_v1';P=S/'scripts/single_human_sac_expert_v1';W=Path('/mnt/c/Users/HankL/Desktop/Coding/adaptive_traction_mpc/single_human_sac_work')
+assert not json.loads((D/'STATE.json').read_text())['formal_training_started']
+for name in ('SAC_EXPERT_V1_CONTRACT.json','SAC_EXPERT_V1_CONTRACT.md','SAC_ACTION_PERIOD_QUALIFICATION.json','SAC_REWARD_AUDIT.json','SAC_REWARD_AUDIT.md','SAC_RESET_STRESS.json','SAC_RESET_STRESS.md'):
+    if (D/name).exists():shutil.copy2(D/name,D/(Path(name).stem+'_DEVELOPMENT_01'+Path(name).suffix))
+for name in ('sac_env.py','qualify.py','test_adapter.py','prepare_final_qualification.py'):
+    shutil.copy2(W/name,P/name)
+contract=json.loads((D/'SAC_EXPERT_V1_CONTRACT.json').read_text());contract['development_revision']=2
+contract['chosen_period_s']=.02
+contract['discount']['chosen_gamma']=float(__import__('math').exp(-.02/150))
+contract['evaluation']['matched']='Common prospective clocks: OUTBOUND 9.000 s, HOLD 1.000 s, RETURN 9.000 s; original continuous valid 0.500 s HOLD still required. Independent phase durations must match within 0.010 s; late arrivals invalid for matched ranking. No source trajectory/count constraint.'
+contract['budget']['conservative_campaign_start_utc']='2026-10-02T15:55:00Z'
+contract['budget']['absolute_hard_cutoff_utc']='2026-10-03T03:55:00Z'
+contract['period_selection_reason']='Fresh physical action tests pass at all rates. 50 ms recorded 249 steps/55.405s including logging: 300k estimate 18.54 h exceeds hard cap. 20 ms recorded 617 steps/57.102s: 300k estimate 7.71 h. Prefer slowest cadence compatible with a useful bounded expert campaign; final compact/CUDA benchmark decides exact budget, not cadence.'
+(D/'SAC_EXPERT_V1_CONTRACT.json').write_text(json.dumps(contract,indent=2,sort_keys=True)+'\n')
+(D/'SAC_EXPERT_V1_CONTRACT.md').write_text('# Single-Human Direct SAC Expert v1 final qualification revision\n\nNo formal training has begun. Development revision 01 and every result are preserved. Final qualification uses 20 ms because the measured 50 ms cadence projects a 300k campaign beyond the 12-hour cap; all three rates passed physical authority tests. Gamma = exp(-0.020/150), fixed before training.\n\nControlled timing requires common physical clocks of OUTBOUND 9 s, HOLD 1 s and RETURN 9 s. The original valid 0.5 s HOLD remains mandatory. Early arrival waits under real CR12/cuff/Human physics with full measured cost; late phases beyond 10 ms timing tolerance are ineligible. This fixes the discovery that natural HOLD acquisition creates a variable phase duration; the initial draft is preserved.\n\nAll A–K settings, observations and reward definitions are in JSON. No environment, task, physics or evaluator change during formal training. Main training remains prohibited until final-period reward/reset/comparator/throughput qualification passes.\n')
+(D/'DEVELOPMENT_REPAIR_LOG.json').write_text(json.dumps(dict(formal_steps=0,revisions=[dict(issue='Smoke-only +/-0.05 rad terminal action lacks required freedom',repair='Versioned Gym absolute-target mapping through unchanged certified interface'),dict(issue='Variable natural HOLD phase duration confounds total matched timing',repair='Prospective additional HOLD 1s lower gate; retain original valid dwell requirement'),dict(issue='Repeated/alternating rejection test terminated at first rejection',repair='New adversaries establish a certified prefix before repeated extreme commands; preserve incomplete first test'),dict(issue='50ms rate minimum step budget exceeds cap in measured throughput',repair='20ms as slowest qualified rate projecting useful minimum within cap, retest final config')]),indent=2)+'\n')
+print('FINAL_QUALIFICATION_REVISION_02_PREPARED')

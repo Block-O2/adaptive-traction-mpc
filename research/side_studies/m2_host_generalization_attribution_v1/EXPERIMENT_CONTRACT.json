@@ -1,0 +1,192 @@
+{
+  "schema": "FROZEN_M2_GENERALIZATION_ATTRIBUTION_v1",
+  "registered_unix": 1791464690.6867137,
+  "budget": {
+    "t0_unix": 1791464352.0,
+    "t0_basis": "first observed UTC clock at task entry",
+    "hard_stop_unix": 1791473352.0,
+    "dispatch_cutoff_unix": 1791471552.0,
+    "physics_budget": 12,
+    "max_physics_budget": 12,
+    "physical_dt_s": 0.00025,
+    "control_dt_s": 0.005,
+    "threads": 1,
+    "bytes_target": 4294967296,
+    "single_physics_owner": true,
+    "no_auto_resume": true
+  },
+  "tracks_independent": true,
+  "label": "RESEARCH_HOST_EXPERIMENT / RUNTIME_NOT_QUALIFIED",
+  "science": {
+    "dwell_s": 0.5,
+    "HOLD_minimum_s": 1.0,
+    "completion_tolerance_s": 1e-12,
+    "expiry_ms": 100,
+    "control_dt_s": 0.005,
+    "native_dt_s": 0.00025,
+    "K3": "unchanged",
+    "targets_physics_safety_controller": "unchanged"
+  },
+  "axes": {
+    "PHYSICAL_TASK_VALID": [
+      "original physical scorer PASS",
+      "full task or preregistered legal segment",
+      "controlled original HOLD",
+      "no native execution failure"
+    ],
+    "HOST_EXECUTION_CAUSAL_VALID": [
+      "every physical step owner reconstructed",
+      "no expired actual write",
+      "original current admission and fallback",
+      "original timestamps and native permission"
+    ],
+    "FAST_RUNTIME_ENGINEERING_QUALIFIED": {
+      "full_OUT_HOLD_RETURN": true,
+      "original_physical_safety": true,
+      "original_current_state_admission": true,
+      "source_expiry_ns": 100000000,
+      "meaningful_plans_min": 2,
+      "causal_substep_command_ownership": true,
+      "quantization_delay_ns_max": 250000,
+      "service_gap_p50_ms_max": 5.5,
+      "service_gap_p95_ms_max": 7.5,
+      "service_gap_p99_ms_max": 10.0,
+      "service_gap_over_10ms_fraction_max": 0.05,
+      "missed_grid_fraction_max": 0.15,
+      "rolling_1s_service_mean_ms_max": 6.0,
+      "max_unresolved_backlog_s": 0.1,
+      "expired_write_count_max": 0
+    },
+    "LEGACY_R2_MATCHED": {
+      "unchanged_original_evaluator": true,
+      "HOLD_upper_s": 1.020000001,
+      "OUTBOUND_RETURN_original_timing_reported": true
+    },
+    "LEGACY_STRICT55": {
+      "unchanged_original_qualification": true,
+      "activation_age_ms": "strictly <55",
+      "not_sole_M2_gate": true
+    }
+  },
+  "Q_sha256": "3be0536a8cd9007e8926fc1f49d97468facd2d09233bd89618d04e683b6d3db9",
+  "Q_training": 0,
+  "Q_online_updates": 0,
+  "G": false,
+  "P_full_repetition_optimizer": false,
+  "adaptive_Q": false,
+  "Human_matrix_expansion": false,
+  "allowed_inputs": "Original deployable observations/commissioned belief/current task reference/history only; evaluation truth never enters selection",
+  "truth_firewall": "evaluation truth used only after execution, never selection",
+  "hypotheses": [
+    "New registered legal prefixes may or may not reproduce lower J_F",
+    "Fixed-candidate masked Q differences may be state independent",
+    "RETURN benefits require force-duration and multiobjective decomposition"
+  ],
+  "setup": "Two pre-existing registered prefixes new to preceding host package, two matched seeds; same single high-ROM nominal Human; not unseen-Human validation",
+  "seeds": [
+    2026100801,
+    2026100802
+  ],
+  "pair_plan": [
+    {
+      "pair_id": "deviation_P1_seed1",
+      "ids": [
+        "001_deviation_P1_seed1_B",
+        "002_deviation_P1_seed1_M2"
+      ],
+      "seed": 2026100801,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.3,
+            -0.1,
+            0.05
+          ]
+        ]
+      },
+      "prefix_registry_pair": 1
+    },
+    {
+      "pair_id": "deviation_P1_seed2",
+      "ids": [
+        "003_deviation_P1_seed2_M2",
+        "004_deviation_P1_seed2_B"
+      ],
+      "seed": 2026100802,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            0.3,
+            -0.1,
+            0.05
+          ]
+        ]
+      },
+      "prefix_registry_pair": 1
+    },
+    {
+      "pair_id": "deviation_P2_seed1",
+      "ids": [
+        "005_deviation_P2_seed1_M2",
+        "006_deviation_P2_seed1_B"
+      ],
+      "seed": 2026100801,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.15,
+            0.25,
+            -0.2
+          ]
+        ]
+      },
+      "prefix_registry_pair": 2
+    },
+    {
+      "pair_id": "deviation_P2_seed2",
+      "ids": [
+        "007_deviation_P2_seed2_B",
+        "008_deviation_P2_seed2_M2"
+      ],
+      "seed": 2026100802,
+      "prefix": {
+        "OUTBOUND": [
+          [
+            -0.15,
+            0.25,
+            -0.2
+          ]
+        ]
+      },
+      "prefix_registry_pair": 2
+    }
+  ],
+  "candidate_budget": 6,
+  "issued_count_semantics": "modifiable issued proposals, never silently committed count",
+  "K3": [
+    0.1,
+    0.4,
+    0.7
+  ],
+  "zero_residual": "original B",
+  "guard_policy": "guard-on min(40,55-36)=19ms; guard-off retains 40ms physical bridge deadline and original 100ms lifecycle/current admission/ownership; classify before changing",
+  "repair_policy": "No B/Q redesign, no safety threshold changes; only package-path relocation",
+  "phase_attribution": "Left-endpoint TASK trace quadrature, exact transition partition, symmetric product decomposition; retain phase-clock durations and integrated durations",
+  "exclusions": "No outcome exclusion; pair valid only full physical/safety and causal PASS with complete exports, matched configurations, verified Q identity and nonzero M2 native execution",
+  "stop_policy": "Stop all physical dispatch at safety, causal ownership, identity, export, unstable-resource, repeated-identical-failure or budget failure",
+  "prohibited": [
+    "B control law changes",
+    "Human/physics/safety/task mathematics",
+    "timestamp rewrite",
+    "Q/G training",
+    "online adaptation",
+    "legacy result edits",
+    "main Git mutation"
+  ],
+  "comparator": "NOT_RUN if real-arithmetic fixed-ranking equivalence proven; preserve deployed float32 close-rank safeguards",
+  "prefix_source": {
+    "path": "/home/hank/coding/adaptive-traction-mpc-side-studies/b_native_q_realtime_integration_v1/versions/LEGAL_PREFIX_STABILITY_PROTOCOL.json",
+    "sha256": "3394c65afd6352a7183513ad97fff91d5bc420b2af726c3f81062db963a12ae1"
+  },
+  "statistical_scope": "Four descriptive matched pairs; no population-level inference"
+}
