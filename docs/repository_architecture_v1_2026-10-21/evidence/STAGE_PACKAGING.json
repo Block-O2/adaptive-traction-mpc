@@ -1,0 +1,48 @@
+{
+  "stage3_full3d": {
+    "pyproject": "[build-system]\nrequires = [\"setuptools>=68\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"adaptive-traction-mpc-stage3-full3d\"\nversion = \"0.1.0\"\ndescription = \"Independent torque-actuated UR10e robot core for Stage 3.\"\nrequires-python = \">=3.10\"\ndependencies = [\n    \"mujoco\",\n    \"numpy\",\n    \"scipy\",\n]\n\n[project.optional-dependencies]\ndev = [\"pytest\"]\n\n[tool.setuptools.packages.find]\nwhere = [\"src\"]\n",
+    "src_dirs": [
+      "traction_mpc_stage3"
+    ],
+    "top_dirs": [
+      "models",
+      "tests",
+      "src",
+      "results",
+      "scripts",
+      "docs",
+      "vendor"
+    ]
+  },
+  "stage4_adaptive_control": {
+    "pyproject": "[build-system]\nrequires = [\"setuptools>=68\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"adaptive-traction-mpc-stage4\"\nversion = \"0.1.0\"\ndescription = \"Trust-gated adaptive MPC and report validation for the Stage-3 coupled plant.\"\nrequires-python = \">=3.10\"\ndependencies = [\n    \"imageio\",\n    \"mujoco\",\n    \"numpy\",\n    \"Pillow\",\n    \"scipy\",\n]\n\n[project.optional-dependencies]\ndev = [\"imageio-ffmpeg\", \"pytest\"]\n\n[tool.setuptools.packages.find]\nwhere = [\"src\"]\n",
+    "src_dirs": [
+      "traction_mpc_stage4"
+    ],
+    "top_dirs": [
+      "configs",
+      "tests",
+      "src",
+      "results",
+      "scripts",
+      "docs"
+    ]
+  },
+  "stage5_personalized_motion_learning": {
+    "pyproject": "[build-system]\nrequires = [\"setuptools>=68\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"adaptive-traction-mpc-stage5\"\nversion = \"0.1.0\"\ndescription = \"Provisional laboratory geometry and stiff-interface validation for Stage 5.\"\nrequires-python = \">=3.10\"\ndependencies = [\n    \"matplotlib\",\n    \"mujoco\",\n    \"numpy\",\n    \"scipy\",\n]\n\n[project.optional-dependencies]\ndev = [\"pytest\"]\n\n[tool.setuptools.packages.find]\nwhere = [\"src\"]\n",
+    "src_dirs": [
+      "traction_mpc_stage5",
+      "adaptive_traction_mpc_stage5.egg-info"
+    ],
+    "top_dirs": [
+      "configs",
+      "models",
+      "tests",
+      "src",
+      "results",
+      "scripts",
+      "docs",
+      "vendor"
+    ]
+  }
+}

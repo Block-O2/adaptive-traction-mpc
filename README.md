@@ -117,7 +117,8 @@ stages/
 ├── stage1/                    point-force Spring2D foundation
 ├── stage2_linkage/            planar Human V2 and rigid cuff
 ├── stage3_full3d/             coupled 3D plant and robot interfaces
-└── stage4_adaptive_control/   estimator, trust, MPC, validation, evidence
+├── stage4_adaptive_control/   estimator, trust, MPC, validation, evidence
+└── stage5_personalized_motion_learning/   motion and learning research
 ```
 
 Stage 4 imports Stage 3 simulation APIs explicitly; it does not duplicate the
@@ -172,4 +173,40 @@ promote archived variants to formal B, hardware readiness or clinical validation
 
 The audited research source is on `codex/local-research-sync-20261020`. Tested source payload: `a60686f30aaee5e950fa7e9ae7e802cd74df4cc2`. See [cleanup acceptance](docs/repository_cleanup_v2_2026-10-21/REPOSITORY_CLEANUP_REPORT.md), [GitHub audit](docs/repository_cleanup_v2_2026-10-21/GITHUB_SOURCE_AUDIT.md), [deployment guide](docs/repository_cleanup_v2_2026-10-21/CLOUD_GITHUB_DEPLOYMENT_GUIDE.md), and [original B/H150 scorer readiness](docs/repository_cleanup_v2_2026-10-21/B_H150_EVALUATOR_READINESS.md).
 
-Current Stage3–5 source/assets, the sealed RL-B CPU capsule, hash-locked dependencies, and original offline scorer recovery have been checked locally. Complete native fixtures require the separately hashed archive. Full fork replay and the current server deployment remain unverified; original READINESS and training gates are unchanged. Historical snapshots are preserved by identity, not merged into active scientific code.
+Current Stage3–5 source/assets, the sealed RL-B CPU capsule, hash-locked dependencies, and original offline scorer recovery have been checked locally. All 32 original D01R parent/B/H150 fixture files are now tracked at their native paths; no external archive is required for this offline score. Full fork replay and the current server deployment remain unverified; original READINESS and training gates are unchanged. Historical snapshots are preserved by identity, not merged into active scientific code.
+
+## Portable original evaluation and CPU checks — 2026-10-21
+
+See [repository architecture](docs/repository_architecture_v1_2026-10-21/REPOSITORY_ARCHITECTURE.md),
+[directory map](docs/repository_architecture_v1_2026-10-21/RESEARCH_DIRECTORY_MAP.md),
+[B/H150 reproduction](docs/repository_architecture_v1_2026-10-21/B_H150_REPRODUCIBILITY.md),
+[RL-B reproduction](docs/repository_architecture_v1_2026-10-21/RL_B_REPRODUCIBILITY.md), and
+[fresh-clone validation](docs/repository_architecture_v1_2026-10-21/FRESH_CLONE_VALIDATION.md).
+Use a fixed tested commit in a new Linux x86_64 clone with CPython 3.12 and python3.12-venv.
+If ensurepip is unavailable, set PIP_BOOTSTRAP_PYTHON to a trusted Python with modern pip;
+the installer uses it only to install the hash-locked wheels into the new Python3.12 venv.
+
+```bash
+bash deployment/install_offline.sh
+python3.12 -B deployment/verify_b_h150.py --config deployment/configs/b_h150_original_v1.json
+.deployment-work/offline-env/bin/python -B deployment/score_b_h150.py \
+  --config deployment/configs/b_h150_original_v1.json \
+  --work-dir .deployment-work/D01R-original-score-001
+bash deployment/install_rl_b.sh
+python3.12 -B deployment/check_rl_b.py \
+  --python "$PWD/.deployment-work/rl-b-env/bin/python" \
+  --work-dir .deployment-work/rl-b-import-check-001
+.deployment-work/rl-b-env/bin/python -B deployment/check_models.py \
+  --output .deployment-work/model-check-001.json
+python3.12 -B -m unittest discover -s deployment/tests -v
+```
+
+Every output directory/report must be new. The original offline scorer, historical
+receipt/motion arrays, all scientific metrics and frozen acceptance checks are compared;
+RUN_PROVENANCE.json and OUTPUT_MANIFEST.json preserve source/config/input/output identity.
+These commands perform offline scoring, imports, unit checks and XML compilation only.
+Full fork replay lacks a complete parent checkpoint; new live matched evaluation,
+dynamic physics, training and target-host qualification remain NOT_RUN.
+The sealed RL-B READINESS and training gates remain authoritative.
+Other historical raw/checkpoints are indexed in deployment/data_catalog.json and may
+be NOT_PORTABLE without a separately accessible data source. No server connection occurred.

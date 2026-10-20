@@ -4,6 +4,7 @@ Copies the unchanged capsule into a new work directory and blocks physics APIs.
 This never grants the physical qualification gates required by train.py.
 """
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -24,11 +25,19 @@ runpy.run_path(sys.argv[0],run_name='__main__')
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--python', default=sys.executable)
+    parser.add_argument('--config', type=Path, default=ROOT / 'deployment/configs/rl_b_cpu_handoff_v1.json')
     parser.add_argument('--work-dir', type=Path, required=True)
     args = parser.parse_args()
+    from reproducibility import repository_path
+    config = json.loads(args.config.read_text())
+    if config['schema'] != 'ihear.sealed_cpu_handoff.v1':
+        parser.error('Unsupported sealed handoff configuration')
+    package = repository_path(config['package_root'])
+    if package != ROOT / 'research/rl_b_cpu_handoff_v1':
+        parser.error('The sealed RL-B package identity is required')
     args.work_dir.mkdir(parents=True, exist_ok=False)
     capsule = args.work_dir.resolve() / 'capsule'
-    shutil.copytree(ROOT / 'research/rl_b_cpu_handoff_v1', capsule,
+    shutil.copytree(package, capsule,
                     ignore=shutil.ignore_patterns('__pycache__', 'runs', 'cache', 'model_cache', 'model_path_cache', 'test_outputs', '.venv'))
     env = os.environ.copy()
     env.pop('PYTHONPATH', None)
@@ -46,7 +55,13 @@ def main():
     report = dict(status='PASS' if all(c['status'] == 'PASS' for c in checks) and result.returncode == 0 else 'FAIL',
                   scope='ENVIRONMENT_IMPORT_AND_UNIT_TESTS_ONLY', runtime=runtime, checks=checks,
                   physics_steps=0, training='NOT_RUN', physical_qualification='NOT_RUN',
-                  cloud='UNVERIFIED', original_READINESS_json='UNCHANGED')
+                  cloud='UNVERIFIED', original_READINESS_json='UNCHANGED',
+                  source_commit=subprocess.check_output(['git', '-C', str(ROOT), 'rev-parse', 'HEAD'], text=True).strip(),
+                  config_sha256=hashlib.sha256(args.config.read_bytes()).hexdigest(),
+                  sealed_manifest_sha256=hashlib.sha256(repository_path(config['sealed_identity']).read_bytes()).hexdigest(),
+                  dependency_lock_sha256=hashlib.sha256(repository_path(config['dependency_lock']).read_bytes()).hexdigest(),
+                  training_seeds=config['seeds'], checkpoint_restore_execution='NOT_RUN_NO_ORIGINAL_RL_B_CHECKPOINT',
+                  recent_german_server_version=config['recent_german_server_version'])
     (args.work_dir / 'RL_B_ENVIRONMENT_CHECK.json').write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps(report))
     raise SystemExit(report['status'] != 'PASS')

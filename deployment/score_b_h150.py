@@ -10,9 +10,13 @@ import importlib.util
 import json
 import math
 import os
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 import shutil
 import sys
+
+from reproducibility import DEFAULT_CONFIG, load_config, verify_inputs, provenance, repository_path
 
 REPO = Path(__file__).resolve().parents[1]
 CANONICAL = REPO / 'research/side_studies/ihear_overnight_control_learning_transition_v1'
@@ -52,7 +56,8 @@ def compare_values(actual, expected, path=''):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--fixture-dir', type=Path, required=True)
+    parser.add_argument('--config', type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument('--fixture-dir', type=Path, help='Defaults to the original native fixtures tracked in this clone')
     parser.add_argument('--work-dir', type=Path, required=True, help='Must not exist; originals are never overwritten')
     args = parser.parse_args()
     if not __debug__:
@@ -60,8 +65,13 @@ def main():
     sys.dont_write_bytecode = True
     for key in ('OPENBLAS_NUM_THREADS', 'OMP_NUM_THREADS', 'MKL_NUM_THREADS'):
         os.environ[key] = '1'
-    manifest = json.loads((REPO / 'deployment/b_h150_fixture_manifest.json').read_text())
-    inputs = args.fixture_dir.resolve()
+    config = load_config(args.config)
+    identity_check = verify_inputs(config, args.fixture_dir)
+    if identity_check['status'] != 'PASS':
+        raise ValueError(json.dumps(identity_check))
+    run_provenance = provenance(args.config, config)
+    manifest = json.loads(repository_path(config['fixture_manifest']).read_text())
+    inputs = args.fixture_dir.resolve() if args.fixture_dir else repository_path(config['fixture_root'])
     for row in manifest['files']:
         p = inputs / row['path']
         assert p.is_file() and p.stat().st_size == row['bytes'] and digest(p) == row['sha256'], 'FIXTURE_IDENTITY:' + row['path']
@@ -107,15 +117,28 @@ def main():
     independent.P = root
     measurements = {}
     checks = []
-    for ident in ('D01R_parent', 'D01R_B', 'D01R_H150'):
+    for ident in config['ids']:
         historical = json.loads((inputs / 'reports' / (ident + '_MEASURED.json')).read_text())
         result = am.measure(ident)  # Original promotion assertion remains enabled.
         compare_values(result, historical)
+        compare_values(json.loads((root / 'reports' / (ident + '_EXECUTED_RESIDUAL_RECEIPTS.json')).read_text()),
+                       json.loads((inputs / 'reports' / (ident + '_EXECUTED_RESIDUAL_RECEIPTS.json')).read_text()))
+        import numpy as np
+        with np.load(root / 'motion_series' / (ident + '.npz')) as actual_motion, np.load(inputs / 'motion_series' / (ident + '.npz')) as original_motion:
+            if set(actual_motion.files) != set(original_motion.files):
+                raise ValueError('ORIGINAL_MOTION_KEYS:' + ident)
+            for key in original_motion.files:
+                if not np.array_equal(actual_motion[key], original_motion[key]):
+                    raise ValueError('ORIGINAL_MOTION_ARRAY:' + ident + ':' + key)
         measurements[ident] = result
         verified = independent.measure(ident)
         checks.append(verified)
         print('ORIGINAL_MEASURE_AND_INDEPENDENT_PASS ' + ident, flush=True)
     comparison = am.compare(measurements['D01R_H150'], measurements['D01R_B'])
+    reference_path = repository_path(config['comparison_reference'])
+    if digest(reference_path) != config['comparison_reference_sha256']:
+        raise ValueError('COMPARISON_REFERENCE_IDENTITY')
+    compare_values(comparison, json.loads(reference_path.read_text())['comparison'])
     assert comparison['acceptance_pass'], 'ORIGINAL_MOTION_ACCEPTANCE_FAILED'
     assert comparison['gain_percent'] > 0, 'HISTORICAL_GAIN_FAILED'
     for row in manifest['files']:
@@ -126,13 +149,31 @@ def main():
                   full_fork_replay='NOT_RUN_NO_PORTABLE_PARENT_CHECKPOINT',
                   metadata_path_binding={'analyze_matched.S': str(root), 'explore_common.S': str(root), 'independent_recompute.P': str(root)},
                   original_code_sha256=expected_code, inputs_verified=len(manifest['files']),
+                  identity_check=identity_check, historical_comparison_all_fields='PASS',
+                  OFFLINE_SCORER_READY='PASS',
+                  FULL_FORK_REPLAY_READY='NOT_RUN_NO_COMPLETE_PARENT_CHECKPOINT',
+                  MATCHED_EVALUATOR_READY='NOT_RUN_NEW_LIVE_MATCHED_EXPERIMENT',
+                  archived_D01R_W1_matched_comparison='PASS',
                   original_module_bindings={m.__name__: m.__file__ for m in modules},
                   historical_numeric_tolerance=1e-8, independent_checks=checks, comparison=comparison)
     (root / 'OFFLINE_SCORER_RESULT.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n')
+    run_provenance.update(run_uuid=str(uuid.uuid4()), completed_at=datetime.now(timezone.utc).isoformat(),
+                          output_directory=str(root), result='OFFLINE_SCORER_RESULT.json')
+    run_provenance['experiment_identity_sha256'] = hashlib.sha256(json.dumps(
+        {k: v for k, v in run_provenance.items() if k not in {'run_uuid', 'completed_at', 'output_directory', 'command'}},
+        sort_keys=True).encode()).hexdigest()
+    (root / 'RUN_PROVENANCE.json').write_text(json.dumps(run_provenance, indent=2) + '\n')
+    outputs = {p.relative_to(root).as_posix(): dict(bytes=p.stat().st_size, sha256=digest(p))
+               for p in sorted(root.rglob('*')) if p.is_file()}
+    (root / 'OUTPUT_MANIFEST.json').write_text(json.dumps(dict(schema='ihear.output_identity.v1', files=outputs), indent=2) + '\n')
     print(json.dumps(dict(status=report['status'], result=str(root / 'OFFLINE_SCORER_RESULT.json'),
                           B_J_F=measurements['D01R_B']['J_F_N_s'], H150_J_F=measurements['D01R_H150']['J_F_N_s'],
                           gain_percent=comparison['gain_percent'])), flush=True)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as exc:
+        print(json.dumps(dict(status='FAIL', scope='OFFLINE_SCORER', error=str(exc))), file=sys.stderr)
+        raise
