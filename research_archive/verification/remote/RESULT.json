@@ -1,0 +1,200 @@
+{
+  "schema": "ihear.archive.fresh_remote_acceptance.v1",
+  "status": "PASS",
+  "source_commit": "5586b946024c4a979aaa66287d9f2250a51dddb8",
+  "remote": "https://github.com/Block-O2/adaptive-traction-mpc.git",
+  "clone_owns_git_objects": true,
+  "local_object_alternates": false,
+  "started_unix": 1793202753.7342925,
+  "finished_unix": 1793203765.194701,
+  "wall_s": 1011.4604091644287,
+  "steps": [
+    {
+      "name": "static",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 32.9021577835083,
+      "log": "static.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "deployment/archive_checks.py",
+        "--output",
+        "/tmp/ihear-archive-remote-verification/STATIC.json"
+      ]
+    },
+    {
+      "name": "baseline_identity",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 4.124098062515259,
+      "log": "baseline_identity.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "deployment/verify_repository.py",
+        "--expected-commit",
+        "5586b946024c4a979aaa66287d9f2250a51dddb8",
+        "--output",
+        "/tmp/ihear-archive-remote-verification/BASELINE_IDENTITY.json"
+      ]
+    },
+    {
+      "name": "models",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 1.3168036937713623,
+      "log": "models.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "deployment/check_models.py",
+        "--output",
+        "/tmp/ihear-archive-remote-verification/MODELS.json"
+      ]
+    },
+    {
+      "name": "original_d01r_offline",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 19.526602506637573,
+      "log": "original_d01r_offline.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "deployment/score_b_h150.py",
+        "--work-dir",
+        "/tmp/ihear-archive-remote-verification/d01r_offline"
+      ]
+    },
+    {
+      "name": "original_v7_offline",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 16.947840929031372,
+      "log": "original_v7_offline.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "deployment/score_archive_combo.py",
+        "--repo",
+        "/tmp/ihear-archive-remote-20261028",
+        "--output",
+        "/tmp/ihear-archive-remote-verification/v7_offline"
+      ]
+    },
+    {
+      "name": "learning_interface",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 0.2644627094268799,
+      "log": "learning_interface.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "deployment/check_learning_interface.py",
+        "--repo",
+        "/tmp/ihear-archive-remote-20261028",
+        "--output",
+        "/tmp/ihear-archive-remote-verification/learning"
+      ]
+    },
+    {
+      "name": "rl_b_contract",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 7.035628318786621,
+      "log": "rl_b_contract.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "deployment/check_rl_b.py",
+        "--work-dir",
+        "/tmp/ihear-archive-remote-verification/rl_b_contract"
+      ]
+    },
+    {
+      "name": "rebuild_figures",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 2.519038438796997,
+      "log": "rebuild_figures.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "figures/rebuild_archive_evidence.py",
+        "--source-root",
+        "/tmp/ihear-archive-remote-20261028/research_archive/packages",
+        "--output-dir",
+        "/tmp/ihear-archive-remote-verification/rebuilt_figures"
+      ]
+    },
+    {
+      "name": "original_b_dynamic",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 114.22208905220032,
+      "log": "original_b_dynamic.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "deployment/reproduce_original_b.py",
+        "--repo",
+        "/tmp/ihear-archive-remote-20261028",
+        "--output",
+        "/tmp/ihear-archive-remote-verification/original_b",
+        "--timeout-s",
+        "900"
+      ]
+    },
+    {
+      "name": "strong_traditional_dynamic",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 481.45256328582764,
+      "log": "strong_traditional_dynamic.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "deployment/reproduce_trad_combo.py",
+        "--repo",
+        "/tmp/ihear-archive-remote-20261028",
+        "--output",
+        "/tmp/ihear-archive-remote-verification/combo",
+        "--timeout-s",
+        "900"
+      ]
+    },
+    {
+      "name": "d01r_dynamic",
+      "status": "PASS",
+      "returncode": 0,
+      "wall_s": 331.1410300731659,
+      "log": "d01r_dynamic.log",
+      "command": [
+        "/tmp/ihear-archive-clean-env/bin/python",
+        "-B",
+        "deployment/reproduce_traditional.py",
+        "--repo",
+        "/tmp/ihear-archive-remote-20261028",
+        "--output",
+        "/tmp/ihear-archive-remote-verification/d01r",
+        "--timeout-s",
+        "900"
+      ]
+    }
+  ],
+  "forbidden_roots": [
+    "/home/hank/ihear-lab",
+    "/home/hank/coding",
+    "/home/hank/envs",
+    "/mnt/c",
+    "/mnt/d"
+  ],
+  "forbidden_python_file_access_events": 0,
+  "isolation_limit": "Python audit hook, not an OS sandbox; archive model/source path rebasing and actual clone provenance also checked.",
+  "new_training_steps": 0,
+  "hardware": "NOT_RUN",
+  "host_realtime": "NOT_EVALUABLE",
+  "paid_cloud_resources_created": 0
+}

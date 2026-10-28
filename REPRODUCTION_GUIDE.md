@@ -32,7 +32,7 @@ python3.12 -m venv .venv
 
 该入口使用原Git `research/side_studies/m2_18d_baseline_qualification_v1/{source,code,deps}`，严格检查原 `BASELINE_CONTRACT.json` 和 `RUN_PLAN.json` 的seed2026101303、名义原case及零prefix；原manifest中目前存在的1346个对象逐一SHA一致才可准备。原B接口继续使用原MatchedInterface.control的全零residual，直接执行完整cold commissioning与原TASK；不运行E/search、不训练。只有原scorer/task、绝对安全、native receipt、matched、原motion全部通过，且实际TASK时长19.03s，才能写PASS。`RESULT.json`记录JF/JM、时长、资格、运行依赖版本和prefix backend；`reports/original_b_MEASURED.json`保留native jerk等完整指标。
 
-原manifest有38个当前Git树中缺失对象；launcher逐项报告，不称完整历史镜像。三个实际依赖JSON（PHASE_B_MATRIX、HISTORICAL_NATIVE_GRAPH_ACTIONS、HISTORICAL_SPATIAL_GRAPH）仅在v8归档对象SHA与原manifest完全一致时恢复。其余缺失包括旧CPython3.10 native扩展、metadata、旧source_history及Q权重；原该B路径默认`prefix_backend='numpy'`，不主动切换为其它backend。若实际调用需要缺失对象，应原样失败，不用新实现偷偷替代。原源码只重绑定字面路径和新的host允许时长，所有来源hash与差异保存在PREPARATION。
+原manifest有38个当前Git树中缺失对象；launcher逐项报告，不称完整历史镜像。三个实际依赖JSON（PHASE_B_MATRIX、HISTORICAL_NATIVE_GRAPH_ACTIONS、HISTORICAL_SPATIAL_GRAPH）仅在v8归档对象SHA与原manifest完全一致时恢复。其余在旧快照位置缺失的对象包括旧CPython3.10 native扩展、metadata、旧source_history及Q权重；22项已有归档内原SHA相同别名（包括四个frozen_Q_v1文件），可按 [恢复映射](research_archive/manifests/historical_alias_recovery.json) 在新capsule恢复，不能把快照缺位置误作整个归档没有这些权重。原该B路径默认`prefix_backend='numpy'`，不主动切换为其它backend。若实际调用需要缺失对象，应原样失败，不用新实现偷偷替代。原源码只重绑定字面路径和新的host允许时长，所有来源hash与差异保存在PREPARATION。
 
 历史原B参考JF为1438.613498467N·s。使用新依赖/平台运行且未与旧native raw逐字段比较时，只能宣称归档原源码/任务/参数的重新执行；`historical_raw_exact_identity=NOT_TESTED`。新的实际通过/失败仍以 [ARCHIVE_VERIFICATION.md](ARCHIVE_VERIFICATION.md) 为准。
 

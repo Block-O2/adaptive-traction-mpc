@@ -1,21 +1,36 @@
 # 删除服务器的影响
 
-本轮不删除、重建或关闭服务器，也不制作整盘备份或Snapshot。归档不是完整磁盘备份。
+**本轮没有删除、重建或关闭Hetzner服务器，也没有制作整盘备份或Snapshot。** GitHub已保留可实际运行的科研闭包和代表证据，但不是全部历史数据备份。删除须用户另行确认。
 
-## 明确不在本次上传范围内
+## 已可从GitHub恢复
 
-大规模历史native raw、重复轨迹/实验副本、全部中间策略/Adam/RNG训练状态、所有模型缓存、virtualenv、pip缓存、大型zip研究包、编辑器和用户主目录、SSH/Git/云凭据、主机配置不上传。本轮专用SSH私钥保留在归档树外，也不会上传；新主机须另行配置GitHub认证。未归档的历史材料若服务器被删除且用户无其他备份，将不可从本归档恢复。可从代码重新生成的结果也不保证数值逐字等同旧运行。
+原B、H150、18D及关键传统优化/平顺性版本的源码、模型/mesh/XML与参数/任务/评分/安全依赖；原Git研究历史；v1–v8及更早Learning代表实现/接口/合同与少量已训练checkpoint；14份综合主文档、真实图/CSV和实际远端核验回执。原B19.03s、强传统组合和D01R B/H150已从独立远端clone实际跑通，见 [核验报告](ARCHIVE_VERIFICATION.md)。
 
-## 保留与不能恢复的边界
+[选定原文件清单](research_archive/manifests/selected_files.json)为23,756项、1,214,474,476bytes；[122项代表证据](evidence_selection.json)为151,544,024bytes。另保留新原B完整native/5ms trace与紧凑实际回执约12.46MB。相同快照由Git去重，不上传整包ZIP。
 
-主要传统源码/plant与资产依赖、完整任务和评价、安全执行逻辑、历史版本与条件、现代强传统两个完整raw、若干完整native数组、代表Learning模型和接口、代码与配置保留。旧D01R原raw已在既有Git对象中保留。完整动态复现会建立新的合法父状态，不将未保存的Python/ MuJoCo活地址空间虚构成磁盘checkpoint。
+## 删除后不能保证恢复的内容
 
-更早History/ILC/BO部分历史训练数据和权重原本就缺档；源码与报告不能补回这些数值。仅native保存的heavy H150/18D、v8持续ILC轨迹不能单靠该数组重放全部安全/ownership scorer。代表性权重不能恢复全部训练中间状态或每个seed的原优化器。
+|内容|丢失或恢复限制|
+|---|---|
+|未选的独有历史native raw、完整轨迹、各失败/分支的全部receipt|不能从PNG/CSV/摘要补回；重新运行也不保证所有旧字节/状态相同|
+|全部中间模型、Adam/RNG、pending rollout、每seed训练状态|只保留代表checkpoint，不能从头到尾精确续训每个历史分支|
+|活MuJoCo/Python地址空间与fork父状态|未序列化为跨机完整checkpoint；新验证是重新commission，不是恢复旧内存|
+|更早部分History/ILC/BO主要权重/训练集与完整ledger|本来已缺，源码/报告不能制造缺失数值；未称独立完整复算|
+|legacy Stage1的40项模型引用、旧m2未找回对象|现代B不依赖这些；不宣称完整旧磁盘镜像|
+|只保留native的heavy H150/18D、v8持续ILC|可读运动数组与历史指标，不能仅凭native重放全安全/ownership评分|
+|本轮新复现的全部gzip raw|保留关键回执与原B native/trace，其余scratch大raw未全上传；完整旧D01R与现代B/组合代表raw已保留|
+|虚拟环境、缓存、编辑器/主目录、主机配置、云/SSH/Git凭据|不在归档；软件依赖按锁文件在线新装已验证。本轮专用SSH私钥在归档树外，不上传，新机须重新认证|
 
-选定文件精确身份见 [selected_files.json](research_archive/manifests/selected_files.json)，代表证据见 [evidence_selection.json](evidence_selection.json)。未选资料见 [逐路径盘点](research_archive/manifests/omitted_research_assets.csv) 和 [汇总](research_archive/manifests/server_research_inventory_summary.json)。该清单的“未选”指未按该原相对路径复制，不证明每个文件独有；重复内容可能已在旧Git别处保留。主要不可恢复的是未选的独有native raw、训练中间权重/Adam/RNG、未保存的活模拟器/控制状态，以及本来已经缺失的历史数据。
+原具名研究包和根ZIP的[未选逐路径盘点](research_archive/manifests/omitted_research_assets.csv)共 **79,019项 / 111,789,741,362bytes**，约111.79GB。它不是“全部独有资料丢失”的证明：副本可能在旧Git其它路径，模型缓存可重建，ZIP可与已归档源重复。旧m2的38个缺位置对象中22项已有原SHA相同[归档别名](research_archive/manifests/historical_alias_recovery.json)，包括四个旧linear Q文件，不应误列为全局丢失。
+
+盘点仅限任务中的具名研究包，不是所有主目录、挂载盘或其它云资源的普查。删除前若用户还需要未选的独有资料或范围外文件，必须另行保存；本任务未制作全服务器备份。
+
+## 公开历史与认证
+
+新树排除PRIVATE工作树状态和非必需用户原文，见 [排除记录](research_archive/manifests/public_exclusions.json)。旧公开提交已有的副本不能通过新分支删除而撤回；本轮遵守不重写历史、不force push、不改可见性的边界。未发现必须另建Private仓库才能保留的本轮选定仿真数据；不能将此当成对全部旧历史敏感内容的穷尽保证。
 
 ## 可能继续产生Hetzner费用的资源
 
-本任务所在计算服务器仍保持运行；如果它属于Hetzner付费实例，计算实例及其附属计费项目仍可能持续计费。另须由用户在Hetzner Console核对所有Project中的服务器、Volume、Primary/Floating IP、Load Balancer、Object Storage、既有Backup/Snapshot及其他订阅。未获得云账户资源清单，无法确认它们是否实际存在、数量或金额；没有擅自推定已停止计费。
+当前服务器保持运行。如果它是Hetzner付费实例，实例与附属资源仍可能持续计费。用户还须在Hetzner Console核对所有Project中的服务器、Volume、Primary/Floating IP、Load Balancer、Object Storage、既有Backup/Snapshot及其它订阅。云账户资源清单/账单没有访问或核验，数量、是否存在和金额均为UNKNOWN；不能声称已停止计费。
 
-本轮没有新建付费云实例、整盘备份或Snapshot，没有调用删除/关机/重建API。删除需用户另行明确确认，且应先核实最终交接和所有需要保留的本地独有资料。
+本轮没有创建新的付费云实例、Backup或Snapshot，没有调用关机/删除/重建API。科研归档结束后STOP，服务器处置等待用户另行明确确认。

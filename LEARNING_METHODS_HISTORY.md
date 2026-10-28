@@ -127,3 +127,5 @@ F1改为共同动作前OUT0的39D，48条完整任务、10case；完整motion失
 5. 同时报告学习信息、真实动作变化、完整原门、强传统增量、新条件与净成本；每层独立给证据。
 
 本次归档仅保存与验证，不运行上述新研究。后续架构问题见 [NEXT_GENERATION_ARCHITECTURE.md](NEXT_GENERATION_ARCHITECTURE.md)。
+
+旧native linear Q的四个frozen_Q_v1权重/训练数据/训练与部署记录已在既有Git canonical路径保留；它们与旧m2缺位置的原SHA完全一致，见 [别名恢复清单](research_archive/manifests/historical_alias_recovery.json)。这不补齐另一个History/ILC/BO包缺失的history_models等对象，也不宣称旧Q动态重新验证。

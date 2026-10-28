@@ -1,5 +1,7 @@
 # Verification receipts
 
-`local_*` files are preparatory checks of the uncommitted isolated archive tree and the fresh hash-locked environment. They are not remote clean-clone acceptance. Their source_commit can still be the archive base HEAD; no claim of payload commit identity is made for these preliminary checks.
+`remote/RESULT.json` is the completed 11-step actual acceptance of source payload 5586b946024c4a979aaa66287d9f2250a51dddb8 from a genuine independent GitHub clone and fresh hash-locked environment. Its OUTPUT_MANIFEST records retained output bytes/SHA256. Full repeated new gzip raw is intentionally not all archived; original B native motion and 5ms trace are retained.
 
-Final remote-clone receipts and the tested payload SHA will be added after publication. Full local generated raw remains in separate scratch directories; only compact results are retained here.
+`local_*` files are preliminary checks of the uncommitted isolated archive tree, not remote acceptance. Their source_commit may still be the archive base HEAD; no payload commit identity is claimed for these initial checks. `preliminary_failures/` preserves actual earlier small failure logs.
+
+See top-level ARCHIVE_VERIFICATION.md for PASS, FAIL, NOT_RUN and scope limits.

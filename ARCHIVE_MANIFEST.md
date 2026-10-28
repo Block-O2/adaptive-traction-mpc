@@ -45,3 +45,5 @@
 历史包各有原SOURCE/EXECUTION/OUTPUT manifest，描述原完整包而不一定只描述本次选取子集；不要要求这些全包manifest在稀疏归档副本中逐项都存在。本次机器清单才是上传范围的合同。文档中历史数值保持原实验身份/单位/合同；新运行另写scratch，不覆盖原证据。
 
 本轮用户面向日期为Asia/Shanghai的2026-10-28，机器日志保留UTC时间戳与原unix值。干净clone的实际核验、未执行范围和失败修复记录见 [ARCHIVE_VERIFICATION.md](ARCHIVE_VERIFICATION.md)；删前风险和可能持续费用见 [DELETION_IMPACT.md](DELETION_IMPACT.md)。
+
+最终远端验收为11项全部PASS，原B完整native/trace及紧凑回执另保留约12.46MB，不并入原122项证据预算。旧m2快照38个缺位置对象中22项已找到归档内原SHA别名，包含旧linear Q权重和数据；见 [恢复映射](research_archive/manifests/historical_alias_recovery.json)。这说明位置缺失与全局不可恢复必须区分。
