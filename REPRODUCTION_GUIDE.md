@@ -5,7 +5,7 @@
 ## 从归档分支启动
 
 ```bash
-git clone --branch <FINAL_HANDOFF中记录的归档分支> https://github.com/Block-O2/adaptive-traction-mpc.git
+git clone --branch archive/research-closure-20261028 https://github.com/Block-O2/adaptive-traction-mpc.git
 cd adaptive-traction-mpc
 python3.12 -m venv .venv
 .venv/bin/python -m pip install --require-hashes -r deployment/requirements-rl-b-cp312.lock
@@ -48,10 +48,11 @@ python3.12 -m venv .venv
 
 输出至少包含：
 
-- `RESULT.json`：实际complete/qualified和JF/JM；只有三臂全部完整原合格才给PASS。
+- `RESULT.json`：实际complete/qualified和JF/JM；只有三臂全部完整原合格，且COMBO对phase通过原冻结额外质量门，才给PASS。
 - `attempts/DEVPC02_*_RESULT.json`：冻结动作、完整资格、具体原门失败、执行metadata。
 - `runtime/source/results/DEVPC02_*/summary.json`、`trace.npz`、`runtime_artifacts.json.gz`：完整新raw和receipt。
 - `runtime/reports/*_MEASURED.json`：JF/JM、phase积分、native jerk、tracking、motion和安全轴；`*_EXECUTED_RESIDUAL_RECEIPTS.json`为真实native归属审计。
+- `analysis/native_metrics/` 与 `analysis/DEVPC02_PAIRED_METRICS.json`：调用原v7_metrics_v3完整native jerk/wrench复算，使用原freeze/DEVPC02.json的jerk RMS≤1.001、force norm-rate RMS≤1.004界，并要求COMBO的JF/JM均不劣于phase。
 - `audit/DEVPC02_PARENT_RAW_GATE.json`：新parent与新B逐字段/receipt/native比较；`jobs/DEVPC02/WORKER_DONE.json`和父状态不变回执。
 
 历史同条件参考为B `1437.971420 /100.829734`、V6PHASE `1405.990071 /105.481425`、TRAD_COMBO `1405.935078 /105.464006`（JF N·s / JM N·m·s）。这些是历史对照值，先检查任务和评分资格，再看数值误差。跨平台数值不同应原样报告，不调参数“对齐”结果。

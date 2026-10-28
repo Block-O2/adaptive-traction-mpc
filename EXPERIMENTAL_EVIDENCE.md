@@ -146,7 +146,7 @@ BO 实际冻结 V2 要求相对 H150 的保守 JM 上界不增、保守JF超过�
 
 ## 本次实际保留与重新核验
 
-[evidence_selection.json](evidence_selection.json) 列出 **116个原文件、144,780,088 bytes**，每个原相对路径、字节数、SHA256和保留理由均明确；另有本次从真实数据提取的图/CSV/脚本约1.8MB。源码、文档及参数依赖闭包由总归档清单另记，不包含在此代表性数据预算内。
+[evidence_selection.json](evidence_selection.json) 列出 **122个原文件、151,544,024 bytes**，每个原相对路径、字节数、SHA256和保留理由均明确；另有本次从真实数据提取的图/CSV/脚本约1.8MB。源码、文档及参数依赖闭包由总归档清单另记，不包含在此代表性数据预算内。
 
 - **两套完整原raw/scorer材料：** `DEVPC02_B`、`DEVPC02_TRAD_COMBO`。各自保留 `runtime_artifacts.json.gz`、`trace.npz`、`native_reference.npz`、`summary.json`、config snapshot、physical audit、transition记录、原结果及六种output JSON（metric、DATA、DECISIONS、ISSUED_REFERENCE、REFERENCE_OBJECTS、CAUSAL_STATE）。完整raw含commissioning/继承prefix，不能只看压缩文件名当TASK-only。
 - **八份完整native运动数组：** 上述B/组合、heavy B/late/early H150、EARLYABL01_EARLY_18D，以及v8真实light T3 H150/ILC gain .25。native-only材料支持完整轨迹及运动分析；没有其全raw的条目，不能独立重放全部ownership、安全与执行因果scorer，相关最终指标为保留的历史证据。

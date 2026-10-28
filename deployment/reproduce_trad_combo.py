@@ -56,7 +56,7 @@ def main():
                  'runtime/tmp/mpl','audit','attempts','history','jobs/DEVPC02','owned','experiments',
                  'predictions','freeze']:(dest/part).mkdir(parents=True,exist_ok=True)
     for rel in ['runtime/output/SHARED_COORDINATION_ACTION_CONTRACT.json',
-                'freeze/VARIED_HUMAN_SPLIT_V1.json','audit/CLOSURE_RELOCATION.json']:
+                'freeze/VARIED_HUMAN_SPLIT_V1.json','freeze/DEVPC02.json','audit/CLOSURE_RELOCATION.json']:
         assert (src/rel).is_file(),f'Missing required original closure object: {src/rel}'
         shutil.copy2(src/rel,dest/rel)
     old='/home/hank/ihear-lab/autonomous_learning_smoothness_v7'
@@ -110,7 +110,18 @@ def main():
         w.main()
         rows=[json.loads((dest/'attempts'/('DEVPC02_'+tag+'_RESULT.json')).read_text())
               for tag in ['B','V6PHASE','TRAD_COMBO']]
-        out={'status':'PASS' if all(r.get('complete') and r.get('qualified') for r in rows) else 'FAIL_REPORTED_QUALIFICATIONS',
+        import v7_metrics_v3 as native_metrics
+        for row in rows:
+            native_metrics.evaluate(row['id'])
+        paired = native_metrics.compare('DEVPC02')
+        combo_quality = next(x for x in paired if x['id']=='DEVPC02_TRAD_COMBO')
+        original_pass = all(r.get('complete') and r.get('qualified') for r in rows)
+        extra_pass = combo_quality['both_cost_improvement_and_quality'] is True
+        final_status = 'PASS' if original_pass and extra_pass else ('FAIL_REPORTED_QUALIFICATIONS' if not original_pass else 'FAIL_FROZEN_EXTRA_QUALITY')
+        out={'status':final_status,
+             'frozen_quality_contract':json.loads((dest/'freeze/DEVPC02.json').read_text())['quality_contract'],
+             'original_native_quality_comparison':paired,
+             'native_metrics_paths':['analysis/native_metrics/'+x['id']+'.json' for x in rows],
              'wall_s':time.monotonic()-start,'rows':rows,'training_steps':0,
              'clock':'SCIENTIFIC_SIMULATION','host_qualification':'NOT_EVALUABLE'}
         dump(dest/'RESULT.json',out);print(json.dumps(out,ensure_ascii=False),flush=True)
