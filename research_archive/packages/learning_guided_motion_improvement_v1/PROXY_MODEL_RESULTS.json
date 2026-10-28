@@ -1,0 +1,424 @@
+{
+  "status": "LIMITED_PROXY_DIAGNOSIS_COMPLETE",
+  "new_physical_attempts": 0,
+  "new_native_steps": 0,
+  "trajectory_groups": 1,
+  "independent_patient_groups": 1,
+  "historical_rows": 2,
+  "historical_source": "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/github/research/side_studies/ihear_overnight_control_learning_transition_v1",
+  "historical_compute_cost": "not recomputed; original prefix/B/H150 shared public prior",
+  "posthoc": {
+    "B": {
+      "allocator_posthoc": {
+        "JF": 1435.3436999236285,
+        "JM": 100.09489892630289,
+        "phase_JF": {
+          "OUTBOUND": 753.5320718320149,
+          "HOLD": 53.92074094100538,
+          "RETURN": 627.890887150608
+        }
+      },
+      "actual": {
+        "JF": 1436.456498145051,
+        "JM": 101.25369459130377,
+        "phase_JF": {
+          "OUTBOUND": 719.8680839281895,
+          "HOLD": 54.394340089441144,
+          "RETURN": 662.1940741274205
+        }
+      }
+    },
+    "H150": {
+      "allocator_posthoc": {
+        "JF": 1402.9718373174283,
+        "JM": 105.65071401311684,
+        "phase_JF": {
+          "OUTBOUND": 740.9061329687669,
+          "HOLD": 53.920757945791685,
+          "RETURN": 608.14494640287
+        }
+      },
+      "actual": {
+        "JF": 1402.6432114861727,
+        "JM": 107.07227190726205,
+        "phase_JF": {
+          "OUTBOUND": 706.697254907956,
+          "HOLD": 54.39433114692218,
+          "RETURN": 641.5516254312939
+        }
+      }
+    }
+  },
+  "forward_reconstruction": {
+    "inputs": [
+      "completed B causal reference",
+      "commissioned estimated beta and geometry",
+      "proposed frozen18D/H150 intent"
+    ],
+    "not_used": [
+      "H150 actual future q/dq",
+      "future requested torque",
+      "future receipts",
+      "true Human parameters"
+    ],
+    "B": {
+      "JF": 1432.0367162203745,
+      "JM": 99.79457933000715,
+      "phase_JF": {
+        "OUTBOUND": 717.744958132957,
+        "HOLD": 53.65542168989017,
+        "RETURN": 660.6363363975274
+      }
+    },
+    "H150_approx": {
+      "JF": 1424.1009899001292,
+      "JM": 99.88673031042666,
+      "phase_JF": {
+        "OUTBOUND": 709.9847423837193,
+        "HOLD": 53.65542168989017,
+        "RETURN": 660.4608258265197
+      }
+    },
+    "actual_delta": {
+      "JF": -33.81328665887827,
+      "JM": 5.818577315958279
+    },
+    "predicted_delta": {
+      "JF": -7.935726320245294,
+      "JM": 0.09215098041950398
+    },
+    "delta_error": {
+      "JF": 25.877560338632975,
+      "JM": -5.7264263355387754
+    },
+    "sign_correct": {
+      "JF": true,
+      "JM": true
+    },
+    "limitations": [
+      "template omits segment schedule/terminal timing/posture repairs",
+      "nominal allocation omits robot/contact/feedback/discrete admission",
+      "one matched group is not independent validation"
+    ]
+  },
+  "PHYSICS_PROXY_USABLE": "CONDITIONAL_NOMINAL_LOAD_RANKING_ONLY",
+  "RESIDUAL_LEARNING_NEEDED": "HYPOTHESIS_TO_TEST",
+  "FORWARD_PREDICTION_BLOCKED": "FULL_CLOSED_LOOP_MOTION_TASK_CONTACT_NOT_CLOSED",
+  "actual_tracking_prediction": "UNKNOWN",
+  "actual_motion_margin_prediction": "UNKNOWN",
+  "task_feasibility_prediction": "UNKNOWN",
+  "physics_calls_intercepted": 0,
+  "artifact_scope": "Historical zero-new-physics diagnostic preserved plus completed local prequential validation; no full robot/contact/motion prediction qualification",
+  "historical_diagnostic_new_physical_attempts": 0,
+  "current_optimizer_attempts": {
+    "A": 20,
+    "B": 20,
+    "C": 20
+  },
+  "current_local_prequential": {
+    "A": {
+      "force_nominal_anchored": {
+        "n_complete_trajectories": 20,
+        "MAE": 0.7276578522957493,
+        "RMSE": 0.8152460700280056,
+        "bias": 0.6562678347260885,
+        "max_abs_error": 1.2327341900702322,
+        "gain_sign_correct": 20,
+        "gain_sign_denominator": 20,
+        "spearman": 0.9443609022556391
+      },
+      "moment_nominal_anchored": {
+        "n_complete_trajectories": 20,
+        "MAE": 0.38096527983889245,
+        "RMSE": 0.41242319821207946,
+        "bias": -0.3503980486993399,
+        "max_abs_error": 0.5861080384925543,
+        "gain_sign_correct": 20,
+        "gain_sign_denominator": 20,
+        "spearman": 0.8736842105263156
+      },
+      "nominal_actual_motion_prediction": "UNKNOWN; no pure-physics pass prediction"
+    },
+    "B": {
+      "force_nominal_anchored": {
+        "n_complete_trajectories": 20,
+        "MAE": 0.8341414441608321,
+        "RMSE": 0.8951565257132684,
+        "bias": 0.7790570492119286,
+        "max_abs_error": 1.2170069535334278,
+        "gain_sign_correct": 20,
+        "gain_sign_denominator": 20,
+        "spearman": 0.8360902255639097
+      },
+      "moment_nominal_anchored": {
+        "n_complete_trajectories": 20,
+        "MAE": 0.4259357332325685,
+        "RMSE": 0.45271679812856624,
+        "bias": -0.3953685020930159,
+        "max_abs_error": 0.5861080384925543,
+        "gain_sign_correct": 20,
+        "gain_sign_denominator": 20,
+        "spearman": 0.7924812030075187
+      },
+      "nominal_actual_motion_prediction": "UNKNOWN; no pure-physics pass prediction"
+    },
+    "C": {
+      "force_nominal_anchored": {
+        "n_complete_trajectories": 20,
+        "MAE": 0.8799989867103705,
+        "RMSE": 0.9413231455697046,
+        "bias": 0.8249145917614669,
+        "max_abs_error": 1.2170069535334278,
+        "gain_sign_correct": 20,
+        "gain_sign_denominator": 20,
+        "spearman": 0.9338345864661652
+      },
+      "moment_nominal_anchored": {
+        "n_complete_trajectories": 20,
+        "MAE": 0.4438779170655941,
+        "RMSE": 0.47023928622418404,
+        "bias": -0.41331068592604153,
+        "max_abs_error": 0.5861080384925543,
+        "gain_sign_correct": 20,
+        "gain_sign_denominator": 20,
+        "spearman": 0.8812030075187969
+      },
+      "nominal_actual_motion_prediction": "UNKNOWN; no pure-physics pass prediction",
+      "force_learned_prequential": {
+        "n_complete_trajectories": 20,
+        "MAE": 0.19122056589781095,
+        "RMSE": 0.32483710671361415,
+        "bias": -0.02928974970159288,
+        "max_abs_error": 0.9796908852858905,
+        "gain_sign_correct": 20,
+        "gain_sign_denominator": 20,
+        "spearman": 0.6977443609022556
+      },
+      "force_empirical_95_interval_coverage": {
+        "inside": 7,
+        "n": 20,
+        "caution": "empirical coverage only; no calibrated confidence guarantee from this small local GP"
+      },
+      "moment_learned_prequential": {
+        "n_complete_trajectories": 20,
+        "MAE": 0.07275947861300694,
+        "RMSE": 0.1163752318660641,
+        "bias": -0.025748478846719536,
+        "max_abs_error": 0.3213056121361433,
+        "gain_sign_correct": 20,
+        "gain_sign_denominator": 20,
+        "spearman": 0.78796992481203
+      },
+      "moment_empirical_95_interval_coverage": {
+        "inside": 8,
+        "n": 20,
+        "caution": "empirical coverage only; no calibrated confidence guarantee from this small local GP"
+      },
+      "motion_worst_ratio_learned_prequential": {
+        "n_complete_trajectories": 20,
+        "MAE": 0.07530989797599164,
+        "RMSE": 0.20769101644373072,
+        "bias": -0.01368289673220131,
+        "max_abs_error": 0.7075251685960817,
+        "gain_sign_correct": 14,
+        "gain_sign_denominator": 20,
+        "spearman": 0.31729323308270674
+      },
+      "motion_worst_ratio_empirical_95_interval_coverage": {
+        "inside": 14,
+        "n": 20,
+        "caution": "empirical coverage only; no calibrated confidence guarantee from this small local GP"
+      },
+      "predicted_motion_pass_but_original_failed": [
+        "OPTIMIZATION_C_015"
+      ],
+      "predicted_motion_pass_denominator": 19
+    }
+  },
+  "current_phase_nominal_prediction_errors": {
+    "A": {
+      "OUTBOUND": {
+        "n_complete_trajectories": 20,
+        "nominal_anchored_MAE_N_s": 0.062046439160093315,
+        "nominal_anchored_RMSE_N_s": 0.08561163028790407
+      },
+      "HOLD": {
+        "n_complete_trajectories": 20,
+        "nominal_anchored_MAE_N_s": 3.624813889047118e-07,
+        "nominal_anchored_RMSE_N_s": 4.2307350824964486e-07
+      },
+      "RETURN": {
+        "n_complete_trajectories": 20,
+        "nominal_anchored_MAE_N_s": 0.7570552850780473,
+        "nominal_anchored_RMSE_N_s": 0.8567765433524926
+      }
+    },
+    "B": {
+      "OUTBOUND": {
+        "n_complete_trajectories": 20,
+        "nominal_anchored_MAE_N_s": 0.05624332498274498,
+        "nominal_anchored_RMSE_N_s": 0.07810382822604876
+      },
+      "HOLD": {
+        "n_complete_trajectories": 20,
+        "nominal_anchored_MAE_N_s": 3.788803059734391e-07,
+        "nominal_anchored_RMSE_N_s": 4.2139068609518447e-07
+      },
+      "RETURN": {
+        "n_complete_trajectories": 20,
+        "nominal_anchored_MAE_N_s": 0.8632278572810037,
+        "nominal_anchored_RMSE_N_s": 0.9296969608671413
+      }
+    },
+    "C": {
+      "OUTBOUND": {
+        "n_complete_trajectories": 20,
+        "nominal_anchored_MAE_N_s": 0.06911852804038858,
+        "nominal_anchored_RMSE_N_s": 0.09054625173819209
+      },
+      "HOLD": {
+        "n_complete_trajectories": 20,
+        "nominal_anchored_MAE_N_s": 3.22122498630506e-07,
+        "nominal_anchored_RMSE_N_s": 3.687024266945771e-07
+      },
+      "RETURN": {
+        "n_complete_trajectories": 20,
+        "nominal_anchored_MAE_N_s": 0.9290567955104165,
+        "nominal_anchored_RMSE_N_s": 0.9962046980984776
+      }
+    }
+  },
+  "feedback_firewall": [
+    {
+      "arm": "A",
+      "attempts": 20,
+      "own_prior_attempts_only": true
+    },
+    {
+      "arm": "B",
+      "attempts": 20,
+      "own_prior_attempts_only": true
+    },
+    {
+      "arm": "C",
+      "attempts": 20,
+      "own_prior_attempts_only": true
+    }
+  ],
+  "current_motion_task_scope": {
+    "physics_actual_tracking": "UNKNOWN",
+    "physics_actual_v_a_jerk": "UNKNOWN; reference-template derivatives only",
+    "physics_excursion_terminal_overshoot": "UNKNOWN for actual Human; template quantities only",
+    "physics_task_contact_feasibility": "UNKNOWN",
+    "learned_worst_motion_ratio": "limited same-parent offline empirical label model",
+    "cross_patient_validated": false,
+    "current_new_legal_prefix": "FROZEN_NEW_PREFIX_RESULTS.json",
+    "motion_failure_domain_validation": "inspect actual failed rows"
+  },
+  "updated_utc": "2026-10-21T17:07:52.357068+00:00",
+  "postlock_source_sha256": "fdddd6bb63714cfa2bec48cebc24f664d469d429bdaea41dbadcbe05a400be1e",
+  "frozen_new_prefix_validation": {
+    "same_Human": 1,
+    "independent_legal_prefix_groups": 1,
+    "no_new_prefix_model_updates": true,
+    "rows": [
+      {
+        "id": "FROZEN_NEW_PREFIX_LOCKED_A",
+        "x": [
+          0.875,
+          -1.0
+        ],
+        "qualified": true,
+        "actual_JF": 1401.358816272693,
+        "frozen_nominal_absolute_JF": 1401.2582491780506,
+        "nominal_absolute_error": -0.10056709464242886,
+        "frozen_learned_absolute_JF": null,
+        "learned_absolute_error": null,
+        "frozen_nominal_delta_vs_original_H150": -1.3849623081221125,
+        "frozen_learned_delta_vs_original_H150": null,
+        "actual_delta_vs_new_H150": -2.5401398782862543,
+        "new_H150_qualified": true,
+        "frozen_nominal_absolute_JM": 107.16447209010764,
+        "nominal_absolute_JM_error": -0.10504480686584827,
+        "frozen_learned_absolute_JM": null,
+        "learned_absolute_JM_error": null,
+        "frozen_learned_delta_JM_vs_original_H150": null,
+        "actual_delta_JM_vs_new_H150": 0.6634029030244051,
+        "model_updated_or_reanchored_on_new_prefix_for_selection": false
+      },
+      {
+        "id": "FROZEN_NEW_PREFIX_LOCKED_B",
+        "x": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ],
+        "qualified": true,
+        "actual_JF": 1401.3361689129117,
+        "frozen_nominal_absolute_JF": 1401.3067352135097,
+        "nominal_absolute_error": -0.029433699402034108,
+        "frozen_learned_absolute_JF": null,
+        "learned_absolute_error": null,
+        "frozen_nominal_delta_vs_original_H150": -1.3364762726630488,
+        "frozen_learned_delta_vs_original_H150": null,
+        "actual_delta_vs_new_H150": -2.5627872380675853,
+        "new_H150_qualified": true,
+        "frozen_nominal_absolute_JM": 107.16067452219929,
+        "nominal_absolute_JM_error": -0.0914305698334772,
+        "frozen_learned_absolute_JM": null,
+        "learned_absolute_JM_error": null,
+        "frozen_learned_delta_JM_vs_original_H150": null,
+        "actual_delta_JM_vs_new_H150": 0.6459910980836838,
+        "model_updated_or_reanchored_on_new_prefix_for_selection": false
+      },
+      {
+        "id": "FROZEN_NEW_PREFIX_LOCKED_C",
+        "x": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ],
+        "qualified": true,
+        "actual_JF": 1401.3361689129117,
+        "frozen_nominal_absolute_JF": 1401.3067352135097,
+        "nominal_absolute_error": -0.029433699402034108,
+        "frozen_learned_absolute_JF": 1400.1552099318474,
+        "learned_absolute_error": -1.1809589810643502,
+        "frozen_nominal_delta_vs_original_H150": -1.3364762726630488,
+        "frozen_learned_delta_vs_original_H150": -2.488001554325365,
+        "actual_delta_vs_new_H150": -2.5627872380675853,
+        "new_H150_qualified": true,
+        "frozen_nominal_absolute_JM": 107.16067452219929,
+        "nominal_absolute_JM_error": -0.0914305698334772,
+        "frozen_learned_absolute_JM": 107.75194813140014,
+        "learned_absolute_JM_error": 0.4998430393673772,
+        "frozen_learned_delta_JM_vs_original_H150": 0.6796762241380918,
+        "actual_delta_JM_vs_new_H150": 0.6459910980836838,
+        "model_updated_or_reanchored_on_new_prefix_for_selection": false
+      },
+      {
+        "id": "FROZEN_NEW_PREFIX_PRIMARY12_A",
+        "x": [
+          1.0,
+          -1.0
+        ],
+        "qualified": true,
+        "actual_JF": 1401.38748892164,
+        "frozen_nominal_absolute_JF": 1401.1690519597016,
+        "nominal_absolute_error": -0.2184369619383233,
+        "frozen_learned_absolute_JF": null,
+        "learned_absolute_error": null,
+        "frozen_nominal_delta_vs_original_H150": -1.4741595264711123,
+        "frozen_learned_delta_vs_original_H150": null,
+        "actual_delta_vs_new_H150": -2.5114672293393596,
+        "new_H150_qualified": true,
+        "frozen_nominal_absolute_JM": 107.17238839462206,
+        "nominal_absolute_JM_error": -0.13671512432489408,
+        "frozen_learned_absolute_JM": null,
+        "learned_absolute_JM_error": null,
+        "frozen_learned_delta_JM_vs_original_H150": null,
+        "actual_delta_JM_vs_new_H150": 0.702989524997875,
+        "model_updated_or_reanchored_on_new_prefix_for_selection": false
+      }
+    ],
+    "interpretation": "Absolute forecasts retain original anchor; paired deltas are separately diagnosed against matched new H150 after results. No new-baseline reanchoring was used to choose candidates; no cross-patient qualification."
+  }
+}

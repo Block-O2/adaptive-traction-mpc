@@ -1,0 +1,51 @@
+{
+  "t0_unix": 1792486980.0,
+  "hard_stop_unix": 1792515780.0,
+  "no_new_physics_after_unix": 1792512180.0,
+  "native_steps_hard_cap": 42000000,
+  "rl_decisions_hard_cap": 40000,
+  "optimizer_steps_hard_cap": 12000,
+  "episode_decision_cap": 128,
+  "max_episode_wall_s": 300,
+  "min_available_ram_GiB": 6,
+  "min_free_disk_GiB": 10,
+  "max_output_GiB": 35,
+  "cpu_threads_per_environment": 1,
+  "maximum_physics_envs": 1,
+  "process_timeout_s": 14400,
+  "monitor_interval_s": 15,
+  "study": "rl_b_autonomous_replication_v1",
+  "protocol_sha256": "ce84e6e748554b00850ae28159ac2c1fb79dbf8bbe069a26ea20693e84f35e2f",
+  "seeds": [
+    1106823814,
+    1495656323,
+    1630784693
+  ],
+  "environment_seed": 20261020,
+  "phase_caps": [
+    20,
+    50,
+    80
+  ],
+  "training_episode_cap": 240,
+  "stage2_episode_cap": 50,
+  "evaluation_episode_cap": 24,
+  "reward_version": "pilot_v3_failure_cost_floor",
+  "ppo": {
+    "net_arch": [
+      32,
+      32
+    ],
+    "learning_rate": 0.0003,
+    "gamma": 1.0,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "ent_coef": 0.0,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "n_epochs": 4,
+    "batch_size": 16,
+    "rollout": "one complete physical episode per PPO rollout; variable length; every recorded training transition enters update",
+    "initialization": "random weights; no teachers"
+  }
+}

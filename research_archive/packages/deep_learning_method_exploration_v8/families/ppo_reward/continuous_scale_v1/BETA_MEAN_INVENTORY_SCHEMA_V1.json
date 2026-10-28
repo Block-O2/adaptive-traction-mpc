@@ -1,0 +1,54 @@
+{
+  "schema": "v8.beta_mean_inventory_schema_definition.v1",
+  "status": "SOURCE_ONLY_SCHEMA_NO_ACTUAL_MODEL_INVENTORY_CREATED",
+  "future_instance_schema": "v8.beta_frozen_mean_deployment_inventory.v1",
+  "future_instance_status": "FROZEN_ACTUAL_PARENT_FIRST_LAST_NOT_BEST",
+  "field_definitions": {
+    "arm_ids": ["BETA_RF_RAW", "BETA_PPO_RAW", "BETA_RF_SCALED", "BETA_PPO_SCALED"],
+    "policy_location": ["policy"],
+    "root_endpoint_review": "actual immutable root review {path,sha256}; schema below",
+    "complete_generation_transaction_inventory": "ordered actual [{generation_index,transaction:{path,sha256}}] from generation0 through frozen run tip, including cancel generations",
+    "axis": "actual FROZEN_AXIS_GATE1_V1.json {path,sha256}",
+    "axis_object_sha256": "actual axis canonical JSON SHA",
+    "normalization_source": "actual G0 categorical RF_RAW checkpoint {path,sha256}; read policy.normalization only, no new fit",
+    "A3_adapter_manifest": "actual coverage_state_v3/LIVE_SELECTOR_ADAPTER_MANIFEST_V1.json {path,sha256}",
+    "roles": "exact ordered three objects for PARENT, FIRST_COMPLETED, LAST_COMPLETED; each {role,generation_index,checkpoints:[4 objects in arm_ids order]}",
+    "role_checkpoint_object": "{arm_id,path,sha256,policy_behavior_sha256}; must equal actual generation TRANSACTION checkpoint reference; policy body hash independently checked"
+  },
+  "endpoint_selection": {
+    "PARENT": "actual generation0 READY_ALL_FOUR_INITIALIZED",
+    "FIRST_COMPLETED": "minimum generation index whose actual TRANSACTION.status is READY_ALL_FOUR_UPDATED",
+    "LAST_COMPLETED": "maximum generation index whose actual TRANSACTION.status is READY_ALL_FOUR_UPDATED",
+    "cancel_generation": "included in complete inventory but never substituted for a completed update",
+    "one_completed_batch": "FIRST_COMPLETED and LAST_COMPLETED may refer to identical actual immutable checkpoints; still perform and bill all12 logical mean calls",
+    "no_completed_update": "reject deployment inventory; never fabricate future models or relabel parent as completed"
+  },
+  "root_review_schema": "v8.beta_frozen_mean_endpoint_review.v1",
+  "root_review_required_fields": {
+    "status": "CLOSED_ACTUAL_ENDPOINTS_PARENT_FIRST_LAST_REVIEWED",
+    "true_hard_safety_violation": false,
+    "all_training_physical_owners_closed": true,
+    "endpoint_selected_by_outcome_or_best_seed": false,
+    "original_evidence_files_sha256": "nonempty actual closed computation/publication/physics review file map",
+    "role_generation_indices": "actual {PARENT:0,FIRST_COMPLETED:minUpdated,LAST_COMPLETED:maxUpdated}",
+    "generation_inventory_object_sha256": "canonical SHA of the complete_generation_transaction_inventory list",
+    "latest_published_generation_index": "actual closed frozen run tip, including any later cancelled generation"
+  },
+  "job_extension_schema": "v8.beta_frozen_mean_extension_job.v1",
+  "job_extension_location": "config.beta_mean_extension",
+  "job_extension_fields": ["inventory:{path,sha256}", "deployment_authorization:{path,sha256}"],
+  "deployment_authorization_schema": "v8.beta_frozen_mean_deployment_authorization.v1",
+  "deployment_authorization_fields": {
+    "status": "APPROVED_BY_MAIN_READ_ONLY_FROZEN_DEPLOYMENT",
+    "inventory": "same actual {path,sha256} as config",
+    "activation_sha256": "original unique ACTVATION.json file SHA",
+    "mean_policy_forward_only": true,
+    "new_training_or_restore_authorized": false,
+    "authorized_job_groups": "future main-approved concrete physical groups",
+    "approved_unix": "actual main approval time",
+    "deployment_deadline_unix": "new read-only deployment deadline at or before original global stop; does not extend training clock",
+    "source_files_sha256": "extension, frozen beta_policy/axis, actual A3 proof adapter+manifest+bundle+causal/scoped APIs and complete job/source closure; every member must be actual config.frozen_artifacts"
+  },
+  "actual_model_paths_in_this_delivery": [],
+  "actual_model_initializations_forwards_restores_or_physics": 0
+}

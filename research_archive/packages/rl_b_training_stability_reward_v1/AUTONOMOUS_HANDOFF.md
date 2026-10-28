@@ -1,0 +1,7 @@
+# 最终研究交接：STOP
+
+本轮有界开发研究已结束。请从REPORT.md、ANALYSIS_SUMMARY.json、PACKAGE_VERIFICATION.json读取实际结果与证据范围；旧运行中交接保存在audit/ACTIVE_SESSION_HANDOFF.md。
+
+原ACTIVATION和硬截止未重置。全部owned实验/监督服务已关闭，独立保存数据审计与归档状态以PACKAGE_VERIFICATION.json为准。所有原始失败、partial、checkpoint与源码身份均保留。
+
+G4_STRICT_PASS=FAIL；NEW_LIVE_MATCHED_READY、STAGE2_READY、FINAL_CAMPAIGN_READY=NOT_READY。禁止自动重启本包、启动下一研究包、Stage2、最终大规模Campaign或Git写入。唯一后续建议见NEXT_RESEARCH_DECISION.md，须另获授权。

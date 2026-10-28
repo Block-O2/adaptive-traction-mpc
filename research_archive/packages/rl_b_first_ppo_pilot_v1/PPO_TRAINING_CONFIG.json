@@ -1,0 +1,60 @@
+{
+  "study": "rl_b_first_ppo_pilot_v1",
+  "category": "DEVELOPMENT_TRAINING_ONLY",
+  "t0_unix": 1792482180.0,
+  "hard_stop_unix": 1792500180.0,
+  "no_new_physics_after_unix": 1792497480.0,
+  "seed": 20261020,
+  "environment_seed": 20261020,
+  "training_episode_cap": 50,
+  "evaluation_episode_cap": 4,
+  "phase_caps": [
+    5,
+    20,
+    50
+  ],
+  "native_steps_hard_cap": 8000000,
+  "rl_decisions_hard_cap": 6400,
+  "optimizer_steps_hard_cap": 2500,
+  "episode_decision_cap": 128,
+  "max_episode_wall_s": 300,
+  "min_available_ram_GiB": 6,
+  "min_free_disk_GiB": 10,
+  "max_output_GiB": 12,
+  "cpu_threads": 1,
+  "physics_envs": 1,
+  "ppo": {
+    "net_arch": [
+      32,
+      32
+    ],
+    "learning_rate": 0.0003,
+    "gamma": 1.0,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "ent_coef": 0.0,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "n_epochs": 4,
+    "batch_size": 16,
+    "rollout": "one complete physical episode per PPO rollout; variable length; every recorded training transition enters update",
+    "initialization": "random weights; no teachers"
+  },
+  "reward_version": "pilot_v3_failure_cost_floor",
+  "failure_total_cost_floor": 1.5,
+  "failure_base_penalty": 10,
+  "checkpoint": "every completed training episode, optimizer + Python/NumPy/Torch RNG; fresh physical episode on resume",
+  "evaluation_plan": [
+    "initial_deterministic",
+    "fixed_legal_plus_one",
+    "final_deterministic",
+    "final_deterministic_repeat"
+  ],
+  "generalization": "NOT_TESTED; repeated nominal initial state is not unseen-state evidence",
+  "stop_conditions": [
+    "hard safety violation or reward/termination/ownership audit failure",
+    "memory/disk/native/decision/gradient/wall cap",
+    "nonfinite gradient/action/reward",
+    "repeated fallback farming or task shortening"
+  ]
+}

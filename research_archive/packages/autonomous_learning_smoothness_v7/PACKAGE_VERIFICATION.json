@@ -1,0 +1,176 @@
+{
+  "schema": "ihear.package_verification.v7.final",
+  "status": "COMPLETE_WITH_DOCUMENTED_METADATA_LIMITATIONS",
+  "created_unix": 1793058802.0302882,
+  "verification_stage_at_record_seal": "STRICT_PRESEAL_COMPLETED",
+  "activation_id": "autonomous_learning_smoothness_v7_20261026T155651Z",
+  "required_deliverables": [
+    "REPORT.md",
+    "EXPERIMENT_CONTRACT.md",
+    "BASELINE_AND_PAIRED_OPTIMIZATION.md",
+    "LEARNING_METHODS_AUDIT.md",
+    "CRITIC_AND_VALUE_RESULTS.md",
+    "RL_AND_REWARD_RESULTS.md",
+    "HISTORY_CONDITIONED_LEARNING.md",
+    "MOTION_FORCE_MOMENT_TRADEOFF.md",
+    "RELATED_WORK.md",
+    "LEARNING_CONTROL_INTERFACE_GUIDE.md",
+    "RESEARCH_DECISIONS.jsonl",
+    "RESOURCE_AND_ATTEMPT_ACCOUNTING.json",
+    "PACKAGE_VERIFICATION.json",
+    "NEXT_RESEARCH_DECISION.md",
+    "END.json"
+  ],
+  "strict_preseal": {
+    "path": "audit/final_verification_v7_preseal_v2/VERIFICATION.json",
+    "sha256": "1f3f45fcd494d5a8ee69ea79fe9f37addda24cc3424b6bbc6d2c803941d05579"
+  },
+  "strict_preseal_END": {
+    "path": "audit/final_verification_v7_preseal_v2/END.json",
+    "sha256": "c12b027298ccce5427f1a156c9fc9ef8bb64900471a2c194672f8d01c1fdbb2c"
+  },
+  "strict_preseal_issues": [],
+  "known_limitations": [
+    {
+      "id": "FOREGROUND_METADATA_PID_GAPS",
+      "category": "FOREGROUND_STATIC_TOOL_EXIT_ONLY",
+      "message": "Several foreground static/metadata commands have tool exit receipts without fully persisted PID/start_ticks. No identity reconstructed.",
+      "evidence": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "metadata_perfect_PASS_allowed": false
+    },
+    {
+      "id": "ORIGINAL_REVIEW_END_GAPS",
+      "category": "ORIGINAL_REVIEW_END_OR_MANIFEST_LIMITED",
+      "message": "Current main closure receipts and normalized manifests preserve original missing/nonstandard records; no historical END fabricated.",
+      "evidence": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "metadata_perfect_PASS_allowed": false
+    },
+    {
+      "id": "ZERO_START_PREIMPORT_IDENTITY",
+      "category": "ZERO_START_PREIMPORT_SOURCE_IDENTITY_LIMITED",
+      "message": "Actual zero-START preimport logs/owners/frozen inputs checked; complete loaded-module/interpreter identity not proved.",
+      "evidence": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "metadata_perfect_PASS_allowed": false
+    },
+    {
+      "id": "METADATA_REPAIR_BUDGET_OVERRUN",
+      "category": "BOUNDED_REVIEW_METADATA_SEAL_OVERRUN",
+      "message": "One 600s pure repair branch used624.612s including metadata sealing; no extra fit/env/physics, not perfect budget compliance.",
+      "evidence": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "metadata_perfect_PASS_allowed": false
+    },
+    {
+      "id": "FAILED_WORKER_JOIN_RECEIPT_LIMITED",
+      "category": "FAILED_WORKER_NORMAL_JOIN_RECEIPT_MISSING",
+      "message": "Four preserved FAILED_PRESERVED WORKER_DONE receipts lack the normal aggregate join flag. Exact original attempt joins, supervisor STOP/exit1/no survivors and current recorded PID closure are checked separately; no normal receipt reconstructed.",
+      "evidence": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "metadata_perfect_PASS_allowed": false
+    },
+    {
+      "id": "CPU_AND_GENERALIZATION_LIMITS",
+      "category": "TOTAL_COMPUTE_AND_GENERALIZATION_NOT_ESTABLISHED",
+      "message": "Total host core-seconds unknown; model fit times exclude label collection. No patient/hardware or total compute-efficiency claim.",
+      "evidence": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "metadata_perfect_PASS_allowed": false
+    },
+    {
+      "id": "DEVPC01_ZERO_START_MISSING_PLAN_NO_RUNTIME_MANIFEST",
+      "category": "ZERO_START_DEVPC01_RUNTIME_IDENTITY_LIMITED",
+      "message": "Original frozen config/worker/model, owner and missing-plan traceback are bound. PRELAUNCH, launcher, runtime plan and worker SOURCE_MANIFEST were absent. Current campaign source is review-only; complete loaded-runtime/interpreter identity is not proven.",
+      "evidence": "owned/DEVPC01_SUPERVISOR_END.json",
+      "metadata_perfect_PASS_allowed": false
+    },
+    {
+      "id": "HOLDSS01_PREIMPORT_NO_WORKER_SOURCE_MANIFEST",
+      "category": "ZERO_START_PREIMPORT_SOURCE_IDENTITY_LIMITED",
+      "message": "Original prelaunch/config/launcher/source hashes and failed import ownership are bound, but no worker-created SOURCE_MANIFEST or independent loaded-module identity exists. Do not claim complete runtime source identity.",
+      "evidence": "owned/HOLDSS01_DETACHED_LAUNCH.json",
+      "metadata_perfect_PASS_allowed": false
+    }
+  ],
+  "metadata_limitations": {
+    "path": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+    "sha256": "c3856ef89ec38cead3c7c619727655fafaa6d18f6be1147581ecf604124a6c83"
+  },
+  "perfect_metadata_PASS_allowed": false,
+  "final_manifest": "FINAL_MANIFEST.json",
+  "terminal_checks": {
+    "sealed_verification": "audit/final_verification_v7_sealed_v3/VERIFICATION.json",
+    "ownership": "audit/ownership_final_v2/OWNERSHIP_RESULT.json",
+    "completion_receipt": "audit/FINAL_COMPLETION_RECEIPT_V1.json",
+    "hash_addendum": "audit/FINAL_METADATA_ADDENDUM_V1.json",
+    "must_pass_before_user_delivery": true,
+    "pending_at_this_immutable_record_creation": true,
+    "scope": "Only read-only verification and its own closure metadata; no new scientific computation"
+  },
+  "raw_and_original_scorer": {
+    "status": "CONFIRMED_IN_REGISTERED_SCOPE",
+    "three_disjoint_integral_audits": [
+      59,
+      104,
+      7
+    ],
+    "closure": {
+      "path": "agent_reviews/integral_audit/incremental_final_lstf_v3/THREE_SNAPSHOT_170_CLOSURE.json",
+      "sha256": "c1912d7d8ff2b8e0dcbc02d38ab5025750f3d3a22fef6768e45e3423b669282f"
+    },
+    "original_scorer_replay_directory": "audit/scorer_replay",
+    "raw_hashes_bound_by_index_and_manifest": true,
+    "failed_partial_and_engineering_raw_preserved": true,
+    "partial_or_unqualified_formal_cost_ranking_allowed": false,
+    "DEVRC01_B": "Recovered original physical PASS; original worker failure retained; engineering unranked",
+    "DEVRT02_B": "Original complete qualified B preserved despite later job path-check failure",
+    "HOLDSS01_B": "Actual START group HOLDSS02; complete raw, no original motion verdict; engineering unranked"
+  },
+  "accounting": {
+    "path": "RESOURCE_AND_ATTEMPT_ACCOUNTING.json",
+    "sha256": "3b0dae776e8af925474e607e2e883eeebf618a73fdab7deec9b27692ae7c9134"
+  },
+  "model_and_data_sha256": {
+    "models/CAUSAL_STUMPS_V1/FIT_ACCOUNTING.json": "330ef32acc9481a0fdc779ed8ae114474375978820362a0df656c434c28b2cc6",
+    "models/CAUSAL_STUMPS_V1/TRAINING_RESULTS.json": "48f0ebdacf796eb66d8b11e2af66664e9a08b53704e092d255f90d205bcbb756",
+    "models/CAUSAL_STUMPS_V1/DATA.json": "b92ab2d9beda02cdf317fbe95439216f34915d1fa6338ab89bec22fd8230667b",
+    "models/CAUSAL_STUMPS_V1/MODEL.json": "bf36d1cad7770a9328f0773745285235e0f20c301f55f283a21108d063b4919f",
+    "models/CAUSAL_STUMPS_V1/SOURCE_DATA_MANIFEST.json": "26d19548d05bdf9bedb66293c19223b75d0658889baee6309cd56230aa2667d2",
+    "models/LOCAL_RESPONSE_2D_V1/MODEL.json": "a2ac6678017bb14a3224f423c6a0c142eb3211427ff82c0bbfbd05109d7a80b8",
+    "models/LOCAL_RESPONSE_2D_V1/TRAINING_ACCOUNTING.json": "0f5e6a0eb456c10bcc2ba904f1544ef28543b4551745ef120b02ebc80f2e8cc6",
+    "models/LOCAL_RESPONSE_2D_V1/SOURCE_DATA_MANIFEST.json": "7e5fa454d5ddca72ec6daf88f84de8b83888917dc8efc5bbb73e50aeb69099b5"
+  },
+  "historical_content": {
+    "path": "audit/HISTORY_CONTENT_HASH_FINAL.json",
+    "sha256": "61ccbfb1d1b81b72ffbe742e3af75df319bb7de1b678188944314d990e21500b"
+  },
+  "historical_metadata_and_critical_sources": {
+    "path": "audit/HISTORY_PROTECTION_FINAL.json",
+    "sha256": "a6abde64a9d5efead44c5c4b6649da3cfe48c7114310adb66f54ad67f70cabda"
+  },
+  "historical_full_hash_exact_T0": false,
+  "journal": {
+    "path": "audit/JOURNAL_PREFIX_FINAL.json",
+    "sha256": "834cb64a2d982fc442ddaa9d542b9e58141d766a5fb2a7ad5c32eace8dd2a584",
+    "original_prefix_bytes": 24862,
+    "original_prefix_sha256": "90b0cc5a9cfe547deaefbb78cb997db4dfb72a660abd24eecfcd819c7abd080b",
+    "final_journal_sha256": "ba0e6acb3159ec10e5790ed2eda33941e021486773edf53283293dd5bb2e039a",
+    "prefix_unchanged_append_only": true
+  },
+  "preceding_process_closure": {
+    "path": "audit/SEAL_PRECEDING_PROCESS_CLOSURE_V1.json",
+    "sha256": "a195e89537800396f92c4d728e642b519947a0e2112f832d6df020a4595354ac"
+  },
+  "review_index": {
+    "path": "audit/FINAL_REVIEW_INDEX_V2.json",
+    "sha256": "a661b6df21b45e1566f6bb022eb11d750e7d08cf606f9bdbdea74213c6fcbf3c"
+  },
+  "review_records": 40,
+  "top_level_review_directories": 38,
+  "scientific_contract_unchanged": true,
+  "original_physics_sources_checkpoints_and_raw_modified": false,
+  "new_env_model_fit_physics_during_seal": 0,
+  "not_equivalent_conclusions": {
+    "method_effective": "CONFIRMED only in specified finite conditions; traditional positives and scientific negatives separately retained",
+    "learning_independent_increment_over_strongest_traditional": "NOT_DEMONSTRATED",
+    "total_compute_or_actual_attempt_efficiency_advantage": "NOT_DEMONSTRATED; actual simulator attempts saved0, hardware0",
+    "independent_generalization": "LIMITED_FIXED_PREFIX_EVIDENCE_WITH_SS_NEGATIVE; no patient/hardware validation"
+  },
+  "no_automatic_next_round": true
+}

@@ -1,212 +1,53 @@
-# Adaptive Traction MPC for Lower-Limb Rehabilitation
+# iHEAR Lab — Research Closure & Reproducible Archive
 
-Adaptive Traction MPC is a simulation research platform for robot-assisted
-lower-limb motion under uncertain Human dynamics. It combines explicit
-human–robot cuff mechanics, causal effective-dynamics estimation, trust-gated
-model promotion, and constrained model-predictive control. The current system
-is a simulation-qualified prototype preparing for robot-side commissioning—not
-a clinical or production system.
+这是 2026-10-28 的研究收束分支，用于重新搭建科研系统、复现传统控制、理解 Learning 的接入位置，并与教授讨论下一代架构。本轮没有新算法搜索或训练。所有主要物理证据均为 MuJoCo 科学仿真，不能作为真机、临床或硬实时资格。
 
-## Overview
+当前可用的研究结论是：**受保护的传统控制底座能够运行完整任务；平顺性、JF 与 JM 存在条件相关的权衡；Learning 尚未建立稳定超过强传统与简单等效对照的独立收益。** 本归档保留正负结果及未解决矛盾，不宣称全局理论最优。
 
-The project asks whether natural rehabilitation motion can identify enough of
-a patient's control-effective dynamics to improve tracking without hidden
-calibration motion or direct access to simulator truth. Stage 3 supplies the
-coupled 3D UR10e-surrogate/Human-V2 plant. Stage 4 consumes only robot-facing
-state, cuff pose/twist, and reconstructed wrench measurements.
+## 从这里阅读
 
-## Method
+|需要回答的问题|入口|
+|---|---|
+|系统实际如何运行、各层时钟和安全边界|[SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md)|
+|B、H150、18D、固定阶段、HANDOFF/PATTERN/COMPOSE|[TRADITIONAL_CONTROL.md](TRADITIONAL_CONTROL.md)|
+|Learning 在哪里产生什么动作，如何训练和进入执行|[LEARNING_ARCHITECTURE.md](LEARNING_ARCHITECTURE.md)|
+|更早及 v1–v8 各方法的已做/未做范围|[LEARNING_METHODS_HISTORY.md](LEARNING_METHODS_HISTORY.md)|
+|数值、曲线、完整轨迹与来源合同|[EXPERIMENTAL_EVIDENCE.md](EXPERIMENTAL_EVIDENCE.md)|
+|失败机制、证据矛盾、评价权限限制|[FAILURE_ANALYSIS.md](FAILURE_ANALYSIS.md)|
+|重新搭建并执行|[REPRODUCTION_GUIDE.md](REPRODUCTION_GUIDE.md)|
+|下一代研究假设与教授讨论问题|[NEXT_GENERATION_ARCHITECTURE.md](NEXT_GENERATION_ARCHITECTURE.md)、[PROFESSOR_TECHNICAL_BRIEF.md](PROFESSOR_TECHNICAL_BRIEF.md)|
+|保留范围、文件身份与遗漏|[ARCHIVE_MANIFEST.md](ARCHIVE_MANIFEST.md)|
+|本轮实际核验、删除影响与交接|[ARCHIVE_VERIFICATION.md](ARCHIVE_VERIFICATION.md)、[DELETION_IMPACT.md](DELETION_IMPACT.md)、[FINAL_HANDOFF.md](FINAL_HANDOFF.md)|
 
-```text
-Robot-facing measurements
-  ├─ smoothed pose-history velocity → Human reconstruction / estimator / MPC
-  └─ cuff-center Jacobian velocity  → robot translational control feedback
-                                      (200 Hz, 5 ms ZOH, 140 Ns/m)
-  → constrained Human-space MPC
-  → Safety Filter / BRAKE
-  → rigid or registered P1 cuff interface
-```
+## 主要复现目标
 
-The online model is control-effective, not an anatomical parameter estimate.
-Until a challenger passes causal future-block validation, the population prior
-remains in control. The retained allocator and safety/actuator gates are shared
-across fixed and adaptive MPC.
+主要现代对照为 v7 `DEVPC02` 同父的 **B / V6PHASE / TRAD_COMBO**：B 的 JF/JM 为 1437.971420/100.829734，组合为 1405.935078/105.464006，均为完整 19.03s 原合格轨迹。组合对 phase 只有约 0.055 N·s 的局部降力，并伴随小幅 jerk 增加；JM 仍高于 B。它不是对所有条件、指标占优的总冠军。重型更早 H150 是另一个重要复现条件，保持其早启/晚启与 Human 的适用范围。历史 D01R B/H150 全 raw 与原 scorer 继续保留。
 
-## Technical contributions
+![完整 B / TRAD_COMBO 轨迹](figures/ARCHIVE_FULL_TASK_B_TRAD_COMBO.png)
 
-- A coupled rehabilitation-robot simulation with explicit Human-V2 dynamics,
-  cuff mechanics, robot-side measurements, and reconstructed interaction wrench.
-- A causal, trust-gated adaptive MPC pipeline that keeps the population prior in
-  control until a challenger passes embargoed future-block validation.
-- A separated measurement architecture for estimation and low-latency robot
-  velocity feedback, with matched controller and safety contracts across A/B runs.
-- Model-based force decomposition and clean-clone reporting tools that connect
-  Human mechanics, feedback demand, execution effects, and High-ROM force margins.
-
-## Key results
-
-- All 36 preregistered patient-generalization arms completed with full reference
-  progress and no recorded safety-gate event. Across 12 matched comparisons,
-  Fixed MPC was smoother than PD+feedforward, while Adaptive MPC improved or
-  tied Fixed MPC tracking RMSE; load and effort changes remained mixed.
-- The authoritative crossed patient × trajectory × seed replication achieved
-  18/18 promotion, completion, tracking-RMSE improvement, and prediction-RMSE
-  improvement, with two cases still worsening maximum tracking error.
-- Peak cuff force in the 36-arm study remained below the 200 N engineering
-  gate. This is not a comfort, tissue-load, or clinical-safety result.
-- Saved-trace desktop replay measured 9.42 ms mean MPC time and 16.52 ms mean
-  full-cycle time (about 60.5 Hz); this is not a hard-realtime guarantee.
-- The corrected High-ROM baseline separates low-latency robot control velocity
-  from the history-derived estimation velocity. With the Human MPC, 140 Ns/m
-  gain, Safety Filter, BRAKE, 200 N target, models, and trajectories unchanged,
-  Rigid NEW completes 40/80, executes 90/120 to 96.18% outbound / 100.00%
-  return progress, and executes 120/120 to 99.33% / 99.99%, without the old
-  BRAKE/200 N bottleneck.
-- In the corrected Rigid NEW versus P1 NEW comparison, P1 is not required for
-  High-ROM feasibility. Its repeatable independent effect is lower force slew;
-  force-peak and tracking changes remain trajectory-dependent.
-- The dense registered quasistatic force map spans 0.06–182.30 N over
-  q1,q2 = 0–125°, below the registered 200 N engineering stress-test target;
-  it is an analytic mechanics map, not a clinical or dynamic safety boundary.
-
-Detailed claims, hashes, and limitations are in the
-[Stage-4 evidence map](stages/stage4_adaptive_control/docs/research/STAGE4_EVIDENCE_MAP.md)
-and [report-validation evidence map](stages/stage4_adaptive_control/docs/research/STAGE4_REPORT_VALIDATION_EVIDENCE_MAP.md).
-The compact corrected High-ROM evidence is indexed in the
-[Phase-3A corrected baseline package](stages/stage4_adaptive_control/results/summaries/phase3a_corrected_high_rom/README.md),
-and the [single-file professor report](stages/stage4_adaptive_control/results/engineering_validation/PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html)
-opens offline with all media embedded.
-
-Both final Phase-3A reporting tools work from tracked clean-clone inputs:
-`build_phase3a_corrected_professor_html.py` regenerates the self-contained
-professor report from a compact render-source package, and
-`build_phase3a_force_landscape.py` regenerates the dense analytic map,
-200/220/250 N margins, conditioning and acceleration-sensitivity views, plus
-corrected dynamic overlays. Neither tool requires historical progressive
-campaign directories or the local corrected raw campaign. Historical binary
-campaign products are intentionally external to the final tree and remain
-identifiable through the Phase-3A external-archive checksum manifest.
-
-## Demos
-
-### Fixed MPC vs Adaptive MPC
-
-![Fixed versus Adaptive MPC](stages/stage4_adaptive_control/results/media/readme/hero_fixed_vs_adaptive.gif)
-
-Synchronized real MuJoCo replay from frozen traces; no controller rollout or
-new simulation was performed to create this README media.
-
-### Patient Generalization
-
-![Patient generalization](stages/stage4_adaptive_control/results/media/readme/02_Patient_Generalization.png)
-
-The same frozen controller settings are used across the shown patient
-variations without patient-specific retuning.
-
-### Trajectory Generalization
-
-![Trajectory generalization](stages/stage4_adaptive_control/results/media/readme/03_Trajectory_Generalization.png)
-
-The same frozen Adaptive MPC is replayed across different rehabilitation
-trajectories.
-
-## Repository structure
-
-```text
-stages/
-├── stage1/                    point-force Spring2D foundation
-├── stage2_linkage/            planar Human V2 and rigid cuff
-├── stage3_full3d/             coupled 3D plant and robot interfaces
-├── stage4_adaptive_control/   estimator, trust, MPC, validation, evidence
-└── stage5_personalized_motion_learning/   motion and learning research
-```
-
-Stage 4 imports Stage 3 simulation APIs explicitly; it does not duplicate the
-plant. See the [Stage-4 guide](stages/stage4_adaptive_control/README.md) for its
-code, configs, tests, evidence hierarchy, and canonical commands.
-
-## Setup and validation
-
-The recorded environment is named `mpc_learn`. From the repository root:
+Linux x86_64 / CPython 3.12，CPU 即可。先安装系统 venv/EGL/GL 依赖，再在干净 clone 中执行：
 
 ```bash
-conda run -n mpc_learn python -m pip install -e "stages/stage3_full3d[dev]"
-conda run -n mpc_learn python -m pip install -e "stages/stage4_adaptive_control[dev]"
-
-PYTHONPATH=stages/stage4_adaptive_control/src:stages/stage3_full3d/src:stages/stage4_adaptive_control \
-  conda run -n mpc_learn pytest -q stages/stage4_adaptive_control/tests
+bash deployment/install_rl_b.sh /tmp/ihear-archive-env
+/tmp/ihear-archive-env/bin/python deployment/archive_checks.py --output /tmp/ihear-static.json
+/tmp/ihear-archive-env/bin/python deployment/check_models.py --output /tmp/ihear-models.json
+/tmp/ihear-archive-env/bin/python deployment/score_b_h150.py --work-dir /tmp/ihear-offline
+/tmp/ihear-archive-env/bin/python deployment/reproduce_original_b.py --repo . --output /tmp/ihear-original-b
+/tmp/ihear-archive-env/bin/python deployment/reproduce_trad_combo.py --repo . --output /tmp/ihear-combo
+/tmp/ihear-archive-env/bin/python deployment/reproduce_traditional.py --repo . --output /tmp/ihear-d01r
+/tmp/ihear-archive-env/bin/python deployment/check_learning_interface.py --repo . --output /tmp/ihear-learning
 ```
 
-Formal scientific runs are user-executed only and must use a new output
-directory. Repository validation never reruns or overwrites frozen evidence.
-Exact experiment commands live in the approved specs under
-[`stages/stage4_adaptive_control/docs/research/`](stages/stage4_adaptive_control/docs/research/).
+输出目录必须为新目录；实际可执行及通过范围见核验报告。动态入口使用原控制、plant、任务、motion 与安全门，仅在新 scratch 中重绑定路径、建立新的机械执行时限和真实源码 hash。Linux fork 的活状态不等于持久化 checkpoint。不要直接恢复已到期的历史 campaign worker 或运行训练脚本。
 
-## Limitations and status
+## 仓库布局与版本
 
-- Simulation-only evidence, mostly within the representable Human-V2 family.
-- UR10e is a surrogate; CR12 command, timing, calibration, and emergency-stop
-  behavior remain unvalidated.
-- The cuff surface-load quantity is a mathematical proxy, not pressure,
-  comfort, tissue loading, injury risk, or clinical safety.
-- The 200 N High-ROM target is a registered simulation engineering stress-test
-  target. It is not a clinical threshold or a validated hardware limit.
-- Desktop replay timing is not target-hardware or worst-case real-time proof.
-- No clinical efficacy, certification, or production claim is made.
+- `stages/`、`research/side_studies/`、`research/rl_b_cpu_handoff_v1/`、`deployment/`：复用既有公开 Git 源码、模型、历史证据与部署工具。
+- `research_archive/packages/<原包名>/`：选定的 v1–v8 与更早代码/模型依赖、小配置、研究报告、紧凑结果和少量 raw/checkpoint；保持原始文件字节。
+- `research_archive/manifests/`：逐文件 SHA256、证据清单、删前资产盘点和公开审查结果。
+- `figures/`：从真实保存数组提取的易读图、CSV、重建脚本与独立数值回执。
+- `research_archive/historical/README_before_closure.md`：归档前的 README，保留当时入口与主张。
 
-Stage 4 adaptive-estimation science remains closed for its checkpoint. The
-corrected Phase-3A High-ROM engineering baseline is now the current repository
-interpretation; historical history-derived-velocity BRAKE results remain
-diagnostic evidence. The next phase is robot-only commissioning and hardware
-safety-interface validation.
+远端为 [Block-O2/adaptive-traction-mpc](https://github.com/Block-O2/adaptive-traction-mpc)，独立分支 `archive/research-closure-20261028`，基点 `1adb1de177d6f5f32de6d01c4e629cbfae9ce121`。本次不覆盖已有研究分支、不合并、不改仓库可见性。最终 payload 和核验 commit 见交接文件；源提交身份与文档自身 SHA 避免循环引用。
 
-## Local Stage-5 research preservation (2026-10-20)
-
-The current research boundary is recorded in [CURRENT_RESEARCH_BASELINE.md](CURRENT_RESEARCH_BASELINE.md).
-[Source archives](research/README.md) preserve local Stage-5/control/learning variants separately.
-The [repository audit](docs/repository_sync_2026-10-20/REPOSITORY_AUDIT.md) and
-[B/H150 source inventory](docs/repository_sync_2026-10-20/B_H150_EVALUATOR_SOURCE_INVENTORY.md)
-record tested scope, external evidence and missing cloud identities. These additions do not
-promote archived variants to formal B, hardware readiness or clinical validation.
-
-## GitHub source baseline — 2026-10-21
-
-The audited research source is on `codex/local-research-sync-20261020`. Tested source payload: `a60686f30aaee5e950fa7e9ae7e802cd74df4cc2`. See [cleanup acceptance](docs/repository_cleanup_v2_2026-10-21/REPOSITORY_CLEANUP_REPORT.md), [GitHub audit](docs/repository_cleanup_v2_2026-10-21/GITHUB_SOURCE_AUDIT.md), [deployment guide](docs/repository_cleanup_v2_2026-10-21/CLOUD_GITHUB_DEPLOYMENT_GUIDE.md), and [original B/H150 scorer readiness](docs/repository_cleanup_v2_2026-10-21/B_H150_EVALUATOR_READINESS.md).
-
-Current Stage3–5 source/assets, the sealed RL-B CPU capsule, hash-locked dependencies, and original offline scorer recovery have been checked locally. All 32 original D01R parent/B/H150 fixture files are now tracked at their native paths; no external archive is required for this offline score. Full fork replay and the current server deployment remain unverified; original READINESS and training gates are unchanged. Historical snapshots are preserved by identity, not merged into active scientific code.
-
-## Portable original evaluation and CPU checks — 2026-10-21
-
-See [repository architecture](docs/repository_architecture_v1_2026-10-21/REPOSITORY_ARCHITECTURE.md),
-[directory map](docs/repository_architecture_v1_2026-10-21/RESEARCH_DIRECTORY_MAP.md),
-[B/H150 reproduction](docs/repository_architecture_v1_2026-10-21/B_H150_REPRODUCIBILITY.md),
-[RL-B reproduction](docs/repository_architecture_v1_2026-10-21/RL_B_REPRODUCIBILITY.md), and
-[fresh-clone validation](docs/repository_architecture_v1_2026-10-21/FRESH_CLONE_VALIDATION.md).
-Use a fixed tested commit in a new Linux x86_64 clone with CPython 3.12 and python3.12-venv.
-If ensurepip is unavailable, set PIP_BOOTSTRAP_PYTHON to a trusted Python with modern pip;
-the installer uses it only to install the hash-locked wheels into the new Python3.12 venv.
-
-```bash
-bash deployment/install_offline.sh
-python3.12 -B deployment/verify_b_h150.py --config deployment/configs/b_h150_original_v1.json
-.deployment-work/offline-env/bin/python -B deployment/score_b_h150.py \
-  --config deployment/configs/b_h150_original_v1.json \
-  --work-dir .deployment-work/D01R-original-score-001
-bash deployment/install_rl_b.sh
-python3.12 -B deployment/check_rl_b.py \
-  --python "$PWD/.deployment-work/rl-b-env/bin/python" \
-  --work-dir .deployment-work/rl-b-import-check-001
-.deployment-work/rl-b-env/bin/python -B deployment/check_models.py \
-  --output .deployment-work/model-check-001.json
-python3.12 -B -m unittest discover -s deployment/tests -v
-```
-
-Every output directory/report must be new. The original offline scorer, historical
-receipt/motion arrays, all scientific metrics and frozen acceptance checks are compared;
-RUN_PROVENANCE.json and OUTPUT_MANIFEST.json preserve source/config/input/output identity.
-These commands perform offline scoring, imports, unit checks and XML compilation only.
-Full fork replay lacks a complete parent checkpoint; new live matched evaluation,
-dynamic physics, training and target-host qualification remain NOT_RUN.
-The sealed RL-B READINESS and training gates remain authoritative.
-Other historical raw/checkpoints are indexed in deployment/data_catalog.json and may
-be NOT_PORTABLE without a separately accessible data source. No server connection occurred.
+选定证据不覆盖全部历史 raw 和权重。复制了源码不代表所有历史实验均可逐状态恢复；旧报告中的绝对路径和未归档材料仅是历史来源，不能自动视作可用运行依赖。精确边界见复现指南与删除影响。

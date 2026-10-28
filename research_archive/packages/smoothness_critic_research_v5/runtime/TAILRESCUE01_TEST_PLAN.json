@@ -1,0 +1,236 @@
+{
+  "condition": {
+    "name": "TAILRESCUE01",
+    "seed": 2026102490,
+    "prefix": {
+      "OUTBOUND": [
+        [
+          0.055,
+          0.06,
+          0.02
+        ]
+      ],
+      "RETURN": [
+        [
+          0.04,
+          0.02,
+          0.03
+        ]
+      ]
+    },
+    "split": "CRITIC_LOCKED_TEST_NEW_PREFIX",
+    "role": "EXPOSED_HELDOUT_FAILURE_REPLAY: known TAILOT failure; unchanged pre-failure branch model, no unseen-generalization claim",
+    "parent_family": "D01"
+  },
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+    },
+    {
+      "id": "H150",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "timing": [
+        {
+          "phase": "RETURN",
+          "slot": 5,
+          "duration_factor": 1.5
+        }
+      ],
+      "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+    }
+  ],
+  "group": "TAILRESCUE01",
+  "B": {
+    "id": "B",
+    "base": "B",
+    "posture": [],
+    "early": [],
+    "changes": [],
+    "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+  },
+  "H150": {
+    "id": "H150",
+    "base": "T",
+    "posture": [
+      {
+        "phase": "RETURN",
+        "slot": 2,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      },
+      {
+        "phase": "RETURN",
+        "slot": 3,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      }
+    ],
+    "early": [
+      {
+        "phase": "RETURN",
+        "slot": 1,
+        "duration_factor": 1.1
+      },
+      {
+        "phase": "RETURN",
+        "slot": 4,
+        "duration_factor": 1.2
+      }
+    ],
+    "changes": [],
+    "timing": [
+      {
+        "phase": "RETURN",
+        "slot": 5,
+        "duration_factor": 1.5
+      }
+    ],
+    "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+  },
+  "historical_repeats": {},
+  "actions": [
+    {
+      "tag": "B",
+      "action": {
+        "family": "B"
+      },
+      "category": "adaptive_new_failure_tail_rescue"
+    },
+    {
+      "tag": "SPEEDP",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.8,
+          0.0
+        ],
+        "legacy": [
+          0.0,
+          0.0
+        ]
+      },
+      "category": "adaptive_new_failure_tail_rescue"
+    },
+    {
+      "tag": "ANT",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.8,
+          0.0
+        ],
+        "legacy": [
+          0.0,
+          0.0
+        ],
+        "anticipatory": true
+      },
+      "category": "adaptive_new_failure_tail_rescue"
+    },
+    {
+      "tag": "BLINDM",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.8,
+          0.0
+        ],
+        "legacy": [
+          0.0,
+          0.0
+        ],
+        "blind_shift_deg": -0.02
+      },
+      "category": "adaptive_new_failure_tail_rescue"
+    },
+    {
+      "tag": "BLINDP",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.8,
+          0.0
+        ],
+        "legacy": [
+          0.0,
+          0.0
+        ],
+        "blind_shift_deg": 0.02
+      },
+      "category": "adaptive_new_failure_tail_rescue"
+    }
+  ],
+  "job_wall_cap_s": 5400,
+  "worker": "v5_tail_rescue_worker.py",
+  "fork_phase": "OUTBOUND",
+  "fork_slot": 2,
+  "short_horizons_s": [
+    0.25,
+    0.5,
+    1.0
+  ]
+}

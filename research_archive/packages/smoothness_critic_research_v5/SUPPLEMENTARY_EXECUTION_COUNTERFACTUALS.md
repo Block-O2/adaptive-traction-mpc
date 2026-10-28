@@ -1,0 +1,68 @@
+# 补充执行反事实：预登记PPO修复与暴露失败重放
+
+两组补充实验均不回写主12次优化或主VAL候选。PPO修复动作／条件在主VAL前冻结，只依名义开发门触发独立prefix；TAILRESCUE是在已暴露TAILOT失败之后注册的探索性重放，不称盲泛化。两者均使用原执行链、原证书和guard。
+
+## 冻结PPO的执行权限
+
+PPOREPAIR01_TIME0 相对 PPOCHECK_FROZEN_MEAN：双方原合格=True，髋／膝jerk变化0.194%／0.172%，力模长变化率0.111%，ΔJF=-0.026772 N·s，ΔJM=0.008848 Nm·s。
+
+PPOREPAIR01_TIME0_RULE 相对 PPOCHECK_FROZEN_PLUS_RULE：双方原合格=True，髋／膝jerk变化-4.360%／-3.718%，力模长变化率-2.546%，ΔJF=2.505596 N·s，ΔJM=0.176395 Nm·s。
+
+PPOREPAIR01_TIME0_RULE 相对 PPOREPAIR01_TIME0：双方原合格=True，髋／膝jerk变化-6.344%／-6.099%，力模长变化率-3.186%，ΔJF=3.839766 N·s，ΔJM=-0.233371 Nm·s。
+
+PPOREPAIRVAL_TIME0 相对 PPOREPAIRVAL_MEAN：双方原合格=True，髋／膝jerk变化0.194%／0.171%，力模长变化率0.113%，ΔJF=-0.027009 N·s，ΔJM=0.008860 Nm·s。
+
+PPOREPAIRVAL_TIME0_RULE 相对 PPOREPAIRVAL_RULE：双方原合格=True，髋／膝jerk变化-4.368%／-3.839%，力模长变化率-2.574%，ΔJF=2.536438 N·s，ΔJM=0.172947 Nm·s。
+
+PPOREPAIRVAL_TIME0_RULE 相对 PPOREPAIRVAL_TIME0：双方原合格=True，髋／膝jerk变化-6.357%／-6.204%，力模长变化率-3.225%，ΔJF=3.753466 N·s，ΔJM=-0.295528 Nm·s。
+
+PPOREPAIRVAL_TIME0_RULE 相对 PPOREPAIRVAL_BEST：双方原合格=True，髋／膝jerk变化-6.452%／-6.293%，力模长变化率-2.980%，ΔJF=5.602304 N·s，ΔJM=-0.768286 Nm·s。
+
+独立验证触发=True。补充冻结prefix实际完成，原资格逐项保留。
+
+接受／拒绝数量：
+
+| 身份 | 原门 | 出程接受／拒绝 | 回程接受／拒绝 |
+| --- | --- | --- | --- |
+| PPOCHECK_FROZEN_MEAN | PASS | 0/4 | 5/0 |
+| PPOCHECK_FROZEN_PLUS_RULE | PASS | 0/4 | 5/0 |
+| PPOREPAIR01_TIME0 | PASS | 4/0 | 5/0 |
+| PPOREPAIR01_TIME0_RULE | PASS | 4/0 | 5/0 |
+| PPOREPAIRVAL_B | PASS | 0/0 | 0/0 |
+| PPOREPAIRVAL_BEST | PASS | 4/0 | 5/0 |
+| PPOREPAIRVAL_MEAN | PASS | 0/4 | 5/0 |
+| PPOREPAIRVAL_RULE | PASS | 0/4 | 5/0 |
+| PPOREPAIRVAL_TIME0 | PASS | 4/0 | 5/0 |
+| PPOREPAIRVAL_TIME0_RULE | PASS | 4/0 | 5/0 |
+
+
+|身份|OUTBOUND jerk RMS 髋／膝|RETURN jerk RMS 髋／膝|
+|---|---|---|
+|PPOCHECK_FROZEN_MEAN|373.8550/781.9550|275.3434/596.3097|
+|PPOCHECK_FROZEN_PLUS_RULE|373.8550/781.9550|260.3175/558.1452|
+|PPOREPAIR01_TIME0|374.9705/784.0859|275.3434/596.3097|
+|PPOREPAIR01_TIME0_RULE|349.3760/737.6285|260.3175/558.1452|
+|PPOREPAIRVAL_B|322.8553/811.3737|304.8046/645.0097|
+|PPOREPAIRVAL_BEST|373.6598/783.9270|277.6280/600.5106|
+|PPOREPAIRVAL_MEAN|373.6290/784.1423|275.3666/595.9099|
+|PPOREPAIRVAL_RULE|373.6290/784.1423|260.3071/557.8006|
+|PPOREPAIRVAL_TIME0|374.7474/786.2618|275.3666/595.9099|
+|PPOREPAIRVAL_TIME0_RULE|349.1135/738.3408|260.3071/557.8006|
+
+TIME0只将原actor向量的出程时序坐标置零；TIME0_RULE还套用原合法共同通过速度规则。不是新PPO训练，不将候选采样最佳当部署actor。即使执行权限恢复，也必须由实际完整motion／JF／JM判断是否有益。
+
+## 未改模型的新暴露失败
+
+B 原门=PASS、guard active=0；SPEEDP 原门=FAIL、guard active=1；ANT 原门=FAIL、guard active=1；BLINDM 原门=FAIL、guard active=1；BLINDP 原门=FAIL、guard active=1。实际改变当前决策1次。
+
+| 身份 | 原门 | JF | JM | 髋／膝jerk RMS | 4kHz力模长变化率RMS |
+| --- | --- | --- | --- | --- | --- |
+| TAILRESCUE01_B | PASS | 1437.339984 | 100.973305 | 305.212/713.238 | 20.918081 |
+| TAILRESCUE01_SPEEDP | FAIL | 1432.194426 | 101.141512 | 666.769/1061.723 | 33.597599 |
+| TAILRESCUE01_ANT | FAIL | 1432.129652 | 101.145387 | 666.703/1061.895 | 33.597231 |
+| TAILRESCUE01_BLINDM | FAIL | 1432.259217 | 101.137641 | 666.836/1061.551 | 33.597985 |
+| TAILRESCUE01_BLINDP | FAIL | 1432.129652 | 101.145387 | 666.703/1061.895 | 33.597231 |
+
+原B与原SPEEDP重放的参考／物理／native Human／native wrench逐字段身份均通过；随后决策恢复B，由ROLLING_TAIL_POLICY_AND_TIME审计。模型不读未来真值，原模型SHA与失败暴露前冻结身份一致；候选与源hash单列。盲移位均为同权限当前一次±0.02°协调。
+
+CONFIRMED：模型和这两种盲移位均未恢复该失败；不能把普通局部微扰视为可靠解决方案。 原冻结Critic出程负结果保持，未用本次重放重新训练或改写。完整风险评分、候选选择和实际结果见analysis/NEW_FAILURE_TAIL_RESCUE_RESULTS.json。

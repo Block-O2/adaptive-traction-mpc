@@ -1,0 +1,153 @@
+{
+  "SAC_reduction": "one-step optimal finite actor softmax(minQ/alpha); deterministic argmax equals same-Q greedy for positive alpha; not full multi-step robot SAC exploration",
+  "activation": "deep_learning_method_exploration_v8_20261027T032540Z",
+  "actual_build_resource_audit_path": "families/il_dagger_sac/discrete_sac_v1/data/offpolicy_first_completed_v5/BUILD_RESOURCE_AND_STATUS_V5.json",
+  "actual_build_resource_audit_sha256": "ab1397c3e446ce1dc78cef7a6e6a1468ebcfd3de7f6ae6133d9c4b46524b076e",
+  "approved_build_binding_path": "families/il_dagger_sac/discrete_sac_v1/MAIN_APPROVAL_READONLY_BUILD_V5.json",
+  "approved_build_binding_sha256": "45aef9b7bfc8e77de85c108e1e672af4a704daefed613740b494c390ffa990cb",
+  "bc3_parent_path": "families/ppo_reward/offline_fit_v2/checkpoints/qualified_force_raw/ALL_EXPOSED_DEVELOPMENT/BC_linear_commissioned25.json",
+  "bc3_parent_sha256": "559bbf2799908b0cd1c6735ce040af2e884c7e06d3b55be45fb8f1e81903cc7c",
+  "build_source_manifest_sha256": "ed66a38c426e156ac71bb2fb1d560f634ce19a268d9caa82efc9fd157bc35d26",
+  "cohorts": {
+    "AGGREGATE64": {
+      "expected_actual_rows": 64,
+      "expected_case_groups": 12,
+      "genuine_rows": 16,
+      "hist48_sha256": "e7a54dd7d3d39f0ab94cec45ceea284d6efec51d186ab74e46ff2335e82b79e0",
+      "primary": true
+    },
+    "FRESH16": {
+      "closed_first_batch_known_label_summary": {
+        "hard_safety": false,
+        "heavy8_original_qualified": 8,
+        "light8_complete_original_motion_failed": 8,
+        "light8_gain1_terminal_return": -1
+      },
+      "expected_actual_rows": 16,
+      "expected_case_groups": 2,
+      "incomplete_action_coverage": "Exact actual counts from approved build; NOT_FULLY_EXPLORED, never use future mask",
+      "primary": false
+    }
+  },
+  "controls_source_path": "families/il_dagger_sac/discrete_sac_v1/source/offpolicy_controls_candidate_v6.py",
+  "dataset_coverage": {
+    "AGGREGATE64": {
+      "action_counts": {
+        "B": 17,
+        "EARLY_H150": 15,
+        "EARLY_PHASE": 12,
+        "LATE_H150": 10,
+        "LATE_PHASE": 10
+      },
+      "actual_rows": 64,
+      "independent_case_groups": 12,
+      "missing_actions_not_imputed": true,
+      "repeated_actual_samples": 12,
+      "split_group": "case_sha256; duplicates of same case never cross fold",
+      "unique_context_action_keys": 52
+    },
+    "FRESH16": {
+      "action_counts": {
+        "B": 7,
+        "EARLY_H150": 5,
+        "EARLY_PHASE": 3,
+        "LATE_H150": 0,
+        "LATE_PHASE": 1
+      },
+      "actual_rows": 16,
+      "independent_case_groups": 2,
+      "missing_actions_not_imputed": true,
+      "repeated_actual_samples": 12,
+      "split_group": "case_sha256; duplicates of same case never cross fold",
+      "unique_context_action_keys": 4
+    }
+  },
+  "dataset_file_sha256": "b8a2b12479f25112a8cdfc720a6ad0f56f24467cd4c143425c675f814812c39d",
+  "dataset_identity_status": "ACTUAL_APPROVED_READONLY_BUILD_COMPLETED_NO_LEARNER_CALLS",
+  "dataset_manifest_file_sha256": "78544e67744a5eb3c384dd3f3042382c0a2bb2c4a9ac2a7755475546bd77803e",
+  "dataset_manifest_path": "families/il_dagger_sac/discrete_sac_v1/data/offpolicy_first_completed_v5/SAC_OFFPOLICY_DATASET_MANIFEST_V5.json",
+  "dataset_path": "families/il_dagger_sac/discrete_sac_v1/data/offpolicy_first_completed_v5/SAC_OFFPOLICY_DATASET_V5.json",
+  "engineering_correction": "Pre-fit source audit found fresh16 no common observed action; fixed/stump abstain where no support. No missing outcomes imputed, SAC math/steps unchanged. V5 real fit never launched.",
+  "family": "NOT_FULLY_EXPLORED",
+  "fit_runner_path": "families/il_dagger_sac/discrete_sac_v1/source/offpolicy_fit_candidate_v6.py",
+  "fold_updates": 25,
+  "full_updates": 100,
+  "global_deadline_unix": 1793114740.0,
+  "inherited_common_BC_prior_exposure_not_independent_case_test": true,
+  "initial_Q_seed": 2026102794,
+  "limits": {
+    "AS_bytes": 1073741824,
+    "CPU_count": 1,
+    "CPU_s": 180,
+    "CV_best_selection": false,
+    "SAC_predict_API_calls": 84,
+    "auto_retry": false,
+    "common_logit_lift_calls": 1,
+    "control_API_calls": 112,
+    "control_fits": 16,
+    "full_replay_parameter_steps_max": 1650,
+    "model_initializations_max": 48,
+    "new_native_steps": 0,
+    "new_physics": 0,
+    "wall_s": 180
+  },
+  "mechanisms": [
+    "VANILLA_FIXED_ENTROPY",
+    "ADAPTIVE_TEMPERATURE",
+    "CONSERVATIVE_SUPPORT"
+  ],
+  "new_real_fit_or_forward": 0,
+  "output_directory": "families/il_dagger_sac/discrete_sac_v1/offpolicy_fit_run_v6",
+  "pending_approval_requirements": [
+    "Main explicit one-shot <=180s real offline SAC training approval with this exact contract/source/data SHA",
+    "New MAIN_APPROVAL and actual interpreter identity before initialization",
+    "External finite timeout/resources and no retry if failure"
+  ],
+  "primary": {
+    "cohort": "AGGREGATE64",
+    "mechanism": "VANILLA_FIXED_ENTROPY",
+    "selector": "ACTOR_ARGMAX"
+  },
+  "readonly_build_contract_path": "families/il_dagger_sac/discrete_sac_v1/contracts/READ_ONLY_BUILD_CONTRACT_V5.json",
+  "readonly_build_contract_sha256": "492808d936d6addb10052b728e6a6b85a40fae05ccb5dd6ac5e1862370447c46",
+  "real_training_status": "NOT_RUN_NOT_APPROVED",
+  "required_accounting": [
+    "actual Python binary/version",
+    "initial/final wall CPU RSS",
+    "init/step attempts including failed copies",
+    "linear head forward/softmax/apply counters before execution",
+    "successful steps/risk cost gradient examples/alpha iterations",
+    "retain all original physical costs; synthetic separated"
+  ],
+  "sac_source_path": "families/il_dagger_sac/discrete_sac_v1/source/terminal_discrete_sac_offpolicy_candidate_v2.py",
+  "schema": "v8.final_terminal_sac_offpolicy_fit_contract.v6",
+  "sealed_reads": 0,
+  "source_manifest_path": "families/il_dagger_sac/discrete_sac_v1/SOURCE_ONLY_OFFPOLICY_MANIFEST_V6.json",
+  "source_manifest_sha256": "7058c52b991776fac9561cc326ba887baca63f95db05d8b4099dc4894c9496e2",
+  "status": "FINAL_FROZEN_PENDING_MAIN_APPROVAL",
+  "strong_controls": [
+    "CONSTANT_B",
+    "case-balanced observed BEST_FIXED",
+    "single IF stump: action observed in all training leaf cases",
+    "NEAREST observed training case",
+    "Q_GREEDY_SAME_Q",
+    "SOFTMAX_Q_SAME_Q"
+  ],
+  "target": {
+    "JF_JM": "Independent physical full-task heads; risk separate; no current-result action mask",
+    "return": "complete original qualified clip((JF_B-JF)/max(JF_B,1),-.9,.9), else -1 only original complete motion failure; gain1 shared",
+    "strict_JM": "Actual JM and motion always separate; original-qualified does not mean JM-nonincreasing",
+    "terminal_Q": "y=canonical return; done=True, no bootstrap/next-state entropy"
+  },
+  "training": {
+    "CV": "leave entire case SHA, duplicate case/action never crosses fold",
+    "Q": "same twin initialization seed for all mechanisms; minQ terminal",
+    "actor": "same exact frozen BC3->5 common logit lift; phase logits mean of H150 rows",
+    "missing": "UNKNOWN_MISSING_ACTION_LABEL; no imputation or future-qualification mask",
+    "normalization": "inherited frozen common BC parent, no refit; parent historical exposure makes case CV diagnostic only",
+    "risk": "original failure logistic report only, no future mask",
+    "support": "RMS<=1 and >=2 distinct training case groups per action; repeated rollouts do not raise count",
+    "weights": "actual empirical rows; repeated real samples are not independent contexts"
+  },
+  "training_numpy_scipy_usage": "NOT_IMPORTED_OR_USED; learner pure stdlib, raw stream helper NumPy import was build-only and separately audited"
+}

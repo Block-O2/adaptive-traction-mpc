@@ -1,0 +1,84 @@
+{
+  "id": "E_COMMON_OUT0_FIT_PROPOSED_V1",
+  "status": "PROPOSED_SOURCE_ONLY_DATA_NOT_BUILT_NO_FIT_AUTHORIZATION",
+  "dataset_bytes_SHA": null,
+  "dataset_manifest_SHA": null,
+  "fit_runner_source_SHA": null,
+  "main_approval_id": null,
+  "primary": "F1_FIXED_RIDGE_DIAGNOSTIC",
+  "F1": {
+    "resources": {
+      "CPU_threads": 1,
+      "wall_s": 180,
+      "memory_bytes": 1073741824,
+      "max_multihead_matrix_solves": 253,
+      "max_matrix_dimension": 400,
+      "max_scalar_outputs_per_solve": 16,
+      "gradient_updates": 0,
+      "physics": 0,
+      "auto_retry": false
+    },
+    "ridge_alpha": 10.0,
+    "no_hyperparameter_or_fold_best_selection": true,
+    "folds": 11,
+    "primary_direct_models": [
+      "ACTION_BLIND39_ABSOLUTE",
+      "ACTION_ONLY_GLOBAL_RECIPE",
+      "CONTEXT_ACTION_ABSOLUTE",
+      "CONTEXT_ACTION_KINEMATIC_RESIDUAL",
+      "PAIRED_CONTEXT_ACTION_DELTA_VS_B"
+    ],
+    "primary_horizons": 4,
+    "primary_solves": 220,
+    "curve_models": [
+      "ACTION_BLIND_ANCHORED_CURVE",
+      "CONTEXT_ACTION_ANCHORED_CURVE",
+      "CONTEXT_ACTION_KINEMATIC_RESIDUAL_CURVE"
+    ],
+    "curve_solves": 33,
+    "designs": {
+      "direct_absolute": "a5 plus a5 outer standardized39, max200d; fixed horizon",
+      "direct_paired": "nonB a4 and a4 outer39, no action-independent intercept, B delta algebraically0, no actual B result at inference",
+      "dense_curve": "y0 + tau*D_a(z39) + tau^2*D_a(z39), max400d, exact at t=0; kinematic-residual uses fixed kinematic yK baseline instead; action-blind80d"
+    },
+    "curve_training": "Only fixed OUT0 input plus selected recipe/public time and future labels to4s. Never replace scoped39 with future/predicted states. Query to16s is open-loop direct-curve extrapolation, not recurrent Markov validation.",
+    "controls": [
+      "PERSISTENCE14 + force/moment persistence cost",
+      "KINEMATIC constant qdot/refdot + wrench persistence",
+      "zero paired action effect",
+      "action-only global recipe mean",
+      "action-blind context model"
+    ],
+    "absolute_residual_scope": "Same ridge family with different fixed regularization anchors, not independent algorithms or theoretical representation superiority"
+  },
+  "F2_optional_neural": {
+    "status": "SEPARATE_SOURCE_AND_CPU_APPROVAL_REQUIRED_NOT_INCLUDED_IN_F1",
+    "purpose": "Same E mechanism correction: fixed-query MLP checks nonlinear recipe/context response without future-state input",
+    "architecture": "39+5onehot+publicquerytime -> tanh32 ->16 causal endpoint/cumulativecost outputs; exact t0 initial14 and zero cost anchor",
+    "variants": [
+      "MLP_FROM_INITIAL",
+      "MLP_KINEMATIC_RESIDUAL"
+    ],
+    "seed": 2026102798,
+    "minibatch_seed": 2026102799,
+    "hidden_units": 32,
+    "batch_size": 64,
+    "updates_per_fit": 500,
+    "folds": 11,
+    "max_parameter_updates": 11000,
+    "learning_rate": 0.01,
+    "gradient_norm_cap": 1.0,
+    "optimizer": "SGD_NO_MOMENTUM",
+    "target_preprocess": "training-only output scales, primary dense times<=4s",
+    "resources": {
+      "CPU_threads": 1,
+      "wall_s": 180,
+      "memory_bytes": 1073741824,
+      "max_forward_query_vectors_including_training": 1400000,
+      "physics": 0,
+      "auto_retry": false
+    },
+    "model_source_SHA": null
+  },
+  "reporting": "All failed/partial fits/initializations/solve/forward/gradient/query/cost counted; past48 paid physics retained; window lowcost never qualifies task; family remains NOT_FULLY_EXPLORED"
+}

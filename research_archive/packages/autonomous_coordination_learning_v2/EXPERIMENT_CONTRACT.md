@@ -1,0 +1,29 @@
+# Autonomous coordination learning v2 — frozen master contract
+
+T0/hard STOP use ACTIVATION.json; never reset. At most 10 wall hours. One physical owner; complete native address-space forks from original commissioning plus registered legal prefix. No hardware/Stage2/final Campaign or Git mutations. Historical files are read only except append-only research journal.
+
+A1: same legacy x=(OUTBOUND,RETURN) domain [-1,1]^2, coefficient delta .002 at indices1,6, compare native coordinates with x=(u+v,u-v) on diamond |u+v|<=1, |u-v|<=1. Exact-motion identity is checked with paired native raw, not parameter dimension.
+
+A2: H150 plus 8 bounded, independent phase-local reference modes. OUTBOUND/RETURN each have common and relative target offsets, local duration scaling and common pass-velocity scaling. Spatial amplitude .30 degree per mode times fixed sin² request-slot envelope; time ±8%; passage speed ±12%. Only internal targets; phase endpoints, HOLD and terminal repairs unchanged. Same new permissions for direct, nominal physics, learning and scratch PPO. Family expansion is separate from optimizer/learning credit. New code uses original _evaluate and full original certificates/admission/quintic/governor/allocator/native physics. Rejection uses inherited certified continuation and is recorded, never counted as executed proposal.
+
+No Human/robot/cuff parameters, safety limits, scorer, original task/motion thresholds or timing contracts are changed. Full TASK force/moment left integrals, all native Human motion and original B-relative motion checks qualify gains. Partial failures consume attempts/native and never enter low-cost rankings. Complete but motion-failing trajectories remain in all learning and analysis evidence. Engineering evaluation margins are simulation outcome feedback, not a new patient sensor assumption.
+
+Three-way optimization compares identical cumulative physical attempts with own-arm completed feedback only. Common engineering priors are disclosed; historical and new engineering costs are separate. Primary checkpoints proposed at 16,32,48 attempts per arm, subject to measured throughput and time reserve. Upper budget is a cap, not a fixed small checklist. Additional budgets are frozen before use. Model predictions and training identities are written before candidate START. Nominal predictor consumes completed public reference and commissioned belief only; no future target state/force. Distinguish numerical error, ranking, changed decision and real qualified gain.
+
+PPO: new actor semantics require scratch or separately labelled teacher initialization. No old checkpoint continuation. One RL decision commits one modal plan for the remaining complete task; original low-level causal controller continues. Pre-tanh Gaussian actions with tanh transform, exact density ownership, batches from one frozen behavior generation; no clipping of executed coordinates. Report RL decisions, episodes, native steps, Adam updates and wall time separately. Same physical checkpoints and additional training budget both reported. Diagnose reachability, reward ordering and advantage before increasing budget.
+
+LOCKED_VALIDATION_PLAN.json prefixes are preregistered and unopened until candidate/model/source lock. No tuning or feedback to optimizers after opening. Same-state exact repeats are reproducibility, distinct legal prefixes are cross-state, neither is cross-patient. Cross-trial study only if useful adaptation mechanism exists; each actual trial and cumulative burden counted.
+
+Queue job IDs, PID, config and source SHA, deadlines, checkpoints, partial/raw, counters and atomic state required. Attempt cap500/native60M/development400; 100 attempt reserve includes locked validation/engineering. Dynamically allocate local budgets from measured throughput. Default development stops8.5h, locked dispatch9.2h, all physics9h20, last40min for independent raw/scorer recomputation and audit/END. Each job has finite local cap/timeout. Never start extra work solely to fill time. No autonomous next research round.
+
+Claims: observed fact / supported explanation / untested hypothesis separate. No global optimum, online5ms, patient/clinical or hardware qualification claims. Ordinary infeasibility/learning failure is local. Actual hard-safety or identity/evidence/stop-mechanism failure stops affected jobs and preserves evidence.
+
+
+## Executed protocol addenda
+
+The original master contract above is retained. Final primary allocation is32 candidates per A/B/C and64 scratch PPO episodes, locked before execution in CORE_ALLOCATION_LOCK.json. The active eight-mode search is centred on the publicly reproduced strong legacy coordinate[0.8245887463260377,-0.9835625245511301], with H150 and B separately reproduced. Eight local reference-response directions are observed; global independence beyond old18D is not claimed. Retimed compiler and individual endpoint locks are documented in RETIMED_INTERFACE_GATE and EXECUTABLE_FAMILY_EXTENSION_WITNESS.
+
+MOTION_CAUSE is a separate four-candidate mechanism branch after an observed GP motion false-positive. Original clearance feedback and all native absolute safety/task/scorer contracts remain unchanged; its internal approximate halfspace infeasibility is separately recorded and is not silently relabelled as a native hard-limit pass/fail. All branch outcomes and overhead are charged. Validation time-only extension uses unopened T0-registered prefixes, frozen methods and unchanged deadlines; never outcome-based state selection.
+
+
+Validation wall-budget addendum (before any held-out result): the unopened validation worker and time-only registered-prefix extension may dispatch until the original physics-hard-stop minus600seconds; physics still stops atT0+9h20 and total STOP atT0+10h. Initial allocation remains conservative; runtime/RUN_PLAN and running/historical job manifests are unchanged. See VALIDATION_ABSOLUTE_DEADLINE_ADDENDUM.json.

@@ -1,0 +1,13 @@
+# V8COMPENG01 具体配置独立静审
+
+config SHA5f7bc572aae5f6b2e02f6909726299356a29193343663c7211afbce83af5aa68；thinwrapper22346ded7fcf91fc7b90983f8bae8b70e364f99518aec7cb7ac798160f8a42bf；candidate c55ba8…332d。只读源码/冻结checkpoint JSON形状与identity，0模型初始化/forward/fit/raw/physics。
+
+71/71 frozen_artifacts 实际SHA匹配；core5顶层action、完整recipe、resolved基础、FROZEN18D和planner源逐值一致。12个G0/G2/G3 categorical文档均实际top.policy、完整5recipe、25feature与有限5×26权重/归一化结构正确；9BCbundle对象hash/菜单/字段/模型结构合法，其中3个实际bundle.model.kind=BC_LINEAR。C snapshot仅原3recipe，恰好core前3、模型结构匹配原C3API；不伪称C有5动作。A3磁盘7role profile与当前worker_v2均相符，实际loadedmodule证据须真实调用时再审。
+
+发现必须另闭的源码闭包：families/history_conditioned/trial_interface.py 被 completed_history_reader 与 c3b_inference 实际import，参与summarize/feature_vector；不在71清单，worker自动SOURCE_MANIFEST也不扫families。必须launch/接受C前由root绑定原helper精确SHA及实际modulepath/source证据。原71不能宣称已完整冻结C依赖；本审查不改原config/source/approval字节。
+
+完整库存55项beforeB selector，28top入口、52宏state/control API，另3个BC内部categorical选择/概率forward与6个SAC/V7restore分开。9BC“预计0”是root已披露approval_V1元数据路径错误，独立核实际kind为3；这不是actual调用数，也不改任何checkpoint/选择。C如启用另B后5API；同Qgreedy/softQ不增加modelAPI。全部55标签唯一。
+
+运行尚未发生。已暴露heavy仅作engineering integration；EARLY_STOP后PHYSICS_DONE不能作完整成功，root仍须逐5core完整与closed/native/raw/receipt门，C选B时HISTORY_B另计真实repeat并过原rawexact门。部分wrapper异常的nested准确账仍未知，不能报0。
+
+全部71SHA、模型结构、7role、recipe和计数细目见同名JSON。

@@ -1,0 +1,165 @@
+{
+  "schema": "v8.E2.synthetic_live_parity_contract.v1",
+  "status": "SOURCE_ONLY_NOT_APPROVED_NOT_RUN",
+  "created_unix": 1793092168.5682452,
+  "original_activation_id": "deep_learning_method_exploration_v8_20261027T032540Z",
+  "original_global_stop_unix": 1793114740.0,
+  "identity": "SYNTHETIC_ONLY_NO_REAL_E2_WEIGHTS_NO_A3",
+  "output": "families/learning_assisted/common_out0_v2/synthetic/live_e2_parity_v1",
+  "budget": {
+    "wall_seconds": 30,
+    "CPU_threads": 1,
+    "address_space_bytes": 1073741824,
+    "cleanup_kill_after_seconds": 2,
+    "actual_A3_calls": 0,
+    "real_weight_reads": 0,
+    "fit": 0,
+    "physics": 0
+  },
+  "expected_success_counters": {
+    "prediction_API_calls": 25,
+    "prediction_query_vectors": 85,
+    "shared_B_inference_forward_API_calls": 4,
+    "backward_API_calls": 0,
+    "stochastic_initializations": 0,
+    "gradient_updates": 0,
+    "fit": 0,
+    "actual_A3_predict_calls": 0,
+    "real_weight_reads": 0,
+    "real_dataset_reads": 0,
+    "physics": 0
+  },
+  "source_definitions_only": {
+    "candidate_path": "families/learning_assisted/common_out0_v2/frozen_live_e2_candidate_v1.py",
+    "candidate_sha256": "650c089fe51cc9d0b38c2ccbe94f0fb770512d9de6fb4e9e890c511fb475228f",
+    "math_path": "families/learning_assisted/common_out0_v2/e2_models_candidate_v1.py",
+    "math_sha256": "edaf6fab6d48bfdf44bb5e4bcc09c73b7532079cabc6a4fc6b303a4839275e32"
+  },
+  "synthetic_coefficients": {
+    "origin": "fixed arange/sin/cos/linspace formulas embedded in this runner source",
+    "RNG_calls": 0,
+    "stochastic_initializations": 0,
+    "fixed_ridge_node_models_constructed": 16,
+    "fixed_MLP_parameter_sets_constructed": 2,
+    "training_or_optimization": false,
+    "context39": "39 finite closed-form synthetic scalars",
+    "menu": "synthetic_only_recipe actions with independently synthetic identity hashes; never dispatched"
+  },
+  "candidate_calls": {
+    "helper": "cost_predictions",
+    "invocations": 1,
+    "backend_API_calls": 7,
+    "query_vectors": 35,
+    "ridge_matrices": 3,
+    "NN_forward": 4,
+    "shared_B_forward": 2
+  },
+  "reference_calls": {
+    "frozen_functions": [
+      "ridge_design",
+      "predict_knots",
+      "interpolate_knots",
+      "predict_mlp"
+    ],
+    "backend_API_calls": 18,
+    "query_vectors": 50,
+    "ridge_matrices": 4,
+    "ridge_matrix_query_vectors": 20,
+    "single_horizon_interpolation_API": 10,
+    "interpolation_query_vectors": 10,
+    "NN_forward": 4,
+    "NN_forward_query_vectors": 20,
+    "shared_B_forward": 2,
+    "MLP_predict_wrapper_calls": 2
+  },
+  "expected_backend_kinds": {
+    "RIDGE_KNOT_MATRIX": {
+      "API_calls": 7,
+      "query_vectors": 35
+    },
+    "KNOTWISE_INTERPOLATION": {
+      "API_calls": 10,
+      "query_vectors": 10
+    },
+    "NEURAL_FORWARD_A": {
+      "API_calls": 4,
+      "query_vectors": 20
+    },
+    "NEURAL_FORWARD_B": {
+      "API_calls": 4,
+      "query_vectors": 20
+    }
+  },
+  "parity": {
+    "methods": [
+      "D4_RIDGE_CONTEXT_ACTION",
+      "D4_MLP_PAIRED",
+      "DFull_RIDGE_CONTEXT_ACTION",
+      "DFull_MLP_PAIRED"
+    ],
+    "recipe_rows_each": 5,
+    "output_heads_each": 16,
+    "scalar_values_compared": 320,
+    "atol": 1e-12,
+    "rtol": 1e-12,
+    "bit_exact_recorded_not_required": true,
+    "D4": "original-order last3.5/4 extrapolation to19.03 explicitlyOOD",
+    "DFull": "last16/19.03 originalinterpolate reference to exact19.03 knot",
+    "paired_B_exact_zero": true,
+    "paired_integral": "NOT_APPLICABLE_NO_ABSOLUTE_B_RECONSTRUCTION",
+    "no_future_B_or_real_labels": true,
+    "synthetic_input_and_weights_digest_unchanged": true
+  },
+  "selection": {
+    "pure_selector_invocations": 5,
+    "decisions_per_invocation": 9,
+    "decisions_checked": 45,
+    "exact_argmin_invocations": 40,
+    "fixed_risk_rule_checks": 5,
+    "actual_A3_calls": 0,
+    "synthetic_risk_cases": [
+      "risk exactly.5 rejects nonB; Bfallback evenBrisk.9",
+      "nextafter(.5,-inf) accepts",
+      "nextafter(.5,+inf) rejects",
+      "exactcosttie lowestrecipeindex",
+      "costgap -1e-12 versus0 must not1e-6floor"
+    ],
+    "JF_only": "huge independent JM values cannot enter objective",
+    "risk_scores_not_calibrated": true
+  },
+  "authority": {
+    "schema": "v8.E2.synthetic_live_parity_approval.v1",
+    "required_status": "ROOT_APPROVED_SYNTHETIC_LIVE_E2_PARITY_ONCE_V1",
+    "exact_approval_bytes_SHA_required": true,
+    "manifest_and_contract_SHA_bound": true,
+    "original_actualOUT0_approval_not_granted": true,
+    "review_only_template_rejected": true
+  },
+  "read_allowlist": [
+    "ownsource files and owncontract/manifest/approval",
+    "ACTIVATION.json",
+    "OS ownprocess metadata and Python/NumPy libraries"
+  ],
+  "forbidden_reads": [
+    "actual E2/A3 frozen weight bundles including hashing their bytes",
+    "E2 NPZ/INDEX/targets",
+    "historical raw or active physical jobs",
+    "sealed validation payload/outcome",
+    "CURRENT pointers"
+  ],
+  "deadline": "launcher entry+30 or originalglobalstop; timeout gets only remaining time; runner min(existing launcherdeadline, ownentry+30, originalglobalstop); no resets",
+  "closure": "external START records launcherPID/startticks; time→timeout→runner tracked; preserve nonempty cmdline transitions at zombie; receipt proves childPID closure, launcher closure checked only after outerexec returns",
+  "failure": "oneattempt; exclusiveoutput; source/auth failure before any modelmodule import. Runtimefirstfailure/timeout saves counters/phase and stops; no retry/resume. Externalkill/storagefailure may leave only START/logs; they remain, do not rerun.",
+  "static_only_so_far": {
+    "AST_compile": true,
+    "candidate_imports": 0,
+    "numerical_imports": 0,
+    "numerical_fixture_calls": 0,
+    "backend_API_calls": 0,
+    "real_weights_read": 0,
+    "A3_calls": 0,
+    "fit": 0,
+    "physics": 0
+  },
+  "interpretation": "synthetic math/controlflow parity only; actual OUT0 seven-role proof, actual inference and original task gates remain separate main approval."
+}

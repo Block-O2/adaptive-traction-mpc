@@ -1,0 +1,1146 @@
+{
+  "study_T0": "2026-10-20T18:08:05.854196+00:00",
+  "program_jobs": [
+    {
+      "job": "bounded_frozen_physics",
+      "start": {
+        "unix": 1792520257.6629362,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "-B",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/evaluation_manager.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 3000,
+        "pid": 154697,
+        "new_training_authorized": false,
+        "child_pid": 154700
+      },
+      "end": {
+        "unix": 1792520849.8687713,
+        "wall_s": 592.2058355808258,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 154700,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "generate_reports",
+      "start": {
+        "unix": 1792520921.8367386,
+        "command": [
+          "python3",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/build_deliverables.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 180,
+        "pid": 157094,
+        "new_training_authorized": false,
+        "child_pid": 157095
+      },
+      "end": {
+        "unix": 1792520922.838184,
+        "wall_s": 1.001446008682251,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 157095,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "generate_reports_final",
+      "start": {
+        "unix": 1792521123.9143853,
+        "command": [
+          "python3",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/build_deliverables.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 180,
+        "pid": 157827,
+        "new_training_authorized": false,
+        "child_pid": 157828
+      },
+      "end": {
+        "unix": 1792521124.915758,
+        "wall_s": 1.001373052597046,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 157828,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "historical_execution",
+      "start": {
+        "unix": 1792520341.9247887,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "-B",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/historical_execution.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 600,
+        "pid": 155049,
+        "new_training_authorized": false,
+        "child_pid": 155051
+      },
+      "end": {
+        "unix": 1792520362.9339151,
+        "wall_s": 21.009127140045166,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 155051,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "historical_offline_scorer",
+      "start": {
+        "unix": 1792519977.818974,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/offline-env/bin/python",
+          "-B",
+          "deployment/score_b_h150.py",
+          "--work-dir",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scorer/original-001"
+        ],
+        "cwd": "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/github",
+        "timeout_s": 300,
+        "pid": 153614,
+        "new_training_authorized": false,
+        "child_pid": 153617
+      },
+      "end": {
+        "unix": 1792519997.8271258,
+        "wall_s": 20.0081524848938,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 153617,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "identity_guard_tests",
+      "start": {
+        "unix": 1792519998.7175126,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/offline-env/bin/python",
+          "-B",
+          "deployment/tests/test_identity_guards.py"
+        ],
+        "cwd": "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/github",
+        "timeout_s": 120,
+        "pid": 153766,
+        "new_training_authorized": false,
+        "child_pid": 153768
+      },
+      "end": {
+        "unix": 1792519999.7187953,
+        "wall_s": 1.0012831687927246,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 153768,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "install_offline",
+      "start": {
+        "unix": 1792519881.226436,
+        "command": [
+          "env",
+          "PIP_BOOTSTRAP_PYTHON=/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "bash",
+          "deployment/install_offline.sh",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/offline-env"
+        ],
+        "cwd": "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/github",
+        "timeout_s": 600,
+        "pid": 153188,
+        "new_training_authorized": false,
+        "child_pid": 153191
+      },
+      "end": {
+        "unix": 1792519887.2290742,
+        "wall_s": 6.002638816833496,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 153191,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "install_rlb",
+      "start": {
+        "unix": 1792519883.9970884,
+        "command": [
+          "env",
+          "PIP_BOOTSTRAP_PYTHON=/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "bash",
+          "deployment/install_rl_b.sh",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env"
+        ],
+        "cwd": "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/github",
+        "timeout_s": 900,
+        "pid": 153224,
+        "new_training_authorized": false,
+        "child_pid": 153226
+      },
+      "end": {
+        "unix": 1792519912.0071197,
+        "wall_s": 28.010031938552856,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 153226,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "models_compile",
+      "start": {
+        "unix": 1792519998.586185,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "-B",
+          "deployment/check_models.py",
+          "--output",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/audit/MODEL_VERIFICATION.json"
+        ],
+        "cwd": "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/github",
+        "timeout_s": 120,
+        "pid": 153763,
+        "new_training_authorized": false,
+        "child_pid": 153765
+      },
+      "end": {
+        "unix": 1792520000.5880563,
+        "wall_s": 2.0018718242645264,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 153765,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "postrun_checks",
+      "start": {
+        "unix": 1792521026.428067,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "-B",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/postrun_checks.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 600,
+        "pid": 157430,
+        "new_training_authorized": false,
+        "child_pid": 157432
+      },
+      "end": {
+        "unix": 1792521027.429446,
+        "wall_s": 1.0013794898986816,
+        "exit_code": 1,
+        "stop_reason": null,
+        "child_pid": 157432,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "postrun_checks_fixed",
+      "start": {
+        "unix": 1792521046.2841,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "-B",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/postrun_checks.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 600,
+        "pid": 157500,
+        "new_training_authorized": false,
+        "child_pid": 157506
+      },
+      "end": {
+        "unix": 1792521049.2861192,
+        "wall_s": 3.0020196437835693,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 157506,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "prepare_physical",
+      "start": {
+        "unix": 1792520196.8671901,
+        "command": [
+          "python3",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/prepare_evaluation.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 120,
+        "pid": 154496,
+        "new_training_authorized": false,
+        "child_pid": 154498
+      },
+      "end": {
+        "unix": 1792520197.868737,
+        "wall_s": 1.00154709815979,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 154498,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "protection_end",
+      "start": {
+        "unix": 1792521023.216347,
+        "command": [
+          "python3",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/protection.py",
+          "end"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 300,
+        "pid": 157413,
+        "new_training_authorized": false,
+        "child_pid": 157415
+      },
+      "end": {
+        "unix": 1792521035.2211285,
+        "wall_s": 12.004799604415894,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 157415,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "repository_identity",
+      "start": {
+        "unix": 1792519887.285489,
+        "command": [
+          "python3",
+          "-B",
+          "deployment/verify_repository.py",
+          "--expected-commit",
+          "1adb1de177d6f5f32de6d01c4e629cbfae9ce121",
+          "--output",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/audit/REPOSITORY_VERIFICATION.json"
+        ],
+        "cwd": "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/github",
+        "timeout_s": 300,
+        "pid": 153269,
+        "new_training_authorized": false,
+        "child_pid": 153270
+      },
+      "end": {
+        "unix": 1792519891.2878268,
+        "wall_s": 4.002338171005249,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 153270,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "reward_semantics",
+      "start": {
+        "unix": 1792520408.329512,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "-B",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/reward_semantics.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 600,
+        "pid": 155283,
+        "new_training_authorized": false,
+        "child_pid": 155285
+      },
+      "end": {
+        "unix": 1792520413.332168,
+        "wall_s": 5.002656936645508,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 155285,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "rlb_import_units",
+      "start": {
+        "unix": 1792519999.2779438,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "-B",
+          "deployment/check_rl_b.py",
+          "--python",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "--work-dir",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/audit/rlb-check-001"
+        ],
+        "cwd": "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/github",
+        "timeout_s": 300,
+        "pid": 153784,
+        "new_training_authorized": false,
+        "child_pid": 153786
+      },
+      "end": {
+        "unix": 1792520006.2821658,
+        "wall_s": 7.004222631454468,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 153786,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "scorer_inputs",
+      "start": {
+        "unix": 1792519958.1731114,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/offline-env/bin/python",
+          "-B",
+          "deployment/verify_b_h150.py",
+          "--output",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/audit/FIXTURE_CONTRACT_VERIFICATION.json"
+        ],
+        "cwd": "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/github",
+        "timeout_s": 300,
+        "pid": 153511,
+        "new_training_authorized": false,
+        "child_pid": 153514
+      },
+      "end": {
+        "unix": 1792519959.174672,
+        "wall_s": 1.001561164855957,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 153514,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "source_comparison",
+      "start": {
+        "unix": 1792519928.9565384,
+        "command": [
+          "python3",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/source_diff.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 300,
+        "pid": 153403,
+        "new_training_authorized": false,
+        "child_pid": 153405
+      },
+      "end": {
+        "unix": 1792519929.958215,
+        "wall_s": 1.0016770362854004,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 153405,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "stability_offline",
+      "start": {
+        "unix": 1792520081.0048833,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "-B",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/stability_analysis.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 600,
+        "pid": 154067,
+        "new_training_authorized": false,
+        "child_pid": 154069
+      },
+      "end": {
+        "unix": 1792520085.0073457,
+        "wall_s": 4.002463102340698,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 154069,
+        "child_joined": true
+      }
+    },
+    {
+      "job": "stability_plots",
+      "start": {
+        "unix": 1792520467.6606028,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "-B",
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/scripts/plot_stability.py"
+        ],
+        "cwd": "/home/hank",
+        "timeout_s": 120,
+        "pid": 155483,
+        "new_training_authorized": false,
+        "child_pid": 155485
+      },
+      "end": {
+        "unix": 1792520469.6623347,
+        "wall_s": 2.001732349395752,
+        "exit_code": 0,
+        "stop_reason": null,
+        "child_pid": 155485,
+        "child_joined": true
+      }
+    }
+  ],
+  "program_START_count": 28,
+  "program_END_count": 28,
+  "program_ledger_scope": "Only actual study-owned audit/jobs and frozen evaluator programs; historical fixture START/END and imported archived logs are not counted as new attempts.",
+  "failed_program_jobs": [
+    "postrun_checks"
+  ],
+  "failure_resolution": "postrun_checks failed only while serializing NumPy bool; failed source/log retained; postrun_checks_fixed succeeds. No extra physics or training was run to repair it.",
+  "new_physical_attempts": [
+    {
+      "id": "seed1495656323_ep050_rng2026102101",
+      "start": {
+        "unix": 1792520259.8606422,
+        "pid": 154701,
+        "case": {
+          "id": "seed1495656323_ep050_rng2026102101",
+          "training_seed": 1495656323,
+          "checkpoint_episode": 50,
+          "evaluation_rng_seed": 2026102101,
+          "environment_seed": 20261020
+        },
+        "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_replication_v1/seeds/1495656323/stage1/checkpoints/episode_050",
+        "checkpoint_model_sha256": "03b158b77e72a2fc63df524f6c1251ca282e245a73184258a752ca7441cd131a",
+        "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372",
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "actual_physics_attempt": false,
+        "gradient_updates_allowed": 0,
+        "source_model_config_identity": "exact original frozen executable contract; resource/time budget replaced only in passed runtime guard"
+      },
+      "end": {
+        "unix": 1792520341.226415,
+        "pid": 154701,
+        "error": null,
+        "completed": true,
+        "physics_attempted": true,
+        "gradient_updates": 0,
+        "resources": {
+          "samples": 153,
+          "minimum_available_GiB": 28.298969268798828,
+          "wall_s": 76.58867325099709,
+          "failure": null,
+          "monitor_joined": true
+        },
+        "owner_joined": true
+      },
+      "physics_start": {
+        "unix": 1792520260.7743082,
+        "pid": 154701,
+        "case": {
+          "id": "seed1495656323_ep050_rng2026102101",
+          "training_seed": 1495656323,
+          "checkpoint_episode": 50,
+          "evaluation_rng_seed": 2026102101,
+          "environment_seed": 20261020
+        },
+        "includes_preparation": true
+      },
+      "physics_end": {
+        "unix": 1792520341.2265244,
+        "error": null,
+        "native_steps": 119920,
+        "owner_joined": true
+      },
+      "episode_start": {
+        "unix": 1792520279.3716452,
+        "pid": 154701,
+        "seed": 20261020,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "physics_start_s": 10.049999999999253,
+        "reward": "pilot_v3_failure_cost_floor"
+      },
+      "episode_end": {
+        "unix": 1792520337.3613305,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "status": "COMPLETE",
+        "partial_abandoned": false,
+        "native_steps": 119920,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS"
+      },
+      "terminal_runtime_status": "COMPLETE",
+      "success": true,
+      "native_steps": 119920,
+      "RL_decisions": 25,
+      "gradient_updates": 0,
+      "independent_audits_pass": true
+    },
+    {
+      "id": "seed1495656323_ep050_rng2026102102",
+      "start": {
+        "unix": 1792520345.521384,
+        "pid": 155059,
+        "case": {
+          "id": "seed1495656323_ep050_rng2026102102",
+          "training_seed": 1495656323,
+          "checkpoint_episode": 50,
+          "evaluation_rng_seed": 2026102102,
+          "environment_seed": 20261020
+        },
+        "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_replication_v1/seeds/1495656323/stage1/checkpoints/episode_050",
+        "checkpoint_model_sha256": "03b158b77e72a2fc63df524f6c1251ca282e245a73184258a752ca7441cd131a",
+        "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372",
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "actual_physics_attempt": false,
+        "gradient_updates_allowed": 0,
+        "source_model_config_identity": "exact original frozen executable contract; resource/time budget replaced only in passed runtime guard"
+      },
+      "end": {
+        "unix": 1792520388.0626616,
+        "pid": 155059,
+        "error": null,
+        "completed": true,
+        "physics_attempted": true,
+        "gradient_updates": 0,
+        "resources": {
+          "samples": 80,
+          "minimum_available_GiB": 28.50296401977539,
+          "wall_s": 39.80949208300444,
+          "failure": null,
+          "monitor_joined": true
+        },
+        "owner_joined": true
+      },
+      "physics_start": {
+        "unix": 1792520346.4565926,
+        "pid": 155059,
+        "case": {
+          "id": "seed1495656323_ep050_rng2026102102",
+          "training_seed": 1495656323,
+          "checkpoint_episode": 50,
+          "evaluation_rng_seed": 2026102102,
+          "environment_seed": 20261020
+        },
+        "includes_preparation": true
+      },
+      "physics_end": {
+        "unix": 1792520388.062777,
+        "error": null,
+        "native_steps": 63100,
+        "owner_joined": true
+      },
+      "episode_start": {
+        "unix": 1792520365.069856,
+        "pid": 155059,
+        "seed": 20261020,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "physics_start_s": 10.049999999999253,
+        "reward": "pilot_v3_failure_cost_floor"
+      },
+      "episode_end": {
+        "unix": 1792520386.2641687,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "status": "ABORTED",
+        "partial_abandoned": false,
+        "native_steps": 63100,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS"
+      },
+      "terminal_runtime_status": "ABORTED",
+      "success": false,
+      "native_steps": 63100,
+      "RL_decisions": 8,
+      "gradient_updates": 0,
+      "independent_audits_pass": true
+    },
+    {
+      "id": "seed1495656323_ep080_rng2026102101",
+      "start": {
+        "unix": 1792520391.5659144,
+        "pid": 155213,
+        "case": {
+          "id": "seed1495656323_ep080_rng2026102101",
+          "training_seed": 1495656323,
+          "checkpoint_episode": 80,
+          "evaluation_rng_seed": 2026102101,
+          "environment_seed": 20261020
+        },
+        "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_replication_v1/seeds/1495656323/stage1/checkpoints/episode_080",
+        "checkpoint_model_sha256": "cc57b495e91776cebcbe410749579b464d8cabbf5960dce4fd124ca0e7080495",
+        "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372",
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "actual_physics_attempt": false,
+        "gradient_updates_allowed": 0,
+        "source_model_config_identity": "exact original frozen executable contract; resource/time budget replaced only in passed runtime guard"
+      },
+      "end": {
+        "unix": 1792520458.1226158,
+        "pid": 155213,
+        "error": null,
+        "completed": true,
+        "physics_attempted": true,
+        "gradient_updates": 0,
+        "resources": {
+          "samples": 125,
+          "minimum_available_GiB": 28.51535415649414,
+          "wall_s": 62.41017029700015,
+          "failure": null,
+          "monitor_joined": true
+        },
+        "owner_joined": true
+      },
+      "physics_start": {
+        "unix": 1792520392.5012507,
+        "pid": 155213,
+        "case": {
+          "id": "seed1495656323_ep080_rng2026102101",
+          "training_seed": 1495656323,
+          "checkpoint_episode": 80,
+          "evaluation_rng_seed": 2026102101,
+          "environment_seed": 20261020
+        },
+        "includes_preparation": true
+      },
+      "physics_end": {
+        "unix": 1792520458.1227343,
+        "error": null,
+        "native_steps": 99180,
+        "owner_joined": true
+      },
+      "episode_start": {
+        "unix": 1792520410.6712523,
+        "pid": 155213,
+        "seed": 20261020,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "physics_start_s": 10.049999999999253,
+        "reward": "pilot_v3_failure_cost_floor"
+      },
+      "episode_end": {
+        "unix": 1792520454.9096615,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "status": "ABORTED",
+        "partial_abandoned": false,
+        "native_steps": 99180,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS"
+      },
+      "terminal_runtime_status": "ABORTED",
+      "success": false,
+      "native_steps": 99180,
+      "RL_decisions": 18,
+      "gradient_updates": 0,
+      "independent_audits_pass": true
+    },
+    {
+      "id": "seed1495656323_ep080_rng2026102102",
+      "start": {
+        "unix": 1792520462.0966048,
+        "pid": 155448,
+        "case": {
+          "id": "seed1495656323_ep080_rng2026102102",
+          "training_seed": 1495656323,
+          "checkpoint_episode": 80,
+          "evaluation_rng_seed": 2026102102,
+          "environment_seed": 20261020
+        },
+        "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_replication_v1/seeds/1495656323/stage1/checkpoints/episode_080",
+        "checkpoint_model_sha256": "cc57b495e91776cebcbe410749579b464d8cabbf5960dce4fd124ca0e7080495",
+        "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372",
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "actual_physics_attempt": false,
+        "gradient_updates_allowed": 0,
+        "source_model_config_identity": "exact original frozen executable contract; resource/time budget replaced only in passed runtime guard"
+      },
+      "end": {
+        "unix": 1792520511.7818499,
+        "pid": 155448,
+        "error": null,
+        "completed": true,
+        "physics_attempted": true,
+        "gradient_updates": 0,
+        "resources": {
+          "samples": 93,
+          "minimum_available_GiB": 28.53948211669922,
+          "wall_s": 46.57479943900398,
+          "failure": null,
+          "monitor_joined": true
+        },
+        "owner_joined": true
+      },
+      "physics_start": {
+        "unix": 1792520463.014089,
+        "pid": 155448,
+        "case": {
+          "id": "seed1495656323_ep080_rng2026102102",
+          "training_seed": 1495656323,
+          "checkpoint_episode": 80,
+          "evaluation_rng_seed": 2026102102,
+          "environment_seed": 20261020
+        },
+        "includes_preparation": true
+      },
+      "physics_end": {
+        "unix": 1792520511.7819679,
+        "error": null,
+        "native_steps": 73620,
+        "owner_joined": true
+      },
+      "episode_start": {
+        "unix": 1792520481.379767,
+        "pid": 155448,
+        "seed": 20261020,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "physics_start_s": 10.049999999999253,
+        "reward": "pilot_v3_failure_cost_floor"
+      },
+      "episode_end": {
+        "unix": 1792520509.5869956,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "status": "ABORTED",
+        "partial_abandoned": false,
+        "native_steps": 73620,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS"
+      },
+      "terminal_runtime_status": "ABORTED",
+      "success": false,
+      "native_steps": 73620,
+      "RL_decisions": 10,
+      "gradient_updates": 0,
+      "independent_audits_pass": true
+    },
+    {
+      "id": "seed1630784693_ep050_rng2026102101",
+      "start": {
+        "unix": 1792520515.4924579,
+        "pid": 155693,
+        "case": {
+          "id": "seed1630784693_ep050_rng2026102101",
+          "training_seed": 1630784693,
+          "checkpoint_episode": 50,
+          "evaluation_rng_seed": 2026102101,
+          "environment_seed": 20261020
+        },
+        "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_replication_v1/seeds/1630784693/stage1/checkpoints/episode_050",
+        "checkpoint_model_sha256": "eaacad3979a8a8af02b440c1dd8dc8925672f9d1f7eb76ad10b270aec24bb58d",
+        "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372",
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "actual_physics_attempt": false,
+        "gradient_updates_allowed": 0,
+        "source_model_config_identity": "exact original frozen executable contract; resource/time budget replaced only in passed runtime guard"
+      },
+      "end": {
+        "unix": 1792520595.937963,
+        "pid": 155693,
+        "error": null,
+        "completed": true,
+        "physics_attempted": true,
+        "gradient_updates": 0,
+        "resources": {
+          "samples": 151,
+          "minimum_available_GiB": 28.44046401977539,
+          "wall_s": 75.68580587900215,
+          "failure": null,
+          "monitor_joined": true
+        },
+        "owner_joined": true
+      },
+      "physics_start": {
+        "unix": 1792520516.437096,
+        "pid": 155693,
+        "case": {
+          "id": "seed1630784693_ep050_rng2026102101",
+          "training_seed": 1630784693,
+          "checkpoint_episode": 50,
+          "evaluation_rng_seed": 2026102101,
+          "environment_seed": 20261020
+        },
+        "includes_preparation": true
+      },
+      "physics_end": {
+        "unix": 1792520595.9380789,
+        "error": null,
+        "native_steps": 118820,
+        "owner_joined": true
+      },
+      "episode_start": {
+        "unix": 1792520534.7951818,
+        "pid": 155693,
+        "seed": 20261020,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "physics_start_s": 10.049999999999253,
+        "reward": "pilot_v3_failure_cost_floor"
+      },
+      "episode_end": {
+        "unix": 1792520592.1211233,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "status": "COMPLETE",
+        "partial_abandoned": false,
+        "native_steps": 118820,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS"
+      },
+      "terminal_runtime_status": "COMPLETE",
+      "success": true,
+      "native_steps": 118820,
+      "RL_decisions": 23,
+      "gradient_updates": 0,
+      "independent_audits_pass": true
+    },
+    {
+      "id": "seed1630784693_ep050_rng2026102102",
+      "start": {
+        "unix": 1792520600.221303,
+        "pid": 155956,
+        "case": {
+          "id": "seed1630784693_ep050_rng2026102102",
+          "training_seed": 1630784693,
+          "checkpoint_episode": 50,
+          "evaluation_rng_seed": 2026102102,
+          "environment_seed": 20261020
+        },
+        "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_replication_v1/seeds/1630784693/stage1/checkpoints/episode_050",
+        "checkpoint_model_sha256": "eaacad3979a8a8af02b440c1dd8dc8925672f9d1f7eb76ad10b270aec24bb58d",
+        "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372",
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "actual_physics_attempt": false,
+        "gradient_updates_allowed": 0,
+        "source_model_config_identity": "exact original frozen executable contract; resource/time budget replaced only in passed runtime guard"
+      },
+      "end": {
+        "unix": 1792520681.0300066,
+        "pid": 155956,
+        "error": null,
+        "completed": true,
+        "physics_attempted": true,
+        "gradient_updates": 0,
+        "resources": {
+          "samples": 152,
+          "minimum_available_GiB": 28.468128204345703,
+          "wall_s": 76.0407164079952,
+          "failure": null,
+          "monitor_joined": true
+        },
+        "owner_joined": true
+      },
+      "physics_start": {
+        "unix": 1792520601.1723013,
+        "pid": 155956,
+        "case": {
+          "id": "seed1630784693_ep050_rng2026102102",
+          "training_seed": 1630784693,
+          "checkpoint_episode": 50,
+          "evaluation_rng_seed": 2026102102,
+          "environment_seed": 20261020
+        },
+        "includes_preparation": true
+      },
+      "physics_end": {
+        "unix": 1792520681.0301168,
+        "error": null,
+        "native_steps": 118820,
+        "owner_joined": true
+      },
+      "episode_start": {
+        "unix": 1792520619.5938525,
+        "pid": 155956,
+        "seed": 20261020,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "physics_start_s": 10.049999999999253,
+        "reward": "pilot_v3_failure_cost_floor"
+      },
+      "episode_end": {
+        "unix": 1792520677.2111852,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "status": "COMPLETE",
+        "partial_abandoned": false,
+        "native_steps": 118820,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS"
+      },
+      "terminal_runtime_status": "COMPLETE",
+      "success": true,
+      "native_steps": 118820,
+      "RL_decisions": 24,
+      "gradient_updates": 0,
+      "independent_audits_pass": true
+    },
+    {
+      "id": "seed1630784693_ep080_rng2026102101",
+      "start": {
+        "unix": 1792520685.267616,
+        "pid": 156230,
+        "case": {
+          "id": "seed1630784693_ep080_rng2026102101",
+          "training_seed": 1630784693,
+          "checkpoint_episode": 80,
+          "evaluation_rng_seed": 2026102101,
+          "environment_seed": 20261020
+        },
+        "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_replication_v1/seeds/1630784693/stage1/checkpoints/episode_080",
+        "checkpoint_model_sha256": "e7dcadbb8b954bf5737e12713db61215a5ff5b0f67519ae238f2dbb3660d26a3",
+        "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372",
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "actual_physics_attempt": false,
+        "gradient_updates_allowed": 0,
+        "source_model_config_identity": "exact original frozen executable contract; resource/time budget replaced only in passed runtime guard"
+      },
+      "end": {
+        "unix": 1792520764.340966,
+        "pid": 156230,
+        "error": null,
+        "completed": true,
+        "physics_attempted": true,
+        "gradient_updates": 0,
+        "resources": {
+          "samples": 148,
+          "minimum_available_GiB": 28.457977294921875,
+          "wall_s": 74.34393155399448,
+          "failure": null,
+          "monitor_joined": true
+        },
+        "owner_joined": true
+      },
+      "physics_start": {
+        "unix": 1792520686.1992342,
+        "pid": 156230,
+        "case": {
+          "id": "seed1630784693_ep080_rng2026102101",
+          "training_seed": 1630784693,
+          "checkpoint_episode": 80,
+          "evaluation_rng_seed": 2026102101,
+          "environment_seed": 20261020
+        },
+        "includes_preparation": true
+      },
+      "physics_end": {
+        "unix": 1792520764.341075,
+        "error": null,
+        "native_steps": 116440,
+        "owner_joined": true
+      },
+      "episode_start": {
+        "unix": 1792520704.6209264,
+        "pid": 156230,
+        "seed": 20261020,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "physics_start_s": 10.049999999999253,
+        "reward": "pilot_v3_failure_cost_floor"
+      },
+      "episode_end": {
+        "unix": 1792520760.541282,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "status": "COMPLETE",
+        "partial_abandoned": false,
+        "native_steps": 116440,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS"
+      },
+      "terminal_runtime_status": "COMPLETE",
+      "success": true,
+      "native_steps": 116440,
+      "RL_decisions": 20,
+      "gradient_updates": 0,
+      "independent_audits_pass": true
+    },
+    {
+      "id": "seed1630784693_ep080_rng2026102102",
+      "start": {
+        "unix": 1792520768.5730214,
+        "pid": 156546,
+        "case": {
+          "id": "seed1630784693_ep080_rng2026102102",
+          "training_seed": 1630784693,
+          "checkpoint_episode": 80,
+          "evaluation_rng_seed": 2026102102,
+          "environment_seed": 20261020
+        },
+        "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_replication_v1/seeds/1630784693/stage1/checkpoints/episode_080",
+        "checkpoint_model_sha256": "e7dcadbb8b954bf5737e12713db61215a5ff5b0f67519ae238f2dbb3660d26a3",
+        "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372",
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "actual_physics_attempt": false,
+        "gradient_updates_allowed": 0,
+        "source_model_config_identity": "exact original frozen executable contract; resource/time budget replaced only in passed runtime guard"
+      },
+      "end": {
+        "unix": 1792520847.6146014,
+        "pid": 156546,
+        "error": null,
+        "completed": true,
+        "physics_attempted": true,
+        "gradient_updates": 0,
+        "resources": {
+          "samples": 149,
+          "minimum_available_GiB": 28.44765853881836,
+          "wall_s": 74.35579185999813,
+          "failure": null,
+          "monitor_joined": true
+        },
+        "owner_joined": true
+      },
+      "physics_start": {
+        "unix": 1792520769.5098207,
+        "pid": 156546,
+        "case": {
+          "id": "seed1630784693_ep080_rng2026102102",
+          "training_seed": 1630784693,
+          "checkpoint_episode": 80,
+          "evaluation_rng_seed": 2026102102,
+          "environment_seed": 20261020
+        },
+        "includes_preparation": true
+      },
+      "physics_end": {
+        "unix": 1792520847.6147249,
+        "error": null,
+        "native_steps": 116320,
+        "owner_joined": true
+      },
+      "episode_start": {
+        "unix": 1792520787.7985895,
+        "pid": 156546,
+        "seed": 20261020,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS",
+        "physics_start_s": 10.049999999999253,
+        "reward": "pilot_v3_failure_cost_floor"
+      },
+      "episode_end": {
+        "unix": 1792520843.8636138,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "status": "COMPLETE",
+        "partial_abandoned": false,
+        "native_steps": 116320,
+        "category": "BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS"
+      },
+      "terminal_runtime_status": "COMPLETE",
+      "success": true,
+      "native_steps": 116320,
+      "RL_decisions": 15,
+      "gradient_updates": 0,
+      "independent_audits_pass": true
+    }
+  ],
+  "PHYSICS_START_count": 8,
+  "PHYSICS_END_count": 8,
+  "EPISODE_START_count": 8,
+  "EPISODE_END_count": 8,
+  "new_training_episodes": 0,
+  "new_gradient_updates": 0,
+  "new_native_steps": 826220,
+  "new_RL_decisions": 143,
+  "max_new_physical_evaluations": 8,
+  "all_owned_ledgers_closed": true,
+  "engineering_failures": "audit/ENGINEERING_ATTEMPTS.json",
+  "Stage2": "NOT_RUN",
+  "full_fork_replay": "NOT_RUN",
+  "new_live_matched_evaluation": "NOT_RUN"
+}

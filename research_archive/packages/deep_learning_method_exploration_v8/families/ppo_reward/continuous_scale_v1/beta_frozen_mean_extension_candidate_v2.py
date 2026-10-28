@@ -1,0 +1,338 @@
+"""SOURCE_ONLY V2 committed G0/G1 endpoint scope with external quarantine.
+
+predict_before_B does 12 frozen Beta mean forwards plus five fixed mappings.
+No optimizer/Arm/restore/RNG, no old training-clock extension, no I/O writes or
+physics. Actual model inventory/authorization must be supplied by main later.
+"""
+from pathlib import Path
+import copy
+import hashlib
+import importlib.util
+import json
+import math
+import time
+
+FAMILY = "families/ppo_reward/continuous_scale_v1/"
+ARM_IDS = ["BETA_RF_RAW", "BETA_PPO_RAW", "BETA_RF_SCALED", "BETA_PPO_SCALED"]
+ROLES = ["PARENT", "FIRST_COMPLETED", "LAST_COMPLETED"]
+GRID = [0., .25, .5, .75, 1.]
+GLOBAL_STOP = 1793114740.0
+A3_ADAPTER = "families/critic_value/coverage_state_v3/source/live_selector_adapter_candidate_v1.py"
+A3_MANIFEST = "families/critic_value/coverage_state_v3/LIVE_SELECTOR_ADAPTER_MANIFEST_V1.json"
+
+
+def digest(value):
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def bounded(package, relative):
+    path = (package/relative).resolve()
+    if not path.is_relative_to(package):
+        raise ValueError("BETA_DEPLOYMENT_PATH_ESCAPES_PACKAGE")
+    return path
+
+
+def verified(package, ref):
+    path = bounded(package, ref["path"])
+    if sha(path) != ref["sha256"]:
+        raise ValueError("FROZEN_BETA_DEPLOYMENT_ARTIFACT_CHANGED:"+ref["path"])
+    return json.loads(path.read_text())
+
+
+def _before_B(config, study):
+    if (study.child is not None or study.fork_done is not True or study.metrics or
+            config.get("fork_phase") != "OUTBOUND" or config.get("fork_slot") != 0):
+        raise ValueError("BETA_ALL_CHOICES_REQUIRE_ACTUAL_COLD_OUT0_BEFORE_ANY_B_RESULT")
+
+
+def _authorization(package, config, spec):
+    auth = verified(package, spec["deployment_authorization"])
+    if (auth.get("schema") != "v8.beta_frozen_mean_deployment_authorization.v2" or
+            auth.get("status") != "APPROVED_BY_MAIN_READ_ONLY_FROZEN_DEPLOYMENT" or
+            auth.get("inventory") != spec["inventory"] or config["group"] not in auth["authorized_job_groups"] or
+            auth.get("mean_policy_forward_only") is not True or auth.get("new_training_or_restore_authorized") is not False or
+            auth.get("physical_dispatch_authority_from_endpoint_review") is not False or
+            not auth["approved_unix"] <= time.time() < min(auth["deployment_deadline_unix"], GLOBAL_STOP)):
+        raise ValueError("SEPARATE_FROZEN_DEPLOYMENT_MAIN_APPROVAL_REQUIRED")
+    activation = verified(package, {"path":"ACTIVATION.json", "sha256":auth["activation_sha256"]})
+    if activation["hard_stop_unix"] != GLOBAL_STOP or activation.get("clock_must_not_reset") is not True:
+        raise ValueError("ORIGINAL_GLOBAL_ACTIVATION_DEADLINE_MUST_NOT_RESET")
+    required = {FAMILY+"beta_frozen_mean_extension_candidate_v2.py", FAMILY+"beta_policy.py", FAMILY+"axis_mapping.py", A3_ADAPTER, A3_MANIFEST}
+    if not required <= set(auth["source_files_sha256"]):
+        raise ValueError("COMPLETE_MEAN_EXTENSION_AND_PROOF_SOURCE_CLOSURE_REQUIRED")
+    for relative, expected in auth["source_files_sha256"].items():
+        if sha(bounded(package,relative)) != expected or config["frozen_artifacts"].get(relative) != expected:
+            raise ValueError("DEPLOYMENT_SOURCE_NOT_ACTUAL_JOB_FREEZE:"+relative)
+    for ref in (spec["inventory"], spec["deployment_authorization"]):
+        if config["frozen_artifacts"].get(ref["path"]) != ref["sha256"]:
+            raise ValueError("ACTUAL_INVENTORY_AND_DEPLOYMENT_AUTH_NOT_JOB_FROZEN")
+    return auth
+
+
+def _closed_metadata(package, config, ref):
+    path = bounded(package,ref["path"])
+    if path.suffix != ".json" or path.name == "CURRENT.json" or any(p.lower() in ("sampling","pending_inputs") for p in path.parts):
+        raise ValueError("ENDPOINT_REVIEW_METADATA_ONLY_NO_RAW_OR_MUTABLE_PENDING_READ")
+    if config["frozen_artifacts"].get(ref["path"]) != ref["sha256"]:
+        raise ValueError("ENDPOINT_SCOPE_OR_QUARANTINE_METADATA_NOT_JOB_FROZEN")
+    return verified(package,ref)
+
+
+def _inventory(package, config, spec):
+    inventory = verified(package,spec["inventory"])
+    if (inventory.get("schema") != "v8.beta_committed_endpoint_inventory.v2" or
+            inventory.get("status") != "COMMITTED_G0_G1_ONLY_WITH_EXTERNAL_UNRESOLVED_QUARANTINE" or
+            [item["role"] for item in inventory["roles"]] != ROLES or inventory["arm_ids"] != ARM_IDS or
+            inventory.get("policy_location") != ["policy"]):
+        raise ValueError("EXACT_COMMITTED_G0_G1_PARENT_FIRST_LAST_INVENTORY_REQUIRED")
+    review = _closed_metadata(package,config,inventory["root_endpoint_scope_review"])
+    scope = review["endpoint_transaction_scope"]
+    if (review.get("schema") != "v8.beta_committed_endpoint_scope_review.v2" or
+            review.get("status") != "SAFE_COMMITTED_ENDPOINT_SCOPE_EXTERNAL_BATCH02_UNRESOLVED" or
+            "true_hard_safety_violation" in review or
+            review.get("whole_training_hard_status") != "UNKNOWN_EXTERNAL_BATCH02_UNRESOLVED" or
+            scope.get("generation_indices") != [0,1] or scope.get("true_hard_safety_violation") is not False or
+            scope.get("all_committed_checkpoints_have_no_pending") is not True or
+            scope.get("original_complete_receipts_raw_scorer_checks_reviewed") is not True or
+            scope.get("excludes_external_batch02_pending") is not True or
+            review.get("endpoint_selected_by_outcome_or_best_seed") is not False or
+            review.get("quarantine") != inventory["quarantine"] or
+            review.get("physical_dispatch_authority_granted") is not False):
+        raise ValueError("ENDPOINT_SCOPED_FALSE_CANNOT_BECOME_GLOBAL_TRAINING_HARD_FALSE")
+    if not review.get("metadata_evidence_files_sha256"):
+        raise ValueError("ORIGINAL_CLOSED_METADATA_EVIDENCE_REQUIRED_NOT_BOOLEAN_ONLY")
+    for relative,expected_sha in review["metadata_evidence_files_sha256"].items():
+        _closed_metadata(package,config,{"path":relative,"sha256":expected_sha})
+    batch01_ref = scope["committed_batch01_closure"]
+    if batch01_ref != {"path":"audit/BETA_BATCH01_MAIN_CLOSURE_REVIEW_V2.json",
+                       "sha256":"9907d7853d6fadb6e1f83dec2bfa35cf2e1091507bc810b8f4013262a922de1e"}:
+        raise ValueError("EXACT_SAFE_ORIGINAL_BATCH01_CLOSURE_REQUIRED")
+    batch01 = _closed_metadata(package,config,batch01_ref)
+    if (batch01.get("true_hard_safety_violation") is not False or
+            any(batch01.get(key) is not True for key in ("all_started_children_joined","all_parent_prefixes_unchanged","all_started_attempts_hard_safety_reviewed")) or
+            batch01.get("status") != "READY_FULL_TWO_CASE_RECEIPTS_FOR_ALL_FOUR_ARMS"):
+        raise ValueError("ONLY_ORIGINAL_COMMITTED_BATCH01_HAS_SCOPED_SAFE_CLOSURE")
+    quarantine = _closed_metadata(package,config,inventory["quarantine"])
+    if (quarantine.get("schema") != "v8.beta_external_unresolved_batch_quarantine.v1" or
+            quarantine.get("status") != "EXTERNAL_BATCH02_PENDING_UNRESOLVED_UNMODIFIED_NOT_ENDPOINT" or
+            quarantine.get("external_pending_proposal_count") != 9 or quarantine.get("published_updates_from_external_batch") != 0 or
+            quarantine.get("disposition") != "KEEP_EXTERNAL_PENDING_NO_CANCEL_NO_COMMIT" or
+            quarantine.get("pending_and_RNG_mutated_by_freeze") is not False or
+            quarantine.get("external_pending_in_endpoint_models") is not False or
+            "true_hard_safety_violation" not in quarantine or
+            quarantine.get("true_hard_safety_violation") is not None or
+            quarantine.get("hard_status") != "UNKNOWN_NOT_FALSE" or
+            quarantine.get("original_UNKNOWN_physical_guard_unchanged") is not True):
+        raise ValueError("ALL_NINE_UNRESOLVED_EXTERNAL_PROPOSALS_MUST_REMAIN_QUARANTINED")
+    records = quarantine["external_pending_identity_inventory"]
+    if (len(records) != 9 or len({r["proposal_identity_sha256"] for r in records}) != 9 or
+            any(r["arm_id"] not in ARM_IDS or not r.get("original_snapshot_sha256") for r in records)):
+        raise ValueError("NINE_DISTINCT_ORIGINAL_PENDING_AND_RNG_SNAPSHOT_IDENTITIES_REQUIRED")
+    prefix_ref = quarantine["original_prefix_review"]
+    if prefix_ref != {"path":"families/critic_value/analysis/beta02l_prefix_trace_v1/PREFIX_TRACE_REVIEW_V1.json",
+                     "sha256":"d15d9d623fcda633530d7be702804dbce49ffb3d6ed63fb7188fcfa505b2113d"}:
+        raise ValueError("EXACT_CLOSED_THREE_UNKNOWN_PREFIX_REVIEW_REQUIRED")
+    prefix = _closed_metadata(package,config,prefix_ref)
+    unknown = ["human_acceleration","session_clearance","measured_sleeve_clearance"]
+    if (set(prefix.get("unresolved_gates",[])) != set(unknown) or
+            prefix.get("global_prefix_11hard_false_established") is not None or
+            any(prefix["additional6_scope_review"][name].get("value") is not None for name in unknown) or
+            quarantine.get("unresolved_prefix_condition_names") != unknown):
+        raise ValueError("ORIGINAL_THREE_PREFIX_UNKNOWNS_CANNOT_BE_RELABELED_FALSE_OR_NA")
+    owners = _closed_metadata(package,config,quarantine["all_owner_closure_review"])
+    if (owners.get("status") != "ALL_KNOWN_TRAINING_OWNERS_EXITED" or owners.get("survivors") != [] or
+            owners.get("all_original_PID_startticks_exited") is not True or not owners.get("processes") or
+            any(process.get("original_closed") is not True for process in owners["processes"])):
+        raise ValueError("CLOSED_OWNERS_DO_NOT_RESOLVE_HARD_STATUS_BUT_ARE_REQUIRED_FOR_FREEZE")
+    transactions = {}
+    for item in inventory["complete_committed_generation_transaction_inventory"]:
+        transaction = _closed_metadata(package,config,item["transaction"])
+        index = item["generation_index"]
+        if (transaction["generation_index"] != index or index in transactions or
+                transaction.get("all_four_published_together") is not True or set(transaction["checkpoints"]) != set(ARM_IDS)):
+            raise ValueError("ACTUAL_ATOMIC_FOUR_ARM_COMMITTED_TRANSACTION_REQUIRED")
+        transactions[index] = transaction
+    if (sorted(transactions) != [0,1] or transactions[0]["status"] != "READY_ALL_FOUR_INITIALIZED" or
+            transactions[1]["status"] != "READY_ALL_FOUR_UPDATED" or
+            review.get("committed_generation_inventory_object_sha256") != digest(inventory["complete_committed_generation_transaction_inventory"]) or
+            review.get("latest_actual_committed_generation_index") != 1):
+        raise ValueError("EXACT_WHOLE_COMMITTED_G0_TO_G1_SCOPE_NOT_A_SELECTED_PREFIX")
+    pointer = _closed_metadata(package,config,review["frozen_committed_pointer_snapshot"])
+    tx1 = next(item["transaction"] for item in inventory["complete_committed_generation_transaction_inventory"] if item["generation_index"]==1)
+    if (pointer.get("generation_index") != 1 or pointer.get("transaction_sha256") != tx1["sha256"] or
+            pointer.get("checkpoints") != transactions[1]["checkpoints"] or pointer.get("status") != "READY_ALL_FOUR_UPDATED"):
+        raise ValueError("FROZEN_METADATA_POINTER_MUST_BIND_ACTUAL_COMMITTED_G1_WITHOUT_CURRENT_WRITE")
+    if scope.get("reviewed_G1_transaction_sha256") != tx1["sha256"]:
+        raise ValueError("MAIN_SCOPED_SAFETY_REVIEW_MUST_BIND_EXACT_G1_TRANSACTION")
+    expected = {"PARENT":0,"FIRST_COMPLETED":1,"LAST_COMPLETED":1}
+    if review.get("role_generation_indices") != expected:
+        raise ValueError("FIRST_AND_LAST_MUST_BOTH_ALIAS_ACTUAL_COMMITTED_G1")
+    axis = verified(package,inventory["axis"])
+    if (digest(axis) != inventory["axis_object_sha256"] or
+            config["frozen_artifacts"].get(inventory["axis"]["path"]) != inventory["axis"]["sha256"]):
+        raise ValueError("ACTUAL_FROZEN_CONTINUOUS_AXIS_REQUIRED")
+    for relative,expected_sha in axis["source_files_sha256"].items():
+        if sha(bounded(package,relative)) != expected_sha or config["frozen_artifacts"].get(relative) != expected_sha:
+            raise ValueError("LIVE_AXIS_SOURCE_NOT_ORIGINAL_FREEZE")
+    if inventory["normalization_source"]["path"] != "families/ppo_reward/onpolicy_runs/GENUINE_V1/GENERATION_0000/RF_RAW.json":
+        raise ValueError("ORIGINAL_FROZEN_G0_NORMALIZATION_PROVENANCE_REQUIRED")
+    normalized = verified(package,inventory["normalization_source"])["policy"]["normalization"]
+    records = []
+    for role in inventory["roles"]:
+        if role["generation_index"] != expected[role["role"]] or [item["arm_id"] for item in role["checkpoints"]] != ARM_IDS:
+            raise ValueError("EXACT_PARENT_FIRST_LAST_AND_FOUR_ARM_ORDER")
+        transaction = transactions[role["generation_index"]]
+        for item in role["checkpoints"]:
+            ref = {"path":item["path"], "sha256":item["sha256"]}
+            actual_ref = transaction["checkpoints"][item["arm_id"]]
+            if any(ref[key] != actual_ref[key] for key in ref) or config["frozen_artifacts"].get(ref["path"]) != ref["sha256"]:
+                raise ValueError("MODEL_NOT_THIS_ACTUAL_CLOSED_GENERATION_AND_JOB_FREEZE")
+            checkpoint = verified(package,ref)
+            expected_algorithm = "PPO" if item["arm_id"].startswith("BETA_PPO") else "REINFORCE"
+            expected_gain = 20. if item["arm_id"].endswith("SCALED") else 1.
+            if (checkpoint.get("schema") != "v8.continuous_beta_arm_checkpoint.v2" or
+                    checkpoint.get("execution_mode") != "GENUINE_ON_POLICY" or checkpoint.get("pending") or
+                    checkpoint.get("math_fixture_contract_sha256") is not None or checkpoint.get("algorithm") != expected_algorithm or
+                    checkpoint["policy"].get("schema") != "v8.scalar_beta_linear25.v1" or checkpoint["policy"].get("gain") != expected_gain or
+                    checkpoint["policy"]["arm_id"] != item["arm_id"] or checkpoint["policy"]["normalization"] != normalized or
+                    checkpoint["frozen_axis_sha256"] != inventory["axis_object_sha256"] or
+                    checkpoint["policy"]["axis_contract"] != axis or
+                    checkpoint["policy_behavior_sha256"] != item["policy_behavior_sha256"]):
+                raise ValueError("REAL_FINISHED_BETA_POLICY_CONTENT_IDENTITY")
+            if role["role"] == "PARENT" and (checkpoint["policy"]["version"] != 0 or checkpoint["policy"]["counters"]["parameter_updates"] != 0):
+                raise ValueError("PARENT_MUST_BE_ACTUAL_UNTRAINED_INITIALIZED_ENDPOINT")
+            records.append({"role":role["role"],"generation_index":role["generation_index"],"item":item,"checkpoint":checkpoint})
+    return inventory,axis,records,scope,quarantine
+
+
+def _predict_before_B(P,config,study,counts):
+    package = Path(P).resolve(); _before_B(config,study)
+    spec = config["beta_mean_extension"]
+    if spec.get("schema") != "v8.beta_frozen_mean_extension_job.v2":
+        raise ValueError("SEPARATE_CONTINUOUS_EXTRAS_CONFIG_SCHEMA_REQUIRED")
+    auth = _authorization(package,config,spec)
+    inventory,axis,records,endpoint_scope,quarantine = _inventory(package,config,spec)
+    a3_manifest = verified(package,inventory["A3_adapter_manifest"])
+    if inventory["A3_adapter_manifest"]["path"] != A3_MANIFEST or a3_manifest["adapter_sha256"] != auth["source_files_sha256"][A3_ADAPTER]:
+        raise ValueError("ACTUAL_REGISTERED_A3_PROOF_HELPER_REQUIRED")
+    a3_proof_dependencies = [a3_manifest["bundles"]["A3"]]+list(a3_manifest["api_files"]["A3"].values())
+    for ref in a3_proof_dependencies:
+        if (auth["source_files_sha256"].get(ref["path"]) != ref["sha256"] or
+                config["frozen_artifacts"].get(ref["path"]) != ref["sha256"]):
+            raise ValueError("A3_PROOF_PREPARATION_BUNDLE_AND_APIS_MUST_BE_DEPLOYMENT_AND_JOB_FROZEN")
+    loader = importlib.util.spec_from_file_location("_v8_beta_mean_frozen_A3_proof",bounded(package,A3_ADAPTER))
+    a3 = importlib.util.module_from_spec(loader); loader.loader.exec_module(a3)
+    bundle = verified(package,a3_manifest["bundles"]["A3"])
+    # Only original source attestation and context preparation; no A1/A2/A3
+    # prediction APIs are called by this extension.
+    a3._menu_matches(package,config,bundle["menu"])
+    counts["A3_actual_live_seven_role_proof_entry"] += 1
+    raw,source_proof,proof_audit = a3._actual_live_proof(package,config,study,bundle)
+    counts["A3_actual_live_seven_role_proof_completed"] += 1
+    files = a3_manifest["api_files"]["A3"]
+    private_a3 = a3._private_modules(package,{k:files[k] for k in ("scoped_subset_api","causal_api")},"BETA_MEAN_CAUSAL")
+    counts["A3_scoped_context39_preparation_entry"] += 1
+    full_context = private_a3["causal_api"].to_context_full(raw,bundle["input_source_profiles"],source_proof)
+    counts["A3_scoped_context39_preparation_completed"] += 1
+    names = private_a3["scoped_subset_api"].COMMISSION25
+    position = {name:i for i,name in enumerate(full_context["feature_names"])}
+    context = {"feature_names":list(names),"features":[full_context["features"][position[name]] for name in names]}
+    counts["commissioned25_projection"] += 1
+    api_files = {"axis_mapping":{"path":FAMILY+"axis_mapping.py","sha256":auth["source_files_sha256"][FAMILY+"axis_mapping.py"]},
+        "beta_policy":{"path":FAMILY+"beta_policy.py","sha256":auth["source_files_sha256"][FAMILY+"beta_policy.py"]}}
+    apis = a3._private_modules(package,api_files,"BETA_FROZEN_MEAN")
+    beta = apis["beta_policy"]; mapping = apis["axis_mapping"]
+    if context["feature_names"] != beta.FEATURE_NAMES:
+        raise ValueError("EXACT_CAUSAL_COMMISSIONED25_WHITELIST_REQUIRED")
+    # Validate every model before the first forward, even if role refs alias.
+    for record in records:
+        if beta.policy_sha256(record["checkpoint"]["policy"]) != record["item"]["policy_behavior_sha256"]:
+            raise ValueError("ACTUAL_BETA_POLICY_BEHAVIOR_IDENTITY")
+    decisions = {}; fixed = {}; catalog = {}
+    def add_catalog(name,mapped):
+        recipe_sha = mapped["full_recipe_sha256"]
+        if digest(mapped["full_recipe"]) != recipe_sha or digest(mapped["proposal_action"]) != mapped["physical_action_sha256"]:
+            raise ValueError("ACTUAL_CONTINUOUS_FULLRECIPE_ACTION_IDENTITY")
+        if recipe_sha in catalog:
+            if catalog[recipe_sha]["full_recipe"] != mapped["full_recipe"] or catalog[recipe_sha]["actual_action"] != mapped["proposal_action"]:
+                raise ValueError("SAME_RECIPE_SHA_DIFFERENT_ACTION")
+            catalog[recipe_sha]["selected_by"].append(name)
+        else:
+            catalog[recipe_sha] = {"full_recipe":copy.deepcopy(mapped["full_recipe"]),"actual_action":copy.deepcopy(mapped["proposal_action"]),
+                "physical_action_sha256":mapped["physical_action_sha256"],"selected_by":[name],"original_qualification_granted":False}
+    core_B = next(item for item in bundle["menu"] if item["tag"]=="B")
+    for record in records:
+        _before_B(config,study)
+        if not time.time() < min(auth["deployment_deadline_unix"],GLOBAL_STOP):raise ValueError("SEPARATE_DEPLOYMENT_DEADLINE_STOP")
+        policy = copy.deepcopy(record["checkpoint"]["policy"]); counts["logical_policy_deepcopies"] += 1
+        before = copy.deepcopy(policy["counters"])
+        name = "BETA_"+record["role"]+"_"+record["item"]["arm_id"].removeprefix("BETA_")+"_MEAN"
+        counts["deploy_mean_entry"] += 1
+        try:
+            result = beta.deploy_mean(policy,context["feature_names"],context["features"],qa_validated=True,frozen_axis_sha256=inventory["axis_object_sha256"])
+        except (ValueError,OverflowError) as error:
+            counts["deploy_mean_failed"] += 1
+            decisions[name] = {"status":"PREDICTIVE_REJECT_EXPLICIT_ORIGINAL_B_FALLBACK_REQUEST","error_type":type(error).__name__,"error":str(error),
+                "actual_continuous_action":None,"full_recipe_sha256":None,"checkpoint":record["item"],
+                "fallback_core":{"tag":"B","recipe_sha256":core_B["recipe_sha256"],"action":copy.deepcopy(core_B["action"])},
+                "original_qualification_granted":False,"training_sample_eligible":False}
+        else:
+            counts["deploy_mean_completed"] += 1
+            if policy["counters"]["forward"] != before["forward"]+1 or any(policy["counters"][key] != before[key] for key in ("score_evaluations","parameter_updates")):
+                raise ValueError("PURE_FROZEN_MEAN_FORWARD_COUNTERS_REQUIRED")
+            if record["role"]=="PARENT" and result["lambda"] != .5:
+                raise ValueError("ACTUAL_SYMMETRIC_PARENT_MEAN_MUST_ALIAS_POINT5")
+            add_catalog(name,result)
+            decisions[name] = {"status":"FROZEN_CONTINUOUS_MEAN_PROPOSAL_NOT_QUALIFIED",**result,
+                "checkpoint":record["item"],"role":record["role"],"generation_index":record["generation_index"]}
+        finally:
+            counts["actual_policy_forward_delta"] += policy["counters"]["forward"]-before["forward"]
+        if beta.policy_sha256(policy) != record["item"]["policy_behavior_sha256"]:
+            raise ValueError("FROZEN_BETA_MODEL_PARAMETERS_CHANGED_DURING_MEAN")
+    for value in GRID:
+        _before_B(config,study)
+        if not time.time() < min(auth["deployment_deadline_unix"],GLOBAL_STOP):raise ValueError("SEPARATE_DEPLOYMENT_DEADLINE_STOP")
+        name = "BETA_AXIS_FIXED_L"+str(round(value*100)).zfill(3)
+        counts["fixed_axis_map_entry"] += 1
+        result = mapping.map_lambda(axis,value,expected_axis_sha256=inventory["axis_object_sha256"])
+        counts["fixed_axis_map_completed"] += 1
+        add_catalog(name,result); fixed[name] = {"status":"FIXED_AXIS_CONTROL_NOT_QUALIFIED",**result,"training_sample_eligible":False}
+    original_early = next(item for item in bundle["menu"] if item["tag"]=="EARLY_H150")
+    _before_B(config,study)
+    if not time.time() < min(auth["deployment_deadline_unix"],GLOBAL_STOP):raise ValueError("SEPARATE_DEPLOYMENT_DEADLINE_STOP")
+    return {"schema":"v8.beta.continuous_mean_and_grid_extras_before_B.v1","continuous_decisions":decisions,
+        "fixed_axis_controls":fixed,"full_recipe_catalog":catalog,"actual_counts":counts,
+        "context25":context,"causal25_numeric_identity_sha256":digest({"names":context["feature_names"],"values":context["features"]}),
+        "actual_seven_role_source_proof":source_proof,"proof_audit":proof_audit,
+        "endpoint_transaction_scope":endpoint_scope,"frozen_external_quarantine":quarantine,
+        "whole_training_hard_status":"UNKNOWN_EXTERNAL_BATCH02_UNRESOLVED",
+        "endpoint_review_is_not_physical_dispatch_authority":True,
+        "all_choices_before_any_B_result":True,"inventory":spec["inventory"],"deployment_authorization":spec["deployment_authorization"],
+        "core5_interface_not_used_for_continuous_hashes":True,
+        "same_fullrecipe_execution_aliases_not_independent_replication_or_attempt_savings":True,
+        "training_rollouts_never_deduplicated":True,
+        "required_new_job_paid_exact_raw_repeat_gate":{"continuous_tag":"BETA_AXIS_FIXED_L100",
+            "continuous_recipe_sha256":fixed["BETA_AXIS_FIXED_L100"]["full_recipe_sha256"],
+            "original_core_tag":"EARLY_H150","original_core_recipe_sha256":original_early["recipe_sha256"],
+            "both_new_paid_START_END_required":True,"do_not_alias_away_either_required_repeat":True,
+            "exact_original_raw_and_scorer_gate_required":True,"static_physical_equivalence_claimed":False},
+        "original_B_outside_Beta_support":True,"lambda0_is_B_or_noop":False,
+        "training_clock_read_or_extended":False,"physical_dispatch_or_qualification_granted":False}
+
+
+def predict_before_B(P,config,study):
+    """Future root calls once; exception carries all consumed inference work."""
+    counts = {"A3_actual_live_seven_role_proof_entry":0,"A3_actual_live_seven_role_proof_completed":0,
+        "A3_scoped_context39_preparation_entry":0,"A3_scoped_context39_preparation_completed":0,
+        "commissioned25_projection":0,"deploy_mean_entry":0,"deploy_mean_completed":0,"deploy_mean_failed":0,
+        "actual_policy_forward_delta":0,"logical_policy_deepcopies":0,"fixed_axis_map_entry":0,"fixed_axis_map_completed":0,
+        "restore":0,"BetaArm_constructor":0,"initialize":0,"RNG_draws":0,"fit_gradient_or_update":0,"new_physics":0}
+    try:
+        return _predict_before_B(P,config,study,counts)
+    except BaseException as error:
+        error.beta_mean_extension_consumed_work = copy.deepcopy(counts)
+        raise

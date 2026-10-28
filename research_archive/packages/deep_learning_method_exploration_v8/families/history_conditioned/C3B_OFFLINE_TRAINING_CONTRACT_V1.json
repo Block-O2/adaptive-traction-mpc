@@ -1,0 +1,31 @@
+{
+  "status": "PROPOSED_WAITING_MAIN_AGENT_APPROVAL",
+  "objective": "Diagnose whether completed causal B history carries action-relative information beyond action-only and commissioning context in the exposed six-context OUT0 recipe library",
+  "scope": "OFFLINE_CONTEXTUAL_LIBRARY_FIT; neither fresh on-policy nor actual continuous Trial adaptation",
+  "local_timeout_s": 120,
+  "cpu_threads": 1,
+  "physics_attempts": 0,
+  "interpreter": "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python -B",
+  "input_history": "V7_COMPLETE_B_HISTORY8_DATASET.json; six groups EARLYN01/EARLYH01/EARLYL01/CFACTORH01/CFACTORL01/HOLDSS03; all exposed development",
+  "input_outcomes": "main-agent frozen HISTORICAL_RECIPE_DATASET_V2.json, exact complete underlying recipe bindings required before fit",
+  "actions": ["B", "LATE_H150", "EARLY_H150"],
+  "no_missing_label_rule": "Every context must contain complete original JF/JM/qualification for each requested menu action; absent rows remain absent and are not filled or inferred",
+  "paired_targets": ["JF(action)-JF(B)", "JM(action)-JM(B)", "original complete qualification 0/1", "original worst_ratio-1 when actually available"],
+  "motion_missing_rule": "Missing original margin head omitted with explicit status; never fill zero. Original complete qualification remains authoritative for offline realized evaluation.",
+  "models": [
+    {"id": "ACTION_ONLY", "design": "action one-hot including B; no context"},
+    {"id": "HISTORY_ADDITIVE", "design": "action one-hot plus normalized history8; context main effects shared across actions"},
+    {"id": "HISTORY_INTERACTION", "design": "action one-hot plus normalized history8 plus explicit history8 x nonbaseline-action one-hot"},
+    {"id": "HISTORY_DISABLED", "design": "same frozen HISTORY_INTERACTION weights; infer current context as training-fold mean history8, no current complete B history supplied"},
+    {"id": "COMMISSIONED25_INTERACTION", "design": "independent comparator, same recipe heads and fold-local preprocessing with main-agent allowlisted commissioned25"}
+  ],
+  "fit": "regularized least squares per head, intercept unpenalized and fixed ridge=1; no hyperparameter search or calibration claim",
+  "folds": "6 leave-one-parent-context-out development folds plus all-exposed fit; each context's actions kept together",
+  "preprocessing": "training-context mean/std fitted inside each fold; scale <1e-9 becomes 1; exact named order frozen; no source split mixing",
+  "selection": "predicted qualification>=0.5, B always admissible as fallback; select minimum predicted paired JF among eligible. JF objective separate from JM/motion, no weighted objective. Also report unconstrained cost ranking to distinguish information from eligibility gates.",
+  "uncertainty_scope": "No 6-context CV error is a certified confidence bound. No model-safe claim.",
+  "reference_baselines": ["B", "each exact fixed recipe", "best qualification-aware training-fold constant", "one-level training-history stump", "commissioned25 exact comparator"],
+  "required_outputs": ["dataset/source/config SHA", "all fitted weights and exact feature names", "fit/solve counters and resource START/END", "per-fold predicted/selected tag and original realized qualification/JF/JM/motion", "history-enabled versus disabled action changes", "strong-fixed increments", "unconstrained relative ranking changes", "all bad predictions and all failures retained", "0 physics and 0 new training-patient claim"],
+  "promotion_gate": "No physical promotion without main-agent review of frozen outputs, different fresh context and same-menu original qualification evaluation",
+  "extension_rule": "If local timeout is insufficient, terminate preserving partial; further batch needs a separately recorded main-agent approval rather than silently extending"
+}

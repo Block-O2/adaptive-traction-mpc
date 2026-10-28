@@ -1,0 +1,100 @@
+{
+  "schema_version": "stage4_trajectory_excitation_suite_v1",
+  "design_status": "preregistered_before_closed_loop_execution",
+  "anchor": "registered_high_flexion_23s",
+  "audit": {
+    "sample_period_s": 0.02,
+    "integral_window_s": 0.5,
+    "block_stride_measurements": 5,
+    "parameter_scaling": "frozen_integral_identifier_box_span"
+  },
+  "cases": [
+    {
+      "trajectory_id": "registered_high_flexion_23s",
+      "construction": "registered_cold_start_anchor",
+      "duration_s": 23.0,
+      "rehabilitation_interpretation": "Current staged hip-and-knee flexion, high-flexion hold, and staged return task.",
+      "design_intent": "Frozen anchor; copied exactly from the formal Stage-4 runner.",
+      "identical_to_anchor": [
+        "all joint references and derivatives",
+        "all waypoint times and holds",
+        "initial and final posture"
+      ]
+    },
+    {
+      "trajectory_id": "moderate_rom_23s",
+      "construction": "anchor_excursion_scale",
+      "duration_s": 23.0,
+      "joint_excursion_scale": [0.6, 0.6],
+      "rehabilitation_interpretation": "Same staged assisted flexion-return task performed over a moderate range of motion.",
+      "design_intent": "Isolate reduced angular excursion without changing timing or coordination pattern.",
+      "identical_to_anchor": [
+        "duration and waypoint times",
+        "initial and final posture",
+        "relative phase ordering, holds, and return structure"
+      ]
+    },
+    {
+      "trajectory_id": "slow_high_flexion_34p5s",
+      "construction": "anchor_time_scale",
+      "duration_s": 34.5,
+      "time_scale": 1.5,
+      "rehabilitation_interpretation": "The same full high-flexion rehabilitation task performed at a deliberately slower clinical pace.",
+      "design_intent": "Isolate velocity and acceleration magnitude while preserving the geometric path.",
+      "identical_to_anchor": [
+        "joint-space path and ROM",
+        "coordination pattern and ordering",
+        "relative timing fractions and hold fractions"
+      ]
+    },
+    {
+      "trajectory_id": "hip_dominant_low_knee_23s",
+      "construction": "anchor_excursion_scale",
+      "duration_s": 23.0,
+      "joint_excursion_scale": [1.0, 0.25],
+      "rehabilitation_interpretation": "Assisted hip-flexion or straight-leg-raise-like task with the knee kept near extension but not at the singular zero-flexion posture.",
+      "design_intent": "Create joint-specific low knee excitation while retaining a normal hip-flexion task.",
+      "identical_to_anchor": [
+        "duration and waypoint times",
+        "hip reference",
+        "initial and final posture",
+        "phase ordering and holds"
+      ]
+    },
+    {
+      "trajectory_id": "knee_dominant_low_hip_23s",
+      "construction": "anchor_excursion_scale",
+      "duration_s": 23.0,
+      "joint_excursion_scale": [0.25, 1.0],
+      "rehabilitation_interpretation": "Isolated assisted knee flexion-extension with the thigh comparatively stabilized.",
+      "design_intent": "Create joint-specific low hip excitation while retaining a normal knee exercise.",
+      "identical_to_anchor": [
+        "duration and waypoint times",
+        "knee reference",
+        "initial and final posture",
+        "phase ordering and holds"
+      ]
+    },
+    {
+      "trajectory_id": "two_cycle_moderate_23s",
+      "construction": "piecewise_quintic_waypoints",
+      "duration_s": 23.0,
+      "rehabilitation_interpretation": "Two ordinary moderate flexion-return repetitions in one session rather than one staged high-flexion repetition.",
+      "design_intent": "Change the normal repetition pattern without adding a calibration segment or estimator-directed probe.",
+      "waypoints": [
+        {"time_s": 0.0, "q_deg": [5.0, 10.0], "label": "initial_hold_start"},
+        {"time_s": 1.0, "q_deg": [5.0, 10.0], "label": "repetition_1_start"},
+        {"time_s": 6.0, "q_deg": [50.0, 60.0], "label": "repetition_1_peak"},
+        {"time_s": 11.0, "q_deg": [5.0, 10.0], "label": "repetition_2_start"},
+        {"time_s": 16.0, "q_deg": [50.0, 60.0], "label": "repetition_2_peak"},
+        {"time_s": 22.0, "q_deg": [5.0, 10.0], "label": "final_hold_start"},
+        {"time_s": 23.0, "q_deg": [5.0, 10.0], "label": "final_hold_end"}
+      ],
+      "identical_to_anchor": [
+        "total duration",
+        "initial and final posture",
+        "one-second initial and final holds"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "schema": "stage5_interface_robustness_closeout_v1",
+  "evidence_category": "engineering_development_only",
+  "clinical_or_hardware_safety_validation": false,
+  "task": {
+    "start_return_target_deg": [5.0, 10.0],
+    "outbound_goal_target_deg": [20.0, 35.0],
+    "full_joint_trajectory_provided": false,
+    "fixed_joint_coordination_ratio": false,
+    "path_corridor_active": false
+  },
+  "evaluation_truth_acceptance": {
+    "terminal_angle_abs_error_deg": [3.0, 3.0],
+    "arrival_abs_velocity_deg_s": [5.0, 5.0],
+    "continuous_outbound_terminal_set_s": 0.5,
+    "dedicated_long_hold_s": 5.0,
+    "long_hold_last_window_s": 2.0,
+    "long_hold_last_window_peak_to_peak_angle_deg": [2.0, 2.0],
+    "normal_episode_max_duration_s": 25.0,
+    "long_hold_episode_max_duration_s": 30.0
+  },
+  "state_estimation_acceptance": {
+    "q_rmse_deg": [2.0, 2.0],
+    "q_abs_error_p95_deg": [3.0, 3.0],
+    "q_abs_error_max_deg": [5.0, 5.0],
+    "completion_window_q_abs_error_max_deg": [2.0, 2.0],
+    "completion_window_dq_abs_error_max_deg_s": [2.0, 2.0]
+  },
+  "prediction_acceptance": {
+    "horizon_s": 0.02,
+    "physical_force_vector_error_rmse_n": 10.0,
+    "physical_force_vector_error_p95_n": 15.0,
+    "action_hold_peak_force_max_underprediction_n": 20.0,
+    "physical_moment_vector_error_rmse_nm": 1.0,
+    "physical_moment_vector_error_p95_nm": 2.0,
+    "frame": "world",
+    "reference_point": "Human-side cuff reference point",
+    "timing": "prediction over the selected 20 ms action hold versus time-aligned physical samples"
+  },
+  "registered_hard_limits_unchanged": {
+    "joint_velocity_deg_s": [45.0, 75.0],
+    "joint_acceleration_20ms_deg_s2": [300.0, 600.0],
+    "physical_cuff_force_gate_n": 200.0,
+    "human_rom": "Stage-5 registered Human ROM",
+    "robot_joint_torque": "existing executable-command and Safety Filter limits",
+    "invented_cuff_moment_limit": null
+  },
+  "control_authority": {
+    "fixed_nominal_kelvin_voigt_model": true,
+    "online_interface_parameter_identification_active": false,
+    "interface_hypothesis_bank_is_control_authority": false,
+    "human_adaptation_active": false,
+    "value_or_rl_learning_active": false,
+    "plant_truth_available_online": false
+  },
+  "development_v1": {
+    "maximum_new_episodes": 6,
+    "planning_physical_force_ceiling_n": 180.0,
+    "reserve_to_physical_gate_n": 20.0,
+    "planning_joint_velocity_ceiling_deg_s": [15.0, 25.0],
+    "planning_velocity_is_not_registered_hard_limit": true,
+    "cases": [
+      {"name": "nominal_normal", "Kt_scale": 1.0, "Kr_scale": 1.0, "D_scale": 1.0, "hold_s": 0.5},
+      {"name": "nominal_hold_5s", "Kt_scale": 1.0, "Kr_scale": 1.0, "D_scale": 1.0, "hold_s": 5.0},
+      {"name": "kt_0p7", "Kt_scale": 0.7, "Kr_scale": 1.0, "D_scale": 1.0, "hold_s": 0.5},
+      {"name": "kt_1p3", "Kt_scale": 1.3, "Kr_scale": 1.0, "D_scale": 1.0, "hold_s": 0.5},
+      {"name": "kr_0p7", "Kt_scale": 1.0, "Kr_scale": 0.7, "D_scale": 1.0, "hold_s": 0.5},
+      {"name": "kr_1p3", "Kt_scale": 1.0, "Kr_scale": 1.3, "D_scale": 1.0, "hold_s": 0.5}
+    ],
+    "v2_allowed_only_after_clear_general_v1_failure": true,
+    "maximum_implementation_versions": 2
+  },
+  "preregistered_final_campaign": {
+    "authorized_to_run": false,
+    "core_box": {
+      "alpha_t_range": [0.9, 1.1],
+      "alpha_r_range": [0.9, 1.1],
+      "alpha_d_range": [0.8, 1.2],
+      "conditions": "nominal plus eight box corners",
+      "fixed_seeds_per_condition": 3,
+      "episode_count": 27
+    },
+    "boundary_challenges": [
+      "Kt_x0.7",
+      "Kt_x1.3",
+      "Kr_x0.7",
+      "approximately_10_percent_progressive_tangent_stiffness_near_nominal_peak"
+    ],
+    "repeatability": {
+      "continuous_episode_count": 30,
+      "five_second_hold_episodes": [1, 30],
+      "required_truth_complete_count": 30,
+      "last5_minus_first5_terminal_drift_abs_max_deg": [1.0, 1.0]
+    }
+  },
+  "exit_rules": {
+    "A": "final campaign passes: close interface identification and proceed to Human identification, then value learning",
+    "B": "core box works and boundary failures are known/detectable: freeze the limited scope explicitly",
+    "C": "after V2 core still false-completes, silently violates, or is unusable: stop interface work and require a research/mechanical decision"
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "status": "PASS",
+  "physics_attempts": 3,
+  "physics_process_START": 3,
+  "physics_process_END": 3,
+  "physical_episodes": 3,
+  "episode_START": 3,
+  "episode_END": 3,
+  "PPO_optimizer_gradient_steps": 4,
+  "attempts": [
+    {
+      "run": "ppo_initial",
+      "START": {
+        "unix": 1792481056.9223268,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "functional_smoke.py",
+          "--stage",
+          "initial",
+          "--out",
+          "runs/ppo_initial/physics"
+        ],
+        "pid": 27441,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "a90be1274d3ff5094b21d432d29764e38ba7234f095c08ddc4a6ff5faae162bc",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 600.0
+      },
+      "END": {
+        "unix": 1792481141.085126,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 27443,
+        "child_joined": true,
+        "resources": {
+          "samples": 169,
+          "minimum_available_GiB": 28.551246643066406,
+          "wall_s": 84.16828559699934,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "episode_start": {
+        "unix": 8731.649753845,
+        "pid": 27443,
+        "seed": 20261021,
+        "category": "UNQUALIFIED_TRAINING_SMOKE",
+        "contract_sha256": "a90be1274d3ff5094b21d432d29764e38ba7234f095c08ddc4a6ff5faae162bc",
+        "task_plant_safety_unchanged": true,
+        "stage": "initial"
+      },
+      "episode_end": {
+        "unix": 1792481140.207013,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "terminal_status": "COMPLETE",
+        "partial_abandoned": false,
+        "category": "UNQUALIFIED_TRAINING_SMOKE"
+      },
+      "RESULT": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/runs/ppo_initial/physics/RESULT.json",
+      "complete": true
+    },
+    {
+      "run": "ppo_resume",
+      "START": {
+        "unix": 1792481166.4359818,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "functional_smoke.py",
+          "--stage",
+          "resume",
+          "--out",
+          "runs/ppo_resume/physics",
+          "--checkpoint",
+          "runs/ppo_initial/physics/checkpoints/final"
+        ],
+        "pid": 27883,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "a90be1274d3ff5094b21d432d29764e38ba7234f095c08ddc4a6ff5faae162bc",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 600.0
+      },
+      "END": {
+        "unix": 1792481252.607175,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 27885,
+        "child_joined": true,
+        "resources": {
+          "samples": 173,
+          "minimum_available_GiB": 28.70211410522461,
+          "wall_s": 86.17403189600009,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "episode_start": {
+        "unix": 8841.225395844,
+        "pid": 27885,
+        "seed": 20261021,
+        "category": "UNQUALIFIED_TRAINING_SMOKE",
+        "contract_sha256": "a90be1274d3ff5094b21d432d29764e38ba7234f095c08ddc4a6ff5faae162bc",
+        "task_plant_safety_unchanged": true,
+        "stage": "resume"
+      },
+      "episode_end": {
+        "unix": 1792481251.585034,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "terminal_status": "ABORTED",
+        "partial_abandoned": false,
+        "category": "UNQUALIFIED_TRAINING_SMOKE"
+      },
+      "RESULT": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/runs/ppo_resume/physics/RESULT.json",
+      "complete": true
+    },
+    {
+      "run": "ppo_evaluation",
+      "START": {
+        "unix": 1792481277.4112751,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "functional_smoke.py",
+          "--stage",
+          "evaluation",
+          "--out",
+          "runs/ppo_evaluation/physics",
+          "--checkpoint",
+          "runs/ppo_resume/physics/checkpoints/final"
+        ],
+        "pid": 28277,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "a90be1274d3ff5094b21d432d29764e38ba7234f095c08ddc4a6ff5faae162bc",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 600.0
+      },
+      "END": {
+        "unix": 1792481355.055374,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 28279,
+        "child_joined": true,
+        "resources": {
+          "samples": 156,
+          "minimum_available_GiB": 28.73342514038086,
+          "wall_s": 77.64685215200006,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "episode_start": {
+        "unix": 8952.266984918,
+        "pid": 28279,
+        "seed": 20261021,
+        "category": "UNQUALIFIED_TRAINING_SMOKE",
+        "contract_sha256": "a90be1274d3ff5094b21d432d29764e38ba7234f095c08ddc4a6ff5faae162bc",
+        "task_plant_safety_unchanged": true,
+        "stage": "evaluation"
+      },
+      "episode_end": {
+        "unix": 1792481354.17319,
+        "owner_joined": true,
+        "capture_cleared": true,
+        "terminal_status": "ABORTED",
+        "partial_abandoned": false,
+        "category": "UNQUALIFIED_TRAINING_SMOKE"
+      },
+      "RESULT": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/runs/ppo_evaluation/physics/RESULT.json",
+      "complete": true
+    }
+  ],
+  "unit_test_groups": {
+    "G4_UNIT_RESULTS.json": 19,
+    "REPAIR_BOUNDARY_TESTS.json": 10,
+    "SAFETY_AUTHORITY_TESTS.json": 6,
+    "EXECUTION_CONTRACT_TESTS.json": 6
+  },
+  "read_only_raw_audits": {
+    "old_force_episodes": 9,
+    "new_case_force_motion_owner_episodes": 3
+  },
+  "failed_scientific_episodes_retained": [
+    "ppo_resume:ABORTED at19.840s",
+    "ppo_evaluation:ABORTED at16.610s"
+  ],
+  "infrastructure_failures": [],
+  "diagnostic_failures": [
+    {
+      "command": "first sandboxed attachment read",
+      "error": "bwrap loopback RTM_NEWADDR Operation not permitted",
+      "recovery": "authorized read via tool escalation; no physics launched"
+    },
+    {
+      "command": "contract discovery searches",
+      "error": "candidate paths absent; rg exit2",
+      "recovery": "actual file inventory and ZIP search; absent B/H150 full authority reported"
+    },
+    {
+      "command": "early progress probes",
+      "error": "RESULT.json not yet present or no running process match",
+      "recovery": "waited for owned guard completion"
+    }
+  ],
+  "clock_note": "Outer START/END unix fields are authoritative wall time. Inner EPISODE_START unix is a misnamed perf_counter host_start value from the recording wrapper, not UTC; no wall-time claim is based on it. It records episode identity after commissioning; outer START predates all physics. Inner END unix is true UTC epoch. Raw native time stays independently audited.",
+  "parameter_manifest": "RUN_PLAN.json plus frozen source/config contract and config_snapshot.json per episode",
+  "hard_episode_cap": 12,
+  "all_attempts_closed": true,
+  "no_new_long_physics_after_cutoff": true
+}

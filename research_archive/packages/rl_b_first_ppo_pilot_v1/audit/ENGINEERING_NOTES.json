@@ -1,0 +1,31 @@
+{
+  "read_only_analysis_command_corrections": [
+    {
+      "issue": "system python lacks numpy",
+      "resolution": "reran analysis with existing rl_b_cloud_v1/.venv/bin/python",
+      "physics_or_training_affected": false
+    },
+    {
+      "issue": "analysis attempted plain summary.json after lossless compression",
+      "resolution": "used gzip-aware evidence reader",
+      "physics_or_training_affected": false
+    }
+  ],
+  "training_source_or_config_changes_after_freeze": false,
+  "no_additional_repair": true,
+  "automatic_approval_rejection": {
+    "action": "proposed removal of transient full training runtime/native streams after compact evidence generation",
+    "reason": "hash records cannot restore deleted original evidence",
+    "resolution": "cleanup abandoned; preserve all lossless compressed raw/native/receipt streams; no approval needed for continuing nondeleting work",
+    "files_deleted": false,
+    "training_affected": false
+  },
+  "archive_manifest_correction": {
+    "issue": "initial archive included the in-progress auxiliary console redirection file; after finalprint the local console content changed from the archived empty diagnostic",
+    "scientific_evidence_affected": false,
+    "resolution": "preserve initial archive and verification record; produce a new verified archive with completed static console log and no redirection into the package directory",
+    "initial_archive": "../rl_b_first_ppo_pilot_v1.zip",
+    "final_archive": "../rl_b_first_ppo_pilot_v1_verified.zip",
+    "evidence_deleted": false
+  }
+}

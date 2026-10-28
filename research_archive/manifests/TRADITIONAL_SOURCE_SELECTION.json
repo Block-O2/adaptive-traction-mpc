@@ -1,0 +1,232 @@
+{
+  "schema": "ihear.archive.traditional_source_selection.v1",
+  "date": "2026-10-28",
+  "scope": "Source inspection only; no new training, algorithm exploration or heavy simulation by this agent",
+  "destination_convention": "research_archive/packages/<original_package_name>/",
+  "core_repository": {
+    "source": "rl_b_matched_recovery_stability_v1/github",
+    "recommendation": "Preserve original Git source tree and history; do not prune controller/model/Stage3-5 dependencies merely for size",
+    "protected_instructions": "AGENTS.md"
+  },
+  "primary_reproduction": {
+    "launcher": "deployment/reproduce_trad_combo.py",
+    "original_package": "autonomous_learning_smoothness_v7",
+    "original_config": "experiments/DEVPC02.json",
+    "original_worker": "source/v7_worker_v5.py",
+    "arms": [
+      "B",
+      "V6PHASE",
+      "TRAD_COMBO"
+    ],
+    "seed": 2026102690,
+    "fork": "OUTBOUND slot1; full live address-space serial fork after exact lawful prefix",
+    "expected_historical_metrics": {
+      "B": {
+        "JF": 1437.97142,
+        "JM": 100.829734
+      },
+      "V6PHASE": {
+        "JF": 1405.990071,
+        "JM": 105.481425
+      },
+      "TRAD_COMBO": {
+        "JF": 1405.935078,
+        "JM": 105.464006
+      }
+    },
+    "qualification_limit": "Same exposed nominal S1, finite local composition; not universal optimum. Relative to B, JM increases. Existing short-segment geometry double-cost reversal remains.",
+    "mechanical_relocation": [
+      "Copy into new scratch",
+      "literal absolute package path rebase with before/after SHA",
+      "new host RUN_PLAN only",
+      "filter fixed arms; no GP or training",
+      "omit optional cross-package historical raw repeat audit, explicitly recorded; original physical/motion/receipt/parent raw gates retained"
+    ]
+  },
+  "secondary_reproduction": {
+    "launcher": "deployment/reproduce_traditional.py",
+    "runtime_package": "deep_learning_method_exploration_v8",
+    "original_config_in_core": "research/side_studies/ihear_overnight_control_learning_transition_v1/D01R_PLAN.json",
+    "original_runner": "runtime/control/campaign_v6.py::Campaign + runtime/code/study_common.py::run",
+    "arms": [
+      "B",
+      "H150"
+    ],
+    "seed": 2026102001,
+    "task_seconds_historical": 19.03,
+    "condition_limit": "B/H150 after registered legal prefix, not prefix-free canonical B.",
+    "historical_JF": {
+      "B": 1436.456498,
+      "H150": 1402.643211
+    }
+  },
+  "required_for_each_selected_runtime": [
+    "runtime/source/stages/** (complete model/code/config/scorer dependencies including robot meshes and XML)",
+    "runtime/code/**",
+    "runtime/control/**",
+    "runtime/deps/**",
+    "runtime/*.json",
+    "runtime/output/SHARED_COORDINATION_ACTION_CONTRACT.json"
+  ],
+  "special_implicit_dependencies": [
+    "runtime/deps/HISTORICAL_NATIVE_GRAPH_ACTIONS.json",
+    "runtime/deps/HISTORICAL_SPATIAL_GRAPH.json",
+    "runtime/FROZEN_18D.json",
+    "runtime/PARAMETER_MAP.json",
+    "runtime/MOTION_ACCEPTANCE_PROTOCOL.json",
+    "runtime/ACTION_SET.json"
+  ],
+  "v7_additional_required": [
+    "source/*.py",
+    "experiments/DEVPC02.json",
+    "freeze/VARIED_HUMAN_SPLIT_V1.json",
+    "audit/CLOSURE_RELOCATION.json"
+  ],
+  "important_controller_modules": {
+    "original_waypoint_mpc": "runtime/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_feedback_mpc.py",
+    "quintic_scheduler": "runtime/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/human_waypoint_scheduler.py",
+    "main_runtime": "runtime/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime_coordination_residual_v2.py",
+    "native_residual": "runtime/source/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/coordination_residual_v2.py",
+    "18d": "runtime/code/rich_planner.py",
+    "T": "runtime/code/terminal_repair.py",
+    "D": "runtime/control/round_planner.py",
+    "early_return": "runtime/control/early_return_planner.py",
+    "H150_terminal": "runtime/control/terminal_planner.py",
+    "modal8": "source/acl2_modal_planner.py",
+    "modal8_retimed": "source/acl2_modal_retimed.py",
+    "original_measure": "runtime/code/analyze_matched.py",
+    "original_motion_thresholds": "runtime/code/explore_common.py"
+  },
+  "safety_closure": "Keep full full3d_adaptive_integration_v1 directory, Stage3 executable command/current-state admission, Stage4 estimator/cuff allocator and model dependencies. Relevant modules include activation_validation, online_reference, receipt_reference_governor, rolling_suffix_splice, multisegment_reference, safe_fallback, scientific_scheduler, wall_physics. Do not extract only high-level planners.",
+  "representative_evidence_to_keep": [
+    {
+      "package": "autonomous_learning_smoothness_v7",
+      "paths": [
+        "BASELINE_AND_PAIRED_OPTIMIZATION.md",
+        "MOTION_FORCE_MOMENT_TRADEOFF.md",
+        "analysis/evidence_final_v4/ALL_CANDIDATE_EVIDENCE.json",
+        "analysis/evidence_final_v4/ALL_CANDIDATE_METRICS.csv",
+        "analysis/FINAL_EVIDENCE_CLASSIFICATION_RECONCILIATION_V2.json",
+        "analysis/figures_final_v3/**",
+        "attempts/DEVPC02_{B,V6PHASE,TRAD_COMBO}_RESULT.json",
+        "experiments/DEVPC02.json",
+        "experiments/PFXV01.json",
+        "experiments/PFXV02.json"
+      ],
+      "purpose": "Main traditional paired results, finite transfer, failures and metric contract"
+    },
+    {
+      "package": "smoothness_critic_integration_v6",
+      "paths": [
+        "SMOOTHNESS_BASELINE_COMPARISON.md",
+        "REPORT.md",
+        "ADAPTIVE_FIXED_RULE_RESULTS.md",
+        "analysis/FIXED_PHASE_RULE*",
+        "freeze/CAUSAL_GUARD_RULE_BASELINE.json"
+      ],
+      "purpose": "B/BEST/HANDOFF/PATTERN/COMPOSE/BLEND/fixed-phase qualification and failures"
+    },
+    {
+      "package": "smoothness_critic_research_v5",
+      "paths": [
+        "REPORT.md",
+        "source/v5_phase_composition.py",
+        "source/v5_bounded_smooth.py",
+        "source/v5_bounded_anticipatory.py"
+      ],
+      "purpose": "Original smoothness recipe construction, reference/force/moment tradeoffs"
+    },
+    {
+      "package": "representation_execution_v3",
+      "paths": [
+        "REPORT.md",
+        "source/old18d_match.py",
+        "source/independent_path_certificate.py",
+        "source/scheduler_replay.py"
+      ],
+      "purpose": "Old18D permission alignment, endpoint/duration differences, certificate limits"
+    },
+    {
+      "package": "constraint_geometry_learning_v4",
+      "paths": [
+        "REPORT.md",
+        "source/dual_causal_replay.py",
+        "source/swept_gap_conditions.py",
+        "source/endpoint_witness.py"
+      ],
+      "purpose": "Guard/clearance mechanism evidence and incomplete observer/actuator bound closure"
+    },
+    {
+      "core_repository": "research/side_studies/ihear_overnight_control_learning_transition_v1",
+      "paths": [
+        "D01R_PLAN.json",
+        "reports/D01R_{B,H150}_MEASURED.json"
+      ],
+      "purpose": "Exact D01R historical B/H150 identity and full-task contract"
+    }
+  ],
+  "raw_selection_recommendation": [
+    {
+      "package": "autonomous_learning_smoothness_v7",
+      "ids": [
+        "DEVPC02_B",
+        "DEVPC02_V6PHASE",
+        "DEVPC02_TRAD_COMBO"
+      ],
+      "per_id": [
+        "runtime/source/results/<ID>/summary.json",
+        "runtime/source/results/<ID>/trace.npz",
+        "runtime/source/results/<ID>/runtime_artifacts.json.gz",
+        "runtime/source/results/<ID>/config_snapshot.json",
+        "runtime/output/<ID>.json",
+        "runtime/output/<ID>_DATA.json",
+        "runtime/reports/<ID>_MEASURED.json",
+        "runtime/reports/<ID>_EXECUTED_RESIDUAL_RECEIPTS.json"
+      ],
+      "reason": "Small representative set retaining physical/task/scorer/native-jerk/JF/JM evidence"
+    },
+    {
+      "core_repository": "research/side_studies/ihear_overnight_control_learning_transition_v1",
+      "ids": [
+        "D01R_B",
+        "D01R_H150"
+      ],
+      "reason": "Retain existing Git objects/fixtures and avoid duplicate uploads"
+    }
+  ],
+  "nonessential_for_no_training_reproduction": [
+    "All historical weight checkpoints",
+    "optimizer states",
+    "venv/site-packages",
+    "__pycache__",
+    "all duplicate model/trace experiment bundles",
+    "zip archives of complete packages",
+    "tmp runtime/output caches and old queued campaign processes"
+  ],
+  "portability_check_status": {
+    "traditional_launcher": "py_compile + source/campaign import + controller construction passed; complete dynamics delegated to main archive verification",
+    "combo_launcher": "py_compile + original worker import + Study construction + original frozen case_adapter.install passed; complete dynamics delegated to main archive verification",
+    "manifest_fix": "Exclude both generated EXECUTION_CODE_MANIFEST names from own files list to avoid self hash mutation",
+    "explicit_limit": "Zero-physics import checks used existing local dependency environment for investigation only; final clean-clone environment tests must be separately recorded."
+  },
+  "prefix_free_original_b": {
+    "launcher": "deployment/reproduce_original_b.py",
+    "source": "research/side_studies/m2_18d_baseline_qualification_v1/{source,code,deps}",
+    "original_manifest": "EXECUTION_CODE_MANIFEST.json",
+    "original_contract": "BASELINE_CONTRACT.json",
+    "seed": 2026101303,
+    "prefix": {},
+    "task_seconds_required": 19.03,
+    "existing_original_objects_verified": 1346,
+    "missing_original_manifest_objects": 38,
+    "exact_sha_support_restored_from_v8": [
+      "source/stages/stage5_personalized_motion_learning/docs/high_rom_v1/PHASE_B_MATRIX.json",
+      "deps/HISTORICAL_NATIVE_GRAPH_ACTIONS.json",
+      "deps/HISTORICAL_SPATIAL_GRAPH.json"
+    ],
+    "historical_raw_exact_identity": "NOT_TESTED",
+    "source_default_prefix_backend": "numpy",
+    "status": "Zero-physics prepare/import/controller construction/original loader passed; full dynamics delegated to final archive verification"
+  },
+  "all_launchers_must_run_unoptimized_python": true
+}

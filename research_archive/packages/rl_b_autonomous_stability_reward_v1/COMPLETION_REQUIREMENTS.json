@@ -1,0 +1,639 @@
+{
+  "created_utc": "2026-10-20T20:15:41.175705+00:00",
+  "source_contract": "TASK_CONTRACT.md",
+  "purpose": "Final manual completion-audit matrix; file existence alone does not prove any requirement",
+  "overall_status": "CONTENT_REVIEW_COMPLETE_WITH_DECLARED_SCIENTIFIC_LIMITS",
+  "requirements": [
+    {
+      "id": "TIME",
+      "criterion": "Actual9–10h unless documented exhaustion; no new training after9h15; hard stop10h",
+      "authoritative_evidence_to_inspect": [
+        "START.json",
+        "END.json",
+        "STOP.json",
+        "ATTEMPT_ACCOUNTING.json"
+      ],
+      "verification_status": "VERIFIED_ACTUAL_CLOCK",
+      "reviewed_utc": "2026-10-21T04:04:35.861882+00:00",
+      "findings": "START→STOP/END实际9.110334小时；全部训练在最终pair锁定和9h15截止前结束；后续独立封存的实际时间在PACKAGE_VERIFICATION，全部受10h硬停保护。",
+      "reviewed_evidence": [
+        {
+          "path": "START.json",
+          "sha256": "1407e49a80fa38a1fa910960c824cdc08008a9097a2e230e6a340ac29a05fef2"
+        },
+        {
+          "path": "END.json",
+          "sha256": "06a289cfd6fdc116492762062488e85c62d5a3cead5008d22f50d47f26ca08bf"
+        },
+        {
+          "path": "audit/INDEPENDENT_CLOSED_SCIENCE_REVIEW.json",
+          "sha256": "5f64a58ed03e61ac14ed39bfeb0187c1070199bcc368f2be5efa82d91446df04"
+        }
+      ]
+    },
+    {
+      "id": "ISOLATION",
+      "criterion": "All new science in this package; protected histories/source/checkpoints/ZIPs unchanged",
+      "authoritative_evidence_to_inspect": [
+        "audit/HISTORICAL_PROTECTION_START.json",
+        "audit/HISTORICAL_PROTECTION_END.json",
+        "audit/RUNTIME_COPY.json"
+      ],
+      "verification_status": "VERIFIED_PROTECTED_SCIENTIFIC_BYTES",
+      "reviewed_utc": "2026-10-21T04:04:35.862005+00:00",
+      "findings": "全部科学输出在新包。关闭程序及另一进程分别复核69384历史保护文件、447运行合同文件，零字节差异；原checkpoint/ZIP/scorer保持。保护范围排除的Git元数据另行披露。",
+      "reviewed_evidence": [
+        {
+          "path": "audit/HISTORICAL_PROTECTION_START.json",
+          "sha256": "8c8ef647ee8074faa3674cb45c2f42672c757fc0d987799b513ed674ff1fa702"
+        },
+        {
+          "path": "audit/HISTORICAL_PROTECTION_END.json",
+          "sha256": "f6f426a463714969cdd1a31c0fbc88a97695e3c914f119f4f309f2ebb5fab321"
+        },
+        {
+          "path": "audit/INDEPENDENT_CLOSED_SCIENCE_REVIEW.json",
+          "sha256": "5f64a58ed03e61ac14ed39bfeb0187c1070199bcc368f2be5efa82d91446df04"
+        }
+      ]
+    },
+    {
+      "id": "FIXED_GITHUB",
+      "criterion": "Original fixed commit1adb1de177d6f5f32de6d01c4e629cbfae9ce121 unchanged and no git mutation",
+      "authoritative_evidence_to_inspect": [
+        "audit/GITHUB_START_IDENTITY.json",
+        "audit/GITHUB_END_IDENTITY.json"
+      ],
+      "verification_status": "REVIEWED_WITH_DECLARED_METADATA_LIMITATION",
+      "reviewed_utc": "2026-10-21T04:04:35.882375+00:00",
+      "findings": "HEAD保持1adb1de177d6f5f32de6d01c4e629cbfae9ce121、detached branch和clean科学工作树与起点相同；未观察到禁止Git命令。FETCH_HEAD于19:24更新、来源未归因，不能证明全部Git元数据未变；未回改或删除该观察。",
+      "reviewed_evidence": [
+        {
+          "path": "audit/GITHUB_START_IDENTITY.json",
+          "sha256": "ad6ee1a1d5a741591fa84758d20992c923eb7ba4d660ca17e2a93a7211811311"
+        },
+        {
+          "path": "audit/GITHUB_END_IDENTITY.json",
+          "sha256": "51a83ce5b188652d3870e4ac77c7486669a6ba2bc74b45ea4cd19fdcf3512639"
+        },
+        {
+          "path": "audit/GIT_METADATA_UPDATE_ATTRIBUTION.json",
+          "sha256": "69eb2caa843715f09db5dd1e7f9dda6e615ed03500263f4c6693c0d6102b0862"
+        },
+        {
+          "path": "audit/INDEPENDENT_CLOSED_SCIENCE_REVIEW.json",
+          "sha256": "5f64a58ed03e61ac14ed39bfeb0187c1070199bcc368f2be5efa82d91446df04"
+        }
+      ]
+    },
+    {
+      "id": "HARD_BUDGETS",
+      "criterion": "All attempts including early failures: training<=450/evaluation<=60/native<=50M; unknown crash work conservatively charged",
+      "authoritative_evidence_to_inspect": [
+        "LEDGER.json",
+        "audit/FINAL_ACCOUNTING_AUDIT.json",
+        "ATTEMPT_ACCOUNTING.json"
+      ],
+      "verification_status": "VERIFIED_ALL_ATTEMPTS",
+      "reviewed_utc": "2026-10-21T04:04:35.882851+00:00",
+      "findings": "442次全部结算：训练390/450、评价52/60、native42865780/50000000、RL6885、真实Adam1760；early failures全部计数，无unknown/open。合成Adam80另计。390超建议目标的真实保持/单位消融信息价值已明确，硬限未改。",
+      "reviewed_evidence": [
+        {
+          "path": "audit/FINAL_ACCOUNTING_AUDIT.json",
+          "sha256": "8b3144842a53ffa91468a1247be3327e159585dd943ffd50cb5039ebc6416999"
+        },
+        {
+          "path": "ATTEMPT_ACCOUNTING.json",
+          "sha256": "216aed69c4a9da52d7c58a4a70591054a27bb61da9fd01d4a3c10c0f83f7ea6b"
+        },
+        {
+          "path": "BUDGET_ALLOCATION_NOTE.json",
+          "sha256": "a42206df6ed6985110c0476589f886fcbdb70b025921d4f0a1f54ce367519d53"
+        }
+      ]
+    },
+    {
+      "id": "H1",
+      "criterion": "Both successful050 parents, full Adam/RNG restored, LR1e-4 vs strictly matched or bounded3e-4 control;30 continuations,10/20/30 frozen",
+      "authoritative_evidence_to_inspect": [
+        "H1_STABILITY_RESULTS.json",
+        "audit/CONTROL_REUSE_DECISION.json",
+        "CHECKPOINT_COMPARISON.json"
+      ],
+      "verification_status": "VERIFIED_COMPLETED_WITH_NONUNIFORM_RESULT",
+      "reviewed_utc": "2026-10-21T04:04:35.883661+00:00",
+      "findings": "两成功050全state恢复、LR唯一区别；各5真实Control逐transition/fullstate复演后复用原51–80。双方各30及10/20/30 mean/sample共12评价齐；只有163 mean保持，149退化、30sample均失败，未授一致稳定性。",
+      "reviewed_evidence": [
+        {
+          "path": "H1_STABILITY_RESULTS.json",
+          "sha256": "1f1ce982ed1562b9b82231bcef77f056fdab4e8f14f1e5abe0a2ea167866e8ca"
+        },
+        {
+          "path": "H1_STABILITY_ANALYSIS.json",
+          "sha256": "2f88ae6f8f7dde588c6005567b632b33370d44106dd23e20cdfe87247ec04a84"
+        },
+        {
+          "path": "audit/CONTROL_REUSE_DECISION.json",
+          "sha256": "368c0e660ae4b2d6bd2e7af177b8196e32dc5f0c2738a001f84f375e37021386"
+        },
+        {
+          "path": "PPO_OPTIMIZATION_DIAGNOSIS.md",
+          "sha256": "4336caf504fa1ac754ac3f2a5def255e95b3906f383e2d59be6a290550f32167"
+        }
+      ]
+    },
+    {
+      "id": "H2",
+      "criterion": "One justified update/credit mechanism, explicit control, same parent/reward/action; real bounded training if indicated; sample/update cost disclosed",
+      "authoritative_evidence_to_inspect": [
+        "PPO_OPTIMIZATION_DIAGNOSIS.md",
+        "UPDATE_LOG.jsonl",
+        "audit/H2_AGGREGATION_ENGINEERING_TEST.json",
+        "ALL_ATTEMPTS.jsonl"
+      ],
+      "verification_status": "VERIFIED_BOUNDED_NOMINAL_SUPPORT",
+      "reviewed_utc": "2026-10-21T04:04:35.884520+00:00",
+      "findings": "R0/LR3e-4相同父下完整episode聚合>=64和明确尾批机制；两父30/60 mean保持，60最新sample完整，163/30sample反例保留。935/922transitions、248/244Adam，不作唯一根因或中间全部端点成功声称。",
+      "reviewed_evidence": [
+        {
+          "path": "H2_STABILITY_RESULTS.json",
+          "sha256": "8eedd409b5ff1fdb6e1deaad26195ddd3327513d4fb684d834b3b5ae14976371"
+        },
+        {
+          "path": "RETENTION_H2_RESULTS.json",
+          "sha256": "485903fbc2109cb803b0db890d4f153d4670f47d6413b9c91d984ada48893992"
+        },
+        {
+          "path": "H2_RETENTION_REFLECTION.md",
+          "sha256": "361086c8f7c1b0cff3243f7ca245613e401ea6bfd1a703984ce970ed7b624bd8"
+        },
+        {
+          "path": "PPO_OPTIMIZATION_DIAGNOSIS.md",
+          "sha256": "4336caf504fa1ac754ac3f2a5def255e95b3906f383e2d59be6a290550f32167"
+        }
+      ]
+    },
+    {
+      "id": "REWARD_LOOP",
+      "criterion": "Versioned formulas/weights/sourceSHA, causal/math/safety audit, real training+common frozen evaluation, reflection; no reward-scale ranking",
+      "authoritative_evidence_to_inspect": [
+        "REWARD_CANDIDATES.md",
+        "REWARD_VERSION_MANIFEST.json",
+        "REWARD_SEARCH_RESULTS.json",
+        "RESEARCH_DECISION_LOG.jsonl",
+        "source_versions"
+      ],
+      "verification_status": "VERIFIED_BOUNDED_SEARCH_COMPLETE",
+      "reviewed_utc": "2026-10-21T04:04:35.885105+00:00",
+      "findings": "R1/R2/R3三个新候选，公式/权重/源码SHA、因果数学审计、实际训练及七问反思完整；R1同60验证与R3单一单位消融均以结果/reflection SHA绑定登记。R2短窗口、R3十集界限明确，未按回报/value loss尺度排名。",
+      "reviewed_evidence": [
+        {
+          "path": "REWARD_CANDIDATES.md",
+          "sha256": "c8c3b3f1dfb50945fbc6c59d3fbb7f732cf60cb7b0c8fb726815e101c54d81c5"
+        },
+        {
+          "path": "REWARD_VERSION_MANIFEST.json",
+          "sha256": "b4415ab7352fa334d1198142f9e82130fc75b6691c65c82e2b091d03525076ef"
+        },
+        {
+          "path": "REWARD_SEARCH_RESULTS.json",
+          "sha256": "ebdafe9b328365601061218a92c76eed7792a2783b9f1c55058e076218ca8646"
+        },
+        {
+          "path": "ADDITIONAL_REWARD_STUDIES.json",
+          "sha256": "b0709428ede72b3490678c4ec50b0a9fda3f33b3aa830d069c028136ddc33dc1"
+        },
+        {
+          "path": "R1_RETENTION_REFLECTION.md",
+          "sha256": "e5de27599d2afb479e59f070ba75b69184c7838aa9e770fff0853f5ecef12ca2"
+        },
+        {
+          "path": "R2_REWARD_REFLECTION.md",
+          "sha256": "d44505a1d92c5f957ec63a065fd042edb12d329f408e3621bbc86f2ecc76d591"
+        },
+        {
+          "path": "R3_REWARD_REFLECTION.md",
+          "sha256": "1696d687b2e26967a77b2e7bf4b5a6c5e24fc5676e3c9108eb105d37ddd5ac22"
+        }
+      ]
+    },
+    {
+      "id": "PHYSICAL_CONTRACT",
+      "criterion": "Real coupled MuJoCo original physics,dt,task,ROM,torque,clearance,contact,planner/certificate/admission unchanged",
+      "authoritative_evidence_to_inspect": [
+        "runtime/FROZEN_CONTRACT_MANIFEST.json",
+        "audit/HISTORICAL_PROTECTION_END.json",
+        "PACKAGE_VERIFICATION.json",
+        "FROZEN_EVALUATION_RESULTS.json"
+      ],
+      "verification_status": "VERIFIED_UNCHANGED_OBSERVED_PATHS",
+      "reviewed_utc": "2026-10-21T04:04:35.885720+00:00",
+      "findings": "原真实耦合MuJoCo、native0.25ms/控制5ms/bridge/lifecycle与ROM/torque/clearance/contact/planner/certificate/admission由447文件hash和原52冻结保存raw复算核对；仅观察路径支持，不授G4全矩阵。",
+      "reviewed_evidence": [
+        {
+          "path": "runtime/FROZEN_CONTRACT_MANIFEST.json",
+          "sha256": "c2c7131c99ff4ae6a08fcbe56020c1fd8f9655d52b187ffecad4a8cdb94c930b"
+        },
+        {
+          "path": "audit/FINAL_FROZEN_PHYSICS_RECHECK.json",
+          "sha256": "1319f9e7be2881ffeb749abbdefbbf03ed2d9c33d867638d23afc38478f54713"
+        },
+        {
+          "path": "audit/INDEPENDENT_CLOSED_SCIENCE_REVIEW.json",
+          "sha256": "5f64a58ed03e61ac14ed39bfeb0187c1070199bcc368f2be5efa82d91446df04"
+        }
+      ]
+    },
+    {
+      "id": "TRUTH_FIREWALL",
+      "criterion": "41D causal actor; rewards only legal observations/receipts/realized transition outcomes; no future Human truth",
+      "authoritative_evidence_to_inspect": [
+        "audit/PREFLIGHT_TESTS.json",
+        "audit/RESEARCH_REWARD_MATH_TESTS.json",
+        "REWARD_VERSION_MANIFEST.json",
+        "source_versions"
+      ],
+      "verification_status": "VERIFIED_SOURCE_AND_REALIZED_REWARDS",
+      "reviewed_utc": "2026-10-21T04:04:35.886087+00:00",
+      "findings": "原41D actor因果allowlist与源/接口测试复用；Reward只用合法measurement、receipt及已发生转移结果，V是在线估计代理。R1/R2数学审计与R3正单位及旧版本等价审计通过；未把native truth输入actor。",
+      "reviewed_evidence": [
+        {
+          "path": "audit/PREFLIGHT_TESTS.json",
+          "sha256": "c1551703ab1811525a4fb34f16abe582428c316339d1ce38256f0dc4cbfafbbd"
+        },
+        {
+          "path": "audit/RESEARCH_REWARD_MATH_TESTS.json",
+          "sha256": "dcdce4afa4942448bd96c525c8d0a3c1d5f1b9836755cc8022fe9681d6e28d59"
+        },
+        {
+          "path": "audit/R3_REWARD_ACTIVATED_AUDIT.json",
+          "sha256": "bb7750d1751529e198e3ec538b2c81678abcbd70018d1cafc1c93c0b1977cd0f"
+        },
+        {
+          "path": "REWARD_CANDIDATES.md",
+          "sha256": "c8c3b3f1dfb50945fbc6c59d3fbb7f732cf60cb7b0c8fb726815e101c54d81c5"
+        }
+      ]
+    },
+    {
+      "id": "REWARD_TERMINATION",
+      "criterion": "Correct dt/full vs partial integral, finite task terminated not timeout-bootstrap, resets/fallback attribution preserved",
+      "authoritative_evidence_to_inspect": [
+        "audit/FINAL_ACCOUNTING_AUDIT.json",
+        "FROZEN_EVALUATION_RESULTS.json",
+        "runtime/jobs"
+      ],
+      "verification_status": "VERIFIED_EXECUTED_TIME_FULL_PARTIAL",
+      "reviewed_utc": "2026-10-21T04:04:35.886577+00:00",
+      "findings": "原5ms传感器左积分按实际执行区间归属，零时长0剂量；所有442计数和52原终止/Reward/native ownership审计通过。失败potential/floor和真实终止保留；0.005s partial未作完整收益。",
+      "reviewed_evidence": [
+        {
+          "path": "audit/FINAL_ACCOUNTING_AUDIT.json",
+          "sha256": "8b3144842a53ffa91468a1247be3327e159585dd943ffd50cb5039ebc6416999"
+        },
+        {
+          "path": "audit/FINAL_FROZEN_PHYSICS_RECHECK.json",
+          "sha256": "1319f9e7be2881ffeb749abbdefbbf03ed2d9c33d867638d23afc38478f54713"
+        },
+        {
+          "path": "audit/PHASE_DOSE_ATTRIBUTION.json",
+          "sha256": "63750b7005d0db1b19a78f9a422bc03e49d787ab747d24ff3ddacf48d1401a25"
+        },
+        {
+          "path": "TASK_FORCE_MOTION_COMPARISON.md",
+          "sha256": "6700b92c81cac68574c60d9fb1f4e41fa9c86e710c6a647c516f361ed2fc45e8"
+        }
+      ]
+    },
+    {
+      "id": "EVALUATION",
+      "criterion": "Frozen policy/Adam no updates; original full task commit; duration,safety,applied receipts,JF/JM,real Human q/dq,tracking,velocity,acceleration,jerk,overshoot and failure reasons retained",
+      "authoritative_evidence_to_inspect": [
+        "FROZEN_EVALUATION_RESULTS.json",
+        "TASK_FORCE_MOTION_COMPARISON.md",
+        "runtime/jobs"
+      ],
+      "verification_status": "VERIFIED_FROZEN_AND_RECOMPUTED",
+      "reviewed_utc": "2026-10-21T04:04:35.887279+00:00",
+      "findings": "52冻结全部policy前后SHA相同、0Adam、fullstate restore；原worker执行optimizer前后hash断言，未虚构单独post-optimizer文件。duration/receipts/fullpartialJFJM/nativeq-dq/tracking/velocity/acceleration/jerk/overshoot与失败原因均保存并原审计复算。",
+      "reviewed_evidence": [
+        {
+          "path": "FROZEN_EVALUATION_RESULTS.json",
+          "sha256": "aab4b341fe4dbed65de769978e6b5481dbf2874dc343694dc2d820b96e1fb058"
+        },
+        {
+          "path": "FINAL_ACTION_STREAM_RESULTS.json",
+          "sha256": "7128ecfcbf26066f2043bb52a574f9de8a6320fc9a6ae12013d287b66a8f1192"
+        },
+        {
+          "path": "audit/FINAL_FROZEN_PHYSICS_RECHECK.json",
+          "sha256": "1319f9e7be2881ffeb749abbdefbbf03ed2d9c33d867638d23afc38478f54713"
+        },
+        {
+          "path": "TASK_FORCE_MOTION_COMPARISON.md",
+          "sha256": "6700b92c81cac68574c60d9fb1f4e41fa9c86e710c6a647c516f361ed2fc45e8"
+        }
+      ]
+    },
+    {
+      "id": "GENERALIZATION",
+      "criterion": "Audit actual supported initial-state interface; independent dev/holdout if admitted, otherwise explicit BLOCKED and nominal-only",
+      "authoritative_evidence_to_inspect": [
+        "GENERALIZATION_AUDIT.md",
+        "audit/GENERALIZATION_INTERFACE_AUDIT.json",
+        "configs"
+      ],
+      "verification_status": "REVIEWED_CONDITIONAL_BLOCKED_INTERFACE",
+      "reviewed_utc": "2026-10-21T04:04:35.888780+00:00",
+      "findings": "实际reset/options和native初始化路径已审查；改start会改任务RETURN目标，因此独立合法物理初态BLOCKED。保留nominal，最终8条仅未见动作流，各父3/4，不称患者泛化。",
+      "reviewed_evidence": [
+        {
+          "path": "GENERALIZATION_AUDIT.md",
+          "sha256": "58d68694ce32d96eec058f783a31623acbf754006a17affafdc9559b087eef67"
+        },
+        {
+          "path": "audit/GENERALIZATION_INTERFACE_AUDIT.json",
+          "sha256": "d044b375c6ebf65fd27eed87d32ca8f88d952d803f5e7d908ea98478f0f0ce22"
+        },
+        {
+          "path": "FINAL_FROZEN_SELECTION.json",
+          "sha256": "5ca25f82070f545a9d5d1c48d8b394344ca305fd8e2b8b8e54c75c30d514b005"
+        },
+        {
+          "path": "FINAL_ACTION_STREAM_RESULTS.json",
+          "sha256": "7128ecfcbf26066f2043bb52a574f9de8a6320fc9a6ae12013d287b66a8f1192"
+        }
+      ]
+    },
+    {
+      "id": "DURABLE_RESUME",
+      "criterion": "Owned persistent finite queue; identity-checked stop,atomic generations,Adam/RNG restore,complete-rollout recovery and no runaway rewards",
+      "authoritative_evidence_to_inspect": [
+        "audit/OWNED_STOP_TEST.json",
+        "audit/BUDGET_RESOURCE_GUARD_TESTS.json",
+        "source_versions",
+        "runtime/jobs",
+        "PROCESS_EXIT_AUDIT.json"
+      ],
+      "verification_status": "VERIFIED_BOUNDED_EXECUTION_AND_COMPLETE_PENDING",
+      "reviewed_utc": "2026-10-21T04:04:35.889028+00:00",
+      "findings": "持久有限队列、PID启动身份和独占进程组关闭、资源/attempt预留/异常保护完整。75 bundle/141normal/118preAdam generation核验；真实59+24=83有序pending恢复与合成连续/分段fullstate一致。partial父启动前拒绝；实际partial-Adam故障重放未运行，明确不声称通过。",
+      "reviewed_evidence": [
+        {
+          "path": "audit/USED_SOURCE_BUNDLE_VERIFICATION.json",
+          "sha256": "0bbc9df644669bd0ef85d1c33bbd0820e20d5fca5faf17ae9b9bbb7764c5c6a7"
+        },
+        {
+          "path": "audit/REAL_PENDING_CONTINUATION_AUDIT.json",
+          "sha256": "9b9b087f622fd65508414303567d991ff700e2f65025ecb1e14855d21dffa441"
+        },
+        {
+          "path": "audit/R2_REAL_PENDING_CONTINUATION_AUDIT.json",
+          "sha256": "2a0f8c380b63708b82d274b68738f12cdb45c1c020471e93921b630cd42dabbf"
+        },
+        {
+          "path": "audit/PENDING_BUFFER_EQUIVALENCE_TEST.json",
+          "sha256": "2a840210e9cf553f7a508b4d4a181ad812402c91f1a1949484d8260d1048d272"
+        },
+        {
+          "path": "SOURCE_RETURN_PLAN.md",
+          "sha256": "73fe75d3ae613b5ad0320f232f51f6bb68a8b7d9433d2c05353def8b500f5559"
+        },
+        {
+          "path": "PROCESS_EXIT_AUDIT.json",
+          "sha256": "65adff1686bc20460de23060b4f06afa5aff3734bcbfceea7e97e97e720b7efc"
+        }
+      ]
+    },
+    {
+      "id": "RESOURCES",
+      "criterion": "At least6GiB available RAM; disk/output,wall/episode/native/error/checkpoint protection; no paid expansion",
+      "authoritative_evidence_to_inspect": [
+        "RESOURCE_USAGE.json",
+        "jobs",
+        "audit/BUDGET_RESOURCE_GUARD_TESTS.json"
+      ],
+      "verification_status": "VERIFIED_OBSERVED_RESERVES_AND_GUARDS",
+      "reviewed_utc": "2026-10-21T04:04:35.889905+00:00",
+      "findings": "全部记录可用RAM最低约27.73GiB，原6GiB门未改；磁盘/输出/native/episode/wall保护与shadow admission测试齐。单环境单线程CPU实测1401/1281native steps/s含开销，未扩容/租赁/迁移。",
+      "reviewed_evidence": [
+        {
+          "path": "RESOURCE_USAGE.json",
+          "sha256": "3ace7bc75a5205ab241c7ccdb7403c2fce7a48e31d15d2cf2abd249e37bc89ec"
+        },
+        {
+          "path": "audit/CPU_THROUGHPUT_SUMMARY.json",
+          "sha256": "308cab39787b8ce5ee3cc9800d7a8a2827743fd2a50e777f7f53339b8b51bdda"
+        },
+        {
+          "path": "audit/BUDGET_RESOURCE_GUARD_TESTS.json",
+          "sha256": "86f5301b2c7e0f28321d8f0958edd92cae88de9c244f9da9ef9e65d8315c9cbd"
+        },
+        {
+          "path": "audit/INDEPENDENT_CLOSED_SCIENCE_REVIEW.json",
+          "sha256": "5f64a58ed03e61ac14ed39bfeb0187c1070199bcc368f2be5efa82d91446df04"
+        }
+      ]
+    },
+    {
+      "id": "PHASE_REPORTS",
+      "criterion": "Internal2/4/6/8h reports with actual counts,results,currentbest,remaining budget,next work,blockers+alternatives; reports do not stop research",
+      "authoritative_evidence_to_inspect": [
+        "PHASE_2H.md",
+        "PHASE_4H.md",
+        "PHASE_6H.md",
+        "PHASE_8H.md"
+      ],
+      "verification_status": "VERIFIED_FOUR_TIMED_CONTENT_REPORTS",
+      "reviewed_utc": "2026-10-21T04:04:35.890143+00:00",
+      "findings": "2/4/6/8h实际时间均在目标15秒内；自动快照按SHA留档并保留为报告前缀。已逐份阅读计数、当时结果/候选、预留/剩余、下一步、阻碍/nominal替代，补注有时间边界，未作STOP。",
+      "reviewed_evidence": [
+        {
+          "path": "PHASE_2H.md",
+          "sha256": "8bb53d38061d9edb07d5f87dd9bb1e79afabce9e3b4aa6fb746fa430a93d643f"
+        },
+        {
+          "path": "PHASE_4H.md",
+          "sha256": "8190df1b2143dfea144926ab6014db00506627cafadd51b2c535624691411a9d"
+        },
+        {
+          "path": "PHASE_6H.md",
+          "sha256": "c6cd79e96357819c89ce575747589343e2099da56adfc03cf24a3bd695cdd5a3"
+        },
+        {
+          "path": "PHASE_8H.md",
+          "sha256": "012925ab0aaee949aa3642913d155617659e1293b0f3f083bb9588fef9184697"
+        },
+        {
+          "path": "audit/PHASE_REPORT_COMPLETENESS_REVIEW.json",
+          "sha256": "9bf9b14619e2d18ef30e24ac8585ac708a1c352b3d1b5f4e924395bfe054674d"
+        }
+      ]
+    },
+    {
+      "id": "SOURCE_RETURN",
+      "criterion": "Reviewable minimal patches/tests only; no source mainline overwrite,commit or push",
+      "authoritative_evidence_to_inspect": [
+        "SOURCE_RETURN_PLAN.md",
+        "patches",
+        "audit/SOURCE_RETURN_PATCH_VERIFICATION.json"
+      ],
+      "verification_status": "VERIFIED_REVIEWABLE_PATCHES_ONLY",
+      "reviewed_utc": "2026-10-21T04:04:35.891079+00:00",
+      "findings": "force/moment区间和phase期限patch仅在新scratch应用并与已用冻结模块字节相同；固定主树只读apply--check通过、未apply。partial-parent研究wrapper最小patch及负向0physics probe保留；基础设施抽取与研究Reward/PPO身份分开，无commit/push。",
+      "reviewed_evidence": [
+        {
+          "path": "SOURCE_RETURN_PLAN.md",
+          "sha256": "73fe75d3ae613b5ad0320f232f51f6bb68a8b7d9433d2c05353def8b500f5559"
+        },
+        {
+          "path": "audit/SOURCE_RETURN_PATCH_VERIFICATION.json",
+          "sha256": "7dc51df304e95bb5e5976377531e75332c3cc541268e491fdafda7ab450bdf28"
+        },
+        {
+          "path": "audit/SOURCE_RETURN_ACTIVE_MAIN_CHECK.json",
+          "sha256": "7a3bacab4d3f05d42db7fa7ff22a6748e8aeccc84c2f343a334fc60a179c1085"
+        },
+        {
+          "path": "audit/SOURCE_RETURN_PARENT_ADMISSION_PATCH.json",
+          "sha256": "9c5bbf83676ee93efc08055d55ac406d4810fbf025e3f637fce6a94a84b16c40"
+        }
+      ]
+    },
+    {
+      "id": "QUALIFICATIONS",
+      "criterion": "Ten independent requested qualifications,each with evidence/scope; dev success does not grantG4/liveMatched/Stage2/finalCampaign",
+      "authoritative_evidence_to_inspect": [
+        "QUALIFICATIONS.json",
+        "FINAL_CAMPAIGN_READINESS.md"
+      ],
+      "verification_status": "VERIFIED_TEN_SEPARATE_SCOPED_OUTCOMES",
+      "reviewed_utc": "2026-10-21T04:04:35.891423+00:00",
+      "findings": "十项独立资格均有结果/证据/范围：开发有效、mean名义保持与小幅meanforce改善受限支持，motion仅观察审计；Reward搜索完成不等于候选全面成功。G4=FAIL，newliveMatched/Stage2/正式Campaign均NOT_READY。",
+      "reviewed_evidence": [
+        {
+          "path": "QUALIFICATIONS.json",
+          "sha256": "d630d169b4de3d11603983df68c45ae81f711e362d4b9993fc2db5e82727cf99"
+        },
+        {
+          "path": "FINAL_CAMPAIGN_READINESS.md",
+          "sha256": "ebce1d41bf9b7013b5f7ae23514f42f4fdca0f5d654f849409e2fabf6d24c586"
+        },
+        {
+          "path": "GENERALIZATION_AUDIT.md",
+          "sha256": "58d68694ce32d96eec058f783a31623acbf754006a17affafdc9559b087eef67"
+        }
+      ]
+    },
+    {
+      "id": "REPORT_TWENTY",
+      "criterion": "Chinese final report directly answers all20 requested questions with actual numbers,decisions,limits and one next recommendation",
+      "authoritative_evidence_to_inspect": [
+        "REPORT.md",
+        "SCIENTIFIC_REVIEW.md",
+        "NEXT_RESEARCH_DECISION.md"
+      ],
+      "verification_status": "VERIFIED_ALL_TWENTY_ACTUAL_ANSWERS",
+      "reviewed_utc": "2026-10-21T04:04:35.891502+00:00",
+      "findings": "中文20问逐项有真实数值、反例、选择理由、边界及一个具体下一问题；9.110334h实际END、R1/H2/60 force-moment/motion取舍、最终各3/4两阶段失败和Git元数据限制均显式。下一std.2冻结机制建议未执行。",
+      "reviewed_evidence": [
+        {
+          "path": "REPORT.md",
+          "sha256": "976bdd6526786f410252d8689f37ca32c78cb0d4e812855571452deac1c67690"
+        },
+        {
+          "path": "SCIENTIFIC_REVIEW.md",
+          "sha256": "7591478074aa4bdabd196cedc1a913cec722d66023087ee459507615eea0c58d"
+        },
+        {
+          "path": "SCIENTIFIC_REVIEW_STATUS.json",
+          "sha256": "22b60685046ca07efd3b86dcb4dd43a92c6518e9ec24e09021010f48c3664814"
+        },
+        {
+          "path": "NEXT_RESEARCH_DECISION.md",
+          "sha256": "62cc589be7d1d9c0cc86c1a3d01e9a6cd63af055d2aafd0efddff31c724b7bf1"
+        }
+      ]
+    },
+    {
+      "id": "FINAL_DELIVERABLES",
+      "criterion": "All explicitly named artifacts contain real evidence; standalone curves; reproducible configs,parent IDs,seeds,updates,decisions,native,failures,checkpoints/Adam/RNG/raw",
+      "authoritative_evidence_to_inspect": [
+        "TRAINING_CURVES",
+        "CHECKPOINT_COMPARISON.json",
+        "SOURCE_RETURN_PLAN.md",
+        "PACKAGE_VERIFICATION.json",
+        "OUTPUT_MANIFEST.json"
+      ],
+      "verification_status": "VERIFIED_REAL_CONTENT_FINAL_HASH_AUTHORITY_SEPARATE",
+      "reviewed_utc": "2026-10-21T04:04:35.891613+00:00",
+      "findings": "全部明确命名交付均含真实证据，配置/source/父模型/RNG/Adam/训练与冻结raw和失败齐。四张图PNG+PDF共8artifact，最终8流图已实际目检并显式标出17.910/0.005s失败；最终完整文件hash/覆盖以PACKAGE_VERIFICATION为权威。",
+      "reviewed_evidence": [
+        {
+          "path": "CHECKPOINT_COMPARISON.json",
+          "sha256": "859bd3e2523213b6335183654c2e2eefb2c58b4431a94bec8162417ed4a098ef"
+        },
+        {
+          "path": "FROZEN_EVALUATION_RESULTS.json",
+          "sha256": "aab4b341fe4dbed65de769978e6b5481dbf2874dc343694dc2d820b96e1fb058"
+        },
+        {
+          "path": "TRAINING_CURVES/MANIFEST.json",
+          "sha256": "cfee24799d79c1da8c90d63d831866621d7d1fc8c482dda63d484b5388b48bed"
+        },
+        {
+          "path": "audit/FINAL_ACTION_STREAM_FIGURE_REVIEW.json",
+          "sha256": "c9c7fb7290efc741858714f733ee88f10da04bfb5c55c03923046094738c17b7"
+        },
+        {
+          "path": "SOURCE_RETURN_PLAN.md",
+          "sha256": "73fe75d3ae613b5ad0320f232f51f6bb68a8b7d9433d2c05353def8b500f5559"
+        }
+      ]
+    },
+    {
+      "id": "CLOSURE",
+      "criterion": "All owned workers/services exited,START/END closed,raw preservation and manifest verified; finalSTOP and no next package/finalCampaign started",
+      "authoritative_evidence_to_inspect": [
+        "PROCESS_EXIT_AUDIT.json",
+        "audit/FINAL_ACCOUNTING_AUDIT.json",
+        "OUTPUT_MANIFEST.json",
+        "PACKAGE_VERIFICATION.json",
+        "STOP.json"
+      ],
+      "verification_status": "VERIFIED_STOP_PROCESS_EXIT_FINAL_HASH_SEPARATE",
+      "reviewed_utc": "2026-10-21T04:04:35.892705+00:00",
+      "findings": "START/END/STOP闭合、442已结算，无活跃worker/服务/队列/观察/recheck/finalizer，已另进程核验。当前内容审阅后重新seal，再由独立脚本核验全部文件精确覆盖/字节SHA和resealer退出；最终结果仅记excluded PACKAGE_VERIFICATION，未启动下一包/Campaign。",
+      "reviewed_evidence": [
+        {
+          "path": "STOP.json",
+          "sha256": "abff4e558492653e7c4dfdba8b53453f4a93b21d8cbbf858be4f43ee964fd00c"
+        },
+        {
+          "path": "END.json",
+          "sha256": "06a289cfd6fdc116492762062488e85c62d5a3cead5008d22f50d47f26ca08bf"
+        },
+        {
+          "path": "PROCESS_EXIT_AUDIT.json",
+          "sha256": "65adff1686bc20460de23060b4f06afa5aff3734bcbfceea7e97e97e720b7efc"
+        },
+        {
+          "path": "audit/INDEPENDENT_CLOSED_SCIENCE_REVIEW.json",
+          "sha256": "5f64a58ed03e61ac14ed39bfeb0187c1070199bcc368f2be5efa82d91446df04"
+        }
+      ]
+    }
+  ],
+  "reviewed_utc": "2026-10-21T04:04:35.892829+00:00",
+  "review_method": "Manual substantive review against TASK_CONTRACT plus actual result/negative evidence, independent post-close scientific hashes/joins and later final byte verification; file existence alone was not treated as completion.",
+  "independent_science_review_sha256": "5f64a58ed03e61ac14ed39bfeb0187c1070199bcc368f2be5efa82d91446df04",
+  "final_manifest_verification_authority": "PACKAGE_VERIFICATION.json",
+  "declared_limits": [
+    "Selected successful parents, nominal-only, no independent physical initial-state generalization",
+    "Final fixed R1 action streams3/4 perparent, no random robustness qualification",
+    "JF mean decreases with JM/motion tradeoffs; no originalB/H150 live matched benefit",
+    "G4FAIL, Stage2/finalCampaignNOT_READY",
+    "FETCH_HEAD metadata changed, originundetermined; no blanketGitmetadataimmutability claim",
+    "Actual partial-Adam fault replay not executed"
+  ]
+}

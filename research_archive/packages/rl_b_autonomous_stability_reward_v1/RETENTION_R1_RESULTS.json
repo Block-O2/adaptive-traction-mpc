@@ -1,0 +1,503 @@
+{
+  "time_utc": "2026-10-21T03:33:48.751980+00:00",
+  "status": "COMPLETE_BOUNDED_RETENTION_COHORT",
+  "branch": "RETENTION_R1",
+  "lineage": "REWARD_R1",
+  "reward": "R1",
+  "cumulative_continuation_endpoint": 60,
+  "original_training_episode": 110,
+  "seed_results": [
+    {
+      "seed": 1495656323,
+      "parent_checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R1_seed1495656323_to030/checkpoints/episode_030",
+      "parent_model_sha256": "e6296a54927a05f7f2e6dcfcd411a3a9910638236f5503ff10700853255a5ba5",
+      "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1495656323_to060/checkpoints/episode_060",
+      "model_sha256": "a2fb5efe642b460ee19ebd0997052997e5157bc21d7931299b2fa10eee8f3132",
+      "metadata_sha256": "74e8f72750b1c87bd94e290fc3a2189cfe56f25312b4b763a32e5b665385b5fd",
+      "full_restore_pass": true,
+      "research_config": {
+        "job_id": "RETENTION_R1_seed1495656323_to060",
+        "branch": "RETENTION_R1",
+        "seed": 1495656323,
+        "parent_checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R1_seed1495656323_to030/checkpoints/episode_030",
+        "start_episode": 30,
+        "episodes": 30,
+        "mode": "training",
+        "learning_rate": 0.0003,
+        "rollout": "aggregate64",
+        "reward": "R1",
+        "target_kl": null,
+        "rollout_terminal_episode": 60
+      },
+      "worker_source_sha256": "784ebd356d10cdeb707615bf89cb2c26733f89c47017be4ff6db5d1b1741a29b",
+      "reward_source_sha256": "cd6129342a2abc0b1e24fd7dff19f8091e33c7adb25b65345d026e991814f8e5",
+      "training": {
+        "episodes": 30,
+        "successes": 8,
+        "sampled_transitions": 462,
+        "optimized_transitions": 462,
+        "actual_Adam": 124,
+        "PPO_train": 6,
+        "epochs": 24,
+        "singleton_minibatches": 0,
+        "terminal_pending": 0,
+        "native_steps": 2786620,
+        "all_independent_audits_pass": true
+      },
+      "evaluations": [
+        {
+          "job_id": "RETENTION_R1_seed1495656323_ep060_deterministic_dev1",
+          "policy_mode": "deterministic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.030000000048588,
+          "JF": 1438.4162021128197,
+          "JM": 103.10836889050213,
+          "integral_scope": "COMPLETE_TASK",
+          "comparisons": [
+            {
+              "reference": "ORIGINAL_050_MEAN",
+              "complete_equal_duration_same_mode": true,
+              "JF_percent": -0.5789855915792508,
+              "JM_percent": 1.5517797153596247,
+              "reference_JF": 1446.792924686744,
+              "reference_JM": 101.53280344224935,
+              "reference_task_s": 19.030000000048588
+            },
+            {
+              "reference": "SAME_FAMILY_030_SAME_MODE",
+              "complete_equal_duration_same_mode": true,
+              "JF_percent": -0.04430103683091824,
+              "JM_percent": 0.20599087063157828,
+              "reference_JF": 1439.0537178303725,
+              "reference_JM": 102.8964116762416,
+              "reference_task_s": 19.030000000048588
+            }
+          ],
+          "motion": {
+            "time_utc": "2026-10-21T02:53:42.158688+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1495656323_ep060_deterministic_dev1/episode_061",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.030000000048588,
+            "JF": 1438.4162021128197,
+            "JM": 103.10836889050213,
+            "task_native_steps": 76120,
+            "tracking_RMS_deg": [
+              0.4848737802824221,
+              0.5032028498283037
+            ],
+            "velocity_RMS_deg_s": [
+              14.848953805772425,
+              13.845522254376625
+            ],
+            "velocity_peak_deg_s": [
+              25.612739643016212,
+              27.122088504784855
+            ],
+            "acceleration_RMS_deg_s2": [
+              27.999951851794997,
+              26.65448369695574
+            ],
+            "acceleration_peak_deg_s2": [
+              67.71613119548739,
+              151.63629447274695
+            ],
+            "jerk_RMS_deg_s3": [
+              381.9132781357302,
+              907.3795858926323
+            ],
+            "jerk_peak_deg_s3": [
+              5849.354566403682,
+              19955.762843511853
+            ],
+            "terminal_q_deg": [
+              5.499554750989514,
+              9.49971003827872
+            ],
+            "terminal_dq_deg_s": [
+              -0.00014372510970980129,
+              -0.000948274620420975
+            ],
+            "terminal_return_signed_error_deg": [
+              0.49955475098951413,
+              -0.5002899617212809
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.49955475098951413,
+              0.5002899617212809
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.0,
+              0.5298554716317677
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.2653874200569125,
+              0.24307784764010104
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "independent_audit_pass": true,
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1495656323_ep060_deterministic_dev1/episode_061"
+        },
+        {
+          "job_id": "RETENTION_R1_seed1495656323_ep060_stochastic_dev1",
+          "policy_mode": "stochastic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.945000000052957,
+          "JF": 1457.9471364677504,
+          "JM": 107.95244951033617,
+          "integral_scope": "COMPLETE_TASK",
+          "comparisons": [
+            {
+              "reference": "ORIGINAL_050_MEAN",
+              "complete_equal_duration_same_mode": false,
+              "JF_percent": null,
+              "JM_percent": null,
+              "reference_JF": 1446.792924686744,
+              "reference_JM": 101.53280344224935,
+              "reference_task_s": 19.030000000048588
+            },
+            {
+              "reference": "SAME_FAMILY_030_SAME_MODE",
+              "complete_equal_duration_same_mode": false,
+              "JF_percent": null,
+              "JM_percent": null,
+              "reference_JF": 1456.6717949161125,
+              "reference_JM": 108.32029650268007,
+              "reference_task_s": 19.915000000052814
+            }
+          ],
+          "motion": {
+            "time_utc": "2026-10-21T02:55:17.334767+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1495656323_ep060_stochastic_dev1/episode_061",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.945000000052957,
+            "JF": 1457.9471364677504,
+            "JM": 107.95244951033617,
+            "task_native_steps": 79780,
+            "tracking_RMS_deg": [
+              0.46388253608569807,
+              0.8909769872334948
+            ],
+            "velocity_RMS_deg_s": [
+              14.116988295678166,
+              15.959630214820496
+            ],
+            "velocity_peak_deg_s": [
+              24.853968154672163,
+              38.75159249964359
+            ],
+            "acceleration_RMS_deg_s2": [
+              32.30246023247805,
+              45.02010368264301
+            ],
+            "acceleration_peak_deg_s2": [
+              147.48479901271736,
+              169.46070547719762
+            ],
+            "jerk_RMS_deg_s3": [
+              441.0745471891697,
+              1148.9332780283098
+            ],
+            "jerk_peak_deg_s3": [
+              7098.3979417733535,
+              23347.59954660146
+            ],
+            "terminal_q_deg": [
+              5.619509365980364,
+              9.406159218242625
+            ],
+            "terminal_dq_deg_s": [
+              1.6470389220445312,
+              0.8288090750409391
+            ],
+            "terminal_return_signed_error_deg": [
+              0.6195093659803642,
+              -0.5938407817573748
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.6195093659803642,
+              0.5938407817573748
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.4066534495816418,
+              2.302446861154498
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.2967330129622764,
+              0.308753850978383
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "independent_audit_pass": true,
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1495656323_ep060_stochastic_dev1/episode_061"
+        }
+      ]
+    },
+    {
+      "seed": 1630784693,
+      "parent_checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R1_seed1630784693_to030/checkpoints/episode_030",
+      "parent_model_sha256": "1b6e2a027c1b56dca447e4a252703b6983a5e2b510dc7ed7a99a81b14afb5fc0",
+      "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1630784693_to060/checkpoints/episode_060",
+      "model_sha256": "0f559270cdad9ad4a8bbbdb3820713ae38ec516579b09d1c3e4fc8e760a74992",
+      "metadata_sha256": "e725922c6154fc1ddbec90bfbc9533538f01ffa7c0f1f7d2e2325b7315f8ce1d",
+      "full_restore_pass": true,
+      "research_config": {
+        "job_id": "RETENTION_R1_seed1630784693_to060",
+        "branch": "RETENTION_R1",
+        "seed": 1630784693,
+        "parent_checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R1_seed1630784693_to030/checkpoints/episode_030",
+        "start_episode": 30,
+        "episodes": 30,
+        "mode": "training",
+        "learning_rate": 0.0003,
+        "rollout": "aggregate64",
+        "reward": "R1",
+        "target_kl": null,
+        "rollout_terminal_episode": 60
+      },
+      "worker_source_sha256": "784ebd356d10cdeb707615bf89cb2c26733f89c47017be4ff6db5d1b1741a29b",
+      "reward_source_sha256": "cd6129342a2abc0b1e24fd7dff19f8091e33c7adb25b65345d026e991814f8e5",
+      "training": {
+        "episodes": 30,
+        "successes": 17,
+        "sampled_transitions": 448,
+        "optimized_transitions": 448,
+        "actual_Adam": 120,
+        "PPO_train": 6,
+        "epochs": 24,
+        "singleton_minibatches": 0,
+        "terminal_pending": 0,
+        "native_steps": 2974020,
+        "all_independent_audits_pass": true
+      },
+      "evaluations": [
+        {
+          "job_id": "RETENTION_R1_seed1630784693_ep060_deterministic_dev1",
+          "policy_mode": "deterministic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.030000000048588,
+          "JF": 1429.2539984738396,
+          "JM": 104.46351222971855,
+          "integral_scope": "COMPLETE_TASK",
+          "comparisons": [
+            {
+              "reference": "ORIGINAL_050_MEAN",
+              "complete_equal_duration_same_mode": true,
+              "JF_percent": -0.5427650420350538,
+              "JM_percent": 1.6681945170695434,
+              "reference_JF": 1437.0538242671898,
+              "reference_JM": 102.74945151325538,
+              "reference_task_s": 19.030000000048588
+            },
+            {
+              "reference": "SAME_FAMILY_030_SAME_MODE",
+              "complete_equal_duration_same_mode": true,
+              "JF_percent": -0.19404795772979266,
+              "JM_percent": 1.0208797044064744,
+              "reference_JF": 1432.0328289324032,
+              "reference_JM": 103.40784255233714,
+              "reference_task_s": 19.030000000048588
+            }
+          ],
+          "motion": {
+            "time_utc": "2026-10-21T03:31:55.418791+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1630784693_ep060_deterministic_dev1/episode_061",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.030000000048588,
+            "JF": 1429.2539984738396,
+            "JM": 104.46351222971855,
+            "task_native_steps": 76120,
+            "tracking_RMS_deg": [
+              0.49657978626091387,
+              0.6334421260384371
+            ],
+            "velocity_RMS_deg_s": [
+              14.873299965762833,
+              15.257456360343754
+            ],
+            "velocity_peak_deg_s": [
+              25.068926050879337,
+              25.72569691440489
+            ],
+            "acceleration_RMS_deg_s2": [
+              27.742836805025078,
+              17.176050374464285
+            ],
+            "acceleration_peak_deg_s2": [
+              88.62417619396558,
+              76.69012838055706
+            ],
+            "jerk_RMS_deg_s3": [
+              362.3566475120391,
+              778.0753715311168
+            ],
+            "jerk_peak_deg_s3": [
+              5849.089134637628,
+              20137.09311127084
+            ],
+            "terminal_q_deg": [
+              5.499217483470966,
+              9.499595592193987
+            ],
+            "terminal_dq_deg_s": [
+              0.0030680048812755257,
+              -0.002008630529545133
+            ],
+            "terminal_return_signed_error_deg": [
+              0.4992174834709664,
+              -0.5004044078060124
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.4992174834709664,
+              0.5004044078060124
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.3225293722379219,
+              2.360245243787226
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.2486437208829603,
+              1.1775521161048434
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "independent_audit_pass": true,
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1630784693_ep060_deterministic_dev1/episode_061"
+        },
+        {
+          "job_id": "RETENTION_R1_seed1630784693_ep060_stochastic_dev1",
+          "policy_mode": "stochastic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 20.005000000053244,
+          "JF": 1447.8281139871021,
+          "JM": 114.88309595080464,
+          "integral_scope": "COMPLETE_TASK",
+          "comparisons": [
+            {
+              "reference": "ORIGINAL_050_MEAN",
+              "complete_equal_duration_same_mode": false,
+              "JF_percent": null,
+              "JM_percent": null,
+              "reference_JF": 1437.0538242671898,
+              "reference_JM": 102.74945151325538,
+              "reference_task_s": 19.030000000048588
+            },
+            {
+              "reference": "SAME_FAMILY_030_SAME_MODE",
+              "complete_equal_duration_same_mode": false,
+              "JF_percent": null,
+              "JM_percent": null,
+              "reference_JF": 1443.4457691820965,
+              "reference_JM": 113.72636670511147,
+              "reference_task_s": 19.91000000005279
+            }
+          ],
+          "motion": {
+            "time_utc": "2026-10-21T03:33:32.628126+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1630784693_ep060_stochastic_dev1/episode_061",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 20.005000000053244,
+            "JF": 1447.8281139871021,
+            "JM": 114.88309595080464,
+            "task_native_steps": 80020,
+            "tracking_RMS_deg": [
+              0.46541058136796365,
+              1.0101518562724838
+            ],
+            "velocity_RMS_deg_s": [
+              14.286916682747282,
+              15.560249318392662
+            ],
+            "velocity_peak_deg_s": [
+              24.800963649386972,
+              39.907428072359515
+            ],
+            "acceleration_RMS_deg_s2": [
+              32.71044729369934,
+              35.470325207110285
+            ],
+            "acceleration_peak_deg_s2": [
+              144.36179633666939,
+              166.28811769274876
+            ],
+            "jerk_RMS_deg_s3": [
+              428.51662814250176,
+              1074.691695022617
+            ],
+            "jerk_peak_deg_s3": [
+              7539.738133357845,
+              25049.323511828086
+            ],
+            "terminal_q_deg": [
+              5.617060158634155,
+              9.399684071133617
+            ],
+            "terminal_dq_deg_s": [
+              1.6237842034581085,
+              0.9473117930730166
+            ],
+            "terminal_return_signed_error_deg": [
+              0.6170601586341553,
+              -0.6003159288663829
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.6170601586341553,
+              0.6003159288663829
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.4148432371180109,
+              2.4188876430168937
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.3192541380102036,
+              0.27050206593886145
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "independent_audit_pass": true,
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1630784693_ep060_stochastic_dev1/episode_061"
+        }
+      ]
+    }
+  ],
+  "all_latest_mean_success": true,
+  "all_latest_sample_success": true,
+  "all_tested_lineage_means_retained": true,
+  "lineage_audit": "audit/STABILITY_LINEAGE_AUDIT.json",
+  "source_sha256": "4aa17682b9acde90926ed6cb3ef94f08c1ccefb5caab91b3bc0c04ebacea5fdd",
+  "new_physics": 0,
+  "new_Adam": 0,
+  "scope": "Continue the actual saved030 state for30 more episodes. The legal030 terminal flush already happened; this is not the same update schedule as uninterrupted60 from050. Nominal selected-parent development, no independent initial-state or B/H150 matched qualification."
+}

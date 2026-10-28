@@ -1,0 +1,57 @@
+{
+  "nominal_proxy_inputs": [
+    {
+      "field": "high_rom deployable_prior",
+      "category": "FIXED_NOMINAL_STRUCTURAL_PRIOR",
+      "source": "original controller high_rom_v1.py; ROM/soft-limit convention unchanged",
+      "simulation_patient_truth": false
+    },
+    {
+      "field": "beta/geometry/state_residual_weights",
+      "category": "COMMISSIONED_ESTIMATED",
+      "source": "completed historical D01R_H150 handoff_belief",
+      "simulation_patient_truth": false
+    },
+    {
+      "field": "reference q/dq/ddq and phase clock",
+      "category": "CAUSAL_ISSUED_HISTORY",
+      "source": "completed historical H150 trace allowlist, no true Human arrays copied into template",
+      "future_target_trajectory": false
+    },
+    {
+      "field": "x_O/x_R",
+      "category": "PROPOSED_ACTION",
+      "source": "registered bounded optimizer"
+    }
+  ],
+  "current_context": {
+    "category": "ONLINE_ESTIMATED_CAUSAL",
+    "source": "audit/OPTIMIZATION_FORK_CONTEXT.json or FROZEN_NEW_PREFIX_CONTEXT.json",
+    "model_feature_used": "constant same-parent conditioning; GP varies only candidate x",
+    "provenance_binding": "full snapshot hash in every START/prediction"
+  },
+  "feedback_labels": [
+    {
+      "field": "complete JF/JM",
+      "category": "COMPLETED_MEASURED_WRENCH_FEEDBACK",
+      "source": "actual completed full TASK trace; failed partial excluded from formal complete target"
+    },
+    {
+      "field": "worst original motion ratio",
+      "category": "OFFLINE_SIMULATION_EVALUATION_LABEL",
+      "source": "original native Human evaluation-only dq/position metrics; same feedback boundary for A/B/C",
+      "deployment_sensor_contract": "NOT_VALIDATED",
+      "future_target_input": false
+    }
+  ],
+  "forbidden_preexecution_inputs": [
+    "target candidate future true Human q/dq",
+    "target future requested torque",
+    "target future receipts",
+    "hidden physical Human generation parameters",
+    "another arm unpublished feedback"
+  ],
+  "actual_torque": "receipts/native audit only; no free motor-torque action",
+  "historical_weight_missing_scope": "Neural Q reported Q32 artifact not restored; not used by any current model",
+  "new_model_training_identity": "models/C_*.json production entries; synthetic zero-physics preflight classified separately"
+}

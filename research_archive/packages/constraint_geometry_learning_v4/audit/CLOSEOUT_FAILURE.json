@@ -1,0 +1,70 @@
+{
+  "state": "STOP",
+  "verification_pass": false,
+  "error": "AssertionError('CLOSEOUT_STEP_FAILED:protection_audit')",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/hank/ihear-lab/constraint_geometry_learning_v4/source/closeout_queue.py\", line 19, in <module>\n    for name,script,cap in [('branches','source/analyze_completed.py',600),('safety_partials','source/augment_safety_and_partials.py',120),('scorer_final','source/recompute_completed.py',600),('accounting','source/aggregate_results.py',120),('requests','source/compare_request_pairs.py',120),('historical_and_factor_identity','source/reference_identity_audit.py',600),('receipt_native_identity','source/receipt_audit_v4.py',600),('fresh_timings','source/timing_probe.py',120),('protected_manifests','source/verify_protected_inputs.py',300),('protection_audit','source/preseal_audit.py',180),('figures','source/make_figures.py',120),('result_reports','source/write_result_reports.py',120),('csv_partials','source/append_partial_csv.py',120),('partial_notes','source/append_partial_notes.py',120),('main_report','source/write_main_report.py',120)]:run(name,script,cap)\n                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              ^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hank/ihear-lab/constraint_geometry_learning_v4/source/closeout_queue.py\", line 8, in run\n    row=dict(name=name,script=script,returncode=r.returncode,wall_s=time.time()-begin);steps.append(row);(P/'audit/CLOSEOUT_STEP_ACCOUNTING.json').write_text(json.dumps(steps,indent=2)+'\\n');print('CLOSEOUT_STEP',name,r.returncode,flush=True);assert r.returncode==0,'CLOSEOUT_STEP_FAILED:'+name\n                                                                                                                                                                                                                                                          ^^^^^^^^^^^^^^^\nAssertionError: CLOSEOUT_STEP_FAILED:protection_audit\n",
+  "activation": "constraint_geometry_learning_v4_20261022T053258Z",
+  "ended_unix": 1792652009.3073113,
+  "steps": [
+    {
+      "name": "branches",
+      "script": "source/analyze_completed.py",
+      "returncode": 0,
+      "wall_s": 16.563086986541748
+    },
+    {
+      "name": "safety_partials",
+      "script": "source/augment_safety_and_partials.py",
+      "returncode": 0,
+      "wall_s": 0.16441750526428223
+    },
+    {
+      "name": "scorer_final",
+      "script": "source/recompute_completed.py",
+      "returncode": 0,
+      "wall_s": 1.7216229438781738
+    },
+    {
+      "name": "accounting",
+      "script": "source/aggregate_results.py",
+      "returncode": 0,
+      "wall_s": 0.7662475109100342
+    },
+    {
+      "name": "requests",
+      "script": "source/compare_request_pairs.py",
+      "returncode": 0,
+      "wall_s": 0.6655149459838867
+    },
+    {
+      "name": "historical_and_factor_identity",
+      "script": "source/reference_identity_audit.py",
+      "returncode": 0,
+      "wall_s": 8.241317749023438
+    },
+    {
+      "name": "receipt_native_identity",
+      "script": "source/receipt_audit_v4.py",
+      "returncode": 0,
+      "wall_s": 115.78403425216675
+    },
+    {
+      "name": "fresh_timings",
+      "script": "source/timing_probe.py",
+      "returncode": 0,
+      "wall_s": 0.11418294906616211
+    },
+    {
+      "name": "protected_manifests",
+      "script": "source/verify_protected_inputs.py",
+      "returncode": 0,
+      "wall_s": 19.069857358932495
+    },
+    {
+      "name": "protection_audit",
+      "script": "source/preseal_audit.py",
+      "returncode": 1,
+      "wall_s": 5.548203706741333
+    }
+  ]
+}

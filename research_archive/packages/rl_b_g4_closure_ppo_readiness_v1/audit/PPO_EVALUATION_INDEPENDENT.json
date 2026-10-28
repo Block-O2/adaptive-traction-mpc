@@ -1,0 +1,811 @@
+{
+  "case": {
+    "category": "INDEPENDENT_SAVED_REAL_PHYSICS_EVIDENCE",
+    "run": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/runs/ppo_evaluation/physics",
+    "episode": 1,
+    "pass": true,
+    "checks": {
+      "reward_independent": true,
+      "single_native_owner_torque_and_source_age": true,
+      "raw_trace_integral_consistency": true,
+      "actual_human_motion_and_safety": true,
+      "no_truth_consumed_by_current_certificate": true,
+      "current_state_certificate_feasible": true,
+      "100ms_original_immutable_age": true,
+      "activation_same_episode_and_model": true,
+      "40ms_bridges_original": true,
+      "one_native_proposal_per_request": true,
+      "proposal_action_ids_unique": true,
+      "immutable_source_sample": true,
+      "decision_candidate_single_no_teacher_ranking": true,
+      "executor_closed": true
+    },
+    "status": "ABORTED",
+    "reward": {
+      "category": "INDEPENDENT_REWARD_AND_TERMINAL_RECOMPUTATION_REAL_PHYSICS",
+      "run": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/runs/ppo_evaluation/physics",
+      "pass": true,
+      "checks": {
+        "finite_transitions": true,
+        "actor_41d": true,
+        "bounded_actions": true,
+        "only_final_transition_terminal": true,
+        "finite_horizon_no_timeout_bootstrap": true,
+        "absorbing_terminal": true,
+        "nondecreasing_online_callback_time": true,
+        "zero_duration_notifications_preserve_sensors_and_potential": true,
+        "reward_parts_independent": true,
+        "reward_sum_independent": true,
+        "force_integral_independent": true,
+        "moment_integral_independent": true,
+        "task_duration_native_grid": true,
+        "completion_semantics": true
+      },
+      "status": "ABORTED",
+      "abort_reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: target waypoint enters existing shank-table geometry (-13.443951 mm)",
+      "success": false,
+      "task_s": 16.610000000037033,
+      "phases": [
+        "OUTBOUND",
+        "HOLD",
+        "RETURN",
+        "ABORTED"
+      ],
+      "tick_count": 3325,
+      "zero_duration_notifications": [
+        {
+          "task_s": 16.320000000035648,
+          "identical_physical_sensor_state": true,
+          "valid_same_boundary_notification": true,
+          "declared_v2_failure_terminal": false,
+          "phase_from": "RETURN",
+          "phase_to": "RETURN",
+          "internal_phase_elapsed_delta_s": 0.005000000000023874
+        },
+        {
+          "task_s": 16.610000000037033,
+          "identical_physical_sensor_state": true,
+          "valid_same_boundary_notification": true,
+          "declared_v2_failure_terminal": true,
+          "phase_from": "RETURN",
+          "phase_to": "ABORTED",
+          "internal_phase_elapsed_delta_s": 0.005000000000023874
+        }
+      ],
+      "reward_parts": {
+        "progress": 0.0,
+        "completion": -10.0,
+        "force": -0.25253031050231356,
+        "variation": -0.0023733092819096836
+      },
+      "reward_difference": {
+        "progress": -1.7763568394002505e-15,
+        "completion": 0.0,
+        "force": 0.0,
+        "variation": 4.336808689942018e-19
+      },
+      "sum_reward": -10.254903619784226,
+      "J_F": 1262.6515525115676,
+      "J_M": 73.98861352047426,
+      "variation_integral": 0.23733092819096838,
+      "callback_time_note": "An original fallback may notify the same physical boundary twice. Zero-duration notifications contribute no force/variation time and must preserve sensor state and reward potential. Native integration time is audited strictly separately.",
+      "limitations": "Full physical safety and command ownership audited separately; these are developer validation episodes, not heldout tests."
+    },
+    "ownership": {
+      "category": "INDEPENDENT_RECOMPUTATION_FROM_SAVED_RAW",
+      "path": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/runs/ppo_evaluation/physics/env/episode_0001/runtime_artifacts.json",
+      "task_duration_s": 16.610000000037033,
+      "terminal_phase": "ABORTED",
+      "boundary_closure_added": false,
+      "J_F_N_s": 1262.6515525115674,
+      "J_M_Nm_s": 73.98861352047426,
+      "phase_integrals": {
+        "OUTBOUND": {
+          "duration_s": 9.005000000000718,
+          "J_F": 722.2143983770454,
+          "J_M": 48.27779700643567
+        },
+        "HOLD": {
+          "duration_s": 1.0200000000048703,
+          "J_F": 54.39434677743102,
+          "J_M": 1.2187101842971897
+        },
+        "RETURN": {
+          "duration_s": 6.585000000031442,
+          "J_F": 486.0428073570906,
+          "J_M": 24.492106329741375
+        }
+      },
+      "force_peak_N": 120.4391281824087,
+      "moment_peak_Nm": 16.516311566663916,
+      "recorded_interval_J_F": 1262.6515525115667,
+      "J_F_abs_difference": 6.821210263296962e-13,
+      "boundary_intervals": 3322,
+      "native_steps_all": 106640,
+      "native_task_steps": 66440,
+      "native_grid_errors": 0,
+      "unowned_native_steps": 0,
+      "torque_receipt_mismatches": 0,
+      "receipt_count_mismatches": [],
+      "source_age_errors": [],
+      "task_native_contact_steps": 0,
+      "errors": [],
+      "human_index_source": "caller must supply indices from actual model audit",
+      "human_motion": {
+        "q_min_deg": [
+          5.499648699761459,
+          9.499562108606847
+        ],
+        "q_max_deg": [
+          120.4428310817243,
+          120.2397543619747
+        ],
+        "abs_dq_max_deg_s": [
+          26.004284705649106,
+          25.06678703864908
+        ],
+        "final_q_deg": [
+          13.83532802439392,
+          23.96741966212564
+        ],
+        "final_dq_deg_s": [
+          1.6550099832977956,
+          -1.5638989663438951
+        ]
+      },
+      "full_qualification": "NOT_GRANTED_BY_THIS_AUDIT_ALONE",
+      "accounting_pass": true
+    },
+    "motion": {
+      "category": "REAL_NATIVE_PHYSICS_EVALUATION_ONLY",
+      "pass": true,
+      "checks": {
+        "finite_actual_human": true,
+        "ROM_original_0_125": true,
+        "velocity_original_45_75": true,
+        "native_acceleration_original_300_600": true,
+        "5ms_acceleration_original_300_600": true,
+        "20ms_acceleration_original_300_600": true,
+        "torque_fraction_below_1": true,
+        "native_force_below_200": true,
+        "native_moment_below_60": true,
+        "positive_true_clearance": true,
+        "no_true_bed_contact": true,
+        "no_mujoco_warnings": true
+      },
+      "task_native_steps": 66440,
+      "q_min_deg": [
+        5.499648699761459,
+        9.499562108606847
+      ],
+      "q_max_deg": [
+        120.4428310817243,
+        120.2397543619747
+      ],
+      "abs_dq_max_deg_s": [
+        26.004284705649106,
+        25.06678703864908
+      ],
+      "velocity_exceedance_steps": [
+        0,
+        0
+      ],
+      "abs_ddq_max_deg_s2": {
+        "native": [
+          100.31761071807142,
+          144.67997182643285
+        ],
+        "5ms": [
+          98.33025879003118,
+          144.2497606542081
+        ],
+        "20ms": [
+          91.38251166496943,
+          143.8504396546853
+        ]
+      },
+      "acceleration_exceedance_windows": {
+        "native": [
+          0,
+          0
+        ],
+        "5ms": [
+          0,
+          0
+        ],
+        "20ms": [
+          0,
+          0
+        ]
+      },
+      "original_motion_limits": {
+        "velocity_deg_s": [
+          45.0,
+          75.0
+        ],
+        "acceleration_deg_s2": [
+          300.0,
+          600.0
+        ]
+      },
+      "native_true_physics": {
+        "boundary_observation_count": {
+          "ACTIVE_RECOVERY": 1,
+          "COMMISSIONING": 0,
+          "TASK": 1
+        },
+        "clearance_definition": "minimum physical shank capsule bottom minus physical bed plane; MuJoCo world z, meters",
+        "contact_and_rom_count_semantics": "post-integration observations plus one task-handoff boundary observation",
+        "evaluation_only": true,
+        "interface_load_observation_count": {
+          "ACTIVE_RECOVERY": 12101,
+          "COMMISSIONING": 28100,
+          "TASK": 66441
+        },
+        "interface_load_scope": "evaluation-only cached post-refresh human-site wrench at native physical nodes",
+        "maximum_interface_force_n": {
+          "ACTIVE_RECOVERY": 78.90964022649035,
+          "COMMISSIONING": 101.97215518503963,
+          "TASK": 120.4391281824087
+        },
+        "maximum_interface_moment_nm": {
+          "ACTIVE_RECOVERY": 12.652424371678011,
+          "COMMISSIONING": 14.58027203785087,
+          "TASK": 16.518968849934705
+        },
+        "minimum_clearance_m": {
+          "ACTIVE_RECOVERY": 0.018903501710522932,
+          "COMMISSIONING": 0.008247518020102162,
+          "TASK": 0.019015424312302475
+        },
+        "missing_interface_load_observation_count": {
+          "ACTIVE_RECOVERY": 0,
+          "COMMISSIONING": 0,
+          "TASK": 0
+        },
+        "rom_violation_steps": {
+          "ACTIVE_RECOVERY": 0,
+          "COMMISSIONING": 0,
+          "TASK": 0
+        },
+        "shank_bed_contact_steps": {
+          "ACTIVE_RECOVERY": 0,
+          "COMMISSIONING": 0,
+          "TASK": 0
+        },
+        "step_count": {
+          "ACTIVE_RECOVERY": 12100,
+          "COMMISSIONING": 28100,
+          "TASK": 66440
+        }
+      },
+      "task_torque_fraction": 0.4086957264375677,
+      "qualification_scope": "observed episode only; finite-difference actual Human acceleration is independent of reference certificate; not all-action or host realtime safety"
+    },
+    "native_actions": [
+      {
+        "action_id": 0,
+        "request_id": 6,
+        "proposed_rl_action": [
+          0.009951330721378326,
+          0.0005115142557770014
+        ],
+        "source_sample_s": 10.049999999999253,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00000_outbound_dq_00",
+        "activation_physics_s": 10.054999999999241
+      },
+      {
+        "action_id": 1,
+        "request_id": 7,
+        "proposed_rl_action": [
+          0.010474583134055138,
+          0.0016092484584078193
+        ],
+        "source_sample_s": 10.87499999999733,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00001_outbound_dq_00",
+        "activation_physics_s": 10.879999999997318
+      },
+      {
+        "action_id": 2,
+        "request_id": 8,
+        "proposed_rl_action": [
+          0.010895424522459507,
+          0.002577519277110696
+        ],
+        "source_sample_s": 11.579999999995687,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00002_outbound_dq_00",
+        "activation_physics_s": 11.584999999995675
+      },
+      {
+        "action_id": 3,
+        "request_id": 9,
+        "proposed_rl_action": [
+          0.011224052868783474,
+          0.003085854696109891
+        ],
+        "source_sample_s": 12.29499999999402,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00003_outbound_dq_00",
+        "activation_physics_s": 12.299999999994009
+      },
+      {
+        "action_id": 4,
+        "request_id": 10,
+        "proposed_rl_action": [
+          0.011545532383024693,
+          0.003516341792419553
+        ],
+        "source_sample_s": 13.004999999992366,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00004_outbound_dq_00",
+        "activation_physics_s": 13.009999999992354
+      },
+      {
+        "action_id": 5,
+        "request_id": 11,
+        "proposed_rl_action": [
+          0.011771389283239841,
+          0.004130175337195396
+        ],
+        "source_sample_s": 13.704999999990735,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00005_outbound_dq_00",
+        "activation_physics_s": 13.709999999990723
+      },
+      {
+        "action_id": 6,
+        "request_id": 12,
+        "proposed_rl_action": [
+          0.011697799898684025,
+          0.004891290329396725
+        ],
+        "source_sample_s": 14.394999999989126,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00006_outbound_dq_00",
+        "activation_physics_s": 14.399999999989115
+      },
+      {
+        "action_id": 7,
+        "request_id": 13,
+        "proposed_rl_action": [
+          0.01142706349492073,
+          0.0057219634763896465
+        ],
+        "source_sample_s": 15.07999999998753,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00007_outbound_dq_00",
+        "activation_physics_s": 15.084999999987518
+      },
+      {
+        "action_id": 8,
+        "request_id": 14,
+        "proposed_rl_action": [
+          0.011073491536080837,
+          0.006621739361435175
+        ],
+        "source_sample_s": 15.764999999985934,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00008_outbound_dq_00",
+        "activation_physics_s": 15.769999999985922
+      },
+      {
+        "action_id": 9,
+        "request_id": 15,
+        "proposed_rl_action": [
+          0.010691104456782341,
+          0.007530457805842161
+        ],
+        "source_sample_s": 16.449999999987533,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00009_outbound_dq_00",
+        "activation_physics_s": 16.454999999987557
+      },
+      {
+        "action_id": 10,
+        "request_id": 16,
+        "proposed_rl_action": [
+          0.009880999103188515,
+          0.009012166410684586
+        ],
+        "source_sample_s": 17.17999999999102,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00010_outbound_dq_00",
+        "activation_physics_s": 17.184999999991042
+      },
+      {
+        "action_id": 11,
+        "request_id": 17,
+        "proposed_rl_action": [
+          0.011858144775032997,
+          0.007064466364681721
+        ],
+        "source_sample_s": 19.05499999999997,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00011_hold_dq_00",
+        "activation_physics_s": 19.059999999999995
+      },
+      {
+        "action_id": 12,
+        "request_id": 18,
+        "proposed_rl_action": [
+          0.011759404093027115,
+          0.007263497449457645
+        ],
+        "source_sample_s": 19.565000000002406,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00012_hold_dq_00",
+        "activation_physics_s": 19.57000000000243
+      },
+      {
+        "action_id": 13,
+        "request_id": 19,
+        "proposed_rl_action": [
+          0.006953421048820019,
+          0.009227659553289413
+        ],
+        "source_sample_s": 20.07500000000484,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00013_return_dq_00",
+        "activation_physics_s": 20.080000000004866
+      },
+      {
+        "action_id": 14,
+        "request_id": 20,
+        "proposed_rl_action": [
+          0.005909142550081015,
+          0.008999127894639969
+        ],
+        "source_sample_s": 20.895000000008757,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00014_return_dq_00",
+        "activation_physics_s": 20.90000000000878
+      },
+      {
+        "action_id": 15,
+        "request_id": 21,
+        "proposed_rl_action": [
+          0.005792687647044659,
+          0.00872985739260912
+        ],
+        "source_sample_s": 21.575000000012004,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00015_return_dq_00",
+        "activation_physics_s": 21.580000000012028
+      },
+      {
+        "action_id": 16,
+        "request_id": 22,
+        "proposed_rl_action": [
+          0.005542495287954807,
+          0.008329360745847225
+        ],
+        "source_sample_s": 22.25500000001525,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00016_return_dq_00",
+        "activation_physics_s": 22.260000000015275
+      },
+      {
+        "action_id": 17,
+        "request_id": 23,
+        "proposed_rl_action": [
+          0.00533546507358551,
+          0.007871422916650772
+        ],
+        "source_sample_s": 22.930000000018474,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00017_return_dq_00",
+        "activation_physics_s": 22.935000000018498
+      },
+      {
+        "action_id": 18,
+        "request_id": 24,
+        "proposed_rl_action": [
+          0.005179171916097403,
+          0.007353305350989103
+        ],
+        "source_sample_s": 23.605000000021697,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00018_return_dq_00",
+        "activation_physics_s": 23.61000000002172
+      },
+      {
+        "action_id": 19,
+        "request_id": 25,
+        "proposed_rl_action": [
+          0.005007786210626364,
+          0.006762300152331591
+        ],
+        "source_sample_s": 24.285000000024944,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00019_return_dq_00",
+        "activation_physics_s": 24.290000000024968
+      },
+      {
+        "action_id": 20,
+        "request_id": 26,
+        "proposed_rl_action": [
+          0.004633791279047728,
+          0.006113788112998009
+        ],
+        "source_sample_s": 24.970000000028215,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00020_return_dq_00",
+        "activation_physics_s": 24.97500000002824
+      },
+      {
+        "action_id": 21,
+        "request_id": 27,
+        "proposed_rl_action": [
+          0.0039217593148350716,
+          0.005577207077294588
+        ],
+        "source_sample_s": 25.665000000031533,
+        "outcome": "ACTIVATED",
+        "reason": null,
+        "plan_activated": true,
+        "executed_label": "rl_00021_return_dq_00",
+        "activation_physics_s": 25.670000000031557
+      },
+      {
+        "action_id": 22,
+        "request_id": 28,
+        "proposed_rl_action": [
+          0.0030021080747246742,
+          0.005349649116396904
+        ],
+        "source_sample_s": 26.365000000034875,
+        "outcome": "FAILED",
+        "reason": "ValueError:state-feedback Human-waypoint MPC has no feasible candidate: target waypoint enters existing shank-table geometry (-44.006120 mm)",
+        "plan_activated": false,
+        "executed_label": null,
+        "activation_physics_s": null
+      },
+      {
+        "action_id": 23,
+        "request_id": 29,
+        "proposed_rl_action": [
+          0.005782800726592541,
+          0.005181123502552509
+        ],
+        "source_sample_s": 26.65500000003626,
+        "outcome": "FAILED",
+        "reason": "ValueError:state-feedback Human-waypoint MPC has no feasible candidate: target waypoint enters existing shank-table geometry (-13.443951 mm)",
+        "plan_activated": false,
+        "executed_label": null,
+        "activation_physics_s": null
+      }
+    ],
+    "activation_validations": 24,
+    "bridges": 19,
+    "fallback_events": [
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 10.054999999999241,
+        "request_id": 6
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 10.879999999997318,
+        "request_id": 7
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 11.584999999995675,
+        "request_id": 8
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 12.299999999994009,
+        "request_id": 9
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 13.009999999992354,
+        "request_id": 10
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 13.709999999990723,
+        "request_id": 11
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 14.399999999989115,
+        "request_id": 12
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 15.084999999987518,
+        "request_id": 13
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 15.769999999985922,
+        "request_id": 14
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 16.454999999987557,
+        "request_id": 15
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 20.080000000004866,
+        "request_id": 19
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 20.90000000000878,
+        "request_id": 20
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 21.580000000012028,
+        "request_id": 21
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 22.260000000015275,
+        "request_id": 22
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 22.935000000018498,
+        "request_id": 23
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 23.61000000002172,
+        "request_id": 24
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 24.290000000024968,
+        "request_id": 25
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 24.97500000002824,
+        "request_id": 26
+      },
+      {
+        "event": "ESCAPE_ADMITTED",
+        "physics_s": 25.670000000031557,
+        "request_id": 27
+      },
+      {
+        "event": "PRIMARY_REJECTED_ESCAPE_RETAINED",
+        "physics_s": 26.3700000000349,
+        "request_id": null
+      },
+      {
+        "event": "FALLBACK_COMMITTED",
+        "physics_s": 26.400000000035043,
+        "request_id": null
+      },
+      {
+        "event": "FALLBACK_STOPPED",
+        "physics_s": 26.650000000036236,
+        "request_id": null
+      },
+      {
+        "event": "FALLBACK_HOLD",
+        "physics_s": 26.650000000036236,
+        "request_id": null
+      },
+      {
+        "event": "FRESH_REPLAN_REQUESTED",
+        "physics_s": 26.65500000003626,
+        "request_id": 29
+      }
+    ],
+    "proposal_is_applied_action": false,
+    "applied_action_definition": "actual command_torque_nm on each command receipt; every native step independently assigned to exactly one receipt",
+    "legacy_exact_19_03_regression": "NOT_APPLICABLE",
+    "scope": "observed native scientific execution only; no host realtime or all-action Human qualification"
+  },
+  "force": {
+    "category": "INDEPENDENT_RAW_5MS_LEFT_INTEGRATION",
+    "episode": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/runs/ppo_evaluation/physics/env/episode_0001",
+    "task_duration_s": 16.610000000037033,
+    "independent_J_F_N_s": 1262.6515525115674,
+    "independent_J_M_Nm_s": 73.98861352047426,
+    "phases": {
+      "OUTBOUND": {
+        "duration_s": 9.005000000000718,
+        "J_F_N_s": 722.2143983770454,
+        "J_M_Nm_s": 48.27779700643567
+      },
+      "HOLD": {
+        "duration_s": 1.0200000000048703,
+        "J_F_N_s": 54.39434677743102,
+        "J_M_Nm_s": 1.2187101842971897
+      },
+      "RETURN": {
+        "duration_s": 6.585000000031442,
+        "J_F_N_s": 486.0428073570906,
+        "J_M_Nm_s": 24.492106329741375
+      },
+      "ABORTED": {
+        "duration_s": 0.0,
+        "J_F_N_s": 0.0,
+        "J_M_Nm_s": 0.0
+      }
+    },
+    "summary_force": 1262.6515525115667,
+    "wrapper_reward": {
+      "progress": 1.7763568394002505e-15,
+      "completion": -10.0,
+      "force": -0.25253031050231356,
+      "variation": -0.002373309281909684
+    },
+    "differences": {
+      "summary_force": -6.821210263296962e-13,
+      "wrapper_force": 2.2737367544323206e-13,
+      "tick_force": -4.547473508864641e-13,
+      "summary_moment": 0.0,
+      "wrapper_moment": 0.0,
+      "tick_moment": -5.684341886080802e-14,
+      "reward_force": -5.551115123125783e-17
+    },
+    "mismatching_rows": [],
+    "zero_duration_rows": [
+      {
+        "row": 3322,
+        "time_s": 26.660000000036284,
+        "phase": "ABORTED",
+        "cost": 0.0,
+        "rejected_before_apply": false,
+        "terminal_boundary": true
+      }
+    ],
+    "pass": true,
+    "integration_definition": "original measured force norm, interval-start left integral over executed TASK time; zero duration owns zero cost"
+  },
+  "pass": true
+}

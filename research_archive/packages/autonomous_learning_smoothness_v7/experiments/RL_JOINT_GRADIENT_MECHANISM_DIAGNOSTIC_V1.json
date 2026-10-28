@@ -1,0 +1,22 @@
+{
+  "event": "REGISTER_BRANCH",
+  "unix": 1793037531.710972,
+  "id": "RL_JOINT_GRADIENT_MECHANISM_DIAGNOSTIC_V1",
+  "owner": "main",
+  "delegate": "agent_history",
+  "hypothesis": "If valuegradient dominates historical PPO jointnorm clipping, the actual first onpolicy update may attenuate actorgradient despitecorrect JM rewardinformation; exact reconstruction can distinguish this mechanicaleffect from rewardlack",
+  "scope": "Conditional on exacthistorical pre-update checkpoint+originalrollout/GAE/logprob/update order available. CPU-onlyforward/backward diagnostic on isolated copiedinmemorymodel; no env construction, rollout, optimizerstep, checkpoint overwrite orclaim of repairedpolicy",
+  "budget": {
+    "wall_s": 1800,
+    "CPU_threads": 1,
+    "new_physical": 0,
+    "new_Adam_updates": 0,
+    "new_RL_episodes": 0,
+    "RAM_floor_GiB": 6
+  },
+  "inputs": "Alreadyprotected R1/R4 parentcheckpoint and transition/buffer artifacts, hash verified before load",
+  "output": "agent_reviews/rl_gradient",
+  "success": "Report exact policy/value/jointgradient norms andclip scaling withsource/weights/rolloutidentity; distinguish measuredmechanicalclipping from causaldeploymenthypothesis",
+  "stop": "If exact pre-update buffer/checkpoint/sourcecannotbereconstructed, NOT_RUN exactreplay ratherthan use wrong-policy surrogate. No broadnewPPO training ortrial.",
+  "continuation": "Any newtraining requires separate mainregistration after currentstrongbaseline anddecisionneedreview"
+}

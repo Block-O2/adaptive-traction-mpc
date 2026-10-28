@@ -1,0 +1,58 @@
+{
+  "status": "CONSTRUCTIVE_TARGET_LEVEL_NONEXPRESSIBILITY_AT_MATCHED_REQUEST",
+  "decision_index": 12,
+  "phase": "RETURN",
+  "slot": 4,
+  "actual_target_rad": [
+    0.2023398557501508,
+    0.16580627893946132
+  ],
+  "actual_target_deg": [
+    11.593219761769522,
+    9.5
+  ],
+  "registered_start_deg": [
+    5,
+    10
+  ],
+  "internal_terminal_reference_deg": [
+    5.5,
+    9.5
+  ],
+  "old_R_progress": [
+    0.9426676542454824,
+    1.0045454545454546
+  ],
+  "old_transform_requires_all_progress_between_0_and_1": true,
+  "knee_progress_excess_over_one": 0.00454545454545463,
+  "new_individual_joint_endpoint_locks": [
+    false,
+    true
+  ],
+  "nearest_unmodified_native_candidate": "return_dq_07",
+  "nearest_native_target_rad": [
+    0.19983397856078566,
+    0.16580627893946132
+  ],
+  "nearest_native_target_max_error_deg": 0.14357618692872662,
+  "locked_knee_offset_from_registered_goal_deg": -0.5,
+  "registered_task_and_safety_rules_unchanged": true,
+  "original_modal_certificate_and_activation": {
+    "modal_status": "ACCEPTED",
+    "activated": true,
+    "fresh_original_certificate": true
+  },
+  "proof_cases": [
+    "If old RichFreePlanner accepts a nonzero spatial transformation, every modified normalized coordinate must belong to[0,1]. Desired knee coordinate is1.00454545, so this exact target is rejected for every coefficient vector, even without coefficient bounds.",
+    "If the Rich transform is skipped/rejected, output must be one of the finite native candidates. None equals desired target. RETURN slot4 has no native residual/posture shift; H150 early timing changes duration only.",
+    "The terminal whole-vector early-return bypass applies only when target equals full phase goal, whereas desired hip remains11.593219deg rather than5.5deg.",
+    "Thus the matched-request exact intermediate target is unavailable to restored full18D, even granting frozen H150 adjuncts. A different earlier trajectory may generate different native candidate values, so this is not a theorem about equal JF or all Human motions."
+  ],
+  "source_identity": {
+    "/home/hank/ihear-lab/autonomous_coordination_learning_v2/runtime/source/results/MOTION_MARGIN_BACKOFF_RPASS_020/summary.json": "3d9dfc9ebdd03936a2ba2360ad6148cf6a3f012ef9c19e2ef47ccd9dadeaee91",
+    "/home/hank/ihear-lab/autonomous_coordination_learning_v2/runtime/code/rich_planner.py": "1bca0bee74c1d62dc939cba01ff501118fb79ca8bb8dc3928289a1e4b78dfa8d",
+    "/home/hank/ihear-lab/autonomous_coordination_learning_v2/runtime/control/campaign_v6.py": "913bf3f59d8edb27ee1760b47870c0d818ce9b53dae14af173c0d7dfede4303e",
+    "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_modal_retimed.py": "12173fcfa7461410840a77c4246e6bdc16f50111f995a5a498ad0e57e020ad27"
+  },
+  "physical_steps_added": 0
+}

@@ -1,0 +1,165 @@
+{
+  "status": "PASS",
+  "category": "UNQUALIFIED_TRAINING_SMOKE",
+  "seed": 20261021,
+  "network_hidden_layers": [
+    16,
+    16
+  ],
+  "physics_envs": 1,
+  "device": "cpu",
+  "ppo_train_calls": 2,
+  "actual_optimizer_gradient_steps": 4,
+  "gradient_steps": [
+    {
+      "gradient_l2": 0.4999999403953552,
+      "finite": true,
+      "weights_changed": true,
+      "optimizer_steps": [
+        1
+      ]
+    },
+    {
+      "gradient_l2": 0.49999991059303284,
+      "finite": true,
+      "weights_changed": true,
+      "optimizer_steps": [
+        2
+      ]
+    },
+    {
+      "gradient_l2": 0.4999999403953552,
+      "finite": true,
+      "weights_changed": true,
+      "optimizer_steps": [
+        3
+      ]
+    },
+    {
+      "gradient_l2": 0.49999991059303284,
+      "finite": true,
+      "weights_changed": true,
+      "optimizer_steps": [
+        4
+      ]
+    }
+  ],
+  "ppo_collection_decisions": 16,
+  "audit_tail_decisions_not_used_by_optimizer": 38,
+  "frozen_evaluation_decisions": 24,
+  "all_real_rollout_decisions": 78,
+  "real_native_physics_steps": 343520,
+  "task_native_physics_steps": 222920,
+  "episodes_completed": 3,
+  "frozen_task_evaluation_successes": 0,
+  "frozen_task_evaluation_total": 1,
+  "losses": {
+    "ppo_initial": [
+      {
+        "num_timesteps": 8,
+        "n_updates": 1,
+        "losses": {
+          "train/learning_rate": 0.0003,
+          "train/entropy_loss": -2.8378769159317017,
+          "train/policy_gradient_loss": -0.0003480762243270874,
+          "train/value_loss": 3.352255702018738,
+          "train/approx_kl": 1.214444637298584e-06,
+          "train/clip_fraction": 0.0,
+          "train/loss": 1.4559152126312256,
+          "train/explained_variance": -0.5617724657058716,
+          "train/std": 0.9998601675033569,
+          "train/n_updates": 1.0,
+          "train/clip_range": 0.2
+        }
+      }
+    ],
+    "ppo_resume": [
+      {
+        "num_timesteps": 16,
+        "n_updates": 2,
+        "losses": {
+          "train/learning_rate": 0.0003,
+          "train/entropy_loss": -2.837467074394226,
+          "train/policy_gradient_loss": -0.0003864467144012451,
+          "train/value_loss": 4.884328126907349,
+          "train/approx_kl": 4.3958425521850586e-07,
+          "train/clip_fraction": 0.0,
+          "train/loss": 1.939048171043396,
+          "train/explained_variance": -0.6895605325698853,
+          "train/std": 0.9995751976966858,
+          "train/n_updates": 2.0,
+          "train/clip_range": 0.2
+        }
+      }
+    ]
+  },
+  "episodes": [
+    {
+      "run": "ppo_initial",
+      "status": "COMPLETE",
+      "task_s": 19.28000000004978,
+      "reward_parts": {
+        "progress": 14.999999999999996,
+        "completion": 20.0,
+        "force": -0.288716042049172,
+        "variation": -0.002147906464875215
+      },
+      "native_steps_total": 117320,
+      "task_native_steps": 77120,
+      "rl_decisions": 27,
+      "source_result": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/runs/ppo_initial/physics/RESULT.json",
+      "independent_audit": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/audit/PPO_INITIAL_INDEPENDENT.json"
+    },
+    {
+      "run": "ppo_resume",
+      "status": "ABORTED",
+      "task_s": 19.840000000052456,
+      "reward_parts": {
+        "progress": 1.7763568394002505e-15,
+        "completion": -10.0,
+        "force": -0.3019532769320867,
+        "variation": -0.0017319750102000135
+      },
+      "native_steps_total": 119560,
+      "task_native_steps": 79360,
+      "rl_decisions": 27,
+      "source_result": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/runs/ppo_resume/physics/RESULT.json",
+      "independent_audit": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/audit/PPO_RESUME_INDEPENDENT.json"
+    },
+    {
+      "run": "ppo_evaluation",
+      "status": "ABORTED",
+      "task_s": 16.610000000037033,
+      "reward_parts": {
+        "progress": 1.7763568394002505e-15,
+        "completion": -10.0,
+        "force": -0.25253031050231356,
+        "variation": -0.002373309281909684
+      },
+      "native_steps_total": 106640,
+      "task_native_steps": 66440,
+      "rl_decisions": 24,
+      "source_result": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/runs/ppo_evaluation/physics/RESULT.json",
+      "independent_audit": "/home/hank/ihear-lab/rl_b_g4_closure_ppo_readiness_v1/audit/PPO_EVALUATION_INDEPENDENT.json"
+    }
+  ],
+  "wall_seconds_inside_children": 238.3489851639988,
+  "outer_guard_wall_seconds": 247.9891696449995,
+  "cpu_user_s": 240.694386,
+  "cpu_system_s": 4.241654,
+  "peak_single_process_rss_KiB": 981600,
+  "minimum_available_RAM_GiB": 28.551246643066406,
+  "physical_rollout_decisions_per_wall_s": 0.3272512360240644,
+  "native_steps_per_wall_s": 1441.2480076793154,
+  "simulated_seconds_per_wall_second": 0.3603120019198289,
+  "teacher_used": false,
+  "learning_success_claim": false,
+  "counter_semantics": {
+    "SB3_n_updates": "PPO epoch counter: 0→1→2; each epoch has two actual optimizer steps",
+    "optimizer_steps": "instrumented optimizer.step calls, Adam per-parameter step counter 0→2→4",
+    "episodes_completed_checkpoint_field": "per-process physical episode count; cumulative count is reconstructed along immutable parent checkpoint links",
+    "SB3_episode_num": "0 at both checkpoints because terminal completion occurs in audit tails outside collect_rollouts; restored exactly",
+    "gradient_optimizer_steps_total_checkpoint_field": "sum of per-parameter Adam step counters (26 then52 for13 parameter tensors), NOT actual optimizer call count; use actual_optimizer_gradient_steps=4"
+  },
+  "qualification_scope": "software and observed execution only; full PPO task qualification not granted"
+}

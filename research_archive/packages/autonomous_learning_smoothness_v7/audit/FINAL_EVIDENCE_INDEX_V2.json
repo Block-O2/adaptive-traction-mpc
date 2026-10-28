@@ -1,0 +1,1714 @@
+{
+  "final_references": {
+    "historical_content": {
+      "path": "audit/HISTORY_CONTENT_HASH_FINAL.json",
+      "sha256": "61ccbfb1d1b81b72ffbe742e3af75df319bb7de1b678188944314d990e21500b",
+      "require": {
+        "/status": "PASS",
+        "/errors": [],
+        "/checked_files": 204641,
+        "/expected_files": 204641,
+        "/bytes_hashed": 93289584051
+      }
+    },
+    "protected_inputs": {
+      "path": "audit/HISTORY_PROTECTION_FINAL.json",
+      "sha256": "a6abde64a9d5efead44c5c4b6649da3cfe48c7114310adb66f54ad67f70cabda",
+      "require": {
+        "/status": "PASS",
+        "/checked_files": 204641,
+        "/metadata_changes": [],
+        "/added_historical_files": [],
+        "/critical_hash_mismatches": [],
+        "/late_at_start": []
+      }
+    },
+    "journal_prefix": {
+      "path": "audit/JOURNAL_PREFIX_FINAL.json",
+      "sha256": "834cb64a2d982fc442ddaa9d542b9e58141d766a5fb2a7ad5c32eace8dd2a584",
+      "require": {
+        "/status": "PASS",
+        "/original_prefix_preserved": true,
+        "/before_bytes_preserved": true,
+        "/only_append_no_history_overwrite": true
+      }
+    },
+    "attempt_accounting": {
+      "path": "RESOURCE_AND_ATTEMPT_ACCOUNTING.json",
+      "sha256": "3b0dae776e8af925474e607e2e883eeebf618a73fdab7deec9b27692ae7c9134",
+      "require": {
+        "/schema": "ihear.resource_attempt_accounting.v8",
+        "/physical_START": 170,
+        "/physical_END": 170,
+        "/actual_new_native_steps": 12997720,
+        "/active_attempt_ids": [],
+        "/duplicate_START_ids": [],
+        "/duplicate_END_ids": [],
+        "/actual_attempts_saved": 0
+      }
+    },
+    "owned_final": {
+      "path": "audit/OWNED_FINAL_V1.json",
+      "sha256": "ea80d5ca897ea3bdebac8010c08c4b55a31bcf2e4f7a6172024b1481deb570a4",
+      "require": {
+        "/status": "PASS_RECORDED_SCOPE_WITH_DOCUMENTED_METADATA_LIMITATIONS",
+        "/known_live_or_zombie": 0,
+        "/known_live_descendants": 0,
+        "/checker_exit_proven_by_external_PID_ticks_recheck": true,
+        "/perfect_PID_metadata_compliance_claim": false
+      }
+    }
+  },
+  "freeze_refs": [
+    {
+      "path": "freeze/DEVRT03.json",
+      "sha256": "fc27e4a9164705224ae92129e4aa0fbfc4ec363686377857236a442ec2021138",
+      "require": {
+        "/group": "DEVRT03",
+        "/quality_contract/hip_knee_jerk_RMS_ratio_max_vs_V6PHASE": 1.001,
+        "/quality_contract/force_norm_rate_RMS_ratio_max_vs_V6PHASE": 1.004
+      }
+    },
+    {
+      "path": "freeze/CONDITIONAL_RULE_DEVELOPMENT_GATE_V2.json",
+      "sha256": "7376ffbb88a74f13aefeb1697a1d2ad873a0a05ecc5d4c9d6092fe36b59abe93",
+      "require": {
+        "/status": "NOT_MET",
+        "/labels/CFACTORH01": 0,
+        "/labels/CFACTORL01": 0,
+        "/threshold_refits": 0
+      }
+    }
+  ],
+  "known_limitations": [
+    {
+      "path": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "sha256": "c3856ef89ec38cead3c7c619727655fafaa6d18f6be1147581ecf604124a6c83",
+      "require": {
+        "/foreground_static_tool_only_gap_present": true,
+        "/perfect_metadata_PASS_allowed": false
+      },
+      "id": "FOREGROUND_METADATA_PID_GAPS",
+      "category": "FOREGROUND_STATIC_TOOL_EXIT_ONLY",
+      "message": "Several foreground static/metadata commands have tool exit receipts without fully persisted PID/start_ticks. No identity reconstructed."
+    },
+    {
+      "path": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "sha256": "c3856ef89ec38cead3c7c619727655fafaa6d18f6be1147581ecf604124a6c83",
+      "require": {
+        "/original_missing_END_reviews": [
+          "history",
+          "local_surrogate"
+        ],
+        "/perfect_metadata_PASS_allowed": false
+      },
+      "id": "ORIGINAL_REVIEW_END_GAPS",
+      "category": "ORIGINAL_REVIEW_END_OR_MANIFEST_LIMITED",
+      "message": "Current main closure receipts and normalized manifests preserve original missing/nonstandard records; no historical END fabricated."
+    },
+    {
+      "path": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "sha256": "c3856ef89ec38cead3c7c619727655fafaa6d18f6be1147581ecf604124a6c83",
+      "require": {
+        "/zero_START_preimport_manifest_missing": [
+          "DEVPC01",
+          "HOLDSS01"
+        ],
+        "/perfect_metadata_PASS_allowed": false
+      },
+      "id": "ZERO_START_PREIMPORT_IDENTITY",
+      "category": "ZERO_START_PREIMPORT_SOURCE_IDENTITY_LIMITED",
+      "message": "Actual zero-START preimport logs/owners/frozen inputs checked; complete loaded-module/interpreter identity not proved."
+    },
+    {
+      "path": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "sha256": "c3856ef89ec38cead3c7c619727655fafaa6d18f6be1147581ecf604124a6c83",
+      "require": {
+        "/metadata_seal_budget_compliance_complete": false,
+        "/perfect_metadata_PASS_allowed": false
+      },
+      "id": "METADATA_REPAIR_BUDGET_OVERRUN",
+      "category": "BOUNDED_REVIEW_METADATA_SEAL_OVERRUN",
+      "message": "One 600s pure repair branch used624.612s including metadata sealing; no extra fit/env/physics, not perfect budget compliance."
+    },
+    {
+      "path": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "sha256": "c3856ef89ec38cead3c7c619727655fafaa6d18f6be1147581ecf604124a6c83",
+      "require": {
+        "/failed_worker_normal_join_receipt_missing_groups": [
+          "DEVRC01",
+          "DEVRT01",
+          "DEVRT02",
+          "HOLDSS02"
+        ],
+        "/perfect_metadata_PASS_allowed": false
+      },
+      "id": "FAILED_WORKER_JOIN_RECEIPT_LIMITED",
+      "category": "FAILED_WORKER_NORMAL_JOIN_RECEIPT_MISSING",
+      "message": "Four preserved FAILED_PRESERVED WORKER_DONE receipts lack the normal aggregate join flag. Exact original attempt joins, supervisor STOP/exit1/no survivors and current recorded PID closure are checked separately; no normal receipt reconstructed."
+    },
+    {
+      "path": "audit/FINAL_METADATA_LIMITATIONS_V2.json",
+      "sha256": "c3856ef89ec38cead3c7c619727655fafaa6d18f6be1147581ecf604124a6c83",
+      "require": {
+        "/total_host_core_seconds_known": false,
+        "/perfect_metadata_PASS_allowed": false
+      },
+      "id": "CPU_AND_GENERALIZATION_LIMITS",
+      "category": "TOTAL_COMPUTE_AND_GENERALIZATION_NOT_ESTABLISHED",
+      "message": "Total host core-seconds unknown; model fit times exclude label collection. No patient/hardware or total compute-efficiency claim."
+    }
+  ],
+  "artifact_sha256": {
+    "models/CAUSAL_STUMPS_V1/FIT_ACCOUNTING.json": "330ef32acc9481a0fdc779ed8ae114474375978820362a0df656c434c28b2cc6",
+    "models/CAUSAL_STUMPS_V1/TRAINING_RESULTS.json": "48f0ebdacf796eb66d8b11e2af66664e9a08b53704e092d255f90d205bcbb756",
+    "models/CAUSAL_STUMPS_V1/DATA.json": "b92ab2d9beda02cdf317fbe95439216f34915d1fa6338ab89bec22fd8230667b",
+    "models/CAUSAL_STUMPS_V1/MODEL.json": "bf36d1cad7770a9328f0773745285235e0f20c301f55f283a21108d063b4919f",
+    "models/CAUSAL_STUMPS_V1/SOURCE_DATA_MANIFEST.json": "26d19548d05bdf9bedb66293c19223b75d0658889baee6309cd56230aa2667d2",
+    "models/LOCAL_RESPONSE_2D_V1/MODEL.json": "a2ac6678017bb14a3224f423c6a0c142eb3211427ff82c0bbfbd05109d7a80b8",
+    "models/LOCAL_RESPONSE_2D_V1/TRAINING_ACCOUNTING.json": "0f5e6a0eb456c10bcc2ba904f1544ef28543b4551745ef120b02ebc80f2e8cc6",
+    "models/LOCAL_RESPONSE_2D_V1/SOURCE_DATA_MANIFEST.json": "7e5fa454d5ddca72ec6daf88f84de8b83888917dc8efc5bbb73e50aeb69099b5"
+  },
+  "owned_end_pairs": [
+    {
+      "start": "agent_reviews/adam_counterfactual/EXECUTION_STARTED.json",
+      "end": "agent_reviews/adam_counterfactual/END.json"
+    },
+    {
+      "start": "agent_reviews/causal_stump_scope/START_AND_INPUT_IDENTITY.json",
+      "end": "agent_reviews/causal_stump_scope/V1_REVIEW_COMPUTE_END.json"
+    },
+    {
+      "start": "agent_reviews/causal_stump_scope_v2b/FINALIZATION_START.json",
+      "end": "agent_reviews/causal_stump_scope_v2b/END.json"
+    },
+    {
+      "start": "agent_reviews/causal_stumps_v1/SEAL_START.json",
+      "end": "agent_reviews/causal_stumps_v1/END.json"
+    },
+    {
+      "start": "agent_reviews/causal_stumps_v1/PURE_TEST_START.json",
+      "end": "agent_reviews/causal_stumps_v1/PURE_TEST_END.json"
+    },
+    {
+      "start": "agent_reviews/causal_stumps_v1/FIT_OWNED_INITIAL.json",
+      "end": "agent_reviews/causal_stumps_v1/FIT_END.json"
+    },
+    {
+      "start": "agent_reviews/causal_stumps_v1/FIT_START.json",
+      "end": "agent_reviews/causal_stumps_v1/FIT_END.json"
+    },
+    {
+      "start": "agent_reviews/conditional_rule_driver/SEAL_START.json",
+      "end": "agent_reviews/conditional_rule_driver/END.json"
+    },
+    {
+      "start": "agent_reviews/conditional_rule_driver/START.json",
+      "end": "agent_reviews/conditional_rule_driver/END.json"
+    },
+    {
+      "start": "agent_reviews/conditional_rule_driver/BUILD_START.json",
+      "end": "agent_reviews/conditional_rule_driver/END.json"
+    },
+    {
+      "start": "agent_reviews/conditional_rule_independent_scope_v2/START_AND_INPUT_IDENTITY.json",
+      "end": "agent_reviews/conditional_rule_independent_scope_v2/BOOTSTRAP_END.json"
+    },
+    {
+      "start": "agent_reviews/early_18d_ablation_scope/HASH_SEARCH_START.json",
+      "end": "agent_reviews/early_18d_ablation_scope/HASH_SEARCH_END.json"
+    },
+    {
+      "start": "agent_reviews/early_18d_ablation_scope/START.json",
+      "end": "agent_reviews/early_18d_ablation_scope/END.json"
+    },
+    {
+      "start": "agent_reviews/early_18d_ablation_scope/OWNED_INITIAL.json",
+      "end": "agent_reviews/early_18d_ablation_scope/END.json"
+    },
+    {
+      "start": "agent_reviews/early_simplification_runtime/SEAL_START.json",
+      "end": "agent_reviews/early_simplification_runtime/PACKAGE_END.json"
+    },
+    {
+      "start": "agent_reviews/early_simplification_runtime/SCHEMA_READ_START.json",
+      "end": "agent_reviews/early_simplification_runtime/SCHEMA_READ_END.json"
+    },
+    {
+      "start": "agent_reviews/early_simplification_runtime/OWNED_INITIAL.json",
+      "end": "agent_reviews/early_simplification_runtime/COMPUTE_END.json"
+    },
+    {
+      "start": "agent_reviews/early_simplification_runtime/BINDING_START.json",
+      "end": "agent_reviews/early_simplification_runtime/BINDING_END.json"
+    },
+    {
+      "start": "agent_reviews/early_simplification_runtime/SUMMARY_START.json",
+      "end": "agent_reviews/early_simplification_runtime/SUMMARY_END.json"
+    },
+    {
+      "start": "agent_reviews/factorial_case_interface/SEAL_START.json",
+      "end": "agent_reviews/factorial_case_interface/END.json"
+    },
+    {
+      "start": "agent_reviews/factorial_case_interface/PURE_GATE_START.json",
+      "end": "agent_reviews/factorial_case_interface/PURE_GATE_END.json"
+    },
+    {
+      "start": "agent_reviews/factorial_case_scope/SEAL_START.json",
+      "end": "agent_reviews/factorial_case_scope/PACKAGE_END.json"
+    },
+    {
+      "start": "agent_reviews/factorial_case_scope/START.json",
+      "end": "agent_reviews/factorial_case_scope/END.json"
+    },
+    {
+      "start": "agent_reviews/factorial_case_scope/OWNED_INITIAL.json",
+      "end": "agent_reviews/factorial_case_scope/END.json"
+    },
+    {
+      "start": "agent_reviews/final_interface_guide/SEAL_START.json",
+      "end": "agent_reviews/final_interface_guide/END.json"
+    },
+    {
+      "start": "agent_reviews/final_verifier/SEAL_START.json",
+      "end": "agent_reviews/final_verifier/END.json"
+    },
+    {
+      "start": "agent_reviews/final_verifier/START.json",
+      "end": "agent_reviews/final_verifier/END.json"
+    },
+    {
+      "start": "agent_reviews/final_verifier_zero_start_v3/SEAL_START.json",
+      "end": "agent_reviews/final_verifier_zero_start_v3/END.json"
+    },
+    {
+      "start": "agent_reviews/final_verifier_zero_start_v3/INDEX_PREPARATION_START.json",
+      "end": "agent_reviews/final_verifier_zero_start_v3/END.json"
+    },
+    {
+      "start": "agent_reviews/final_verifier_zero_start_v3/START.json",
+      "end": "agent_reviews/final_verifier_zero_start_v3/END.json"
+    },
+    {
+      "start": "agent_reviews/integral_audit/SEAL_START.json",
+      "end": "agent_reviews/integral_audit/SEAL_END.json"
+    },
+    {
+      "start": "agent_reviews/integral_audit/FREEZE_START.json",
+      "end": "agent_reviews/integral_audit/FREEZE_END.json"
+    },
+    {
+      "start": "agent_reviews/local_response_residual/START_AND_INPUT_IDENTITY.json",
+      "end": "agent_reviews/local_response_residual/COMPUTE_END.json"
+    },
+    {
+      "start": "agent_reviews/out0_context_scope/FINITE_AUDIT_START.json",
+      "end": "agent_reviews/out0_context_scope/FINITE_AUDIT_END.json"
+    },
+    {
+      "start": "agent_reviews/out0_context_scope/LIGHT_AUDIT_START.json",
+      "end": "agent_reviews/out0_context_scope/LIGHT_AUDIT_END.json"
+    },
+    {
+      "start": "agent_reviews/ppo_scorer_bridge_gate/COMPUTE_START.json",
+      "end": "agent_reviews/ppo_scorer_bridge_gate/END.json"
+    },
+    {
+      "start": "agent_reviews/ppo_scorer_bridge_gate/FINAL_VERIFICATION_START.json",
+      "end": "agent_reviews/ppo_scorer_bridge_gate/END.json"
+    },
+    {
+      "start": "agent_reviews/validation_identity/KNOWN_EXPOSED_PARENTS.json.START.json",
+      "end": "agent_reviews/validation_identity/END.json"
+    },
+    {
+      "start": "agent_reviews/validation_identity/FINAL_INPUT_VERIFICATION_START.json",
+      "end": "agent_reviews/validation_identity/END.json"
+    },
+    {
+      "start": "agent_reviews/validation_identity/KNOWN_EXPOSED_PARENTS_PURE_PHYSICS.json.START.json",
+      "end": "agent_reviews/validation_identity/END.json"
+    },
+    {
+      "start": "agent_reviews/validation_identity/KNOWN_EXPOSED_PARENTS_WITH_TRACE.json.START.json",
+      "end": "agent_reviews/validation_identity/END.json"
+    },
+    {
+      "start": "agent_reviews/final_verifier/pure_fixture_run/START.json",
+      "end": "agent_reviews/final_verifier/pure_fixture_run/END.json"
+    },
+    {
+      "start": "agent_reviews/final_verifier/pure_fixture_run_v2/START.json",
+      "end": "agent_reviews/final_verifier/pure_fixture_run_v2/END.json"
+    },
+    {
+      "start": "agent_reviews/final_verifier_zero_start_v3/pure_fixture_run/START.json",
+      "end": "agent_reviews/final_verifier_zero_start_v3/pure_fixture_run/END.json"
+    },
+    {
+      "start": "agent_reviews/final_verifier_zero_start_v3/pure_fixture_run_final/START.json",
+      "end": "agent_reviews/final_verifier_zero_start_v3/pure_fixture_run_final/END.json"
+    },
+    {
+      "start": "agent_reviews/conditional_rule_driver/pure_stub_run/START.json",
+      "end": "agent_reviews/conditional_rule_driver/pure_stub_run/END.json"
+    },
+    {
+      "start": "agent_reviews/conditional_rule_driver/pure_stub_run_v2/START.json",
+      "end": "agent_reviews/conditional_rule_driver/pure_stub_run_v2/END.json"
+    },
+    {
+      "start": "agent_reviews/conditional_rule_driver/pure_stub_run_v3/START.json",
+      "end": "agent_reviews/conditional_rule_driver/pure_stub_run_v3/END.json"
+    },
+    {
+      "start": "agent_reviews/conditional_rule_driver/pure_stub_v2_driver_run/START.json",
+      "end": "agent_reviews/conditional_rule_driver/pure_stub_v2_driver_run/END.json"
+    },
+    {
+      "start": "agent_reviews/conditional_rule_driver/pure_stub_v2_driver_final/START.json",
+      "end": "agent_reviews/conditional_rule_driver/pure_stub_v2_driver_final/END.json"
+    },
+    {
+      "start": "owned/ADAPTER_NOMINAL_REPLAY_START.json",
+      "end": "owned/ADAPTER_NOMINAL_REPLAY_END.json"
+    },
+    {
+      "start": "owned/CFACTORH01_SUPERVISOR.json",
+      "end": "owned/CFACTORH01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/CFACTORL01_SUPERVISOR.json",
+      "end": "owned/CFACTORL01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/DEVPC01_SUPERVISOR.json",
+      "end": "owned/DEVPC01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/DEVPC02_SUPERVISOR.json",
+      "end": "owned/DEVPC02_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/DEVRC01_SUPERVISOR.json",
+      "end": "owned/DEVRC01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/DEVRC02_SUPERVISOR.json",
+      "end": "owned/DEVRC02_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/DEVRT01_SUPERVISOR.json",
+      "end": "owned/DEVRT01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/DEVRT02_SUPERVISOR.json",
+      "end": "owned/DEVRT02_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/DEVRT03_SUPERVISOR.json",
+      "end": "owned/DEVRT03_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/EARLYABL01_SUPERVISOR.json",
+      "end": "owned/EARLYABL01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/EARLYH01_SUPERVISOR.json",
+      "end": "owned/EARLYH01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/EARLYL01_SUPERVISOR.json",
+      "end": "owned/EARLYL01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/EARLYN01_SUPERVISOR.json",
+      "end": "owned/EARLYN01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/EARLYPH01_SUPERVISOR.json",
+      "end": "owned/EARLYPH01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/FACTORIAL_METADATA_1793052045798324084_START.json",
+      "end": "owned/FACTORIAL_METADATA_1793052045798324084_END.json"
+    },
+    {
+      "start": "owned/FACTORIAL_METADATA_1793052063920505629_START.json",
+      "end": "owned/FACTORIAL_METADATA_1793052063920505629_END.json"
+    },
+    {
+      "start": "owned/FACTORIAL_METADATA_1793052069441104061_START.json",
+      "end": "owned/FACTORIAL_METADATA_1793052069441104061_END.json"
+    },
+    {
+      "start": "owned/H150H01_SUPERVISOR.json",
+      "end": "owned/H150H01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/H150L01_SUPERVISOR.json",
+      "end": "owned/H150L01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/H150N01_SUPERVISOR.json",
+      "end": "owned/H150N01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/HOLDSS01_SUPERVISOR.json",
+      "end": "owned/HOLDSS01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/HOLDSS02_SUPERVISOR.json",
+      "end": "owned/HOLDSS02_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/HOLDSS03_SUPERVISOR.json",
+      "end": "owned/HOLDSS03_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/HSAPP01_SUPERVISOR.json",
+      "end": "owned/HSAPP01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/HUMANHS01_SUPERVISOR.json",
+      "end": "owned/HUMANHS01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/HUMANLS01_SUPERVISOR.json",
+      "end": "owned/HUMANLS01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/LOCAL_RESPONSE_2D_V1_FIT_START.json",
+      "end": "owned/LOCAL_RESPONSE_2D_V1_FIT_END.json"
+    },
+    {
+      "start": "owned/LSREP01_SUPERVISOR.json",
+      "end": "owned/LSREP01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/LSTF01_SUPERVISOR.json",
+      "end": "owned/LSTF01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/LSTIM01_SUPERVISOR.json",
+      "end": "owned/LSTIM01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/METADATA_LSTF_FREEZE_1793052871748675925_START.json",
+      "end": "owned/METADATA_LSTF_FREEZE_1793052871748675925_END.json"
+    },
+    {
+      "start": "owned/METADATA_STUMP_FREEZE_1793051765201541713_START.json",
+      "end": "owned/METADATA_STUMP_FREEZE_1793051765201541713_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793031392879582934_START.json",
+      "end": "owned/METRICS_1793031392879582934_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793031709447978568_START.json",
+      "end": "owned/METRICS_1793031709447978568_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793032234680633337_START.json",
+      "end": "owned/METRICS_1793032234680633337_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793032612482942315_START.json",
+      "end": "owned/METRICS_1793032612482942315_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793034143375938710_START.json",
+      "end": "owned/METRICS_1793034143375938710_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793034568777701993_START.json",
+      "end": "owned/METRICS_1793034568777701993_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793034940026070476_START.json",
+      "end": "owned/METRICS_1793034940026070476_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793035088021208583_START.json",
+      "end": "owned/METRICS_1793035088021208583_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793035806927261801_START.json",
+      "end": "owned/METRICS_1793035806927261801_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793036195980909038_START.json",
+      "end": "owned/METRICS_1793036195980909038_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793037000515092669_START.json",
+      "end": "owned/METRICS_1793037000515092669_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793038673311982284_START.json",
+      "end": "owned/METRICS_1793038673311982284_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793039491624570916_START.json",
+      "end": "owned/METRICS_1793039491624570916_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793039579056017398_START.json",
+      "end": "owned/METRICS_1793039579056017398_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793039699317331357_START.json",
+      "end": "owned/METRICS_1793039699317331357_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793040176163799755_START.json",
+      "end": "owned/METRICS_1793040176163799755_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793040720679241353_START.json",
+      "end": "owned/METRICS_1793040720679241353_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793041712237379198_START.json",
+      "end": "owned/METRICS_1793041712237379198_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793042505959477205_START.json",
+      "end": "owned/METRICS_1793042505959477205_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793043365184462939_START.json",
+      "end": "owned/METRICS_1793043365184462939_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793044461812962267_START.json",
+      "end": "owned/METRICS_1793044461812962267_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793045227798554543_START.json",
+      "end": "owned/METRICS_1793045227798554543_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793046654564810320_START.json",
+      "end": "owned/METRICS_1793046654564810320_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793047988062309943_START.json",
+      "end": "owned/METRICS_1793047988062309943_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793048688309469785_START.json",
+      "end": "owned/METRICS_1793048688309469785_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793049581182660183_START.json",
+      "end": "owned/METRICS_1793049581182660183_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793051887383916356_START.json",
+      "end": "owned/METRICS_1793051887383916356_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793052163273646035_START.json",
+      "end": "owned/METRICS_1793052163273646035_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793053116579423290_START.json",
+      "end": "owned/METRICS_1793053116579423290_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793054042700411820_START.json",
+      "end": "owned/METRICS_1793054042700411820_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793054172924095636_START.json",
+      "end": "owned/METRICS_1793054172924095636_END.json"
+    },
+    {
+      "start": "owned/METRICS_1793055016407808040_START.json",
+      "end": "owned/METRICS_1793055016407808040_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_history_content_hash_1793032434250973609_START.json",
+      "end": "owned/OFFLINE_history_content_hash_1793032434250973609_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_protect_history_1793032093449409369_START.json",
+      "end": "owned/OFFLINE_protect_history_1793032093449409369_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_recover_devrc01_raw_1793033314414151140_START.json",
+      "end": "owned/OFFLINE_recover_devrc01_raw_1793033314414151140_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_1793032825935041818_START.json",
+      "end": "owned/OFFLINE_v7_accounting_1793032825935041818_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v2_1793033865592801475_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v2_1793033865592801475_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v2_1793035259107395744_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v2_1793035259107395744_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v2_1793036413343061473_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v2_1793036413343061473_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v3_1793038673115599141_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v3_1793038673115599141_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v4_1793042844642623397_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v4_1793042844642623397_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v4_1793044792866702752_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v4_1793044792866702752_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v4_1793049017573365346_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v4_1793049017573365346_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v5_1793050850506691417_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v5_1793050850506691417_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v5_1793054396957714274_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v5_1793054396957714274_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793032612094724115_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793032612094724115_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793035097571571628_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793035097571571628_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793036412316425548_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793036412316425548_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793040721895193424_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793040721895193424_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793041711620077027_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793041711620077027_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793043383223982667_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793043383223982667_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793048691675186179_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793048691675186179_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793049926316464411_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793049926316464411_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793052163839124213_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793052163839124213_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793053215612659497_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793053215612659497_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793054299187877813_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793054299187877813_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793055005457506298_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793055005457506298_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_action_identity_1793055145509352580_START.json",
+      "end": "owned/OFFLINE_v7_action_identity_1793055145509352580_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793032386223783910_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793032386223783910_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793034774935310288_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793034774935310288_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793036412947527715_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793036412947527715_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793038673769635614_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793038673769635614_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793039778263449837_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793039778263449837_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793041006052899736_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793041006052899736_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793042845569680553_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793042845569680553_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793044791179316322_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793044791179316322_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793047991500288241_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793047991500288241_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793049584200102188_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793049584200102188_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_1793051885974680786_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_1793051885974680786_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_v2_1793053117317460325_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_v2_1793053117317460325_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_v2_1793054172895968044_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_v2_1793054172895968044_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_v2_1793055017563503915_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_v2_1793055017563503915_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_audit_batch_v2_1793055145812062561_START.json",
+      "end": "owned/OFFLINE_v7_audit_batch_v2_1793055145812062561_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_causal_stump_watch_v2b_1793052088621047447_START.json",
+      "end": "owned/OFFLINE_v7_causal_stump_watch_v2b_1793052088621047447_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_causal_stump_watch_v2b_1793053188416287933_START.json",
+      "end": "owned/OFFLINE_v7_causal_stump_watch_v2b_1793053188416287933_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_close_conditional_gate_v2_1793054299873507294_START.json",
+      "end": "owned/OFFLINE_v7_close_conditional_gate_v2_1793054299873507294_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_evaluate_causal_stumps_v2_1793054257672990120_START.json",
+      "end": "owned/OFFLINE_v7_evaluate_causal_stumps_v2_1793054257672990120_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_excursion_mechanism_1793037258498903883_START.json",
+      "end": "owned/OFFLINE_v7_excursion_mechanism_1793037258498903883_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_factorial_install_and_bind_v3_1793052045788486596_START.json",
+      "end": "owned/FACTORIAL_METADATA_1793052045798324084_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_factorial_install_and_bind_v3_1793052063911626717_START.json",
+      "end": "owned/FACTORIAL_METADATA_1793052063920505629_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_factorial_install_and_bind_v3_1793052069431712952_START.json",
+      "end": "owned/FACTORIAL_METADATA_1793052069441104061_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_final_evidence_tables_v1_1793049926428950216_START.json",
+      "end": "owned/OFFLINE_v7_final_evidence_tables_v1_1793049926428950216_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_final_evidence_tables_v2_1793049944101002924_START.json",
+      "end": "owned/OFFLINE_v7_final_evidence_tables_v2_1793049944101002924_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_final_evidence_tables_v3_1793052349133077977_START.json",
+      "end": "owned/OFFLINE_v7_final_evidence_tables_v3_1793052349133077977_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_final_history_content_recheck_1793055146248980505_START.json",
+      "end": "owned/OFFLINE_v7_final_history_content_recheck_1793055146248980505_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_lstf_closure_diagnostic_v1_1793055248730633092_START.json",
+      "end": "owned/OFFLINE_v7_lstf_closure_diagnostic_v1_1793055248730633092_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793034568723816456_START.json",
+      "end": "owned/METRICS_1793034568777701993_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793034939970770345_START.json",
+      "end": "owned/METRICS_1793034940026070476_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793035087966311250_START.json",
+      "end": "owned/METRICS_1793035088021208583_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793035806868304178_START.json",
+      "end": "owned/METRICS_1793035806927261801_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793036195923088109_START.json",
+      "end": "owned/METRICS_1793036195980909038_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793037000454483263_START.json",
+      "end": "owned/METRICS_1793037000515092669_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793038673256357264_START.json",
+      "end": "owned/METRICS_1793038673311982284_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793039491569666555_START.json",
+      "end": "owned/METRICS_1793039491624570916_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793039579002405043_START.json",
+      "end": "owned/METRICS_1793039579056017398_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793039699262984440_START.json",
+      "end": "owned/METRICS_1793039699317331357_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793040176109208872_START.json",
+      "end": "owned/METRICS_1793040176163799755_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793040720620460162_START.json",
+      "end": "owned/METRICS_1793040720679241353_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793041712186886081_START.json",
+      "end": "owned/METRICS_1793041712237379198_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793042505900846913_START.json",
+      "end": "owned/METRICS_1793042505959477205_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793043365127871679_START.json",
+      "end": "owned/METRICS_1793043365184462939_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793044461762150232_START.json",
+      "end": "owned/METRICS_1793044461812962267_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793045227746019159_START.json",
+      "end": "owned/METRICS_1793045227798554543_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793046654508030444_START.json",
+      "end": "owned/METRICS_1793046654564810320_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793047988012334785_START.json",
+      "end": "owned/METRICS_1793047988062309943_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793048688255585533_START.json",
+      "end": "owned/METRICS_1793048688309469785_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793049581133214048_START.json",
+      "end": "owned/METRICS_1793049581182660183_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793051887325619238_START.json",
+      "end": "owned/METRICS_1793051887383916356_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793052163224192922_START.json",
+      "end": "owned/METRICS_1793052163273646035_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793053116526353011_START.json",
+      "end": "owned/METRICS_1793053116579423290_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_overshoot_1793033865638328134_START.json",
+      "end": "owned/OFFLINE_v7_overshoot_1793033865638328134_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_overshoot_1793035259632222490_START.json",
+      "end": "owned/OFFLINE_v7_overshoot_1793035259632222490_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_parent_identity_v2_1793045502131375589_START.json",
+      "end": "owned/OFFLINE_v7_parent_identity_v2_1793045502131375589_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_parent_identity_v2_1793047348918231856_START.json",
+      "end": "owned/OFFLINE_v7_parent_identity_v2_1793047348918231856_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_prefix_pair_identity_v1_1793047350827085797_START.json",
+      "end": "owned/OFFLINE_v7_prefix_pair_identity_v1_1793047350827085797_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_prevalidation_inventory_run_1793045257635592040_START.json",
+      "end": "owned/OFFLINE_v7_prevalidation_inventory_run_1793045257635592040_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_proposal_margin_audit_1793035987163733752_START.json",
+      "end": "owned/OFFLINE_v7_proposal_margin_audit_1793035987163733752_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_replay_orchestration_raw_v1_1793051832380026613_START.json",
+      "end": "owned/OFFLINE_v7_replay_orchestration_raw_v1_1793051832380026613_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_same_fork_proof_1793035087551273800_START.json",
+      "end": "owned/OFFLINE_v7_same_fork_proof_1793035087551273800_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_stump_main_receipt_v2_1793052151069830284_START.json",
+      "end": "owned/OFFLINE_v7_stump_main_receipt_v2_1793052151069830284_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_stump_main_receipt_v2_1793053245012399488_START.json",
+      "end": "owned/OFFLINE_v7_stump_main_receipt_v2_1793053245012399488_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_stump_target_identifiability_v2_1793054530277869869_START.json",
+      "end": "owned/OFFLINE_v7_stump_target_identifiability_v2_1793054530277869869_END.json"
+    },
+    {
+      "start": "owned/PFXV01_SUPERVISOR.json",
+      "end": "owned/PFXV01_DESCENDANTS.json"
+    },
+    {
+      "start": "owned/PFXV02_SUPERVISOR.json",
+      "end": "owned/PFXV02_DESCENDANTS.json"
+    },
+    {
+      "start": "predictions/CAUSAL_STUMPS_V1/CFACTORH01/WATCH_START.json",
+      "end": "predictions/CAUSAL_STUMPS_V1/CFACTORH01/WATCH_END.json"
+    },
+    {
+      "start": "predictions/CAUSAL_STUMPS_V1/CFACTORL01/WATCH_START.json",
+      "end": "predictions/CAUSAL_STUMPS_V1/CFACTORL01/WATCH_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_prepare_review_closure_adapters_v1_1793056522928731626_START.json",
+      "end": "owned/OFFLINE_v7_prepare_review_closure_adapters_v1_1793056522928731626_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793044461762150232_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793044461762150232_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793034939970770345_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v2_1793034939970770345_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_prepare_final_evidence_index_v1_1793057986198009745_START.json",
+      "end": "owned/OFFLINE_v7_prepare_final_evidence_index_v1_1793057986198009745_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_final_evidence_tables_v4_1793055521991410284_START.json",
+      "end": "owned/OFFLINE_v7_final_evidence_tables_v4_1793055521991410284_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793034568723816456_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v2_1793034568723816456_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793052163224192922_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793052163224192922_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_confirm_owned_checker_exit_v1_1793056996082025254_START.json",
+      "end": "owned/OFFLINE_v7_confirm_owned_checker_exit_v1_1793056996082025254_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_factorial_install_and_bind_v3_1793052069431712952_START.json",
+      "end": "owned/OFFLINE_v7_factorial_install_and_bind_v3_1793052069431712952_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793039579002405043_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793039579002405043_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793042505900846913_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793042505900846913_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793035087966311250_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v2_1793035087966311250_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_lstf_alias_classification_v2_1793055402707393042_START.json",
+      "end": "owned/OFFLINE_v7_lstf_alias_classification_v2_1793055402707393042_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793041712186886081_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793041712186886081_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v6_1793055441892504116_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v6_1793055441892504116_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793036195923088109_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v2_1793036195923088109_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v8_1793057642242917101_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v8_1793057642242917101_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793045227746019159_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793045227746019159_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793048688255585533_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793048688255585533_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793046654508030444_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793046654508030444_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793051887325619238_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793051887325619238_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793053116526353011_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793053116526353011_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_protect_history_1793055653963622468_START.json",
+      "end": "owned/OFFLINE_protect_history_1793055653963622468_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_prepare_final_metadata_inventory_v2_1793056882163504636_START.json",
+      "end": "owned/OFFLINE_v7_prepare_final_metadata_inventory_v2_1793056882163504636_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793049581133214048_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793049581133214048_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793037000454483263_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v2_1793037000454483263_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_finalize_report_and_limits_v1_1793057937967763397_START.json",
+      "end": "owned/OFFLINE_v7_finalize_report_and_limits_v1_1793057937967763397_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793035806868304178_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v2_1793035806868304178_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_factorial_install_and_bind_v3_1793052045788486596_START.json",
+      "end": "owned/OFFLINE_v7_factorial_install_and_bind_v3_1793052045788486596_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793038673256357264_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v2_1793038673256357264_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_prepare_final_verifier_v7_1793058456342689230_START.json",
+      "end": "owned/OFFLINE_v7_prepare_final_verifier_v7_1793058456342689230_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793043365127871679_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793043365127871679_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_factorial_install_and_bind_v3_1793052063911626717_START.json",
+      "end": "owned/OFFLINE_v7_factorial_install_and_bind_v3_1793052063911626717_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793047988012334785_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793047988012334785_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_review_manifest_precheck_v1_1793056330969781354_START.json",
+      "end": "owned/OFFLINE_v7_review_manifest_precheck_v1_1793056330969781354_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793040720620460162_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793040720620460162_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_final_evidence_tables_v3_1793055442424204285_START.json",
+      "end": "owned/OFFLINE_v7_final_evidence_tables_v3_1793055442424204285_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793039699262984440_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793039699262984440_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_accounting_v7_1793057128771613862_START.json",
+      "end": "owned/OFFLINE_v7_accounting_v7_1793057128771613862_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v2_1793039491569666555_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v2_1793039491569666555_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_metrics_v3_1793040176109208872_START.json",
+      "end": "owned/OFFLINE_v7_metrics_v3_1793040176109208872_END.json"
+    },
+    {
+      "start": "owned/OFFLINE_v7_append_final_journal_v1_1793057298577448084_START.json",
+      "end": "owned/OFFLINE_v7_append_final_journal_v1_1793057298577448084_END.json"
+    }
+  ],
+  "agent_reviews": [
+    {
+      "directory": "agent_reviews/adam_counterfactual",
+      "end": "agent_reviews/adam_counterfactual/END.json",
+      "manifest": "agent_reviews/adam_counterfactual/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/causal_stump_scope",
+      "end": "agent_reviews/causal_stump_scope/END.json",
+      "manifest": "agent_reviews/causal_stump_scope/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/causal_stump_scope_v2b",
+      "end": "agent_reviews/causal_stump_scope_v2b/END.json",
+      "manifest": "agent_reviews/causal_stump_scope_v2b/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/causal_stumps_v1",
+      "end": "agent_reviews/causal_stumps_v1/END.json",
+      "manifest": "agent_reviews/causal_stumps_v1/MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/conditional_rule_driver",
+      "end": "agent_reviews/conditional_rule_driver/END.json",
+      "manifest": "agent_reviews/conditional_rule_driver/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/conditional_rule_independent_scope_v2",
+      "end": "agent_reviews/conditional_rule_independent_scope_v2/END.json",
+      "manifest": "agent_reviews/conditional_rule_independent_scope_v2/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/conditional_validation_cases",
+      "end": "agent_reviews/conditional_validation_cases/END.json",
+      "manifest": "agent_reviews/conditional_validation_cases/MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/early_18d_ablation_scope",
+      "end": "agent_reviews/early_18d_ablation_scope/PACKAGE_END.json",
+      "manifest": "agent_reviews/early_18d_ablation_scope/MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/early_activation",
+      "end": "agent_reviews/early_activation/END.json",
+      "manifest": "agent_reviews/early_activation/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/early_h150_mechanism",
+      "end": "agent_reviews/early_h150_mechanism/END.json",
+      "manifest": "agent_reviews/early_h150_mechanism/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/early_simplification_runtime",
+      "end": "agent_reviews/early_simplification_runtime/PACKAGE_END.json",
+      "manifest": "agent_reviews/early_simplification_runtime/MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/factorial_case_interface",
+      "end": "agent_reviews/factorial_case_interface/END.json",
+      "manifest": "agent_reviews/factorial_case_interface/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/factorial_case_scope",
+      "end": "agent_reviews/factorial_case_scope/PACKAGE_END.json",
+      "manifest": "agent_reviews/factorial_case_scope/MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/figures_builder",
+      "end": "agent_reviews/figures_builder/END.json",
+      "manifest": "agent_reviews/figures_builder/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/final_interface_guide",
+      "end": "agent_reviews/final_interface_guide/END.json",
+      "manifest": "agent_reviews/final_interface_guide/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/final_learning_evidence",
+      "end": "agent_reviews/final_learning_evidence/END.json",
+      "manifest": "agent_reviews/final_learning_evidence/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/final_verifier",
+      "end": "agent_reviews/final_verifier/END.json",
+      "manifest": "agent_reviews/final_verifier/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/final_verifier_zero_start_v3",
+      "end": "agent_reviews/final_verifier_zero_start_v3/END.json",
+      "manifest": "agent_reviews/final_verifier_zero_start_v3/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/integral_audit",
+      "end": "agent_reviews/integral_audit/END.json",
+      "manifest": "agent_reviews/integral_audit/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/local_response_residual",
+      "end": "agent_reviews/local_response_residual/END.json",
+      "manifest": "agent_reviews/local_response_residual/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/ls_terminal_factor_v3",
+      "end": "agent_reviews/ls_terminal_factor_v3/END.json",
+      "manifest": "agent_reviews/ls_terminal_factor_v3/MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/next_learning_target",
+      "end": "agent_reviews/next_learning_target/END_V2.json",
+      "manifest": "agent_reviews/next_learning_target/OUTPUT_MANIFEST_V2.json"
+    },
+    {
+      "directory": "agent_reviews/out0_context_scope",
+      "end": "agent_reviews/out0_context_scope/END.json",
+      "manifest": "agent_reviews/out0_context_scope/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/past_burden",
+      "end": "agent_reviews/past_burden/END.json",
+      "manifest": "agent_reviews/past_burden/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/ppo_clip_feasibility",
+      "end": "agent_reviews/ppo_clip_feasibility/END.json",
+      "manifest": "agent_reviews/ppo_clip_feasibility/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/ppo_scorer_bridge_gate",
+      "end": "agent_reviews/ppo_scorer_bridge_gate/END.json",
+      "manifest": "agent_reviews/ppo_scorer_bridge_gate/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/rl_gradient",
+      "end": "agent_reviews/rl_gradient/END.json",
+      "manifest": "agent_reviews/rl_gradient/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/rl_history",
+      "end": "agent_reviews/rl_history/END.json",
+      "manifest": "agent_reviews/rl_history/REVIEW_OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/short_segments_protocol",
+      "end": "agent_reviews/short_segments_protocol/END_V2_ADDENDUM.json",
+      "manifest": "agent_reviews/short_segments_protocol/OUTPUT_MANIFEST_V2.json"
+    },
+    {
+      "directory": "agent_reviews/validation_identity",
+      "end": "agent_reviews/validation_identity/END.json",
+      "manifest": "agent_reviews/validation_identity/MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/causal_human_interface",
+      "end": "agent_reviews/causal_human_interface/END.json",
+      "manifest": "audit/review_closure_adapters_v1/causal_human_interface_NORMALIZED_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/interface",
+      "end": "agent_reviews/interface/REVIEW_END.json",
+      "manifest": "audit/review_closure_adapters_v1/interface_NORMALIZED_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/terminal_rule",
+      "end": "agent_reviews/terminal_rule/END.json",
+      "manifest": "audit/review_closure_adapters_v1/terminal_rule_NORMALIZED_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/history",
+      "end": "audit/review_closure_adapters_v1/history_CURRENT_MAIN_CLOSURE_RECEIPT.json",
+      "manifest": "agent_reviews/history/REVIEW_OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/local_surrogate",
+      "end": "audit/review_closure_adapters_v1/local_surrogate_CURRENT_MAIN_CLOSURE_RECEIPT.json",
+      "manifest": "agent_reviews/local_surrogate/FINAL_REVIEW_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/final_metadata_inventory",
+      "end": "agent_reviews/final_metadata_inventory/END.json",
+      "manifest": "agent_reviews/final_metadata_inventory/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/final_verifier_devpc01_v4",
+      "end": "agent_reviews/final_verifier_devpc01_v4/END.json",
+      "manifest": "agent_reviews/final_verifier_devpc01_v4/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/final_scientific_claim_scope",
+      "end": "agent_reviews/final_scientific_claim_scope/END.json",
+      "manifest": "agent_reviews/final_scientific_claim_scope/OUTPUT_MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/integral_audit/incremental_closed_v2",
+      "end": "agent_reviews/integral_audit/incremental_closed_v2/END.json",
+      "manifest": "agent_reviews/integral_audit/incremental_closed_v2/MANIFEST.json"
+    },
+    {
+      "directory": "agent_reviews/integral_audit/incremental_final_lstf_v3",
+      "end": "agent_reviews/integral_audit/incremental_final_lstf_v3/END.json",
+      "manifest": "agent_reviews/integral_audit/incremental_final_lstf_v3/MANIFEST.json"
+    }
+  ],
+  "config_paths": {
+    "CFACTORH01": "experiments/CFACTORH01.json",
+    "CFACTORL01": "experiments/CFACTORL01.json",
+    "DEVPC01": "experiments/DEVPC01.json",
+    "DEVPC02": "experiments/DEVPC02.json",
+    "DEVRC01": "experiments/DEVRC01.json",
+    "DEVRC02": "experiments/DEVRC02.json",
+    "DEVRT01": "experiments/DEVRT01.json",
+    "DEVRT02": "experiments/DEVRT02.json",
+    "DEVRT03": "experiments/DEVRT03.json",
+    "EARLYABL01": "experiments/EARLYABL01.json",
+    "EARLYH01": "experiments/EARLYH01.json",
+    "EARLYL01": "experiments/EARLYL01.json",
+    "EARLYN01": "experiments/EARLYN01.json",
+    "EARLYPH01": "experiments/EARLYPH01.json",
+    "H150H01": "experiments/H150H01.json",
+    "H150L01": "experiments/H150L01.json",
+    "H150N01": "experiments/H150N01.json",
+    "HOLDSS01": "experiments/HOLDSS01.json",
+    "HOLDSS02": "experiments/HOLDSS02.json",
+    "HOLDSS03": "experiments/HOLDSS03.json",
+    "HSAPP01": "experiments/HSAPP01.json",
+    "HUMANHS01": "experiments/HUMANHS01.json",
+    "HUMANLS01": "experiments/HUMANLS01.json",
+    "LSREP01": "experiments/LSREP01.json",
+    "LSTF01": "experiments/LSTF01.json",
+    "LSTIM01": "experiments/LSTIM01.json",
+    "PFXV01": "experiments/PFXV01.json",
+    "PFXV02": "experiments/PFXV02.json"
+  },
+  "engineering_failures": {
+    "HOLDSS01": {
+      "zero_START": true,
+      "evidence": {
+        "path": "audit/HOLDSS01_ZERO_START_RECOVERY_REGISTRATION.json",
+        "sha256": "4f9886871d1bac69becd92d4ce273b368bd46bc74ced5d3a06bec97007e5f3f3",
+        "require": {
+          "/recovery_of": "HOLDSS01",
+          "/prior_physical_START_END": [
+            0,
+            0
+          ],
+          "/old_worker_exit": 1,
+          "/old_survivors": []
+        }
+      },
+      "preimport_zero_start": {
+        "schema": "ihear.holdss01.preimport_zero_start.v3",
+        "group": "HOLDSS01",
+        "worker_source_manifest_absent_acknowledged": true,
+        "runtime_worker_source_identity_proven": false,
+        "prelaunch": {
+          "path": "audit/HOLDSS01_PRELAUNCH.json",
+          "sha256": "d8fd58407f566aae374371acbede2235f485d739dedec9d28d7dddaa3a4c3477",
+          "require": {
+            "/status": "PASS",
+            "/group": "HOLDSS01",
+            "/config_sha256": "70dd9105c7b4ef22c9c54567e47006b233fbb0080ec1d8b0e363ab9b78e254ec"
+          }
+        },
+        "binding": {
+          "path": "audit/HOLDSS01_VALIDATION_BINDING.json",
+          "sha256": "2bac51a89040c72b9e87468759e389f7ae5d9e15543dd86c7b09b4b60b93f508",
+          "require": {
+            "/status": "PASS",
+            "/group": "HOLDSS01",
+            "/exact_fields_and_canonical_config_verified": true,
+            "/original_contract_unchanged": true
+          }
+        },
+        "launch": {
+          "path": "owned/HOLDSS01_DETACHED_LAUNCH.json",
+          "sha256": "8cf2d82917f1b28f8b327629b48a547c69bbf5df9fef8d3961cd18c13381aa97",
+          "require": {
+            "/group": "HOLDSS01",
+            "/config_sha256": "70dd9105c7b4ef22c9c54567e47006b233fbb0080ec1d8b0e363ab9b78e254ec"
+          }
+        },
+        "supervisor": {
+          "path": "owned/HOLDSS01_SUPERVISOR.json",
+          "sha256": "dae214fef9b7a47bc24bfd83bcf1501c5eed57caf2d64306e1026dc1625e6ae6",
+          "require": {
+            "/config_sha256": "70dd9105c7b4ef22c9c54567e47006b233fbb0080ec1d8b0e363ab9b78e254ec",
+            "/identity/start_ticks": 57721484,
+            "/worker/start_ticks": 57721487
+          }
+        },
+        "supervisor_end": {
+          "path": "owned/HOLDSS01_SUPERVISOR_END.json",
+          "sha256": "ddd6fd7d52c5be0ef3bf91a1755d3c1bb2b17f4134107ea014a5de9b7cfdf768",
+          "require": {
+            "/state": "STOP",
+            "/worker_exit_code": 1,
+            "/survivors": []
+          }
+        },
+        "descendants": {
+          "path": "owned/HOLDSS01_DESCENDANTS.json",
+          "sha256": "2217fb53ca030f603f0a50d956212f00bec886e5cacdfa2e9ff0e14a27371fe2",
+          "require": {
+            "/known_owned/1032899/start_ticks": 57721487
+          }
+        },
+        "freeze": {
+          "path": "freeze/HOLDSS01.json",
+          "sha256": "b685b159d630ff4b66bcb13beb2f779dafc2ddbb5095d5952d360c5f2f8e77c0",
+          "require": {
+            "/group": "HOLDSS01",
+            "/config_sha256": "70dd9105c7b4ef22c9c54567e47006b233fbb0080ec1d8b0e363ab9b78e254ec"
+          }
+        },
+        "runtime_plan": {
+          "path": "runtime/HOLDSS01_TEST_PLAN.json",
+          "sha256": "70dd9105c7b4ef22c9c54567e47006b233fbb0080ec1d8b0e363ab9b78e254ec"
+        },
+        "worker_log": {
+          "path": "logs/HOLDSS01_worker.log",
+          "sha256": "0eeae8e1c865b9224c8c1a8810126ffa6c4bf113c29ec5936b76901d9a4381fc"
+        },
+        "source_sha256": {
+          "source/v7_prepare_job.py": "f34079b2e6e9122af0e6aebfa78e4944917bbb4daf447d299299b1e1bf472a24",
+          "source/v7_validate_holdout_binding_v1.py": "00ab94636794eeda52f9876b029f896f48f809c42f7cca247d7a9685810d64c2",
+          "source/v7_launch_detached.py": "825869fc78f41b58ddfc51c04d9e43a30e93efa1c164ba30b9c196bf4296e7bc",
+          "source/v7_supervise_v3.py": "1eb475d9704c2dd42cb2770f41d087301d006fa166ab02afb587fe43d609e6e3",
+          "source/v7_worker_v8.py": "55e1785dc18807c253c120c5fbb785427466f54aac93ae331fb690f6b1fdef49"
+        }
+      }
+    },
+    "DEVPC01": {
+      "zero_START": true,
+      "evidence": {
+        "path": "freeze/DEVPC01.json",
+        "sha256": "ffd16653f9743b6925c6b56de9925922e57a98a3ae182191e48f21a21b880d3a",
+        "require": {
+          "/group": "DEVPC01",
+          "/config_sha256": "f83e3ed3637d1890536ea54a334bcda7bdc86070ceb7db6862341129aa3e29e3"
+        }
+      },
+      "devpc01_preimport_zero_start": {
+        "schema": "ihear.devpc01.missing_plan_zero_start.v4",
+        "group": "DEVPC01",
+        "original_absent_metadata_acknowledged": true,
+        "runtime_loaded_source_or_interpreter_identity_proven": false,
+        "freeze": {
+          "path": "freeze/DEVPC01.json",
+          "sha256": "ffd16653f9743b6925c6b56de9925922e57a98a3ae182191e48f21a21b880d3a",
+          "require": {
+            "/group": "DEVPC01",
+            "/config_sha256": "f83e3ed3637d1890536ea54a334bcda7bdc86070ceb7db6862341129aa3e29e3",
+            "/worker_source_sha256": "788be3d7957bf20d14b36e51011579cf6c1720b7b829294853412e2f8812cffb"
+          }
+        },
+        "supervisor": {
+          "path": "owned/DEVPC01_SUPERVISOR.json",
+          "sha256": "c5b84b20e743b39c821c7a23310391f09430ec6e94ea261dae1e337c1ace3eab",
+          "require": {
+            "/identity/pid": 975818,
+            "/identity/start_ticks": 56284124,
+            "/worker/pid": 975820,
+            "/worker/start_ticks": 56284131,
+            "/config_sha256": "f83e3ed3637d1890536ea54a334bcda7bdc86070ceb7db6862341129aa3e29e3"
+          }
+        },
+        "supervisor_end": {
+          "path": "owned/DEVPC01_SUPERVISOR_END.json",
+          "sha256": "88462f931e31700c3ee66476a2353bca0c67eeb00484495e876dc21202d603af",
+          "require": {
+            "/state": "STOP",
+            "/worker_exit_code": 1,
+            "/survivors": []
+          }
+        },
+        "descendants": {
+          "path": "owned/DEVPC01_DESCENDANTS.json",
+          "sha256": "5077e711d474960d6662f3d32ca0dcf8b4f61b2a7a638b2e501fb10095e3f358",
+          "require": {
+            "/known_owned/975820/start_ticks": 56284131
+          }
+        },
+        "worker_log": {
+          "path": "logs/DEVPC01_worker.log",
+          "sha256": "81eae0253889ad8e0b7af7ce1c5917575c9595ed52edf2024d76388328901957"
+        },
+        "current_import_source_review": {
+          "path": "runtime/control/campaign_v6.py",
+          "sha256": "913bf3f59d8edb27ee1760b47870c0d818ce9b53dae14af173c0d7dfede4303e",
+          "original_load_attestation": false
+        },
+        "decision_line_sha256": {
+          "31": "d2f9ab2b4c188ba41d793ab38bf4e84f214d48518c431314186c9c03ef944edd",
+          "34": "8868436df0550f9a01bb36998411b6e9c7dc58ad552eaa2d601268b56da909f3"
+        }
+      }
+    },
+    "DEVRT01": {
+      "zero_START": false,
+      "evidence": {
+        "path": "audit/ENGINEERING_JOB_CLOSEOUT_INDEX_V2.json",
+        "sha256": "40f9399910403e54b4df26a7782545c7a44aa9aae14ab837d4489f4decf5d826",
+        "require": {
+          "/status": "ORIGINAL_ENGINEERING_FAILURES_PRESERVED",
+          "/groups/DEVRT01/worker_exit_code": 1,
+          "/groups/DEVRT01/original_failure_not_deleted": true
+        }
+      },
+      "failed_join_receipt_schema": "ihear.failed_worker_join_receipt.v1",
+      "normal_worker_join_receipt_missing_acknowledged": true,
+      "failed_join_receipt_evidence": {
+        "path": "jobs/DEVRT01/WORKER_DONE.json",
+        "sha256": "25ebfa8942750560754fa7235ea09227f263bc3d8779f95a7cb8bc358985ace3",
+        "require": {
+          "/status": "FAILED_PRESERVED",
+          "/error": "'native_step_cap'"
+        }
+      }
+    },
+    "DEVRT02": {
+      "zero_START": false,
+      "evidence": {
+        "path": "audit/ENGINEERING_JOB_CLOSEOUT_INDEX_V2.json",
+        "sha256": "40f9399910403e54b4df26a7782545c7a44aa9aae14ab837d4489f4decf5d826",
+        "require": {
+          "/status": "ORIGINAL_ENGINEERING_FAILURES_PRESERVED",
+          "/groups/DEVRT02/worker_exit_code": 1,
+          "/groups/DEVRT02/original_failure_not_deleted": true
+        }
+      },
+      "failed_join_receipt_schema": "ihear.failed_worker_join_receipt.v1",
+      "normal_worker_join_receipt_missing_acknowledged": true,
+      "failed_join_receipt_evidence": {
+        "path": "jobs/DEVRT02/WORKER_DONE.json",
+        "sha256": "3b15348d231ae0cdd6d82e5f23071ad7f4326dbd135815cc33f344165f597105",
+        "require": {
+          "/status": "FAILED_PRESERVED",
+          "/error": "[Errno 2] No such file or directory: '/home/hank/ihear-lab/autonomous_learning_smoothness_v7/runtime/source/results/PHASE_RULE_S1_B/trace.npz'"
+        }
+      },
+      "preserve_completed_control_ids": [
+        "DEVRT02_B"
+      ],
+      "completed_control_result": {
+        "path": "attempts/DEVRT02_B_RESULT.json",
+        "sha256": "3b232e836c4cae3f1fcbeabe4058da4a1fd98e903903601a5487b9575aef35bb",
+        "require": {
+          "/id": "DEVRT02_B",
+          "/complete": true,
+          "/qualified": true
+        }
+      },
+      "completed_control_replay": {
+        "path": "audit/scorer_replay/DEVRT02_B.json",
+        "sha256": "c1ae7ff8226469af40613acd6745103ae3045bae7a6a01c7cf5417eebefebb34",
+        "require": {
+          "/status": "SCORER_REPLAY_PASS",
+          "/qualified_replay": true,
+          "/original_result_exact_reproduced": true
+        }
+      }
+    },
+    "DEVRC01": {
+      "zero_START": false,
+      "evidence": {
+        "path": "audit/ENGINEERING_JOB_CLOSEOUT_INDEX_V2.json",
+        "sha256": "40f9399910403e54b4df26a7782545c7a44aa9aae14ab837d4489f4decf5d826",
+        "require": {
+          "/status": "ORIGINAL_ENGINEERING_FAILURES_PRESERVED",
+          "/groups/DEVRC01/worker_exit_code": 1,
+          "/groups/DEVRC01/original_failure_not_deleted": true
+        }
+      },
+      "failed_join_receipt_schema": "ihear.failed_worker_join_receipt.v1",
+      "normal_worker_join_receipt_missing_acknowledged": true,
+      "failed_join_receipt_evidence": {
+        "path": "jobs/DEVRC01/WORKER_DONE.json",
+        "sha256": "c6f5d9d78424ae2badf8d04831957ce4f44deac801c77edf4cf2738d5c487e1a",
+        "require": {
+          "/status": "FAILED_PRESERVED",
+          "/error": "B_NOT_QUALIFIED"
+        }
+      }
+    },
+    "HOLDSS02": {
+      "zero_START": false,
+      "evidence": {
+        "path": "audit/ENGINEERING_JOB_CLOSEOUT_INDEX_V2.json",
+        "sha256": "40f9399910403e54b4df26a7782545c7a44aa9aae14ab837d4489f4decf5d826",
+        "require": {
+          "/status": "ORIGINAL_ENGINEERING_FAILURES_PRESERVED",
+          "/groups/HOLDSS02/worker_exit_code": 1,
+          "/groups/HOLDSS02/original_failure_not_deleted": true
+        }
+      },
+      "failed_join_receipt_schema": "ihear.failed_worker_join_receipt.v1",
+      "normal_worker_join_receipt_missing_acknowledged": true,
+      "failed_join_receipt_evidence": {
+        "path": "jobs/HOLDSS02/WORKER_DONE.json",
+        "sha256": "d9529db635eeeb240c400951576b26846f03389977f7da00e596a0f0e5c4efdc",
+        "require": {
+          "/status": "FAILED_PRESERVED",
+          "/error": "[Errno 2] No such file or directory: '/home/hank/ihear-lab/autonomous_learning_smoothness_v7/runtime/source/results/HOLDSS02_B/summary.json'"
+        }
+      }
+    }
+  },
+  "raw_aliases": {
+    "HOLDSS01_B": {
+      "raw_id": "HOLDSS01_B",
+      "unranked": true,
+      "sha256": {
+        "trace.npz": "86c50dae69d762d05742a26c4d07d2dcf46c42a2447ae95e19be59261d077943",
+        "summary.json": "52f6eb253789847b3d66110013628499cd57080051ebd1b2767607d1d03f8200",
+        "runtime_artifacts.json.gz": "6ce83d05d9778cc6621f0edb863eebe277fba34db690bae528cd9e17b5fe6127"
+      },
+      "evidence": {
+        "path": "audit/HOLDSS02_ENGINEERING_RAW_PRESERVATION.json",
+        "sha256": "70cc58c4d4cb13be670e169a61f0a5326c3db14ea8e25da2f7ecdf50b4d6fb5d",
+        "require": {
+          "/status": "CLOSED_ENGINEERING_FAILURE_RAW_PRESERVED",
+          "/actual_group": "HOLDSS02",
+          "/rows/0/id": "HOLDSS01_B"
+        }
+      }
+    }
+  },
+  "package_manifests": [
+    {
+      "path": "audit/STATIC_PACKAGE_MANIFEST_PRESEAL_V2.json",
+      "sha256": "1c63370fe674853da3132f553433593b32edccce877765921b47ea9c7afeff10",
+      "require": {
+        "/status": "PASS_HASHED_STATIC_SNAPSHOT",
+        "/metadata_limits_present": true
+      }
+    }
+  ]
+}

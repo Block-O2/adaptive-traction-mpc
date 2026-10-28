@@ -1,0 +1,25 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase1_strict_prefit_rom_supervisor_diagnosis_v1",
+  "evidence_category": "development_diagnostic",
+  "arms": ["oracle"],
+  "cases": [
+    {"setup_seed": 1101, "task_seed": 2101, "high_rom": false},
+    {"setup_seed": 1102, "task_seed": 2102, "high_rom": false},
+    {"setup_seed": 1103, "task_seed": 2103, "high_rom": false},
+    {"setup_seed": 1104, "task_seed": 2104, "high_rom": false},
+    {"setup_seed": 1105, "task_seed": 2105, "high_rom": true},
+    {"setup_seed": 1106, "task_seed": 2106, "high_rom": true}
+  ],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 8.0,
+  "hidden_generation": {
+    "source": "same frozen defaults as phase1_firewall_safe_development_v1",
+    "purpose": "quantify strict pre-fit population-geometry q-envelope false aborts before deriving an uncertainty-aware causal consistency margin"
+  },
+  "held_out_policy": {
+    "is_held_out": false,
+    "seeds_may_inform_repairs": true,
+    "formal_seed_namespace": "not accessed by this config"
+  }
+}

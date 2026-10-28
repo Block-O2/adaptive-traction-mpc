@@ -1,0 +1,37 @@
+{
+  "utc": "2026-10-21T19:01:22.869854+00:00",
+  "source_sha256": "88c26d33e04eaddfb3c8e04b26aeff445bafac33b9042f429fca4565fc1baeac",
+  "new_semantics": true,
+  "actor": "8 pre-tanh mean and log-std parameters for one fixed causal context; scalar value",
+  "initial_mu": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "initial_std": [
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2,
+    0.2
+  ],
+  "scratch_base": "same public strong fixed plan as every other method",
+  "complete_qualified_reward": "5*tanh((same-chain strong JF - actual full JF)/5), strictly rank-preserving",
+  "complete_unqualified_reward": "-10-min(5,max(0,actual original-motion ratio -1))",
+  "incomplete_reward": -20.0,
+  "objective": "retain complete original qualification and reduce full JF; original scorer unchanged",
+  "ratio_clip": 0.2,
+  "KL_early_stop": 0.03,
+  "pre_tanh_entropy_coefficient": 0.002,
+  "logSTD_projection": "[log(.05),log(.7)] after Adam, never clipping sampled executed actions",
+  "minibatch": "one complete generation of up to8 whole tasks; no pending old-policy samples",
+  "one_RL_decision_per_episode": true
+}

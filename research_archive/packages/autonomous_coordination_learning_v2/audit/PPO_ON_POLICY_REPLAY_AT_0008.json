@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "group": "PPO_SCRATCH",
+  "utc": "2026-10-21T22:37:17.668496+00:00",
+  "errors": [],
+  "RL_decisions": 9,
+  "completed_rollout_records": 8,
+  "samples_used_in_completed_updates": 8,
+  "pending_or_incomplete_issued_decisions": 1,
+  "policy_update_epochs": 2,
+  "Adam_parameter_group_updates": 6,
+  "maximum_replay_errors": {
+    "density": 8.881784197001252e-16,
+    "raw_advantage": 0.0,
+    "normalized_advantage": 0.0,
+    "Adam_parameter": 3.2440716779547074e-13,
+    "Adam_m": 2.5234848932687015e-13,
+    "Adam_v": 7.804222762822222e-16,
+    "reward": 0.0,
+    "RNG_sample": 0.0
+  },
+  "generations": [
+    {
+      "generation": 1,
+      "episodes": 8,
+      "behavior_id": "c932e1de49f6efe0f20a9a7d64d5cb6b920bdff25a160c3a0dc3322ed37ccdb5",
+      "policy_epochs": 2,
+      "qualified": 8,
+      "exact_analytic_actor_KL_available": true,
+      "epoch_checks": [
+        {
+          "Adam_policy_epoch": 1,
+          "numerical_gradient_norm": 6.896093538023256,
+          "exact_Gaussian_KL": 0.010002045849475172,
+          "empirical_ratio_KL": 0.01629891407059355,
+          "numerical_difference_min_step": 1e-05,
+          "numerical_difference_max_step": 1e-05
+        },
+        {
+          "Adam_policy_epoch": 2,
+          "numerical_gradient_norm": 4.584258420466567,
+          "exact_Gaussian_KL": 0.02734305680416571,
+          "empirical_ratio_KL": 0.03647888708551264,
+          "numerical_difference_min_step": 1e-05,
+          "numerical_difference_max_step": 1e-05
+        }
+      ],
+      "checkpoint_max_parameter_error": 3.2440716779547074e-13,
+      "checkpoint_max_Adam_m_error": 2.5234848932687015e-13,
+      "checkpoint_max_Adam_v_error": 7.804222762822222e-16,
+      "one_RL_decision_per_episode": true
+    },
+    {
+      "generation": 2,
+      "status": "PARTIAL_BATCH_UNUPDATED_PRESERVED"
+    }
+  ],
+  "method": "independent density formula, seeded sample replay, original raw-qualification reward replay, one-step returns/advantage, five-point finite-difference clipped-objective gradient with local stencil shrinkage to avoid crossing clip kinks, and separate Adam replay",
+  "limitation": "Same agent and saved dataset; fixed single context, scalar critic is not evidence of multi-step/state-dependent value contribution.",
+  "wall_s": 0.017145633697509766,
+  "source_sha256": "b58fca54d78a6bdd7c32aa61727dbe149dfdfbde86c886757e4ff7e11a358fa9"
+}

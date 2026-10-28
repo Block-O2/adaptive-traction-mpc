@@ -1,0 +1,70 @@
+{
+  "schema": "ihear_native_event_cpu_ppo_v1",
+  "enabled": false,
+  "backend": "native_mujoco_scientific",
+  "device": "cpu",
+  "physics_envs": 1,
+  "torch_threads": 1,
+  "seeds": [
+    20261021,
+    20261022,
+    20261023
+  ],
+  "observation_dim": 41,
+  "action_dim": 2,
+  "action_bounds": [
+    -1,
+    1
+  ],
+  "action_units": "fraction_of_maximum_progress_per_native_planner_event",
+  "reward_version": "failure_cancels_progress_v2",
+  "teacher_or_expert_weights": false,
+  "policy_hidden_layers": [
+    32,
+    32
+  ],
+  "learning_rate": 0.0003,
+  "gamma": 1.0,
+  "gae_lambda": 0.95,
+  "clip_range": 0.2,
+  "ent_coef": 0.0,
+  "vf_coef": 0.5,
+  "max_grad_norm": 0.5,
+  "minimum_available_GiB": 6,
+  "minimum_disk_free_GiB": 5,
+  "profiles": {
+    "smoke": {
+      "enabled": false,
+      "decisions": 32,
+      "n_steps": 16,
+      "batch_size": 8,
+      "n_epochs": 2,
+      "wall_seconds": 840,
+      "output_limit_GiB": 2,
+      "completed_episode_limit": 6
+    },
+    "pilot": {
+      "enabled": false,
+      "decisions": 100000,
+      "n_steps": 64,
+      "batch_size": 32,
+      "n_epochs": 5,
+      "wall_seconds": 21600,
+      "output_limit_GiB": 20,
+      "completed_episode_limit": 100
+    },
+    "future_1m": {
+      "enabled": false,
+      "decisions": 1000000,
+      "n_steps": 128,
+      "batch_size": 32,
+      "n_epochs": 5,
+      "wall_seconds": 86400,
+      "output_limit_GiB": 40,
+      "completed_episode_limit": 5000
+    }
+  },
+  "budget_semantics": "stop at first of decision, complete episode, disk, resource, wall limits; rollout decisions count native events, not 50ms ticks; profiles are templates, no learning claim",
+  "checkpoint_semantics": "policy+Adam+RNG+counters; resume starts a fresh physical episode; no simulator mid-episode restoration",
+  "evaluation": "separate frozen-policy process, seeds independent from training, no optimizer updates"
+}

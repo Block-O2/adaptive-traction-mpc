@@ -1,0 +1,49 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase1_firewall_safe_five_arm_development_v1",
+  "evidence_category": "development",
+  "arms": [
+    "oracle",
+    "adaptive",
+    "fixed_nominal",
+    "wrong_geometry_adaptive_dynamics",
+    "no_dynamics_adaptation"
+  ],
+  "cases": [
+    {"setup_seed": 1101, "task_seed": 2101, "high_rom": false},
+    {"setup_seed": 1102, "task_seed": 2102, "high_rom": false},
+    {"setup_seed": 1103, "task_seed": 2103, "high_rom": false},
+    {"setup_seed": 1104, "task_seed": 2104, "high_rom": false},
+    {"setup_seed": 1105, "task_seed": 2105, "high_rom": true},
+    {"setup_seed": 1106, "task_seed": 2106, "high_rom": true}
+  ],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 8.0,
+  "hidden_generation": {
+    "continuous": true,
+    "patient_height_scale": [0.88, 1.12],
+    "patient_mass_scale": [0.78, 1.28],
+    "passive_stiffness_scale": [0.65, 1.45],
+    "passive_damping_scale": [0.70, 1.35],
+    "rest_offset_q_deg": [[-4.0, -5.0], [5.0, 6.0]],
+    "thigh_com_scale": [0.88, 1.12],
+    "shank_com_scale": [0.86, 1.14],
+    "hip_placement_x_m": [-0.12, 0.12],
+    "hip_placement_z_m": [0.045, 0.16],
+    "cuff_fraction_of_shank": [0.52, 0.88],
+    "initial_q_deg": [[6.0, 10.0], [18.0, 28.0]],
+    "task_profiles": ["coordinated", "hip_lead", "knee_lead", "two_rate"],
+    "standard_goal_q_deg": [[35.0, 48.0], [62.0, 78.0]],
+    "high_rom_goal_q_deg": [[66.0, 82.0], [75.0, 95.0]],
+    "standard_duration_s": [9.0, 12.0],
+    "high_rom_duration_s": [12.0, 15.0],
+    "measurement_position_std_m": 0.00015,
+    "measurement_angle_std_deg": 0.03,
+    "measurement_twist_assumption": "ideal_noiseless_simulated_derivative"
+  },
+  "held_out_policy": {
+    "is_held_out": false,
+    "seeds_may_inform_repairs": true,
+    "formal_seed_namespace": "not accessed by this config"
+  }
+}

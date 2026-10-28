@@ -1,0 +1,9 @@
+# 有限作业与恢复合同
+
+每组experiments配置在START前冻结，jobs/*/SOURCE_MANIFEST记录控制依赖和配置hash。jobs/*/PROGRESS.json在每个候选结束后记录完整/失败身份、实际native计数和优化器已完成反馈；attempts、原raw及runtime/ATTEMPTS.jsonl共同构成已完成尝试的持久checkpoint。owned supervisor记录PID/start_ticks、资源曲线和局部/全局停止上限。
+
+物理分叉使用同一存活父进程的完整地址空间，保存父状态manifest/hash并逐次检查不变。它不是可以从磁盘重建全部MuJoCo、observer、scheduler与异步请求状态的通用序列化checkpoint。NOT_IMPLEMENTED：中途崩溃后将同一物理ID从任意native步无缝续跑。若发生此类中断，须保留partial和真实积分身份，以新独立ID重新取得合法父状态；不得把新运行覆盖成旧ID，不得将partial小积分排入胜利结果。
+
+SSH断开不终止已分离运行的有限队列；队列本身含固定最大任务数、原T0截止、资源下限和STOP_REQUESTED检查。恢复Agent只接续观察这些进程与已完成checkpoint，不能重置ACTIVATION或截止。所有候选/模型生成仅在已经登记的有限协议内，独立验证反馈不回流开发。
+
+最终每组CHECKPOINT_STATUS.json汇总持久结果与是否需要恢复。SUPERVISOR.json为不可覆盖的启动身份，实际结束以对应SUPERVISOR_END.json和最终内核PID身份扫描为准。

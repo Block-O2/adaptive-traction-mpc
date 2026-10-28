@@ -1,0 +1,43 @@
+{
+  "event": "REGISTER_BRANCH",
+  "unix": 1793037618.708944,
+  "id": "RETURN_RANGE_REPAIR_TRADITIONAL_V1",
+  "owner": "main",
+  "hypothesis": "The lightsoftphase failure is a RETURN knee lower-bound shift: interior RETURN commonnegative or relativepositive targetmodes may reduce undershoot enough to restore originalexcursion qualification while retaining rawjerk/wrench improvements, without endpoint/HOLD or safety changes",
+  "trigger": "Only after originalH150 simplebaseline is measured on sameLScondition; execute if simplerH150 doesnot already solve qualifiedforce/motion target; otherwise NOT_RUN with evidence",
+  "base": "FrozenV6PHASE wholepolicy on exactlysameexposed lightsoftS1; all8coords except named andH150/OUT1rule unchanged",
+  "initial_contrasts": [
+    {
+      "tag": "R_COMMON_M015",
+      "coordinate": 2,
+      "value": -0.15
+    },
+    {
+      "tag": "R_COMMON_M030",
+      "coordinate": 2,
+      "value": -0.3
+    },
+    {
+      "tag": "R_RELATIVE_P015",
+      "coordinate": 3,
+      "value": -0.8071745795248378
+    }
+  ],
+  "controls": [
+    "OriginalB",
+    "V6PHASE",
+    "OriginalH150_FIXED"
+  ],
+  "why_legal": "Only originalinterior modalparameters in[-1,1]; retimedplanner individualjoint endpointlocks, unchangedendgoals/HOLD/original freshcertificate. No filtering or dosecontractrelaxation.",
+  "labels": "Originalcompletequalification andcontinuousoriginalexcursion/endpoint/ROM/othermargins, separateJF/JM/jerk/wrench; failedreference costs nevercountas successful",
+  "budget": {
+    "physics_workers": 1,
+    "per_job_s": 7200,
+    "per_attempt_s": 600,
+    "finite_initial_menu": "3controls+3specificcontrasts, not globalattemptcap",
+    "global_deadline_unchanged": true
+  },
+  "iteration_rule": "If direction is confirmed but not enough, one newmechanisticstep mayberegistered after results; do not endlesslyresample same failure",
+  "stop": "Originalsafety/Bfailure/resources/deadline; noactioneffect, noinformative response, a simpler alreadyvalid solution, or no justifiedrepairhypothesis",
+  "scope": "Traditionaldevelopment onexposedLS, notindependentHumanvalidation, notnewLearning orclinicalsuccess"
+}

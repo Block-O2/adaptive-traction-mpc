@@ -1,0 +1,102 @@
+{
+  "schema_version": "high_rom_time_scale_scan_v1",
+  "evidence_category": "engineering_feasibility_audit_not_formal_or_authoritative",
+  "checkpoint_commit": "bb012f0ac9afabd90b037eb38edbc3edf6e1fcd5",
+  "single_changed_variable": "alpha_scan",
+  "controller_contract": {
+    "controller": "fixed_mpc_population_prior",
+    "adaptive_model_applied": false,
+    "estimator_trust_execution": "shadow_only_no_model_or_clock_authority",
+    "reference_clock": "audit_local_constant_external_time_scale",
+    "reference_phase_rule": "phase_s=alpha_scan*wall_simulation_time_s",
+    "reference_velocity_rule": "dq_dt=alpha_scan*dq_dphase",
+    "reference_acceleration_rule": "ddq_dt2=alpha_scan^2*ddq_dphase2",
+    "adaptive_trust_pacing_bypassed": true,
+    "adaptive_force_pacing_bypassed": true,
+    "mpc_cem_changed": false,
+    "estimator_trust_changed": false,
+    "safety_filter_changed": false,
+    "brake_changed": false,
+    "allocator_changed": false,
+    "gains_changed": false,
+    "reference_manager_mathematics_changed": false,
+    "command_force_gate_n": 200.0,
+    "physical_force_gate_n": 200.0,
+    "human_model": "nominal_high_rom_human_v2_qmax_125deg",
+    "cuff_adapter_m": 0.14,
+    "engineering_scenario": "suspended_seated_like_high_rom",
+    "measurement_seed": 44104
+  },
+  "trajectories": [
+    {
+      "name": "knee_high_folding_90_120",
+      "endpoint_deg": [90.0, 120.0]
+    },
+    {
+      "name": "hip_dominant_100_60",
+      "endpoint_deg": [100.0, 60.0]
+    },
+    {
+      "name": "aggressive_both_120_120",
+      "endpoint_deg": [120.0, 120.0]
+    }
+  ],
+  "base_reference_phase_duration_s": 23.0,
+  "control_period_s": 0.005,
+  "simulation_horizon_rule": "ceil((23.0/alpha_scan)/0.005)*0.005",
+  "legacy_32s_timeout_used": false,
+  "scan_rule": {
+    "initial_alpha": 0.25,
+    "slower_alpha_after_initial_failure": 0.125,
+    "ascending_alphas_after_initial_pass": [0.5, 0.75, 1.0],
+    "bisection_alpha_resolution": 0.025,
+    "bisection_midpoint_round_decimal_places": 6,
+    "bisection_stop_rule": "stop_when_fail_alpha_minus_pass_alpha_lte_0.025",
+    "nonmonotone_rule": "if_any_slower_tested_alpha_fails_and_any_faster_tested_alpha_passes_stop_boundary_search",
+    "run_order_rule": "per_trajectory_complete_the_registered_adaptive_scan_before_starting_the_next_trajectory",
+    "rule_mutable_after_first_run": false
+  },
+  "completion_contract": {
+    "full_reference_progress": "reference_phase_time_s_gte_23.0",
+    "endpoint_completion": "termination_reason_is_reference_completed",
+    "new_tracking_tolerance_added": false
+  },
+  "pass_contract": {
+    "full_geometric_path_completed": true,
+    "maximum_executed_command_force_n_lte": 200.0,
+    "maximum_physical_cuff_force_n_lte": 200.0,
+    "rom_event_samples_eq": 0,
+    "mpc_solver_failures_eq": 0,
+    "mujoco_warning_count_eq": 0,
+    "robot_joint_limit_samples_eq": 0,
+    "structural_event_count_eq": 0,
+    "permanent_brake": false,
+    "timeout": false,
+    "safety_filter_intervention_allowed": true,
+    "transient_brake_allowed_if_track_recovers_and_endpoint_completes": true
+  },
+  "classification_rule": {
+    "A_SPEED_LIMITED_FEASIBLE": "at_least_one_low_speed_pass_and_at_least_one_higher_speed_fail_with_monotone_boundary",
+    "B_FEASIBLE_THROUGH_TESTED_RANGE": "all_registered_tested_speeds_through_alpha_1.0_pass",
+    "C_NOT_SPEED_RESOLVABLE": "alpha_0.125_fails",
+    "D_NON_MONOTONE_CONTROLLER_SWITCH_LIMITED": "a_slower_tested_speed_fails_while_a_faster_tested_speed_passes"
+  },
+  "snapshot_contract": {
+    "save_for_each_failed_run": true,
+    "last_safe_state": "mjSTATE_INTEGRATION_immediately_before_first_detected_failure_or_final_pretermination_safe_state",
+    "first_failure_state": "mjSTATE_INTEGRATION_at_first_detected_failure_or_controller_termination_state",
+    "include_command_and_observation_context": true,
+    "npz_allow_pickle": false
+  },
+  "prohibited_changes": [
+    "measured_force_controller",
+    "task_relaxation_gamma",
+    "brake_recovery",
+    "controller_tuning",
+    "new_mpc_cost",
+    "new_force_margin",
+    "trajectory_specific_tuning",
+    "adaptive_mpc",
+    "additional_seed"
+  ]
+}

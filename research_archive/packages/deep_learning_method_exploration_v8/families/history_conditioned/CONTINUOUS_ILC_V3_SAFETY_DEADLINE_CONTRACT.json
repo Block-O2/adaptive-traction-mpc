@@ -1,0 +1,72 @@
+{
+  "contract_id": "CONTINUOUS_ILC_COMPONENT_BO_V3_SAFETY_DEADLINE_AMENDMENT",
+  "status": "SOURCE_ONLY_SYNTHETIC_PASS_NOT_PHYSICAL_AUTHORIZATION",
+  "parent_c2b_contract": "C2B_COMPONENT_BO_CONTRACT_V2.json",
+  "parent_c2b_contract_sha256": "95207501e660b8dfbbbcdd857f0fdb750a4ad79da10b5d6d6d583d6b95b2cda2",
+  "preserved_source_sha256": {
+    "continuous_ilc_worker_v2.py": "d10f523461d614549013d79459e3ad93734244dd8c0eda220fea619ed008647e",
+    "continuous_ilc_worker_v1.py": "37f75dd0bc11823c7aee8b1002c02f6d4e495f4f30d146faf85a32d49c0b565e",
+    "C2B_COMPONENT_BO_CONTRACT_V2.json": "95207501e660b8dfbbbcdd857f0fdb750a4ad79da10b5d6d6d583d6b95b2cda2",
+    "PRIOR_NOMINAL_LIGHT_H150_POPULATION_V1.json": "a6352b665f0e901f8c11073469d39bf3fd6fe01e8af0fe424d8b4741ff6ab596"
+  },
+  "new_source_sha256": {
+    "continuous_ilc_worker_v3.py": "f4dcf7c1189ef9f876dce31608ec03bf6757db473c71b410bfaad1419a092d91",
+    "failed_child_safety_v3.py": "de3de6dbe55bbbd3e4be87a8c3b5f0a782ab97a2aacee78d1dbc206f51c91791",
+    "owner_deadline_v3.py": "a63d8819860d64cbcc46699a821fb168c54a26275de81ddc9ff448da91eac0fd",
+    "check_v3_synthetic_safety_deadline.py": "b181727394b9f87e03e7687e884027eec087b377cd635949971b2e5af5f9d013"
+  },
+  "scope": "Only closed failed-child hard-safety attribution and absolute inherited owner deadline, plus version/dependency metadata; original task/scorer/motion/action interfaces unchanged",
+  "hard_fields": [
+    "force",
+    "moment",
+    "torque",
+    "human_speed",
+    "human_acceleration",
+    "robot_speed",
+    "session_clearance",
+    "true_clearance",
+    "measured_sleeve_clearance",
+    "no_shank_table_contact",
+    "no_human_rom_violation"
+  ],
+  "closed_gate": [
+    "caller verified actual child joined and parent unchanged",
+    "exactly one original START and END for same id",
+    "END joined is exactly true",
+    "no raw/result DATA/PARTIAL read before those checks"
+  ],
+  "failure_sources": [
+    "RESULT original audit",
+    "DATA original metric physical audit",
+    "PARTIAL original scorer if saved",
+    "persistent delta accounting for cost"
+  ],
+  "hard_false": "Any original listed hard condition explicit false, or physical finite_trace/finite_native false: stop current stage immediately and preserve failure/cost",
+  "unknown": "Missing original hard evidence, malformed source, or unclosed join: stop current stage conservatively; never impute true/zero",
+  "non_hard": "Completion/dwell/phase/motion/burden failure alone is not hard false; all 11 original hard fields must be confirmed true to continue after failed child; incomplete task remains unqualified/unranked",
+  "cost": "Keep original failure, original documents/SHA, original END and all cost sources; prefer real persistent delta, then DATA/PARTIAL/RESULT; preserve disagreement and original absolute index separately; no imputed zero or partial JF ranking",
+  "deadline": {
+    "clock": "absolute monotonic owner deadline plus earlier campaign wall stop",
+    "new_stage": "min(new local budget deadline, inherited outer owner deadline)",
+    "child_and_parent": "all child forks, child physical tasks, final parent control and inherited boundary arm against same deadline",
+    "restoration": "400 remaining before 7 seconds waiting means 393, never 3600 reset; expired budget raises without minimum-one-second extension",
+    "hook": "unchanged V2 hook separately restores prior ITIMER_REAL minus elapsed; its original 400->393 and 20->13 fixtures retained",
+    "parent_root_cap": "Original root supervisor overall cap and earlier campaign stop still win"
+  },
+  "synthetic_fixture": {
+    "path": "CONTINUOUS_V3_SYNTHETIC_SAFETY_DEADLINE_FIXTURE.json",
+    "sha256": "239585091d2f8721107c548cf681924c16e426c11270ef54addb0c4a94240804",
+    "checks": 22,
+    "status": "PASS",
+    "external_wall_s": 0.05,
+    "external_user_s": 0.03,
+    "external_system_s": 0.02,
+    "actual_AST_V3_decision_boundary_cases": 3,
+    "real_data_read": false,
+    "real_fit": 0,
+    "real_fork": 0,
+    "physics": 0
+  },
+  "unchanged_bo": "All original T3 roles joined before hook and parent control; same independent component models/gates; zero exact raw; at most one new grid point through original true fork loop; arms metadata hash change recorded",
+  "remaining": "Root review, new root wrapper/config/source freeze and explicit real CPU/physics approvals; runtime hard failure attribution and nested deadline not yet validated in real job"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "R3",
+  "parameters": {
+    "version": "R3_R1_uniform_units_div30",
+    "progress": 0.06666666666666667,
+    "complete": 0.6666666666666666,
+    "failure": -0.5,
+    "force_per_Ns": 1.6666666666666667e-05,
+    "moment_per_Nms": 0.00016666666666666666,
+    "variation": 0.0006666666666666666,
+    "failure_floor": 0.5,
+    "rationale": "Uniform positive scaling of R1 by its absolute failure penalty15 plus floor15; probe critic/GAE/joint-clip coupling with unchanged parent optimizer and critic. No preference or physics change."
+  },
+  "finite_task_gamma": 1.0,
+  "uniform_units_divisor": 30.0,
+  "source_selection": "transition(version=id,...) in this exact module",
+  "original_R0_contract": "runtime/pilot_env.py",
+  "parent_critic_and_Adam": "Restore original successful050 without unit rescaling; intentional optimizer/value/GAE unit-coupling ablation"
+}

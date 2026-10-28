@@ -1,0 +1,571 @@
+{
+  "utc": "2026-10-22T03:02:11.332877+00:00",
+  "T0_utc": "2026-10-21T18:08:55.399309+00:00",
+  "elapsed_h": 8.887759330670038,
+  "hard_stop_utc": "2026-10-22T04:08:55.399309+00:00",
+  "actual_physical_START": 285,
+  "closed_native_END_records": 285,
+  "actual_new_native_steps": 20093240,
+  "by_category": {
+    "engineering": 69,
+    "optimization": 114,
+    "PPO": 68,
+    "mechanism": 4,
+    "validation": 30
+  },
+  "by_group": {
+    "INTERFACE": 16,
+    "RETIMED": 14,
+    "CORE": 100,
+    "PPO_SCRATCH": 72,
+    "COORDINATE": 19,
+    "PARETO_SCOUT": 12,
+    "RESPONSE": 8,
+    "MOTION_CAUSE": 8,
+    "MOTION_MARGIN_BACKOFF": 6,
+    "LOCKED_REPEAT": 20,
+    "LOCKED_STATE_1": 10
+  },
+  "new_native_by_group": {
+    "INTERFACE": 992060,
+    "RETIMED": 1016700,
+    "CORE": 6973060,
+    "PPO_SCRATCH": 5033780,
+    "COORDINATE": 1363000,
+    "PARETO_SCOUT": 878180,
+    "RESPONSE": 601140,
+    "MOTION_CAUSE": 601140,
+    "MOTION_MARGIN_BACKOFF": 462620,
+    "LOCKED_REPEAT": 1432260,
+    "LOCKED_STATE_1": 739300
+  },
+  "candidate_rows": 273,
+  "complete_task_candidates": 269,
+  "qualified_candidates": 240,
+  "failed_or_unqualified_candidates": 33,
+  "cold_parent_attempts": 11,
+  "native_counter_note": "Every branch subtracts its own recorded inherited prefix (47,060steps for development); full archived trajectories are not summed as new integration. Full JF includes the common executed task prefix.",
+  "model_API_calls": {
+    "main_calls": 5793246,
+    "native_worker_calls": 785001,
+    "unknown_main_attempts": [
+      "INTERFACE_MODE4_POS"
+    ],
+    "unknown_worker_attempts": [
+      "INTERFACE_parent",
+      "INTERFACE_MODE4_POS"
+    ]
+  },
+  "model_API_calls_scope": "Physical-rollout originalAPI counters only; offline proxy/model build/reconstruction query counts and wall times are separately bound in their model/analysis artifacts, not silently included as universal totalAPI counts.",
+  "jobs": [
+    {
+      "id": "000_INTERFACE",
+      "start": {
+        "id": "000_INTERFACE",
+        "pid": 467282,
+        "owner_pid": 467280,
+        "utc": "2026-10-21T18:08:55.445242+00:00",
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_worker.py",
+          "jobs/INTERFACE_CONFIG.json"
+        ],
+        "source_sha256": "b16648601f2fa10773ec6cf7aee72187c95e6451bf63564709dc61b0b0199825",
+        "absolute_deadline_unix": 1792610935.445239
+      },
+      "end": {
+        "status": "FAILED_PRESERVED",
+        "returncode": 1,
+        "wall_s": 2.0006747245788574,
+        "utc": "2026-10-21T18:08:57.445920+00:00"
+      }
+    },
+    {
+      "id": "001_INTERFACE_CLOSURE_REPAIR",
+      "start": {
+        "id": "001_INTERFACE_CLOSURE_REPAIR",
+        "pid": 467435,
+        "owner_pid": 467280,
+        "utc": "2026-10-21T18:09:29.453809+00:00",
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_worker.py",
+          "jobs/INTERFACE_CONFIG.json"
+        ],
+        "source_sha256": "b16648601f2fa10773ec6cf7aee72187c95e6451bf63564709dc61b0b0199825",
+        "absolute_deadline_unix": 1792610969.4538028
+      },
+      "end": {
+        "status": "FAILED_PRESERVED",
+        "returncode": -2,
+        "wall_s": 1526.545562028885,
+        "utc": "2026-10-21T18:34:55.999370+00:00"
+      }
+    },
+    {
+      "id": "002_INTERFACE_AUDIT",
+      "start": {
+        "id": "002_INTERFACE_AUDIT",
+        "pid": 473069,
+        "owner_pid": 467280,
+        "utc": "2026-10-21T18:34:58.001264+00:00",
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_interface_audit.py"
+        ],
+        "source_sha256": "3b7934af718baa9ccbd33337599aaaa968a42775abf98dacfccfc056dd4c4790",
+        "absolute_deadline_unix": 1792608298.0012581
+      },
+      "end": {
+        "status": "FAILED_PRESERVED",
+        "returncode": 1,
+        "wall_s": 2.000746250152588,
+        "utc": "2026-10-21T18:35:00.002010+00:00"
+      }
+    },
+    {
+      "id": "003_RETIMED_INTERFACE",
+      "start": {
+        "id": "003_RETIMED_INTERFACE",
+        "pid": 473077,
+        "owner_pid": 467280,
+        "utc": "2026-10-21T18:35:00.003330+00:00",
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_worker_retimed.py",
+          "jobs/RETIMED_CONFIG.json"
+        ],
+        "source_sha256": "f92d1869327975c8a3b2198aae5c4773193eb85d8f12780dcf671fdfa6ad2fb1",
+        "absolute_deadline_unix": 1792611900.003328
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": null,
+        "wall_s": 1577.0916028022766,
+        "utc": "2026-10-21T19:01:17.094935+00:00",
+        "adopted_live_process": true,
+        "exit_status_from_worker_record": true
+      }
+    },
+    {
+      "id": "004_RETIMED_AUDIT",
+      "start": {
+        "id": "004_RETIMED_AUDIT",
+        "pid": 478356,
+        "owner_pid": 473407,
+        "utc": "2026-10-21T19:01:17.096079+00:00",
+        "start_unix": 1792609277.0960727,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_retimed_audit.py"
+        ],
+        "source_sha256": "a676b72e20ac84ff9efc290a91329fce2a3a92609e8d2d6ef8762866b57457ea",
+        "absolute_deadline_unix": 1792609877.0960727
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 2.001169204711914,
+        "utc": "2026-10-21T19:01:19.097246+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "005_ALLOCATE_CORE",
+      "start": {
+        "id": "005_ALLOCATE_CORE",
+        "pid": 478372,
+        "owner_pid": 473407,
+        "utc": "2026-10-21T19:01:21.099305+00:00",
+        "start_unix": 1792609281.0992951,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_allocate_core.py"
+        ],
+        "source_sha256": "7e76ca1ae5fc245a43d3d68b32c34707e76ad8830e6004416ce035eca7311cb6",
+        "absolute_deadline_unix": 1792610481.0992951
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 2.0011513233184814,
+        "utc": "2026-10-21T19:01:23.100451+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "006_CORE",
+      "start": {
+        "id": "006_CORE",
+        "pid": 478388,
+        "owner_pid": 473407,
+        "utc": "2026-10-21T19:01:25.102550+00:00",
+        "start_unix": 1792609285.1025422,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_worker_owned.py",
+          "jobs/CORE_CONFIG.json"
+        ],
+        "source_sha256": "12a2e06c2b5ef7b27c519307e3870e77d62c04416f4b30655643aa9ef521dd3e",
+        "absolute_deadline_unix": 1792625497.1025422
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 11492.954529762268,
+        "utc": "2026-10-21T22:12:58.057079+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "007_PPO_SCRATCH",
+      "start": {
+        "id": "007_PPO_SCRATCH",
+        "pid": 518613,
+        "owner_pid": 473407,
+        "utc": "2026-10-21T22:12:58.059186+00:00",
+        "start_unix": 1792620778.0591767,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_worker_owned.py",
+          "jobs/PPO_SCRATCH_CONFIG.json"
+        ],
+        "source_sha256": "12a2e06c2b5ef7b27c519307e3870e77d62c04416f4b30655643aa9ef521dd3e",
+        "absolute_deadline_unix": 1792632618.0591767
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 7939.217742204666,
+        "utc": "2026-10-22T00:25:17.276923+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "007a_PPO_REPLAY_AUDIT",
+      "start": {
+        "id": "007a_PPO_REPLAY_AUDIT",
+        "pid": 556265,
+        "owner_pid": 473407,
+        "utc": "2026-10-22T00:58:28.085981+00:00",
+        "start_unix": 1792630708.085975,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_ppo_audit.py"
+        ],
+        "source_sha256": "b58fca54d78a6bdd7c32aa61727dbe149dfdfbde86c886757e4ff7e11a358fa9",
+        "absolute_deadline_unix": 1792631308.085975
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 2.000908613204956,
+        "utc": "2026-10-22T00:58:30.086887+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "008_COORDINATE",
+      "start": {
+        "id": "008_COORDINATE",
+        "pid": 548212,
+        "owner_pid": 473407,
+        "utc": "2026-10-22T00:25:17.277998+00:00",
+        "start_unix": 1792628717.2779953,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_worker_owned.py",
+          "jobs/COORDINATE_CONFIG.json"
+        ],
+        "source_sha256": "12a2e06c2b5ef7b27c519307e3870e77d62c04416f4b30655643aa9ef521dd3e",
+        "absolute_deadline_unix": 1792632283.2779953
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 1988.8061168193817,
+        "utc": "2026-10-22T00:58:26.084115+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "008b_PARETO_SCOUT",
+      "start": {
+        "id": "008b_PARETO_SCOUT",
+        "pid": 556273,
+        "owner_pid": 473407,
+        "utc": "2026-10-22T00:58:30.087977+00:00",
+        "start_unix": 1792630710.0879743,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_worker_owned.py",
+          "jobs/PARETO_SCOUT_CONFIG.json"
+        ],
+        "source_sha256": "12a2e06c2b5ef7b27c519307e3870e77d62c04416f4b30655643aa9ef521dd3e",
+        "absolute_deadline_unix": 1792633110.0879743
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 1266.5002839565277,
+        "utc": "2026-10-22T01:19:36.588262+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "008c_BUILD_RESPONSE_MODEL",
+      "start": {
+        "id": "008c_BUILD_RESPONSE_MODEL",
+        "pid": 505685,
+        "owner_pid": 505684,
+        "utc": "2026-10-21T21:14:07.813665+00:00",
+        "start_unix": 1792617247.8136494,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_response_model.py"
+        ],
+        "source_sha256": "86e0fde93f6d76bffb9d831fd3b683bd2abcf19af860257642cdd8068bec030e",
+        "absolute_deadline_unix": 1792618447.8129997,
+        "execution": "EARLY_BOUNDED_ZERO_NATIVE_AUXILIARY",
+        "schedule_addendum": "EARLY_REFERENCE_BUILD_SCHEDULE_ADDENDUM.json"
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "utc": "2026-10-21T21:14:47.835839+00:00",
+        "wall_s": 40.02221202850342,
+        "reason": null,
+        "new_native_steps": 0,
+        "aux_owner_pid": 505684,
+        "physical_queue_not_restarted": true
+      }
+    },
+    {
+      "id": "008d_RESPONSE_PHYSICS",
+      "start": {
+        "id": "008d_RESPONSE_PHYSICS",
+        "pid": 560741,
+        "owner_pid": 473407,
+        "utc": "2026-10-22T01:19:36.589435+00:00",
+        "start_unix": 1792631976.5894313,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_worker_owned.py",
+          "jobs/RESPONSE_CONFIG.json"
+        ],
+        "source_sha256": "12a2e06c2b5ef7b27c519307e3870e77d62c04416f4b30655643aa9ef521dd3e",
+        "absolute_deadline_unix": 1792633776.5894313
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 928.3799421787262,
+        "utc": "2026-10-22T01:35:04.969377+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "008e_MOTION_CAUSE",
+      "start": {
+        "id": "008e_MOTION_CAUSE",
+        "pid": 563833,
+        "owner_pid": 473407,
+        "utc": "2026-10-22T01:35:04.970803+00:00",
+        "start_unix": 1792632904.9707966,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_worker_owned.py",
+          "jobs/MOTION_CAUSE_CONFIG.json"
+        ],
+        "source_sha256": "12a2e06c2b5ef7b27c519307e3870e77d62c04416f4b30655643aa9ef521dd3e",
+        "absolute_deadline_unix": 1792634704.9707966
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 944.4151129722595,
+        "utc": "2026-10-22T01:50:49.385914+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "008f_MOTION_MARGIN_BACKOFF",
+      "start": {
+        "id": "008f_MOTION_MARGIN_BACKOFF",
+        "pid": 566925,
+        "owner_pid": 473407,
+        "utc": "2026-10-22T01:50:51.388535+00:00",
+        "start_unix": 1792633851.388527,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_worker_owned.py",
+          "jobs/MOTION_MARGIN_BACKOFF_CONFIG.json"
+        ],
+        "source_sha256": "12a2e06c2b5ef7b27c519307e3870e77d62c04416f4b30655643aa9ef521dd3e",
+        "absolute_deadline_unix": 1792635351.388527
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 688.2947602272034,
+        "utc": "2026-10-22T02:02:19.683292+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "009_FREEZE_VALIDATION",
+      "start": {
+        "id": "009_FREEZE_VALIDATION",
+        "pid": 569210,
+        "owner_pid": 473407,
+        "utc": "2026-10-22T02:02:19.684429+00:00",
+        "start_unix": 1792634539.6844237,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_freeze_validate.py"
+        ],
+        "source_sha256": "050efddda539e1263d8c4ddb83341942d3e42bf29bd49ab67eba582e711181f1",
+        "absolute_deadline_unix": 1792635139.6844237
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 2.0010948181152344,
+        "utc": "2026-10-22T02:02:21.685523+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "010_LOCKED_REPEAT",
+      "start": {
+        "id": "010_LOCKED_REPEAT",
+        "pid": 569227,
+        "owner_pid": 473407,
+        "utc": "2026-10-22T02:02:23.688205+00:00",
+        "start_unix": 1792634543.6881952,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_validation_worker.py",
+          "jobs/LOCKED_REPEAT_CONFIG.json"
+        ],
+        "source_sha256": "8a55b50950e8db4bb09a1dde2c9389a25c6efb8e42da7dac48904a148ebb8ec6",
+        "absolute_deadline_unix": 1792637991.6881952
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 2359.090164899826,
+        "utc": "2026-10-22T02:41:42.778365+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "090_VALIDATION_TIME_EXTENSION",
+      "start": {
+        "id": "090_VALIDATION_TIME_EXTENSION",
+        "pid": 577345,
+        "owner_pid": 473407,
+        "utc": "2026-10-22T02:41:42.779856+00:00",
+        "start_unix": 1792636902.7798471,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_validation_extension.py"
+        ],
+        "source_sha256": "a8756685a44f480767b40876a28ae769e4ffc55c513884c7cd10d34b3ae96a89",
+        "absolute_deadline_unix": 1792637022.7798471
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 2.0015146732330322,
+        "utc": "2026-10-22T02:41:44.781367+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "100_LOCKED_STATE_1",
+      "start": {
+        "id": "100_LOCKED_STATE_1",
+        "pid": 577361,
+        "owner_pid": 473407,
+        "utc": "2026-10-22T02:41:46.783738+00:00",
+        "start_unix": 1792636906.7837303,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/cpu-env/bin/python",
+          "/home/hank/ihear-lab/autonomous_coordination_learning_v2/source/acl2_validation_worker.py",
+          "jobs/LOCKED_STATE_1_CONFIG.json"
+        ],
+        "source_sha256": "8a55b50950e8db4bb09a1dde2c9389a25c6efb8e42da7dac48904a148ebb8ec6",
+        "absolute_deadline_unix": 1792638571.7837303
+      },
+      "end": {
+        "status": "COMPLETED",
+        "returncode": 0,
+        "wall_s": 1182.5061149597168,
+        "utc": "2026-10-22T03:01:29.289849+00:00",
+        "adopted_live_process": false,
+        "exit_status_from_worker_record": false
+      }
+    },
+    {
+      "id": "PROXY_INPUT_ABLATION",
+      "start": {
+        "pid": 486060,
+        "utc": "2026-10-21T19:41:05.738743+00:00",
+        "source_sha256": "7789a70f9e3317fe1566d1b36dab86e56001c27f12f4bbb740029738f37ddc71",
+        "native_steps": 0,
+        "local_timeout_s": 180,
+        "hard_deadline_unix": 1792642135.3993092
+      },
+      "end": {
+        "utc": "2026-10-21T19:41:11.542228+00:00",
+        "status": "COMPLETED",
+        "wall_s": 4.680643081665039,
+        "pid": 486060,
+        "new_native_steps": 0,
+        "source_sha256": "7789a70f9e3317fe1566d1b36dab86e56001c27f12f4bbb740029738f37ddc71"
+      }
+    },
+    {
+      "id": "REFERENCE_DIAGNOSIS",
+      "start": {
+        "pid": 480284,
+        "utc": "2026-10-21T19:11:05.456483+00:00",
+        "new_native_steps": 0,
+        "source": "source/acl2_reference_diagnosis.py",
+        "kind": "POSTHOC_ONLY_NOT_OPTIMIZER_FEEDBACK",
+        "hard_deadline_unix": 1792642135.3993092
+      },
+      "end": {
+        "status": "COMPLETED",
+        "utc": "2026-10-21T19:11:10.307047+00:00",
+        "wall_s": 3.654571771621704,
+        "pid": 480284,
+        "native_steps": 0,
+        "source_sha256": "e7e976df257c32f632419dacfce5220f9c7e1c7debb49fb8477e74c338f0b15c"
+      }
+    }
+  ],
+  "telemetry": {
+    "samples": 2677,
+    "start_utc": "2026-10-21T19:34:47.848596+00:00",
+    "min_available_ram_gib": 26.66187286376953,
+    "min_free_disk_gib": 146.59510040283203,
+    "max_owned_RSS_gib": 3.329742431640625,
+    "scope": "Telemetry started during early CORE; earlier live resource snapshots and per-native-boundary RAM>=6GiB assertions are separate."
+  },
+  "native_steps_are_not_independent_learning_samples": true
+}

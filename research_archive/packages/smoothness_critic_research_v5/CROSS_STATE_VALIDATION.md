@@ -1,0 +1,41 @@
+# 冻结后独立合法prefix
+
+四组prefix输入在16:54:53 UTC预登记，晚于早期CORE复现结果；当时尚无这些验证条件的执行结果。完整候选与模型随后锁定，再开始VAL物理执行。全部为同一Human；不同prefix不是跨患者泛化。
+
+| 身份 | 原门 | 权限 | JF N·s | JM Nm·s | native jerk RMS 髋/膝 °/s³ | 200Hz ‖F‖ rate RMS N/s | 4kHz ‖F‖ rate RMS N/s |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| VAL01_ANTICIPATORY | PASS | original domain | 1398.534492 | 107.724398 | 320.21/679.45 | 17.7638 | 19.3537 |
+| VAL01_BEST | PASS | original domain | 1398.583340 | 107.720690 | 320.21/679.46 | 17.7633 | 19.3531 |
+| VAL01_B | PASS | original domain | 1437.335513 | 101.017131 | 305.14/713.79 | 19.3862 | 20.9081 |
+| VAL01_COMPOSE | PASS | original domain | 1406.689096 | 105.810242 | 295.97/634.99 | 16.7730 | 18.2341 |
+| VAL01_HANDOFF | PASS | original domain | 1402.325433 | 107.524572 | 299.41/636.70 | 17.3084 | 18.7660 |
+| VAL01_PATTERN | PASS | original domain | 1403.294837 | 105.924807 | 297.70/635.43 | 16.9852 | 18.4475 |
+| VAL01_PPO_MEAN | PASS | original domain | 1400.457758 | 107.238404 | 319.27/677.66 | 17.8007 | 19.3810 |
+| VAL01_PPO_RULE | PASS | original domain | 1401.765175 | 106.837482 | 313.25/662.10 | 17.7499 | 19.2752 |
+| VAL01_REFERENCE | PASS | original domain | 1398.490107 | 107.821365 | 320.67/680.75 | 17.7830 | 19.3780 |
+| VAL02_ANTICIPATORY | PASS | original domain | 1397.097577 | 108.250049 | 320.31/677.65 | 17.7419 | 19.3335 |
+| VAL02_BEST | PASS | original domain | 1397.125113 | 108.247405 | 320.31/677.66 | 17.7419 | 19.3334 |
+| VAL02_B | PASS | original domain | 1435.595205 | 101.618538 | 305.25/714.12 | 19.4226 | 20.9494 |
+| VAL02_COMPOSE | PASS | original domain | 1405.109374 | 106.347920 | 296.22/633.31 | 16.7642 | 18.2276 |
+| VAL02_HANDOFF | PASS | original domain | 1400.775429 | 108.001973 | 299.69/634.89 | 17.2923 | 18.7521 |
+| VAL02_PATTERN | PASS | original domain | 1401.764940 | 106.460501 | 298.05/633.64 | 16.9776 | 18.4425 |
+| VAL02_REFERENCE | PASS | original domain | 1397.041404 | 108.354182 | 320.93/679.78 | 17.7641 | 19.3619 |
+| VAL03_ANTICIPATORY | FAIL | original domain | 1398.844940 | 107.767596 | 320.13/679.26 | 17.7577 | 19.3474 |
+| VAL03_BEST | FAIL | original domain | 1398.759560 | 107.775841 | 320.14/679.22 | 17.7577 | 19.3475 |
+| VAL03_B | PASS | original domain | 1437.288999 | 101.047299 | 305.39/713.38 | 19.4030 | 20.9258 |
+| VAL03_COMPOSE | PASS | original domain | 1406.765836 | 105.807871 | 296.08/634.80 | 16.7740 | 18.2361 |
+| VAL03_HANDOFF | PASS | original domain | 1402.398223 | 107.522268 | 299.44/636.30 | 17.2984 | 18.7563 |
+| VAL03_PATTERN | PASS | original domain | 1403.373560 | 105.922324 | 297.82/635.07 | 16.9837 | 18.4470 |
+| VAL03_PPO_MEAN | PASS | original domain | 1400.642347 | 107.296984 | 319.37/677.40 | 17.7992 | 19.3801 |
+| VAL03_PPO_RULE | PASS | original domain | 1401.843660 | 106.835297 | 313.32/661.80 | 17.7449 | 19.2709 |
+| VAL03_REFERENCE | FAIL | original domain | 1398.675900 | 107.880568 | 320.74/680.70 | 17.7793 | 19.3748 |
+| VAL04_ANTICIPATORY | PASS | original domain | 1397.489449 | 108.153679 | 320.34/677.80 | 17.7432 | 19.3351 |
+| VAL04_BEST | PASS | original domain | 1397.468059 | 108.155739 | 320.34/677.79 | 17.7433 | 19.3351 |
+| VAL04_B | PASS | original domain | 1436.017735 | 101.470852 | 305.20/714.76 | 19.4019 | 20.9282 |
+| VAL04_COMPOSE | PASS | original domain | 1405.370510 | 106.192973 | 296.18/633.38 | 16.7579 | 18.2212 |
+| VAL04_HANDOFF | PASS | original domain | 1401.060976 | 107.904946 | 299.71/634.99 | 17.2950 | 18.7551 |
+| VAL04_PATTERN | PASS | original domain | 1402.022064 | 106.305901 | 298.00/633.71 | 16.9714 | 18.4362 |
+| VAL04_REFERENCE | PASS | original domain | 1397.383883 | 108.262578 | 320.95/679.90 | 17.7654 | 19.3637 |
+
+
+冻结候选身份及首次START先后关系由最终审计核验；验证结果不回流开发选点。

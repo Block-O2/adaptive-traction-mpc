@@ -1,0 +1,780 @@
+{
+  "time_utc": "2026-10-21T00:26:08.184533+00:00",
+  "status": "COMPLETE_BOUNDED_DEVELOPMENT_COHORT",
+  "reward": "R2",
+  "branch": "REWARD_R2",
+  "endpoint": 30,
+  "tested_windows": [
+    10,
+    30
+  ],
+  "seed_results": [
+    {
+      "seed": 1495656323,
+      "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1495656323_to030/checkpoints/episode_030",
+      "model_sha256": "c3f62d1bd5605d625e4c21279687de5385a4760f057a4db72a41867eb76b4cd4",
+      "metadata_sha256": "e49d3ab1560d5c1d7467bb773b4ae84ba0706798f33bbfe929acd78e1eba0e0f",
+      "research_config": {
+        "job_id": "REWARD_R2_seed1495656323_to030",
+        "branch": "REWARD_R2",
+        "seed": 1495656323,
+        "parent_checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1495656323_to010/checkpoints/episode_010",
+        "start_episode": 10,
+        "episodes": 20,
+        "mode": "training",
+        "learning_rate": 0.0003,
+        "rollout": "aggregate64",
+        "reward": "R2",
+        "target_kl": null,
+        "rollout_terminal_episode": 30,
+        "carry_complete_pending": true,
+        "rollout_protocol_path": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/configs/REWARD_ROLLOUT_PROTOCOL_v1.json",
+        "rollout_protocol_sha256": "a3e042487e7c9fd4a3cc0088c04d339de361faee15553d2f1cb0028a5906ba5d"
+      },
+      "worker_source_sha256": "784ebd356d10cdeb707615bf89cb2c26733f89c47017be4ff6db5d1b1741a29b",
+      "reward_source_sha256": "4107426fe5bc9bac14f918843413e6152752175d1b8837bdce7144c5469b1d6d",
+      "training": {
+        "episodes": 30,
+        "successes": 15,
+        "sampled_transitions": 450,
+        "optimized_transitions": 450,
+        "actual_Adam": 120,
+        "PPO_train": 7,
+        "epochs": 28,
+        "native_steps": 2771140,
+        "terminal_pending": 0,
+        "singleton_minibatches": 0,
+        "all_independent_audits_pass": true
+      },
+      "evaluations": [
+        {
+          "job_id": "REWARD_R2_seed1495656323_ep010_deterministic_dev1",
+          "endpoint": 10,
+          "policy_mode": "deterministic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.030000000048588,
+          "JF": 1444.4469398187236,
+          "JM": 102.09316494540286,
+          "integral_scope": "COMPLETE_TASK",
+          "parent_equal_duration_complete_mean": true,
+          "JF_percent": -0.162150700904784,
+          "JM_percent": 0.5519019313519058,
+          "motion": {
+            "time_utc": "2026-10-20T23:19:00.819541+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1495656323_ep010_deterministic_dev1/episode_011",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.030000000048588,
+            "JF": 1444.4469398187236,
+            "JM": 102.09316494540286,
+            "task_native_steps": 76120,
+            "tracking_RMS_deg": [
+              0.48936540699260106,
+              0.5271112020500871
+            ],
+            "velocity_RMS_deg_s": [
+              14.801647910373564,
+              14.081876036919981
+            ],
+            "velocity_peak_deg_s": [
+              25.72614172846098,
+              34.06419462912669
+            ],
+            "acceleration_RMS_deg_s2": [
+              30.328177969019,
+              33.303932369984494
+            ],
+            "acceleration_peak_deg_s2": [
+              81.09109200025082,
+              149.52426211077346
+            ],
+            "jerk_RMS_deg_s3": [
+              414.9976835866036,
+              1017.5727343574131
+            ],
+            "jerk_peak_deg_s3": [
+              5846.068103551422,
+              20068.7396266479
+            ],
+            "terminal_q_deg": [
+              5.50062785769199,
+              9.49974667105166
+            ],
+            "terminal_dq_deg_s": [
+              -0.0034677912383492123,
+              0.0038402558250638535
+            ],
+            "terminal_return_signed_error_deg": [
+              0.50062785769199,
+              -0.5002533289483392
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.50062785769199,
+              0.5002533289483392
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.0,
+              0.6410037996830609
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.11872878464029651,
+              0.0
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1495656323_ep010_deterministic_dev1/episode_011",
+          "independent_audit_pass": true
+        },
+        {
+          "job_id": "REWARD_R2_seed1495656323_ep010_stochastic_dev1",
+          "endpoint": 10,
+          "policy_mode": "stochastic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.930000000052885,
+          "JF": 1452.58823418871,
+          "JM": 108.53606403163633,
+          "integral_scope": "COMPLETE_TASK",
+          "parent_equal_duration_complete_mean": false,
+          "JF_percent": null,
+          "JM_percent": null,
+          "motion": {
+            "time_utc": "2026-10-20T23:20:28.178280+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1495656323_ep010_stochastic_dev1/episode_011",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.930000000052885,
+            "JF": 1452.58823418871,
+            "JM": 108.53606403163633,
+            "task_native_steps": 79720,
+            "tracking_RMS_deg": [
+              0.46662761649836926,
+              0.9188620048237175
+            ],
+            "velocity_RMS_deg_s": [
+              14.137457549356125,
+              15.939455941102699
+            ],
+            "velocity_peak_deg_s": [
+              25.493125140252562,
+              39.36552284123323
+            ],
+            "acceleration_RMS_deg_s2": [
+              31.903527664545084,
+              45.49031835044319
+            ],
+            "acceleration_peak_deg_s2": [
+              85.52546710143405,
+              177.0683118051096
+            ],
+            "jerk_RMS_deg_s3": [
+              414.3771986351627,
+              1155.4893378045167
+            ],
+            "jerk_peak_deg_s3": [
+              7320.769247246707,
+              24688.849627245614
+            ],
+            "terminal_q_deg": [
+              5.47500682642635,
+              9.351173549710946
+            ],
+            "terminal_dq_deg_s": [
+              1.7795754600116338,
+              1.2915537792922307
+            ],
+            "terminal_return_signed_error_deg": [
+              0.4750068264263503,
+              -0.6488264502890544
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.4750068264263503,
+              0.6488264502890544
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.12344784505860407,
+              2.4401476155298916
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.3761835194334053,
+              0.1254694011543693
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1495656323_ep010_stochastic_dev1/episode_011",
+          "independent_audit_pass": true
+        },
+        {
+          "job_id": "REWARD_R2_seed1495656323_ep030_deterministic_dev1",
+          "endpoint": 30,
+          "policy_mode": "deterministic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.030000000048588,
+          "JF": 1439.9741941043494,
+          "JM": 102.74028356264624,
+          "integral_scope": "COMPLETE_TASK",
+          "parent_equal_duration_complete_mean": true,
+          "JF_percent": -0.4712996909264744,
+          "JM_percent": 1.1892512365067276,
+          "motion": {
+            "time_utc": "2026-10-20T23:57:56.226636+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1495656323_ep030_deterministic_dev1/episode_031",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.030000000048588,
+            "JF": 1439.9741941043494,
+            "JM": 102.74028356264624,
+            "task_native_steps": 76120,
+            "tracking_RMS_deg": [
+              0.4877555443356195,
+              0.5074985261793112
+            ],
+            "velocity_RMS_deg_s": [
+              14.808767684374649,
+              14.091398567283473
+            ],
+            "velocity_peak_deg_s": [
+              25.482447814724605,
+              32.68088017238057
+            ],
+            "acceleration_RMS_deg_s2": [
+              29.03901888172939,
+              28.342482430559485
+            ],
+            "acceleration_peak_deg_s2": [
+              83.28000125167245,
+              152.42357212853983
+            ],
+            "jerk_RMS_deg_s3": [
+              398.72882426725,
+              915.2368828301102
+            ],
+            "jerk_peak_deg_s3": [
+              5833.456070766003,
+              19983.808556132146
+            ],
+            "terminal_q_deg": [
+              5.49935175155149,
+              9.49977970544507
+            ],
+            "terminal_dq_deg_s": [
+              -0.0011266989130597547,
+              -0.0021852529546898397
+            ],
+            "terminal_return_signed_error_deg": [
+              0.4993517515514899,
+              -0.5002202945549308
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.4993517515514899,
+              0.5002202945549308
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.0,
+              0.6560965137483813
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.14348890629836145,
+              0.23926791688789925
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1495656323_ep030_deterministic_dev1/episode_031",
+          "independent_audit_pass": true
+        },
+        {
+          "job_id": "REWARD_R2_seed1495656323_ep030_stochastic_dev1",
+          "endpoint": 30,
+          "policy_mode": "stochastic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.905000000052766,
+          "JF": 1457.129742450091,
+          "JM": 108.4648877645807,
+          "integral_scope": "COMPLETE_TASK",
+          "parent_equal_duration_complete_mean": false,
+          "JF_percent": null,
+          "JM_percent": null,
+          "motion": {
+            "time_utc": "2026-10-20T23:59:39.344983+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1495656323_ep030_stochastic_dev1/episode_031",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.905000000052766,
+            "JF": 1457.129742450091,
+            "JM": 108.4648877645807,
+            "task_native_steps": 79620,
+            "tracking_RMS_deg": [
+              0.46950727747867216,
+              0.9178211012738702
+            ],
+            "velocity_RMS_deg_s": [
+              14.140691180819825,
+              16.05086449682953
+            ],
+            "velocity_peak_deg_s": [
+              25.634570428114888,
+              39.333679129495685
+            ],
+            "acceleration_RMS_deg_s2": [
+              32.406889168365616,
+              45.241808661988706
+            ],
+            "acceleration_peak_deg_s2": [
+              87.52416929168533,
+              176.67602938918276
+            ],
+            "jerk_RMS_deg_s3": [
+              421.9769193133479,
+              1140.1216907225703
+            ],
+            "jerk_peak_deg_s3": [
+              7311.874474870378,
+              24853.85172347719
+            ],
+            "terminal_q_deg": [
+              5.544321301902195,
+              9.358976669543432
+            ],
+            "terminal_dq_deg_s": [
+              1.684406745052864,
+              1.4414762174360207
+            ],
+            "terminal_return_signed_error_deg": [
+              0.544321301902195,
+              -0.6410233304565678
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.544321301902195,
+              0.6410233304565678
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.2980753795167438,
+              2.3428869712173297
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.34914422475888685,
+              0.0
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1495656323_ep030_stochastic_dev1/episode_031",
+          "independent_audit_pass": true
+        }
+      ]
+    },
+    {
+      "seed": 1630784693,
+      "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1630784693_to030/checkpoints/episode_030",
+      "model_sha256": "656ed3c151994212f544145c9a0e333d34989227a262236c0542ce825cad427c",
+      "metadata_sha256": "8305f542b63c975b1bc427ebbc3c3aee907c7e58d51a061a62055d2b4f16b415",
+      "research_config": {
+        "job_id": "REWARD_R2_seed1630784693_to030",
+        "branch": "REWARD_R2",
+        "seed": 1630784693,
+        "parent_checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1630784693_to010/checkpoints/episode_010",
+        "start_episode": 10,
+        "episodes": 20,
+        "mode": "training",
+        "learning_rate": 0.0003,
+        "rollout": "aggregate64",
+        "reward": "R2",
+        "target_kl": null,
+        "rollout_terminal_episode": 30,
+        "carry_complete_pending": true,
+        "rollout_protocol_path": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/configs/REWARD_ROLLOUT_PROTOCOL_v1.json",
+        "rollout_protocol_sha256": "a3e042487e7c9fd4a3cc0088c04d339de361faee15553d2f1cb0028a5906ba5d"
+      },
+      "worker_source_sha256": "784ebd356d10cdeb707615bf89cb2c26733f89c47017be4ff6db5d1b1741a29b",
+      "reward_source_sha256": "4107426fe5bc9bac14f918843413e6152752175d1b8837bdce7144c5469b1d6d",
+      "training": {
+        "episodes": 30,
+        "successes": 14,
+        "sampled_transitions": 424,
+        "optimized_transitions": 424,
+        "actual_Adam": 116,
+        "PPO_train": 6,
+        "epochs": 24,
+        "native_steps": 2820100,
+        "terminal_pending": 0,
+        "singleton_minibatches": 0,
+        "all_independent_audits_pass": true
+      },
+      "evaluations": [
+        {
+          "job_id": "REWARD_R2_seed1630784693_ep010_deterministic_dev1",
+          "endpoint": 10,
+          "policy_mode": "deterministic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.030000000048588,
+          "JF": 1434.0479373430337,
+          "JM": 103.31887048118293,
+          "integral_scope": "COMPLETE_TASK",
+          "parent_equal_duration_complete_mean": true,
+          "JF_percent": -0.20917010020059523,
+          "JM_percent": 0.5541820024743238,
+          "motion": {
+            "time_utc": "2026-10-20T23:32:49.546732+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1630784693_ep010_deterministic_dev1/episode_011",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.030000000048588,
+            "JF": 1434.0479373430337,
+            "JM": 103.31887048118293,
+            "task_native_steps": 76120,
+            "tracking_RMS_deg": [
+              0.5060888913092131,
+              0.6178028640330012
+            ],
+            "velocity_RMS_deg_s": [
+              14.852007897506928,
+              15.14204268504451
+            ],
+            "velocity_peak_deg_s": [
+              26.124130657932994,
+              25.12747306662941
+            ],
+            "acceleration_RMS_deg_s2": [
+              29.5642584535995,
+              16.99445832547341
+            ],
+            "acceleration_peak_deg_s2": [
+              84.77556643232823,
+              74.57746044728334
+            ],
+            "jerk_RMS_deg_s3": [
+              384.6109293459748,
+              800.3271913583999
+            ],
+            "jerk_peak_deg_s3": [
+              5832.005294716368,
+              20188.47071901062
+            ],
+            "terminal_q_deg": [
+              5.499429416848459,
+              9.500111934680348
+            ],
+            "terminal_dq_deg_s": [
+              -0.008303118950796428,
+              -0.003263063531169425
+            ],
+            "terminal_return_signed_error_deg": [
+              0.4994294168484594,
+              -0.4998880653196526
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.4994294168484594,
+              0.4998880653196526
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.1435537841237886,
+              2.75409864738632
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.3167848291093978,
+              0.2622192359738297
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1630784693_ep010_deterministic_dev1/episode_011",
+          "independent_audit_pass": true
+        },
+        {
+          "job_id": "REWARD_R2_seed1630784693_ep010_stochastic_dev1",
+          "endpoint": 10,
+          "policy_mode": "stochastic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.38000000005026,
+          "JF": 1456.0314606707582,
+          "JM": 103.11637866109012,
+          "integral_scope": "COMPLETE_TASK",
+          "parent_equal_duration_complete_mean": false,
+          "JF_percent": null,
+          "JM_percent": null,
+          "motion": {
+            "time_utc": "2026-10-20T23:34:16.490587+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1630784693_ep010_stochastic_dev1/episode_011",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.38000000005026,
+            "JF": 1456.0314606707582,
+            "JM": 103.11637866109012,
+            "task_native_steps": 77520,
+            "tracking_RMS_deg": [
+              0.4783151599337054,
+              0.9477106126624236
+            ],
+            "velocity_RMS_deg_s": [
+              14.477398148155308,
+              15.938177118500892
+            ],
+            "velocity_peak_deg_s": [
+              24.92176026243143,
+              40.592638449341244
+            ],
+            "acceleration_RMS_deg_s2": [
+              30.907839621466476,
+              42.3728113203461
+            ],
+            "acceleration_peak_deg_s2": [
+              81.7794046829669,
+              173.69756357322154
+            ],
+            "jerk_RMS_deg_s3": [
+              403.48632755208115,
+              1062.0489454868205
+            ],
+            "jerk_peak_deg_s3": [
+              7855.5839418521855,
+              22676.061084408775
+            ],
+            "terminal_q_deg": [
+              5.4779139602497136,
+              9.3478415399025
+            ],
+            "terminal_dq_deg_s": [
+              1.8214687741112605,
+              1.3317884082538773
+            ],
+            "terminal_return_signed_error_deg": [
+              0.47791396024971333,
+              -0.6521584600974994
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.47791396024971333,
+              0.6521584600974994
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.14183034755684631,
+              2.42892076512256
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.2506563154967076,
+              0.6148596362057571
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1630784693_ep010_stochastic_dev1/episode_011",
+          "independent_audit_pass": true
+        },
+        {
+          "job_id": "REWARD_R2_seed1630784693_ep030_deterministic_dev1",
+          "endpoint": 30,
+          "policy_mode": "deterministic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.030000000048588,
+          "JF": 1431.9666193015146,
+          "JM": 103.45915233288508,
+          "integral_scope": "COMPLETE_TASK",
+          "parent_equal_duration_complete_mean": true,
+          "JF_percent": -0.3540023957188554,
+          "JM_percent": 0.6907100808593025,
+          "motion": {
+            "time_utc": "2026-10-21T00:24:20.141350+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1630784693_ep030_deterministic_dev1/episode_031",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.030000000048588,
+            "JF": 1431.9666193015146,
+            "JM": 103.45915233288508,
+            "task_native_steps": 76120,
+            "tracking_RMS_deg": [
+              0.4979060516250799,
+              0.6305178298589811
+            ],
+            "velocity_RMS_deg_s": [
+              14.857330704075764,
+              15.22479337254655
+            ],
+            "velocity_peak_deg_s": [
+              24.872458256128393,
+              27.185344714567098
+            ],
+            "acceleration_RMS_deg_s2": [
+              27.837307402395545,
+              18.363410874389643
+            ],
+            "acceleration_peak_deg_s2": [
+              81.57017846477092,
+              75.95544400788073
+            ],
+            "jerk_RMS_deg_s3": [
+              367.50202393866084,
+              802.7104500126532
+            ],
+            "jerk_peak_deg_s3": [
+              5840.939786343003,
+              20161.43830892432
+            ],
+            "terminal_q_deg": [
+              5.499248832669098,
+              9.499629780825535
+            ],
+            "terminal_dq_deg_s": [
+              0.0022737706876298164,
+              -0.0020118401018257284
+            ],
+            "terminal_return_signed_error_deg": [
+              0.49924883266909825,
+              -0.5003702191744648
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.49924883266909825,
+              0.5003702191744648
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.25463349243672173,
+              2.3854447703399755
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.2970213773294133,
+              0.9993674607914645
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1630784693_ep030_deterministic_dev1/episode_031",
+          "independent_audit_pass": true
+        },
+        {
+          "job_id": "REWARD_R2_seed1630784693_ep030_stochastic_dev1",
+          "endpoint": 30,
+          "policy_mode": "stochastic",
+          "success": true,
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "task_s": 19.890000000052694,
+          "JF": 1442.2447924735086,
+          "JM": 113.55499284289186,
+          "integral_scope": "COMPLETE_TASK",
+          "parent_equal_duration_complete_mean": false,
+          "JF_percent": null,
+          "JM_percent": null,
+          "motion": {
+            "time_utc": "2026-10-21T00:25:47.118698+00:00",
+            "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+            "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1630784693_ep030_stochastic_dev1/episode_031",
+            "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+            "status": "COMPLETE",
+            "success": true,
+            "integral_scope": "COMPLETE_TASK",
+            "task_s": 19.890000000052694,
+            "JF": 1442.2447924735086,
+            "JM": 113.55499284289186,
+            "task_native_steps": 79560,
+            "tracking_RMS_deg": [
+              0.46843664852680333,
+              1.0018672899531287
+            ],
+            "velocity_RMS_deg_s": [
+              14.339722572824778,
+              15.664799703613989
+            ],
+            "velocity_peak_deg_s": [
+              25.739894669269823,
+              40.06588053587029
+            ],
+            "acceleration_RMS_deg_s2": [
+              32.46601007531542,
+              35.46444470439566
+            ],
+            "acceleration_peak_deg_s2": [
+              117.9874126156854,
+              168.0157726886236
+            ],
+            "jerk_RMS_deg_s3": [
+              413.3442198415179,
+              1047.770674619031
+            ],
+            "jerk_peak_deg_s3": [
+              7609.185180514511,
+              25094.43954635002
+            ],
+            "terminal_q_deg": [
+              5.590188241590767,
+              9.367109999482295
+            ],
+            "terminal_dq_deg_s": [
+              1.7381210021780016,
+              1.3851357978116599
+            ],
+            "terminal_return_signed_error_deg": [
+              0.5901882415907677,
+              -0.6328900005177052
+            ],
+            "terminal_return_absolute_error_deg": [
+              0.5901882415907677,
+              0.6328900005177052
+            ],
+            "RETURN_overshoot_below_goal_deg": [
+              0.41490526617670054,
+              2.4160902203097847
+            ],
+            "OUTBOUND_overshoot_above_goal_deg": [
+              0.3169872723277685,
+              0.27222219976933254
+            ],
+            "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+            "generalization": "KNOWN_NOMINAL_ONLY",
+            "formal_matched_qualification": "NOT_GRANTED"
+          },
+          "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R2_seed1630784693_ep030_stochastic_dev1/episode_031",
+          "independent_audit_pass": true
+        }
+      ]
+    }
+  ],
+  "all_tested_mean_success": true,
+  "all_tested_sample_success": true,
+  "reward_manifest_sha256": "e35ed1082136b67f39b50026ff7c42498cef08362a298e6e4c85123fb8ab109a",
+  "source_sha256": "d44ad8c0cd1fab252bed5d19fe3cd410d1d9a51431b3b716e26a5fef1fdb3965",
+  "scope": "Two selected successful parents; nominal development only. Distinct checkpoints/modes are not independent completion-rate trials. No formal matched or independent initial-state qualification.",
+  "new_physics": 0,
+  "new_Adam": 0
+}

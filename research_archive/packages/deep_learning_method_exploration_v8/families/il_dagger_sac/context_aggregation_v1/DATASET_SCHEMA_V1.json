@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v8.out0_context_aggregation_dataset.v1",
+  "type": "object",
+  "required": ["schema", "status", "training_ready", "required_new_groups_evaluation_only", "closed_new_groups_evaluation_only", "pending_new_groups_not_opened", "menu", "feature_names", "contexts_evaluation_only", "rows", "teacher_labels_training_only", "source_files_sha256", "model_fit", "normalization_fit", "new_physics"],
+  "properties": {
+    "schema": {"const": "v8.out0_context_aggregation_dataset.v1"},
+    "status": {"enum": ["COMPLETE_INPUT_READY_FOR_MAIN_REVIEW_NOT_TRAINED", "DRAFT_INCOMPLETE_FOUR_CTX_INPUT_NOT_TRAINING_READY"]},
+    "training_ready": {"type": "boolean", "description": "Input completeness only; never grants training approval"},
+    "required_new_groups_evaluation_only": {"const": ["V8CTX01", "V8CTX02", "V8CTX03", "V8CTX04"]},
+    "closed_new_groups_evaluation_only": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "pending_new_groups_not_opened": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "feature_names": {"type": "array", "minItems": 25, "maxItems": 25, "uniqueItems": true, "items": {"type": "string"}},
+    "menu": {"type": "object", "required": ["action_names", "action_contracts", "full_recipe_sha256"], "properties": {
+      "action_names": {"const": ["B", "LATE_H150", "EARLY_H150", "LATE_PHASE", "EARLY_PHASE"]},
+      "action_contracts": {"type": "array", "minItems": 5, "maxItems": 5},
+      "full_recipe_sha256": {"type": "array", "minItems": 5, "maxItems": 5, "uniqueItems": true, "items": {"$ref": "#/$defs/sha256"}}
+    }},
+    "contexts_evaluation_only": {"type": "object", "additionalProperties": {"$ref": "#/$defs/context"}},
+    "rows": {"type": "array", "items": {"$ref": "#/$defs/row"}},
+    "teacher_labels_training_only": {"type": "array", "items": {"$ref": "#/$defs/teacher"}},
+    "source_files_sha256": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}},
+    "model_fit": {"const": 0}, "normalization_fit": {"const": 0}, "new_physics": {"const": 0}
+  },
+  "allOf": [{"if": {"properties": {"training_ready": {"const": true}}}, "then": {"properties": {"closed_new_groups_evaluation_only": {"minItems": 4, "maxItems": 4}, "pending_new_groups_not_opened": {"maxItems": 0}}}}],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "context": {"type": "object", "required": ["context_group_evaluation_only", "parent_group_evaluation_only", "origin", "feature_names", "features", "quality", "causal_features_sha256", "legacy77d_valid"], "properties": {
+      "context_group_evaluation_only": {"type": "string"}, "parent_group_evaluation_only": {"type": "string"},
+      "origin": {"enum": ["HISTORICAL_EXPOSED_DEVELOPMENT", "NEW_EXPOSED_DEVELOPMENT"]},
+      "features": {"type": "array", "minItems": 25, "maxItems": 25, "items": {"type": "number"}},
+      "quality": {"type": "object", "minProperties": 33, "maxProperties": 33, "additionalProperties": {"type": "number"}},
+      "causal_features_sha256": {"$ref": "#/$defs/sha256"}, "legacy77d_valid": {"const": false}
+    }},
+    "row": {"type": "object", "required": ["id", "context_group_evaluation_only", "origin", "action_index", "full_recipe_sha256", "labels_evaluation_only", "source_reference", "actual_new_physics_by_this_preparation"], "properties": {
+      "id": {"type": "string"}, "context_group_evaluation_only": {"type": "string"},
+      "origin": {"enum": ["HISTORICAL_V2", "CLOSED_NEW_EXPOSED_CTX"]},
+      "action_index": {"type": "integer", "minimum": 0, "maximum": 4},
+      "full_recipe_sha256": {"$ref": "#/$defs/sha256"},
+      "labels_evaluation_only": {"type": "object", "required": ["JF_N_s", "JM_Nm_s", "complete", "original_qualified"], "properties": {
+        "JF_N_s": {"type": ["number", "null"]}, "JM_Nm_s": {"type": ["number", "null"]}, "complete": {"type": "boolean"}, "original_qualified": {"type": "boolean"}
+      }},
+      "source_reference": {"type": "object"}, "actual_new_physics_by_this_preparation": {"const": 0}
+    }},
+    "teacher": {"type": "object", "required": ["context_group_evaluation_only", "source_row_id", "teacher_action_index", "teacher_action_name", "full_recipe_sha256", "teacher_complete_and_qualified", "JF_N_s", "JM_Nm_s", "delta_JF_vs_B", "delta_JM_vs_B", "teacher_rule"], "properties": {
+      "context_group_evaluation_only": {"type": "string"}, "source_row_id": {"type": "string"},
+      "teacher_action_index": {"type": "integer", "minimum": 0, "maximum": 4}, "teacher_action_name": {"type": "string"},
+      "full_recipe_sha256": {"$ref": "#/$defs/sha256"}, "teacher_complete_and_qualified": {"const": true},
+      "JF_N_s": {"type": "number", "minimum": 0}, "JM_Nm_s": {"type": "number", "minimum": 0},
+      "delta_JF_vs_B": {"type": "number"}, "delta_JM_vs_B": {"type": "number"},
+      "teacher_rule": {"const": "OBSERVED_COMPLETE_ORIGINAL_QUALIFIED_MIN_JF_WITHIN_FROZEN_FIVE_TIE_MENU_ORDER"}
+    }}
+  },
+  "$comment": "Cross-row parent-recipe uniqueness, actual canonical recipe digests, complete+qualified teacher selection, exact 25D names and source closure are enforced by the preparation code, not merely this structural schema. Labels/group/hash/path never enter select_out0."
+}

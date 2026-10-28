@@ -1,0 +1,85 @@
+{
+  "schema": "v8.E.common_out0_actual_F1_fit_contract.v1",
+  "status": "FROZEN_SOURCE_AND_ACTUAL_DATA_PENDING_MAIN_F1_APPROVAL",
+  "activation_id": "deep_learning_method_exploration_v8_20261027T032540Z",
+  "global_deadline_unix": 1793114740.0,
+  "proposed_contract_path": "families/learning_assisted/common_out0_v2/FIT_CONTRACT_PROPOSED_V1.json",
+  "proposed_contract_sha256": "a5954902dc223ad1397a9e3e91c92e131a0e1ed771252156e0da575ab520792d",
+  "runner_path": "families/learning_assisted/common_out0_v2/fit_f1_candidate_v1.py",
+  "runner_sha256": "c7b9b0cc86a4a18b7782efe1e36a1fa6f7f62194442f22a7627770d04f0a0bcd",
+  "output_directory": "families/learning_assisted/common_out0_v2/fits/f1_v1",
+  "dataset_directory": "families/learning_assisted/common_out0_v2/data/build_v1",
+  "dataset_files_sha256": {
+    "INDEX.json": "49cc208bd3c07093e18a078ae437cb0a6d9b004fbc4e58869a8370729d917f95",
+    "TARGETS_CAUSAL_ONLY.npz": "23d978a19a7fd25b4fda7033fee6f643805461fc83d0a5e4d90f6d93f2ec4f1b"
+  },
+  "dataset_manifest_sha256": "3fc5c804158de7d1424e274058f0dd4ab62bd1f9d7f1410b92b57670b85506c7",
+  "build_execution_receipt_sha256": "0335c93c9e07151fe7cb0768ae1e270c06bf81e813b7a83efe2be733cbab060d",
+  "build_main_approval_sha256": "68808627266402c561352e026c4ba4517eccf17c35a0f70991ca5c97351e7384",
+  "resources": {
+    "CPU_threads": 1,
+    "wall_s": 180,
+    "memory_bytes": 1073741824,
+    "max_multihead_matrix_solves": 253,
+    "max_matrix_dimension": 400,
+    "max_scalar_outputs_per_solve": 16,
+    "max_scalar_head_solutions": 3982,
+    "max_prediction_query_vectors": 1000000,
+    "gradient_updates": 0,
+    "physics": 0,
+    "auto_retry": false
+  },
+  "ridge_alpha": 10.0,
+  "folds": "10 leave-entire-case-SHA development folds + ALL_DEVELOPMENT; no future qualification filter or CV-best pick",
+  "models": {
+    "direct": [
+      "ACTION_BLIND39_ABSOLUTE",
+      "ACTION_ONLY_GLOBAL_RECIPE",
+      "CONTEXT_ACTION_ABSOLUTE",
+      "CONTEXT_ACTION_KINEMATIC_RESIDUAL",
+      "PAIRED_CONTEXT_ACTION_DELTA_VS_B"
+    ],
+    "curve": [
+      "ACTION_BLIND_ANCHORED_CURVE",
+      "CONTEXT_ACTION_ANCHORED_CURVE",
+      "CONTEXT_ACTION_KINEMATIC_RESIDUAL_CURVE"
+    ]
+  },
+  "expected_success_counts": {
+    "normalizer_fits": 11,
+    "direct_solves": 220,
+    "curve_solves": 33,
+    "total_multihead_solves": 253,
+    "scalar_head_solutions": 3982,
+    "learned_prediction_API_calls": 508,
+    "learned_prediction_query_vectors": 923808,
+    "explicit_fixed_control_query_vectors": 768
+  },
+  "preprocessing": {
+    "context": "Mean/scale from unique training case contexts only; no test or query-node multiplicity",
+    "target": "Direct absolute/kinematic residual centers/scales on training labels only; paired and curve target centers fixed0 to preserve algebraic B delta/initial anchors; per-head training scales only",
+    "dense_training": "public0:.02:4s, inputs frozen OUT0 legal39 + full recipe + public querytime; all8/12/16 labels excluded from fit/target scaling"
+  },
+  "metric_ties": {
+    "JF_N_s": 1e-06,
+    "JM_Nm_s": 1e-07,
+    "ranking_selection": "minimum predicted windowJF within1e-6 ties by fixed recipe order B first; predicted sign ties count0"
+  },
+  "metrics": [
+    "per-channel physical units endpoint/paired error",
+    "paired deltaJF/JM MAE and skill vs zero",
+    "non-tie true direction counts with predicted ties counted separately",
+    "observed pairwise ranking and windowJF regret, original full qualification of chosen recipe retrospective only",
+    "dense no-feedback errors/force-moment integrals at.5/1/2/4/8/12/16",
+    "direct vs curve integrated deltaJF/JM inconsistency; negative absolute direct-cost predictions preserved"
+  ],
+  "source_validation": "AST compile only, no synthetic numerical fixture, real model init/fit/forward=0 for this runner",
+  "not_included": [
+    "F2 MLP",
+    "Markov simulator validation",
+    "planner control",
+    "new physical sampling",
+    "independent population generalization"
+  ],
+  "actual_F1_fit_runs": 0
+}

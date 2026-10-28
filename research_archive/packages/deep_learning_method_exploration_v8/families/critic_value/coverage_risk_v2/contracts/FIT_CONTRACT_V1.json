@@ -1,0 +1,102 @@
+{
+  "schema": "v8.a2.coverage_risk_fit_contract.v1",
+  "status": "PROPOSED_AWAITING_MAIN_AGENT_BUDGET_APPROVAL",
+  "activation_id": "deep_learning_method_exploration_v8_20261027T032540Z",
+  "global_deadline_unix": 1793114740.0,
+  "data_path": "data/ACTUAL_COVERAGE_DATASET_V1.json",
+  "data_sha256": "e7a54dd7d3d39f0ab94cec45ceea284d6efec51d186ab74e46ff2335e82b79e0",
+  "rows": 48,
+  "contexts": 10,
+  "original_qualified": 31,
+  "complete_failed": 17,
+  "source_files_sha256": {
+    "source/causal_api.py": "ccbe524287cde566ce217fe1b1fa62fa642c08a54ae9363d51487cf09f653a53",
+    "source/fit_candidate.py": "a56cc03efaf14e0badbad2dc1544d7878edc977688e5de578f3d2b9d07c692b6",
+    "source/merge_actual_coverage.py": "b5a7f4072807a5837bf197d1c055bde93e36d2c764ed4ebe1bee8b9c62779c62",
+    "source/predict_api.py": "59a4c6524e0a8d83e88524ea6a0c5fb1de7c85da59890f29d0afe7144fcf3386",
+    "source/run_training_candidate.py": "1f1d7965a7a63c2dc1c2467e040330374a871c343e12e4016676c834f1b37aa6"
+  },
+  "source_semantics": "candidate only; model fits/forwards NOT_RUN",
+  "cohorts": [
+    "OLD_ONLY",
+    "MERGED"
+  ],
+  "representations": [
+    25,
+    15,
+    0
+  ],
+  "targets": [
+    "ABS_JF",
+    "ABS_JM",
+    "DELTA_B_JF",
+    "DELTA_B_JM",
+    "ORIGINAL_QUALIFICATION_FAILURE"
+  ],
+  "objectives": [
+    "JF_QUALIFIED",
+    "JM_QUALIFIED",
+    "STRICT_JM"
+  ],
+  "risk_ablation": [
+    "ON",
+    "OFF"
+  ],
+  "risk_threshold_fixed": 0.5,
+  "risk_regularization_fixed": 0.3,
+  "ridge_regularization_fixed": [
+    0.1,
+    1.0,
+    10.0
+  ],
+  "support_minimum_contexts": 2,
+  "support_RMS_limit": 3.0,
+  "primary_prespecified": {
+    "cohort": "MERGED",
+    "method": "ABS_25",
+    "risk_mode": "ON",
+    "objective": "JF_QUALIFIED"
+  },
+  "group_split": "leave-one-exact-parent-context-out; all sibling actions together",
+  "missing_action_labels": "UNKNOWN_NO_IMPUTATION_NO_FUTURE_MASK",
+  "simple_controls": [
+    "CONSTANT_B",
+    "BEST_FIXED",
+    "IF_STUMP",
+    "NEAREST"
+  ],
+  "new_physics": 0,
+  "new_native_steps": 0,
+  "sealed_validation_read_allowed": false,
+  "old_checkpoints_may_be_modified": false,
+  "cpu_count": 1,
+  "local_wall_cap_s": 180,
+  "final_audit_reserve_s": 5,
+  "maximum_address_space_bytes": 1073741824,
+  "output_directory": "fit_run_v1",
+  "automatic_retry_allowed": false,
+  "expected_cached_unique_training_sets": 18,
+  "expected_risk_logistic_fits": 54,
+  "expected_ridge_two_rhs_solves": 324,
+  "expected_scalar_cost_heads": 648,
+  "uncached_upper_risk_logistic_fits": 66,
+  "uncached_upper_ridge_two_rhs_solves": 396,
+  "expected_prediction_API_calls": 960,
+  "fit_ledger_required": [
+    "risk iterations/nfev/njev",
+    "ridge solve per target/lambda/dimension",
+    "all inference calls",
+    "PID/start_ticks",
+    "immutable local/global times",
+    "wall/user/system CPU/RSS",
+    "failure and source versions"
+  ],
+  "approval_required_fields": [
+    "status=APPROVED_BY_MAIN_AGENT",
+    "contract_sha256",
+    "source_manifest_sha256",
+    "dataset_sha256"
+  ],
+  "approved_now": false,
+  "proposed_command": "timeout 180s env PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 /home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/offline-env/bin/python -B source/run_training_candidate.py --approval <main-agent-exact-approval.json>"
+}

@@ -1,0 +1,11 @@
+from pathlib import Path
+import json,shutil,hashlib,time,datetime
+r=Path(__file__).resolve().parents[1];c=r.parent/'rl_b_autonomous_replication_v1';dest=r/'physical/runtime';dest.mkdir()
+m=json.loads((c/'FROZEN_CONTRACT_MANIFEST.json').read_text());files={}
+for rel,expected in m['files'].items():
+ p=c/rel;actual=hashlib.sha256(p.read_bytes()).hexdigest();assert actual==expected,rel
+ target=dest/rel;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p,target);files[rel]=actual
+for rel in ['FROZEN_CONTRACT_MANIFEST.json']:
+ shutil.copyfile(c/rel,dest/rel)
+plan={'category':'BOUNDED_DEVELOPMENT_FROZEN_STOCHASTIC_DIAGNOSIS','created_unix':time.time(),'reason':'Historical deterministic 050/080 trajectories and all rollout identities are sufficient for drift/admission diagnosis, but training success under changing policies cannot establish whether either frozen policy has stochastic runtime completion. Two prespecified common random-number replicates per checkpoint probe this unresolved distinction; no success-rate or generalization inference from n=2.','source_root':str(c),'runtime_copy':str(dest),'runtime_files':files,'runtime_copy_exact':True,'source_contract_sha256':hashlib.sha256(json.dumps(m['files'],sort_keys=True).encode()).hexdigest(),'cases':[{'id':f'seed{s}_ep{ep:03d}_rng{rng}','training_seed':s,'checkpoint_episode':ep,'evaluation_rng_seed':rng,'environment_seed':20261020} for s in [1495656323,1630784693] for ep in [50,80] for rng in [2026102101,2026102102]],'maximum_new_physical_episodes':8,'training_updates_allowed':0,'baseline_deterministic':'Verified saved first/repeat runs from previous study; no new deterministic reruns','task_safety_action_reward_model_changes':False,'resource_budget':{'per_episode_wall_s':300,'native_steps_per_episode_cap':165000,'rl_decisions_per_episode_cap':128,'min_available_ram_gib':6,'max_output_per_episode_gib':1.5,'parallel_environments':1},'success_criterion':'Original COMPLETE full phase chain and causal_return_actual_completion_commit; repeat outcomes descriptive only','post_hoc_selection_allowed':False}
+(r/'physical/EVALUATION_PLAN.json').write_text(json.dumps(plan,indent=2)+'\n');print('prepared',len(files),'files',len(plan['cases']),'cases')

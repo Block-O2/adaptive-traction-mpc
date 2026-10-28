@@ -1,0 +1,60 @@
+{
+  "required_artifacts": [
+    "REPORT.md",
+    "EXPERIMENT_CONTRACT.md",
+    "SMOOTHNESS_BASELINE_COMPARISON.md",
+    "WRENCH_FLUCTUATION_ANALYSIS.md",
+    "CRITIC_MODEL_AUDIT.md",
+    "CRITIC_STATE_AND_LABEL_AUDIT.md",
+    "SHORT_HORIZON_VS_FULL_TAIL.md",
+    "CRITIC_DECISION_VALUE.md",
+    "SMOOTHNESS_CRITIC_COMBINED_RESULTS.md",
+    "OPTIMIZATION_AND_SAMPLE_EFFICIENCY.md",
+    "MOTION_FORCE_MOMENT_TRADEOFF.md",
+    "LEARNING_CONTROL_INTERFACE_GUIDE.md",
+    "RESEARCH_DECISIONS.jsonl",
+    "RESOURCE_AND_ATTEMPT_ACCOUNTING.json",
+    "PACKAGE_VERIFICATION.json",
+    "NEXT_RESEARCH_DECISION.md",
+    "END.json"
+  ],
+  "report_questions": [
+    "实际时长与物理尝试",
+    "v5平顺性可靠复现",
+    "真实Human平顺性方法",
+    "cuff波动同步性",
+    "完整JF/JM变化",
+    "Critic缺陷修复",
+    "候选选择变化",
+    "是否优于固定和1秒",
+    "出程motion失败",
+    "实际物理尝试节省",
+    "传统pattern/BO/ILC比较",
+    "已确认失败机制",
+    "仍属假设的解释",
+    "新合法状态有效性",
+    "是否继续Critic",
+    "Learning定位变化",
+    "下一轮具体问题",
+    "长期日志更新",
+    "owned作业结束"
+  ],
+  "conclusion_labels": [
+    "CONFIRMED",
+    "SUPPORTED",
+    "HYPOTHESIS",
+    "NOT_TESTED"
+  ],
+  "final_state": "STOP",
+  "source": "user full continuation received asynchronously",
+  "six_hour_clock_is_not_reset": true,
+  "savings_protocol": [
+    "rank before candidate physics using frozen critic/short model/other legal proxy",
+    "only chosen legal candidates complete physics",
+    "save predictions/rejections/outcomes",
+    "update development model with results",
+    "refreeze and evaluate independent states"
+  ],
+  "sample_budget_rules": "fixed checkpoints frozen, adaptive separate, all failures and parents paid, final 40min closure",
+  "protected": "all old models/physics/guard/task/motion/scorer/integral/history; no Git mutations, deployment, Stage2, final Campaign, expansion, hardware or patient trials"
+}

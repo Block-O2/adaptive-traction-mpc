@@ -1,0 +1,17 @@
+# 原B→真实boundary→原B工程门 v1（待主Agent源审）
+
+当前状态：`SOURCE_ONLY_NOT_RUN`。候选 `persistent_worker_v1.py`只保存代码，未导入或运行；源审只用AST。其main要求配置明确 `persistent_engineering_contract=B_BOUNDARY_B_V1` 与 `persistent_physics_authorized=true`，这些字段由主Agent审查后填写，子Agent不调度physics。
+
+唯一ACTIVATION/原硬截止/统一PHYSICS.lock/主mh START-END/source+config SHA/原task、安全、scorer及motion门全保持。工程门固定两个原B任务和一次原inter-rep边界是此具体门的有限合同，不是整个campaign试验次数上限。每次task仍受原600秒局部timeout及180000 native单attempt门；后者使用本次plant-time增量，不用跨任务累计绝对时钟。
+
+DirectB继承base.Study，仅decision_boundary执行原control，不调用fork、不伪child、不应用非Brecipe。boundary保留frozen.Campaign底层审计，附加真实runtime绑定、原RAM/timeout、局部计数与因果history。原Study.boundary中child专用tail与absolute累计计数不适用于direct重复，故明确覆盖；这不是删除安全/任务/运动门。finish复用原base实现。
+
+已只读核实实际 `runtime_coordination_residual_v2.py` 与 `session_state.py`：carryover白名单为plant、measurement_layer、observer、allocator、last_command及其来源、startup、command_response_history；wall_session/plan_lifecycle/trace/activation钩子禁止跨epoch。`_resume_session_runtime`校验连续plant time，重建任务MPC/monitor/authority；`_start_scientific_session_epoch`重建wall和lifecycle并保留测量滤波/RNG。桥接要求前述持久对象与updater同id，不要求每task新wall/lifecycle同id。
+
+case adapter安装一次，保留原INSTALL冷启动声明，并另写CASE_SCOPE明确只首任务cold，次任务使用既有session；不篡改原metadata或修改原case/scorer源码。原physical audit仍每任务重新核验actual case绑定、raw scorer case SHA和完整任务。源审若认为适配器冷声明仍需独立版本，应由主Agent形成新适配器合同，而不是假装第二task冷启动。
+
+T1新增native含初始commissioning和任务；boundary逐native观察held torque/继承最后positive receipt，原advance函数不变；T2新增native含新epoch bootstrap与任务。delta=本次结束plant time−本次开始time，boundary单独计数，三项相加一次。原absolute trace/metric保存在audit，derived actual_new字段只在隔离输出中更正，原JF/JM/scorer结果不改。失败的真实delta和partial保留，不能把partial积分排名。
+
+两任务各自完整causal history补真实COMPLETE terminal boundary，并与原JF/JM到1e−6闭合；无evaluation Human真值进入history。原am.measure负责native安全、receipt所有权、原task与motion；工程门按用户要求compare自身核查完整原门，不把自比较解释为跨Trial运动改进。T2对T1仅描述性额外报告，真实连续初态不同不能逐字raw一致性要求。
+
+通过只表示本case的连续B执行与计数接口有效；不授予learning、非B direct recipe、一般患者、安全或硬件资格。后续学习必须从真实T2 live父fork比较、完整同父原门、冻结history/model/menu和主Agent独立授权；本源文件没有该扩展。

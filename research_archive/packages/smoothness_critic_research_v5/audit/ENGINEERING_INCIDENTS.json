@@ -1,0 +1,56 @@
+{
+  "documented_utc": "2026-10-22T17:14:35.245733+00:00",
+  "original_error_times_not_inferred": true,
+  "incidents": [
+    {
+      "id": "SANDBOX_PREFLIGHT",
+      "status": "RECOVERED",
+      "error": "bwrap: loopback: Failed RTM_NEWADDR: Operation not permitted",
+      "effect": "Initial read commands did not start.",
+      "resolution": "Host execution through reviewed escalation for user-authorized read/write operations.",
+      "new_physical_START": 0
+    },
+    {
+      "id": "CORE00_IMPORT_METADATA",
+      "status": "RECOVERED_WITH_NEW_GROUP_CORE01",
+      "error": "FileNotFoundError: runtime/EXECUTION_CODE_MANIFEST.json",
+      "evidence": [
+        "logs/CORE00_worker.log",
+        "owned/CORE00_SUPERVISOR_END.json"
+      ],
+      "effect": "Worker exited before main dispatch and any physical START.",
+      "resolution": "Copy missing runtime top-level manifest/metadata with exact path relocation; preserve CORE00 and use unique CORE01.",
+      "new_physical_START": 0
+    },
+    {
+      "id": "ENVIRONMENT_INVENTORY",
+      "status": "RECOVERED",
+      "error": "PackageNotFoundError: scikit-learn",
+      "effect": "Inventory subprocess failed after CORE00 launch; physical environment itself unchanged.",
+      "resolution": "Record absent package; use existing NumPy/SciPy kernel models, no dependency installation.",
+      "new_physical_START": 0
+    },
+    {
+      "id": "TORQUE_COMPONENT_MISSING_RECORD",
+      "status": "RECOVERED_EVALUATION_ONLY",
+      "error": "ValueError: Out of range float values are not JSON compliant: nan",
+      "effect": "Initial extended-metric JSON export rejected six missing component entries in one original trace row.",
+      "resolution": "Report finite coverage and missing row explicitly for preclip torque statistics; do not filter Human/wrench or alter original scorer.",
+      "evidence": [
+        "source/v5_metrics.py",
+        "analysis/extended/CORE01_B.json"
+      ],
+      "new_physical_START": 0
+    },
+    {
+      "id": "NATIVE_WRENCH_SOURCE_REVIEW",
+      "status": "SOURCE_REVIEW_COMPLETE_PENDING_PHYSICAL_IDENTITY",
+      "effect": "observe() was found to call refresh and mutate original history.",
+      "resolution": "Do not call observe; copy only wrench already computed in original post-step interface cache. Require exact sensor overlap and baseline physical identity.",
+      "evidence": [
+        "source/v5_native_wrench.py"
+      ],
+      "new_physical_START": 0
+    }
+  ]
+}

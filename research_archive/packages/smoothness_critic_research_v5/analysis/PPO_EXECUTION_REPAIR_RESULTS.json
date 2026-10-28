@@ -1,0 +1,1261 @@
+{
+  "nominal_B_replay_identity": {
+    "a": "PPOREPAIR01_B",
+    "b": "PPOCHECK_B",
+    "status": "PASS",
+    "checks": {
+      "runtime/source/results:time_s": true,
+      "runtime/source/results:estimated_human_state_rad_rad_s": true,
+      "runtime/source/results:evaluation_only_human_state_rad_rad_s": true,
+      "runtime/source/results:reference_q_rad": true,
+      "runtime/source/results:reference_dq_rad_s": true,
+      "runtime/source/results:reference_ddq_rad_s2": true,
+      "runtime/source/results:cr12_q_rad": true,
+      "runtime/source/results:cr12_dq_rad_s": true,
+      "runtime/source/results:cr12_actuator_command_nm": true,
+      "runtime/source/results:physical_cuff_force_world_n": true,
+      "runtime/source/results:physical_cuff_moment_world_nm": true,
+      "runtime/motion_series:time_s": true,
+      "runtime/motion_series:true_q_rad": true,
+      "runtime/motion_series:true_dq_rad_s": true,
+      "runtime/motion_series:acceleration_rad_s2": true,
+      "runtime/motion_series:jerk_rad_s3": true,
+      "native_wrench:time_s": true,
+      "native_wrench:force_world_n": true,
+      "native_wrench:moment_world_nm": true
+    },
+    "scope": "Actual physical/reference fields and native Human/wrench; extra diagnostic labels are intentionally not required equal."
+  },
+  "status": "COMPLETE_COUNTERFACTUAL_ANALYSIS",
+  "utc": "2026-10-22T23:16:01.764991+00:00",
+  "gate": {
+    "utc": "2026-10-22T22:47:02.659368+00:00",
+    "reference_id": "PPOCHECK_FROZEN_PLUS_RULE",
+    "reference_S": 0.9928236368994685,
+    "reference_accepted_modal_plans": 5,
+    "rows": [
+      {
+        "id": "PPOREPAIR01_TIME0",
+        "qualified": true,
+        "S": 1.0060811390852773,
+        "accepted_modal_plans": 9
+      },
+      {
+        "id": "PPOREPAIR01_TIME0_RULE",
+        "qualified": true,
+        "S": 0.9708740071264492,
+        "accepted_modal_plans": 9
+      }
+    ],
+    "validation_triggered": true,
+    "rule": "A qualified repair must improve preregistered S by at least .005 versus frozen PPO+speed rule and restore at least one accepted modal plan. Validation actions and condition were already frozen before primary VAL. No primary validation result consulted."
+  },
+  "rows": [
+    {
+      "id": "PPOCHECK_FROZEN_MEAN",
+      "qualified": true,
+      "JF": 1399.9182718110073,
+      "JM": 107.49230603250658,
+      "phase_cost": {
+        "OUTBOUND": {
+          "J_F_N_s": 706.0600914551994,
+          "moment_integral_Nm_s": 48.928619838929244,
+          "integrated_trace_duration_s": 9.005000000000718,
+          "phase_clock_duration_s": 9.005000000000718,
+          "mean_force_N": 78.40756151639567,
+          "mean_moment_Nm": 5.433494707265446,
+          "force_peak_N": 113.72164577099606,
+          "moment_peak_Nm": 15.515711683982877
+        },
+        "HOLD": {
+          "J_F_N_s": 54.39433075293617,
+          "moment_integral_Nm_s": 1.2187085743475057,
+          "integrated_trace_duration_s": 1.0200000000048703,
+          "phase_clock_duration_s": 1.0200000000048703,
+          "mean_force_N": 53.32777524772201,
+          "mean_moment_Nm": 1.1948123277859672,
+          "force_peak_N": 53.32778160380789,
+          "moment_peak_Nm": 1.1948135055949822
+        },
+        "RETURN": {
+          "J_F_N_s": 639.4638496028713,
+          "moment_integral_Nm_s": 57.34497761922979,
+          "integrated_trace_duration_s": 9.005000000042997,
+          "phase_clock_duration_s": 9.005000000042997,
+          "mean_force_N": 71.01208768459944,
+          "mean_moment_Nm": 6.368126331921818,
+          "force_peak_N": 88.86998733844818,
+          "moment_peak_Nm": 13.100730590601728
+        }
+      },
+      "native_phase_jerk_RMS": {
+        "OUTBOUND": [
+          373.8549898253243,
+          781.9550399752767
+        ],
+        "HOLD": [
+          0.001956157187181564,
+          0.0014107937933536968
+        ],
+        "RETURN": [
+          275.3434329456261,
+          596.3096653025427
+        ]
+      },
+      "native_jerk_RMS": [
+        319.3945758510802,
+        676.4626162908544
+      ],
+      "force_norm_rate_RMS": 19.36550368031431,
+      "moment_norm_rate_RMS": 2.9340265290954073,
+      "force_peak": 113.72164577099606,
+      "force_RMS": 75.52751463621534,
+      "guard": {
+        "events": 3806,
+        "active": 0,
+        "stencil_cross_count": 0,
+        "endpoint_branch_switch_count": 6,
+        "min_abs_model_axis_z": 1.2631253173631078e-05,
+        "min_model_curvature_m_s2": -0.06824818488126992,
+        "unsatisfied": 0,
+        "correction_nm": {
+          "rms": [
+            0.0,
+            0.0
+          ],
+          "peak_abs": [
+            0.0,
+            0.0
+          ],
+          "p50_abs": [
+            0.0,
+            0.0
+          ],
+          "p95_abs": [
+            0.0,
+            0.0
+          ],
+          "p99_abs": [
+            0.0,
+            0.0
+          ],
+          "p999_abs": [
+            0.0,
+            0.0
+          ]
+        },
+        "crossing_records": []
+      },
+      "accepted_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 5
+      },
+      "rejected_modal_by_phase": {
+        "OUTBOUND": 4,
+        "RETURN": 0
+      },
+      "tracking_RMS_deg": [
+        0.45082301614158266,
+        0.5329294286659827
+      ],
+      "worst_motion_ratio": 0.9557669933809155
+    },
+    {
+      "id": "PPOCHECK_FROZEN_PLUS_RULE",
+      "qualified": true,
+      "JF": 1401.2256702393056,
+      "JM": 107.09138788651467,
+      "phase_cost": {
+        "OUTBOUND": {
+          "J_F_N_s": 706.0600914551994,
+          "moment_integral_Nm_s": 48.928619838929244,
+          "integrated_trace_duration_s": 9.005000000000718,
+          "phase_clock_duration_s": 9.005000000000718,
+          "mean_force_N": 78.40756151639567,
+          "mean_moment_Nm": 5.433494707265446,
+          "force_peak_N": 113.72164577099606,
+          "moment_peak_Nm": 15.515711683982877
+        },
+        "HOLD": {
+          "J_F_N_s": 54.39433075293617,
+          "moment_integral_Nm_s": 1.2187085743475057,
+          "integrated_trace_duration_s": 1.0200000000048703,
+          "phase_clock_duration_s": 1.0200000000048703,
+          "mean_force_N": 53.32777524772201,
+          "mean_moment_Nm": 1.1948123277859672,
+          "force_peak_N": 53.32778160380789,
+          "moment_peak_Nm": 1.1948135055949822
+        },
+        "RETURN": {
+          "J_F_N_s": 640.7712480311698,
+          "moment_integral_Nm_s": 56.94405947323788,
+          "integrated_trace_duration_s": 9.005000000042997,
+          "phase_clock_duration_s": 9.005000000042997,
+          "mean_force_N": 71.15727351783566,
+          "mean_moment_Nm": 6.3236046055486925,
+          "force_peak_N": 89.52002170745334,
+          "moment_peak_Nm": 13.101288595273697
+        }
+      },
+      "native_phase_jerk_RMS": {
+        "OUTBOUND": [
+          373.8549898253243,
+          781.9550399752767
+        ],
+        "HOLD": [
+          0.001956157187181564,
+          0.0014107937933536968
+        ],
+        "RETURN": [
+          260.3175327909427,
+          558.1451652313157
+        ]
+      },
+      "native_jerk_RMS": [
+        313.3754156258141,
+        660.8725653739868
+      ],
+      "force_norm_rate_RMS": 19.259706101228176,
+      "moment_norm_rate_RMS": 2.920837029186118,
+      "force_peak": 113.72164577099606,
+      "force_RMS": 75.6019145335469,
+      "guard": {
+        "events": 3806,
+        "active": 0,
+        "stencil_cross_count": 0,
+        "endpoint_branch_switch_count": 6,
+        "min_abs_model_axis_z": 1.2631253173631078e-05,
+        "min_model_curvature_m_s2": -0.06824818488126992,
+        "unsatisfied": 0,
+        "correction_nm": {
+          "rms": [
+            0.0,
+            0.0
+          ],
+          "peak_abs": [
+            0.0,
+            0.0
+          ],
+          "p50_abs": [
+            0.0,
+            0.0
+          ],
+          "p95_abs": [
+            0.0,
+            0.0
+          ],
+          "p99_abs": [
+            0.0,
+            0.0
+          ],
+          "p999_abs": [
+            0.0,
+            0.0
+          ]
+        },
+        "crossing_records": []
+      },
+      "accepted_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 5
+      },
+      "rejected_modal_by_phase": {
+        "OUTBOUND": 4,
+        "RETURN": 0
+      },
+      "tracking_RMS_deg": [
+        0.45083983624645385,
+        0.5246424676262356
+      ],
+      "worst_motion_ratio": 0.9552419990619369
+    },
+    {
+      "id": "PPOREPAIR01_TIME0",
+      "qualified": true,
+      "JF": 1399.891500310702,
+      "JM": 107.50115407753076,
+      "phase_cost": {
+        "OUTBOUND": {
+          "J_F_N_s": 706.0333200662712,
+          "moment_integral_Nm_s": 48.937467898602975,
+          "integrated_trace_duration_s": 9.005000000000718,
+          "phase_clock_duration_s": 9.005000000000718,
+          "mean_force_N": 78.40458856926318,
+          "mean_moment_Nm": 5.434477279133711,
+          "force_peak_N": 113.70729268016123,
+          "moment_peak_Nm": 15.515711683982877
+        },
+        "HOLD": {
+          "J_F_N_s": 54.39433063827586,
+          "moment_integral_Nm_s": 1.2187085593280624,
+          "integrated_trace_duration_s": 1.0200000000048703,
+          "phase_clock_duration_s": 1.0200000000048703,
+          "mean_force_N": 53.327775135309935,
+          "mean_moment_Nm": 1.1948123130610229,
+          "force_peak_N": 53.32778172780916,
+          "moment_peak_Nm": 1.1948135321337114
+        },
+        "RETURN": {
+          "J_F_N_s": 639.4638496061546,
+          "moment_integral_Nm_s": 57.344977619599696,
+          "integrated_trace_duration_s": 9.005000000042997,
+          "phase_clock_duration_s": 9.005000000042997,
+          "mean_force_N": 71.01208768496404,
+          "mean_moment_Nm": 6.3681263319628965,
+          "force_peak_N": 88.86998733882956,
+          "moment_peak_Nm": 13.10073059042564
+        }
+      },
+      "native_phase_jerk_RMS": {
+        "OUTBOUND": [
+          374.9704523436269,
+          784.0858646969499
+        ],
+        "HOLD": [
+          0.0020385493740102466,
+          0.0014693350029197564
+        ],
+        "RETURN": [
+          275.34343294344114,
+          596.309665308213
+        ]
+      },
+      "native_jerk_RMS": [
+        320.0127305880841,
+        677.6287331899917
+      ],
+      "force_norm_rate_RMS": 19.38707252853899,
+      "moment_norm_rate_RMS": 2.9350575164472956,
+      "force_peak": 113.70729268016123,
+      "force_RMS": 75.52593558661665,
+      "guard": {
+        "events": 3806,
+        "active": 0,
+        "stencil_cross_count": 0,
+        "endpoint_branch_switch_count": 6,
+        "min_abs_model_axis_z": 1.263116350014023e-05,
+        "min_model_curvature_m_s2": -0.06773692717843004,
+        "unsatisfied": 0,
+        "correction_nm": {
+          "rms": [
+            0.0,
+            0.0
+          ],
+          "peak_abs": [
+            0.0,
+            0.0
+          ],
+          "p50_abs": [
+            0.0,
+            0.0
+          ],
+          "p95_abs": [
+            0.0,
+            0.0
+          ],
+          "p99_abs": [
+            0.0,
+            0.0
+          ],
+          "p999_abs": [
+            0.0,
+            0.0
+          ]
+        },
+        "crossing_records": []
+      },
+      "accepted_modal_by_phase": {
+        "OUTBOUND": 4,
+        "RETURN": 5
+      },
+      "rejected_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 0
+      },
+      "tracking_RMS_deg": [
+        0.45068510300645565,
+        0.5330985701450396
+      ],
+      "worst_motion_ratio": 0.9557560817265311
+    },
+    {
+      "id": "PPOREPAIR01_TIME0_RULE",
+      "qualified": true,
+      "JF": 1403.7312661296044,
+      "JM": 107.26778312800627,
+      "phase_cost": {
+        "OUTBOUND": {
+          "J_F_N_s": 708.5656898050939,
+          "moment_integral_Nm_s": 49.10501579318045,
+          "integrated_trace_duration_s": 9.005000000000718,
+          "phase_clock_duration_s": 9.005000000000718,
+          "mean_force_N": 78.68580675236396,
+          "mean_moment_Nm": 5.4530833751445345,
+          "force_peak_N": 113.81337749545935,
+          "moment_peak_Nm": 15.515711683982877
+        },
+        "HOLD": {
+          "J_F_N_s": 54.39432820518607,
+          "moment_integral_Nm_s": 1.218707840857728,
+          "integrated_trace_duration_s": 1.0200000000048703,
+          "phase_clock_duration_s": 1.0200000000048703,
+          "mean_force_N": 53.32777274992779,
+          "mean_moment_Nm": 1.194811608678342,
+          "force_peak_N": 53.327782805260746,
+          "moment_peak_Nm": 1.1948135799277344
+        },
+        "RETURN": {
+          "J_F_N_s": 640.7712481193238,
+          "moment_integral_Nm_s": 56.94405949396813,
+          "integrated_trace_duration_s": 9.005000000042997,
+          "phase_clock_duration_s": 9.005000000042997,
+          "mean_force_N": 71.15727352762512,
+          "mean_moment_Nm": 6.3236046078507755,
+          "force_peak_N": 89.52002171164997,
+          "moment_peak_Nm": 13.101288590042204
+        }
+      },
+      "native_phase_jerk_RMS": {
+        "OUTBOUND": [
+          349.37600041472217,
+          737.6285252741751
+        ],
+        "HOLD": [
+          0.002802632354653251,
+          0.0021778402349533856
+        ],
+        "RETURN": [
+          260.3175331745083,
+          558.1451653128647
+        ]
+      },
+      "native_jerk_RMS": [
+        299.71109739243855,
+        636.3012029301677
+      ],
+      "force_norm_rate_RMS": 18.769434352754004,
+      "moment_norm_rate_RMS": 2.887140369036643,
+      "force_peak": 113.81337749545935,
+      "force_RMS": 75.71456211146172,
+      "guard": {
+        "events": 3806,
+        "active": 0,
+        "stencil_cross_count": 0,
+        "endpoint_branch_switch_count": 6,
+        "min_abs_model_axis_z": 1.2631684207839369e-05,
+        "min_model_curvature_m_s2": -0.06822764575531436,
+        "unsatisfied": 0,
+        "correction_nm": {
+          "rms": [
+            0.0,
+            0.0
+          ],
+          "peak_abs": [
+            0.0,
+            0.0
+          ],
+          "p50_abs": [
+            0.0,
+            0.0
+          ],
+          "p95_abs": [
+            0.0,
+            0.0
+          ],
+          "p99_abs": [
+            0.0,
+            0.0
+          ],
+          "p999_abs": [
+            0.0,
+            0.0
+          ]
+        },
+        "crossing_records": []
+      },
+      "accepted_modal_by_phase": {
+        "OUTBOUND": 4,
+        "RETURN": 5
+      },
+      "rejected_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 0
+      },
+      "tracking_RMS_deg": [
+        0.449565011022387,
+        0.5208963214961682
+      ],
+      "worst_motion_ratio": 0.9598420844302621
+    },
+    {
+      "id": "PPOREPAIRVAL_B",
+      "qualified": true,
+      "JF": 1436.773241367911,
+      "JM": 101.24573811147411,
+      "phase_cost": {
+        "OUTBOUND": {
+          "J_F_N_s": 720.7468266654371,
+          "moment_integral_Nm_s": 48.197781553971595,
+          "integrated_trace_duration_s": 9.005000000000718,
+          "phase_clock_duration_s": 9.005000000000718,
+          "mean_force_N": 80.03851489898719,
+          "mean_moment_Nm": 5.352335541806524,
+          "force_peak_N": 114.6539949045162,
+          "moment_peak_Nm": 15.542854559905104
+        },
+        "HOLD": {
+          "J_F_N_s": 54.39434036342111,
+          "moment_integral_Nm_s": 1.2187087374509114,
+          "integrated_trace_duration_s": 1.0200000000048703,
+          "phase_clock_duration_s": 1.0200000000048703,
+          "mean_force_N": 53.32778466976606,
+          "mean_moment_Nm": 1.194812487691267,
+          "force_peak_N": 53.32797952433145,
+          "moment_peak_Nm": 1.1948441485287853
+        },
+        "RETURN": {
+          "J_F_N_s": 661.6320743390528,
+          "moment_integral_Nm_s": 51.829247820051584,
+          "integrated_trace_duration_s": 9.005000000042997,
+          "phase_clock_duration_s": 9.005000000042997,
+          "mean_force_N": 73.47385611725637,
+          "mean_moment_Nm": 5.75560775344854,
+          "force_peak_N": 94.85117764827947,
+          "moment_peak_Nm": 13.683646817887544
+        }
+      },
+      "native_phase_jerk_RMS": {
+        "OUTBOUND": [
+          322.85528743697915,
+          811.3737287453196
+        ],
+        "HOLD": [
+          0.017928552382446367,
+          0.010988706287573957
+        ],
+        "RETURN": [
+          304.8045885492433,
+          645.0096601361209
+        ]
+      },
+      "native_jerk_RMS": [
+        305.4297538522495,
+        713.0136260491242
+      ],
+      "force_norm_rate_RMS": 20.96336220153394,
+      "moment_norm_rate_RMS": 3.4010800707146776,
+      "force_peak": 114.6539949045162,
+      "force_RMS": 77.50854125876423,
+      "guard": {
+        "events": 3806,
+        "active": 0,
+        "stencil_cross_count": 0,
+        "endpoint_branch_switch_count": 8,
+        "min_abs_model_axis_z": 2.8975468961926467e-06,
+        "min_model_curvature_m_s2": -0.06714240274874327,
+        "unsatisfied": 0,
+        "correction_nm": {
+          "rms": [
+            0.0,
+            0.0
+          ],
+          "peak_abs": [
+            0.0,
+            0.0
+          ],
+          "p50_abs": [
+            0.0,
+            0.0
+          ],
+          "p95_abs": [
+            0.0,
+            0.0
+          ],
+          "p99_abs": [
+            0.0,
+            0.0
+          ],
+          "p999_abs": [
+            0.0,
+            0.0
+          ]
+        },
+        "crossing_records": []
+      },
+      "accepted_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 0
+      },
+      "rejected_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 0
+      },
+      "tracking_RMS_deg": [
+        0.4741775655448083,
+        0.4601592968766636
+      ],
+      "worst_motion_ratio": 0.9523809523809523
+    },
+    {
+      "id": "PPOREPAIRVAL_BEST",
+      "qualified": true,
+      "JF": 1398.1225638657622,
+      "JM": 107.88853954911396,
+      "phase_cost": {
+        "OUTBOUND": {
+          "J_F_N_s": 706.7139519530328,
+          "moment_integral_Nm_s": 48.692898617640296,
+          "integrated_trace_duration_s": 9.005000000000718,
+          "phase_clock_duration_s": 9.005000000000718,
+          "mean_force_N": 78.48017234347323,
+          "mean_moment_Nm": 5.407318003069007,
+          "force_peak_N": 113.82928951485911,
+          "moment_peak_Nm": 15.542854559905104
+        },
+        "HOLD": {
+          "J_F_N_s": 54.39433068756966,
+          "moment_integral_Nm_s": 1.2187085633950365,
+          "integrated_trace_duration_s": 1.0200000000048703,
+          "phase_clock_duration_s": 1.0200000000048703,
+          "mean_force_N": 53.32777518363719,
+          "mean_moment_Nm": 1.1948123170482523,
+          "force_peak_N": 53.32778159896697,
+          "moment_peak_Nm": 1.1948135045171226
+        },
+        "RETURN": {
+          "J_F_N_s": 637.0142812251601,
+          "moment_integral_Nm_s": 57.97693236807863,
+          "integrated_trace_duration_s": 9.005000000042997,
+          "phase_clock_duration_s": 9.005000000042997,
+          "mean_force_N": 70.74006454437739,
+          "mean_moment_Nm": 6.438304538345563,
+          "force_peak_N": 87.85079594272258,
+          "moment_peak_Nm": 13.091731709096543
+        }
+      },
+      "native_phase_jerk_RMS": {
+        "OUTBOUND": [
+          373.6597521861056,
+          783.9270356828881
+        ],
+        "HOLD": [
+          0.0019817151826931494,
+          0.0014299868785748063
+        ],
+        "RETURN": [
+          277.6279584273499,
+          600.5106156081562
+        ]
+      },
+      "native_jerk_RMS": [
+        320.2212165379378,
+        679.2952491661459
+      ],
+      "force_norm_rate_RMS": 19.35625686670847,
+      "moment_norm_rate_RMS": 2.9474065393069866,
+      "force_peak": 113.82928951485911,
+      "force_RMS": 75.44070879386663,
+      "guard": {
+        "events": 3806,
+        "active": 0,
+        "stencil_cross_count": 0,
+        "endpoint_branch_switch_count": 6,
+        "min_abs_model_axis_z": 2.8843113244429983e-06,
+        "min_model_curvature_m_s2": -0.06773470673238079,
+        "unsatisfied": 0,
+        "correction_nm": {
+          "rms": [
+            0.0,
+            0.0
+          ],
+          "peak_abs": [
+            0.0,
+            0.0
+          ],
+          "p50_abs": [
+            0.0,
+            0.0
+          ],
+          "p95_abs": [
+            0.0,
+            0.0
+          ],
+          "p99_abs": [
+            0.0,
+            0.0
+          ],
+          "p999_abs": [
+            0.0,
+            0.0
+          ]
+        },
+        "crossing_records": []
+      },
+      "accepted_modal_by_phase": {
+        "OUTBOUND": 4,
+        "RETURN": 5
+      },
+      "rejected_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 0
+      },
+      "tracking_RMS_deg": [
+        0.44993259070475533,
+        0.5419181155295524
+      ],
+      "worst_motion_ratio": 0.9555697375806643
+    },
+    {
+      "id": "PPOREPAIRVAL_MEAN",
+      "qualified": true,
+      "JF": 1399.9984111353162,
+      "JM": 107.40692155027796,
+      "phase_cost": {
+        "OUTBOUND": {
+          "J_F_N_s": 706.5993363680333,
+          "moment_integral_Nm_s": 48.674733683499525,
+          "integrated_trace_duration_s": 9.005000000000718,
+          "phase_clock_duration_s": 9.005000000000718,
+          "mean_force_N": 78.467444349581,
+          "mean_moment_Nm": 5.405300797723003,
+          "force_peak_N": 113.84329733270572,
+          "moment_peak_Nm": 15.542854559905104
+        },
+        "HOLD": {
+          "J_F_N_s": 54.394331087303414,
+          "moment_integral_Nm_s": 1.2187086187640703,
+          "integrated_trace_duration_s": 1.0200000000048703,
+          "phase_clock_duration_s": 1.0200000000048703,
+          "mean_force_N": 53.32777557553303,
+          "mean_moment_Nm": 1.1948123713316188,
+          "force_peak_N": 53.32778133943575,
+          "moment_peak_Nm": 1.1948134488482873
+        },
+        "RETURN": {
+          "J_F_N_s": 639.00474367998,
+          "moment_integral_Nm_s": 57.51347924801439,
+          "integrated_trace_duration_s": 9.005000000042997,
+          "phase_clock_duration_s": 9.005000000042997,
+          "mean_force_N": 70.9611042395257,
+          "mean_moment_Nm": 6.386838339560219,
+          "force_peak_N": 88.76236051216635,
+          "moment_peak_Nm": 13.099791756262253
+        }
+      },
+      "native_phase_jerk_RMS": {
+        "OUTBOUND": [
+          373.6290029435725,
+          784.1423037924184
+        ],
+        "HOLD": [
+          0.0017319644089195205,
+          0.0012505584439364541
+        ],
+        "RETURN": [
+          275.36655196096893,
+          595.9098746866174
+        ]
+      },
+      "native_jerk_RMS": [
+        319.278854953533,
+        677.4931981655373
+      ],
+      "force_norm_rate_RMS": 19.383591818437296,
+      "moment_norm_rate_RMS": 2.9416691719488894,
+      "force_peak": 113.84329733270572,
+      "force_RMS": 75.54508623515638,
+      "guard": {
+        "events": 3806,
+        "active": 0,
+        "stencil_cross_count": 0,
+        "endpoint_branch_switch_count": 6,
+        "min_abs_model_axis_z": 2.30716889697073e-05,
+        "min_model_curvature_m_s2": -0.0681987799566741,
+        "unsatisfied": 0,
+        "correction_nm": {
+          "rms": [
+            0.0,
+            0.0
+          ],
+          "peak_abs": [
+            0.0,
+            0.0
+          ],
+          "p50_abs": [
+            0.0,
+            0.0
+          ],
+          "p95_abs": [
+            0.0,
+            0.0
+          ],
+          "p99_abs": [
+            0.0,
+            0.0
+          ],
+          "p999_abs": [
+            0.0,
+            0.0
+          ]
+        },
+        "crossing_records": []
+      },
+      "accepted_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 5
+      },
+      "rejected_modal_by_phase": {
+        "OUTBOUND": 4,
+        "RETURN": 0
+      },
+      "tracking_RMS_deg": [
+        0.4511366118112834,
+        0.5322984701215978
+      ],
+      "worst_motion_ratio": 0.955504420865297
+    },
+    {
+      "id": "PPOREPAIRVAL_RULE",
+      "qualified": true,
+      "JF": 1401.1884301960679,
+      "JM": 106.94730652307545,
+      "phase_cost": {
+        "OUTBOUND": {
+          "J_F_N_s": 706.5993363680333,
+          "moment_integral_Nm_s": 48.674733683499525,
+          "integrated_trace_duration_s": 9.005000000000718,
+          "phase_clock_duration_s": 9.005000000000718,
+          "mean_force_N": 78.467444349581,
+          "mean_moment_Nm": 5.405300797723003,
+          "force_peak_N": 113.84329733270572,
+          "moment_peak_Nm": 15.542854559905104
+        },
+        "HOLD": {
+          "J_F_N_s": 54.394331087303414,
+          "moment_integral_Nm_s": 1.2187086187640703,
+          "integrated_trace_duration_s": 1.0200000000048703,
+          "phase_clock_duration_s": 1.0200000000048703,
+          "mean_force_N": 53.32777557553303,
+          "mean_moment_Nm": 1.1948123713316188,
+          "force_peak_N": 53.32778133943575,
+          "moment_peak_Nm": 1.1948134488482873
+        },
+        "RETURN": {
+          "J_F_N_s": 640.1947627407313,
+          "moment_integral_Nm_s": 57.05386422081185,
+          "integrated_trace_duration_s": 9.005000000042997,
+          "phase_clock_duration_s": 9.005000000042997,
+          "mean_force_N": 71.09325516242914,
+          "mean_moment_Nm": 6.33579835874952,
+          "force_peak_N": 89.41337562801395,
+          "moment_peak_Nm": 13.101699269676175
+        }
+      },
+      "native_phase_jerk_RMS": {
+        "OUTBOUND": [
+          373.6290029435725,
+          784.1423037924184
+        ],
+        "HOLD": [
+          0.0017319644089195205,
+          0.0012505584439364541
+        ],
+        "RETURN": [
+          260.30710753293175,
+          557.8006247435649
+        ]
+      },
+      "native_jerk_RMS": [
+        313.24375499316125,
+        661.9603582314895
+      ],
+      "force_norm_rate_RMS": 19.275553744176957,
+      "moment_norm_rate_RMS": 2.928654031645513,
+      "force_peak": 113.84329733270572,
+      "force_RMS": 75.61367551460327,
+      "guard": {
+        "events": 3806,
+        "active": 0,
+        "stencil_cross_count": 0,
+        "endpoint_branch_switch_count": 6,
+        "min_abs_model_axis_z": 2.30716889697073e-05,
+        "min_model_curvature_m_s2": -0.0681987799566741,
+        "unsatisfied": 0,
+        "correction_nm": {
+          "rms": [
+            0.0,
+            0.0
+          ],
+          "peak_abs": [
+            0.0,
+            0.0
+          ],
+          "p50_abs": [
+            0.0,
+            0.0
+          ],
+          "p95_abs": [
+            0.0,
+            0.0
+          ],
+          "p99_abs": [
+            0.0,
+            0.0
+          ],
+          "p999_abs": [
+            0.0,
+            0.0
+          ]
+        },
+        "crossing_records": []
+      },
+      "accepted_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 5
+      },
+      "rejected_modal_by_phase": {
+        "OUTBOUND": 4,
+        "RETURN": 0
+      },
+      "tracking_RMS_deg": [
+        0.45103851375428466,
+        0.5239501093180609
+      ],
+      "worst_motion_ratio": 0.9549801183292373
+    },
+    {
+      "id": "PPOREPAIRVAL_TIME0",
+      "qualified": true,
+      "JF": 1399.9714018358593,
+      "JM": 107.41578161018784,
+      "phase_cost": {
+        "OUTBOUND": {
+          "J_F_N_s": 706.5723271720801,
+          "moment_integral_Nm_s": 48.68359375559939,
+          "integrated_trace_duration_s": 9.005000000000718,
+          "phase_clock_duration_s": 9.005000000000718,
+          "mean_force_N": 78.46444499411702,
+          "mean_moment_Nm": 5.406284703564187,
+          "force_peak_N": 113.82898353967228,
+          "moment_peak_Nm": 15.542854559905104
+        },
+        "HOLD": {
+          "J_F_N_s": 54.39433098075615,
+          "moment_integral_Nm_s": 1.2187086062774672,
+          "integrated_trace_duration_s": 1.0200000000048703,
+          "phase_clock_duration_s": 1.0200000000048703,
+          "mean_force_N": 53.32777547107493,
+          "mean_moment_Nm": 1.1948123590898512,
+          "force_peak_N": 53.32778147019342,
+          "moment_peak_Nm": 1.1948134774522692
+        },
+        "RETURN": {
+          "J_F_N_s": 639.0047436830234,
+          "moment_integral_Nm_s": 57.51347924831099,
+          "integrated_trace_duration_s": 9.005000000042997,
+          "phase_clock_duration_s": 9.005000000042997,
+          "mean_force_N": 70.96110423986366,
+          "mean_moment_Nm": 6.386838339593156,
+          "force_peak_N": 88.76236051254533,
+          "moment_peak_Nm": 13.099791756098282
+        }
+      },
+      "native_phase_jerk_RMS": {
+        "OUTBOUND": [
+          374.7474365378312,
+          786.2618086655149
+        ],
+        "HOLD": [
+          0.0018185511990636595,
+          0.001311856034147006
+        ],
+        "RETURN": [
+          275.36655195683034,
+          595.909874680025
+        ]
+      },
+      "native_jerk_RMS": [
+        319.8985073691876,
+        678.6545880697075
+      ],
+      "force_norm_rate_RMS": 19.405398480917047,
+      "moment_norm_rate_RMS": 2.9427359951279897,
+      "force_peak": 113.82898353967228,
+      "force_RMS": 75.54349726553191,
+      "guard": {
+        "events": 3806,
+        "active": 0,
+        "stencil_cross_count": 0,
+        "endpoint_branch_switch_count": 6,
+        "min_abs_model_axis_z": 3.1151283335034275e-06,
+        "min_model_curvature_m_s2": -0.06768752225383422,
+        "unsatisfied": 0,
+        "correction_nm": {
+          "rms": [
+            0.0,
+            0.0
+          ],
+          "peak_abs": [
+            0.0,
+            0.0
+          ],
+          "p50_abs": [
+            0.0,
+            0.0
+          ],
+          "p95_abs": [
+            0.0,
+            0.0
+          ],
+          "p99_abs": [
+            0.0,
+            0.0
+          ],
+          "p999_abs": [
+            0.0,
+            0.0
+          ]
+        },
+        "crossing_records": []
+      },
+      "accepted_modal_by_phase": {
+        "OUTBOUND": 4,
+        "RETURN": 5
+      },
+      "rejected_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 0
+      },
+      "tracking_RMS_deg": [
+        0.4509990065314897,
+        0.5324737727130032
+      ],
+      "worst_motion_ratio": 0.9554927185530413
+    },
+    {
+      "id": "PPOREPAIRVAL_TIME0_RULE",
+      "qualified": true,
+      "JF": 1403.7248681872757,
+      "JM": 107.12025395500307,
+      "phase_cost": {
+        "OUTBOUND": {
+          "J_F_N_s": 709.1357770282407,
+          "moment_integral_Nm_s": 48.847681812939314,
+          "integrated_trace_duration_s": 9.005000000000718,
+          "phase_clock_duration_s": 9.005000000000718,
+          "mean_force_N": 78.74911460612816,
+          "mean_moment_Nm": 5.424506586666898,
+          "force_peak_N": 113.9347514848771,
+          "moment_peak_Nm": 15.542854559905104
+        },
+        "HOLD": {
+          "J_F_N_s": 54.39432832370202,
+          "moment_integral_Nm_s": 1.21870790134313,
+          "integrated_trace_duration_s": 1.0200000000048703,
+          "phase_clock_duration_s": 1.0200000000048703,
+          "mean_force_N": 53.3277728661199,
+          "mean_moment_Nm": 1.1948116679777556,
+          "force_peak_N": 53.327781705969414,
+          "moment_peak_Nm": 1.1948135285643895
+        },
+        "RETURN": {
+          "J_F_N_s": 640.1947628353331,
+          "moment_integral_Nm_s": 57.053864240720564,
+          "integrated_trace_duration_s": 9.005000000042997,
+          "phase_clock_duration_s": 9.005000000042997,
+          "mean_force_N": 71.09325517293462,
+          "mean_moment_Nm": 6.335798360960371,
+          "force_peak_N": 89.41337563352552,
+          "moment_peak_Nm": 13.101699264144418
+        }
+      },
+      "native_phase_jerk_RMS": {
+        "OUTBOUND": [
+          349.1134744979832,
+          738.3407652996996
+        ],
+        "HOLD": [
+          0.002575916610618446,
+          0.0020112680592239505
+        ],
+        "RETURN": [
+          260.3071078586693,
+          557.8006248096252
+        ]
+      },
+      "native_jerk_RMS": [
+        299.56201887102685,
+        636.5490716964089
+      ],
+      "force_norm_rate_RMS": 18.779485384607042,
+      "moment_norm_rate_RMS": 2.8934544000522915,
+      "force_peak": 113.9347514848771,
+      "force_RMS": 75.7278277554571,
+      "guard": {
+        "events": 3806,
+        "active": 0,
+        "stencil_cross_count": 0,
+        "endpoint_branch_switch_count": 6,
+        "min_abs_model_axis_z": 2.30716889697073e-05,
+        "min_model_curvature_m_s2": -0.06800726648492626,
+        "unsatisfied": 0,
+        "correction_nm": {
+          "rms": [
+            0.0,
+            0.0
+          ],
+          "peak_abs": [
+            0.0,
+            0.0
+          ],
+          "p50_abs": [
+            0.0,
+            0.0
+          ],
+          "p95_abs": [
+            0.0,
+            0.0
+          ],
+          "p99_abs": [
+            0.0,
+            0.0
+          ],
+          "p999_abs": [
+            0.0,
+            0.0
+          ]
+        },
+        "crossing_records": []
+      },
+      "accepted_modal_by_phase": {
+        "OUTBOUND": 4,
+        "RETURN": 5
+      },
+      "rejected_modal_by_phase": {
+        "OUTBOUND": 0,
+        "RETURN": 0
+      },
+      "tracking_RMS_deg": [
+        0.4497467379075456,
+        0.5199759352278222
+      ],
+      "worst_motion_ratio": 0.9559104687699292
+    }
+  ],
+  "comparisons": [
+    {
+      "a": "PPOREPAIR01_TIME0",
+      "b": "PPOCHECK_FROZEN_MEAN",
+      "change": {
+        "JF_delta": -0.02677150030535813,
+        "JM_delta": 0.008848045024180351,
+        "jerk_RMS_percent": [
+          0.19353952250338313,
+          0.1723845296184079
+        ],
+        "force_norm_rate_percent": 0.11137767744511251,
+        "force_peak_percent": -0.012621247905375554,
+        "force_RMS_percent": -0.0020906945055632065,
+        "both_original_qualified": true
+      }
+    },
+    {
+      "a": "PPOREPAIR01_TIME0_RULE",
+      "b": "PPOCHECK_FROZEN_PLUS_RULE",
+      "change": {
+        "JF_delta": 2.505595890298764,
+        "JM_delta": 0.1763952414916048,
+        "jerk_RMS_percent": [
+          -4.360367007758981,
+          -3.718018227903619
+        ],
+        "force_norm_rate_percent": -2.5455827098156303,
+        "force_peak_percent": 0.08066338104886217,
+        "force_RMS_percent": 0.14900095931409396,
+        "both_original_qualified": true
+      }
+    },
+    {
+      "a": "PPOREPAIR01_TIME0_RULE",
+      "b": "PPOREPAIR01_TIME0",
+      "change": {
+        "JF_delta": 3.8397658189023787,
+        "JM_delta": -0.23337094952448467,
+        "jerk_RMS_percent": [
+          -6.3440079894126145,
+          -6.098845612002213
+        ],
+        "force_norm_rate_percent": -3.1858248576508097,
+        "force_peak_percent": 0.09329640412467644,
+        "force_RMS_percent": 0.2497506629742352,
+        "both_original_qualified": true
+      }
+    },
+    {
+      "a": "PPOREPAIRVAL_TIME0",
+      "b": "PPOREPAIRVAL_MEAN",
+      "change": {
+        "JF_delta": -0.02700929945694952,
+        "JM_delta": 0.00886005990987826,
+        "jerk_RMS_percent": [
+          0.1940787515492648,
+          0.17142458511982817
+        ],
+        "force_norm_rate_percent": 0.11250062776810843,
+        "force_peak_percent": -0.012573241788316203,
+        "force_RMS_percent": -0.0021033394806302397,
+        "both_original_qualified": true
+      }
+    },
+    {
+      "a": "PPOREPAIRVAL_TIME0_RULE",
+      "b": "PPOREPAIRVAL_RULE",
+      "change": {
+        "JF_delta": 2.5364379912077766,
+        "JM_delta": 0.17294743192761075,
+        "jerk_RMS_percent": [
+          -4.367760219970895,
+          -3.838792794627477
+        ],
+        "force_norm_rate_percent": -2.5735621718248947,
+        "force_peak_percent": 0.08033336552446535,
+        "force_RMS_percent": 0.15096771857332492,
+        "both_original_qualified": true
+      }
+    },
+    {
+      "a": "PPOREPAIRVAL_TIME0_RULE",
+      "b": "PPOREPAIRVAL_TIME0",
+      "change": {
+        "JF_delta": 3.753466351416364,
+        "JM_delta": -0.2955276551847703,
+        "jerk_RMS_percent": [
+          -6.357168923795841,
+          -6.204263127883525
+        ],
+        "force_norm_rate_percent": -3.225458611043297,
+        "force_peak_percent": 0.09291829015407593,
+        "force_RMS_percent": 0.24400576700502885,
+        "both_original_qualified": true
+      }
+    },
+    {
+      "a": "PPOREPAIRVAL_TIME0_RULE",
+      "b": "PPOREPAIRVAL_BEST",
+      "change": {
+        "JF_delta": 5.602304321513429,
+        "JM_delta": -0.7682855941108926,
+        "jerk_RMS_percent": [
+          -6.451539310938614,
+          -6.292724337791144
+        ],
+        "force_norm_rate_percent": -2.979767658970456,
+        "force_peak_percent": 0.09264923858127716,
+        "force_RMS_percent": 0.38058889713641353,
+        "both_original_qualified": true
+      }
+    }
+  ],
+  "scope": "Frozen actor unchanged; TIME0 and TIME0_RULE are explicit execution repairs, not newly learned policies. Supplementary validation uses its own pre-frozen condition, not primary VAL feedback.",
+  "new_physical_START_in_analysis": 0
+}

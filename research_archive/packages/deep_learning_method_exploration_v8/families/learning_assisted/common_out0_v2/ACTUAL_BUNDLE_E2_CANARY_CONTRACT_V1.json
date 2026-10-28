@@ -1,0 +1,150 @@
+{
+  "schema": "v8.E2.actual_bundle_canary_contract.v1",
+  "status": "SOURCE_ONLY_NOT_APPROVED_NOT_EXECUTED",
+  "created_unix": 1793098040.0075846,
+  "purpose": "Actual immutable serialized bundle/schema plus original backend parity on exactly one old development39; engineering repair test, never live proof or original task qualification",
+  "reason": "V1 required outer MLP kind/paired absent in actual fit serialization; inner model already contains correct kind/paired/action_only. No weights refit or model changes.",
+  "original_global_stop_unix": 1793114740.0,
+  "budget": {
+    "wall_seconds": 30,
+    "CPU_threads": 1,
+    "address_space_bytes": 1073741824,
+    "model_fit": 0,
+    "physics": 0,
+    "actual_A3_calls": 0,
+    "actual_OUT0_wrapper_calls": 0
+  },
+  "candidate": {
+    "path": "families/learning_assisted/common_out0_v2/frozen_live_e2_candidate_v2.py",
+    "sha256": "1593e67536fc7c5f2d05d22d22554f23d3c32f83b84b989c4f17bd8c904f75b0"
+  },
+  "original_backend": {
+    "path": "families/learning_assisted/common_out0_v2/e2_models_candidate_v1.py",
+    "sha256": "edaf6fab6d48bfdf44bb5e4bcc09c73b7532079cabc6a4fc6b303a4839275e32"
+  },
+  "input_files": {
+    "bundle": {
+      "path": "families/learning_assisted/common_out0_v2/fits/e2_v1/FROZEN_E2_BUNDLE.json",
+      "sha256": "56b32083ae55ff1cd5e8dc1f3c4e87c08cf4a7948f21fd4a19f9a12b3922f40e"
+    },
+    "old_development_INDEX": {
+      "path": "families/learning_assisted/common_out0_v2/data/fulltask_e2_v1/INDEX.json",
+      "sha256": "bc044f7dd3a3f52dfc0cbd5e7a8bad4e0f20c13edb761bdd682cdf3c970f4707"
+    }
+  },
+  "fixed_actual_context": {
+    "row_index": 0,
+    "row_id": "CFACTORH01_B",
+    "input39_sha256": "3bff08d317dd8847881e44b16d624e4818c74269f5d6c709b1a41f29b2a8b02e",
+    "input39_count": 39,
+    "case_sha256_evaluation_only": "86830ef586eb7629f39d84c29bf3b56bc0a5c8d524f122a9d500b19314fe0547",
+    "actor_receives": "exact row input feature_names/features only; no evaluation labels or identity used as model input"
+  },
+  "model_scope": [
+    "D4/RIDGE_CONTEXT_ACTION",
+    "D4/MLP_PAIRED",
+    "DFull/RIDGE_CONTEXT_ACTION",
+    "DFull/MLP_PAIRED"
+  ],
+  "actual_serialization_rule": "outer paired MLP entry exactly model+normalizer; inner model kind/paired/action_only checked; do not inject synthetic outer aliases",
+  "expected_success_counters": {
+    "prediction_API_calls": 25,
+    "prediction_query_vectors": 85,
+    "shared_B_inference_forward_API_calls": 4,
+    "backward_API_calls": 0,
+    "stochastic_initializations": 0,
+    "gradient_updates": 0,
+    "fit": 0,
+    "actual_A3_predict_calls": 0,
+    "real_bundle_JSON_loads": 1,
+    "old_development_INDEX_JSON_loads": 1,
+    "physics": 0
+  },
+  "phase_accounting": {
+    "CANDIDATE": {
+      "API_calls": 7,
+      "query_vectors": 35
+    },
+    "REFERENCE": {
+      "API_calls": 18,
+      "query_vectors": 50
+    }
+  },
+  "backend_accounting": {
+    "RIDGE_KNOT_MATRIX": {
+      "API_calls": 7,
+      "query_vectors": 35
+    },
+    "KNOTWISE_INTERPOLATION": {
+      "API_calls": 10,
+      "query_vectors": 10
+    },
+    "NEURAL_FORWARD_A": {
+      "API_calls": 4,
+      "query_vectors": 20
+    },
+    "NEURAL_FORWARD_B": {
+      "API_calls": 4,
+      "query_vectors": 20
+    }
+  },
+  "reference": "Original predict_knots for last two actual fitted nodes in each domain, original interpolate_knots on all5 recipes at19.03, original predict_mlp A/B in each domain; no fit/restore/new network init. Same exact weights as candidate.",
+  "checks": {
+    "all4_methods_all16_heads_times5_recipes": 320,
+    "selector_decisions": 9,
+    "selection_reference": "independent exact argmin(valueJF,index), strict nonB risk<.5, B fallback; no epsilon floor",
+    "controlled_public_risk_vector_not_A3_prediction": [
+      0.9,
+      0.49,
+      0.5,
+      0.5000000000000001,
+      0.49999999999999994
+    ],
+    "all16head_values_tolerance": {
+      "atol": 1e-12,
+      "rtol": 1e-12
+    },
+    "choice_tolerance_floor": false,
+    "paired_B_exactzero": true,
+    "DFull_finalnode_D4_OOD_explicit": true,
+    "absolute_B_reconstruction_or_paired_wrench_integral": false,
+    "serialized_input_and_weights_unchanged": true
+  },
+  "file_read_accounting": {
+    "real_bundle_JSON_loads": 1,
+    "old_development_INDEX_JSON_loads": 1,
+    "NPZ_loads": 0,
+    "identity_hash_reads_each_bundle_and_INDEX": {
+      "launcher_preflight": 1,
+      "runner_preflight": 1,
+      "runner_postflight": 1,
+      "total": 3
+    },
+    "source_manifest_hashing_is_not_a_model_forward": true
+  },
+  "module_imports": {
+    "candidate_pure_definition_module": 1,
+    "original_math_definition_module": 1,
+    "A3": 0,
+    "live_wrapper": 0,
+    "worker_environment": 0
+  },
+  "output": "families/learning_assisted/common_out0_v2/canaries/actual_bundle_e2_v1",
+  "authority_schema": "v8.E2.actual_bundle_canary_approval.v1",
+  "authority_status": "ROOT_APPROVED_ACTUAL_BUNDLE_E2_CANARY_ONCE_V1",
+  "approval_flags": {
+    "actual_bundle_only": true,
+    "real_weight_read_authorization": true,
+    "old_development_INDEX_read_authorization": true,
+    "actual_OUT0_wrapper_call_authorization": false,
+    "A3_call_authorization": false,
+    "fit_authorization": false,
+    "physics_authorization": false
+  },
+  "deadline": "min(original launcher entry+30s, original global stop); child gets same unchanged monotonic deadline, no reset after import. external timeout remaining/killafter2.",
+  "failed_work_policy": "new output/launcher files only, no overwrites, no automatic retries; incomplete phase/counters/traceback retained. Numerical failure does not authorize live fallback.",
+  "actual_source_proof": "NOT_EXERCISED; no fake study or seven-role proof supplied. This test grants no actual OUT0 source, risk, selector or task authority.",
+  "new_validation_payloads_outcomes_used": false,
+  "old_failure_paid_prefix": "V8FROZENENG01 2ridgeAPI10queries, 0MLP/A3, parent native40200 retained externally; not overwritten/reclassified as success.",
+  "actual_canary_calls_so_far": 0
+}

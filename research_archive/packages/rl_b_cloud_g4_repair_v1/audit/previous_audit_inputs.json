@@ -1,0 +1,2608 @@
+{
+  "G4_PHYSICAL_VALIDATION.json": {
+    "schema": "cloud_G4_real_physics_v1",
+    "status": "FAIL",
+    "G4_PASS": false,
+    "all_key_real_failure_paths_closed": false,
+    "contract_sha256": "ae714e1d8c1ac6d1145b734afc56ae4f4b26b8d3b7e24193990ce167bc17aed2",
+    "runtime": {
+      "platform": "linux",
+      "python": "3.12.3",
+      "packages": {
+        "mujoco": "3.10.0",
+        "numpy": "2.2.6",
+        "scipy": "1.15.3",
+        "gymnasium": "1.1.1",
+        "stable-baselines3": "2.6.0",
+        "torch": "2.7.1+cpu"
+      }
+    },
+    "coverage": {
+      "zero_progress_or_stagnation": {
+        "natural_status": "PASS",
+        "evidence": [
+          "runs/qual_hold_01/physics",
+          "runs/g4_slow_01/physics"
+        ]
+      },
+      "action_rejection": {
+        "natural_status": "PASS",
+        "evidence": [
+          "runs/qual_hold_01/physics",
+          "runs/g4_slow_01/physics",
+          "runs/g4_return_hold_01/physics"
+        ]
+      },
+      "fallback_brake_hold_fresh_resume": {
+        "natural_status": "PASS",
+        "evidence": [
+          "runs/qual_maximal_01/physics",
+          "runs/qual_random_01/physics"
+        ]
+      },
+      "OUTBOUND_timeout": {
+        "natural_status": "NOT_RUN",
+        "TEST_ONLY_with_real_MuJoCo": {
+          "rl_decisions": 6,
+          "task_s": 10.00000000000547,
+          "native_steps_total": 80200,
+          "task_native_steps": 40000,
+          "reset_wall_s": 20.362964437999835,
+          "host_wall_s": 57.05584948700016,
+          "force_integral_N_s": 778.8869236685138,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 47.68727480358852,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND"
+          ],
+          "accepted": 6,
+          "rejections": 0,
+          "reward_totals": {
+            "progress": 0.0,
+            "completion": -10.0,
+            "force": -0.15577738473370276,
+            "variation": -0.0002639855849825275
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              2.093839934362051,
+              2.094124337174553
+            ],
+            "human_dq_rad_s": [
+              -4.101189452540138e-08,
+              -2.1788268389975913e-08
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 4011,
+          "actor_wait_wall_s": 0.0008864350020303391,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.026398558498252744,
+          "native_journal_file": "runs/g4_outbound_injection_01/physics/native_journals/native_0001.jsonl",
+          "status": "ABORTED",
+          "abort_reason": "TIMEOUT_OUTBOUND",
+          "success": false,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021,
+          "reward_sum": -10.156041370318686
+        }
+      },
+      "HOLD_timeout": {
+        "natural_status": "NOT_RUN",
+        "TEST_ONLY_with_real_MuJoCo": {
+          "rl_decisions": 26,
+          "task_s": 18.700000000047012,
+          "native_steps_total": 115000,
+          "task_native_steps": 74800,
+          "reset_wall_s": 20.4098085859996,
+          "host_wall_s": 81.99373418799951,
+          "force_integral_N_s": 1242.838578210712,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 58.08214229987658,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "ABORTED"
+          ],
+          "accepted": 25,
+          "rejections": 1,
+          "reward_totals": {
+            "progress": 0.0,
+            "completion": -10.0,
+            "force": -0.24856771564214247,
+            "variation": -0.0002639855849825297
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              2.093839932419491,
+              2.0941243367897586
+            ],
+            "human_dq_rad_s": [
+              5.879021031426553e-13,
+              1.5687111543590666e-13
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 5751,
+          "actor_wait_wall_s": 0.003113722002126451,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861,
+            9.005000000000718,
+            9.515000000003154,
+            10.025000000005589,
+            10.535000000008024,
+            11.04500000001046,
+            11.555000000012894,
+            12.06500000001533,
+            12.575000000017765,
+            13.0850000000202,
+            13.595000000022635,
+            14.10500000002507,
+            14.615000000027505,
+            15.12500000002994,
+            15.635000000032376,
+            16.145000000034813,
+            16.655000000037248,
+            17.165000000039683,
+            17.675000000042118,
+            18.185000000044553,
+            18.69500000004699
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.026398558498252973,
+          "native_journal_file": "runs/g4_hold_injection_01/physics/native_journals/native_0001.jsonl",
+          "status": "ABORTED",
+          "abort_reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: no quintic schedule satisfies the registered phase and motion limits",
+          "success": false,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021,
+          "reward_sum": -10.248831701227122
+        },
+        "note": "exit suppression ends first at original no-feasible-candidate; HOLD timeout not reached"
+      },
+      "RETURN_timeout": {
+        "natural_status": "NOT_RUN",
+        "TEST_ONLY_with_real_MuJoCo": {
+          "rl_decisions": 14,
+          "task_s": 20.02500000005334,
+          "native_steps_total": 120300,
+          "task_native_steps": 80100,
+          "reset_wall_s": 20.451698827000655,
+          "host_wall_s": 87.44005122199997,
+          "force_integral_N_s": 1528.3392052551958,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 110.99143788847311,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "RETURN"
+          ],
+          "accepted": 13,
+          "rejections": 1,
+          "reward_totals": {
+            "progress": -1.7763568394002505e-15,
+            "completion": -10.0,
+            "force": -0.30566784105103917,
+            "variation": -0.0005892575594295655
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              0.09598865713725938,
+              0.16580097248604475
+            ],
+            "human_dq_rad_s": [
+              -5.238388513618408e-06,
+              -1.86066500243048e-07
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 6016,
+          "actor_wait_wall_s": 0.0017276720009249402,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861,
+            9.005000000000718,
+            9.515000000003154,
+            10.025000000005589,
+            11.630000000013252,
+            12.950000000019555,
+            14.265000000025834,
+            15.585000000032137,
+            15.870000000033498
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.05892575594295654,
+          "native_journal_file": "runs/g4_return_injection_01/physics/native_journals/native_0001.jsonl",
+          "status": "ABORTED",
+          "abort_reason": "TIMEOUT_RETURN",
+          "success": false,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021,
+          "reward_sum": -10.306257098610468
+        }
+      },
+      "global_task_timeout": {
+        "natural_status": "NOT_RUN",
+        "unit_test": "TEST_ONLY_terminal_GLOBAL_TASK_TIMEOUT"
+      },
+      "absolute_safety_terminal": {
+        "natural_status": "NOT_RUN",
+        "unit_test": "TEST_ONLY_terminal_ABSOLUTE_SAFETY_STOP",
+        "note": "observed physical loads and motion stayed within original limits; no actual violation was manufactured"
+      },
+      "full_task": {
+        "natural_status": "PASS",
+        "evidence": "runs/qual_maximal_01/physics",
+        "task_s": 19.030000000048588
+      },
+      "terminated_not_truncated_and_absorbing_state": {
+        "natural_status": "PASS",
+        "evidence": "independent reward audits for every saved natural episode"
+      },
+      "partial_failure_reward_cancels_progress": {
+        "natural_status": "PASS",
+        "evidence": [
+          "runs/g4_slow_01/physics",
+          "runs/g4_return_hold_01/physics"
+        ]
+      },
+      "early_failure_no_completion_bonus": {
+        "natural_status": "PASS",
+        "evidence": "all naturally aborted episodes have progress 0, completion -10 and nonpositive costs"
+      },
+      "reset_isolation": {
+        "natural_status": "PASS",
+        "evidence": "runs/reset_maximal_01/physics/RESULT.json"
+      },
+      "actual_applied_torque_and_native_receipt": {
+        "natural_status": "PASS",
+        "evidence": "per-episode CLOUD_CASE_AUDIT ownership recomputation"
+      },
+      "raw_force_statistics_consistency": {
+        "natural_status": "FAIL",
+        "evidence": [
+          "runs/g4_slow_01/physics"
+        ]
+      }
+    },
+    "unit_results": {
+      "category": "TEST_ONLY_NO_PHYSICS",
+      "pass": true,
+      "tests": [
+        {
+          "test": "TEST_ONLY_OUTBOUND_timeout",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_OUTBOUND_safety_stop",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_HOLD_timeout",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_HOLD_safety_stop",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_RETURN_timeout",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_RETURN_safety_stop",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_HOLD_cannot_skip_and_dwell_resets",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_all_partial_low_JF_failures_have_no_success_or_progress",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_no_motion_no_free_force_reward",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_TIMEOUT_OUTBOUND",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_TIMEOUT_HOLD",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_TIMEOUT_RETURN",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_GLOBAL_TASK_TIMEOUT",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_ABSOLUTE_SAFETY_STOP",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_REPEATED_REJECTION",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_bogus_COMPLETE_rejected",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_initialize_clears_episode_accounting",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_repeated_rejections_legal_fallback_and_fresh_resume",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_full_task_complete_bonus_once_via_pending_guard",
+          "pass": true
+        }
+      ],
+      "full_G4_physical_pass": false
+    },
+    "episodes": [
+      {
+        "run": "runs/dual_maximal_01/a",
+        "episode": 1,
+        "category": "SHORT_REAL_NATIVE_PHYSICS_NO_LEARNING",
+        "case": "maximal",
+        "metrics": {
+          "rl_decisions": 14,
+          "task_s": 19.030000000048588,
+          "native_steps_total": 116320,
+          "task_native_steps": 76120,
+          "reset_wall_s": 19.348297812000055,
+          "host_wall_s": 77.00848431800023,
+          "force_integral_N_s": 1449.8400609530293,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 98.40661738581369,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "RETURN"
+          ],
+          "accepted": 13,
+          "rejections": 1,
+          "reward_totals": {
+            "progress": 14.999999999999998,
+            "completion": 20.0,
+            "force": -0.28996801219060586,
+            "variation": -0.0005892575290900807
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              0.095979549526587,
+              0.16579510752447818
+            ],
+            "human_dq_rad_s": [
+              0.00013988880039825135,
+              -1.6827927651074734e-05
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 5817,
+          "actor_wait_wall_s": 0.0014083739997658995,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861,
+            9.005000000000718,
+            9.515000000003154,
+            10.025000000005589,
+            11.630000000013252,
+            12.950000000019555,
+            14.265000000025834,
+            15.585000000032137,
+            15.870000000033498
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.058925752909008054,
+          "native_journal_file": "runs/dual_maximal_01/a/physics/native_journals/native_0001.jsonl",
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "success": true,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021
+        },
+        "audit": "runs/dual_maximal_01/a/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 1449.8400609500407,
+        "independent_J_F": 1449.8400609530293
+      },
+      {
+        "run": "runs/dual_maximal_01/b",
+        "episode": 1,
+        "category": "SHORT_REAL_NATIVE_PHYSICS_NO_LEARNING",
+        "case": "maximal",
+        "metrics": {
+          "rl_decisions": 14,
+          "task_s": 19.030000000048588,
+          "native_steps_total": 116320,
+          "task_native_steps": 76120,
+          "reset_wall_s": 18.999119758000234,
+          "host_wall_s": 76.22405493400038,
+          "force_integral_N_s": 1449.8400609530293,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 98.40661738581369,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "RETURN"
+          ],
+          "accepted": 13,
+          "rejections": 1,
+          "reward_totals": {
+            "progress": 14.999999999999998,
+            "completion": 20.0,
+            "force": -0.28996801219060586,
+            "variation": -0.0005892575290900807
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              0.095979549526587,
+              0.16579510752447818
+            ],
+            "human_dq_rad_s": [
+              0.00013988880039825135,
+              -1.6827927651074734e-05
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 5817,
+          "actor_wait_wall_s": 0.0013487750002241228,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861,
+            9.005000000000718,
+            9.515000000003154,
+            10.025000000005589,
+            11.630000000013252,
+            12.950000000019555,
+            14.265000000025834,
+            15.585000000032137,
+            15.870000000033498
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.058925752909008054,
+          "native_journal_file": "runs/dual_maximal_01/b/physics/native_journals/native_0001.jsonl",
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "success": true,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021
+        },
+        "audit": "runs/dual_maximal_01/b/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 1449.8400609500407,
+        "independent_J_F": 1449.8400609530293
+      },
+      {
+        "run": "runs/g4_hold_injection_01",
+        "episode": 1,
+        "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+        "case": "hold_timeout_injection",
+        "metrics": {
+          "rl_decisions": 26,
+          "task_s": 18.700000000047012,
+          "native_steps_total": 115000,
+          "task_native_steps": 74800,
+          "reset_wall_s": 20.4098085859996,
+          "host_wall_s": 81.99373418799951,
+          "force_integral_N_s": 1242.838578210712,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 58.08214229987658,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "ABORTED"
+          ],
+          "accepted": 25,
+          "rejections": 1,
+          "reward_totals": {
+            "progress": 0.0,
+            "completion": -10.0,
+            "force": -0.24856771564214247,
+            "variation": -0.0002639855849825297
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              2.093839932419491,
+              2.0941243367897586
+            ],
+            "human_dq_rad_s": [
+              5.879021031426553e-13,
+              1.5687111543590666e-13
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 5751,
+          "actor_wait_wall_s": 0.003113722002126451,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861,
+            9.005000000000718,
+            9.515000000003154,
+            10.025000000005589,
+            10.535000000008024,
+            11.04500000001046,
+            11.555000000012894,
+            12.06500000001533,
+            12.575000000017765,
+            13.0850000000202,
+            13.595000000022635,
+            14.10500000002507,
+            14.615000000027505,
+            15.12500000002994,
+            15.635000000032376,
+            16.145000000034813,
+            16.655000000037248,
+            17.165000000039683,
+            17.675000000042118,
+            18.185000000044553,
+            18.69500000004699
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.026398558498252973,
+          "native_journal_file": "runs/g4_hold_injection_01/physics/native_journals/native_0001.jsonl",
+          "status": "ABORTED",
+          "abort_reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: no quintic schedule satisfies the registered phase and motion limits",
+          "success": false,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021,
+          "reward_sum": -10.248831701227122
+        },
+        "audit": "runs/g4_hold_injection_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 1242.8385782087555,
+        "independent_J_F": 1242.838578210712
+      },
+      {
+        "run": "runs/g4_outbound_injection_01",
+        "episode": 1,
+        "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+        "case": "outbound_timeout_injection",
+        "metrics": {
+          "rl_decisions": 6,
+          "task_s": 10.00000000000547,
+          "native_steps_total": 80200,
+          "task_native_steps": 40000,
+          "reset_wall_s": 20.362964437999835,
+          "host_wall_s": 57.05584948700016,
+          "force_integral_N_s": 778.8869236685138,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 47.68727480358852,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND"
+          ],
+          "accepted": 6,
+          "rejections": 0,
+          "reward_totals": {
+            "progress": 0.0,
+            "completion": -10.0,
+            "force": -0.15577738473370276,
+            "variation": -0.0002639855849825275
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              2.093839934362051,
+              2.094124337174553
+            ],
+            "human_dq_rad_s": [
+              -4.101189452540138e-08,
+              -2.1788268389975913e-08
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 4011,
+          "actor_wait_wall_s": 0.0008864350020303391,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.026398558498252744,
+          "native_journal_file": "runs/g4_outbound_injection_01/physics/native_journals/native_0001.jsonl",
+          "status": "ABORTED",
+          "abort_reason": "TIMEOUT_OUTBOUND",
+          "success": false,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021,
+          "reward_sum": -10.156041370318686
+        },
+        "audit": "runs/g4_outbound_injection_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 778.8869236687284,
+        "independent_J_F": 778.8869236685138
+      },
+      {
+        "run": "runs/g4_return_hold_01",
+        "episode": 1,
+        "category": "NATURAL_LEGAL_ACTION_REAL_MUJOCO",
+        "case": "return_hold",
+        "metrics": {
+          "rl_decisions": 11,
+          "task_s": 10.22000000000652,
+          "native_steps_total": 81080,
+          "task_native_steps": 40880,
+          "reset_wall_s": 18.98725002500032,
+          "host_wall_s": 53.083972851,
+          "force_integral_N_s": 790.5447548555438,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 47.93886904954137,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "RETURN",
+            "ABORTED"
+          ],
+          "accepted": 9,
+          "rejections": 2,
+          "reward_totals": {
+            "progress": 0.0,
+            "completion": -10.0,
+            "force": -0.1581089509711088,
+            "variation": -0.00026590387517958587
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              2.0920965986373288,
+              2.092769971720548
+            ],
+            "human_dq_rad_s": [
+              -0.01952498834821497,
+              -0.02250302628773458
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 4055,
+          "actor_wait_wall_s": 0.0013768820026598405,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861,
+            9.005000000000718,
+            9.515000000003154,
+            10.025000000005589,
+            10.125000000006066,
+            10.215000000006496
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.026590387517958586,
+          "native_journal_file": "runs/g4_return_hold_01/physics/native_journals/native_0001.jsonl",
+          "status": "ABORTED",
+          "abort_reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "success": false,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021,
+          "reward_sum": -10.158374854846288
+        },
+        "audit": "runs/g4_return_hold_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 790.5447548557025,
+        "independent_J_F": 790.5447548555438
+      },
+      {
+        "run": "runs/g4_return_injection_01",
+        "episode": 1,
+        "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+        "case": "return_timeout_injection",
+        "metrics": {
+          "rl_decisions": 14,
+          "task_s": 20.02500000005334,
+          "native_steps_total": 120300,
+          "task_native_steps": 80100,
+          "reset_wall_s": 20.451698827000655,
+          "host_wall_s": 87.44005122199997,
+          "force_integral_N_s": 1528.3392052551958,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 110.99143788847311,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "RETURN"
+          ],
+          "accepted": 13,
+          "rejections": 1,
+          "reward_totals": {
+            "progress": -1.7763568394002505e-15,
+            "completion": -10.0,
+            "force": -0.30566784105103917,
+            "variation": -0.0005892575594295655
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              0.09598865713725938,
+              0.16580097248604475
+            ],
+            "human_dq_rad_s": [
+              -5.238388513618408e-06,
+              -1.86066500243048e-07
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 6016,
+          "actor_wait_wall_s": 0.0017276720009249402,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861,
+            9.005000000000718,
+            9.515000000003154,
+            10.025000000005589,
+            11.630000000013252,
+            12.950000000019555,
+            14.265000000025834,
+            15.585000000032137,
+            15.870000000033498
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.05892575594295654,
+          "native_journal_file": "runs/g4_return_injection_01/physics/native_journals/native_0001.jsonl",
+          "status": "ABORTED",
+          "abort_reason": "TIMEOUT_RETURN",
+          "success": false,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021,
+          "reward_sum": -10.306257098610468
+        },
+        "audit": "runs/g4_return_injection_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 1528.3392052518334,
+        "independent_J_F": 1528.3392052551958
+      },
+      {
+        "run": "runs/g4_slow_01",
+        "episode": 1,
+        "category": "NATURAL_LEGAL_ACTION_REAL_MUJOCO",
+        "case": "slow",
+        "metrics": {
+          "rl_decisions": 15,
+          "task_s": 9.82000000000461,
+          "native_steps_total": 79480,
+          "task_native_steps": 39280,
+          "reset_wall_s": 18.292507842000305,
+          "host_wall_s": 51.38924975000009,
+          "force_integral_N_s": 927.5259761342978,
+          "force_peak_N": 111.86822217535524,
+          "moment_integral_Nm_s": 114.75606389076545,
+          "moment_peak_Nm": 15.475690818392867,
+          "phases": [
+            "OUTBOUND",
+            "ABORTED"
+          ],
+          "accepted": 12,
+          "rejections": 3,
+          "reward_totals": {
+            "progress": 0.0,
+            "completion": -10.0,
+            "force": -0.1855051952268596,
+            "variation": -0.0024237588274734004
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              0.5542591990904764,
+              0.6408101505041944
+            ],
+            "human_dq_rad_s": [
+              -0.006556406521253394,
+              0.031152009202575753
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 3975,
+          "actor_wait_wall_s": 0.001590072000908549,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            0.3199999999992542,
+            1.1749999999972616,
+            2.029999999995269,
+            2.8899999999932646,
+            3.7499999999912603,
+            4.609999999989256,
+            5.464999999987263,
+            6.319999999987898,
+            7.1749999999919805,
+            8.034999999996087,
+            8.89000000000017,
+            9.17500000000153,
+            9.51000000000313,
+            9.815000000004586
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.24237588274734007,
+          "native_journal_file": "runs/g4_slow_01/physics/native_journals/native_0001.jsonl",
+          "status": "ABORTED",
+          "abort_reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: no quintic schedule satisfies the registered phase and motion limits",
+          "success": false,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021,
+          "reward_sum": -10.187928954054334
+        },
+        "audit": "runs/g4_slow_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": false,
+        "original_summary_J_F": 928.0810851870452,
+        "independent_J_F": 927.5259761342978
+      },
+      {
+        "run": "runs/qual_hold_01",
+        "episode": 1,
+        "category": "SHORT_REAL_NATIVE_PHYSICS_NO_LEARNING",
+        "case": "hold",
+        "metrics": {
+          "rl_decisions": 1,
+          "task_s": 0.004999999999988347,
+          "native_steps_total": 40220,
+          "task_native_steps": 20,
+          "reset_wall_s": 18.34037915600038,
+          "host_wall_s": 24.47853530700013,
+          "force_integral_N_s": 0.39447121483595315,
+          "force_peak_N": 78.8942429673745,
+          "moment_integral_Nm_s": 0.06324093538608115,
+          "moment_peak_Nm": 12.648187077245707,
+          "phases": [
+            "OUTBOUND",
+            "ABORTED"
+          ],
+          "accepted": 0,
+          "rejections": 1,
+          "reward_totals": {
+            "progress": 0.0,
+            "completion": -10.0,
+            "force": -7.889424296719063e-05,
+            "variation": -2.2287147401539834e-16
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              0.09598704032646069,
+              0.16579869630067962
+            ],
+            "human_dq_rad_s": [
+              1.3246891106900326e-05,
+              1.265841450724886e-05
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 2012,
+          "actor_wait_wall_s": 0.0001440579999325564,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 2.2287147401539836e-14,
+          "native_journal_file": "runs/qual_hold_01/physics/native_journals/native_0001.jsonl",
+          "status": "ABORTED",
+          "abort_reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "success": false,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021
+        },
+        "audit": "runs/qual_hold_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 0.3944712148368725,
+        "independent_J_F": 0.39447121483595315
+      },
+      {
+        "run": "runs/qual_maximal_01",
+        "episode": 1,
+        "category": "SHORT_REAL_NATIVE_PHYSICS_NO_LEARNING",
+        "case": "maximal",
+        "metrics": {
+          "rl_decisions": 14,
+          "task_s": 19.030000000048588,
+          "native_steps_total": 116320,
+          "task_native_steps": 76120,
+          "reset_wall_s": 18.479083483000068,
+          "host_wall_s": 74.45384515899968,
+          "force_integral_N_s": 1449.8400609530293,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 98.40661738581369,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "RETURN"
+          ],
+          "accepted": 13,
+          "rejections": 1,
+          "reward_totals": {
+            "progress": 14.999999999999998,
+            "completion": 20.0,
+            "force": -0.28996801219060586,
+            "variation": -0.0005892575290900807
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              0.095979549526587,
+              0.16579510752447818
+            ],
+            "human_dq_rad_s": [
+              0.00013988880039825135,
+              -1.6827927651074734e-05
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 5817,
+          "actor_wait_wall_s": 0.001286749999053427,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861,
+            9.005000000000718,
+            9.515000000003154,
+            10.025000000005589,
+            11.630000000013252,
+            12.950000000019555,
+            14.265000000025834,
+            15.585000000032137,
+            15.870000000033498
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.058925752909008054,
+          "native_journal_file": "runs/qual_maximal_01/physics/native_journals/native_0001.jsonl",
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "success": true,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021
+        },
+        "audit": "runs/qual_maximal_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 1449.8400609500407,
+        "independent_J_F": 1449.8400609530293
+      },
+      {
+        "run": "runs/qual_random_01",
+        "episode": 1,
+        "category": "SHORT_REAL_NATIVE_PHYSICS_NO_LEARNING",
+        "case": "random",
+        "metrics": {
+          "rl_decisions": 30,
+          "task_s": 20.165000000054008,
+          "native_steps_total": 120860,
+          "task_native_steps": 80660,
+          "reset_wall_s": 18.650111044999903,
+          "host_wall_s": 79.13645506399916,
+          "force_integral_N_s": 1616.6956371147098,
+          "force_peak_N": 120.09372327008354,
+          "moment_integral_Nm_s": 111.26678530289922,
+          "moment_peak_Nm": 15.398145453784094,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "RETURN"
+          ],
+          "accepted": 25,
+          "rejections": 5,
+          "reward_totals": {
+            "progress": 15.0,
+            "completion": 20.0,
+            "force": -0.323339127422942,
+            "variation": -0.002718936187685353
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              0.09795452138543888,
+              0.16402988246631497
+            ],
+            "human_dq_rad_s": [
+              0.02917123683216868,
+              0.017628098544770817
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 6044,
+          "actor_wait_wall_s": 0.0031044930019561434,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            0.5049999999988231,
+            1.0149999999976345,
+            1.8499999999956884,
+            2.9899999999930316,
+            3.5249999999917847,
+            4.049999999990561,
+            4.614999999989244,
+            5.364999999987496,
+            6.544999999988972,
+            7.114999999991694,
+            7.424999999993174,
+            8.354999999997615,
+            9.260000000001936,
+            9.770000000004371,
+            10.280000000006806,
+            11.080000000010626,
+            11.560000000012918,
+            12.255000000016237,
+            12.550000000017645,
+            13.945000000024306,
+            14.62000000002753,
+            15.340000000030967,
+            15.625000000032328,
+            16.33500000003572,
+            16.62000000003708,
+            17.915000000043264,
+            18.200000000044625,
+            18.77500000004737,
+            19.21500000004947
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.27189361876853524,
+          "native_journal_file": "runs/qual_random_01/physics/native_journals/native_0001.jsonl",
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "success": true,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021
+        },
+        "audit": "runs/qual_random_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 1616.6956371112926,
+        "independent_J_F": 1616.69563711471
+      },
+      {
+        "run": "runs/reset_maximal_01",
+        "episode": 1,
+        "category": "NATURAL_LEGAL_ACTION_REAL_MUJOCO",
+        "case": "reset_maximal",
+        "metrics": {
+          "rl_decisions": 14,
+          "task_s": 19.030000000048588,
+          "native_steps_total": 116320,
+          "task_native_steps": 76120,
+          "reset_wall_s": 20.776943023999593,
+          "host_wall_s": 79.51551236199975,
+          "force_integral_N_s": 1449.8400609530293,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 98.40661738581369,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "RETURN"
+          ],
+          "accepted": 13,
+          "rejections": 1,
+          "reward_totals": {
+            "progress": 14.999999999999998,
+            "completion": 20.0,
+            "force": -0.28996801219060586,
+            "variation": -0.0005892575290900807
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              0.095979549526587,
+              0.16579510752447818
+            ],
+            "human_dq_rad_s": [
+              0.00013988880039825135,
+              -1.6827927651074734e-05
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 5817,
+          "actor_wait_wall_s": 0.0015938890001052641,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861,
+            9.005000000000718,
+            9.515000000003154,
+            10.025000000005589,
+            11.630000000013252,
+            12.950000000019555,
+            14.265000000025834,
+            15.585000000032137,
+            15.870000000033498
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 1,
+          "motion_variation_penalty_integral": 0.058925752909008054,
+          "native_journal_file": "runs/reset_maximal_01/physics/native_journals/native_0001.jsonl",
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "success": true,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021,
+          "reward_sum": 34.7094427302803
+        },
+        "audit": "runs/reset_maximal_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 1449.8400609500407,
+        "independent_J_F": 1449.8400609530293
+      },
+      {
+        "run": "runs/reset_maximal_01",
+        "episode": 2,
+        "category": "NATURAL_LEGAL_ACTION_REAL_MUJOCO",
+        "case": "reset_maximal",
+        "metrics": {
+          "rl_decisions": 14,
+          "task_s": 19.030000000048588,
+          "native_steps_total": 116320,
+          "task_native_steps": 76120,
+          "reset_wall_s": 18.804403758000262,
+          "host_wall_s": 76.63124865000009,
+          "force_integral_N_s": 1449.8400609530293,
+          "force_peak_N": 115.47911864309106,
+          "moment_integral_Nm_s": 98.40661738581369,
+          "moment_peak_Nm": 15.711377245106318,
+          "phases": [
+            "OUTBOUND",
+            "HOLD",
+            "RETURN"
+          ],
+          "accepted": 13,
+          "rejections": 1,
+          "reward_totals": {
+            "progress": 14.999999999999998,
+            "completion": 20.0,
+            "force": -0.28996801219060586,
+            "variation": -0.0005892575290900807
+          },
+          "belief_hash": "9d86d02f905beba026c0219032d311db6d093c10df798cb2290034bff391c040",
+          "physical_evaluation_only": {
+            "human_q_rad": [
+              0.095979549526587,
+              0.16579510752447818
+            ],
+            "human_dq_rad_s": [
+              0.00013988880039825135,
+              -1.6827927651074734e-05
+            ],
+            "ncon": 0,
+            "dt": 0.00025,
+            "human_qpos_indices": [
+              0,
+              1
+            ],
+            "human_dof_indices": [
+              0,
+              1
+            ]
+          },
+          "applied_receipts": 5817,
+          "actor_wait_wall_s": 0.0015722949992778013,
+          "qualification": "PENDING_EXECUTION_AND_TASK_QUALIFICATION",
+          "architecture": "native_planner_event_v1",
+          "nominal_policy_period_s": null,
+          "decision_times_s": [
+            0.0,
+            1.6099999999962478,
+            2.9349999999931597,
+            4.259999999990072,
+            5.584999999986984,
+            7.149999999991861,
+            9.005000000000718,
+            9.515000000003154,
+            10.025000000005589,
+            11.630000000013252,
+            12.950000000019555,
+            14.265000000025834,
+            15.585000000032137,
+            15.870000000033498
+          ],
+          "action_definition": "two fractions of original maximum progress per native planner event",
+          "episode_seed": 20261021,
+          "episode_number": 2,
+          "motion_variation_penalty_integral": 0.058925752909008054,
+          "native_journal_file": "runs/reset_maximal_01/physics/native_journals/native_0002.jsonl",
+          "status": "COMPLETE",
+          "abort_reason": "",
+          "success": true,
+          "terminated": true,
+          "truncated": false,
+          "seed": 20261021,
+          "reward_sum": 34.7094427302803
+        },
+        "audit": "runs/reset_maximal_01/physics/env/episode_0002/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true,
+        "original_summary_J_F": 1449.8400609500407,
+        "independent_J_F": 1449.8400609530293
+      }
+    ],
+    "blockers": [
+      "Original slow-policy raw trace repeats one physical boundary and double-counts interval force by 0.555109 N s in original summary; wrapper reward independently correct.",
+      "Key natural OUTBOUND/HOLD/RETURN/global timeout and absolute-safety terminal paths remain unverified. TEST_ONLY evidence is separate."
+    ],
+    "no_safety_or_task_relaxation": true,
+    "no_mock_physics": true
+  },
+  "RL_EXECUTION_VALIDATION.json": {
+    "status": "FAIL",
+    "EXECUTION_PASS": false,
+    "scientific_execution_core_preserved_in_observed_nominal_cases": true,
+    "actual_Human_motion_observed_pass": true,
+    "full_frozen_regression_pass": false,
+    "legacy_maximal_audit": "runs/qual_maximal_01/physics/INDEPENDENT_AUDIT.json",
+    "legacy_random_audit": {
+      "category": "INDEPENDENT_RAW_NATIVE_SCIENTIFIC_AUDIT",
+      "policy": "random",
+      "pass": false,
+      "checks": {
+        "reward_independent": true,
+        "one_proposal_per_request": true,
+        "causal_immutable_sources": true,
+        "100ms_same_episode_admission": true,
+        "current_state_certificate": true,
+        "bridges_40ms": true,
+        "native_grid_count": true,
+        "native_ROM": true,
+        "no_task_bed_contact": true,
+        "positive_applied_receipts": true,
+        "executor_closed": true,
+        "governor_source_preserved": true,
+        "single_native_owner_torque_and_source_age": true,
+        "full_original_task_complete": false
+      },
+      "reward": {
+        "category": "INDEPENDENT_REWARD_AND_TERMINAL_RECOMPUTATION_REAL_PHYSICS",
+        "run": "runs/qual_random_01/physics",
+        "pass": true,
+        "checks": {
+          "finite_transitions": true,
+          "actor_41d": true,
+          "bounded_actions": true,
+          "only_final_transition_terminal": true,
+          "finite_horizon_no_timeout_bootstrap": true,
+          "absorbing_terminal": true,
+          "nondecreasing_online_callback_time": true,
+          "zero_duration_notifications_preserve_sensors_and_potential": true,
+          "reward_parts_independent": true,
+          "reward_sum_independent": true,
+          "force_integral_independent": true,
+          "moment_integral_independent": true,
+          "task_duration_native_grid": true,
+          "completion_semantics": true
+        },
+        "status": "COMPLETE",
+        "abort_reason": "",
+        "success": true,
+        "task_s": 20.165000000054008,
+        "phases": [
+          "OUTBOUND",
+          "HOLD",
+          "RETURN"
+        ],
+        "tick_count": 4039,
+        "zero_duration_notifications": [
+          {
+            "task_s": 7.119999999991718,
+            "identical_physical_sensor_state": true,
+            "valid_same_boundary_notification": true,
+            "declared_v2_failure_terminal": false,
+            "phase_from": "OUTBOUND",
+            "phase_to": "OUTBOUND",
+            "internal_phase_elapsed_delta_s": 0.005000000000023874
+          },
+          {
+            "task_s": 12.26000000001626,
+            "identical_physical_sensor_state": true,
+            "valid_same_boundary_notification": true,
+            "declared_v2_failure_terminal": false,
+            "phase_from": "RETURN",
+            "phase_to": "RETURN",
+            "internal_phase_elapsed_delta_s": 0.005000000000023874
+          },
+          {
+            "task_s": 15.345000000030991,
+            "identical_physical_sensor_state": true,
+            "valid_same_boundary_notification": true,
+            "declared_v2_failure_terminal": false,
+            "phase_from": "RETURN",
+            "phase_to": "RETURN",
+            "internal_phase_elapsed_delta_s": 0.005000000000023874
+          },
+          {
+            "task_s": 16.340000000035744,
+            "identical_physical_sensor_state": true,
+            "valid_same_boundary_notification": true,
+            "declared_v2_failure_terminal": false,
+            "phase_from": "RETURN",
+            "phase_to": "RETURN",
+            "internal_phase_elapsed_delta_s": 0.005000000000023874
+          },
+          {
+            "task_s": 17.920000000043288,
+            "identical_physical_sensor_state": true,
+            "valid_same_boundary_notification": true,
+            "declared_v2_failure_terminal": false,
+            "phase_from": "RETURN",
+            "phase_to": "RETURN",
+            "internal_phase_elapsed_delta_s": 0.005000000000023874
+          }
+        ],
+        "reward_parts": {
+          "progress": 15.0,
+          "completion": 20.0,
+          "force": -0.323339127422942,
+          "variation": -0.0027189361876853524
+        },
+        "reward_difference": {
+          "progress": 0.0,
+          "completion": 0.0,
+          "force": 0.0,
+          "variation": 4.336808689942018e-19
+        },
+        "sum_reward": 34.673941936389376,
+        "J_F": 1616.69563711471,
+        "J_M": 111.26678530289922,
+        "variation_integral": 0.27189361876853524,
+        "callback_time_note": "An original fallback may notify the same physical boundary twice. Zero-duration notifications contribute no force/variation time and must preserve sensor state and reward potential. Native integration time is audited strictly separately.",
+        "limitations": "Full physical safety and command ownership audited separately; these are developer validation episodes, not heldout tests."
+      },
+      "physical_accounting": {
+        "category": "INDEPENDENT_RECOMPUTATION_FROM_SAVED_RAW",
+        "path": "runs/qual_random_01/physics/env/episode_0001/runtime_artifacts.json",
+        "task_duration_s": 20.165000000054008,
+        "terminal_phase": "COMPLETE",
+        "boundary_closure_added": false,
+        "J_F_N_s": 1616.69563711471,
+        "J_M_Nm_s": 111.26678530289921,
+        "phase_integrals": {
+          "OUTBOUND": {
+            "duration_s": 9.260000000001936,
+            "J_F": 848.6989146009525,
+            "J_M": 58.33583853111666
+          },
+          "HOLD": {
+            "duration_s": 1.0200000000048703,
+            "J_F": 54.58529223632176,
+            "J_M": 1.279010414648739
+          },
+          "RETURN": {
+            "duration_s": 9.8850000000472,
+            "J_F": 713.4114302774352,
+            "J_M": 51.651936357133664
+          }
+        },
+        "force_peak_N": 120.09372327008353,
+        "moment_peak_Nm": 15.398145453784094,
+        "recorded_interval_J_F": 1616.6956371112926,
+        "J_F_abs_difference": 3.417426341911778e-09,
+        "boundary_intervals": 4033,
+        "native_steps_all": 120860,
+        "native_task_steps": 80660,
+        "native_grid_errors": 0,
+        "unowned_native_steps": 0,
+        "torque_receipt_mismatches": 0,
+        "receipt_count_mismatches": [],
+        "source_age_errors": [],
+        "task_native_contact_steps": 0,
+        "errors": [],
+        "human_index_source": "caller must supply indices from actual model audit",
+        "human_motion": {
+          "q_min_deg": [
+            4.716730370188149,
+            8.13158427739149
+          ],
+          "q_max_deg": [
+            120.06174418042774,
+            120.43882995859235
+          ],
+          "abs_dq_max_deg_s": [
+            25.460857118426382,
+            39.362845641906304
+          ],
+          "final_q_deg": [
+            5.612380659609613,
+            9.398219979346791
+          ],
+          "final_dq_deg_s": [
+            1.6713887536598429,
+            1.0100156474560762
+          ]
+        },
+        "full_qualification": "NOT_GRANTED_BY_THIS_AUDIT_ALONE",
+        "accounting_pass": true
+      },
+      "task_s": 20.165000000054008,
+      "status": "COMPLETE",
+      "abort_reason": "",
+      "native_steps": 120860,
+      "applied_execution_attempts": 6043,
+      "receipt_count": 6044,
+      "requests": 30,
+      "rejected_requests": 5,
+      "bridges": 21,
+      "all_contact_pairs_diagnostic": 0,
+      "scope": "development nominal only; no host real-time or generalization claim"
+    },
+    "raw_force_accounting_failures": [
+      "runs/g4_slow_01/physics"
+    ],
+    "reset_physical_pass": true,
+    "actor_truth_firewall": "source/interface allowlist tests PASS; actor never receives native qpos/qvel truth; evaluation-only audit separately consumes truth",
+    "controller_period_s": 0.005,
+    "native_physics_dt_s": 0.00025,
+    "bridge_s": 0.04,
+    "lifecycle_expiration_s": 0.1,
+    "action_contract": "native planner events, two progress fractions; proposed action is not actual applied torque",
+    "actual_torque_native_ownership_pass": true,
+    "source_preservation": "source/ unchanged against uploaded manifest; no physics, safety, task or B/H150 edits",
+    "host_realtime": "NOT_QUALIFIED",
+    "all_action_Human_motion_qualification": "NOT_GRANTED",
+    "blockers": [
+      "Inherited uniform-random exact-duration regression expects 19.03 +/-0.05 s; actual 20.165 s. Original FAIL retained.",
+      "Original partial raw force bookkeeping is inconsistent; no qualification by ignoring the discrepancy."
+    ],
+    "episode_evidence": [
+      {
+        "run": "runs/dual_maximal_01/a",
+        "episode": 1,
+        "category": "SHORT_REAL_NATIVE_PHYSICS_NO_LEARNING",
+        "audit": "runs/dual_maximal_01/a/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      },
+      {
+        "run": "runs/dual_maximal_01/b",
+        "episode": 1,
+        "category": "SHORT_REAL_NATIVE_PHYSICS_NO_LEARNING",
+        "audit": "runs/dual_maximal_01/b/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      },
+      {
+        "run": "runs/g4_hold_injection_01",
+        "episode": 1,
+        "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+        "audit": "runs/g4_hold_injection_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      },
+      {
+        "run": "runs/g4_outbound_injection_01",
+        "episode": 1,
+        "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+        "audit": "runs/g4_outbound_injection_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      },
+      {
+        "run": "runs/g4_return_hold_01",
+        "episode": 1,
+        "category": "NATURAL_LEGAL_ACTION_REAL_MUJOCO",
+        "audit": "runs/g4_return_hold_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      },
+      {
+        "run": "runs/g4_return_injection_01",
+        "episode": 1,
+        "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+        "audit": "runs/g4_return_injection_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      },
+      {
+        "run": "runs/g4_slow_01",
+        "episode": 1,
+        "category": "NATURAL_LEGAL_ACTION_REAL_MUJOCO",
+        "audit": "runs/g4_slow_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": false
+      },
+      {
+        "run": "runs/qual_hold_01",
+        "episode": 1,
+        "category": "SHORT_REAL_NATIVE_PHYSICS_NO_LEARNING",
+        "audit": "runs/qual_hold_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      },
+      {
+        "run": "runs/qual_maximal_01",
+        "episode": 1,
+        "category": "SHORT_REAL_NATIVE_PHYSICS_NO_LEARNING",
+        "audit": "runs/qual_maximal_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      },
+      {
+        "run": "runs/qual_random_01",
+        "episode": 1,
+        "category": "SHORT_REAL_NATIVE_PHYSICS_NO_LEARNING",
+        "audit": "runs/qual_random_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      },
+      {
+        "run": "runs/reset_maximal_01",
+        "episode": 1,
+        "category": "NATURAL_LEGAL_ACTION_REAL_MUJOCO",
+        "audit": "runs/reset_maximal_01/physics/env/episode_0001/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      },
+      {
+        "run": "runs/reset_maximal_01",
+        "episode": 2,
+        "category": "NATURAL_LEGAL_ACTION_REAL_MUJOCO",
+        "audit": "runs/reset_maximal_01/physics/env/episode_0002/CLOUD_CASE_AUDIT.json",
+        "audit_pass": true
+      }
+    ]
+  },
+  "PPO_SMOKE_RESULTS.json": {
+    "status": "NOT_RUN_BLOCKED_BY_G4_AND_EXECUTION",
+    "PPO_UPDATE_PASS": false,
+    "gradient_updates": 0,
+    "optimizer_steps": 0,
+    "environment_decisions": 0,
+    "native_physics_steps": 0,
+    "complete_episodes": 0,
+    "training_seed": null,
+    "planned_seed": 20261021,
+    "teacher_used": false,
+    "checkpoints_created": [],
+    "learning_success_claim": false,
+    "config": {
+      "schema": "ihear_native_event_cpu_ppo_v1",
+      "enabled": false,
+      "backend": "native_mujoco_scientific",
+      "device": "cpu",
+      "physics_envs": 1,
+      "torch_threads": 1,
+      "seeds": [
+        20261021,
+        20261022,
+        20261023
+      ],
+      "observation_dim": 41,
+      "action_dim": 2,
+      "action_bounds": [
+        -1,
+        1
+      ],
+      "action_units": "fraction_of_maximum_progress_per_native_planner_event",
+      "reward_version": "failure_cancels_progress_v2",
+      "teacher_or_expert_weights": false,
+      "policy_hidden_layers": [
+        32,
+        32
+      ],
+      "learning_rate": 0.0003,
+      "gamma": 1.0,
+      "gae_lambda": 0.95,
+      "clip_range": 0.2,
+      "ent_coef": 0.0,
+      "vf_coef": 0.5,
+      "max_grad_norm": 0.5,
+      "minimum_available_GiB": 6,
+      "minimum_disk_free_GiB": 5,
+      "profiles": {
+        "smoke": {
+          "enabled": false,
+          "decisions": 32,
+          "n_steps": 16,
+          "batch_size": 8,
+          "n_epochs": 2,
+          "wall_seconds": 840,
+          "output_limit_GiB": 2,
+          "completed_episode_limit": 6
+        },
+        "pilot": {
+          "enabled": false,
+          "decisions": 100000,
+          "n_steps": 64,
+          "batch_size": 32,
+          "n_epochs": 5,
+          "wall_seconds": 21600,
+          "output_limit_GiB": 20,
+          "completed_episode_limit": 100
+        },
+        "future_1m": {
+          "enabled": false,
+          "decisions": 1000000,
+          "n_steps": 128,
+          "batch_size": 32,
+          "n_epochs": 5,
+          "wall_seconds": 86400,
+          "output_limit_GiB": 40,
+          "completed_episode_limit": 5000
+        }
+      },
+      "budget_semantics": "stop at first of decision, complete episode, disk, resource, wall limits; rollout decisions count native events, not 50ms ticks; profiles are templates, no learning claim",
+      "checkpoint_semantics": "policy+Adam+RNG+counters; resume starts a fresh physical episode; no simulator mid-episode restoration",
+      "evaluation": "separate frozen-policy process, seeds independent from training, no optimizer updates"
+    },
+    "negative_startup_gate_test": {
+      "pass": true,
+      "evidence": "runs/ppo_gate_negative_01",
+      "no_model_or_environment_created": true
+    },
+    "reason": "User requires both G4 and core execution qualification before PPO; no positive training attempt was started."
+  },
+  "ATTEMPT_ACCOUNTING.json": {
+    "status": "CLOSED",
+    "START_count": 12,
+    "END_count": 12,
+    "all_children_joined": true,
+    "physics_attempts": 11,
+    "physical_episodes": 12,
+    "natural_episodes": 9,
+    "TEST_ONLY_with_real_MuJoCo_episodes": 3,
+    "ppo_positive_attempts": 0,
+    "expected_gate_negative_tests": 1,
+    "attempts": [
+      {
+        "directory": "runs/dual_maximal_01/a",
+        "start": {
+          "unix": 1792476827.9224663,
+          "command": [
+            "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+            "run_rollout.py",
+            "--enable",
+            "--policy",
+            "maximal",
+            "--out",
+            "runs/dual_maximal_01/a/physics"
+          ],
+          "pid": 13439,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "261cefcdb4b6ef5459058a7eb1918f513fa30c6a6214f44f1bbba1f02463961c",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792476907.0562916,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 13440,
+          "child_joined": true,
+          "resources": {
+            "samples": 159,
+            "minimum_available_GiB": 28.471832275390625,
+            "wall_s": 79.136400976,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": {
+          "returncode": 0,
+          "wall_s": 79.4435876790003,
+          "samples": 158,
+          "peak_sum_RSS_bytes": 559104000,
+          "minimum_host_available_bytes": 30573084672,
+          "mean_sampled_cpu_percent": 99.32398370909209,
+          "scope": "sum per-process RSS includes shared pages; sampled CPU is live process-tree counter delta"
+        },
+        "disk_bytes": 152446788
+      },
+      {
+        "directory": "runs/dual_maximal_01/b",
+        "start": {
+          "unix": 1792476827.9224663,
+          "command": [
+            "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+            "run_rollout.py",
+            "--enable",
+            "--policy",
+            "maximal",
+            "--out",
+            "runs/dual_maximal_01/b/physics"
+          ],
+          "pid": 13438,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "261cefcdb4b6ef5459058a7eb1918f513fa30c6a6214f44f1bbba1f02463961c",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792476906.054563,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 13441,
+          "child_joined": true,
+          "resources": {
+            "samples": 157,
+            "minimum_available_GiB": 28.471832275390625,
+            "wall_s": 78.13466722800058,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": {
+          "returncode": 0,
+          "wall_s": 78.52494386499984,
+          "samples": 156,
+          "peak_sum_RSS_bytes": 559493120,
+          "minimum_host_available_bytes": 30547963904,
+          "mean_sampled_cpu_percent": 99.30522522013081,
+          "scope": "sum per-process RSS includes shared pages; sampled CPU is live process-tree counter delta"
+        },
+        "disk_bytes": 152445425
+      },
+      {
+        "directory": "runs/g4_hold_injection_01",
+        "start": {
+          "unix": 1792477064.774836,
+          "command": [
+            ".venv/bin/python",
+            "cloud_g4_cases.py",
+            "--enable",
+            "--case",
+            "hold_timeout_injection",
+            "--out",
+            "runs/g4_hold_injection_01/physics"
+          ],
+          "pid": 14263,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "33473d03c9fe6e0bef71e35c906a0f96bab2bb7e71c26336f0c1a044b939fa9e",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792477149.4296455,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 14264,
+          "child_joined": true,
+          "resources": {
+            "samples": 170,
+            "minimum_available_GiB": 28.93109893798828,
+            "wall_s": 84.65780224799983,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": {
+          "returncode": 0,
+          "wall_s": 85.03329906500039,
+          "samples": 169,
+          "peak_sum_RSS_bytes": 562565120,
+          "minimum_host_available_bytes": 31061241856,
+          "mean_sampled_cpu_percent": 99.15740643244912,
+          "scope": "sum per-process RSS includes shared pages; sampled CPU is live process-tree counter delta"
+        },
+        "disk_bytes": 152744862
+      },
+      {
+        "directory": "runs/g4_outbound_injection_01",
+        "start": {
+          "unix": 1792476997.9745104,
+          "command": [
+            ".venv/bin/python",
+            "cloud_g4_cases.py",
+            "--enable",
+            "--case",
+            "outbound_timeout_injection",
+            "--out",
+            "runs/g4_outbound_injection_01/physics"
+          ],
+          "pid": 14039,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "4f2b457b6b84d97b0402eff8f5037bc65619d1364e997c59b9c60c90e87f31be",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792477058.098382,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 14040,
+          "child_joined": true,
+          "resources": {
+            "samples": 121,
+            "minimum_available_GiB": 28.953632354736328,
+            "wall_s": 60.12645462799992,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": {
+          "returncode": 0,
+          "wall_s": 60.24439871300001,
+          "samples": 120,
+          "peak_sum_RSS_bytes": 494891008,
+          "minimum_host_available_bytes": 31088427008,
+          "mean_sampled_cpu_percent": 98.20891870847585,
+          "scope": "sum per-process RSS includes shared pages; sampled CPU is live process-tree counter delta"
+        },
+        "disk_bytes": 104698594
+      },
+      {
+        "directory": "runs/g4_return_hold_01",
+        "start": {
+          "unix": 1792476943.602817,
+          "command": [
+            ".venv/bin/python",
+            "cloud_g4_cases.py",
+            "--enable",
+            "--case",
+            "return_hold",
+            "--out",
+            "runs/g4_return_hold_01/physics"
+          ],
+          "pid": 13844,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "4f2b457b6b84d97b0402eff8f5037bc65619d1364e997c59b9c60c90e87f31be",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792476999.219749,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 13851,
+          "child_joined": true,
+          "resources": {
+            "samples": 112,
+            "minimum_available_GiB": 28.96291732788086,
+            "wall_s": 55.61966821399983,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": {
+          "returncode": 0,
+          "wall_s": 55.90030604000003,
+          "samples": 111,
+          "peak_sum_RSS_bytes": 496037888,
+          "minimum_host_available_bytes": 31100788736,
+          "mean_sampled_cpu_percent": 98.27289261486628,
+          "scope": "sum per-process RSS includes shared pages; sampled CPU is live process-tree counter delta"
+        },
+        "disk_bytes": 106188534
+      },
+      {
+        "directory": "runs/g4_return_injection_01",
+        "start": {
+          "unix": 1792477163.0198543,
+          "command": [
+            ".venv/bin/python",
+            "cloud_g4_cases.py",
+            "--enable",
+            "--case",
+            "return_timeout_injection",
+            "--out",
+            "runs/g4_return_injection_01/physics"
+          ],
+          "pid": 14588,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "ae714e1d8c1ac6d1145b734afc56ae4f4b26b8d3b7e24193990ce167bc17aed2",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792477253.681009,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 14589,
+          "child_joined": true,
+          "resources": {
+            "samples": 182,
+            "minimum_available_GiB": 28.633052825927734,
+            "wall_s": 90.66414525100026,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": {
+          "returncode": 0,
+          "wall_s": 91.09925590900002,
+          "samples": 181,
+          "peak_sum_RSS_bytes": 566665216,
+          "minimum_host_available_bytes": 30744506368,
+          "mean_sampled_cpu_percent": 96.28651525624446,
+          "scope": "sum per-process RSS includes shared pages; sampled CPU is live process-tree counter delta"
+        },
+        "disk_bytes": 157850890
+      },
+      {
+        "directory": "runs/g4_slow_01",
+        "start": {
+          "unix": 1792476735.3979821,
+          "command": [
+            ".venv/bin/python",
+            "cloud_g4_cases.py",
+            "--enable",
+            "--case",
+            "slow",
+            "--out",
+            "runs/g4_slow_01/physics"
+          ],
+          "pid": 12994,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "031ed537ba27c27bf83399877c0b3fe886fd618339b2e9ed2a310969ff17c987",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792476788.51098,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 12995,
+          "child_joined": true,
+          "resources": {
+            "samples": 107,
+            "minimum_available_GiB": 28.976268768310547,
+            "wall_s": 53.11587219699959,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": {
+          "returncode": 0,
+          "wall_s": 53.620380327999555,
+          "samples": 107,
+          "peak_sum_RSS_bytes": 495865856,
+          "minimum_host_available_bytes": 31112134656,
+          "mean_sampled_cpu_percent": 99.078646177454,
+          "scope": "sum per-process RSS includes shared pages; sampled CPU is live process-tree counter delta"
+        },
+        "disk_bytes": 104573854
+      },
+      {
+        "directory": "runs/ppo_gate_negative_01",
+        "start": {
+          "unix": 1792477206.7431488,
+          "command": [
+            ".venv/bin/python",
+            "train.py",
+            "--enable",
+            "--profile",
+            "smoke",
+            "--decisions",
+            "16",
+            "--seed",
+            "20261021",
+            "--out",
+            "runs/ppo_gate_negative_01/denied_training"
+          ],
+          "pid": 14709,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "ae714e1d8c1ac6d1145b734afc56ae4f4b26b8d3b7e24193990ce167bc17aed2",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 30.0
+        },
+        "end": {
+          "unix": 1792477207.2970958,
+          "returncode": 1,
+          "error": null,
+          "child_pid": 14734,
+          "child_joined": true,
+          "resources": {
+            "samples": 2,
+            "minimum_available_GiB": 28.884662628173828,
+            "wall_s": 0.5568348060005519,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": null,
+        "disk_bytes": 2216
+      },
+      {
+        "directory": "runs/qual_hold_01",
+        "start": {
+          "unix": 1792476474.8314831,
+          "command": [
+            ".venv/bin/python",
+            "run_rollout.py",
+            "--enable",
+            "--policy",
+            "hold",
+            "--out",
+            "runs/qual_hold_01/physics"
+          ],
+          "pid": 12009,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "8d1293b9de2e5d2a61eb9a2c430e89251daf73b41311c80613a7f4c05d4c319b",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792476500.9160056,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 12037,
+          "child_joined": true,
+          "resources": {
+            "samples": 53,
+            "minimum_available_GiB": 28.793315887451172,
+            "wall_s": 26.08913967099943,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": null,
+        "disk_bytes": 50450830
+      },
+      {
+        "directory": "runs/qual_maximal_01",
+        "start": {
+          "unix": 1792476529.0773377,
+          "command": [
+            ".venv/bin/python",
+            "run_rollout.py",
+            "--enable",
+            "--policy",
+            "maximal",
+            "--out",
+            "runs/qual_maximal_01/physics"
+          ],
+          "pid": 12248,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "8d1293b9de2e5d2a61eb9a2c430e89251daf73b41311c80613a7f4c05d4c319b",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792476605.7179499,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 12249,
+          "child_joined": true,
+          "resources": {
+            "samples": 154,
+            "minimum_available_GiB": 28.892303466796875,
+            "wall_s": 76.64339780799946,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": {
+          "returncode": 0,
+          "wall_s": 76.89359357300054,
+          "samples": 153,
+          "peak_sum_RSS_bytes": 561029120,
+          "minimum_host_available_bytes": 31024668672,
+          "mean_sampled_cpu_percent": 99.28762724199538,
+          "scope": "sum per-process RSS includes shared pages; sampled CPU is live process-tree counter delta"
+        },
+        "disk_bytes": 152463898
+      },
+      {
+        "directory": "runs/qual_random_01",
+        "start": {
+          "unix": 1792476633.284562,
+          "command": [
+            ".venv/bin/python",
+            "run_rollout.py",
+            "--enable",
+            "--policy",
+            "random",
+            "--out",
+            "runs/qual_random_01/physics"
+          ],
+          "pid": 12616,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "031ed537ba27c27bf83399877c0b3fe886fd618339b2e9ed2a310969ff17c987",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792476714.4406497,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 12617,
+          "child_joined": true,
+          "resources": {
+            "samples": 163,
+            "minimum_available_GiB": 28.883590698242188,
+            "wall_s": 81.15887594199921,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": {
+          "returncode": 0,
+          "wall_s": 81.42602922300011,
+          "samples": 162,
+          "peak_sum_RSS_bytes": 572108800,
+          "minimum_host_available_bytes": 31010123776,
+          "mean_sampled_cpu_percent": 99.41095612314145,
+          "scope": "sum per-process RSS includes shared pages; sampled CPU is live process-tree counter delta"
+        },
+        "disk_bytes": 159128261
+      },
+      {
+        "directory": "runs/reset_maximal_01",
+        "start": {
+          "unix": 1792477247.8520553,
+          "command": [
+            ".venv/bin/python",
+            "cloud_g4_cases.py",
+            "--enable",
+            "--case",
+            "reset_maximal",
+            "--out",
+            "runs/reset_maximal_01/physics"
+          ],
+          "pid": 14877,
+          "category": "GUARDED_CPU_ATTEMPT",
+          "contract_sha256": "ae714e1d8c1ac6d1145b734afc56ae4f4b26b8d3b7e24193990ce167bc17aed2",
+          "environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1"
+          },
+          "physics_envs": 1,
+          "wall_cap_s": 600.0
+        },
+        "end": {
+          "unix": 1792477408.1233485,
+          "returncode": 0,
+          "error": null,
+          "child_pid": 14878,
+          "child_joined": true,
+          "resources": {
+            "samples": 321,
+            "minimum_available_GiB": 28.633052825927734,
+            "wall_s": 160.27393387400025,
+            "failure": null,
+            "monitor_joined": true
+          }
+        },
+        "measurement": {
+          "returncode": 0,
+          "wall_s": 160.41323547000047,
+          "samples": 318,
+          "peak_sum_RSS_bytes": 562536448,
+          "minimum_host_available_bytes": 30744506368,
+          "mean_sampled_cpu_percent": 97.98331871096867,
+          "scope": "sum per-process RSS includes shared pages; sampled CPU is live process-tree counter delta"
+        },
+        "disk_bytes": 304893939
+      }
+    ],
+    "preserved_failed_checks": [
+      "deployment_audit/hold_audit.log",
+      "runs/qual_hold_01/physics/INDEPENDENT_AUDIT_original_harness.json",
+      "deployment_audit/random_audit.log",
+      "deployment_audit/hold_case_audit.log",
+      "deployment_audit/maximal_case_audit.log",
+      "deployment_audit/random_case_audit.log",
+      "deployment_audit/slow_case_audit.log",
+      "runs/g4_slow_01/physics/env/episode_0001/CLOUD_CASE_AUDIT_initial_harness.json"
+    ],
+    "setup_attempts": [
+      {
+        "stage": "default sandbox command",
+        "result": "bwrap RTM_NEWADDR denied; subsequent authorized tools used existing escalation workflow"
+      },
+      {
+        "stage": "stdlib venv ensurepip",
+        "result": "unavailable; bootstrapped official pip25.2 wheel with PyPI SHA256 in user venv"
+      },
+      {
+        "stage": "sudo -n apt-get",
+        "result": "password required; no password handled; user reported installed, dpkg evidence recorded separately"
+      }
+    ],
+    "owned_process_exit_check": "PROCESS_EXIT_AUDIT.json",
+    "final_owned_training_simulation_process_count": 0
+  },
+  "PACKAGE_VERIFICATION.json": {
+    "DEPLOYMENT_PASS": true,
+    "uploaded_ZIP_sha256": "9ab8622703a84a71501bc7fcd24c665ff0bc2262979cb2857c88e146a2bc638d",
+    "original_manifest_payloads": 450,
+    "original_payload_verified_before_execution": true,
+    "active_source_files": 414,
+    "active_scientific_source_manifest_matches": true,
+    "source_mismatches": [],
+    "missing_files": [],
+    "documented_deployment_overlay": [
+      {
+        "path": "audit_reward_physical.py",
+        "original_sha256": "5329125aec9c47347c6859ddb00167a94c76b239bf38b0ffb641b86082f99c6e",
+        "deployed_sha256": "3e12efd52db942af9abaf9c23e17e385e8e3ea33f6a5d9e805489a08c0c18385"
+      },
+      {
+        "path": "checkpoints.py",
+        "original_sha256": "bdcd8ff26422129e9d1edfba7544ea6f81896e04981d98e5984690a28524ad64",
+        "deployed_sha256": "e0b33e7b21ba41cfc572f28e3418ffeb1692f3fc246af03650fbf622d532664b"
+      },
+      {
+        "path": "CLOUD_TRAINING_CONFIG.json",
+        "original_sha256": "b0cfeab090caf502f90f36074b3c7c2188215b2c62ac6e0661f737d97976007b",
+        "deployed_sha256": "f59527e3237d5852d48ff199a6cea5eda4b0c009ddc202735d700effb605ef84"
+      },
+      {
+        "path": "qualify.py",
+        "original_sha256": "4bb364e950c5fc4766af4f8316ae7767fe7e32c1edfc977e68047fd722772a19",
+        "deployed_sha256": "2b2847bf8cd2fb5e7caea1a9c663b13603a1fcad66d32b3cafa1609d5722ef60"
+      },
+      {
+        "path": "READINESS.json",
+        "original_sha256": "71fffa9197a02855000d74be137750a29f7a4e100e47fd714180f2d9ed064334",
+        "deployed_sha256": "16b73c13ee1d2455df143ae2513397bc632166b8f093b1b7ecc642637d510157"
+      },
+      {
+        "path": "resource_guard.py",
+        "original_sha256": "58301fe309df08de8ccdb114d16b838878378270a9c97ee0596e8dc75fb680e2",
+        "deployed_sha256": "927c16537289f67c7c59fac1cd820bdc1ab9ada8c0d6426f9388533902aef9ff"
+      },
+      {
+        "path": "STUDY_CONFIG.json",
+        "original_sha256": "2e75f7961fcfb10ce81a2165bcb2a9fe45b3c9ccbd158305ccbb2284a6ce33ce",
+        "deployed_sha256": "3098688485049a7446fe00a4b761b3f21d250adef93bff4eed021b562177b518"
+      }
+    ],
+    "active_overlay_manifest": "deployment_audit/DEPLOYED_SOURCE_MANIFEST.json",
+    "original_SHA256_MANIFEST_unchanged": true,
+    "all_pinned_versions_match": true,
+    "package_version_mismatch": [],
+    "no_Git_checkout_used": true,
+    "model_load_evidence": "12 real robot-cuff-Human MuJoCo episodes; cached model XML/MJB/asset hashes recorded per run",
+    "final_preflight": {
+      "category": "STATIC_AND_IMPORT_PREFLIGHT_NO_PHYSICS",
+      "pass": true,
+      "errors": [],
+      "python_files": 200,
+      "vendor_assets": 28,
+      "source_is_packaged": true,
+      "spaces": {
+        "observation": [
+          41
+        ],
+        "action": [
+          2
+        ]
+      },
+      "runtime": {
+        "platform": "linux",
+        "python": "3.12.3",
+        "packages": {
+          "mujoco": "3.10.0",
+          "numpy": "2.2.6",
+          "scipy": "1.15.3",
+          "gymnasium": "1.1.1",
+          "stable-baselines3": "2.6.0",
+          "torch": "2.7.1+cpu"
+        }
+      },
+      "resource_sample": {
+        "unix": 1792477206.4398427,
+        "available_bytes": 30992732160,
+        "total_bytes": 32857436160,
+        "swap_used_bytes": 0,
+        "disk_free_bytes": 224783380480
+      },
+      "contract_sha256": "ae714e1d8c1ac6d1145b734afc56ae4f4b26b8d3b7e24193990ce167bc17aed2",
+      "cloud_runtime_physics": "NOT_RUN",
+      "install_network_dependencies": "wheels must be obtained by install.sh; no venv bundled"
+    },
+    "no_original_ZIP_or_research_overwrite": true
+  }
+}

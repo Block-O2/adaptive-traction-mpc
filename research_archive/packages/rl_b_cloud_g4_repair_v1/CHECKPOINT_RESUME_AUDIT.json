@@ -1,0 +1,29 @@
+{
+  "status": "NOT_RUN",
+  "CHECKPOINT_RESUME_PASS": "NOT_RUN",
+  "reason": "No gate-approved PPO run and no trained checkpoint; do not fabricate a restore claim from random weights",
+  "checkpoint": null,
+  "policy_hash": null,
+  "optimizer_state_restored": null,
+  "RNG_restored": null,
+  "progress_restored": null,
+  "new_process_resume_rollout_updates": 0,
+  "mechanism_review": {
+    "save_atomic_generation_commit_marker": true,
+    "policy_and_Adam_declared_saved": true,
+    "SB3_local_source": "stable_baselines3/common/on_policy_algorithm.py:344 includes policy and policy.optimizer",
+    "python_numpy_torch_RNG_save_load": true,
+    "SHA256_and_contract_rejection_present": true,
+    "counters_num_timesteps_and_n_updates_checked": true,
+    "fresh_episode_semantics_declared": true,
+    "mid_episode_simulator_restore": false,
+    "exact_optimizer_state_runtime_equality": "NOT_RUN",
+    "cross_process_stochastic_sequence_equality": "NOT_RUN",
+    "continuation_gradient_update": "NOT_RUN"
+  },
+  "static_followups": [
+    "train.py records train-call count and SB3 epoch count; actual optimizer.step calls must be counted directly during the future smoke",
+    "fresh physical episode resume must be checked separately from forbidden claims of bit-exact mid-episode restoration"
+  ],
+  "no_random_checkpoint_substituted_for_trained_checkpoint": true
+}

@@ -1,0 +1,550 @@
+{
+  "G4_STRICT_PASS": "FAIL",
+  "G4_TEST_HARNESS_COVERAGE": "PASS",
+  "natural_matrix_closed": false,
+  "required_natural_gaps": [
+    "phase/TASK timeout",
+    "HOLD not established",
+    "absolute safety stop"
+  ],
+  "items": [
+    {
+      "item": "normal_full_task",
+      "natural": "NATURAL_PHYSICS_PASS",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [
+        {
+          "run": "repair_reset_maximal_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "task_s": 19.030000000048588,
+          "reason": "",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_reset_maximal_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_reset_maximal_01",
+          "episode": 2,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "task_s": 19.030000000048588,
+          "reason": "",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_reset_maximal_01/physics/env/episode_0002"
+        },
+        {
+          "run": "repair_random_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "task_s": 20.165000000054008,
+          "reason": "",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_random_01/physics/env/episode_0001"
+        }
+      ],
+      "interpretation": "完整phase与causal native commit；不由此授予matched资格。"
+    },
+    {
+      "item": "natural_TASK_and_phase_timeout",
+      "natural": "NOT_EVALUABLE",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [
+        {
+          "run": "repair_outbound_TEST_ONLY_01",
+          "episode": 1,
+          "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+          "status": "ABORTED",
+          "task_s": 10.00000000000547,
+          "reason": "TIMEOUT_OUTBOUND",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_outbound_TEST_ONLY_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_return_TEST_ONLY_01",
+          "episode": 1,
+          "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+          "status": "ABORTED",
+          "task_s": 20.02500000005334,
+          "reason": "TIMEOUT_RETURN",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_return_TEST_ONLY_01/physics/env/episode_0001"
+        }
+      ],
+      "interpretation": "合法slow在9.820s先NO_FEASIBLE；零进度先reference-regression拒绝，不能冒充自然timeout。三phase各10s使global30s通常被phase bound覆盖；没有全动作不可达证明。"
+    },
+    {
+      "item": "HOLD_failure",
+      "natural": "NOT_EVALUABLE",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [],
+      "interpretation": "HOLD候选与actor比例无关；无授权外扰，自然dwell失败未观察。源码只证明actor不能直接改HOLD目标，不证明所有合法入口均不可能失败。sensor-clock合成流清零dwell并10s timeout；旧HOLD exit-suppression的NO_FEASIBLE不是TIMEOUT_HOLD。"
+    },
+    {
+      "item": "zero_progress_stagnation",
+      "natural": "NATURAL_PHYSICS_PASS",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [
+        {
+          "run": "repair_hold_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 0.004999999999988347,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_hold_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_slow_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 9.82000000000461,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: no quintic schedule satisfies the registered phase and motion limits",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_slow_01/physics/env/episode_0001"
+        }
+      ],
+      "interpretation": "合法零进度在0.005s原规则拒绝；慢动作最终NO_FEASIBLE。只覆盖这些被正确拒绝的停滞case，未声称存在新stagnation watchdog。"
+    },
+    {
+      "item": "consecutive_rejected_actions",
+      "natural": "NATURAL_PHYSICS_PASS",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [
+        {
+          "run": "repair_slow_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 9.82000000000461,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: no quintic schedule satisfies the registered phase and motion limits",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_slow_01/physics/env/episode_0001"
+        }
+      ],
+      "interpretation": "原slow最后两次request FAILED后NO_FEASIBLE；20次拒绝计数与fallback单元是TEST_ONLY，不等价于自然20次拒绝压力测试或独立REPEATED_REJECTION终止器。"
+    },
+    {
+      "item": "planner_failure",
+      "natural": "NATURAL_PHYSICS_PASS",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [
+        {
+          "run": "repair_slow_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 9.82000000000461,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: no quintic schedule satisfies the registered phase and motion limits",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_slow_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_hold_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 0.004999999999988347,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_hold_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_return_hold_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 10.22000000000652,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_return_hold_01/physics/env/episode_0001"
+        }
+      ],
+      "interpretation": "真实无可行candidate/schedule异常保留，原fallback可用时继续，不可用时终止。"
+    },
+    {
+      "item": "legal_fallback",
+      "natural": "NATURAL_PHYSICS_PASS",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [
+        {
+          "run": "repair_random_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "task_s": 20.165000000054008,
+          "reason": "",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_random_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_reset_maximal_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "task_s": 19.030000000048588,
+          "reason": "",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_reset_maximal_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_reset_maximal_01",
+          "episode": 2,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "task_s": 19.030000000048588,
+          "reason": "",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_reset_maximal_01/physics/env/episode_0002"
+        }
+      ],
+      "interpretation": "实际escape、brake/stop/hold、fresh resume与receipt/certificate链；不放宽准入。"
+    },
+    {
+      "item": "absolute_safety_trigger",
+      "natural": "NOT_EVALUABLE",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [
+        {
+          "run": "repair_safety_TEST_ONLY_01",
+          "episode": 1,
+          "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+          "status": "ABORTED",
+          "task_s": 1.0099999999976461,
+          "reason": "TASK_ACCELERATION_LIMIT",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_safety_TEST_ONLY_01/physics/env/episode_0001"
+        }
+      ],
+      "interpretation": "没有在合法动作和完整保护下观察自然超限；不绕过保护制造违规。旧MuJoCo测试只注入monitor acceleration字段；本轮6项原限值/安全优先协议测试。未证明全动作安全不变性。"
+    },
+    {
+      "item": "partial_episode_reward",
+      "natural": "NATURAL_PHYSICS_PASS",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [
+        {
+          "run": "repair_hold_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 0.004999999999988347,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_hold_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_slow_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 9.82000000000461,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: no quintic schedule satisfies the registered phase and motion limits",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_slow_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_return_hold_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 10.22000000000652,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_return_hold_01/physics/env/episode_0001"
+        }
+      ],
+      "interpretation": "3个自然partial+3个TEST_ONLY partial的raw独立复算；失败progress归零、completion=-10、成本非正。"
+    },
+    {
+      "item": "terminated_truncated",
+      "natural": "NATURAL_PHYSICS_PASS",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [
+        {
+          "run": "repair_hold_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 0.004999999999988347,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_hold_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_slow_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 9.82000000000461,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: no quintic schedule satisfies the registered phase and motion limits",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_slow_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_return_hold_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "task_s": 10.22000000000652,
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_return_hold_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_reset_maximal_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "task_s": 19.030000000048588,
+          "reason": "",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_reset_maximal_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_reset_maximal_01",
+          "episode": 2,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "task_s": 19.030000000048588,
+          "reason": "",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_reset_maximal_01/physics/env/episode_0002"
+        }
+      ],
+      "interpretation": "有限任务失败和成功最终transition terminated=True、truncated=False，吸收态为0且不能重复step；deadline专有分支只有TEST_ONLY。"
+    },
+    {
+      "item": "reset_cleanup_and_next_episode_independence",
+      "natural": "NATURAL_PHYSICS_PASS",
+      "test_harness": "TEST_ONLY_PASS",
+      "evidence": [
+        {
+          "run": "repair_reset_maximal_01",
+          "episode": 1,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "task_s": 19.030000000048588,
+          "reason": "",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_reset_maximal_01/physics/env/episode_0001"
+        },
+        {
+          "run": "repair_reset_maximal_01",
+          "episode": 2,
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "task_s": 19.030000000048588,
+          "reason": "",
+          "saved_raw_audit_pass": true,
+          "path": "/home/hank/ihear-lab/rl_b_cloud_g4_repair_v1/runs/repair_reset_maximal_01/physics/env/episode_0002"
+        }
+      ],
+      "interpretation": "同进程两真实episode清理4项检查通过，owner退出、计数/force/reward/队列不继承。跨进程checkpoint恢复不冒充同进程reset证据。"
+    }
+  ],
+  "units": {
+    "G4_UNIT_RESULTS.json": {
+      "category": "TEST_ONLY_NO_PHYSICS",
+      "pass": true,
+      "tests": [
+        {
+          "test": "TEST_ONLY_OUTBOUND_timeout",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_OUTBOUND_safety_stop",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_HOLD_timeout",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_HOLD_safety_stop",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_RETURN_timeout",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_RETURN_safety_stop",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_HOLD_cannot_skip_and_dwell_resets",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_all_partial_low_JF_failures_have_no_success_or_progress",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_no_motion_no_free_force_reward",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_TIMEOUT_OUTBOUND",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_TIMEOUT_HOLD",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_TIMEOUT_RETURN",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_GLOBAL_TASK_TIMEOUT",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_ABSOLUTE_SAFETY_STOP",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_terminal_REPEATED_REJECTION",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_bogus_COMPLETE_rejected",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_initialize_clears_episode_accounting",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_repeated_rejections_legal_fallback_and_fresh_resume",
+          "pass": true
+        },
+        {
+          "test": "TEST_ONLY_full_task_complete_bonus_once_via_pending_guard",
+          "pass": true
+        }
+      ],
+      "full_G4_physical_pass": false
+    },
+    "REPAIR_BOUNDARY_TESTS.json": {
+      "category": "TEST_ONLY_NO_PHYSICS",
+      "tests": [
+        {
+          "test": "late_arrival_cannot_override_OUTBOUND_ready_False",
+          "pass": true
+        },
+        {
+          "test": "late_arrival_cannot_override_OUTBOUND_ready_True",
+          "pass": true
+        },
+        {
+          "test": "late_arrival_cannot_override_HOLD_ready_False",
+          "pass": true
+        },
+        {
+          "test": "late_arrival_cannot_override_HOLD_ready_True",
+          "pass": true
+        },
+        {
+          "test": "late_arrival_cannot_override_RETURN_ready_False",
+          "pass": true
+        },
+        {
+          "test": "late_arrival_cannot_override_RETURN_ready_True",
+          "pass": true
+        },
+        {
+          "test": "HOLD_unestablished_10s_sensor_clock_timeout",
+          "pass": true
+        },
+        {
+          "test": "zero_time_duplicate_has_zero_HOLD_credit",
+          "pass": true
+        },
+        {
+          "test": "causal_commit_TIMEOUT_RETURN",
+          "pass": true
+        },
+        {
+          "test": "causal_commit_GLOBAL_TASK_TIMEOUT",
+          "pass": true
+        }
+      ],
+      "pass": true
+    },
+    "SAFETY_AUTHORITY_TESTS.json": {
+      "category": "TEST_ONLY_NO_PHYSICS_SYNTHETIC_20MS_HISTORY",
+      "tests": [
+        {
+          "test": "original_acceleration_threshold_0.0",
+          "pass": true,
+          "reason": null,
+          "truth_used": false
+        },
+        {
+          "test": "original_acceleration_threshold_1.0",
+          "pass": true,
+          "reason": null,
+          "truth_used": false
+        },
+        {
+          "test": "original_acceleration_threshold_1.000001",
+          "pass": true,
+          "reason": "TASK_ACCELERATION_LIMIT",
+          "truth_used": false
+        },
+        {
+          "test": "original_safety_overrides_phase_OUTBOUND",
+          "pass": true
+        },
+        {
+          "test": "original_safety_overrides_phase_HOLD",
+          "pass": true
+        },
+        {
+          "test": "original_safety_overrides_phase_RETURN",
+          "pass": true
+        }
+      ],
+      "pass": true
+    },
+    "EXECUTION_CONTRACT_TESTS.json": {
+      "evidence_category": "SOURCE_AND_INTERFACE_UNIT_TESTS_ONLY",
+      "tests": [
+        {
+          "test": "source_age_not_refreshed",
+          "pass": true
+        },
+        {
+          "test": "100ms_expiry_rejects_before_apply",
+          "pass": true
+        },
+        {
+          "test": "episode_epoch_mismatch",
+          "pass": true
+        },
+        {
+          "test": "action_boundary_nan_and_hold",
+          "pass": true
+        },
+        {
+          "test": "actor_source_allowlist",
+          "pass": true
+        },
+        {
+          "test": "policy_before_original_snapshot_request",
+          "pass": true
+        }
+      ],
+      "pass": true,
+      "physical_parity": "NOT_ESTABLISHED_BY_UNIT_TESTS"
+    }
+  },
+  "classification_rule": "TEST_ONLY_PASS never substitutes for NATURAL_PHYSICS_PASS",
+  "old_raw_reintegration": "audit/REUSED_FORCE_RECOMPUTATION.json",
+  "no_new_failure_physics_required_for_reuse": true
+}

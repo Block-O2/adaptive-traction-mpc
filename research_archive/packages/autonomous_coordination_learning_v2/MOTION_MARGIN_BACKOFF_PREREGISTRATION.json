@@ -1,0 +1,110 @@
+{
+  "utc": "2026-10-22T01:37:42.468606+00:00",
+  "hypothesis": "The forward candidates fail original range mainly through lower knee minimum in RETURN. Reducing only R_pass_speed from .4878868 to .20/.05 should reduce excursion while retaining some force gain.",
+  "observed_failed_id": "RESPONSE_MODEL_01",
+  "observed_knee_excursion_delta_deg": 0.5058211646557425,
+  "original_excursion_gate_deg": 0.5,
+  "secondary_heuristic_target_deg": 0.49,
+  "original_qualification_thresholds_unchanged": true,
+  "completed_past_training_ids": [
+    "RESPONSE_MODEL_01",
+    "CORE_A_015",
+    "CORE_A_016"
+  ],
+  "finite_difference": {
+    "JF_per_unit": -1.1430848018653705,
+    "JM_per_unit": 0.3104247143809045,
+    "excursion_per_unit": [
+      0.0014792140389171698,
+      0.06034535746382273
+    ]
+  },
+  "variants": [
+    {
+      "tag": "RPASS_020",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ]
+      },
+      "prediction": {
+        "kind": "PAST_NATIVE_ONE_COORDINATE_FINITE_DIFFERENCE_MARGIN_BACKOFF",
+        "created_utc": "2026-10-22T01:37:42.468543+00:00",
+        "training_attempt_ids": [
+          "RESPONSE_MODEL_01",
+          "CORE_A_015",
+          "CORE_A_016"
+        ],
+        "predicted_JF": 1398.0401064036314,
+        "predicted_JM": 107.98713557000212,
+        "predicted_excursion_delta_deg": [
+          0.17249462741383428,
+          0.48844853489494766
+        ],
+        "motion_margin_target_deg": 0.49,
+        "not_calibrated": true,
+        "truth_scope": "Only completed past simulation-evaluation labels; no future Human state or deployable sensor claim.",
+        "all_other_action_coordinates_fixed": true
+      },
+      "category": "optimization"
+    },
+    {
+      "tag": "RPASS_005",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.0,
+          0.0,
+          0.0,
+          0.05
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ]
+      },
+      "prediction": {
+        "kind": "PAST_NATIVE_ONE_COORDINATE_FINITE_DIFFERENCE_MARGIN_BACKOFF",
+        "created_utc": "2026-10-22T01:37:42.468582+00:00",
+        "training_attempt_ids": [
+          "RESPONSE_MODEL_01",
+          "CORE_A_015",
+          "CORE_A_016"
+        ],
+        "predicted_JF": 1398.2115691239112,
+        "predicted_JM": 107.94057186284498,
+        "predicted_excursion_delta_deg": [
+          0.17227274530799672,
+          0.47939673127537424
+        ],
+        "motion_margin_target_deg": 0.49,
+        "not_calibrated": true,
+        "truth_scope": "Only completed past simulation-evaluation labels; no future Human state or deployable sensor claim.",
+        "all_other_action_coordinates_fixed": true
+      },
+      "category": "optimization"
+    }
+  ],
+  "new_candidates": 2,
+  "additional_parent_and_reference_START": 4,
+  "total_additional_START_budget": 6,
+  "classification": "Supplementary traditional physics/history-driven motion-margin repair. Not a new PPO or main GP result, not equal32-budget performance.",
+  "frozen_validation": "After both fixed tests, best qualified modal discovery enters the already-planned BEST_FIXED selection; no validation result is consumed for repair.",
+  "no_future_Human_truth": true
+}

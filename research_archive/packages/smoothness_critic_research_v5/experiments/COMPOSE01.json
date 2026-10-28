@@ -1,0 +1,180 @@
+{
+  "condition": {
+    "name": "COMPOSE01",
+    "seed": 2026102001,
+    "prefix": {
+      "OUTBOUND": [
+        [
+          0.08,
+          0.04,
+          0.03
+        ]
+      ],
+      "RETURN": [
+        [
+          0.04,
+          0.02,
+          0.03
+        ]
+      ]
+    },
+    "split": "train",
+    "role": "historical W1 exposed",
+    "parent_family": "D01"
+  },
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+    },
+    {
+      "id": "H150",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "timing": [
+        {
+          "phase": "RETURN",
+          "slot": 5,
+          "duration_factor": 1.5
+        }
+      ],
+      "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+    }
+  ],
+  "group": "COMPOSE01",
+  "B": {
+    "id": "B",
+    "base": "B",
+    "posture": [],
+    "early": [],
+    "changes": [],
+    "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+  },
+  "H150": {
+    "id": "H150",
+    "base": "T",
+    "posture": [
+      {
+        "phase": "RETURN",
+        "slot": 2,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      },
+      {
+        "phase": "RETURN",
+        "slot": 3,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      }
+    ],
+    "early": [
+      {
+        "phase": "RETURN",
+        "slot": 1,
+        "duration_factor": 1.1
+      },
+      {
+        "phase": "RETURN",
+        "slot": 4,
+        "duration_factor": 1.2
+      }
+    ],
+    "changes": [],
+    "timing": [
+      {
+        "phase": "RETURN",
+        "slot": 5,
+        "duration_factor": 1.5
+      }
+    ],
+    "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+  },
+  "historical_repeats": {},
+  "actions": [
+    {
+      "tag": "B",
+      "action": {
+        "family": "B"
+      },
+      "category": "adaptive_phase_composition_anchor"
+    },
+    {
+      "tag": "PAIR01",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.5,
+          0.9668651272926947,
+          -1.0,
+          -0.9859247321976443
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ]
+      },
+      "category": "adaptive_phase_composition",
+      "prediction": {
+        "type": "EMPIRICAL_PHASE_COMPOSITION",
+        "selection_objective": "QUALITY_Q_PARETO_FRONT",
+        "score": 0.9615024463921592,
+        "quality_score": 0.9368874339611747,
+        "JF": 1406.0932489789097,
+        "JM": 106.06613661385454,
+        "jerk_RMS": [
+          296.0405885907509,
+          633.9573409226854
+        ],
+        "force_rate_RMS": 16.760026088021036,
+        "original_OUTBOUND_and_HOLD": "OPT01_PATTERN004",
+        "original_RETURN": "OPT01_BO007",
+        "future_truth_used": false,
+        "all_inputs_completed_before_START": true
+      }
+    }
+  ],
+  "job_wall_cap_s": 5400,
+  "worker": "v5_wrench_worker.py"
+}

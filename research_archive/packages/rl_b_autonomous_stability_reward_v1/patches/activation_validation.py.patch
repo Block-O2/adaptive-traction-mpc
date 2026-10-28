@@ -1,0 +1,17 @@
+--- a/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py
++++ b/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/activation_validation.py
+@@ -14,9 +14,12 @@
+     if proposed.phase is TaskPhase.ABORTED:
+         return proposed
+     elapsed = previous.phase_elapsed_s + physical_dt
+-    if (continuous_hold and previous.phase is TaskPhase.HOLD
++    # Arrival/dwell completion cannot override an already exceeded deadline.
++    # Exact-boundary convention matches the original terminal commit guard.
++    if (previous.phase in (TaskPhase.OUTBOUND, TaskPhase.HOLD, TaskPhase.RETURN)
+             and elapsed > spec.phase_timeout_s + 1e-12):
+-        return abort_episode(replace(previous, phase_elapsed_s=elapsed), "TIMEOUT_HOLD")
++        return abort_episode(replace(previous, phase_elapsed_s=elapsed),
++                             "TIMEOUT_" + previous.phase.value)
+     guarded = previous.phase in (TaskPhase.OUTBOUND, TaskPhase.RETURN) or (
+         continuous_hold and previous.phase is TaskPhase.HOLD)
+     if proposed.phase is previous.phase or not guarded or reference_ready:

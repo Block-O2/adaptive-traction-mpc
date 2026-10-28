@@ -1,0 +1,187 @@
+{
+  "schema": "v8.E2.synthetic_math_contract.v1",
+  "status": "SOURCE_ONLY_NOT_APPROVED_NOT_RUN",
+  "created_unix": 1793089221.8420408,
+  "classification": "SYNTHETIC_ONLY_NOT_REAL_DATA_TRAINING",
+  "original_activation_id": "deep_learning_method_exploration_v8_20261027T032540Z",
+  "original_global_stop_unix": 1793114740.0,
+  "clock_must_not_reset": true,
+  "actual_data_access": false,
+  "raw_or_sealed_or_active_job_access": false,
+  "real_fit_permission": false,
+  "physics_permission": false,
+  "synthetic_execution_requires_separate_exact_main_approval": true,
+  "model_source": {
+    "path": "families/learning_assisted/common_out0_v2/e2_models_candidate_v1.py",
+    "sha256": "edaf6fab6d48bfdf44bb5e4bcc09c73b7532079cabc6a4fc6b303a4839275e32",
+    "frozen_V1_unchanged": true
+  },
+  "real_fit_source_unchanged": {
+    "path": "families/learning_assisted/common_out0_v2/fit_e2_candidate_v1.py",
+    "sha256": "f6294f238a385b80a513be203eef92a672d62b4dc4b9c16eb4fa000ae2790bc4"
+  },
+  "budget": {
+    "wall_seconds": 30,
+    "cpu_threads": 1,
+    "address_space_bytes": 1073741824,
+    "real_model_fits": 0,
+    "physics": 0
+  },
+  "output": "families/learning_assisted/common_out0_v2/synthetic/e2_math_v1",
+  "no_automatic_retry": true,
+  "fixture_synthetic_identity": {
+    "name": "E2_SYNTHETIC_MATH_V1_NOT_E2NPZ",
+    "origin": "closed form np.sin/cos/arange/linspace constants in frozen fixture source, plus frozen fit_mlp seed0 RNG only",
+    "files_read_before_math": [
+      "exact approval",
+      "own source manifest+contract+source files",
+      "ACTIVATION.json"
+    ],
+    "forbidden_reads": [
+      "E2NPZ",
+      "E2INDEX",
+      "raw",
+      "runtime trace",
+      "active jobs",
+      "sealed payloads"
+    ]
+  },
+  "finite_difference": {
+    "cases": [
+      "absolute6D",
+      "absolute45D",
+      "shared_A_minus_B45D"
+    ],
+    "rows_per_case": 6,
+    "outputs": 16,
+    "epsilon": 1e-06,
+    "central_loss_evaluations_per_coordinate": 2,
+    "coordinates_per_case": 64,
+    "coordinate_rule": "W1[j%d,j],b1[j],W2[j,j],b2[j], j=0..15; 16 in each tensor",
+    "every_output_head_W_and_b_covered": true,
+    "tolerance": "abs(FD-analytical) <= 2e-7 + 2e-5*max(abs(FD),abs(analytical))",
+    "loss": "mean physical decoded16head squared error; explicit u*scale chain",
+    "paired": "one shared parameter perturbation changes both A and B; analytical gradient is backward(A,+d)+backward(B,-d)",
+    "extra_branch_gate": "A==B with nonzero upstream derivative must yield exact zero outputs and all-tensor exact gradient cancellation"
+  },
+  "physical_decode": {
+    "model_predict_calls": 3,
+    "rows_per_call": 6,
+    "kinds": [
+      "MLP_ACTION_ONLY",
+      "MLP_CONTEXT_ACTION",
+      "MLP_PAIRED"
+    ],
+    "all16_scales_nonidentity_and_distinct": true,
+    "absolute": "initial16+u*(network*scale+center)",
+    "paired": "u*(network_A-network_B)*scale; signed independent deltaJF/JM heads",
+    "anchors": [
+      "t=0 absolute initial16",
+      "t=0 paired zero",
+      "B paired zero for all supplied times"
+    ],
+    "delta_wrench_norm_never_delta_JF": true
+  },
+  "synthetic_adam": {
+    "frozen_function": "e2_models_candidate_v1.fit_mlp",
+    "kinds": [
+      "MLP_ACTION_ONLY",
+      "MLP_CONTEXT_ACTION",
+      "MLP_PAIRED"
+    ],
+    "initializations": 3,
+    "training_rows_per_kind": 10,
+    "steps_per_kind": 200,
+    "updates": 600,
+    "batch_size": 128,
+    "batch_draws_with_replacement": 600,
+    "train_target_normalizers": 3,
+    "parameters_by_kind": [
+      384,
+      1008,
+      1008
+    ],
+    "scalar_parameter_update_coordinates": 480000,
+    "extra_seed_or_validation_search": false,
+    "independent_scalar_check": {
+      "steps": [
+        1,
+        2
+      ],
+      "coordinates_each_step": [
+        "W1[0,0]",
+        "b1[0]",
+        "W2[0,0]",
+        "b2[0]"
+      ],
+      "step_checks": 6,
+      "scalar_coordinate_updates": 24,
+      "math": "independent Python math.fsum/math.sqrt scalar recurrence; beta=.9/.999 lr=.003 eps=1e-8 clipnorm5",
+      "observed_gradients": "value-preserving trace wrapper calls frozen original backward once, copies first-two-step outputs, returns original dictionary unchanged; original binding restored in finally",
+      "checks": [
+        "raw norm",
+        "clip",
+        "first moment",
+        "second moment",
+        "parameter"
+      ]
+    },
+    "synthetic_model_outputs_not_deployable": true
+  },
+  "expected_counters": {
+    "synthetic_fixed_parameter_sets": 2,
+    "finite_difference_cases": 3,
+    "finite_difference_coordinates": 192,
+    "finite_difference_loss_evaluations": 384,
+    "analytical_gradient_cases": 3,
+    "equal_branch_cancellation_cases": 1,
+    "physical_decode_predict_API_calls": 3,
+    "neural_initialization_attempts": 3,
+    "neural_initializations": 3,
+    "gradient_update_attempts": 600,
+    "parameter_gradient_updates": 600,
+    "network_training_forward_API_calls": 800,
+    "network_training_forward_query_vectors": 102400,
+    "network_backward_API_calls": 806,
+    "network_backward_query_vectors": 102436,
+    "shared_B_training_forward_API_calls": 200,
+    "shared_B_backward_API_calls": 202,
+    "shared_B_inference_forward_API_calls": 131,
+    "prediction_API_calls": 522,
+    "prediction_query_vectors": 3132,
+    "adam_first_two_step_checks": 6,
+    "scalar_adam_coordinate_updates": 24,
+    "real_data_reads": 0,
+    "real_model_fits": 0,
+    "physics": 0
+  },
+  "call_breakdown": {
+    "FD_central_forward_API": 512,
+    "FD_analytical_forward_API": 4,
+    "equal_branch_forward_API": 2,
+    "physical_decode_forward_API": 4,
+    "all_nontraining_forward_API": 522,
+    "all_training_forward_API": 800,
+    "total_forward_API": 1322,
+    "FD_analytical_backward_API": 4,
+    "equal_branch_backward_API": 2,
+    "training_backward_API": 800,
+    "total_backward_API": 806,
+    "total_forward_query_vectors": 105532,
+    "total_backward_query_vectors": 102436,
+    "model_module_imports_if_approved": 1,
+    "numpy_imports_if_approved": 1,
+    "matrix_solves": 0
+  },
+  "failure_semantics": "first failure or timeout stops; retain all paidwork and current state. Inline V1 Adam updates tensors/keys in-place: unfinished state may be mid-key, nontransactional, not resumable/deployable. No promotion to actual E2 fit or deployment.",
+  "static_work_so_far": {
+    "AST_compile_only": true,
+    "numerical_fixture_calls": 0,
+    "model_imports": 0,
+    "model_forwards": 0,
+    "synthetic_initializations": 0,
+    "synthetic_updates": 0,
+    "real_fit": 0,
+    "physics": 0
+  }
+}

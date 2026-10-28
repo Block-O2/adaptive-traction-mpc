@@ -1,0 +1,76 @@
+{
+  "FORCE_INTEGRATION_PASS": "PASS",
+  "G4_PASS": "FAIL",
+  "EXECUTION_PASS": "FAIL",
+  "PPO_UPDATE_PASS": "NOT_RUN",
+  "CHECKPOINT_RESUME_PASS": "NOT_RUN",
+  "TRAINING_PILOT_READY": "FAIL",
+  "training_pilot_ready_boolean": false,
+  "gates": {
+    "G1": {
+      "status": "PASS",
+      "evidence": "9 independently audited real MuJoCo episodes; original native safety limits preserved",
+      "scope": "observed nominal case, not robustness or hardware safety"
+    },
+    "G2": {
+      "status": "FAIL",
+      "evidence": "random TASK20.165000000054s fails unchanged19.030s ±0.050s frozen regression"
+    },
+    "G3": {
+      "status": "PASS",
+      "evidence": "two full maximal-action episodes, each19.030000000049s; deterministic development repeats"
+    },
+    "G4": {
+      "status": "FAIL",
+      "protocol_logic": "PASS",
+      "natural_specific_failure_coverage": "NOT_EVALUABLE",
+      "evidence": "G4_TERMINATION_REWARD_AUDIT.md; TEST_ONLY does not close all required real failure paths"
+    },
+    "G5": {
+      "status": "PASS",
+      "evidence": "EXECUTION_CONTRACT_TESTS.json actor AST allowlist + causal certificate flags; actor41D, no future Human truth"
+    },
+    "G6": {
+      "status": "NOT_RUN",
+      "mechanism_static_review": "implemented, not sufficient for cross-process reliability qualification",
+      "evidence": "CHECKPOINT_RESUME_AUDIT.json"
+    },
+    "G7": {
+      "status": "PASS",
+      "evidence": "GUARD_UNIT_RESULTS.json + audit/RESOURCE_TIMEOUT_TEST_ONLY.json + all physical guards closed; minRAM28.709GiB"
+    }
+  },
+  "force_independent_episodes_passed": 9,
+  "observed_execution_core_episodes_passed": 9,
+  "parity": {
+    "slow": true,
+    "maximal": true,
+    "random": true
+  },
+  "full_frozen_execution_regression_pass": false,
+  "runtime": {
+    "platform": "linux",
+    "python": "3.12.3",
+    "packages": {
+      "mujoco": "3.10.0",
+      "numpy": "2.2.6",
+      "scipy": "1.15.3",
+      "gymnasium": "1.1.1",
+      "stable-baselines3": "2.6.0",
+      "torch": "2.7.1+cpu"
+    }
+  },
+  "contract_sha256": "062e3d9a52d43e916dd692c6019c1beea2383b7681b3d7e95a00d5f567687b04",
+  "physics_execution_sha256": "853573d03bd3e3355c5e43d55488c55293bb3551de3e0b1f18d1bad612743b51",
+  "original_contract_relaxed": false,
+  "positive_PPO_started": false,
+  "generated_asia_shanghai": "2026-10-20T15:12:36.724515+08:00",
+  "terminal_status": "STOPPED_QUALIFICATION_BLOCKED",
+  "no_more_physics_or_training": true,
+  "limitations": [
+    "natural HOLD failure, dedicated phase timeout and actual absolute-safety failure reachability not established",
+    "all episodes are development validation, not heldout robustness evidence",
+    "host realtime NOT_EVALUABLE",
+    "no positive PPO/update/checkpoint qualification"
+  ]
+}

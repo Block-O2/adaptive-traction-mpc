@@ -1,0 +1,82 @@
+{
+  "schema": "v8.beta_feasibility_context_loo_contract.v1",
+  "status": "SOURCE_ONLY_AWAITING_MAIN_REVIEW",
+  "is_call_authorization": false,
+  "stage": "GateL_CONTEXT_LOO_FIXED_BEHAVIOR_REPLAY",
+  "source_sha256": "b8cfa85d48e46396435a79c0477944e11e08d437ccef8eecde051edc40f4db04",
+  "runner_source_sha256": "f7f1af16e9091eecdf72cee2c7069057eb1f38aa1c054fd7bf2a77543da944b6",
+  "input": {
+    "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/context_loo_v1/INPUT_TEMPLATE_REVIEW_ONLY_V1.json",
+    "sha256": "cdaec39ed84942b8dfd56a62b994fa8caff9b07cc82351dc740d545e710d656c"
+  },
+  "same_paid_global_baseline_reference": {
+    "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/diagnostics/GATEC_ONCE_V1/RESULT.json",
+    "sha256": "28bedbdffab0fee9f46723625fda0459bd3b0ce03194af780906392c71a6d044"
+  },
+  "question": "Finite four-row global-batchmean versus conditional peer baseline credit direction/scale; no prespecified direction reversal or physical success",
+  "unchanged": [
+    "exact4unique and2exposedcontexts",
+    "same original45 dense reward and normalization",
+    "same G0 alpha2/beta2 representation and weights",
+    "same legal25, fullaxis, old scalar densities/actual lambda and physics/scorer/qualification",
+    "all original16 paid physical replicas preserved, no added coverage"
+  ],
+  "baseline": "Within each identical raw25 context, exactly two distinct original frozen-policy draws; b_i=r_other, A_i=r_i-r_other. No learned baseline or target scale tuning.",
+  "conditional_independence_scope": "Other original draw/reward action-independent conditional on fixed context and behavior under registered independent-action sampling assumption; exact sameQA25/density and sequential original RNG-chain proof checked. Does not prove empirical independence from4 values.",
+  "analytic_centered_control": "For n=2, empirical context-centered A_i = .5*LOO A_i; same-initial-score raw gradient likewise half. Only analytic arithmetic, no third model or centered fit; later nonlinear epochs/gradient-clip/ratios/endpoint not extrapolated by half.",
+  "global_mean_scope": "Mean of same4 includes own reward. Under independent draws, its expected score-gradient is3/4 of uncentered terminal gradient; n=2 within-context centered gives1/2; LOO keeps full expectation. Crosscontext offsets alone do not establish expectation direction error; this tests finite-batch differences.",
+  "optimization": {
+    "models": 2,
+    "RF_epochs": 1,
+    "PPO_epochs": 3,
+    "learning_rate": 0.15,
+    "max_gradient_norm": 1,
+    "PPO_clip": 0.2,
+    "optimizer": "manual SGD, no momentum/Adam",
+    "best_checkpoint_selection": false,
+    "new_reward_scale_or_norm_fit": 0
+  },
+  "local_budget": {
+    "single_CPU": true,
+    "wall_s_max": 60,
+    "original_global_stop_unix": 1793114740.0,
+    "original_Beta_local_stop_unchanged": true,
+    "fresh_offline_authorization_does_not_extend_old_training_clock": true,
+    "no_automatic_retry": true
+  },
+  "planned_actual_counts": {
+    "logical_policy_copies": 2,
+    "old_density_forward": 4,
+    "score_for_weights": 16,
+    "surrogate": 16,
+    "parameter_steps": 4,
+    "endpoint_mean_forward": 4,
+    "total_training_forward": 20,
+    "total_forward": 24,
+    "explicit_original_sample_maps": 4,
+    "internal_mean_maps": 4,
+    "peer_baseline_formed": 4,
+    "analytic_half_centered_advantage": 4,
+    "initial_gradient_decomposition": 1,
+    "new_global_baseline_fit_or_forward": 0,
+    "new_linear_rule_fit_or_prediction": 0,
+    "initialize_restore_RNG_newsampling_physics": 0
+  },
+  "nested_expected_counts": {
+    "logpdf": 36,
+    "raw_shape_score": 16,
+    "digamma": 48,
+    "shapes_from_raw": 40
+  },
+  "decomposition": "At same initial scores: global rawgradient = .5*newLOO rawgradient + empirical between-context offset score component. Read paid global gradient, compute new LOO rawgradient/half/component/cosine; no extra old-global or centered model calls.",
+  "strong_controls": "Reuse exact already-paid all4 and2LOCO OLS rules including lambda1 choice, no refit or retuned grid; B remains outside axis",
+  "falsifiable": [
+    "LOO rawgradient may align/oppose/cancel relative global, all preserved",
+    "mean H/L may move same or different direction; no promised reversal",
+    "nonzero gradient/mean shift not physical qualification or JF/JM gain",
+    "newaction-independent baseline can have higher variance with only2draws; no universal lower-variance claim"
+  ],
+  "output": "New independent context-LOO private schema and source/input/counts/traces; cannot replace genuine CURRENT/checkpoints or original12mean inventory",
+  "actual_new_LOO_source_import_forward_fit_or_baseline_numeric_calls": 0,
+  "active02_or_realrun_or_newvalidation_reads": false
+}

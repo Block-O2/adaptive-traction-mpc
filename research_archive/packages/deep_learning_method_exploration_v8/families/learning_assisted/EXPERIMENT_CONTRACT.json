@@ -1,0 +1,28 @@
+{
+  "id": "E_CAUSAL_DYNAMICS_MINIMAL_V1",
+  "created_unix": 1793072271.031427,
+  "status": "REGISTERED_BY_MAIN",
+  "hypothesis": "One-step causal observation models may fit trajectories while failing action responses and autonomous 0.5/1s rollout; directly test that distinction before a world-model planner.",
+  "historical_failure_reference": "v7 GP/quadratic same action, forward JM sign wrong; stump mixed qualification/benefit; do not rename their scalar cost regressors as new world model",
+  "inputs": "Only each past boundary estimated_q_dq4/reference_q_dq4/measured force3+moment3, public task time and phase, known selected complete recipe one-hot; no truth or future boundary fed into rollout",
+  "labels": "next 5ms causal boundary14; future measurements are supervised target only, whole-context split",
+  "data": "v7 V2 historical dataset rows; each original CAUSAL_HISTORY SHA; duplicates grouped by same25D context; complete original failures preserved for dynamics prediction, partial excluded from full cost ranks",
+  "variants": [
+    "persistence",
+    "kinematic q+=dq*dt baseline",
+    "linear absolute next-state ridge",
+    "kinematic-plus linear residual ridge",
+    "same residual with three-boundary history"
+  ],
+  "test": "6 whole-context development folds; one-step errors, autonomous 0.5/1s drift with no future exogenous ref/wrench, force integral errors, action-response contrast errors. Start at first available measured post-action boundary: NOT an OUT0 pre-action counterfactual selector.",
+  "gates": "No control/gradient policy training unless independent action-response and rollout evidence beats simple baseline; one-step RMSE never grants decision/task validity. No future qualification mask.",
+  "budget": {
+    "cpu_threads": 1,
+    "timeout_s": 300,
+    "ram_gib_max": 2,
+    "new_physics": 0,
+    "max_samples_per_trajectory_for_fitting": 800,
+    "fit_cap_semantics": "local diagnostic batch only, not global research cap"
+  },
+  "continuation": "If fails, diagnose representation/exogenous action/reference mismatch, compare short window and history before expanding complexity. Mark family NOT_FULLY_EXPLORED."
+}

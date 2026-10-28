@@ -1,0 +1,35 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase1_control_sufficient_development_v1",
+  "evidence_category": "development",
+  "arms": ["oracle", "adaptive", "fixed_nominal", "no_dynamics_adaptation"],
+  "cases": [
+    {"seed": 1101, "high_rom": false},
+    {"seed": 1102, "high_rom": false},
+    {"seed": 1103, "high_rom": false},
+    {"seed": 1104, "high_rom": false},
+    {"seed": 1105, "high_rom": true},
+    {"seed": 1106, "high_rom": true}
+  ],
+  "hidden_generation": {
+    "continuous": true,
+    "patient_height_scale": [0.88, 1.12],
+    "patient_mass_scale": [0.78, 1.28],
+    "passive_stiffness_scale": [0.65, 1.45],
+    "passive_damping_scale": [0.70, 1.35],
+    "hip_placement_x_m": [-0.12, 0.12],
+    "hip_placement_z_m": [0.045, 0.16],
+    "cuff_fraction_of_shank": [0.52, 0.88],
+    "initial_q1_deg": [6.0, 18.0],
+    "initial_q2_deg": [10.0, 28.0],
+    "task_profiles": ["coordinated", "hip_lead", "knee_lead", "two_rate"],
+    "standard_goal_deg": [[35.0, 62.0], [48.0, 78.0]],
+    "high_rom_goal_deg": [[66.0, 75.0], [82.0, 95.0]],
+    "note": "Ranges are sampled continuously from the seed; beta and geometry are generated independently enough to expose geometry-vs-dynamics confounding."
+  },
+  "held_out_policy": {
+    "is_held_out": false,
+    "seeds_may_inform_repairs": true,
+    "formal_seed_namespace": "not accessed by this config"
+  }
+}

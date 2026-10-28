@@ -1,0 +1,650 @@
+{
+  "guarded_attempts": 10,
+  "START_count": 10,
+  "END_count": 10,
+  "physical_attempts": 8,
+  "actual_episodes": 9,
+  "natural_episodes": 6,
+  "TEST_ONLY_physics_episodes": 3,
+  "complete_episodes": 3,
+  "partial_episodes": 6,
+  "native_steps": 799020,
+  "task_native_steps": 437220,
+  "RL_decisions": 106,
+  "gradient_updates": 0,
+  "optimizer_steps": 0,
+  "training_positive_attempts": 0,
+  "negative_training_gate_attempts": 1,
+  "all_closed": true,
+  "attempts": [
+    {
+      "directory": "audit/resource_timeout_TEST_ONLY",
+      "START": {
+        "unix": 1792479666.7528603,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "-c",
+          "import time; time.sleep(3)"
+        ],
+        "pid": 22940,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "58a4e909093e2657451f60c8a7f03a5fed95786b3c69abcf86571dd93c06dd7f",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 0.2
+      },
+      "END": {
+        "unix": 1792479667.312407,
+        "returncode": null,
+        "error": "ResourceStop:ResourceStop:WALL_DEADLINE",
+        "child_pid": 22941,
+        "child_joined": true,
+        "resources": {
+          "samples": 3,
+          "minimum_available_GiB": 29.059955596923828,
+          "wall_s": 0.5623896570004945,
+          "failure": "ResourceStop:WALL_DEADLINE",
+          "monitor_joined": true
+        }
+      },
+      "start_asia_shanghai": "2026-10-20T15:01:06.752860+08:00",
+      "end_asia_shanghai": "2026-10-20T15:01:07.312407+08:00",
+      "episodes": [],
+      "guard_invocation_returncode": 1
+    },
+    {
+      "directory": "runs/ppo_negative_gate_01",
+      "START": {
+        "unix": 1792479764.5752394,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "train.py",
+          "--enable",
+          "--profile",
+          "smoke",
+          "--seed",
+          "20261021",
+          "--out",
+          "runs/ppo_negative_gate_01/forbidden_training"
+        ],
+        "pid": 23257,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "58a4e909093e2657451f60c8a7f03a5fed95786b3c69abcf86571dd93c06dd7f",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 30.0
+      },
+      "END": {
+        "unix": 1792479765.1354837,
+        "returncode": 1,
+        "error": null,
+        "child_pid": 23260,
+        "child_joined": true,
+        "resources": {
+          "samples": 2,
+          "minimum_available_GiB": 29.324317932128906,
+          "wall_s": 0.5632653669999854,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "start_asia_shanghai": "2026-10-20T15:02:44.575239+08:00",
+      "end_asia_shanghai": "2026-10-20T15:02:45.135484+08:00",
+      "episodes": [],
+      "guard_invocation_returncode": 1
+    },
+    {
+      "directory": "runs/repair_hold_01",
+      "START": {
+        "unix": 1792479429.4478788,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "run_rollout.py",
+          "--enable",
+          "--policy",
+          "hold",
+          "--out",
+          "runs/repair_hold_01/physics"
+        ],
+        "pid": 22072,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "202a237490266a6d98bd637a39e52f35e749babd396cdd106dd20cd41a8b0d02",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 240.0
+      },
+      "END": {
+        "unix": 1792479457.0442624,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 22073,
+        "child_joined": true,
+        "resources": {
+          "samples": 56,
+          "minimum_available_GiB": 29.00616455078125,
+          "wall_s": 27.59925088199998,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "start_asia_shanghai": "2026-10-20T14:57:09.447879+08:00",
+      "end_asia_shanghai": "2026-10-20T14:57:37.044262+08:00",
+      "episodes": [
+        {
+          "directory": "runs/repair_hold_01/physics/env/episode_0001",
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "complete": false,
+          "partial": true,
+          "native_steps": 40220,
+          "task_native_steps": 20,
+          "RL_decisions": 1,
+          "gradient_updates": 0,
+          "task_s": 0.004999999999988347,
+          "host_wall_s": 25.66714404999948,
+          "force_N_s": 0.39447121483595315,
+          "moment_Nm_s": 0.06324093538608115,
+          "independent_force_pass": true,
+          "independent_execution_core_pass": true,
+          "executor_closed": true,
+          "version_sha256": "853573d03bd3e3355c5e43d55488c55293bb3551de3e0b1f18d1bad612743b51"
+        }
+      ],
+      "guard_invocation_returncode": 0
+    },
+    {
+      "directory": "runs/repair_outbound_TEST_ONLY_01",
+      "START": {
+        "unix": 1792479513.247828,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "cloud_g4_cases.py",
+          "--enable",
+          "--case",
+          "outbound_timeout_injection",
+          "--out",
+          "runs/repair_outbound_TEST_ONLY_01/physics"
+        ],
+        "pid": 22389,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "202a237490266a6d98bd637a39e52f35e749babd396cdd106dd20cd41a8b0d02",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 240.0
+      },
+      "END": {
+        "unix": 1792479572.8795526,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 22390,
+        "child_joined": true,
+        "resources": {
+          "samples": 120,
+          "minimum_available_GiB": 28.895450592041016,
+          "wall_s": 59.63439142800053,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "start_asia_shanghai": "2026-10-20T14:58:33.247828+08:00",
+      "end_asia_shanghai": "2026-10-20T14:59:32.879553+08:00",
+      "episodes": [
+        {
+          "directory": "runs/repair_outbound_TEST_ONLY_01/physics/env/episode_0001",
+          "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+          "status": "ABORTED",
+          "reason": "TIMEOUT_OUTBOUND",
+          "complete": false,
+          "partial": true,
+          "native_steps": 80200,
+          "task_native_steps": 40000,
+          "RL_decisions": 6,
+          "gradient_updates": 0,
+          "task_s": 10.00000000000547,
+          "host_wall_s": 57.55320155499976,
+          "force_N_s": 778.8869236685138,
+          "moment_Nm_s": 47.68727480358852,
+          "independent_force_pass": true,
+          "independent_execution_core_pass": true,
+          "executor_closed": true,
+          "version_sha256": "853573d03bd3e3355c5e43d55488c55293bb3551de3e0b1f18d1bad612743b51"
+        }
+      ],
+      "guard_invocation_returncode": 0
+    },
+    {
+      "directory": "runs/repair_random_01",
+      "START": {
+        "unix": 1792479345.246616,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "run_rollout.py",
+          "--enable",
+          "--policy",
+          "random",
+          "--out",
+          "runs/repair_random_01/physics"
+        ],
+        "pid": 21788,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "5ccd20b5456fee16d39b1ff4090f12e3e17fc38a1baef8d53667c6d2e01c7914",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 240.0
+      },
+      "END": {
+        "unix": 1792479429.40365,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 21795,
+        "child_joined": true,
+        "resources": {
+          "samples": 169,
+          "minimum_available_GiB": 28.768836975097656,
+          "wall_s": 84.15966215900062,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "start_asia_shanghai": "2026-10-20T14:55:45.246616+08:00",
+      "end_asia_shanghai": "2026-10-20T14:57:09.403650+08:00",
+      "episodes": [
+        {
+          "directory": "runs/repair_random_01/physics/env/episode_0001",
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "reason": "",
+          "complete": true,
+          "partial": false,
+          "native_steps": 120860,
+          "task_native_steps": 80660,
+          "RL_decisions": 30,
+          "gradient_updates": 0,
+          "task_s": 20.165000000054008,
+          "host_wall_s": 82.07446873699973,
+          "force_N_s": 1616.69563711471,
+          "moment_Nm_s": 111.26678530289921,
+          "independent_force_pass": true,
+          "independent_execution_core_pass": true,
+          "executor_closed": true,
+          "version_sha256": "853573d03bd3e3355c5e43d55488c55293bb3551de3e0b1f18d1bad612743b51"
+        }
+      ],
+      "guard_invocation_returncode": 0
+    },
+    {
+      "directory": "runs/repair_reset_maximal_01",
+      "START": {
+        "unix": 1792479140.687156,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "cloud_g4_cases.py",
+          "--enable",
+          "--case",
+          "reset_maximal",
+          "--out",
+          "runs/repair_reset_maximal_01/physics"
+        ],
+        "pid": 21057,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "40fb63e7566a4a4c84d5c63a9fc26778fbbee0674fbab49eadf7d1df9e16847c",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 300.0
+      },
+      "END": {
+        "unix": 1792479297.439726,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 21073,
+        "child_joined": true,
+        "resources": {
+          "samples": 314,
+          "minimum_available_GiB": 28.857135772705078,
+          "wall_s": 156.75566109400006,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "start_asia_shanghai": "2026-10-20T14:52:20.687156+08:00",
+      "end_asia_shanghai": "2026-10-20T14:54:57.439726+08:00",
+      "episodes": [
+        {
+          "directory": "runs/repair_reset_maximal_01/physics/env/episode_0001",
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "reason": "",
+          "complete": true,
+          "partial": false,
+          "native_steps": 116320,
+          "task_native_steps": 76120,
+          "RL_decisions": 14,
+          "gradient_updates": 0,
+          "task_s": 19.030000000048588,
+          "host_wall_s": 76.94625518000066,
+          "force_N_s": 1449.840060953029,
+          "moment_Nm_s": 98.40661738581368,
+          "independent_force_pass": true,
+          "independent_execution_core_pass": true,
+          "executor_closed": true,
+          "version_sha256": "853573d03bd3e3355c5e43d55488c55293bb3551de3e0b1f18d1bad612743b51"
+        },
+        {
+          "directory": "runs/repair_reset_maximal_01/physics/env/episode_0002",
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "COMPLETE",
+          "reason": "",
+          "complete": true,
+          "partial": false,
+          "native_steps": 116320,
+          "task_native_steps": 76120,
+          "RL_decisions": 14,
+          "gradient_updates": 0,
+          "task_s": 19.030000000048588,
+          "host_wall_s": 77.11199818300065,
+          "force_N_s": 1449.840060953029,
+          "moment_Nm_s": 98.40661738581368,
+          "independent_force_pass": true,
+          "independent_execution_core_pass": true,
+          "executor_closed": true,
+          "version_sha256": "853573d03bd3e3355c5e43d55488c55293bb3551de3e0b1f18d1bad612743b51"
+        }
+      ],
+      "guard_invocation_returncode": 0
+    },
+    {
+      "directory": "runs/repair_return_TEST_ONLY_01",
+      "START": {
+        "unix": 1792479572.9226594,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "cloud_g4_cases.py",
+          "--enable",
+          "--case",
+          "return_timeout_injection",
+          "--out",
+          "runs/repair_return_TEST_ONLY_01/physics"
+        ],
+        "pid": 22583,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "202a237490266a6d98bd637a39e52f35e749babd396cdd106dd20cd41a8b0d02",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 240.0
+      },
+      "END": {
+        "unix": 1792479658.0932148,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 22584,
+        "child_joined": true,
+        "resources": {
+          "samples": 171,
+          "minimum_available_GiB": 28.84298324584961,
+          "wall_s": 85.17334463800034,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "start_asia_shanghai": "2026-10-20T14:59:32.922659+08:00",
+      "end_asia_shanghai": "2026-10-20T15:00:58.093215+08:00",
+      "episodes": [
+        {
+          "directory": "runs/repair_return_TEST_ONLY_01/physics/env/episode_0001",
+          "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+          "status": "ABORTED",
+          "reason": "TIMEOUT_RETURN",
+          "complete": false,
+          "partial": true,
+          "native_steps": 120300,
+          "task_native_steps": 80100,
+          "RL_decisions": 14,
+          "gradient_updates": 0,
+          "task_s": 20.02500000005334,
+          "host_wall_s": 82.75302332900083,
+          "force_N_s": 1528.3392052551956,
+          "moment_Nm_s": 110.9914378884731,
+          "independent_force_pass": true,
+          "independent_execution_core_pass": true,
+          "executor_closed": true,
+          "version_sha256": "853573d03bd3e3355c5e43d55488c55293bb3551de3e0b1f18d1bad612743b51"
+        }
+      ],
+      "guard_invocation_returncode": 0
+    },
+    {
+      "directory": "runs/repair_return_hold_01",
+      "START": {
+        "unix": 1792479457.0869882,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "cloud_g4_cases.py",
+          "--enable",
+          "--case",
+          "return_hold",
+          "--out",
+          "runs/repair_return_hold_01/physics"
+        ],
+        "pid": 22174,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "202a237490266a6d98bd637a39e52f35e749babd396cdd106dd20cd41a8b0d02",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 240.0
+      },
+      "END": {
+        "unix": 1792479513.2068229,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 22175,
+        "child_joined": true,
+        "resources": {
+          "samples": 113,
+          "minimum_available_GiB": 28.70937728881836,
+          "wall_s": 56.12265743499938,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "start_asia_shanghai": "2026-10-20T14:57:37.086988+08:00",
+      "end_asia_shanghai": "2026-10-20T14:58:33.206823+08:00",
+      "episodes": [
+        {
+          "directory": "runs/repair_return_hold_01/physics/env/episode_0001",
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: candidate would regress the emitted reference away from the phase goal",
+          "complete": false,
+          "partial": true,
+          "native_steps": 81080,
+          "task_native_steps": 40880,
+          "RL_decisions": 11,
+          "gradient_updates": 0,
+          "task_s": 10.22000000000652,
+          "host_wall_s": 54.14984907300004,
+          "force_N_s": 790.5447548555438,
+          "moment_Nm_s": 47.93886904954137,
+          "independent_force_pass": true,
+          "independent_execution_core_pass": true,
+          "executor_closed": true,
+          "version_sha256": "853573d03bd3e3355c5e43d55488c55293bb3551de3e0b1f18d1bad612743b51"
+        }
+      ],
+      "guard_invocation_returncode": 0
+    },
+    {
+      "directory": "runs/repair_safety_TEST_ONLY_01",
+      "START": {
+        "unix": 1792479658.1357007,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "safety_TEST_ONLY.py",
+          "--enable",
+          "--out",
+          "runs/repair_safety_TEST_ONLY_01/physics"
+        ],
+        "pid": 22903,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "58a4e909093e2657451f60c8a7f03a5fed95786b3c69abcf86571dd93c06dd7f",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 240.0
+      },
+      "END": {
+        "unix": 1792479688.7339342,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 22904,
+        "child_joined": true,
+        "resources": {
+          "samples": 62,
+          "minimum_available_GiB": 28.98632049560547,
+          "wall_s": 30.600952304999737,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "start_asia_shanghai": "2026-10-20T15:00:58.135701+08:00",
+      "end_asia_shanghai": "2026-10-20T15:01:28.733934+08:00",
+      "episodes": [
+        {
+          "directory": "runs/repair_safety_TEST_ONLY_01/physics/env/episode_0001",
+          "category": "TEST_ONLY_WITH_REAL_MUJOCO",
+          "status": "ABORTED",
+          "reason": "TASK_ACCELERATION_LIMIT",
+          "complete": false,
+          "partial": true,
+          "native_steps": 44240,
+          "task_native_steps": 4040,
+          "RL_decisions": 1,
+          "gradient_updates": 0,
+          "task_s": 1.0099999999976461,
+          "host_wall_s": 28.806154775000323,
+          "force_N_s": 91.40309884677058,
+          "moment_Nm_s": 14.679525069581437,
+          "independent_force_pass": true,
+          "independent_execution_core_pass": true,
+          "executor_closed": true,
+          "version_sha256": "853573d03bd3e3355c5e43d55488c55293bb3551de3e0b1f18d1bad612743b51"
+        }
+      ],
+      "guard_invocation_returncode": 0
+    },
+    {
+      "directory": "runs/repair_slow_01",
+      "START": {
+        "unix": 1792479069.5748942,
+        "command": [
+          "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+          "cloud_g4_cases.py",
+          "--enable",
+          "--case",
+          "slow",
+          "--out",
+          "runs/repair_slow_01/physics"
+        ],
+        "pid": 20788,
+        "category": "GUARDED_CPU_ATTEMPT",
+        "contract_sha256": "d7d7e0e71e37679f5246ccb5b1741f8c0a7c00a1f94f106333abc1c061608b3c",
+        "environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1"
+        },
+        "physics_envs": 1,
+        "wall_cap_s": 240.0
+      },
+      "END": {
+        "unix": 1792479124.692414,
+        "returncode": 0,
+        "error": null,
+        "child_pid": 20810,
+        "child_joined": true,
+        "resources": {
+          "samples": 111,
+          "minimum_available_GiB": 28.73863983154297,
+          "wall_s": 55.12193883599957,
+          "failure": null,
+          "monitor_joined": true
+        }
+      },
+      "start_asia_shanghai": "2026-10-20T14:51:09.574894+08:00",
+      "end_asia_shanghai": "2026-10-20T14:52:04.692414+08:00",
+      "episodes": [
+        {
+          "directory": "runs/repair_slow_01/physics/env/episode_0001",
+          "category": "NATURAL_LEGAL_INPUT",
+          "status": "ABORTED",
+          "reason": "NO_FEASIBLE_WAYPOINT:state-feedback Human-waypoint MPC has no feasible candidate: no quintic schedule satisfies the registered phase and motion limits",
+          "complete": false,
+          "partial": true,
+          "native_steps": 79480,
+          "task_native_steps": 39280,
+          "RL_decisions": 15,
+          "gradient_updates": 0,
+          "task_s": 9.82000000000461,
+          "host_wall_s": 53.21450130100038,
+          "force_N_s": 927.5259761342978,
+          "moment_Nm_s": 114.75606389076545,
+          "independent_force_pass": true,
+          "independent_execution_core_pass": true,
+          "executor_closed": true,
+          "version_sha256": "853573d03bd3e3355c5e43d55488c55293bb3551de3e0b1f18d1bad612743b51"
+        }
+      ],
+      "guard_invocation_returncode": 0
+    }
+  ],
+  "diagnostic_failures_file": "audit/HARNESS_FAILURES.json",
+  "diagnostic_nonphysics_command_timestamps": "not separately recorded; all guarded physics START/END present",
+  "physics_budget_limit": 10,
+  "no_new_physics": true,
+  "last_physics_END_unix": 1792479688.7339342
+}

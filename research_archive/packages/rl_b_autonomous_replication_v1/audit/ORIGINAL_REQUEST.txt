@@ -1,0 +1,500 @@
+
+# iHEAR Lab — Autonomous PPO Replication & Performance Readiness v1
+# 多随机种子学习复现、正式评价器闭合、性能优化探索与最终训练前决策
+
+你现在担任iHEAR Lab的自主机器人强化学习研究Agent。
+
+运行环境：
+德国Hetzner CCX33 CPU服务器，Ubuntu 24.04。
+研究目录位于/home/hank/ihear-lab/。
+
+用户将在一段时间内不在线。
+请自主完成普通科研决策、隔离代码修改、受控实验、
+结果分析和必要修复，不要因小问题反复等待用户确认。
+
+本轮目标：
+
+1. 验证此前单seed PPO任务学习能否稳定复现。
+2. 补齐与B/H150公平比较所需的原冻结完整评价器。
+3. 如果任务学习稳定，开始有限的第二阶段force/motion优化实验。
+4. 判断是否具备下一轮正式大规模RL训练条件。
+5. 在最终大规模训练开始之前强制STOP。
+
+允许探索和修改，但不允许为了得到成功结果
+降低任务、安全或正式评价标准。
+
+预计6–8小时，硬截止T0+8小时。
+提前完成可停止；不得为填满时间盲目训练。
+
+━━━━━━━━━━━━━━━━━━
+一、当前冻结研究事实
+━━━━━━━━━━━━━━━━━━
+
+系统：
+真实MuJoCo robot–cuff–passive Human。
+Human为hip/knee双关节。
+OUTBOUND→HOLD→RETURN完整康复任务。
+
+原生physics timestep=0.25ms。
+现有5ms控制、planner、certificate、
+current-state admission、governor、
+40ms bridge、100ms lifecycle、
+robot controller/allocator及causal receipt。
+
+当前RL-B：
+随机初始化PPO，
+学习有界连续髋膝协调意图，
+不使用B/H150 imitation或教师动作。
+底层仍使用合法机器人控制和执行架构。
+
+上轮First PPO Learning Pilot v1：
+
+真实训练：
+50 episodes
+519 RL decisions
+3,502,540 native physics steps
+272 Adam更新
+
+训练成功：
+11/50 episodes
+
+冻结策略nominal评价：
+训练前0/1成功；
+训练后2/2成功；
+两次均满足19.030s任务时长。
+
+最终完整J_F约1451.717 N·s，
+moment integral约100.680 Nm·s。
+
+相对固定合法策略：
+J_F高约0.129%，
+moment高约2.311%。
+
+因此：
+任务学习出现正信号；
+尚未建立降力或平顺性优势。
+
+历史资格：
+G4_STRICT_PASS仍为FAIL，
+缺自然timeout、HOLD失败、
+绝对安全触发证据。
+
+原B/H150完整matched scorer尚未部署。
+没有PPO正式完整科学资格或跨患者泛化。
+
+此前PPO训练checkpoint与原始物理证据必须保留。
+
+本轮不把单seed成功当作稳定成功，
+也不把训练reward提高当作motion/force优化成功。
+
+━━━━━━━━━━━━━━━━━━
+二、独立研究包与历史保护
+━━━━━━━━━━━━━━━━━━
+
+先定位并读取真实历史包：
+
+rl_b_first_ppo_pilot_v1/
+rl_b_g4_closure_ppo_readiness_v1/
+rl_b_cloud_g4_repair_v1/
+rl_b_cloud_v1/
+
+及原B/H150冻结评价源码和manifest。
+
+实际路径以文件与来源身份为准，
+不能因为文件名相似就认定版本一致。
+
+建立新独立目录：
+
+/home/hank/ihear-lab/rl_b_autonomous_replication_v1/
+
+如已存在，创建新的版本化目录。
+
+正式B/H150、原Human/robot/cuff物理、
+历史checkpoint和研究包均只读。
+
+不得：
+- Git commit/push/merge/reset/stash/clean；
+- 覆盖此前PPO权重；
+- 修改历史失败和结果；
+- 修改正式控制器；
+- 改变原物理、安全与任务定义；
+- 调整或购买Hetzner实例。
+
+本轮新增模型、训练源码、测试、
+raw与报告必须具有独立身份和hash。
+
+━━━━━━━━━━━━━━━━━━
+三、研究路线A：3-seed PPO任务学习复现
+━━━━━━━━━━━━━━━━━━
+
+优先验证上轮的学习结果是否可靠。
+
+使用相同的：
+- RL-B动作语义；
+- observation定义；
+- 任务合同；
+- 原reward；
+- PPO超参数基线；
+- 物理参数；
+- 初始状态生成规则。
+
+首先冻结复现协议，
+再选择3个独立训练seed。
+
+不得挑选训练成功的seed而隐藏失败seed。
+
+建议按阶段执行：
+
+A1：每个seed先训练约20 episodes，
+完成初步训练进度和资源审计。
+
+A2：如果运行稳定，
+继续到每seed约50 episodes。
+
+A3：如果某seed仍明显在学习，
+而预算允许，
+可扩展到每seed最多80 episodes。
+
+总训练episode硬上限240，
+包括失败episode，但不含独立冻结评价。
+实际训练预算还须受wall-clock和native步数限制。
+
+不要因为某个seed早期失败，
+就立即修改其reward或者单独优待该seed。
+
+如果发现系统性训练缺陷，
+允许一次有依据的隔离修复，
+但旧训练与新配置必须分开标记，
+不能混成同一个3-seed复现结果。
+
+每个seed至少记录：
+- 训练episode数；
+- RL decisions；
+- native physics steps；
+- PPO/Adam更新次数；
+- episode reward及分项；
+- task完成率；
+- phase进度与失败阶段；
+- accepted/rejected动作；
+- fallback和安全事件；
+- wall time及资源使用；
+- checkpoint identity。
+
+在预注册检查点冻结策略，
+执行不使用训练结果筛选的独立评价。
+
+报告：
+每个seed的训练完成率、
+冻结评价完成率、
+初始策略与训练后策略差异、
+JF、moment、tracking与motion代价。
+
+一个seed成功不能代表3-seed复现成功。
+
+如果训练表现持续停滞，
+允许记录原因、停止无效训练，
+并将剩余时间转向正式评价器或诊断。
+
+━━━━━━━━━━━━━━━━━━
+四、研究路线B：B/H150正式匹配评价器
+━━━━━━━━━━━━━━━━━━
+
+本轮必须优先补齐这一历史缺口。
+
+从冻结B/H150来源及原scorer复制或
+建立严格等价的隔离评价实现。
+
+不能重新发明一套更宽松的motion门。
+
+至少审查：
+- 原task/phase/duration合同；
+- 19.030s匹配任务及容差；
+- OUTBOUND/HOLD/RETURN；
+- absolute safety；
+- ROM、torque、clearance与contact；
+- B-relative motion/fairness；
+- velocity、acceleration、jerk；
+- excursion与terminal overshoot；
+- cumulative dose；
+- force/moment积分；
+- tracking；
+- native ownership与causal receipt；
+- source-age与执行模式。
+
+区分三种结论：
+
+RUNTIME_COMPLETE：
+满足原runtime真实任务完成条件。
+
+MATCHED_TASK_PASS：
+满足原冻结matched任务合同。
+
+FULL_QUALIFIED：
+完整task、安全、motion和causal全部通过。
+
+不得因为PPO能在19.030s完成任务，
+就自动授予MATCHED或FULL资格。
+
+先复现至少一个历史原B/H150条件，
+核对原raw、指标与资格结果。
+
+若无法完全复现，
+列明缺少的原源码、state恢复或scorer语义，
+保留正式资格NOT_READY，
+不进行近似替代晋级。
+
+训练与评价分开：
+PPO可以在合格开发训练环境中继续学习，
+但不能在scorer未闭合时声称优于B/H150。
+
+严禁把科学模式的执行证据
+冒称host实时/strict55资格。
+
+━━━━━━━━━━━━━━━━━━
+五、研究路线C：任务学习后的性能优化
+━━━━━━━━━━━━━━━━━━
+
+只有满足以下条件才进入C：
+
+1. PPO确有可重复的任务学习信号；
+2. 至少一个冻结checkpoint稳定完成原runtime任务；
+3. 当前训练环境没有已知硬安全或reward漏洞；
+4. 匹配评价器已足以客观评估关键性能，
+   或明确保持本路线为非晋级开发实验；
+5. 时间和物理预算仍然充足。
+
+若上述条件不成立，
+C标记NOT_RUN，不强行启动。
+
+C的目标是：
+
+在保持任务完成能力的同时，
+尝试减少累计cuff force，
+改善实际Human motion variation。
+
+不是重新从随机初始化，
+而是从本轮冻结的任务学习checkpoint
+进行第二阶段性能优化。
+
+必须明确标记：
+TASK_PRETRAINED_PPO_FINETUNING，
+不能重新命名为scratch PPO。
+
+先进行简洁的reward审计。
+
+优先保留：
+- task/progress/completion；
+- cuff force；
+- motion variation。
+
+必要时加入明确的moment或terminal代价，
+但不能一次堆叠十几项无法解释的reward。
+
+硬安全独立约束，
+不能被奖励权重抵消。
+
+先冻结Stage2 reward及配置，
+再运行少量训练。
+
+建议Stage2最多30–50 episodes，
+最多一个有明确证据支持的reward修订分支。
+
+若任务成功率下降、
+策略通过拖延或缩短任务降低JF、
+moment/jerk显著恶化，
+应停止该方向并记录失败。
+
+不得根据最终测试状态调reward后，
+继续将其称为未见测试。
+
+Stage2结束后，
+必须与其Stage1父checkpoint配对比较：
+
+- task完成；
+- 完整J_F；
+- 完整J_M；
+- velocity/acceleration/jerk；
+- tracking；
+- terminal overshoot；
+- 原motion与safety资格；
+- causal receipt；
+- 训练物理样本成本。
+
+如果Stage2成功降低JF，
+但task或安全失败，
+不得称合格改进。
+
+如果force下降但moment明显增加，
+必须如实报告权衡。
+
+━━━━━━━━━━━━━━━━━━
+六、阶段间自主决策
+━━━━━━━━━━━━━━━━━━
+
+允许你自主决定：
+- A/B的分析和实现先后顺序；
+- 哪些物理测试可以复用旧raw；
+- 哪个seed值得在预算内继续；
+- 是否有依据开展一次隔离训练修复；
+- 是否满足Stage2的启动条件；
+- 是否提前停止低信息量训练；
+- 是否需要额外匹配物理对照；
+- 如何分配CPU资源和报告时间。
+
+不需要向用户申请每次普通研究决策。
+
+但必须遵守：
+
+1. 未见验证数据不能用来反复选择配置。
+2. 原训练seed全部保留，不得选择性报告。
+3. 训练奖励不等于正式科学资格。
+4. 每个独立训练分支要有明确身份。
+5. 所有候选须经真实物理执行。
+6. 不允许使用Human future truth作为actor输入。
+7. 不允许修改正式B/H150控制参数。
+8. 不允许修改硬安全、任务或原scorer门槛。
+9. 可以研究任务失败，但不能为训练成功绕过保护。
+10. 单项工作受阻，应推进其他有价值的独立任务。
+
+━━━━━━━━━━━━━━━━━━
+七、资源、时间与物理预算
+━━━━━━━━━━━━━━━━━━
+
+服务器：
+Hetzner CCX33
+8 dedicated vCPU
+32GB RAM
+CPU-only PPO。
+
+研究时间：
+建议6–8小时，
+硬上限T0+8小时。
+
+优先单环境，
+必要时经短测确认后使用最多2个环境。
+
+保证至少6GiB可用RAM。
+
+训练episode总上限：
+Stage1最多240；
+Stage2最多50。
+
+正式评价episode另设最多24次完整物理尝试，
+包括必要B/H150配对、训练前后和失败。
+所有物理尝试均计入完整START/END账本。
+
+这些是上限而不是必须耗尽的目标。
+若时间不足，应减少Stage2或训练长度，
+不能挤占复核、失败保留与交付。
+
+最后60分钟不启动新训练或大型physics，
+完成独立复核与封包。
+
+不得无限等待进程。
+必须设置训练进程超时、
+checkpoint周期、异常退出和资源监控。
+
+如果训练出现OOM、不可恢复执行错误、
+reward漏洞或安全边界异常，
+及时停止相关分支，不自动扩大训练。
+
+━━━━━━━━━━━━━━━━━━
+八、正式大规模训练前停止边界
+━━━━━━━━━━━━━━━━━━
+
+本轮明确禁止：
+
+- 100万/500万/1000万RL steps正式campaign；
+- 上千episode长期无监督训练；
+- 自动购买、更换或扩容服务器；
+- 自动迁移Isaac Lab或重写整套物理引擎；
+- 自动部署正式B或H150；
+- 自动开始下一研究包；
+- 自动进行未经授权的Git写操作。
+
+即使A/B/C全部顺利完成，
+也只能交付最终大规模训练的可执行方案，
+不能直接启动。
+
+最终应给用户一个明确决策：
+
+READY_FOR_FINAL_CAMPAIGN
+NOT_READY_FOR_FINAL_CAMPAIGN
+
+以及推荐：
+- RL架构；
+- reward版本；
+- PPO超参数；
+- 所需训练seed；
+- 训练episode/decision/native预算；
+- 预估wall time；
+- 是否需扩大CPU服务器；
+- 正式评价配置；
+- 主要风险及未解决问题。
+
+上述READY只是研究决策建议，
+不是自动授权正式训练。
+
+━━━━━━━━━━━━━━━━━━
+九、最终交付
+━━━━━━━━━━━━━━━━━━
+
+建立独立研究包，至少包含：
+
+REPORT.md
+RESEARCH_PLAN_AND_DECISIONS.md
+MULTISEED_PPO_RESULTS.json
+PPO_LEARNING_CURVES.md
+MATCHED_EVALUATOR_AUDIT.md
+BASELINE_REPRODUCTION.json
+STAGE2_PERFORMANCE_STUDY.md
+STAGE2_RESULTS.json
+VALIDATION_RESULTS.json
+RESOURCE_USAGE.json
+ATTEMPT_ACCOUNTING.json
+PACKAGE_VERIFICATION.json
+FINAL_CAMPAIGN_READINESS.md
+NEXT_RESEARCH_DECISION.md
+
+保留：
+- 所有seed的checkpoint；
+- 原reward与Stage2 reward；
+- 完整训练配置；
+- native和RL步数；
+- 必要raw/receipt；
+- 失败/partial；
+- 训练和独立评价结果；
+- 代码和模型hash。
+
+训练过程中只保存摘要与定期checkpoint；
+关键评价保存完整原始物理证据。
+
+最终中文报告必须明确回答：
+
+1. 单seed PPO学习能否在3个seed复现？
+2. 各seed实际训练多少episode与梯度更新？
+3. 冻结策略任务完成率如何？
+4. B/H150 matched scorer是否部署并复现？
+5. PPO是否达到完整task/safety/motion资格？
+6. 相对B/H150的JF、moment及motion如何？
+7. Stage2是否启动，效果怎么样？
+8. Stage2是否牺牲了任务完成能力？
+9. 是否观察到不同seed间显著差异？
+10. 当前CPU训练样本成本和wall time是多少？
+11. 哪些问题阻碍正式大规模训练？
+12. 如果明天开始正式训练，应该如何配置？
+13. 下一阶段应优先优化reward、
+    动作空间、算法还是训练规模？
+
+完成后核验：
+- 原ZIP和历史checkpoint未修改；
+- 正式源码/物理与任务门未改变；
+- START/END闭合；
+- 独立raw积分及native运动复核；
+- train/test划分；
+- 全部owned训练/仿真进程退出；
+- 交付文件及manifest完整。
+
+最终STOP。
+
+不自动启动正式大规模训练。

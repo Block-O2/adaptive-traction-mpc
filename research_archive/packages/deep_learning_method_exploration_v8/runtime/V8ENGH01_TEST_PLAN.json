@@ -1,0 +1,189 @@
+{
+  "B": {
+    "id": "B",
+    "base": "B",
+    "posture": [],
+    "early": [],
+    "changes": [],
+    "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+  },
+  "H150": {
+    "id": "H150",
+    "base": "T",
+    "posture": [
+      {
+        "phase": "RETURN",
+        "slot": 2,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      },
+      {
+        "phase": "RETURN",
+        "slot": 3,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      }
+    ],
+    "early": [
+      {
+        "phase": "RETURN",
+        "slot": 1,
+        "duration_factor": 1.1
+      },
+      {
+        "phase": "RETURN",
+        "slot": 4,
+        "duration_factor": 1.2
+      }
+    ],
+    "changes": [],
+    "timing": [
+      {
+        "phase": "RETURN",
+        "slot": 5,
+        "duration_factor": 1.5
+      }
+    ],
+    "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+  },
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+    },
+    {
+      "id": "H150",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "timing": [
+        {
+          "phase": "RETURN",
+          "slot": 5,
+          "duration_factor": 1.5
+        }
+      ],
+      "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+    }
+  ],
+  "condition": {
+    "name": "V8ENGH01",
+    "seed": 2026102690,
+    "prefix": {
+      "OUTBOUND": [
+        [
+          0.068,
+          0.042,
+          0.024
+        ]
+      ],
+      "RETURN": [
+        [
+          0.047,
+          0.026,
+          0.019
+        ]
+      ]
+    },
+    "split": "ENGINEERING_EXPOSED_REPLAY",
+    "role": "Exact known heavy condition, not an independent state; validate isolated evaluator and legal early/late interface."
+  },
+  "case_path": "runtime/source/stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_matrix_heavy_stiff_sync_v1.json",
+  "case_sha256": "44387b2b48a4d486d4fa5f7b980e698a3546365eea95bad2b1c2c50620342ccf",
+  "continuation_policy": "FULL_POLICY_COMMITMENT_WITH_FROZEN_SLOT_OVERRIDES",
+  "matched_reference_group": "SMOOTH_A1",
+  "group": "V8ENGH01",
+  "worker": "v7_worker_v9.py",
+  "job_wall_cap_s": 3600,
+  "short_horizons_s": [
+    0.5,
+    1.0
+  ],
+  "fork_phase": "OUTBOUND",
+  "fork_slot": 0,
+  "mode": "development",
+  "actions": [
+    {
+      "tag": "B",
+      "action": {
+        "family": "B"
+      },
+      "category": "V8_CLOSURE_REPRODUCTION"
+    },
+    {
+      "tag": "LATE_H150",
+      "action": {
+        "family": "H150",
+        "legacy": [
+          0.0,
+          0.0
+        ],
+        "original_B_through_outbound_slots": 1
+      },
+      "category": "V8_CLOSURE_REPRODUCTION"
+    },
+    {
+      "tag": "EARLY_H150",
+      "action": {
+        "family": "H150",
+        "legacy": [
+          0.0,
+          0.0
+        ]
+      },
+      "category": "V8_CLOSURE_REPRODUCTION"
+    }
+  ],
+  "frozen_artifacts": {
+    "runtime/RUN_PLAN.json": "6013eab3de986317877fbfc70287b17008ee81f6d205f8768ad911f5385df7d5",
+    "runtime/MOTION_ACCEPTANCE_PROTOCOL.json": "0f41463cab96b71ea39cc06f9fe86f432de07efe307bd486bc1c4df6cc196ece",
+    "source/v7_worker_v9.py": "760a54f88d45b86a8b45fe44cdc04f42f30a251d56a6ec95293d96e7910b8080",
+    "source/v7_case_adapter_v3.py": "96a69f60f2866bdb395f3b7cbbeca91a935c80f7ae24e037da6fc4fe2a8ebd91",
+    "runtime/EXECUTION_CODE_MANIFEST.json": "f4ea8cf82773df8eec12a1a0da47921b60eec0da3d771fef3faff96e03469b0c"
+  },
+  "scientific_branch": "IMPLEMENTATION_VALIDITY_REPRODUCTION",
+  "historical_repeats": {},
+  "algorithm": null,
+  "reference_v7": {
+    "B": "EARLYH01_B",
+    "LATE_H150": "EARLYH01_LATE_H150",
+    "EARLY_H150": "EARLYH01_EARLY_H150"
+  }
+}

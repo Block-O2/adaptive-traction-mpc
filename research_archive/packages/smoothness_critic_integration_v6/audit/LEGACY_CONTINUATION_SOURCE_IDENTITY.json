@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "checked_unix": 1793025335.6964955,
+  "original_control_ast_identity_except_read_only_tail_policy_logging": true,
+  "removed_logging_blocks": [
+    "if self.child is not None:\n    self.tail_policy_log.append(dict(phase=phase, slot=slot, physical_s=float(b['physical_now']), candidate_intervention=bool(intervene), planner_class=b['planner'].__class__.__module__ + '.' + b['planner'].__class__.__name__, active_action=copy.deepcopy(self.active_action), following_policy='original B rolling/replan', truth_used=False))\n    put('history/' + self.child['label'] + '_' + self.child['kind'] + '_TAIL_POLICY_INPUTS.json', dict(action=self.tail_action, rows=self.tail_policy_log))"
+  ],
+  "original_source_sha256": "5f39abdcd01662351a1d6e74ff460c30680bbd8385cae03d653ccf9d17e8fc7b",
+  "new_source_sha256": "e48bb72045acd5f32a09e2bd5f902352e090c4f418a29c03c7f364fdb7083831",
+  "candidate_actions_equal": {
+    "B": true,
+    "RELATIVEP": true,
+    "SPEEDP": true
+  },
+  "B_identity": true,
+  "H150_identity": true,
+  "runtime_plant_guard_scorer_copy": "all runtime bytes identical or literal package-root replacement; separately audited",
+  "scope": "Checks actual oldB continuation code/action semantics, not merely policy labels. New causal capture/prediction/logging does not write control variables. Distinct prefix/commissioning contexts can change failure qualification. No extra physical runs."
+}

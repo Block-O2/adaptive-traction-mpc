@@ -1,0 +1,47 @@
+{
+  "critical_clock": {
+    "activation_id": "smoothness_critic_integration_v6_20261026T095517Z",
+    "T0_UTC": "2026-10-26T09:55:17+00:00",
+    "T0_unix": 1793008517.0,
+    "deadline_UTC": "2026-10-26T15:55:17+00:00",
+    "hard_stop_unix": 1793030117.0,
+    "T0_basis": "first successful clock at research activation; includes initial sandbox recovery",
+    "max_duration_seconds": 21600,
+    "state": "ACTIVATED",
+    "input_truncated_at": "D step 2",
+    "root": "/home/hank/ihear-lab/smoothness_critic_integration_v6",
+    "id": "smoothness_critic_integration_v6_20261026T095517Z",
+    "t0_unix": 1793008517.0
+  },
+  "reserve_s": 2400,
+  "environment_python": "/home/hank/ihear-lab/rl_b_cloud_v1/.venv/bin/python",
+  "commands_in_order": [
+    "source/v6_summarize.py",
+    "source/v6_job_index.py",
+    "source/v6_decision_diagnostics.py",
+    "source/v6_prediction_error_audit.py",
+    "source/v6_rank_variation.py",
+    "source/v6_force_dose_decomposition.py",
+    "source/v6_test_independence_audit.py",
+    "source/v6_freeze_chronology_audit.py",
+    "source/v6_integrity_audit.py --v5-full",
+    "source/protect_history.py final",
+    "source/v6_figures.py",
+    "source/v6_native_waveform_figure.py",
+    "create CLOSURE_START.json + STOP_REQUESTED only after physical completion",
+    "wait original scorer/nativeledger finite drain, invoke v6_scorer_replay.finish_missing if required withACL2_PACKAGE",
+    "source/v6_owned_closeout.py --cleanup",
+    "source/v6_journal_finalize.py",
+    "source/v6_seal_package.py --finalize"
+  ],
+  "notes": [
+    "Final reports generator plus supplement invoked by sealer after END state; do not manually claim STOP before audits.",
+    "Sealer expects THIRD legacy only whenO3 completed, otherwise2. Primary4 unchanged.",
+    "O2 nearprefix and first legacy allactionsQUAL: do NOT claim motion failure repair yet. O3 lasttarget, ifallqualifiedmarkNOT_TESTED.",
+    "If actual O3 state aliases old training, reclassify as replay, preserve audit and never claim new independent validation.",
+    "Do not edit frozen cost/risk/features/selection/evaluation/worker sources. Unused RULE remainsNOT_RUN.",
+    "Read-only scorer PASS means verdict reproduction, not every candidate qualified.",
+    "Root journal original20376 bytes/hash inJOURNAL_BEFORE; only append.",
+    "All exec_command need require_escalated due default bwrap unavailable; local task authorized."
+  ]
+}

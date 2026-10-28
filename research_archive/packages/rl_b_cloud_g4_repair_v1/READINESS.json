@@ -1,0 +1,55 @@
+{
+  "G4_TERMINATION_REWARD_PASS": "FAIL",
+  "RL_EXECUTION_CONTRACT_PASS": "FAIL",
+  "RL_TASK_REACHABILITY_PASS": "PASS",
+  "all_G1_G7_pass": false,
+  "gates": {
+    "G1": {
+      "status": "PASS",
+      "evidence": "9 independently audited real MuJoCo episodes; original native safety limits preserved",
+      "scope": "observed nominal case, not robustness or hardware safety"
+    },
+    "G2": {
+      "status": "FAIL",
+      "evidence": "random TASK20.165000000054s fails unchanged19.030s ±0.050s frozen regression"
+    },
+    "G3": {
+      "status": "PASS",
+      "evidence": "two full maximal-action episodes, each19.030000000049s; deterministic development repeats"
+    },
+    "G4": {
+      "status": "FAIL",
+      "protocol_logic": "PASS",
+      "natural_specific_failure_coverage": "NOT_EVALUABLE",
+      "evidence": "G4_TERMINATION_REWARD_AUDIT.md; TEST_ONLY does not close all required real failure paths"
+    },
+    "G5": {
+      "status": "PASS",
+      "evidence": "EXECUTION_CONTRACT_TESTS.json actor AST allowlist + causal certificate flags; actor41D, no future Human truth"
+    },
+    "G6": {
+      "status": "NOT_RUN",
+      "mechanism_static_review": "implemented, not sufficient for cross-process reliability qualification",
+      "evidence": "CHECKPOINT_RESUME_AUDIT.json"
+    },
+    "G7": {
+      "status": "PASS",
+      "evidence": "GUARD_UNIT_RESULTS.json + audit/RESOURCE_TIMEOUT_TEST_ONLY.json + all physical guards closed; minRAM28.709GiB"
+    }
+  },
+  "contract_sha256": "062e3d9a52d43e916dd692c6019c1beea2383b7681b3d7e95a00d5f567687b04",
+  "runtime": {
+    "platform": "linux",
+    "python": "3.12.3",
+    "packages": {
+      "mujoco": "3.10.0",
+      "numpy": "2.2.6",
+      "scipy": "1.15.3",
+      "gymnasium": "1.1.1",
+      "stable-baselines3": "2.6.0",
+      "torch": "2.7.1+cpu"
+    }
+  },
+  "reason": "Do not train: frozen19.030 random regression fails and required natural G4 coverage not closed",
+  "positive_training_authorized": false
+}

@@ -1,0 +1,90 @@
+{
+  "39D_all_cases_legal": true,
+  "39D_training_separate_approval_required": true,
+  "BC_prior_context_preexposure": 6,
+  "JF_JM_weighted_policy_score": false,
+  "architectures": [
+    "LINEAR_25_TO_5_130_PARAMS",
+    "TANH_25_TO_16_TO_5_501_PARAMS"
+  ],
+  "availability_sha256": "ffe6ad3906dee82eef370441590672e34d28f94ccd70ccc15109ce8128db1fb8",
+  "best_seed_checkpoint_selection": false,
+  "created_unix": 1793084140.864315,
+  "current_actual_model_import_init_fit_forward_gradient_update_normalizer_physics": 0,
+  "data_counts": {
+    "cases": 12,
+    "complete_failed": 25,
+    "qualified": 39,
+    "repeated_actual_samples": 12,
+    "rows": 64,
+    "unique_context_action_cells": 52
+  },
+  "data_manifest_sha256": "78544e67744a5eb3c384dd3f3042382c0a2bb2c4a9ac2a7755475546bd77803e",
+  "data_path": "families/il_dagger_sac/discrete_sac_v1/data/offpolicy_first_completed_v5/SAC_OFFPOLICY_DATASET_V5.json",
+  "data_sha256": "b8a2b12479f25112a8cdfc720a6ad0f56f24467cd4c143425c675f814812c39d",
+  "endpoints": [
+    0,
+    25,
+    200
+  ],
+  "fixed_primary": "TANH16/RETURN_GREEDY/FINAL200/all3seeds individually",
+  "head_source_sha256": "4b3bb77f504196e0cf0b063b40c116309623cd1f476174ffd2ca3e7521c57267",
+  "independent_targets": [
+    "RETURN",
+    "RISK",
+    "JF_FIXED",
+    "JM_FIXED",
+    "JF_CENTERED",
+    "JM_CENTERED"
+  ],
+  "input_normalization": "13 train-only unique-case mean/std fits, std<1e-6 scale1",
+  "interpretation": "Representation/target-scale/coverage diagnosis. Not SAC renaming, Bellman multi-step RL, deployment or control gain.",
+  "is_call_authorization": false,
+  "mathematical_fixture_actual_calls": 0,
+  "missing_labels_imputed": false,
+  "new_training_runner_and_exact_source_approval_required": true,
+  "optimizer": {
+    "W_only_decay": 0.001,
+    "beta1": 0.9,
+    "beta2": 0.999,
+    "eps": 1e-08,
+    "gradient_norm_clip": 1.0,
+    "kind": "full-batch manual Adam",
+    "lr": 0.01,
+    "steps": 200
+  },
+  "original_global_deadline_unix": 1793114740.0,
+  "primary_dimensions": 25,
+  "proposed_25D_limits": {
+    "AS_bytes": 1073741824,
+    "Adam_group_updates": 93600,
+    "CPU_count": 1,
+    "CPU_s": 120,
+    "evaluation_predict_API": 2700,
+    "evaluation_rows": 89856,
+    "gradient_API": 93600,
+    "head_initializations": 468,
+    "new_physics": 0,
+    "normalizer_fits": 13,
+    "observed_gradient_rows": 5529600,
+    "ridge_evaluation_rows": 2496,
+    "ridge_fits": 39,
+    "ridge_predict_API": 75,
+    "ridge_solves": 195,
+    "target_scale_fits": 26,
+    "training_forward_API": 93600,
+    "wall_s": 120
+  },
+  "proposed_synthetic_math_limits": "MATH_FIXTURE_PLAN_V1.json <=30s only after separate approval",
+  "ridge_source_sha256": "5880c13645656abe9f2fbe23c233a4b3bb98545d8063a9a097e27b46b092605d",
+  "schema": "v8.neuralq_v2.source_only_representation_proposal.v1",
+  "scopes": "12 whole-case LOCO plus ALL_DEVELOPMENT, never independent validation",
+  "secondary": "RETURN_RISK_LE_0P1_ELSE_B",
+  "seeds": [
+    20261027101,
+    20261027102,
+    20261027103
+  ],
+  "status": "PROPOSED_SOURCE_ONLY_AWAITING_MAIN_REVIEW",
+  "target_normalization": "26 train-only physical mu/std fits, std floor1 original unit; fixed JF1500/JM100; return/risk0,1"
+}

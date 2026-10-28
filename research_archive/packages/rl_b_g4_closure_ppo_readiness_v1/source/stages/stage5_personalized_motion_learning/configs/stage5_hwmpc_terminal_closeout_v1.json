@@ -1,0 +1,104 @@
+{
+  "schema": "stage5_hwmpc_terminal_closeout_v1",
+  "status": "FROZEN_AFTER_TC_C_DIAGNOSIS_BEFORE_FIX_VALIDATION",
+  "evidence_category": "bounded_opt_in_terminal_closeout_engineering_validation",
+  "diagnosis": {
+    "classification": "TC-C",
+    "summary": "terminal reference completes but a late coordination-dependent terminal demand leaves realized Human velocity insufficient settling time",
+    "base_config": "stages/stage5_personalized_motion_learning/configs/stage5_hwmpc_state_feedback_v1.json",
+    "base_config_sha256": "f43677441a0776d9c84217397863a8e183dedb493c1a674d6e955bf333ac2273",
+    "base_result": "stages/stage5_personalized_motion_learning/results/engineering_validation/hwmpc_state_feedback_v1_attempt_02/state_feedback_hwmpc_validation.json",
+    "base_result_sha256": "c0473d292865817d7a8621aaadd7cb839fd4225254736d8f97fb1775c12acbd9",
+    "failed_episode": "explore_seed_101",
+    "observed_reference_zero_velocity_onset_phase_s": 1.9,
+    "old_settle_duration_s": 0.3,
+    "observed_additional_settle_needed_s": 0.1
+  },
+  "single_correction": {
+    "name": "common_terminal_reserve_100ms",
+    "terminal_block_start_s_before": 1.5,
+    "terminal_block_start_s_after": 1.4,
+    "terminal_transition_duration_s": 0.4,
+    "terminal_settle_duration_s_before": 0.3,
+    "terminal_settle_duration_s_after": 0.4,
+    "selection_basis": "both failed phases entered the unchanged 2 deg/s completion envelope about 100 ms after dq_ref became zero; all six saved t_phase=1.4 reference states admit the same 0.4 s terminal quintic under existing limits",
+    "force_used": false
+  },
+  "action_contract": {
+    "action": "next_2d_human_waypoint_increment_rad",
+    "maximum_waypoint_step_fraction": 0.20,
+    "action_scales": [0.5, 1.0],
+    "normalized_coordination_directions": [[1.0, 0.5], [1.0, 0.75], [1.0, 1.0], [0.75, 1.0], [0.5, 1.0]],
+    "target_velocity_rad_s": [0.0, 0.0],
+    "selection_cost": {
+      "goal_error_weight": 1.0,
+      "waypoint_change_weight": 0.02,
+      "incomplete_phase_weight": 0.25
+    },
+    "force_used_for_generation_or_selection": false,
+    "fixed_r_or_path_template_used": false,
+    "return_replays_outbound_path": false
+  },
+  "matched_pacing": {
+    "outbound_duration_s": 2.2,
+    "hold_duration_s": 0.5,
+    "return_duration_s": 2.2,
+    "terminal_block_start_s": 1.4,
+    "terminal_transition_duration_s": 0.4,
+    "terminal_settle_duration_s": 0.4,
+    "terminal_target": "exact registered phase q_goal with dq_target=0",
+    "control_period_s": 0.005
+  },
+  "fixed_human": {
+    "mismatch_condition": "damping_plus_20pct",
+    "truth_scales_evaluation_only": [1.0, 1.0, 1.2],
+    "control_model_id": "stage5-human:hwmpc-damping_plus_20pct-progressive:u004:89ac34f2de7a",
+    "control_theta": [1.0001754892631383, 0.9992726057434099, 1.0778852088673856],
+    "support_outcome": "positive",
+    "support_evidence_id": "post-update:stage5-human:hwmpc-damping_plus_20pct-progressive:u004:89ac34f2de7a:positive:rep-5",
+    "source_artifact": "stages/stage5_personalized_motion_learning/results/engineering_validation/hwmpc_human_personalization_v1_attempt_02/hwmpc_human_personalization.json",
+    "source_artifact_sha256": "9ee3151edfc3b3fef79f365b599300bae77d7e2ca1adbf0bb1498881eb69bf74",
+    "updates_enabled": false,
+    "trust_driven_pacing_enabled": false
+  },
+  "bounded_test_budget": {
+    "regression_episodes": [
+      {"name": "greedy_repeat_0", "selection": "greedy", "seed": 0, "group": "original_regression"},
+      {"name": "greedy_repeat_1", "selection": "greedy", "seed": 1, "group": "original_regression"},
+      {"name": "explore_seed_101", "selection": "bounded_top_k", "seed": 101, "group": "original_regression"},
+      {"name": "explore_seed_203", "selection": "bounded_top_k", "seed": 203, "group": "original_regression"},
+      {"name": "explore_seed_307", "selection": "bounded_top_k", "seed": 307, "group": "original_regression"},
+      {"name": "explore_seed_401", "selection": "bounded_top_k", "seed": 401, "group": "original_regression"}
+    ],
+    "fresh_validation_episodes": [
+      {"name": "fresh_explore_seed_503", "selection": "bounded_top_k", "seed": 503, "group": "fresh_validation"},
+      {"name": "fresh_explore_seed_607", "selection": "bounded_top_k", "seed": 607, "group": "fresh_validation"},
+      {"name": "fresh_explore_seed_709", "selection": "bounded_top_k", "seed": 709, "group": "fresh_validation"},
+      {"name": "fresh_explore_seed_811", "selection": "bounded_top_k", "seed": 811, "group": "fresh_validation"},
+      {"name": "fresh_explore_seed_907", "selection": "bounded_top_k", "seed": 907, "group": "fresh_validation"}
+    ],
+    "maximum_fresh_validation_episodes": 5,
+    "exploration_probability": 0.45,
+    "exploration_top_k": 3
+  },
+  "timing_contract": {
+    "simulation_planning_is_synchronous": true,
+    "simulated_physical_time_pauses_during_planning": true,
+    "last_executable_command_remains_applied_until_next_simulation_step": true,
+    "new_plan_first_sample_preserves_last_emitted_reference": true,
+    "hardware_realtime_claim": false
+  },
+  "scope": {
+    "only_terminal_reserve_changed": true,
+    "production_default_changed": false,
+    "action_lattice_or_cost_changed": false,
+    "human_personalization_changed": false,
+    "task_phase_durations_or_completion_criterion_changed": false,
+    "rom_speed_acceleration_limits_changed": false,
+    "geometry_contact_or_safety_logic_changed": false,
+    "force_objective_or_learning_used": false,
+    "fixed_r_or_path_template_used": false,
+    "stage3_or_stage4_changed": false,
+    "historical_evidence_changed": false
+  }
+}

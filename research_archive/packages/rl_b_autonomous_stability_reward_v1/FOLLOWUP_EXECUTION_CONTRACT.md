@@ -1,0 +1,11 @@
+# 后续有限队列执行合同
+
+`followup_queue.py`只读取一份已经封存的配置列表，不生成新Reward或无限搜索。每项绑定config SHA和worker/reward/research_common SHA；执行前及逐job重验，保存独立queue START/END、supervisor源码和逐job结果。exclusive flock防止重复scheduler。
+
+原有限队列完整结束、其PID退出、没有其他live物理worker/后续queue、没有在途native预留且资源/时间门满足，才可执行。先按整份未运行列表的165000/attempt保守上界检查450训练、60评价、50M native；OPTIONAL_RESEARCH同时保留最终8eval/1.32M native。预算不足时必须先重做科学分配，不隐式增加预算或减少测试。
+
+运行沿用run_job/worker的每attempt、每job和全局时限，原normal/partial checkpoint准入、ledger、RNG恢复和单物理环境不变。ordinary TASK FAIL仍是完成的真实尝试，保存后按固定列表继续；工程/审计异常停止本局部queue并回到Agent诊断。queue完成返回科学审阅，不STOP整个包，不启动下一包或正式Campaign。
+
+`followup_queues/*/START.json`已纳入finalize的身份检查、独占组关闭和最终进程审计；observer可在原FINITE_QUEUE_COMPLETE之后继续观察live后续queue。新queue启动前，root仍须记录实际研究决定及remaining budget。T0+9h15m后不再开始训练，10h硬停。
+
+`audit/FOLLOWUP_QUEUE_READONLY_VALIDATION.json`目前仅证明只读预览、配置SHA拒绝和前驱/资源预算检查；测试没有执行queue/physics/Adam。实际后续queue尚未启动，其真实持久执行与END仍待后续验证。配置ENGINEERING_FOLLOWUP_NEVEREXEC_v1仅为只读负载，不得作为科学实验执行。

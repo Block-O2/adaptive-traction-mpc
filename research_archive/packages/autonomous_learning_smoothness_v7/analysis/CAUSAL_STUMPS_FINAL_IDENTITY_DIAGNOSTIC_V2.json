@@ -1,0 +1,116 @@
+{
+  "status": "COMPLETE_PREDICTION_ONLY_DIAGNOSTIC",
+  "created_unix": 1793054257.68591,
+  "source_sha256": "6257c87d1ae353eb5fca454f87afde97a91c466783b8369471c39cd0c01cd818",
+  "model_sha256": "bf36d1cad7770a9328f0773745285235e0f20c301f55f283a21108d063b4919f",
+  "rows": [
+    {
+      "group": "CFACTORH01",
+      "prospective_prediction_admissible_after_final_join": true,
+      "admissibility_errors": [],
+      "predictions": {
+        "K_stump": {
+          "predicted_qualified_benefit_label": 0,
+          "suggested_action": "B"
+        },
+        "geometry_stump": {
+          "predicted_qualified_benefit_label": 1,
+          "suggested_action": "EARLY_H150"
+        },
+        "always_B": {
+          "suggested_action": "B"
+        },
+        "always_EARLY_H150": {
+          "suggested_action": "EARLY_H150"
+        }
+      },
+      "actual": {
+        "label_observed": true,
+        "unobserved_is_not_negative": true,
+        "label": 0,
+        "components": {
+          "complete": true,
+          "original_qualified": false,
+          "JF_less_than_B": true,
+          "both_native_jerk_less_than_B": false,
+          "native_force_norm_rate_less_than_B": true
+        },
+        "B_JF": 1271.679134896331,
+        "B_JM": 93.16610243308743,
+        "EARLY_H150_JF": 1231.7882733729707,
+        "EARLY_H150_JM": 99.96502923420871,
+        "delta_JF": -39.8908615233604,
+        "delta_JM": 6.798926801121283,
+        "JM_not_scalarized": true
+      },
+      "correct": {
+        "K_stump": true,
+        "geometry_stump": false
+      },
+      "controller_deployment": false,
+      "actual_attempts_saved": 0
+    },
+    {
+      "group": "CFACTORL01",
+      "prospective_prediction_admissible_after_final_join": false,
+      "admissibility_errors": [
+        "AssertionError:NO_PREOUTCOME_MAIN_RECEIPT"
+      ],
+      "predictions": null,
+      "actual": {
+        "label_observed": true,
+        "unobserved_is_not_negative": true,
+        "label": 0,
+        "components": {
+          "complete": true,
+          "original_qualified": true,
+          "JF_less_than_B": true,
+          "both_native_jerk_less_than_B": false,
+          "native_force_norm_rate_less_than_B": true
+        },
+        "B_JF": 1621.921912689602,
+        "B_JM": 109.44124372234944,
+        "EARLY_H150_JF": 1584.2447051257218,
+        "EARLY_H150_JM": 114.5078663128482,
+        "delta_JF": -37.6772075638803,
+        "delta_JM": 5.066622590498753,
+        "JM_not_scalarized": true
+      },
+      "correct": null,
+      "controller_deployment": false,
+      "actual_attempts_saved": 0
+    }
+  ],
+  "summary": {
+    "K_stump": {
+      "prospective_cases_observed": 1,
+      "correct": 1,
+      "training_Human_contexts": 3,
+      "statistical_or_clinical_generalization_proven": false
+    },
+    "geometry_stump": {
+      "prospective_cases_observed": 1,
+      "correct": 0,
+      "training_Human_contexts": 3,
+      "statistical_or_clinical_generalization_proven": false
+    },
+    "always_B": {
+      "prospective_cases_observed": 1,
+      "correct": 1,
+      "classification_comparator_only_not_a_deployed_policy": true
+    },
+    "always_EARLY_H150": {
+      "prospective_cases_observed": 1,
+      "correct": 0,
+      "classification_comparator_only_not_a_deployed_policy": true
+    }
+  },
+  "new_fits": 0,
+  "new_env": 0,
+  "new_neural_model_calls": 0,
+  "new_physics": 0,
+  "pure_stump_prediction_rechecks": 2,
+  "same_seven_action_menus_fully_charged": true,
+  "no_online_state_policy_deployed": true,
+  "no_safety_qualification_inherited": true
+}

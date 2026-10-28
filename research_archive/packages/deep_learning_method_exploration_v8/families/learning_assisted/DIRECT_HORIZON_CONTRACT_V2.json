@@ -1,0 +1,17 @@
+{
+  "id": "E_DIRECT_HORIZON_V2",
+  "frozen_unix": 1793073125.4050012,
+  "motivation": "E1 history reduced one-step and rollout errors but action-response residuals remain material; directly predict finite-horizon outcomes to distinguish temporal training objective from autoregressive drift",
+  "historical_data": "Same complete44 historical causal series,6 full-context development folds; no new validation outcomes used",
+  "input": "current14 causal estimated/reference/measured signals + current-minus-two-past14 + causal commissioned25 + public elapsed/phase + selected recipe onehot/state interaction",
+  "target": "For each .5/1/2s horizon, terminal causal14 and actual window JF/JM from measured signals; target is not deployment input",
+  "method": "Fixed ridge10 multioutput, fold-only mean/scale; compare force persistence and prior autonomous history-residual; no parameter search",
+  "evaluation": "first post-action measured boundary and mid-return; action contrasts vs B, absolute window integration and terminal state error, whole-context heldout development only",
+  "limits": "post-action starts are different actual executed states, not common pre-action candidate counterfactuals; model predicts endpoint/window not full controllable trajectory; no safety certificate or planner deployment",
+  "resource": {
+    "threads": 1,
+    "timeout_s": 300,
+    "memory_gib": 2,
+    "new_physics": 0
+  }
+}

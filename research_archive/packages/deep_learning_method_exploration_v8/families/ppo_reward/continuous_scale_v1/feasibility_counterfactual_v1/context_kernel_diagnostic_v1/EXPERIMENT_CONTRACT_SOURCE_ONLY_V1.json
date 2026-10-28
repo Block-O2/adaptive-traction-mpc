@@ -1,0 +1,116 @@
+{
+  "schema": "v8.beta_context_kernel_closed_gradient_diagnostic_contract.v1",
+  "status": "SOURCE_ONLY_NOT_AUTHORIZED_OR_EXECUTED",
+  "stage": "GateK_FIXED_CLOSED_BEHAVIOR_MECHANISM_DIAGNOSTIC",
+  "research_question": "Can a signed cross-context kernel in the frozen sharedlinear25 representation explain the closed LOO Hmean up/Lmean down although each two-point reward slope is positive; alternatively inspect local finite-score direction without estimating variance?",
+  "input_refs": {
+    "global_result": {
+      "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/diagnostics/GATEC_ONCE_V1/RESULT.json",
+      "sha256": "28bedbdffab0fee9f46723625fda0459bd3b0ce03194af780906392c71a6d044"
+    },
+    "loo_result": {
+      "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/context_loo_v1/diagnostics/GATEL_ONCE_V1/RESULT.json",
+      "sha256": "55369ef436e9b0b54023ee7cdb20e9c520d1933c2ed69f865bc3f7f011129db2"
+    },
+    "global_DONE": {
+      "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/diagnostics/GATEC_ONCE_V1/DONE.json",
+      "sha256": "fc531a2394cc332bd14761a99af8132d4bd3e6daf079b57e8c0671800ae57d43"
+    },
+    "loo_DONE": {
+      "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/context_loo_v1/diagnostics/GATEL_ONCE_V1/DONE.json",
+      "sha256": "f955efbaea439cc32337dc2a05091d715f74050a28f95a54ad3e3767043c5d7f"
+    },
+    "replay_input": {
+      "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/metadata_exports/ROOT_G0_CLOSED4_EXACT_V1/REPLAY_INPUT_V1.json",
+      "sha256": "f7596920475e817a45b295b8ff1257e5ac6d28e56b3bf06cda1ccd01dedb6798"
+    },
+    "behavior_exact_export": {
+      "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/metadata_exports/ROOT_G0_CLOSED4_EXACT_V1/ORIGINAL_G0_RF_RAW_EXACT.json",
+      "sha256": "b8b4e879bf5cbdb1e8cefd8832aa5dd27020275f3bbc8442fd05fb753471c873"
+    },
+    "proposal_0": {
+      "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/metadata_exports/ROOT_G0_CLOSED4_EXACT_V1/V8BETA01H_OP_BETA_RF_RAW_01_ORIGINAL_PROPOSAL_EXACT.json",
+      "sha256": "0812e30b69a086f99545e7e5bd2e7c1bdcf48379dd535615ea24a1ff5072de5c"
+    },
+    "proposal_1": {
+      "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/metadata_exports/ROOT_G0_CLOSED4_EXACT_V1/V8BETA01H_OP_BETA_RF_RAW_02_ORIGINAL_PROPOSAL_EXACT.json",
+      "sha256": "6c8451f1a49571dc31863cb8aa353bc60d49346744d571f39f3b813fc4e0f151"
+    },
+    "proposal_2": {
+      "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/metadata_exports/ROOT_G0_CLOSED4_EXACT_V1/V8BETA01L_OP_BETA_RF_RAW_01_ORIGINAL_PROPOSAL_EXACT.json",
+      "sha256": "3d8d5e8d67354855b7dbd0c7f355fb0ff49c6413c3af3e8029a2d619e5f76f5a"
+    },
+    "proposal_3": {
+      "path": "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/metadata_exports/ROOT_G0_CLOSED4_EXACT_V1/V8BETA01L_OP_BETA_RF_RAW_02_ORIGINAL_PROPOSAL_EXACT.json",
+      "sha256": "83afdf2c5b1c6c00da01ccc4b70100753bcbc74cda50d27a95bb6d902de0de38"
+    }
+  },
+  "input_refs_object_sha256": "4623fa15fdb9dc2626960fba94a6fd3bdab4dce53942664d8afeba334d292e01",
+  "source_proof_only_sha256": {
+    "families/ppo_reward/continuous_scale_v1/beta_policy.py": "4716950923aded5a0daffb0230fbcea39d687a3cddba7bca85bb9ba4231b0c95",
+    "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/replay_math_candidate_v1.py": "ca47c88f0f61f7d024bd4a6bc711c0e07d1d6407196fcee5a48baaada96f79a9",
+    "families/ppo_reward/continuous_scale_v1/feasibility_counterfactual_v1/context_loo_v1/replay_context_loo_candidate_v1.py": "b8cfa85d48e46396435a79c0477944e11e08d437ccef8eecde051edc40f4db04"
+  },
+  "data_scope": {
+    "unique_closed_behavior_draws": 4,
+    "contexts": 2,
+    "independent_draws_per_context": 2,
+    "repeated_fourarm_paid_identities_not_extra_coverage": true,
+    "new_context_raw_run_active_sealed_validation_reads": false
+  },
+  "algorithm": {
+    "new_model_or_policy_construction": 0,
+    "normalization": "exact frozen G0 mean/scale, no fit",
+    "gradient_source": "closed RF epoch0 arrays; PPO epoch0 must equal; no new score",
+    "component_recovery": "unique rank2 Gram decomposition, samecontext exactx required; retain original1/4 aggregate factor",
+    "rank_guard_relative_determinant_gt": 1e-12,
+    "span_residual_atol": 1e-12,
+    "span_residual_rtol": 1e-09,
+    "pseudoinverse_ridge_score_or_fitting_fallback": false,
+    "initial_mean_jacobian": "explicit savedalpha2/beta2 rawlogit sigmoid formula, not Betaforward",
+    "comparison": "local/cross directions plus direct storedgradient projection; stored RF1 delta projection and storedmean sign/nonlinear remainder; no new endpoint mean evaluation",
+    "step_lr": 0.15,
+    "clip_scale": "use original closed RF0 trace value, no retuning",
+    "global_and_LOO_both_reported_no_best": true
+  },
+  "predeclared_falsifiers": [
+    "If crossGram>=0 reject negativekernel hypothesis for this pair.",
+    "If localLight<=0 do not attribute lightdirection only to harmful cross-context interference.",
+    "Only flag negativecrosskernel dominance when bothlocal>0, crossHtoL<0 and exceeds localL, totalL<0 and actualRF1H>0/L<0.",
+    "Ifrankfails or spanresidualfails stop asnonidentifiable, do not regenerate scores.",
+    "Two draws/context cannot establish variance reduction, population unbiasedness, robot improvement or physical feasibility."
+  ],
+  "budget": {
+    "wall_s": 60,
+    "CPU_s": 60,
+    "CPU_affinity": [
+      0
+    ],
+    "AS_limit_bytes": 1073741824,
+    "global_stop_unix": 1793114740.0,
+    "independent_offline_local_authority_required": true,
+    "original_Beta_clock_or_any_window_extended": false,
+    "maximum_attempts_without_new_explicit_authority": 1
+  },
+  "successful_numerical_work_exact": {
+    "normalized_scalar_features": 50,
+    "augmented_contexts": 2,
+    "dot26": 19,
+    "dot2": 16,
+    "dot_scalar_products": 526,
+    "two_by_two_decomposition_solves": 4,
+    "recovered_context_gradient_scalar_values": 208,
+    "aggregate_reconstruction_scalar_checks": 104,
+    "scalar_sigmoid_evaluations": 2,
+    "analytic_mean_jacobian_shape_pairs": 1,
+    "analytic_mean_jacobian_context_assignments": 2,
+    "mean_directional_derivatives": 16,
+    "stored_RF_weight_delta_scalar_subtractions": 104,
+    "stored_RF_step_binding_scalar_checks": 8,
+    "stored_RF_mean_ratio_checks": 4,
+    "learner_model_init_restore_copy_forward_score_density_gradient_fit_update_RNG_physics_calls": 0
+  },
+  "zero_calls_scope": "No adapter, helper, Beta forward/mean/density/score, surrogate, initialize, restore, RNG, policycopy, optimizerstep, new gradient estimation, model fit or physics. Numerical projections/derivatives are explicitly paid arithmetic.",
+  "output": "exclusive private diagnostics/GATEK_ONCE_V1 START/RESULT/DONE or FAILED; never actual checkpoint/CURRENT or fourmeanfreeze",
+  "model_selection_or_future_validation_authority": false
+}

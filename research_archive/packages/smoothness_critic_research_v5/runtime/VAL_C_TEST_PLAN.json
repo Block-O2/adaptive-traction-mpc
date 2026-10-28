@@ -1,0 +1,189 @@
+{
+  "condition": {
+    "name": "VAL_C",
+    "seed": 2026102213,
+    "prefix": {
+      "OUTBOUND": [
+        [
+          0.075,
+          0.045,
+          0.02
+        ]
+      ],
+      "RETURN": [
+        [
+          0.035,
+          0.015,
+          0.03
+        ]
+      ]
+    },
+    "split": "locked_post_development_validation",
+    "role": "new prefix never used in candidate selection",
+    "Human": "same nominal commissioned Human; actual legal prefix"
+  },
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+    },
+    {
+      "id": "H150",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "timing": [
+        {
+          "phase": "RETURN",
+          "slot": 5,
+          "duration_factor": 1.5
+        }
+      ],
+      "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+    }
+  ],
+  "group": "VAL_C",
+  "B": {
+    "id": "B",
+    "base": "B",
+    "posture": [],
+    "early": [],
+    "changes": [],
+    "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+  },
+  "H150": {
+    "id": "H150",
+    "base": "T",
+    "posture": [
+      {
+        "phase": "RETURN",
+        "slot": 2,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      },
+      {
+        "phase": "RETURN",
+        "slot": 3,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      }
+    ],
+    "early": [
+      {
+        "phase": "RETURN",
+        "slot": 1,
+        "duration_factor": 1.1
+      },
+      {
+        "phase": "RETURN",
+        "slot": 4,
+        "duration_factor": 1.2
+      }
+    ],
+    "changes": [],
+    "timing": [
+      {
+        "phase": "RETURN",
+        "slot": 5,
+        "duration_factor": 1.5
+      }
+    ],
+    "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+  },
+  "historical_repeats": {},
+  "actions": [
+    {
+      "tag": "B",
+      "action": {
+        "family": "B"
+      },
+      "category": "locked_factor_candidate_validation"
+    },
+    {
+      "tag": "BEST_CONTROL",
+      "action": {
+        "family": "factor8",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ],
+        "endpoint_lock": true,
+        "duration_floor": true
+      },
+      "category": "locked_factor_candidate_validation"
+    },
+    {
+      "tag": "BEST_OLD_DURATION",
+      "action": {
+        "family": "factor8",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ],
+        "endpoint_lock": true,
+        "duration_floor": false
+      },
+      "category": "locked_factor_candidate_validation"
+    }
+  ],
+  "worker": "v4_factor_worker.py",
+  "job_wall_cap_s": 2400,
+  "mode": "validation"
+}

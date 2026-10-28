@@ -1,0 +1,92 @@
+{
+  "frozen_utc": "2026-10-22T06:10:46.108421+00:00",
+  "reason": "Developed L1D0 qualifies and reduces JF with JM cost; requires independent check before robustness claims",
+  "source_development_result_sha256": "8e83fef64600ee61126285c76767be8c612544a79fa7078bf5ee2cb71c8e3f67",
+  "config_sha256": "e59892fdf3bb99715da76a09b0e7861f66f7bfaeb9d095537cfeb8d8e67d7a5d",
+  "condition": {
+    "name": "VAL_C",
+    "seed": 2026102213,
+    "prefix": {
+      "OUTBOUND": [
+        [
+          0.075,
+          0.045,
+          0.02
+        ]
+      ],
+      "RETURN": [
+        [
+          0.035,
+          0.015,
+          0.03
+        ]
+      ]
+    },
+    "split": "locked_post_development_validation",
+    "role": "new prefix never used in candidate selection",
+    "Human": "same nominal commissioned Human; actual legal prefix"
+  },
+  "actions": [
+    {
+      "tag": "B",
+      "action": {
+        "family": "B"
+      },
+      "category": "locked_factor_candidate_validation"
+    },
+    {
+      "tag": "BEST_CONTROL",
+      "action": {
+        "family": "factor8",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ],
+        "endpoint_lock": true,
+        "duration_floor": true
+      },
+      "category": "locked_factor_candidate_validation"
+    },
+    {
+      "tag": "BEST_OLD_DURATION",
+      "action": {
+        "family": "factor8",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ],
+        "endpoint_lock": true,
+        "duration_floor": false
+      },
+      "category": "locked_factor_candidate_validation"
+    }
+  ],
+  "budget": {
+    "additional_physics_cap": 4,
+    "additional_native_cap": 600000,
+    "job_wall_cap_s": 2400
+  },
+  "no_candidate_changes_after_validation": true,
+  "guard": "UNCHANGED_ORIGINAL",
+  "comparison": "endpoint lock fixed true; only duration compiler changes within each matched live parent"
+}

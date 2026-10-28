@@ -1,0 +1,226 @@
+{
+  "time_utc": "2026-10-21T01:07:43.369999+00:00",
+  "status": "FIRST_PARENT60_COMPLETE_SECOND_PARENT_RUNNING",
+  "seed": 1495656323,
+  "lineage": "H2_AGG64",
+  "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_H2_seed1495656323_to060/checkpoints/episode_060",
+  "model_sha256": "df4b840eec48359c9255893a755d838180dddb1a441345e0a45d924fc525eb84",
+  "metadata_sha256": "09ce3d79035a4ee3177678d0d141ea333a15563d6cecfa118fe081c8fad8f8ab",
+  "extension_training": {
+    "time_utc": "2026-10-21T01:04:18.358845+00:00",
+    "status": "FIRST_PARENT_TRAINING_COMPLETE_FROZEN_EVALUATION_RUNNING",
+    "checks": {
+      "all30_indices": true,
+      "all_sampled_optimized": true,
+      "no_terminal_pending": true,
+      "no_singletons": true,
+      "model_zip_identity": true,
+      "original_total_110": true,
+      "full_parent_restore": true
+    },
+    "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_H2_seed1495656323_to060/checkpoints/episode_060",
+    "model_sha256": "df4b840eec48359c9255893a755d838180dddb1a441345e0a45d924fc525eb84",
+    "seed": 1495656323,
+    "episodes": 30,
+    "successes": 13,
+    "sampled": 485,
+    "optimized": 485,
+    "actual_Adam": 128,
+    "PPO_train": 7,
+    "epochs": 28,
+    "native_steps": 2905480,
+    "new_physics_for_audit": 0,
+    "new_Adam_for_audit": 0,
+    "scope": "Training completion and accounting only; no60 endpoint completion or two-parent retention claim"
+  },
+  "cumulative_new_training": {
+    "episodes": 60,
+    "successes": 28,
+    "sampled": 935,
+    "optimized": 935,
+    "actual_Adam": 248,
+    "PPO_train": 14,
+    "epochs": 56
+  },
+  "mean_comparisons": [
+    {
+      "reference": "ORIGINAL_050_MEAN",
+      "complete_same_duration": true,
+      "JF_percent": -0.7494771196324246,
+      "JM_percent": 1.9318984731152788,
+      "reference_JF": 1446.792924686744,
+      "reference_JM": 101.53280344224935
+    },
+    {
+      "reference": "H2_030_MEAN",
+      "complete_same_duration": true,
+      "JF_percent": -0.29618730518531367,
+      "JM_percent": 0.8430372859803636,
+      "reference_JF": 1440.2152775672498,
+      "reference_JM": 102.6291124375421
+    }
+  ],
+  "evaluations": [
+    {
+      "job_id": "RETENTION_H2_seed1495656323_ep060_deterministic_dev1",
+      "policy_mode": "deterministic",
+      "success": true,
+      "task_s": 19.030000000048588,
+      "JF": 1435.9495427477561,
+      "JM": 103.4943141216613,
+      "abort_reason": "",
+      "independent_audit_pass": true,
+      "motion": {
+        "time_utc": "2026-10-21T01:04:38.551624+00:00",
+        "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+        "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_H2_seed1495656323_ep060_deterministic_dev1/episode_061",
+        "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+        "status": "COMPLETE",
+        "success": true,
+        "integral_scope": "COMPLETE_TASK",
+        "task_s": 19.030000000048588,
+        "JF": 1435.9495427477561,
+        "JM": 103.4943141216613,
+        "task_native_steps": 76120,
+        "tracking_RMS_deg": [
+          0.4859684827220633,
+          0.4724441733912376
+        ],
+        "velocity_RMS_deg_s": [
+          14.81869924940594,
+          13.921424804521543
+        ],
+        "velocity_peak_deg_s": [
+          25.46526151591973,
+          24.808723862068316
+        ],
+        "acceleration_RMS_deg_s2": [
+          28.004872795785257,
+          24.483243404766895
+        ],
+        "acceleration_peak_deg_s2": [
+          67.46501372203845,
+          151.92804807658342
+        ],
+        "jerk_RMS_deg_s3": [
+          381.0258547516884,
+          881.5081455091565
+        ],
+        "jerk_peak_deg_s3": [
+          5798.234990704094,
+          19854.032237361833
+        ],
+        "terminal_q_deg": [
+          5.499624624990866,
+          9.500046634180116
+        ],
+        "terminal_dq_deg_s": [
+          -0.007393768787527239,
+          -0.002080862380601569
+        ],
+        "terminal_return_signed_error_deg": [
+          0.49962462499086646,
+          -0.49995336581988314
+        ],
+        "terminal_return_absolute_error_deg": [
+          0.49962462499086646,
+          0.49995336581988314
+        ],
+        "RETURN_overshoot_below_goal_deg": [
+          0.0,
+          0.825638602243288
+        ],
+        "OUTBOUND_overshoot_above_goal_deg": [
+          0.09346270617534398,
+          0.2783170719692041
+        ],
+        "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+        "generalization": "KNOWN_NOMINAL_ONLY",
+        "formal_matched_qualification": "NOT_GRANTED"
+      },
+      "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_H2_seed1495656323_ep060_deterministic_dev1/episode_061"
+    },
+    {
+      "job_id": "RETENTION_H2_seed1495656323_ep060_stochastic_dev1",
+      "policy_mode": "stochastic",
+      "success": true,
+      "task_s": 19.630000000051453,
+      "JF": 1442.06361243945,
+      "JM": 104.05258423878432,
+      "abort_reason": "",
+      "independent_audit_pass": true,
+      "motion": {
+        "time_utc": "2026-10-21T01:06:11.816774+00:00",
+        "category": "SAVED_ACTUAL_NATIVE_HUMAN_EVALUATION_ONLY",
+        "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_H2_seed1495656323_ep060_stochastic_dev1/episode_061",
+        "source_sha256": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+        "status": "COMPLETE",
+        "success": true,
+        "integral_scope": "COMPLETE_TASK",
+        "task_s": 19.630000000051453,
+        "JF": 1442.06361243945,
+        "JM": 104.05258423878432,
+        "task_native_steps": 78520,
+        "tracking_RMS_deg": [
+          0.46900541653896105,
+          0.9526053046120208
+        ],
+        "velocity_RMS_deg_s": [
+          14.20732647402342,
+          16.244441001491687
+        ],
+        "velocity_peak_deg_s": [
+          25.696565365548157,
+          39.10971233946438
+        ],
+        "acceleration_RMS_deg_s2": [
+          29.378789335189662,
+          45.36884187655271
+        ],
+        "acceleration_peak_deg_s2": [
+          84.87752584016405,
+          174.0064496646974
+        ],
+        "jerk_RMS_deg_s3": [
+          410.20207567157587,
+          1112.0184212691277
+        ],
+        "jerk_peak_deg_s3": [
+          7219.74280961835,
+          24689.538505263405
+        ],
+        "terminal_q_deg": [
+          5.090992109195231,
+          9.285909459850716
+        ],
+        "terminal_dq_deg_s": [
+          0.38115750302840123,
+          1.6791171136341208
+        ],
+        "terminal_return_signed_error_deg": [
+          0.09099210919523103,
+          -0.7140905401492831
+        ],
+        "terminal_return_absolute_error_deg": [
+          0.09099210919523103,
+          0.7140905401492831
+        ],
+        "RETURN_overshoot_below_goal_deg": [
+          0.0,
+          2.055132564734087
+        ],
+        "OUTBOUND_overshoot_above_goal_deg": [
+          0.3103565804696146,
+          0.23216256960743115
+        ],
+        "definitions": "Tracking: unique last 5ms TASK trace physical truth minus applied q_ref (original scorer convention). Derivatives: backward native velocity differences including pre-TASK anchors. No invented jerk threshold.",
+        "generalization": "KNOWN_NOMINAL_ONLY",
+        "formal_matched_qualification": "NOT_GRANTED"
+      },
+      "run": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_H2_seed1495656323_ep060_stochastic_dev1/episode_061"
+    }
+  ],
+  "scope": "First selected parent only. Complete equal-duration mean comparison; sample19.63 differs from old sample19.905 and parent mean19.03, so no direct dose gain is computed for it. No causal isolation of Adam count from changed data/update organization. No generalization or full matched qualification.",
+  "new_physics_for_analysis": 0,
+  "new_Adam_for_analysis": 0
+}

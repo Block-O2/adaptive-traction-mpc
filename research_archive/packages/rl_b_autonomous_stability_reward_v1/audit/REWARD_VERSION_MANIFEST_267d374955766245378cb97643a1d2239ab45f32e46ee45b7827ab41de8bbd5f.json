@@ -1,0 +1,44 @@
+{
+  "status": "PRE_REGISTERED_NOT_ALL_TRAINED",
+  "source": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/scripts/rewards.py",
+  "source_sha256": "4107426fe5bc9bac14f918843413e6152752175d1b8837bdce7144c5469b1d6d",
+  "versions": {
+    "R0": {
+      "version": "R0_original_pilot_v3",
+      "progress": 5.0,
+      "complete": 20.0,
+      "failure": -10.0,
+      "force_per_Ns": 0.0002,
+      "moment_per_Nms": 0.0,
+      "variation": 0.01,
+      "failure_floor": 1.5,
+      "rationale": "Exact original reward; use original environment output."
+    },
+    "R1": {
+      "version": "R1_completion_dominant_balanced_dose",
+      "progress": 2.0,
+      "complete": 20.0,
+      "failure": -15.0,
+      "force_per_Ns": 0.0005,
+      "moment_per_Nms": 0.005,
+      "variation": 0.02,
+      "failure_floor": 15.0,
+      "rationale": "Reduce transient progress credit, retain a large terminal success gap, jointly price observed force and moment."
+    },
+    "R2": {
+      "version": "R2_quadratic_phase_potential_balanced_dose",
+      "progress": 2.0,
+      "complete": 20.0,
+      "failure": -15.0,
+      "force_per_Ns": 0.0005,
+      "moment_per_Nms": 0.005,
+      "variation": 0.1,
+      "failure_floor": 15.0,
+      "rationale": "Quadratic normalized task potential gives more credit near full phase-chain completion; increase online acceleration proxy cost."
+    }
+  },
+  "R0_source": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/pilot_env.py",
+  "R0_sha256": "62f6fd7a048fbf5c2b3fd552981e2e597b01f2830892e671304721e800df7125",
+  "versioned_source_bundles": "source_versions/<content_sha256>",
+  "selection_metrics": "Original runtime task completion, unchanged safety/causal audit, equal-duration complete JF/JM and actual Human motion; no cross-reward return comparison"
+}

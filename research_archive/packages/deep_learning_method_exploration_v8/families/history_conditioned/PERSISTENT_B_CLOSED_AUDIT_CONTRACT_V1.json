@@ -1,0 +1,29 @@
+{
+  "id": "PERSISTENT_B_CLOSED_AUDIT_V1",
+  "status": "SOURCE_ONLY_PASS_PENDING_PARENT_CLOSED_JOB_ANALYSIS_APPROVAL",
+  "group": "V8PERSISTB01",
+  "scope": "Independent raw/scorer replay of T1_B and T2_B; original inter-repetition boundary and new native increments reconciled",
+  "physical_steps": 0,
+  "model_fits": 0,
+  "background_jobs": 0,
+  "requested_single_cpu_wall_cap_s": 120,
+  "requested_process_cpu_cap_s": 120,
+  "requires": [
+    "Explicit parent approval after the physical job closes",
+    "WORKER_DONE + EXIT + SUPERVISOR_END and no live owned PID/start_ticks",
+    "Exactly closed T1_B / BOUNDARY_1_2 / T2_B START/END ledger entries",
+    "Numeric interpreter -B; single BLAS/OMP/MKL CPU"
+  ],
+  "reads": [
+    "Frozen source/config/case/scoring/motion contracts",
+    "Closed T1_B/T2_B trace.npz, summary, launch, runtime_artifacts.json.gz",
+    "Original immutable scorer functions, derived reports used only for comparison",
+    "Closed persistent delta/boundary/session/accounting evidence and global ledger"
+  ],
+  "writes_only": "families/history_conditioned/audit/PERSISTENT_B_V8PERSISTB01_CLOSED.json",
+  "no_mutation": ["Frozen B source", "Original raw", "Original scorer", "Original reports", "Root ledger", "ACTIVATION", "Global deadlines"],
+  "limitations": [
+    "Boundary step clock/control archived; no full per-step boundary qpos/qvel archive. Same object/time/source evidence supports continuation but cannot independently establish bitwise hidden-state equality through those unlogged states.",
+    "Known-heavy B-only engineering result supplies no learned adaptation or independent-patient performance claim."
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schema": "architecture_recovery_v2.functional_campaign_config.v1",
+  "study_id": "phase1_bed_feasible_multirate_probe_development_v3",
+  "evidence_category": "development",
+  "arms": [
+    "oracle",
+    "adaptive",
+    "fixed_nominal",
+    "wrong_geometry_adaptive_dynamics",
+    "no_dynamics_adaptation"
+  ],
+  "cases": [
+    {"setup_seed": 3101, "task_seed": 4201, "task_profile": "coordinated", "high_rom": false},
+    {"setup_seed": 3102, "task_seed": 4202, "task_profile": "hip_lead", "high_rom": false},
+    {"setup_seed": 3103, "task_seed": 4203, "task_profile": "two_rate", "high_rom": false},
+    {"setup_seed": 3104, "task_seed": 4204, "task_profile": "coordinated", "high_rom": true},
+    {"setup_seed": 3105, "task_seed": 4205, "task_profile": "hip_lead", "high_rom": true},
+    {"setup_seed": 3106, "task_seed": 4206, "task_profile": "two_rate", "high_rom": true}
+  ],
+  "control_dt_s": 0.02,
+  "probe_duration_s": 8.0,
+  "probe_control_dt_s": 0.01,
+  "environment_contract": {
+    "scenario": "lying_bed_contact_free_clearance",
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.01,
+    "generation_static_force_peak_n_maximum": 150.0,
+    "generation_static_moment_peak_nm_maximum": 45.0,
+    "contact_dynamics": "not invoked because generated reference is clearance-feasible; hidden true clearance is evaluated every probe and task step"
+  },
+  "hidden_generation": {
+    "source": "all continuous ranges are the explicit DEFAULT_GENERATION_DOMAIN in the snapshotted functional_benchmark.py",
+    "task_profiles": ["coordinated", "hip_lead", "two_rate"],
+    "bed_height_m": 0.012,
+    "shank_radius_m": 0.045,
+    "minimum_reference_clearance_m": 0.01,
+    "generation_static_force_peak_n_maximum": 150.0,
+    "generation_static_moment_peak_nm_maximum": 45.0,
+    "generation_max_attempts": 5000
+  },
+  "held_out_policy": {
+    "is_held_out": false,
+    "seeds_may_inform_repairs": true,
+    "formal_seed_namespace": "not accessed by this config"
+  }
+}

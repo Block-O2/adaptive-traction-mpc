@@ -1,0 +1,44 @@
+{
+  "group": "LSTIM01",
+  "frozen_unix": 1793041683.9229972,
+  "branches": [
+    "TERMINAL_APPROACH_TIMING_REPAIR_V2"
+  ],
+  "config_sha256": "d91d48c017a73857d388618bcf5f40462b6c1f478e8f5d55c6ba845745cc0a0e",
+  "worker_source_sha256": "b304756318fcb91b9895910636cc0a18c91366046d1c954321e25050224b372d",
+  "frozen_artifacts": {
+    "source/v7_causal_context.py": "8f6cb63214afb511dcff07d04326505602c176731ffaf95a39826bc7dace4d3e",
+    "source/v7_case_adapter_v2.py": "6c59f1976802a2dce0613b1c6ae9b4974066f34f37fe76d1d6457ac5ea02cd87",
+    "models/LOCAL_RESPONSE_2D_V1/MODEL.json": "a2ac6678017bb14a3224f423c6a0c142eb3211427ff82c0bbfbd05109d7a80b8",
+    "freeze/VARIED_HUMAN_SPLIT_V1.json": "9e194a1df3de80501382048334f3c55ac6bf0c8e4689fb4edb0dedd1241cf934",
+    "freeze/DEVPC02.json": "2e0586f5e735e6776a38c2f5f7e402434889c43c01d67307828a6e016689d19b",
+    "experiments/H150_SIMPLE_BASELINE_COMPLETENESS_V1.json": "4b9b3a7fab34de64f896ae37fba58b4f2072162122034bc1170a242bc90ea81f",
+    "attempts/H150L01_H150_FIXED_RESULT.json": "a7094decfe8d521dce4cc1ea465e971664d437b956366260b3ac401b1738ff1c",
+    "analysis/HUMANLS01_EXCURSION_MECHANISM.json": "c39b33b144cbdf7b0fdf83c60bfd17c0bd5fbfcd3523954bf0c3c97cf427707f",
+    "source/v7_worker_v7.py": "b304756318fcb91b9895910636cc0a18c91366046d1c954321e25050224b372d",
+    "attempts/LSREP01_R_COMMON_M015_RESULT.json": "9b404097920b98bcf7ba2926aa85f2b2b6c4ebf71b3d35e50cbb0ced4c784e6e",
+    "attempts/LSREP01_R_COMMON_M030_RESULT.json": "405140da9c2a1330994e309fe8eee56aefc8503fd85a300e0ba9920e70c01d6e",
+    "attempts/LSREP01_R_RELATIVE_P015_RESULT.json": "604d20cb2b36c858b7f233fabd907a9f4ec2e1f5aa826115a905523d384c0493",
+    "runtime/control/early_return_planner.py": "696cbea58ef2caa28ee1c0ff17ad5d75c01131f3a22239a0cb37e65fce9ed664"
+  },
+  "quality_contract": {
+    "original_gates": "all unchanged",
+    "hip_knee_jerk_RMS_ratio_max_vs_V6PHASE": 1.001,
+    "force_norm_rate_RMS_ratio_max_vs_V6PHASE": 1.004,
+    "JF_delta_max": 0.0,
+    "JM_delta_max": 0.0,
+    "note": "V6PHASE completes but fails original excursion. Extra continuous phase quality comparison doesnot qualify it or candidates; original B comparison remains required."
+  },
+  "hypothesis": "Three legalRETURNinteriorpath contrasts changedfulltrajectorybut failedexcursion; theirknee rangemarginresponse was tiny/wrongdirection. The unchangedterminalapproachR4duration directlyaffects kneefinalmotion/settling beforeconstantreference, so legal1.10/1.30 factors aroundold1.20 may alterundershoot enough torestorequalification. Optionalhip-onlyT5disabledinallnewtimingcontrasts toavoidconfoundingits fragileconstantkneepremise; explicitNO_T5controlrequired.",
+  "baseline": "OriginalBonlyqualified incurrentLSmenu; H150/phasefailedrowsremainpreserved; originalqualification first, thencontinuousJF/JM/nativequality vsphase separately",
+  "independent_state": false,
+  "budget": {
+    "children": 5,
+    "cold_parents": 1,
+    "job_wall_cap_s": 7200,
+    "per_physical_timeout_s": 600,
+    "workers": 1,
+    "global_deadline": 1793073411.846771
+  },
+  "stop": "No informative direction/actual effect, no justified mechanism revision, original safety or deadline/resources. Any next iteration must be newly registered before run."
+}

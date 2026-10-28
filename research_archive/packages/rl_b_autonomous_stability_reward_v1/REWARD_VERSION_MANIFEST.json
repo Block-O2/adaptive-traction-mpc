@@ -1,0 +1,109 @@
+{
+  "status": "VERSIONED_FORMULAS_TRAINING_STATUS_IN_RESULTS",
+  "source": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/scripts/rewards.py",
+  "source_sha256": "cd6129342a2abc0b1e24fd7dff19f8091e33c7adb25b65345d026e991814f8e5",
+  "versions": {
+    "R0": {
+      "version": "R0_original_pilot_v3",
+      "progress": 5.0,
+      "complete": 20.0,
+      "failure": -10.0,
+      "force_per_Ns": 0.0002,
+      "moment_per_Nms": 0.0,
+      "variation": 0.01,
+      "failure_floor": 1.5,
+      "rationale": "Exact original reward; use original environment output."
+    },
+    "R1": {
+      "version": "R1_completion_dominant_balanced_dose",
+      "progress": 2.0,
+      "complete": 20.0,
+      "failure": -15.0,
+      "force_per_Ns": 0.0005,
+      "moment_per_Nms": 0.005,
+      "variation": 0.02,
+      "failure_floor": 15.0,
+      "rationale": "Reduce transient progress credit, retain a large terminal success gap, jointly price observed force and moment."
+    },
+    "R2": {
+      "version": "R2_quadratic_phase_potential_balanced_dose",
+      "progress": 2.0,
+      "complete": 20.0,
+      "failure": -15.0,
+      "force_per_Ns": 0.0005,
+      "moment_per_Nms": 0.005,
+      "variation": 0.1,
+      "failure_floor": 15.0,
+      "rationale": "Quadratic normalized task potential gives more credit near full phase-chain completion; increase online acceleration proxy cost."
+    },
+    "R3": {
+      "version": "R3_R1_uniform_units_div30",
+      "progress": 0.06666666666666667,
+      "complete": 0.6666666666666666,
+      "failure": -0.5,
+      "force_per_Ns": 1.6666666666666667e-05,
+      "moment_per_Nms": 0.00016666666666666666,
+      "variation": 0.0006666666666666666,
+      "failure_floor": 0.5,
+      "rationale": "Uniform positive scaling of R1 by its absolute failure penalty15 plus floor15; probe critic/GAE/joint-clip coupling with unchanged parent optimizer and critic. No preference or physics change."
+    }
+  },
+  "R0_source": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/pilot_env.py",
+  "R0_sha256": "62f6fd7a048fbf5c2b3fd552981e2e597b01f2830892e671304721e800df7125",
+  "versioned_source_bundles": "source_versions/<content_sha256>",
+  "selection_metrics": "Original runtime task completion, unchanged safety/causal audit, equal-duration complete JF/JM and actual Human motion; no cross-reward return comparison",
+  "definition_identities": {
+    "R0": {
+      "id": "R0",
+      "complete_source_sha256": "4107426fe5bc9bac14f918843413e6152752175d1b8837bdce7144c5469b1d6d",
+      "selected_config_sha256": "f225ca41e959312da067ab22de401f7bdbae539c4d5965fc89f624746802e58b",
+      "complete_source_path": "reward_versions/R0/reward.py",
+      "selected_config_path": "reward_versions/R0/SELECTED_CONFIG.json",
+      "definition_sha256": "6d67d389cb85130e2e7fe074d311605058a6f482e7b0d2da458c032afb3f6d28",
+      "definition_path": "reward_versions/R0/DEFINITION.json"
+    },
+    "R1": {
+      "id": "R1",
+      "complete_source_sha256": "4107426fe5bc9bac14f918843413e6152752175d1b8837bdce7144c5469b1d6d",
+      "selected_config_sha256": "637867f9b1b03b03891a430b1485938f3dbb04910bece928b04bb7b5710a1609",
+      "complete_source_path": "reward_versions/R1/reward.py",
+      "selected_config_path": "reward_versions/R1/SELECTED_CONFIG.json",
+      "definition_sha256": "e772fd31168a4aa262e0bcf0466d22a85972723439f197ed952b2205c19197ec",
+      "definition_path": "reward_versions/R1/DEFINITION.json"
+    },
+    "R2": {
+      "id": "R2",
+      "complete_source_sha256": "4107426fe5bc9bac14f918843413e6152752175d1b8837bdce7144c5469b1d6d",
+      "selected_config_sha256": "4ccc93361f0ef7ba35d41460118b56a2787af43f0307aa1a759ed175224af167",
+      "complete_source_path": "reward_versions/R2/reward.py",
+      "selected_config_path": "reward_versions/R2/SELECTED_CONFIG.json",
+      "definition_sha256": "56a39b02cf6a93211967212f897721a49d366e66c249c2d810afe05cc0037d91",
+      "definition_path": "reward_versions/R2/DEFINITION.json"
+    },
+    "R3": {
+      "id": "R3",
+      "complete_source_sha256": "cd6129342a2abc0b1e24fd7dff19f8091e33c7adb25b65345d026e991814f8e5",
+      "selected_config_sha256": "dffd7017680925605f1f2442852cfe19a80b9495f9c896cda4b6ed271148f764",
+      "complete_source_path": "reward_versions/R3/reward.py",
+      "selected_config_path": "reward_versions/R3/SELECTED_CONFIG.json",
+      "definition_sha256": "85b9349a83c3fa4a54946d2763776895e40501da081b0b07ec0dd80ed00baf1a",
+      "definition_path": "reward_versions/R3/DEFINITION.json"
+    }
+  },
+  "identity_annotation_utc": "2026-10-20T20:37:28.218556+00:00",
+  "previous_manifest_sha256": "e35ed1082136b67f39b50026ff7c42498cef08362a298e6e4c85123fb8ab109a",
+  "identity_scope": "Original R0/R1/R2 definitions remain immutable. Added R3 has an independent exact full-source/config definition. Actual per-job implementations remain source-bound.",
+  "registered_utc": "2026-10-21T01:46:07.243071+00:00",
+  "previous_manifest_archive": "audit/reward_manifest_versions/REWARD_VERSION_MANIFEST_e35ed1082136b67f39b50026ff7c42498cef08362a298e6e4c85123fb8ab109a.json",
+  "active_module_implementation_equivalence": {
+    "from_source_sha256": "4107426fe5bc9bac14f918843413e6152752175d1b8837bdce7144c5469b1d6d",
+    "to_source_sha256": "cd6129342a2abc0b1e24fd7dff19f8091e33c7adb25b65345d026e991814f8e5",
+    "unchanged_versions": [
+      "R0",
+      "R1",
+      "R2"
+    ],
+    "audit_path": "audit/R3_REWARD_ACTIVATED_AUDIT.json",
+    "audit_sha256": "bb7750d1751529e198e3ec538b2c81678abcbd70018d1cafc1c93c0b1977cd0f"
+  }
+}

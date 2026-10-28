@@ -1,0 +1,52 @@
+{
+  "schema": "stage5_cr12_sim_v0",
+  "evidence_category": "smoke_engineering_validation_only",
+  "robot_model_selector": "cr12_v0",
+  "official_source": {
+    "repository": "https://github.com/RokaeRobot/rokae_ros2.git",
+    "commit": "d6a508c38513d4c39b2f10f14275d0e26df7fb43",
+    "urdf": "rokae_description/urdf/xMateCR12.urdf.xacro",
+    "srdf": "rokae_xMateCR12_moveit_config/config/xMateCR12.srdf",
+    "mesh_directory": "rokae_description/meshes/xMateCR12",
+    "license": "Apache-2.0"
+  },
+  "lab_cad": {
+    "status": "not_found_in_repository_or_local_user_document_locations",
+    "v1_enabled": false,
+    "missing": [
+      "professor STEP/STP file",
+      "HEX-H QC sensor transform from CR12 flange",
+      "adapter transform",
+      "cuff/end-effector transform and mounting orientation"
+    ]
+  },
+  "frame_chain_v0": {
+    "world_from_base": "unchanged stage5_geometry_mechanics_v1 T_WB",
+    "base_to_link6": "official URDF joint chain joint1..joint6",
+    "link6_origin_as_provisional_flange": true,
+    "flange_from_cuff": "unchanged provisional stage5_geometry_mechanics_v1 T_EC",
+    "hex_h_qc_sensor_frame": null
+  },
+  "mujoco_adapter": {
+    "official_link_inertials_unchanged": true,
+    "official_joint_limits_unchanged": true,
+    "official_effort_limits_used_as_torque_actuator_limits": true,
+    "official_mesh_scale": [0.001, 0.001, 0.001],
+    "joint_armature_kg_m2": [0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    "joint_armature_source": "inherited Stage-5 MuJoCo numerical regularization; not an official CR12 hardware parameter",
+    "joint_damping_nms_rad": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  },
+  "unchanged_semantics": [
+    "Human V2",
+    "goal task and targets",
+    "cuff/Human attachment semantics",
+    "Human estimator/model",
+    "MPC cost and horizon",
+    "Safety Filter and BRAKE",
+    "motion/safety/acceleration limits",
+    "pacing",
+    "Human adaptation",
+    "value/RL logic"
+  ]
+}
+

@@ -1,0 +1,84 @@
+{
+  "study": "rl_b_autonomous_replication_v1",
+  "frozen_unix": 1792487209.5907483,
+  "question": "Does the exact pilot PPO task-learning signal replicate over three independently initialized training seeds?",
+  "category": "BOUNDED_DEVELOPMENT_REPLICATION_NOT_FORMAL_QUALIFICATION",
+  "seed_rule": "first 8 hex digits of SHA256(package_name + :stage1: + index), modulo 2147483647; indices 0,1,2; generated only after this protocol is written",
+  "stage1": {
+    "stages": [
+      20,
+      50
+    ],
+    "optional_extension": 80,
+    "episode_cap": 240,
+    "all_seeds_reported": true,
+    "no_seed_specific_tuning": true,
+    "extension_rule": "At 50 extend ALL three seeds to 80 only if at least two seeds have a higher last-10 than first-10 training completion rate, not all three have final repeated runtime success, at least 90 minutes remain before no-new-physics and >12M native steps remain. Frozen evaluation cannot choose seed/reward; no extension otherwise."
+  },
+  "evaluation": {
+    "episode_cap": 24,
+    "schedule": [
+      "initial deterministic once per seed",
+      "episode20 deterministic once per seed",
+      "episode50 deterministic twice per seed",
+      "if extension episode80 deterministic twice per seed",
+      "one fixed legal plus-one control explicitly not B/H150",
+      "if Stage2 final deterministic twice against its frozen Stage1 parent"
+    ],
+    "nominal_only": true,
+    "environment_seed": 20261020,
+    "physical_initial_state_rule": "Exact historical deterministic commissioning/recovery and nominal task state; environment seed does not randomize patient or physical parameters.",
+    "no_heldout_generalization_claim": true,
+    "not_used_for_configuration_selection": true
+  },
+  "replication_pass_rule": "All three seeds improve from an initial deterministic runtime failure to repeated 2/2 runtime success at the final preregistered checkpoint. Otherwise report partial/not replicated, with every seed. Runtime success is not matched/full qualification.",
+  "stage2": {
+    "episode_cap": 50,
+    "planned_episodes": 30,
+    "parent_rule": "smallest numerical Stage1 seed, final preregistered checkpoint; never pick best force result",
+    "gate": "3/3 replication criterion, parent repeated 2/2 runtime complete, no observed hard safety/reward/ownership defect, >60 minutes until no-new-physics and sufficient native budget; full scorer missing permits non-promotion development only",
+    "reward_design": "Freeze a simple task/progress/completion + force + motion cost after Stage1 training-reward audit and before Stage2. No tuning on frozen evaluation; no reward revision branch planned.",
+    "checkpoints": [
+      10,
+      20,
+      30
+    ],
+    "stop_rule": "Stop on observed safety/reward/ownership defect, nonfinite values, or after a block of 10 with training completion rate more than 20 percentage points below the parent last20; final frozen task failure forbids improvement claim."
+  },
+  "unchanged_scientific_variables": [
+    "41-dimensional causal observation allowlist",
+    "2 bounded continuous progress-fraction intents, no teacher",
+    "pilot_v3_failure_cost_floor reward and all PPO hyperparameters for Stage1",
+    "original robot/cuff/passive hip-knee Human physics",
+    "0.25ms native steps, 5ms controls",
+    "original planner/certificate/admission/governor/40ms bridge/100ms lifecycle/controller/allocator",
+    "original task, absolute safety and scorer thresholds"
+  ],
+  "truth_firewall": "Actor uses current causal measured/estimated interface only. qpos/qvel/native and future truth are evaluation-only. No human future truth or teacher actions.",
+  "qualification": {
+    "runtime": "original COMPLETE, all OUTBOUND/HOLD/RETURN transitions and causal completion commit",
+    "matched": "all original frozen matched task conditions; timing alone insufficient",
+    "full": "original matched task+safety+motion/fairness+causal all passing; missing semantics means NOT_READY",
+    "host_realtime": "NOT_EVALUABLE in scientific mode; no strict55 claim"
+  },
+  "resources": {
+    "t0_unix": 1792486980.0,
+    "hard_stop_unix": 1792515780.0,
+    "no_new_physics_after_unix": 1792512180.0,
+    "native_steps_hard_cap": 42000000,
+    "rl_decisions_hard_cap": 40000,
+    "optimizer_steps_hard_cap": 12000,
+    "episode_decision_cap": 128,
+    "max_episode_wall_s": 300,
+    "min_available_ram_GiB": 6,
+    "min_free_disk_GiB": 10,
+    "max_output_GiB": 35,
+    "cpu_threads_per_environment": 1,
+    "maximum_physics_envs": 1,
+    "process_timeout_s": 14400,
+    "monitor_interval_s": 15
+  },
+  "exclusions": "No task failure excluded. Infrastructure/resource interruption is PARTIAL_INFRASTRUCTURE and counts as a physical attempt, with actual completed steps, but is never relabeled a task failure or successful training episode.",
+  "train_artifacts": "Every episode: compact PPO transition/rollout, terminal summary, reward parts, observed native/motion/safety/causal audit, action proposals/receipts, resources. Periodic checkpoints at initialization and every 5 completed episodes plus phase ends; complete raw for every frozen evaluation. Training native journal and large runtime raw are temporary, audited then pruned with SHA256 tombstones; failed/partial summaries and compact evidence remain.",
+  "stop_boundary": "No final campaign, no next research package, no Git writes or instance changes."
+}

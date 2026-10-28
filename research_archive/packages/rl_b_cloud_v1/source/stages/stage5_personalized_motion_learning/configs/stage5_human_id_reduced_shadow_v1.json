@@ -1,0 +1,92 @@
+{
+  "schema": "stage5_human_id_reduced_shadow_v1",
+  "evidence_category": "small_preregistered_shadow_validation",
+  "status": "PREREGISTERED_FOR_THIS_TASK",
+  "mapping": {
+    "scale_names": ["alpha_M", "alpha_K", "alpha_D"],
+    "alpha_M_beta_indices": [0, 1, 2, 3, 4],
+    "alpha_K_beta_indices": [5, 6, 7, 8],
+    "alpha_D_beta_indices": [9, 10],
+    "formula": "beta(theta)=dynamic_scale_projection(beta_nominal) @ theta",
+    "stiffness_rest_coupling": "k1,k2,rho1=k1*qrest1,rho2=k2*qrest2 share alpha_K, so q_rest remains fixed",
+    "interpretation": "control-effective dimensionless scales, not anatomical truth"
+  },
+  "fixed_interface": {
+    "plant": "Stage-5 Plant-v1 nominal interface",
+    "controller": "stage5_controller_nominal_kelvin_voigt_v1",
+    "interface_adaptation": false
+  },
+  "task": "provisional_20deg_35deg_path_free_outbound_hold_return",
+  "controller": {
+    "human_model": "fixed nominal for every case",
+    "human_adaptation_in_control": false,
+    "cem_random_seed": 20260824,
+    "planning_physical_force_ceiling_n": 180.0,
+    "planning_joint_velocity_ceiling_deg_s": [15.0, 25.0],
+    "terminal_value": 0.0
+  },
+  "identifier": {
+    "sample_period_s": 0.005,
+    "integration_window_s": 0.2,
+    "fit_block_stride_s": 0.05,
+    "minimum_fit_blocks": 16,
+    "update_interval_s": 0.25,
+    "scale_bounds": [0.5, 1.5],
+    "prior_regularization_weight": 0.001,
+    "smoothing_alpha": 0.1,
+    "maximum_update_fraction_of_bound_span": 0.03,
+    "future_embargo_windows": 1,
+    "future_validation_blocks": [8, 10, 12],
+    "trust_method": "one_challenger_HAC_lag2_familywise_alpha_spending",
+    "publication": "shadow_incumbent_only",
+    "arbitrary_condition_number_GO_gate": false
+  },
+  "identifiability_audit": {
+    "regularization_counted_as_information": false,
+    "history_prefix_s": [1.25, 2.5, "full_available"],
+    "integration_window_sensitivity_s": [0.1, 0.2, 0.4],
+    "phase_breakdown": ["OUTBOUND", "HOLD", "RETURN"],
+    "regularization_sensitivity_weights": [0.0, 0.0001, 0.001, 0.01]
+  },
+  "cases": [
+    {
+      "name": "nominal",
+      "truth_scales_evaluation_only": [1.0, 1.0, 1.0],
+      "trace_source": "reuse_human_id_shadow_v1_diagnostic_attempt_03"
+    },
+    {
+      "name": "mass_plus_8pct",
+      "truth_scales_evaluation_only": [1.08, 1.0, 1.0],
+      "trace_source": "reuse_human_id_shadow_v1_diagnostic_attempt_03",
+      "analysis_role": "adaptation_latency_pre_abort"
+    },
+    {
+      "name": "stiffness_plus_15pct",
+      "truth_scales_evaluation_only": [1.0, 1.15, 1.0],
+      "trace_source": "new_small_shadow_diagnostic"
+    },
+    {
+      "name": "damping_plus_20pct",
+      "truth_scales_evaluation_only": [1.0, 1.0, 1.2],
+      "trace_source": "reuse_human_id_shadow_v1_diagnostic_attempt_03"
+    },
+    {
+      "name": "mixed_effective_scales",
+      "truth_scales_evaluation_only": [1.04, 1.10, 1.10],
+      "trace_source": "new_small_shadow_diagnostic"
+    }
+  ],
+  "decision_rule": {
+    "R_A": "conditioned and stable reduced estimates plus causal future acceptance of useful candidates in representative mismatches without truth",
+    "R_B": "only one or two effective directions retain usable causal prediction evidence",
+    "R_C": "the reduced model does not provide stable causal held-out prediction benefit"
+  },
+  "scope": {
+    "formal_or_authoritative": false,
+    "closed_loop_adaptation": false,
+    "interface_identification_reopened": false,
+    "anatomical_recovery_claim": false,
+    "hardware_readiness_claim": false,
+    "value_or_RL_learning": false
+  }
+}

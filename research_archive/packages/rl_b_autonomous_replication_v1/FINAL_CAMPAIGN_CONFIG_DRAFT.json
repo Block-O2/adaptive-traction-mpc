@@ -1,0 +1,57 @@
+{
+  "status": "BLOCKED_PROPOSAL_ONLY_NOT_EXECUTION_AUTHORIZED",
+  "execution_allowed": false,
+  "training_seeds": [
+    1106823814,
+    1495656323,
+    1630784693
+  ],
+  "seed_count": 3,
+  "episodes_per_seed_candidate": 200,
+  "episode_budget_candidate": 600,
+  "RL_decision_hard_cap_candidate": 76800,
+  "native_training_reserve_candidate": 99000000,
+  "evaluation_attempt_cap_candidate": 48,
+  "native_total_reserve_candidate": 106920000,
+  "scheduled_review_episodes_per_seed": [
+    50,
+    100,
+    200
+  ],
+  "architecture": "Retain bounded causal 41D observation → 2D Gaussian PPO intent → original certified native robot execution for next bounded development. No teacher; Stage2 descendants must be labeled TASK_PRETRAINED_PPO_FINETUNING.",
+  "PPO": {
+    "net_arch": [
+      32,
+      32
+    ],
+    "learning_rate": 0.0003,
+    "gamma": 1.0,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "ent_coef": 0.0,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "n_epochs": 4,
+    "batch_size": 16,
+    "rollout": "one complete physical episode per PPO rollout; variable length; every recorded training transition enters update",
+    "initialization": "random weights; no teachers"
+  },
+  "task_pretraining_reward": "pilot_v3_failure_cost_floor",
+  "performance_reward": "UNRESOLVED_DO_NOT_EXECUTE; accept only after paired Stage2 task/safety/motion qualification with original scorer",
+  "original_scorer_sha256": null,
+  "original_B_H150_baseline_identity": null,
+  "fresh_patient_train_validation_final_test_manifest": null,
+  "wall_estimate_hours_current_failed_success_mix": 10.426126196135415,
+  "wall_estimate_hours_complete_episode_cost_plus10s_overhead": 15.79905937049989,
+  "evaluation_and_report_reserve_hours": 3.2639247496399912,
+  "estimate_limitation": "Planning only. Successful episodes are longer than many failed partials; do not extrapolate only the cheaper failed-episode mix. No million-RL-decision campaign is recommended or started.",
+  "unlock_conditions": [
+    "Original B/H150 full scorer/baseline manifest/raw/state identity missing",
+    "G4_STRICT_PASS remains FAIL: natural HOLD-failure/absolute-safety and complete original matrix not closed; new natural OUTBOUND/RETURN timeout evidence is preserved separately",
+    "Observed regression: two previously successful50-episode deterministic checkpoints failed after continued80-episode training; stochastic-vs-mean execution and credit assignment remain unresolved",
+    "No cross-patient held-out generalization",
+    "No formally qualified force/motion advantage demonstrated",
+    "Exact three-seed learning replication criterion failed"
+  ],
+  "instance_change": "No purchase/resize; benchmark at most2 independent environments after parity and resource checks if throughput is later the limiting factor."
+}

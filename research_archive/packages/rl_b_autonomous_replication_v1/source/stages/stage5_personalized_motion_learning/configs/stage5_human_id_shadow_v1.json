@@ -1,0 +1,71 @@
+{
+  "schema": "stage5_human_id_shadow_v1",
+  "evidence_category": "small_diagnostic_shadow_validation",
+  "fixed_interface": {
+    "plant": "Stage-5 Plant-v1 nominal interface",
+    "controller": "stage5_controller_nominal_kelvin_voigt_v1",
+    "interface_adaptation": false,
+    "interface_hypothesis_bank_in_control": false
+  },
+  "task": "provisional_20deg_35deg_path_free_outbound_hold_return",
+  "controller": {
+    "human_model": "fixed nominal for every case",
+    "planning_physical_force_ceiling_n": 180.0,
+    "planning_joint_velocity_ceiling_deg_s": [15.0, 25.0],
+    "human_adaptation_in_control": false,
+    "terminal_value": 0.0
+  },
+  "identifier": {
+    "parameterization": "Stage-4 11-parameter effective Human base dynamics",
+    "sample_period_s": 0.005,
+    "integration_window_s": 0.2,
+    "fit_block_stride_s": 0.05,
+    "minimum_fit_blocks": 16,
+    "update_interval_s": 0.25,
+    "future_embargo_windows": 1,
+    "future_validation_blocks": [8, 10, 12],
+    "trust_method": "one_challenger_HAC_lag2_familywise_alpha_spending",
+    "publication": "shadow_incumbent_only"
+  },
+  "cases": [
+    {
+      "name": "nominal",
+      "mass_scale": 1.0,
+      "stiffness_scale": 1.0,
+      "damping_scale": 1.0,
+      "rest_offset_deg": [0.0, 0.0]
+    },
+    {
+      "name": "mass_plus_8pct",
+      "mass_scale": 1.08,
+      "stiffness_scale": 1.0,
+      "damping_scale": 1.0,
+      "rest_offset_deg": [0.0, 0.0]
+    },
+    {
+      "name": "stiffness_plus_15pct_rest_shift",
+      "mass_scale": 1.0,
+      "stiffness_scale": 1.15,
+      "damping_scale": 1.0,
+      "rest_offset_deg": [-2.0, 2.0]
+    },
+    {
+      "name": "damping_plus_20pct",
+      "mass_scale": 1.0,
+      "stiffness_scale": 1.0,
+      "damping_scale": 1.2,
+      "rest_offset_deg": [0.0, 0.0]
+    }
+  ],
+  "decision_rule": {
+    "H_A": "at least two nonnominal cases publish stable shadow incumbents with positive embargoed future evidence and no practical full-beta conditioning warning",
+    "H_B": "the task supplies usable dynamics prediction signal but the 11-beta fit is practically correlated or unstable; reduce to a control-effective block before closed-loop adaptation",
+    "H_C": "the task supplies insufficient deployable-domain rank or future prediction signal even for a reduced interpretation"
+  },
+  "scope": {
+    "anatomical_recovery_claim": false,
+    "formal_campaign": false,
+    "closed_loop_adaptation": false,
+    "value_or_RL_learning": false
+  }
+}

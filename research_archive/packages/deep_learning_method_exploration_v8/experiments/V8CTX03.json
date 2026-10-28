@@ -1,0 +1,275 @@
+{
+  "B": {
+    "id": "B",
+    "base": "B",
+    "posture": [],
+    "early": [],
+    "changes": [],
+    "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+  },
+  "H150": {
+    "id": "H150",
+    "base": "T",
+    "posture": [
+      {
+        "phase": "RETURN",
+        "slot": 2,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      },
+      {
+        "phase": "RETURN",
+        "slot": 3,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      }
+    ],
+    "early": [
+      {
+        "phase": "RETURN",
+        "slot": 1,
+        "duration_factor": 1.1
+      },
+      {
+        "phase": "RETURN",
+        "slot": 4,
+        "duration_factor": 1.2
+      }
+    ],
+    "changes": [],
+    "timing": [
+      {
+        "phase": "RETURN",
+        "slot": 5,
+        "duration_factor": 1.5
+      }
+    ],
+    "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+  },
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+    },
+    {
+      "id": "H150",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "timing": [
+        {
+          "phase": "RETURN",
+          "slot": 5,
+          "duration_factor": 1.5
+        }
+      ],
+      "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+    }
+  ],
+  "matched_reference_group": "SMOOTH_A1",
+  "group": "V8CTX03",
+  "condition": {
+    "name": "V8CTX03",
+    "seed": 2026102713,
+    "prefix": {
+      "OUTBOUND": [
+        [
+          0.068,
+          0.042,
+          0.024
+        ]
+      ],
+      "RETURN": [
+        [
+          0.047,
+          0.026,
+          0.019
+        ]
+      ]
+    },
+    "split": "V8_FROZEN_TRANSFER_V1",
+    "role": "New v8 cold commissioned execution under a preexisting stock virtual condition; no assumption of historically unseen patient"
+  },
+  "case_path": "runtime/source/stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_matrix_up2_xplus_sync_v1.json",
+  "case_key": "high_rom_matrix_up2_xplus_sync_v1",
+  "case_sha256": "4b77e610067c9cdbb37e6eb66f280dda80fa310ac5b19c71cfd5f44bfa33272c",
+  "worker": "v8_worker_v1.py",
+  "algorithm": "v8_frozen_selectors_v2",
+  "mode": "validation",
+  "fork_phase": "OUTBOUND",
+  "fork_slot": 0,
+  "job_wall_cap_s": 3600,
+  "short_horizons_s": [
+    0.5,
+    1,
+    2,
+    4
+  ],
+  "continuation_policy": "FULL_POLICY_COMMITMENT_WITH_FROZEN_SLOT_OVERRIDES",
+  "actions": [
+    {
+      "tag": "B",
+      "action": {
+        "family": "B"
+      },
+      "category": "FROZEN_CONTEXT_TRANSFER_V1"
+    },
+    {
+      "tag": "LATE_H150",
+      "action": {
+        "family": "H150",
+        "legacy": [
+          0.0,
+          0.0
+        ],
+        "original_B_through_outbound_slots": 1
+      },
+      "category": "FROZEN_CONTEXT_TRANSFER_V1"
+    },
+    {
+      "tag": "EARLY_H150",
+      "action": {
+        "family": "H150",
+        "legacy": [
+          0.0,
+          0.0
+        ]
+      },
+      "category": "FROZEN_CONTEXT_TRANSFER_V1"
+    },
+    {
+      "tag": "LATE_PHASE",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.5,
+          0.9668651272926947,
+          -1.0,
+          -0.9859247321976443
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ],
+        "slot_overrides": [
+          {
+            "phase": "OUTBOUND",
+            "slot": 1,
+            "coordinates": {
+              "4": 0.0,
+              "5": 0.0,
+              "7": -1.0
+            }
+          }
+        ],
+        "original_B_through_outbound_slots": 1
+      },
+      "category": "FROZEN_CONTEXT_TRANSFER_V1"
+    },
+    {
+      "tag": "EARLY_PHASE",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.5,
+          0.9668651272926947,
+          -1.0,
+          -0.9859247321976443
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ],
+        "slot_overrides": [
+          {
+            "phase": "OUTBOUND",
+            "slot": 1,
+            "coordinates": {
+              "4": 0.0,
+              "5": 0.0,
+              "7": -1.0
+            }
+          }
+        ]
+      },
+      "category": "FROZEN_CONTEXT_TRANSFER_V1"
+    }
+  ],
+  "value_bundle": "families/critic_value/models/VALUE_FAMILY_V1_FROZEN.json",
+  "simple_control_bundle": "families/critic_value/models/STRONG_CONTROLS_V1_FROZEN.json",
+  "policy_checkpoints": {
+    "B_PPO_RAW": "families/ppo_reward/offline_fit_v2/checkpoints/qualified_force_raw/ALL_EXPOSED_DEVELOPMENT/PPO_linear_commissioned25.json",
+    "B_RF_RAW": "families/ppo_reward/offline_fit_v2/checkpoints/qualified_force_raw/ALL_EXPOSED_DEVELOPMENT/REINFORCE_linear_commissioned25.json",
+    "D_BC_RAW": "families/ppo_reward/offline_fit_v2/checkpoints/qualified_force_raw/ALL_EXPOSED_DEVELOPMENT/BC_linear_commissioned25.json",
+    "B_PPO_SCALED": "families/ppo_reward/offline_fit_v2/checkpoints/qualified_force_scaled/ALL_EXPOSED_DEVELOPMENT/PPO_linear_commissioned25.json"
+  },
+  "frozen_artifacts": {
+    "source/v8_worker_v1.py": "75afa0790eb0078feb6042d7a879e57f6e710b8c8207d81e319358ec2f428118",
+    "source/v8_case_adapter_v1.py": "97595c1e1134869027e13f6f063b5d0cdd0970c8042879ef7f071ae39c858ce0",
+    "families/critic_value/source/value_api.py": "9803755f97cf772cff58c38c31931ff3ec22949de3dc8b7e7f248a41bd254f23",
+    "families/critic_value/source/controls_api.py": "28c3c71150c3eec726cf43e84c966d0bdb7e548d82ba5237b95ca439fe8376d8",
+    "families/critic_value/models/VALUE_FAMILY_V1_FROZEN.json": "5642ff8e36199e85e734daa81af24f039827b5f3f4369e5e3d268b742122c905",
+    "families/critic_value/models/STRONG_CONTROLS_V1_FROZEN.json": "ee237d3897e55226a09d780e7697fc2d9f0b57cf1615752c958755cc060ef995",
+    "families/critic_value/freeze/FIVE_ACTION_MENU_V1.json": "0d1f65b6cc3563f4524daab597d22da2b211963398c18ae832799150d6538b27",
+    "families/ppo_reward/categorical_policy.py": "cd77c52ea42ce87c3c88a710a196c81627cba3626a7eaf3899302287f62520ff",
+    "runtime/RUN_PLAN.json": "6013eab3de986317877fbfc70287b17008ee81f6d205f8768ad911f5385df7d5",
+    "runtime/MOTION_ACCEPTANCE_PROTOCOL.json": "0f41463cab96b71ea39cc06f9fe86f432de07efe307bd486bc1c4df6cc196ece",
+    "families/ppo_reward/offline_fit_v2/checkpoints/qualified_force_raw/ALL_EXPOSED_DEVELOPMENT/PPO_linear_commissioned25.json": "d4562704919e6cd8dc2346aab531bdc676f7eceb95514e9d0e3f60dcad0b80ce",
+    "families/ppo_reward/offline_fit_v2/checkpoints/qualified_force_raw/ALL_EXPOSED_DEVELOPMENT/REINFORCE_linear_commissioned25.json": "f5ff2492fa6c0c1b39b9aba28a4d91d6b7cfbf828eba52e5054be66094cf186d",
+    "families/ppo_reward/offline_fit_v2/checkpoints/qualified_force_raw/ALL_EXPOSED_DEVELOPMENT/BC_linear_commissioned25.json": "559bbf2799908b0cd1c6735ce040af2e884c7e06d3b55be45fb8f1e81903cc7c",
+    "families/ppo_reward/offline_fit_v2/checkpoints/qualified_force_scaled/ALL_EXPOSED_DEVELOPMENT/PPO_linear_commissioned25.json": "33beb75499b7013111794ad4fe130568908ac86367daede61ed8839c95ea3750",
+    "source/v8_frozen_selectors_v2.py": "c140f20d0e380556e20bdd65187f16ab1f5c8bfc972e45c1d87dbe08973080c7",
+    "families/history_conditioned/c3b_inference.py": "d9d4c16ee4eb266693eef673368e2f27ce44fa05bdf7eaefcd5460c2ba0696a2",
+    "families/history_conditioned/completed_history_reader.py": "3e0a08cd45f91b977fc394904806e5eef3b88b443296c42d424728a378c3976f",
+    "families/history_conditioned/trial_interface.py": "e6d857d4fe581ec078535740408dea3e0574aa586ea4e64cc2b7174e4ef3540d",
+    "families/history_conditioned/c3b_offline_v1/FROZEN_FULL_SNAPSHOT.json": "d4ac2decc3732e4a22de538d90ddd646a37cce142d258e43f6e9c82ea7b0ada4",
+    "runtime/source/stages/stage5_personalized_motion_learning/configs/high_rom_v1/high_rom_matrix_up2_xplus_sync_v1.json": "4b77e610067c9cdbb37e6eb66f280dda80fa310ac5b19c71cfd5f44bfa33272c"
+  },
+  "historical_repeats": {},
+  "history_snapshot": "families/history_conditioned/c3b_offline_v1/FROZEN_FULL_SNAPSHOT.json"
+}

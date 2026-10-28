@@ -1,0 +1,65 @@
+{
+  "source_sha256": "87cdc03d00620e4fcc8a592b36e54ad89b1753fb1141f9b2c34eea709116708b",
+  "versions": {
+    "R0": {
+      "version": "R0_original_pilot_v3",
+      "progress": 5.0,
+      "complete": 20.0,
+      "failure": -10.0,
+      "force_per_Ns": 0.0002,
+      "moment_per_Nms": 0.0,
+      "variation": 0.01,
+      "failure_floor": 1.5,
+      "rationale": "Exact original reward; use original environment output."
+    },
+    "R1": {
+      "version": "R1_completion_dominant_balanced_dose",
+      "progress": 2.0,
+      "complete": 20.0,
+      "failure": -15.0,
+      "force_per_Ns": 0.0005,
+      "moment_per_Nms": 0.005,
+      "variation": 0.02,
+      "failure_floor": 15.0,
+      "rationale": "Reduce transient progress credit, retain a large terminal success gap, jointly price observed force and moment."
+    },
+    "R2": {
+      "version": "R2_quadratic_phase_potential_balanced_dose",
+      "progress": 2.0,
+      "complete": 20.0,
+      "failure": -15.0,
+      "force_per_Ns": 0.0005,
+      "moment_per_Nms": 0.005,
+      "variation": 0.1,
+      "failure_floor": 15.0,
+      "rationale": "Quadratic normalized task potential gives more credit near full phase-chain completion; increase online acceleration proxy cost."
+    },
+    "R3": {
+      "version": "R3_R1_uniform_units_div30",
+      "progress": 0.06666666666666667,
+      "complete": 0.6666666666666666,
+      "failure": -0.5,
+      "force_per_Ns": 1.6666666666666667e-05,
+      "moment_per_Nms": 0.00016666666666666666,
+      "variation": 0.0006666666666666666,
+      "failure_floor": 0.5,
+      "rationale": "Uniform positive scaling of R1 by its absolute failure penalty15 plus floor15; probe critic/GAE/joint-clip coupling with unchanged parent optimizer and critic. No preference or physics change."
+    },
+    "R4": {
+      "version": "R4_R1_moment_price_0p020",
+      "progress": 2.0,
+      "complete": 20.0,
+      "failure": -15.0,
+      "force_per_Ns": 0.0005,
+      "moment_per_Nms": 0.02,
+      "variation": 0.02,
+      "failure_floor": 15.0,
+      "rationale": "Single preregistered moment-price hypothesis; all costs/floor independently recomputed."
+    }
+  },
+  "active_training": [
+    "R1",
+    "R4"
+  ],
+  "evaluation_contract": "Original unmodified R0/scorer; full task first"
+}

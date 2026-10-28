@@ -1,0 +1,19 @@
+{
+  "schema": "architecture_recovery_v2.phase0_reproduction.v1",
+  "evidence_category": "formal_reproduction",
+  "historical_benchmark": "stage1_stage9j_gap_decomposition",
+  "source_config": "stages/stage1/configs/spring2d_safety_aware_cem.yaml",
+  "source_script": "stages/stage1/scripts/run_spring2d_stage9j_gap_decomposition.py",
+  "source_authoritative_result": "stages/stage1/results/final/stage9j_gap_decomposition",
+  "output_dir": "stages/stage5_personalized_motion_learning/results/architecture_recovery_v2/phase0/stage1_stage9j_reproduction_v1",
+  "command": "cd stages/stage1 && conda run -n mpc_learn python scripts/run_spring2d_stage9j_gap_decomposition.py --config configs/spring2d_safety_aware_cem.yaml --output-root ../stage5_personalized_motion_learning/results/architecture_recovery_v2/phase0/stage1_stage9j_reproduction_v1",
+  "contract": {
+    "methods": "unchanged source METHODS",
+    "conditions": "unchanged source CONDITIONS",
+    "seeds": [101, 102, 103],
+    "target_and_crossing": "unchanged strict theta >= pi/2",
+    "controller_and_estimator_settings": "unchanged historical config",
+    "reuse_baseline": false,
+    "interpretation": "Reproduction on current V2 HEAD; historical generating revision is unavailable, so numerical mismatch is reported rather than hidden. Crossing alone is not a general adaptive-control success claim."
+  }
+}

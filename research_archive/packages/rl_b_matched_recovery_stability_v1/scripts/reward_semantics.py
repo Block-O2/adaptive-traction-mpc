@@ -1,0 +1,11 @@
+from pathlib import Path
+import json,sys,collections,hashlib
+import numpy as np
+r=Path(__file__).resolve().parents[1];c=r.parent/'rl_b_autonomous_replication_v1';sys.path.insert(0,str(r/'physical/runtime'))
+from audit_reward_physical import audit
+rows=[json.loads(s) for s in (c/'ALL_TRAINING_LOG.jsonl').read_text().splitlines()];out=[]
+for row in rows:
+ p=c/row['run'];a=audit(p);assert a['pass'],row['run'];z=np.load(p/'ppo_rollout.npz');adv=z['advantages'].reshape(-1);ret=z['returns'].reshape(-1);rew=z['rewards'].reshape(-1);n=len(adv);norm=(adv-adv.mean())/(adv.std(ddof=1)+1e-8) if n>1 else adv
+ out.append({'seed':row['training_seed'],'episode':row['index'],'run':row['run'],'pass':a['pass'],'checks':a['checks'],'success':a['success'],'reward':a['sum_reward'],'reward_parts':a['reward_parts'],'force_integral':a['J_F'],'moment_integral':a['J_M'],'phases':a['phases'],'positive_rewards':int(np.sum(rew>0)),'positive_raw_advantages':int(np.sum(adv>0)),'whole_episode_centered_positive_advantages_diagnostic':int(np.sum(norm>0)),'centered_diagnostic_is_not_actual_minibatch_order':True,'last_reward':float(rew[-1]),'first_GAE_advantage':float(adv[0]),'terminal_penalty_GAE_weight_at_first_transition':float(.95**(n-1)),'no_terminal_bootstrap':True,'decisions':n})
+res={'category':'INDEPENDENT_EXISTING_ONLINE_TICK_REWARD_RECOMPUTATION','episodes':out,'all_pass':all(x['pass'] for x in out),'training_updates':0,'new_physics':0,'failures':sum(not x['success'] for x in out),'failures_positive_total_return':sum(not x['success'] and x['reward']>0 for x in out),'failures_with_positive_intermediate_reward':sum(not x['success'] and x['positive_rewards']>0 for x in out),'failures_with_positive_raw_advantage':sum(not x['success'] and x['positive_raw_advantages']>0 for x in out),'singleton_episodes':sum(x['decisions']==1 for x in out),'singleton_minibatch_episodes':sum(x['decisions']%16==1 for x in out),'actual_minibatch_order':'UNAVAILABLE; no replay of gradient updates attempted','sb3_ppo_source_sha256':hashlib.sha256((r/'cpu-env/lib/python3.12/site-packages/stable_baselines3/ppo/ppo.py').read_bytes()).hexdigest()}
+(r/'stability/REWARD_CREDIT_AUDIT.json').write_text(json.dumps(res,indent=2,ensure_ascii=False)+'\n');print(json.dumps({k:v for k,v in res.items() if k!='episodes'},indent=2))

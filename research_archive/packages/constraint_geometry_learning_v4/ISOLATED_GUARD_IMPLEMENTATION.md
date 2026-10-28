@@ -1,0 +1,9 @@
+# 隔离实现与实际执行身份
+
+真正新写的dual endpoint代码位于source/endpoint_study.py，包含解析gap、gradient、Hessian和box交集诊断；source/swept_gap_conditions.py给出条件性采样间标量关系。两者均未注册成物理controller。
+
+物理中唯一clearance扩展为source/branch_diagnostics.py：先调用原clearance_acceleration_correction，原样返回其correction；仅在record内附加同次因果model/state/interface的轴、轴速率、差分跨支、两个实测端点gap/rate等。无truth读取，无滤波，无阈值或命令修改。原clearance_feedback.py及plant、原scorer的SHA在最终保护审计核验。新增日志不自动具备host实时资格。
+
+v4_worker继承已有完整live-state串行fork、父状态hash恢复检查、receipt/raw记录、资源计数和原motion门。source/supervise.py为有限队列增加PID/start_ticks身份、局部wall cap、原ACTIVATION硬截止和owned后代清理。不会恢复旧checkpoint进入新动作语义，也没有PPO训练。
+
+FACT仅改变两个预登记compiler权限因子；guard与几何不变，factorial_planner.py在固定modal坐标下独立控制逐关节终点锁和parent duration下限保留。该实验不等于旧18D与新8D的等权限全族优化。

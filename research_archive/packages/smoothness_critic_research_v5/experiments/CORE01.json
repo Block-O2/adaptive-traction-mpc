@@ -1,0 +1,216 @@
+{
+  "condition": {
+    "name": "CORE01",
+    "seed": 2026102001,
+    "prefix": {
+      "OUTBOUND": [
+        [
+          0.08,
+          0.04,
+          0.03
+        ]
+      ],
+      "RETURN": [
+        [
+          0.04,
+          0.02,
+          0.03
+        ]
+      ]
+    },
+    "split": "train",
+    "role": "historical W1 exposed",
+    "parent_family": "D01"
+  },
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+    },
+    {
+      "id": "H150",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "timing": [
+        {
+          "phase": "RETURN",
+          "slot": 5,
+          "duration_factor": 1.5
+        }
+      ],
+      "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+    }
+  ],
+  "group": "CORE01",
+  "B": {
+    "id": "B",
+    "base": "B",
+    "posture": [],
+    "early": [],
+    "changes": [],
+    "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+  },
+  "H150": {
+    "id": "H150",
+    "base": "T",
+    "posture": [
+      {
+        "phase": "RETURN",
+        "slot": 2,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      },
+      {
+        "phase": "RETURN",
+        "slot": 3,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      }
+    ],
+    "early": [
+      {
+        "phase": "RETURN",
+        "slot": 1,
+        "duration_factor": 1.1
+      },
+      {
+        "phase": "RETURN",
+        "slot": 4,
+        "duration_factor": 1.2
+      }
+    ],
+    "changes": [],
+    "timing": [
+      {
+        "phase": "RETURN",
+        "slot": 5,
+        "duration_factor": 1.5
+      }
+    ],
+    "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+  },
+  "historical_repeats": {},
+  "actions": [
+    {
+      "tag": "B",
+      "action": {
+        "family": "B"
+      },
+      "category": "core_baseline_and_known_counterexample"
+    },
+    {
+      "tag": "H150",
+      "action": {
+        "family": "legacy",
+        "legacy": [
+          0,
+          0
+        ]
+      },
+      "category": "core_baseline_and_known_counterexample"
+    },
+    {
+      "tag": "BEST",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ]
+      },
+      "category": "core_baseline_and_known_counterexample"
+    },
+    {
+      "tag": "C19",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          0.1705491162583431,
+          0.18114178188549623,
+          -0.09249039530653236,
+          -0.5822431563837076,
+          -0.30180450858858265,
+          -0.7527222422624423,
+          0.09007521890310488,
+          -0.2164800172623864
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ]
+      },
+      "category": "core_baseline_and_known_counterexample"
+    },
+    {
+      "tag": "KNOWN_AVOID",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          0.1705491162583431,
+          0.18114178188549623,
+          -0.09249039530653236,
+          -0.5832431563837076,
+          -0.30180450858858265,
+          -0.7527222422624423,
+          0.09007521890310488,
+          -0.2164800172623864
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ]
+      },
+      "category": "known_region_avoidance_control"
+    }
+  ],
+  "job_wall_cap_s": 3600,
+  "worker": "v4_worker.py"
+}

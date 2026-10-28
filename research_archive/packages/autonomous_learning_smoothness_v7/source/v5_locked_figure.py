@@ -1,0 +1,18 @@
+from pathlib import Path
+import os,sys,json,hashlib
+os.environ.update(OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',MPLBACKEND='Agg',MPLCONFIGDIR='/home/hank/ihear-lab/autonomous_learning_smoothness_v7/runtime/tmp/mpl');sys.dont_write_bytecode=True
+import numpy as np
+import matplotlib.pyplot as plt
+P=Path('/home/hank/ihear-lab/smoothness_critic_research_v5');file=P/'analysis/LOCKED_VALIDATION_PAIRED_SUMMARY.json';d=json.loads(file.read_text());assert d['status']=='FROZEN_VALIDATION_COMPLETE','DO_NOT_PLOT_INCOMPLETE_AS_FINAL'
+rows=d['rows'];baseline={r['group']:r for r in rows if r['method']=='BEST'};summary={r['method']:r for r in d['method_summaries']};fig,ax=plt.subplots(1,2,figsize=(13,5.5));colors=['#d18a26','#7c63a6','#347c9e','#26764b','#b44a48','#78685b','#2b9991'];methods=['REFERENCE','ANTICIPATORY','HANDOFF','PATTERN','COMPOSE','PPO_MEAN','PPO_RULE'];labels=['Local reference objective','Branch selector','Slow passing / BO same action','Pattern search','Phase quality composition','Frozen PPO mean','PPO + passing rule']
+for method,label,color in zip(methods,labels,colors):
+ rr=[r for r in rows if r['method']==method and r['paired_original_qualified_vs_BEST']]
+ if not rr:continue
+ x=np.array([100*(np.linalg.norm(r['native_jerk_RMS'])/np.linalg.norm(baseline[r['group']]['native_jerk_RMS'])-1) for r in rr]);y=np.array([r['descriptive_change_vs_BEST']['force_norm_rate_RMS_pct'] for r in rr]);jf=np.array([r['descriptive_change_vs_BEST']['JF_delta_Ns'] for r in rr]);jm=np.array([r['descriptive_change_vs_BEST']['JM_delta_Nms'] for r in rr]);leg=label+f" (method PASS {summary[method]['original_qualified_conditions']}/{summary[method]['expected_conditions']}; {len(rr)} pairs)"
+ ax[0].scatter(x,y,color=color,s=25,alpha=.5);ax[0].scatter([x.mean()],[y.mean()],color=color,s=100,marker='D',label=leg,edgecolors='white',linewidths=.8)
+ ax[1].scatter(jf,jm,color=color,s=25,alpha=.5);ax[1].scatter([jf.mean()],[jm.mean()],color=color,s=100,marker='D',edgecolors='white',linewidths=.8)
+for a in ax:a.axhline(0,color='#888',lw=.8);a.axvline(0,color='#888',lw=.8);a.grid(alpha=.2)
+ax[0].set_xlabel('Change in combined native Human jerk RMS (%)');ax[0].set_ylabel('Change in actual 4 kHz force-norm rate RMS (%)');ax[0].set_title('Motion / cuff fluctuation');ax[1].set_xlabel('Change in original full JF (N s)');ax[1].set_ylabel('Change in original full JM (Nm s)');ax[1].set_title('Cumulative force / moment tradeoff')
+fig.suptitle('Locked local-prefix validation relative to the same-prefix strong fixed plan\nSame nominal Human; raw 0.25 ms motion/wrench; original 5 ms JF/JM unchanged\nJointly qualified pairs only; diamonds are descriptive means; method PASS counts include all tested conditions.',fontsize=12)
+handles,legend=ax[0].get_legend_handles_labels();fig.legend(handles,legend,loc='lower center',ncol=2,fontsize=8,frameon=False);fig.tight_layout(rect=[0,.22,1,.9]);fig.savefig(P/'figures/06_LOCKED_VALIDATION_TRADEOFF.png',dpi=180);fig.savefig(P/'figures/06_LOCKED_VALIDATION_TRADEOFF.pdf');plt.close(fig)
+(P/'analysis/FROZEN_VALIDATION_FIGURE_SOURCE.json').write_text(json.dumps(dict(data_file=str(file.relative_to(P)),data_sha256=hashlib.sha256(file.read_bytes()).hexdigest(),source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),scope='Dots: original-qualified pairs only; diamonds: arithmetic mean of the shown deterministic local-prefix pairs. Counts explicit, no confidence intervals or cross-patient claims. All failures remain in paired-summary JSON and tables. BO shares HANDOFF actual IDs.'),indent=2)+'\n');print('FINAL_LOCKED_FIGURE_WRITTEN')

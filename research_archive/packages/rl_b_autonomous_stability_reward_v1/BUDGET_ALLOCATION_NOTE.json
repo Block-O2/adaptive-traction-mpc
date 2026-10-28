@@ -1,0 +1,29 @@
+{
+  "time_utc": "2026-10-21T03:48:19.090739+00:00",
+  "hard_limits": "START.json and LEDGER.json",
+  "recommended_final_action_stream_reserve": {
+    "evaluation_attempts": 8,
+    "native_steps_conservative": 1320000
+  },
+  "reserve_enforcement": "Agent checks before optional extensions; core finite queue remains safely bounded",
+  "selection_restriction": "Final reserved RNG results are not used for subsequent reward tuning",
+  "not_an_extra_budget": true,
+  "actual_closed_physics": {
+    "training": 390,
+    "evaluation": 52,
+    "native_steps": 42865780,
+    "real_Adam": 1760,
+    "RL_decisions": 6885
+  },
+  "recommended_target_training": "250–350 is a suggested target, not the450 hard cap",
+  "justified_above_target": "390 includes10 exact Control identity attempts,60 H1,60 H2,60 R1,60 R2,60 longer H2,20 single-unit R3 ablation,60 matched longer R1. The last80 test a mechanistic hypothesis and same60 retention horizon; no unbounded search. Final8 reserved throughout and consumed only after pair lock.",
+  "hard_caps_unchanged": {
+    "training": 450,
+    "evaluation": 60,
+    "native": 50000000
+  },
+  "all_physical_attempts_settled": true,
+  "final_selection": "FINAL_FROZEN_SELECTION.json",
+  "final_fixed_evaluation": "FINAL_ACTION_STREAM_RESULTS.json",
+  "no_training_after_final_selection": true
+}

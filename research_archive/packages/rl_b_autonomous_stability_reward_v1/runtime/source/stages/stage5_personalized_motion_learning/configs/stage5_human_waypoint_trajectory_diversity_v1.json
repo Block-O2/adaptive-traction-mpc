@@ -1,0 +1,42 @@
+{
+  "schema": "stage5_human_waypoint_trajectory_diversity_v1",
+  "evidence_category": "bounded_engineering_validation",
+  "coordination_variable": {
+    "name": "r",
+    "domain": [-1.0, 1.0],
+    "interpretation": "positive prefers relative hip progress; negative prefers relative knee progress",
+    "coordination_gain": 0.25,
+    "mapping": ["p_hip(s,r) = s + 0.25*r*sin(pi*s)", "p_knee(s,r) = s - 0.25*r*sin(pi*s)"],
+    "phase_semantics": "OUTBOUND increases s; RETURN decreases s on the same endpoint-consistent coordination path using the same r"
+  },
+  "preregistered_profiles": [
+    {"name": "knee_anchor", "r": -0.25},
+    {"name": "knee_intermediate", "r": -0.125},
+    {"name": "balanced", "r": 0.0},
+    {"name": "hip_intermediate", "r": 0.125},
+    {"name": "hip_anchor", "r": 0.25}
+  ],
+  "diversity_criteria": {
+    "required_complete_profile_count": 5,
+    "minimum_anchor_pair_rms_path_distance_deg": 1.0,
+    "minimum_anchor_pair_peak_progress_separation_span": 0.1,
+    "minimum_persistent_biased_waypoint_count": 3,
+    "maximum_completion_time_ratio": 1.25
+  },
+  "frozen_semantics": {
+    "maximum_waypoint_step_fraction": 0.2,
+    "action_scales": [0.5, 1.0],
+    "task_cost_unchanged": true,
+    "scheduler_unchanged": true,
+    "execution_unchanged": true,
+    "safety_thresholds_unchanged": true,
+    "force_objective_active": false,
+    "learning_active": false
+  },
+  "notes": [
+    "The five profiles are test conditions on a continuous controller input, not a discrete action vocabulary.",
+    "A profile has one path parameter r and RETURN reverses the same path by decreasing s.",
+    "The gain is the largest checked simple value below the first observed geometric penetration: gain 0.25 keeps all five preregistered paths non-penetrating, while 0.30 does not. This is candidate-path calibration, not a new safety threshold.",
+    "Cuff-force metrics are observational and are not used to select or rank profiles."
+  ]
+}

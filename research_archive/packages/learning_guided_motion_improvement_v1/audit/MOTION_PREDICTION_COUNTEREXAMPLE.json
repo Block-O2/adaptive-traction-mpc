@@ -1,0 +1,31 @@
+{
+  "utc": "2026-10-21T16:20:58.459648+00:00",
+  "phase": "EXTENSION_MOTION_PREDICTION_COUNTEREXAMPLE",
+  "question": "学习force残差能否同时可靠预测原motion余量",
+  "why": "C15事前预测pass但原raw jerk RMS失败，且参数独立重复B13",
+  "hypothesis": "闭环离散响应/失败域未被稀疏局部GP覆盖；原因尚未唯一识别",
+  "method": "source规则保持：原门过滤、失败计预算、C只据自身反馈更新，失败后trust region从.75收至.375",
+  "expected": "保留真实反例，不以force预测精度授motion资格",
+  "actual": {
+    "B13_and_C15_x": [
+      0.8657225587571926,
+      -0.7869727010304737
+    ],
+    "JF": 1400.5304184203735,
+    "hip_jerk_RMS": 558.1903238532266,
+    "baseline_B_hip_jerk_RMS": 305.07675131461014,
+    "C_preexecution_motion_mean": 0.9558128169135898,
+    "C_preexecution_motion_std": 0.0005358164634620033,
+    "actual_worst_ratio": 1.6633379855096715,
+    "task_and_original_absolute_safety": "PASS",
+    "motion": "FAIL"
+  },
+  "support_and_counterevidence": "force/JM预测与motion资格分离；B/C同action重复是一个动作/状态组，不是两个独立患者",
+  "historical_relation": "呼应原18D及低force motion失败，不覆盖历史负结果",
+  "next_decision": "继续原冻结有界队列；将motion GP声明限制为未验证的获取启发式，原native和原scorer仍最终决定",
+  "evidence": [
+    "attempts/OPTIMIZATION_C_015_RESULT.json",
+    "attempts/OPTIMIZATION_B_013_RESULT.json",
+    "audit/MOTION_FAILURE_SAME_ACTION_REPLAY.json"
+  ]
+}

@@ -1,0 +1,19 @@
+# 因果状态与标签
+
+CONFIRMED：输入读取当前observer q/dq、已签参考及其导数、当前测量cuff wrench、phase/task elapsed、active suffix、governor、belief、previous executed delta、当前已施加robot torque和pending request。新增历史来自既有5ms boundary的measured wrench左积分、observer反向差分峰值、q范围、原guard修正/约束未满足计数和context拒绝。反向差分只使用截至H的数据，不把native evaluation-only Human或未来receipt喂给模型。
+
+CONFIRMED：observer历史峰值与原native评分不等价。原gate的native峰值、最终PASS/FAIL、完整JF/JM只作为结果标签。已知原合同失败的吸收性接口已验证，但运行接口缺少精确在线原motion monitor。风险头使用截至H已完成execution_attempts的guard状态、拒绝写入与safe_fallback_events；未完成未来receipt不进入输入。COORD_R2六个开发分支的24项线上值与raw重建值全部相同，见audit/LIVE_WHOLE_HISTORY_FEATURE_REPLAY.json；后续独立状态同样逐条重放。完整状态充分性NOT_TESTED，风险头不是资格保证。
+
+CONFIRMED：三种后续语义分库保存：DEV/SMOOTH整段承诺冻结方案；TRAIN/TEST当前一个候选决策后全部恢复共同COMPOSE；LEGACY_NEW_O当前一次后恢复原B rolling。严格不同成本标签不混合。候选只使用原modal8_retimed与legacy合法box，H150 timing/posture语义、原task/HOLD/端点及原guard保持。
+
+CONFIRMED：TRAIN_R1–R3的B上游接COMPOSE后续导致15个完整候选都被原excursion门拒绝，已保留而未降低门槛。COORD_R1–R3改为先真实执行COMPOSE上游再到RETURN1决策；B资格锚从OUT1独立fork并完整执行。匹配上游后整段COMPOSE与DEV_O1逐字段完全一致，见audit/COORDINATED_UPSTREAM_FULL_RAW_IDENTITY.json。两类状态用因果upstream字段区分，旧失败仍进入资格风险训练。COORD/同类回程的父进程是付费合法prefix采样器，子分支均完整评价；父prefix的partial成本不排名，也不冒充完整成功。
+
+CONFIRMED：每个新test在模型、特征、菜单、后续策略、选择规则和合同冻结后才START；在H=0.5时当场写入predictions/*_H05.json并断言完整summary尚不存在。离线重算只按因果白名单回放，逐项核对预测早于分支END。没有测试后重训再称未见。
+
+NOT_TESTED：独立患者级泛化；全部实验为同一nominal Human不同合法prefix。多个horizon及同父动作不是独立患者或独立统计样本。
+
+CONFIRMED：风险训练161条旧轨迹的936376个execution事件完成时间核验通过，未发现缺end字段；未来信号、未来/尚未结束事件和未来结果字段扰动均不改变当前特征或选择。原失败flag吸收性测试通过。见audit/CAUSAL_EVENT_AVAILABILITY_AND_TRUNCATION.json。这验证数据流，没有证明状态充分性或完整在线资格。
+
+CONFIRMED：时钟±15ms物理选择变化状态数=0；标签变化数=2。OUTBOUND的HANDOFF/PATTERN会在浮点相等分数下互换，但实际执行一致；未改模型或平局规则。
+
+CONFIRMED：O3配置第三prefix系数微扰没有改变实际pre-fork历史，匹配已训练TAILOT及TAILRESCUE父状态。已停止其独立证据分支并重分类训练父状态重放，原始FAIL审计与完整raw均封存；无重训、无删除、未把相同状态改称未见。主4状态与额外2个真正新状态仍独立于训练。派发前应先比较实际因果prefix指纹，再声明新状态。

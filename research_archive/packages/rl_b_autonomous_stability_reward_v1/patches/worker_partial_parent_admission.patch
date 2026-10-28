@@ -1,0 +1,14 @@
+--- a/scripts/worker.py
++++ b/scripts/worker.py
+@@ -166,6 +166,11 @@
+     model=env=guard=None; active=None;error=None;pending=[];rows=[];latest=None
+     try:
+         check_resources()
++        parent_record=read(Path(cfg['parent_checkpoint']).with_suffix('.json'))
++        if not isinstance(parent_record,dict):
++            raise RuntimeError('PARENT_CHECKPOINT_METADATA_MISSING')
++        if parent_record.get('partial_attempt') or parent_record.get('resume_requires_explicit_offline_pending_recovery'):
++            raise RuntimeError('PARTIAL_PARENT_REQUIRES_EXPLICIT_RECOVERY')
+         interface=PilotEnv(out/'interface/env')
+         model,record=load(cfg['parent_checkpoint'],interface);interface.close()
+         restored=snapshot(model);checks={k:restored[k]==v for k,v in record['state_snapshot'].items()}

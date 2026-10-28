@@ -1,0 +1,83 @@
+{
+  "status": "FAIL",
+  "G4_PASS": "FAIL",
+  "protocol_logic_pass": true,
+  "all_key_real_failure_paths_closed": false,
+  "natural_specific_failure_reachability": "NOT_EVALUABLE",
+  "coverage": {
+    "A_normal_complete": {
+      "natural": "PASS",
+      "evidence": "runs/repair_reset_maximal_01/physics, episodes1 and2",
+      "exact19_030_pass": true
+    },
+    "B_OUTBOUND_timeout": {
+      "natural": "NOT_EVALUABLE",
+      "TEST_ONLY_real_MuJoCo": "PASS",
+      "evidence": "runs/repair_outbound_TEST_ONLY_01/physics",
+      "reason": "TIMEOUT_OUTBOUND atTASK10.000s; phase-exit suppression, not a natural legal-action failure"
+    },
+    "C_HOLD_not_established": {
+      "natural": "NOT_EVALUABLE",
+      "TEST_ONLY_sensor_clock": "PASS",
+      "evidence": "REPAIR_BOUNDARY_TESTS.json + G4_UNIT_RESULTS.json",
+      "reachability": "HOLD candidate ignores RL action; no authorized external perturbation. This does not prove global unreachability across all possible entry states. Prior exit-suppression physics aborted at18.700s NO_FEASIBLE before HOLD timeout."
+    },
+    "D_RETURN_timeout": {
+      "natural": "NOT_EVALUABLE",
+      "TEST_ONLY_real_MuJoCo": "PASS",
+      "evidence": "runs/repair_return_TEST_ONLY_01/physics",
+      "reason": "TIMEOUT_RETURN atTASK20.025s; RETURN duration10.000s"
+    },
+    "E_zero_progress_stagnation": {
+      "natural": "PASS",
+      "evidence": "runs/repair_hold_01/physics and runs/repair_slow_01/physics",
+      "reason": "zero action fails at0.005s; slow fails at9.820s with no completion bonus"
+    },
+    "F_consecutive_rejections": {
+      "natural": "PASS",
+      "evidence": "slow final two native request outcomes FAILED, then original NO_FEASIBLE terminal",
+      "TEST_ONLY_20_rejections": "PASS G4_UNIT_RESULTS.json",
+      "limitation": "does not claim a new production rejection-count threshold; original failure is planner infeasibility"
+    },
+    "G_absolute_safety_stop": {
+      "natural": "NOT_EVALUABLE",
+      "TEST_ONLY_original_threshold": "PASS",
+      "TEST_ONLY_real_MuJoCo_chain": "PASS",
+      "evidence": "SAFETY_AUTHORITY_TESTS.json + runs/repair_safety_TEST_ONLY_01/physics/INJECTION.json",
+      "reason": "synthetic causal20ms acceleration1.01x original limits triggers original TASK_ACCELERATION_LIMIT atTASK1.010s; true plant was not forced unsafe"
+    },
+    "H_legal_fallback": {
+      "natural": "PASS",
+      "evidence": "maximal one and random five committed brake/hold/fresh-resume cycles; raw receipts/certificates audited"
+    },
+    "I_partial_rewards": {
+      "natural": "PASS",
+      "evidence": "all6 partial episodes (3 natural,3 TEST_ONLY) independently reconstructed, total progress0, completion-10, nonpositive force/variation costs"
+    },
+    "J_reset_independence": {
+      "natural": "PASS",
+      "evidence": "runs/repair_reset_maximal_01/physics/RESULT.json all4 reset_checks true; per-episode reset and owner_close files"
+    },
+    "global_timeout": {
+      "natural": "NOT_EVALUABLE",
+      "TEST_ONLY_logic": "PASS",
+      "evidence": "REPAIR_BOUNDARY_TESTS.json + G4_UNIT_RESULTS.json",
+      "reachability": "With only3 phases each bounded by10s, no intervening unclocked task stage, sum<=30s. Global30s is not independently earlier than all phase bounds; simultaneous-boundary/floating cases do not supply a distinct natural global-timeout episode."
+    }
+  },
+  "contract_sha256": "062e3d9a52d43e916dd692c6019c1beea2383b7681b3d7e95a00d5f567687b04",
+  "runtime": {
+    "platform": "linux",
+    "python": "3.12.3",
+    "packages": {
+      "mujoco": "3.10.0",
+      "numpy": "2.2.6",
+      "scipy": "1.15.3",
+      "gymnasium": "1.1.1",
+      "stable-baselines3": "2.6.0",
+      "torch": "2.7.1+cpu"
+    }
+  },
+  "qualification_rule_preserved": "Inherited qualify.py requires complete real failure matrix; synthetic cases not promoted to natural evidence",
+  "no_failures_fabricated": true
+}

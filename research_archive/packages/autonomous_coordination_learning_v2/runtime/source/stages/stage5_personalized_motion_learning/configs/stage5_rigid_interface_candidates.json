@@ -1,0 +1,39 @@
+{
+  "schema": "stage5_rigid_interface_candidates_v1",
+  "evidence_category": "smoke_engineering_calibration_only",
+  "provisional_not_measured": true,
+  "damping_design": {
+    "target_zeta": 0.85,
+    "method": "D_i = 2 zeta sqrt(K m_eff_i), with relative cuff effective mass from the full MuJoCo mass matrix and robot-minus-human site Jacobian",
+    "translation_axis_order_C": ["axial_x", "tangential_y", "radial_z"],
+    "translation_effective_mass_kg": [1.65879917, 1.97072401, 1.63691911],
+    "rotation_effective_inertia_kg_m2": 0.1087423433337209,
+    "representative_postures_deg": [[0.0, 5.0], [5.0, 10.0], [20.0, 35.0], [40.0, 60.0], [45.0, 84.0], [60.0, 90.0], [80.0, 100.0], [80.0, 20.0]]
+  },
+  "translation_candidates": [
+    {"name": "Kt_2k", "stiffness_n_m": 2000.0, "damping_ns_m": [97.91761436, 106.72761956, 97.26968930]},
+    {"name": "Kt_5k", "stiffness_n_m": 5000.0, "damping_ns_m": [154.82134222, 168.75118354, 153.79688274]},
+    {"name": "Kt_10k", "stiffness_n_m": 10000.0, "damping_ns_m": [218.95044191, 238.65021242, 217.50163742]},
+    {"name": "Kt_25k", "stiffness_n_m": 25000.0, "damping_ns_m": [346.19104557, 377.33911767, 343.90028453]},
+    {"name": "Kt_50k", "stiffness_n_m": 50000.0, "damping_ns_m": [489.58807182, 533.63809782, 486.34844648]}
+  ],
+  "rotation_candidates": [
+    {"name": "Kr_80", "stiffness_nm_rad": 80.0, "damping_nms_rad": 5.01410309},
+    {"name": "Kr_160", "stiffness_nm_rad": 160.0, "damping_nms_rad": 7.09101259},
+    {"name": "Kr_320", "stiffness_nm_rad": 320.0, "damping_nms_rad": 10.02820618}
+  ],
+  "probe": {
+    "translation_mm": [0.5, 1.0, 2.0, 5.0],
+    "rotation_deg": [0.25, 0.5, 1.0, 2.0],
+    "signs": [-1.0, 1.0],
+    "axes_C": ["axial_x", "tangential_y", "radial_z"],
+    "nominal_postures_deg": [[5.0, 10.0], [45.0, 84.0]],
+    "free_decay_duration_s": 0.30,
+    "nominal_physics_dt_s": 0.00025
+  },
+  "timestep_shortlist": ["Kt_25k", "Kt_50k"],
+  "timestep_probe_s": [0.001, 0.0005, 0.00025],
+  "selected_translation_candidate": "Kt_25k",
+  "selected_rotation_candidate": "Kr_320",
+  "selection_basis": "Kt target 50 N -> 2 mm; Kr tightened to target roughly 2-3 deg under the observed 13-14 Nm replay load, subject to repeated replay and timestep verification"
+}

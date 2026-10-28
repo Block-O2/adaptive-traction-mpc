@@ -1,0 +1,170 @@
+{
+  "time_utc": "2026-10-21T05:36:25.026195+00:00",
+  "status": "FINAL_PREPARED_NOT_STARTED",
+  "decision_final": true,
+  "methods": [
+    "CHECKPOINT_STD",
+    "STD_INIT_0p2"
+  ],
+  "criterion": "STD_INIT_0p2 only if B completes more than A at both parents with no A-only discordance; otherwise test H2 aggregate128 against aggregate64. Small-sample development allocation rule, not statistical qualification.",
+  "training_std_semantics": "Initialize learnable actor log_std to log(.2) once after full identity restore and empty pending verification. Actor mean/critic/Adam inherited; future samples/log_prob generated from new actual policy. Never reuse old-policy densities. Std may subsequently change through training.",
+  "checkpoint_pair": [
+    {
+      "seed": 1495656323,
+      "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1495656323_to060/checkpoints/episode_060",
+      "files": {
+        "runtime/jobs/RETENTION_R1_seed1495656323_to060/checkpoints/episode_060.zip": "a2fb5efe642b460ee19ebd0997052997e5157bc21d7931299b2fa10eee8f3132",
+        "runtime/jobs/RETENTION_R1_seed1495656323_to060/checkpoints/episode_060.rng.pt": "c1303ef6843be620d4318a8cfcee76b6a260cf1558d5f22e6992e16f195fd25c",
+        "runtime/jobs/RETENTION_R1_seed1495656323_to060/checkpoints/episode_060.json": "74e8f72750b1c87bd94e290fc3a2189cfe56f25312b4b763a32e5b665385b5fd"
+      },
+      "state_snapshot": {
+        "policy": "71a71cf1312bb75d607bc60e4d3c85f813f9d037bc6f34fa81f0f06945fbb194",
+        "optimizer": "43ac36f10a1c07287a59d8d5b0b149c4283ede15262c3fb985fd6d00059c907a",
+        "rng": "4035a284f1b664dd3874be6b862139f8b70ff5647a67862c8adb7581e88f8719",
+        "num_timesteps": 1593,
+        "n_updates": 248,
+        "total_timesteps": 40000,
+        "progress_remaining": 1.0,
+        "episode_num": 110
+      },
+      "parent_checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R1_seed1495656323_to030/checkpoints/episode_030",
+      "method": {
+        "job_id": "RETENTION_R1_seed1495656323_to060",
+        "branch": "RETENTION_R1",
+        "seed": 1495656323,
+        "parent_checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R1_seed1495656323_to030/checkpoints/episode_030",
+        "start_episode": 30,
+        "episodes": 30,
+        "mode": "training",
+        "learning_rate": 0.0003,
+        "rollout": "aggregate64",
+        "reward": "R1",
+        "target_kl": null,
+        "rollout_terminal_episode": 60
+      },
+      "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372"
+    },
+    {
+      "seed": 1630784693,
+      "checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/RETENTION_R1_seed1630784693_to060/checkpoints/episode_060",
+      "files": {
+        "runtime/jobs/RETENTION_R1_seed1630784693_to060/checkpoints/episode_060.zip": "0f559270cdad9ad4a8bbbdb3820713ae38ec516579b09d1c3e4fc8e760a74992",
+        "runtime/jobs/RETENTION_R1_seed1630784693_to060/checkpoints/episode_060.rng.pt": "8e0277549c2efb381fc2b61b8843c93a0054da6c6d278cf3ab3f82376c57b280",
+        "runtime/jobs/RETENTION_R1_seed1630784693_to060/checkpoints/episode_060.json": "e725922c6154fc1ddbec90bfbc9533538f01ffa7c0f1f7d2e2325b7315f8ce1d"
+      },
+      "state_snapshot": {
+        "policy": "63586ea5e2a6a3c5217bb3fff56afd12cb58dbd3bfadcde2010de6b12aeae66d",
+        "optimizer": "68fde455585ec6e50e5080de089a8be3c64a60ed9a2c5392b2180b5536e1c9f4",
+        "rng": "85648dd1b9cfcec3e44d1984047f9d5afa7b86a3b07c0c6fa6d8311720e73774",
+        "num_timesteps": 1529,
+        "n_updates": 248,
+        "total_timesteps": 40000,
+        "progress_remaining": 1.0,
+        "episode_num": 110
+      },
+      "parent_checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R1_seed1630784693_to030/checkpoints/episode_030",
+      "method": {
+        "job_id": "RETENTION_R1_seed1630784693_to060",
+        "branch": "RETENTION_R1",
+        "seed": 1630784693,
+        "parent_checkpoint": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/runtime/jobs/REWARD_R1_seed1630784693_to030/checkpoints/episode_030",
+        "start_episode": 30,
+        "episodes": 30,
+        "mode": "training",
+        "learning_rate": 0.0003,
+        "rollout": "aggregate64",
+        "reward": "R1",
+        "target_kl": null,
+        "rollout_terminal_episode": 60
+      },
+      "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372"
+    }
+  ],
+  "limits": {
+    "training_attempts": 160,
+    "evaluation_attempts": 36,
+    "native_steps": 33000000,
+    "min_available_ram_gib": 6,
+    "max_parallel_environments": 1,
+    "max_output_gib": 60
+  },
+  "stages": [
+    {
+      "stage": "STD_screen",
+      "training_episodes": 40,
+      "evaluations": 8
+    },
+    {
+      "stage": "one_paired_STD_extension",
+      "training_episodes": 40,
+      "evaluations": 4
+    },
+    {
+      "stage": "R1_R4",
+      "training_episodes": 40,
+      "evaluations": 8
+    },
+    {
+      "stage": "extra_paired_development",
+      "training_episodes": 0,
+      "evaluations": 4
+    },
+    {
+      "stage": "locked_final",
+      "training_episodes": 0,
+      "evaluations": 12
+    }
+  ],
+  "holdout_streams": [
+    2026102301,
+    2026102302,
+    2026102303,
+    2026102304,
+    2026102305,
+    2026102306
+  ],
+  "holdout_reserve_native": 1980000,
+  "wall_hours": 8,
+  "no_new_training_after_hours": 6,
+  "no_new_physics_after_hours": 7.25,
+  "failsafe_close_after_hours": 7.833333333333333,
+  "historical_measured_rates_native_per_wall_s": {
+    "training": 1401.2974706885632,
+    "evaluation": 1280.638615415628
+  },
+  "historical_mean_native_steps_per_attempt": {
+    "training": 94769.23076923077,
+    "evaluation": 113572.69230769231
+  },
+  "expected_historical_mix_compute_h": 3.892605570636244,
+  "worst_reserved_attempts_at_measured_rates_compute_h": 6.5216649345746855,
+  "report_and_recovery_reserve_h": 0.75,
+  "warning": "Measured wall throughput includes per-job auditing/saving; not ideal episode/s. Historical failure mix is optimistic for all-success runs. Hard budgets and clock override completing every optional branch.",
+  "training_this_stage": 0,
+  "started": false,
+  "authorization": "User explicitly authorized this bounded development in pasted prompt",
+  "original_plan_sha256": "1e85772fb0ff737590fc174b0e394eb9990ca8c67ab84ec7f7ec31353f485fdb",
+  "std_route_training_cap": 80,
+  "training_authorized_for_next_stage": true,
+  "activation_utc": "2026-10-21T06:07:13.137817+00:00",
+  "script_sha256": {
+    "rewards.py": "87cdc03d00620e4fcc8a592b36e54ad89b1753fb1141f9b2c34eea709116708b",
+    "finite_engine.py": "b3100800e8dc8f69c34a51b3a226411ac457d71617f10ad4a28f907a8e121960",
+    "status.py": "a954935bf3acd7f65e89e63f7ba22c4fd1a6a4eacb66e85d0f5d9535ca5e59ba",
+    "close_campaign.py": "ffac80c441d8b3b2e513eb309b7460e077748a990ada7cebfa85be29add8b63a",
+    "motion_metrics.py": "4efd5146c51c86948e1cacd574dc1b095b75e910e04c44f1747f782c2f84a44e",
+    "watchdog.py": "d6fe3db7a4f24bbd7ce7e2c331ddf89370df450f967ff9a07f20654ae2c670d8",
+    "recover_update.py": "e5c3371d1b22276d76da1c696eac4992d90865c121de4ee2baa755d823ca9749",
+    "research_common.py": "10cf9ceb9de2bcf3fc24d24b266aeaa4e493bd980169189e9cc62a5bb47ec840",
+    "run_job.py": "e541a2fa7ea95aed52afe874911ef976f3dcc22dc168b09c00d54dcfb334b732",
+    "failsafe.py": "4db4540f1369ea8bab143c015bc5a79b157f54da3422edec4a4bf1e8453f376e",
+    "verify_saved.py": "9867b82d5a4ca071fea442f3c35dd144d7bde0c37026ff6507dada6165c61d82",
+    "worker.py": "cb600e0281f0e8ab7a1aa0ebaac526c475d95938fa519a94e5e96c52fc779923",
+    "reporter.py": "88f35f3fd8ddb31f834c62a8da24d0ec98e63c565f744d7b964168f8e980cfcd",
+    "campaign.py": "d2e8ac88204d30ed4e4e94d1aed6a92d4418252701d9f0b089338ac4e98041b5"
+  },
+  "contract_sha256": "98d11513df9eaff3d13e4fe640916c47183e38fe3d4236947c860af18dda3372",
+  "official_launcher_sha256": "a89d6359ef8c1fdcc0264ecf2b01335a08af1043532e457d3206b008394d4ac6",
+  "source_amendment": "Isolated v2: enforce user STD80 and cleanup45; compare screens before extension; retain all original guards; add preflight and complete final locks",
+  "authorization_sha256": "ee22e8f125365e8a13ab251a204e7b8aa3d4dc23b2a3477a3f5857073e584c52"
+}

@@ -1,0 +1,63 @@
+{
+  "time_utc": "2026-10-21T02:09:22.251634+00:00",
+  "status": "TWO_PARENT_CONTROLLED_UNIT_EFFECT_OBSERVED",
+  "cases": [
+    {
+      "seed": 1495656323,
+      "actual_Adam_each": 20,
+      "controlled_checks": {
+        "full_prestate": true,
+        "physical_inputs": true,
+        "actual_update_implementation": true,
+        "PPO_hyperparameters": true,
+        "actual_Adam_counts": true
+      },
+      "R1_actor_l2": 0.03277483063303242,
+      "R3_actor_l2": 0.06185784211099318,
+      "actor_l2_ratio": 1.8873581012085894,
+      "R1_Gaussian_KL": 0.0002360947401029989,
+      "R3_Gaussian_KL": 0.0006082564359530807,
+      "Gaussian_KL_ratio": 2.5763235372703437,
+      "R1_shared_mean_change": [
+        0.02081490121781826,
+        0.0038731556851416826
+      ],
+      "R3_shared_mean_change": [
+        0.03226786479353905,
+        0.009954686276614666
+      ]
+    },
+    {
+      "seed": 1630784693,
+      "actual_Adam_each": 20,
+      "controlled_checks": {
+        "full_prestate": true,
+        "physical_inputs": true,
+        "actual_update_implementation": true,
+        "PPO_hyperparameters": true,
+        "actual_Adam_counts": true
+      },
+      "R1_actor_l2": 0.08367506614484926,
+      "R3_actor_l2": 0.1634230441173903,
+      "actor_l2_ratio": 1.9530674028328814,
+      "R1_Gaussian_KL": 0.0015258882194757462,
+      "R3_Gaussian_KL": 0.00035071451566182077,
+      "Gaussian_KL_ratio": 0.22984286213463054,
+      "R1_shared_mean_change": [
+        0.0073069194331765175,
+        0.05275046452879906
+      ],
+      "R3_shared_mean_change": [
+        0.012512248940765858,
+        0.016002416610717773
+      ]
+    }
+  ],
+  "actual_update_source": "audit/CONTROLLED_R3_FIRST_UPDATE.json",
+  "actual_update_source_sha256": "46601b411fa79b35fdf8942c583b9e896344b5cb35eecf53a74f0aa660f2df09",
+  "input_identity_source": "audit/FOUR_REWARD_FIRST_ROLLOUT_IDENTITY.json",
+  "input_identity_sha256": "7f4e0a2fee2101128390aeba4300e53a884f3073c7a0042cbc6b54ef91e627ab",
+  "inference": "Uniform positive R1/30 with unchanged inherited critic/Adam changes actual optimization on identical data. Actor parameter L2 grows in both parents, while shared-observation Gaussian KL moves in opposite directions. Neither scalar gradient, parameter distance nor one seed determines runtime drift or retention. GAE, joint clipping and Adam are not separately isolated.",
+  "physics_attempts_for_audit": 0,
+  "Adam_updates_for_audit": 0
+}

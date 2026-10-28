@@ -1,0 +1,175 @@
+{
+  "schema": "v8.history_conditioned.bo_abstain_objective_clarification.v1",
+  "status": "PASS_READ_ONLY_SOURCE_AND_STORED_METADATA_CLARIFICATION",
+  "scope": "CONVAL02 same live T3 parent; no new calculation, model, scorer, raw, physics, active APP02 or root-document access",
+  "references": {
+    "contract_v1": {
+      "path": "families/history_conditioned/C2B_COMPONENT_BO_CONTRACT_V1.json",
+      "sha256": "5ccaa3f47c25aeae0a6c352f71d191b423f3d502ff2f64d42887dca3c7ded889"
+    },
+    "contract_v2": {
+      "path": "families/history_conditioned/C2B_COMPONENT_BO_CONTRACT_V2.json",
+      "sha256": "95207501e660b8dfbbbcdd857f0fdb750a4ad79da10b5d6d6d583d6b95b2cda2"
+    },
+    "selector": {
+      "path": "families/history_conditioned/c2b_component_selector_v2.py",
+      "sha256": "7ff8e3be3f9cc8ecb3cedb62714ba059578d22b17d0105f42ec0cb62232a3c17"
+    },
+    "evidence_adapter": {
+      "path": "families/history_conditioned/c2b_evidence_bundle_v2.py",
+      "sha256": "c924b5a96039bcce91dd6279d2dc140bef8a99ea4896fff1c1d84ee0d334531c"
+    },
+    "continuous_owner": {
+      "path": "families/history_conditioned/continuous_ilc_worker_v4.py",
+      "sha256": "228c3210193b0998a8c6d9d569adc9d658c82395720866a4681215bd0d3a0bb2"
+    },
+    "original_motion_protocol": {
+      "path": "runtime/MOTION_ACCEPTANCE_PROTOCOL.json",
+      "sha256": "0f41463cab96b71ea39cc06f9fe86f432de07efe307bd486bc1c4df6cc196ece"
+    },
+    "stored_decision": {
+      "path": "freeze/V8CONVAL02_T2_H150_T3_C2B_V2_DECISION.json",
+      "sha256": "cb444c3a410d07ada52ca6dc63ce1d03e96cfac9a160946cdec2460be3ae79be"
+    },
+    "stored_bundle": {
+      "path": "freeze/V8CONVAL02_T2_H150_T3_C2B_V2_OBSERVATION_BUNDLE.json",
+      "sha256": "bfb371237bc85f9934625e545182e2edf371c610f453b191e89cd775f476e5ba"
+    },
+    "closed_independent_audit": {
+      "path": "families/history_conditioned/audit/V8CONVAL02_INDEPENDENT_CONTINUOUS_C4_V1/RESULT.json",
+      "sha256": "60797de3083752adece20846b5051a1d27c36a3da0d357cfb3764f1eadb7b9a2"
+    }
+  },
+  "exact_predeclared_rules": {
+    "effective_version": "V2, explicitly pinned by stored_decision /source_sha256 and /parent_fit_approval/contract_sha256; V1 preserved as proposal provenance",
+    "V1_objective_pointer": "contract_v1 /objective (broad unchanged-original-qualification objective; does not contain the later explicit <=0 delta-JM acquisition condition)",
+    "V2_pointer": "contract_v2 /selection/require; /selection/minimum_predicted_JF_gain_over_best_observed_qualified_N_s; selector lines149-170",
+    "labels": "delta JF and delta JM are action minus same-parent H150; margins are original requirements relative to same-parent B",
+    "proposal_conditions": [
+      "exclude any already attempted semantic x3",
+      "max over all six models of predicted delta JF mean+2*spread <= best observed originally qualified delta JF - 0.01 N*s",
+      "max over all six models of predicted delta JM mean+2*spread <= 0 (relative to H150)",
+      "min over every model and original continuous component of absolute margin mean-2*spread >= 0"
+    ],
+    "original_task_JM_qualification": {
+      "pointer": "original_motion_protocol /primary/moment_integral_ratio; evidence_adapter motion_margins lines68-69; continuous_owner result_row lines106-112",
+      "ratio": 1.25,
+      "baseline": "same-parent B",
+      "distinction": "This original qualification allows a JM tradeoff inside the original bound. It does not require JM(action)<=JM(H150). ILC/fixed actual comparisons use original qualification; descriptive force increments are not a joint cost-dominance claim."
+    },
+    "benchmark_vs_proposal_permission": "selector line149 selects best observed qualified action without a separate delta-JM<=0 filter. Thus the force benchmark may use an already qualified JM-tradeoff action, while any new BO proposal must additionally satisfy no upper-bound JM increase versus H150. This is the frozen conservative acquisition contract, not equal objective permissions across arms.",
+    "uncertainty": "All mean+/-2spread terms are predeclared DATA_LIMITED heuristics, not calibrated probabilities or proof that the actual unexecuted task would fail."
+  },
+  "stored_decision_evidence": {
+    "pointer": "stored_decision /status,/reason,/best_observed_qualified,/grid_audit,/cost_only_grid_ranking_first",
+    "status": "ABSTAIN",
+    "reason": "NO_REGISTERED_GRID_POINT_MEETS_COMPONENT_RULE",
+    "selected_x3": null,
+    "best_observed_qualified": {
+      "id": "V8CONVAL02_T2_H150_T3_FIXED_X3_MINUS025",
+      "x3": -0.25,
+      "delta_JF_N_s": -0.47218150475237053
+    },
+    "grid_audit": [
+      {
+        "x3": -0.25,
+        "eligible": false,
+        "reasons": [
+          "ALREADY_ATTEMPTED_SEMANTIC_X3",
+          "NO_ALL_MODEL_CONSERVATIVE_FORCE_INCREMENT",
+          "JM_COMPONENT_RISK"
+        ],
+        "worst_model_JF_upper_N_s": -0.46909177385924644,
+        "worst_model_JM_upper_Nm_s": 0.05476952525905055,
+        "minimum_model_component_lower_margin": 0.016837343534171427
+      },
+      {
+        "x3": -0.125,
+        "eligible": false,
+        "reasons": [
+          "NO_ALL_MODEL_CONSERVATIVE_FORCE_INCREMENT",
+          "JM_COMPONENT_RISK",
+          "ORIGINAL_MOTION_COMPONENT_RISK"
+        ],
+        "worst_model_JF_upper_N_s": -0.08035262955587835,
+        "worst_model_JM_upper_Nm_s": 0.043879292876795664,
+        "minimum_model_component_lower_margin": -0.14055647998526677
+      },
+      {
+        "x3": 0.0,
+        "eligible": false,
+        "reasons": [
+          "ALREADY_ATTEMPTED_SEMANTIC_X3",
+          "NO_ALL_MODEL_CONSERVATIVE_FORCE_INCREMENT"
+        ],
+        "worst_model_JF_upper_N_s": 0.0,
+        "worst_model_JM_upper_Nm_s": 0.0,
+        "minimum_model_component_lower_margin": 0.020876354124186675
+      },
+      {
+        "x3": 0.125,
+        "eligible": false,
+        "reasons": [
+          "NO_ALL_MODEL_CONSERVATIVE_FORCE_INCREMENT",
+          "JM_COMPONENT_RISK",
+          "ORIGINAL_MOTION_COMPONENT_RISK"
+        ],
+        "worst_model_JF_upper_N_s": 0.9890399102230343,
+        "worst_model_JM_upper_Nm_s": 0.04105722499376835,
+        "minimum_model_component_lower_margin": -0.6982733457512429
+      },
+      {
+        "x3": 0.25,
+        "eligible": false,
+        "reasons": [
+          "ALREADY_ATTEMPTED_SEMANTIC_X3",
+          "NO_ALL_MODEL_CONSERVATIVE_FORCE_INCREMENT"
+        ],
+        "worst_model_JF_upper_N_s": 0.47196135462163563,
+        "worst_model_JM_upper_Nm_s": -0.05362325368048834,
+        "minimum_model_component_lower_margin": 0.02090912086697296
+      }
+    ],
+    "cost_only_grid_ranking_first": {
+      "x3": -0.125,
+      "eligible": false,
+      "reasons": [
+        "NO_ALL_MODEL_CONSERVATIVE_FORCE_INCREMENT",
+        "JM_COMPONENT_RISK",
+        "ORIGINAL_MOTION_COMPONENT_RISK"
+      ],
+      "worst_model_JF_upper_N_s": -0.08035262955587835,
+      "worst_model_JM_upper_Nm_s": 0.043879292876795664,
+      "minimum_model_component_lower_margin": -0.14055647998526677
+    },
+    "fit_matrix_solves": 42,
+    "unique_actions": 6,
+    "scalar_heads": 47,
+    "all_stored_input_gates": {
+      "all_roles_completed_or_verified_alias": true,
+      "core_original_qualified": true,
+      "zero_raw_exact": true,
+      "signed_actual_nonzero_clean": true,
+      "same_full_parent_snapshot": true,
+      "same_full_H150_recipe": true,
+      "same_source_case_config_scorer_activation": true,
+      "child_END_joined": true
+    }
+  },
+  "interpretation": [
+    "Both untried grid points -0.125 and +0.125 failed all three non-duplicate acceptance tests: conservative JF improvement, JM-component upper bound, and at least one continuous original-component lower margin. The three other grid points were already attempted and cannot be new proposals.",
+    "ABSTAIN is not a missing-data, failed prerequisite, unexecuted fit, or lack-of-local-response identification result. Six clean unique observations and all prerequisite gates were available; 42 multi-RHS solves with 47 heads completed.",
+    "JM nonincrease is an extra objective permission restriction relative to the original ratio<=1.25 qualification. It is not the sole cause here: both untried points also failed conservative JF and motion-margin gates. Removing JM alone would not remove their stored other rejection reasons; no relaxed-objective rerun was performed.",
+    "The JF/motion rejections are model-and-heuristic-bound based insufficiency to authorize this acquisition, not empirical failure of the unexecuted candidates, model-family falsification, or demonstration that every pointwise mean is poor. No new numerical attribution between mean error and spread was computed.",
+    "The stored grid summarizes only the minimum component lower margin, not the identity of its argmin head. This review does not recompute predictions to localize that head.",
+    "Do not compare BO ABSTAIN with ILC/fixed JF gains as if all were given identical JM permissions, and do not count a proposed/abstained action as an executed physics candidate."
+  ],
+  "new_work": {
+    "model_imports_or_calls": 0,
+    "new_math_diagnostics": 0,
+    "scorer_or_raw_calls": 0,
+    "physics": 0,
+    "writes": "this unique audit note only"
+  },
+  "stopping_all_file_writes_now": true
+}

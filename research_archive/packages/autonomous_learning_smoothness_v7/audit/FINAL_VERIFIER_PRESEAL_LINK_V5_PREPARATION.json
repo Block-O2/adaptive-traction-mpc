@@ -1,0 +1,55 @@
+{
+  "status": "MAIN_VERSIONED_PRESEAL_LINK_FIX_PURECHECK_PASS_NOT_FINAL_RUN",
+  "pid": 1061648,
+  "start_ticks": 58446992,
+  "started_unix": 1793056798.3938544,
+  "ended_unix": 1793056798.4371126,
+  "source": "source/v7_verify_final_package_v5.py",
+  "source_sha256": "f5b0c2b2bcdb9e4f10d24d4d03dd99e24c7704f851e5eca13e7f2397e4cf7a01",
+  "base_v4_sha256": "e74a5205afc56d48555805f05cc31b5ca27e81992d3a2cf7639b2c060bc88002",
+  "changed_methods": [
+    "Verifier.run"
+  ],
+  "new_function": "allowed_pending_report_link",
+  "reason": "OriginalpresealallowsrootEND/PACKAGEpending but linkvalidator incorrectly rejectsREPORT links tosamependingrootfiles. Only exacttwo rootpending targets exempt inpreseal; sealedstage andallotherlinks unchanged.",
+  "purefixtures": [
+    {
+      "name": "rootEND",
+      "actual": true,
+      "expected": true,
+      "status": "PASS"
+    },
+    {
+      "name": "rootPACKAGE",
+      "actual": true,
+      "expected": true,
+      "status": "PASS"
+    },
+    {
+      "name": "sealedEND",
+      "actual": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "name": "nestedEND",
+      "actual": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "name": "outsideEND",
+      "actual": false,
+      "expected": false,
+      "status": "PASS"
+    },
+    {
+      "name": "missingNEXT",
+      "actual": false,
+      "expected": false,
+      "status": "PASS"
+    }
+  ],
+  "scientific_source_scoring_qualification_changes": false,
+  "new_env_model_fit_physics": 0
+}

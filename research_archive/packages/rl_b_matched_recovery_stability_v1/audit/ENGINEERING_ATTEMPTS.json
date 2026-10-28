@@ -1,0 +1,41 @@
+{
+  "setup_failures": [
+    {
+      "action": "sandbox read-only discovery",
+      "result": "bwrap loopback RTM_NEWADDR operation not permitted; no command executed",
+      "resolution": "authorized elevated local execution",
+      "scientific_attempts": 0
+    },
+    {
+      "action": "SSH git ls-remote",
+      "result": "no trusted GitHub host key; no remote read",
+      "evidence": "logs/remote_ref.stderr",
+      "git_exit_code": "not separately captured by setup shell; fatal error preserved",
+      "resolution": "HTTPS ls-remote and clone matched exact commit",
+      "scientific_attempts": 0
+    },
+    {
+      "action": "optional GitHub connector commit metadata call",
+      "result": "invalid argument commit_sha missing; no mutation",
+      "resolution": "exact remote git ref and clone used",
+      "scientific_attempts": 0
+    },
+    {
+      "action": "exploratory training loss summary",
+      "result": "KeyError for intentionally omitted nonfinite explained_variance",
+      "resolution": "analysis preserves actual available metric counts",
+      "scientific_attempts": 0
+    },
+    {
+      "action": "postrun_checks JSON output",
+      "result": "NumPy bool scalar not JSON serializable",
+      "failed_job": "audit/jobs/postrun_checks",
+      "failed_script": "audit/postrun_checks_failed_serialization.py",
+      "resolution": "cast to native bool; read-only verifier rerun as postrun_checks_fixed; no experiment rerun",
+      "scientific_attempts": 0
+    }
+  ],
+  "expected_failures": "Integrity/access guard negative tests are expected rejection evidence, separate from these setup/checker failures.",
+  "new_training": 0,
+  "new_physical_episodes": 8
+}

@@ -1,0 +1,26 @@
+{
+  "status": "PASS_ANALYTIC_SCALAR_LOWER_BOUND",
+  "samples": 10000,
+  "min_gap_residual_m": -4.551108025597356e-17,
+  "max_abs_boundary_residual_m": 4.551108025597356e-17,
+  "counterexamples": [
+    {
+      "g_m": 2e-05,
+      "v_m_s": -0.02,
+      "delta_s": 0.005,
+      "required_gap_acceleration_m_s2": 20.0,
+      "old_horizon_required_m_s2": 1.996875,
+      "old_horizon_actual_scalar_acceleration_m_s2": 2.0,
+      "continuous_minimum_gap_m": -5.500000000000001e-05
+    }
+  ],
+  "conditional_proof": "If every endpoint true gap acceleration is bounded below by constant a_i throughout [0,delta], and measured g/v are valid lower bounds, then a_i >= required_acceleration enforces all-time endpoint gap >= threshold. Pointwise dual minimum equivalence then enforces sleeve.",
+  "missing_for_plant": [
+    "valid causal g/v error bounds",
+    "lower bound on acceleration from final saturated robot torque through cuff/Human dynamics",
+    "Hessian/velocity changes across hold",
+    "robust feasible backup for empty endpoint/actuator intersection",
+    "all other original geometry components and task rules retained"
+  ],
+  "physical_steps": 0
+}

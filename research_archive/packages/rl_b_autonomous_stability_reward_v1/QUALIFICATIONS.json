@@ -1,0 +1,227 @@
+{
+  "generated_utc": "2026-10-21T04:02:39.940602+00:00",
+  "qualifications": {
+    "DEVELOPMENT_TRAINING_VALID": {
+      "status": "PASS",
+      "scope": "Observed isolated development attempts only; inherited + affected tests",
+      "evidence": [
+        "audit/DEVELOPMENT_LEVEL_A.json",
+        "ALL_ATTEMPTS.jsonl"
+      ]
+    },
+    "PPO_STABILITY_IMPROVED": {
+      "status": "SUPPORTED_NOMINAL_DEVELOPMENT",
+      "scope": "Two selected successful050 parents retained mean completion at the explicitly tested nominal endpoints; longer continuation, stochastic robustness and independent initial-state qualification remain separate",
+      "evidence": [
+        "H1_STABILITY_RESULTS.json",
+        "CHECKPOINT_COMPARISON.json"
+      ],
+      "supported_branches": [
+        "H2_AGG64",
+        "REWARD_R1",
+        "REWARD_R2"
+      ],
+      "tested_continuation_endpoints": {
+        "H2_AGG64": [
+          30,
+          60
+        ],
+        "REWARD_R1": [
+          10,
+          30,
+          60
+        ],
+        "REWARD_R2": [
+          10,
+          30
+        ]
+      },
+      "horizon_evidence": {
+        "longest_tested_mean_endpoint": 60,
+        "two_parent_families_tested_at_longest": [
+          "H2_AGG64",
+          "REWARD_R1"
+        ],
+        "supported_at_longest_endpoint": [
+          "H2_AGG64",
+          "REWARD_R1"
+        ],
+        "all_tested_mean_failures": [
+          {
+            "lineage": "H1",
+            "job": "H1_seed1495656323_ep010_deterministic_dev1",
+            "seed": 1495656323,
+            "endpoint": 10
+          },
+          {
+            "lineage": "H1",
+            "job": "H1_seed1495656323_ep020_deterministic_dev1",
+            "seed": 1495656323,
+            "endpoint": 20
+          },
+          {
+            "lineage": "H1",
+            "job": "H1_seed1495656323_ep030_deterministic_dev1",
+            "seed": 1495656323,
+            "endpoint": 30
+          }
+        ],
+        "interpretation": "Untested longer horizons do not count as retained success. Earlier positive windows remain explicitly limited."
+      },
+      "lineage_audit": "audit/STABILITY_LINEAGE_AUDIT.json"
+    },
+    "REWARD_SEARCH_COMPLETED": {
+      "status": "PASS",
+      "scope": "Bounded development search; success of a reward is a separate question",
+      "evidence": [
+        "REWARD_SEARCH_RESULTS.json",
+        "REWARD_VERSION_MANIFEST.json"
+      ]
+    },
+    "RUNTIME_TASK_SUCCESS": {
+      "status": "PASS",
+      "scope": "Only explicitly listed frozen checkpoints and nominal action streams",
+      "evidence": [
+        "FROZEN_EVALUATION_RESULTS.json"
+      ],
+      "successful_frozen_job_ids": [
+        "H1_seed1495656323_ep010_stochastic_dev1",
+        "H1_seed1630784693_ep010_deterministic_dev1",
+        "H1_seed1495656323_ep020_stochastic_dev1",
+        "H1_seed1630784693_ep020_deterministic_dev1",
+        "H1_seed1630784693_ep030_deterministic_dev1",
+        "H2_AGG64_seed1495656323_ep030_deterministic_dev1",
+        "H2_AGG64_seed1495656323_ep030_stochastic_dev1",
+        "H2_AGG64_seed1630784693_ep030_deterministic_dev1",
+        "REWARD_R1_seed1495656323_ep010_deterministic_dev1",
+        "REWARD_R1_seed1495656323_ep010_stochastic_dev1",
+        "REWARD_R1_seed1630784693_ep010_deterministic_dev1",
+        "REWARD_R1_seed1630784693_ep010_stochastic_dev1",
+        "REWARD_R1_seed1495656323_ep030_deterministic_dev1",
+        "REWARD_R1_seed1495656323_ep030_stochastic_dev1",
+        "REWARD_R1_seed1630784693_ep030_deterministic_dev1",
+        "REWARD_R1_seed1630784693_ep030_stochastic_dev1",
+        "REWARD_R2_seed1495656323_ep010_deterministic_dev1",
+        "REWARD_R2_seed1495656323_ep010_stochastic_dev1",
+        "REWARD_R2_seed1630784693_ep010_deterministic_dev1",
+        "REWARD_R2_seed1630784693_ep010_stochastic_dev1",
+        "REWARD_R2_seed1495656323_ep030_deterministic_dev1",
+        "REWARD_R2_seed1495656323_ep030_stochastic_dev1",
+        "REWARD_R2_seed1630784693_ep030_deterministic_dev1",
+        "REWARD_R2_seed1630784693_ep030_stochastic_dev1",
+        "RETENTION_H2_seed1495656323_ep060_deterministic_dev1",
+        "RETENTION_H2_seed1495656323_ep060_stochastic_dev1",
+        "RETENTION_H2_seed1630784693_ep060_deterministic_dev1",
+        "RETENTION_H2_seed1630784693_ep060_stochastic_dev1",
+        "REWARD_R3_seed1495656323_ep010_deterministic_dev1",
+        "REWARD_R3_seed1495656323_ep010_stochastic_dev1",
+        "REWARD_R3_seed1630784693_ep010_deterministic_dev1",
+        "REWARD_R3_seed1630784693_ep010_stochastic_dev1",
+        "RETENTION_R1_seed1495656323_ep060_deterministic_dev1",
+        "RETENTION_R1_seed1495656323_ep060_stochastic_dev1",
+        "RETENTION_R1_seed1630784693_ep060_deterministic_dev1",
+        "RETENTION_R1_seed1630784693_ep060_stochastic_dev1",
+        "RETENTION_R1_seed1495656323_ep060_final_rng2026102191",
+        "RETENTION_R1_seed1495656323_ep060_final_rng2026102192",
+        "RETENTION_R1_seed1495656323_ep060_final_rng2026102194",
+        "RETENTION_R1_seed1630784693_ep060_final_rng2026102191",
+        "RETENTION_R1_seed1630784693_ep060_final_rng2026102193",
+        "RETENTION_R1_seed1630784693_ep060_final_rng2026102194"
+      ],
+      "failed_frozen_attempts": 10
+    },
+    "FORCE_IMPROVEMENT": {
+      "status": "SUPPORTED_NOMINAL_MEAN_ONLY",
+      "scope": "Listed equal-duration COMPLETE nominal mean tasks versus each selected parent050; JM tradeoffs remain, no original B/H150 live matched or generalization qualification",
+      "evidence": [
+        "TASK_FORCE_MOTION_COMPARISON.md"
+      ],
+      "supported_branches": {
+        "H2_AGG64": [
+          {
+            "job": "RETENTION_H2_seed1495656323_ep060_deterministic_dev1",
+            "seed": 1495656323,
+            "JF_change_percent": -0.7494771196324246,
+            "JM_change_percent": 1.9318984731152788,
+            "task_s": 19.030000000048588
+          },
+          {
+            "job": "RETENTION_H2_seed1630784693_ep060_deterministic_dev1",
+            "seed": 1630784693,
+            "JF_change_percent": -0.3141207481403785,
+            "JM_change_percent": 0.8484301386826765,
+            "task_s": 19.030000000048588
+          }
+        ],
+        "REWARD_R1": [
+          {
+            "job": "RETENTION_R1_seed1495656323_ep060_deterministic_dev1",
+            "seed": 1495656323,
+            "JF_change_percent": -0.5789855915792508,
+            "JM_change_percent": 1.5517797153596247,
+            "task_s": 19.030000000048588
+          },
+          {
+            "job": "RETENTION_R1_seed1630784693_ep060_deterministic_dev1",
+            "seed": 1630784693,
+            "JF_change_percent": -0.5427650420350538,
+            "JM_change_percent": 1.6681945170695434,
+            "task_s": 19.030000000048588
+          }
+        ],
+        "REWARD_R2": [
+          {
+            "job": "REWARD_R2_seed1495656323_ep030_deterministic_dev1",
+            "seed": 1495656323,
+            "JF_change_percent": -0.4712996909264744,
+            "JM_change_percent": 1.1892512365067276,
+            "task_s": 19.030000000048588
+          },
+          {
+            "job": "REWARD_R2_seed1630784693_ep030_deterministic_dev1",
+            "seed": 1630784693,
+            "JF_change_percent": -0.3540023957188554,
+            "JM_change_percent": 0.6907100808593025,
+            "task_s": 19.030000000048588
+          }
+        ]
+      },
+      "formal_matched_status": "NOT_READY"
+    },
+    "MOTION_QUALIFIED": {
+      "status": "OBSERVED_EPISODE_AUDITS_PASS",
+      "scope": "No independent generalization, full matched or all-action qualification; jerk diagnostic only",
+      "evidence": [
+        "FROZEN_EVALUATION_RESULTS.json"
+      ]
+    },
+    "G4_STRICT_PASS": {
+      "status": "FAIL",
+      "scope": "Historical natural extreme paths and complete strict safety matrix remain unclosed",
+      "evidence": [
+        "/home/hank/ihear-lab/rl_b_autonomous_replication_v1/G4_NATURAL_PATH_UPDATE.json"
+      ]
+    },
+    "NEW_LIVE_MATCHED_READY": {
+      "status": "NOT_READY",
+      "scope": "New PPO lacks original same-parent-prefix portable fork/B/H150 live matched chain",
+      "evidence": [
+        "/home/hank/ihear-lab/rl_b_matched_recovery_stability_v1/FROZEN_SCORER_VALIDATION.md"
+      ]
+    },
+    "STAGE2_READY": {
+      "status": "NOT_READY",
+      "scope": "G4/live matched/independent legal initial-state and retained stability gates not closed",
+      "evidence": [
+        "GENERALIZATION_AUDIT.md"
+      ]
+    },
+    "FINAL_CAMPAIGN_READY": {
+      "status": "NOT_READY",
+      "scope": "Final large-scale Campaign not authorized or started",
+      "evidence": [
+        "FINAL_CAMPAIGN_READINESS.md"
+      ]
+    }
+  }
+}

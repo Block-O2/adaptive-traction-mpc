@@ -1,0 +1,90 @@
+{
+  "time_utc": "2026-10-21T01:46:07.236507+00:00",
+  "status": "PASS",
+  "candidate_source": "/home/hank/ihear-lab/rl_b_autonomous_stability_reward_v1/scripts/rewards.py",
+  "candidate_source_sha256": "cd6129342a2abc0b1e24fd7dff19f8091e33c7adb25b65345d026e991814f8e5",
+  "reference_source_sha256": "4107426fe5bc9bac14f918843413e6152752175d1b8837bdce7144c5469b1d6d",
+  "active_source_sha256": "cd6129342a2abc0b1e24fd7dff19f8091e33c7adb25b65345d026e991814f8e5",
+  "active_candidate": true,
+  "checks": {
+    "all_R1_terms_and_floor_uniformly_divided30": true,
+    "closed_cycle_shaping_zero": true,
+    "failure_terminal_potential_zero": true,
+    "success_terminal_potential_three": true,
+    "positive_unit_scale_preserves_trajectory_reward_order": true,
+    "original_R0_R1_R2_outputs_bitwise_unchanged": true,
+    "no_import_or_future_truth_access": true,
+    "original_parent_critic_and_Adam_must_remain_unchanged": true
+  },
+  "cases": [
+    {
+      "success": false,
+      "JF": 0.0,
+      "JM": 0.0,
+      "online_variation": 0.0,
+      "total": -0.9999999999999999,
+      "expected": -1.0
+    },
+    {
+      "success": true,
+      "JF": 0.0,
+      "JM": 0.0,
+      "online_variation": 0.0,
+      "total": 0.8666666666666667,
+      "expected": 0.8666666666666667
+    },
+    {
+      "success": false,
+      "JF": 100.0,
+      "JM": 5.0,
+      "online_variation": 0.01,
+      "total": -1.0,
+      "expected": -1.0
+    },
+    {
+      "success": true,
+      "JF": 100.0,
+      "JM": 5.0,
+      "online_variation": 0.01,
+      "total": 0.86416,
+      "expected": 0.86416
+    },
+    {
+      "success": false,
+      "JF": 6000.0,
+      "JM": 1800.0,
+      "online_variation": 30.0,
+      "total": -1.0,
+      "expected": -1.0
+    },
+    {
+      "success": true,
+      "JF": 6000.0,
+      "JM": 1800.0,
+      "online_variation": 30.0,
+      "total": 0.4466666666666666,
+      "expected": 0.44666666666666666
+    },
+    {
+      "success": false,
+      "JF": 60000.0,
+      "JM": 18000.0,
+      "online_variation": 300.0,
+      "total": -4.699999999999999,
+      "expected": -4.7
+    },
+    {
+      "success": true,
+      "JF": 60000.0,
+      "JM": 18000.0,
+      "online_variation": 300.0,
+      "total": -3.333333333333333,
+      "expected": -3.3333333333333335
+    }
+  ],
+  "saved_transition_version_comparisons": 13932,
+  "random_transition_cases": 1000,
+  "physics_attempts": 0,
+  "Adam_updates": 0,
+  "scope": "Arithmetic/source validation only. No claim about actual PPO update magnitude, task completion, retention, motion or generalization. gamma1; successful-terminal shaping remains explicit bonus."
+}

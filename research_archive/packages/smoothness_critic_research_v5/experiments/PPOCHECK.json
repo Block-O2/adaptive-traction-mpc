@@ -1,0 +1,205 @@
+{
+  "condition": {
+    "name": "PPOCHECK",
+    "seed": 2026102001,
+    "prefix": {
+      "OUTBOUND": [
+        [
+          0.08,
+          0.04,
+          0.03
+        ]
+      ],
+      "RETURN": [
+        [
+          0.04,
+          0.02,
+          0.03
+        ]
+      ]
+    },
+    "split": "train",
+    "role": "historical W1 exposed",
+    "parent_family": "D01"
+  },
+  "arms": [
+    {
+      "id": "B",
+      "base": "B",
+      "posture": [],
+      "early": [],
+      "changes": [],
+      "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+    },
+    {
+      "id": "H150",
+      "base": "T",
+      "posture": [
+        {
+          "phase": "RETURN",
+          "slot": 2,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        },
+        {
+          "phase": "RETURN",
+          "slot": 3,
+          "delta_deg": [
+            0.3,
+            -0.3
+          ]
+        }
+      ],
+      "early": [
+        {
+          "phase": "RETURN",
+          "slot": 1,
+          "duration_factor": 1.1
+        },
+        {
+          "phase": "RETURN",
+          "slot": 4,
+          "duration_factor": 1.2
+        }
+      ],
+      "changes": [],
+      "timing": [
+        {
+          "phase": "RETURN",
+          "slot": 5,
+          "duration_factor": 1.5
+        }
+      ],
+      "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+    }
+  ],
+  "group": "PPOCHECK",
+  "B": {
+    "id": "B",
+    "base": "B",
+    "posture": [],
+    "early": [],
+    "changes": [],
+    "candidate_hash": "5908d9453a12b2aae83c88d46d4926979b223ff4732a3984eda43ec3ca9af60b"
+  },
+  "H150": {
+    "id": "H150",
+    "base": "T",
+    "posture": [
+      {
+        "phase": "RETURN",
+        "slot": 2,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      },
+      {
+        "phase": "RETURN",
+        "slot": 3,
+        "delta_deg": [
+          0.3,
+          -0.3
+        ]
+      }
+    ],
+    "early": [
+      {
+        "phase": "RETURN",
+        "slot": 1,
+        "duration_factor": 1.1
+      },
+      {
+        "phase": "RETURN",
+        "slot": 4,
+        "duration_factor": 1.2
+      }
+    ],
+    "changes": [],
+    "timing": [
+      {
+        "phase": "RETURN",
+        "slot": 5,
+        "duration_factor": 1.5
+      }
+    ],
+    "candidate_hash": "255b40496f100c5d78956da64102276993c9995965fbfa610bd00a3967102931"
+  },
+  "historical_repeats": {},
+  "actions": [
+    {
+      "tag": "B",
+      "action": {
+        "family": "B"
+      },
+      "category": "core_baseline_and_known_counterexample"
+    },
+    {
+      "tag": "BEST",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          -0.18310670132483464,
+          0.0,
+          0.0,
+          -0.9571745795248379,
+          0.0,
+          0.0,
+          0.0,
+          0.2
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ]
+      },
+      "category": "core_baseline_and_known_counterexample"
+    },
+    {
+      "tag": "FROZEN_MEAN",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          -0.048506454172918476,
+          0.03117127149571636,
+          0.10081915599665753,
+          -0.09718214978905118,
+          -0.19424016654365725,
+          0.07700593624747575,
+          0.04594476562645618,
+          0.016391697735678154
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ]
+      },
+      "category": "PPO_frozen_policy_evaluation"
+    },
+    {
+      "tag": "FROZEN_PLUS_RULE",
+      "action": {
+        "family": "modal8_retimed",
+        "x": [
+          -0.048506454172918476,
+          0.03117127149571636,
+          0.10081915599665753,
+          -0.09718214978905118,
+          -0.19424016654365725,
+          0.07700593624747575,
+          -1.0,
+          -1.0
+        ],
+        "legacy": [
+          0.8245887463260377,
+          -0.9835625245511301
+        ]
+      },
+      "category": "PPO_plus_explicit_handoff_rule_not_actor_learning"
+    }
+  ],
+  "job_wall_cap_s": 3600,
+  "worker": "v5_wrench_worker.py"
+}

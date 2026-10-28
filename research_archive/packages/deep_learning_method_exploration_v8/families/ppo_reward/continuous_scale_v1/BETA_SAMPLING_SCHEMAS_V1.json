@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v8.continuous_beta_sampling_schema_catalog.v1",
+  "$comment": "Source-only schema catalog, never an actual authorization, Gate1 PASS, initialized clock or checkpoint.",
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_hashes": {"type": "object", "minProperties": 1, "additionalProperties": {"$ref": "#/$defs/sha256"}},
+    "job_spec": {
+      "type": "object",
+      "required": ["schema", "development_context_id", "launch_authorization_path", "launch_authorization_sha256", "approved_contract_path", "approved_contract_sha256", "gate1_review_path", "gate1_review_sha256", "axis_path", "axis_file_sha256", "axis_object_sha256", "case_route_manifest", "case_route_manifest_sha256", "receipt_adapter_path", "receipt_adapter_sha256", "arm_inputs", "output_directory"],
+      "properties": {
+        "schema": {"const": "v8.continuous_beta_sampling_job.v1"},
+        "development_context_id": {"type": "string"},
+        "case_route_manifest": {"const": "freeze/ONPOLICY_V1_CASE_ROUTES.json"},
+        "arm_inputs": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "object", "required": ["arm_id", "snapshot_path", "snapshot_sha256"], "properties": {"arm_id": {"enum": ["BETA_RF_RAW", "BETA_PPO_RAW", "BETA_RF_SCALED", "BETA_PPO_SCALED"]}, "snapshot_path": {"type": "string"}, "snapshot_sha256": {"$ref": "#/$defs/sha256"}}}}
+      },
+      "$comment": "Placed at config.onpolicy_sampling so root V2 read-only _binding validates exactly the saved config and original case routes; distinct Beta schema and fields, not categorical proposals. arm_inputs list order is fixed by source."
+    },
+    "gate1_main_review": {
+      "type": "object",
+      "required": ["schema", "status", "axis_object_sha256", "lambda1_original_H150_exact_raw_PASS", "original_B_full_qualified", "original_H150_full_qualified", "lambda0_and_lambda05_engineering_review_completed", "mean_lambda05_full_original_qualified", "true_hard_safety_violation", "reviewed_unix", "original_evidence_files_sha256"],
+      "properties": {
+        "schema": {"const": "v8.beta_axis_gate1_main_review.v1"},
+        "status": {"const": "PASS_ENGINEERING_MAPPING_REVIEWED_FOR_REAL_SAMPLING"},
+        "axis_object_sha256": {"$ref": "#/$defs/sha256"},
+        "lambda1_original_H150_exact_raw_PASS": {"const": true},
+        "original_B_full_qualified": {"const": true}, "original_H150_full_qualified": {"const": true}, "lambda0_and_lambda05_engineering_review_completed": {"const": true},
+        "mean_lambda05_full_original_qualified": {"const": true},
+        "true_hard_safety_violation": {"const": false},
+        "reviewed_unix": {"type": "number"},
+        "original_evidence_files_sha256": {"$ref": "#/$defs/source_hashes"}
+      },
+      "$comment": "Root must review actual original B/H150 complete qualification, lambda0/.5 execution/motion evidence and exact raw gate before issuing this new document; source preparation does not issue it."
+    },
+    "real_sampling_authorization": {
+      "type": "object",
+      "required": ["schema", "approved_for_real_sampling", "approved_for_real_updates", "approved_unix", "activation_sha256", "authorized_job_groups", "arm_ids", "source_files_sha256", "approved_contract_path", "approved_contract_sha256", "gate1_review_path", "gate1_review_sha256", "axis_path", "axis_file_sha256", "axis_object_sha256", "case_route_manifest", "case_route_manifest_sha256", "receipt_adapter_path", "receipt_adapter_sha256", "registered_max_local_window_s", "initialized_window"],
+      "properties": {
+        "schema": {"const": "v8.beta_real_sampling_authorization.v1"},
+        "approved_for_real_sampling": {"const": true},
+        "approved_for_real_updates": {"type": "boolean"},
+        "approved_unix": {"type": "number"},
+        "activation_sha256": {"$ref": "#/$defs/sha256"},
+        "authorized_job_groups": {"type": "array", "minItems": 2, "items": {"type": "string"}, "uniqueItems": true},
+        "arm_ids": {"const": ["BETA_RF_RAW", "BETA_PPO_RAW", "BETA_RF_SCALED", "BETA_PPO_SCALED"]},
+        "source_files_sha256": {"$ref": "#/$defs/source_hashes"},
+        "registered_max_local_window_s": {"type": "number", "exclusiveMinimum": 0},
+        "initialized_window": {"type": "object", "required": ["clock_initialized_after_main_approval", "initialized_unix", "local_stop_unix", "original_global_deadline_unix"], "properties": {
+          "clock_initialized_after_main_approval": {"const": true}, "initialized_unix": {"type": "number"}, "local_stop_unix": {"type": "number", "maximum": 1793114740}, "original_global_deadline_unix": {"const": 1793114740}
+        }}
+      }
+    },
+    "root_closure_review": {
+      "type": "object",
+      "required": ["schema", "status", "group_transaction_id", "all_started_children_joined", "all_parent_prefixes_unchanged", "all_started_attempts_hard_safety_reviewed", "true_hard_safety_violation", "original_evidence_files_sha256", "pending_snapshot_object_sha256"],
+      "properties": {
+        "schema": {"const": "v8.beta_four_arm_root_closure_review.v1"},
+        "status": {"enum": ["READY_FULL_TWO_CASE_RECEIPTS_FOR_ALL_FOUR_ARMS", "ENGINEERING_CENSOR_CANCEL_ALL_ARMS", "HARD_SAFETY_STOP"]},
+        "group_transaction_id": {"type": "string"},
+        "all_started_children_joined": {"const": true}, "all_parent_prefixes_unchanged": {"const": true}, "all_started_attempts_hard_safety_reviewed": {"const": true},
+        "true_hard_safety_violation": {"type": ["boolean", "null"]},
+        "original_evidence_files_sha256": {"$ref": "#/$defs/source_hashes"},
+        "pending_snapshot_object_sha256": {"type": "object", "minProperties": 4, "maxProperties": 4, "additionalProperties": {"$ref": "#/$defs/sha256"}}
+      },
+      "$comment": "Hard true halts before clock/count/censor; unknown rejects update. Both case parent DONE and every START/END including unbound/partial attempts require review. Generator DONE alone is insufficient."
+    },
+    "pending_output_bundle": {
+      "type": "object",
+      "required": ["schema", "stage", "owner_pid", "owner_start_ticks", "owner_only_writes", "source_inputs", "context25", "causal_features_sha256", "snapshots", "parameter_updates_in_this_job", "root_transaction_after_two_dev_jobs_required"],
+      "properties": {"schema": {"const": "v8.continuous_beta_pending_bundle.v1"}, "owner_only_writes": {"const": true}, "parameter_updates_in_this_job": {"const": 0}, "root_transaction_after_two_dev_jobs_required": {"const": true}},
+      "$comment": "snapshots values are direct v8.continuous_beta_arm_checkpoint.v2; pending proposals have sample plus physical_receipt, never categorical action_index/proposal_recipe/physical_result. RNG is canonical JSON lists in files and restored with V2 _tuple_tree."
+    }
+  }
+}

@@ -1,0 +1,50 @@
+--- a/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime_sac_expert_v1.py
++++ b/stages/stage5_personalized_motion_learning/src/traction_mpc_stage5/full3d_adaptive_integration_v1/runtime_sac_expert_v1.py
+@@ -3591,7 +3591,10 @@
+             "actual_acceleration_rad_s2": split.human_motion_acceleration_rad_s2.copy(),
+             "actual_acceleration_valid": split.human_motion_valid,
+             "acceleration_violation": authority.violation,
+-            "interval_force_cost_n_s": force_norm * CONTROL_DT_S,
++            # A boundary proposal owns no interval until execution advances
++            # native physics. Rejected admission may revisit this same boundary.
++            "interval_force_cost_n_s": 0.0,
++            "owned_interval_duration_s": 0.0,
+         })
+         candidate = _candidate(
+             f"execute_{len(decisions):03d}_{step:05d}",
+@@ -3609,6 +3612,8 @@
+                 candidate=candidate,
+                 actuation_enabled=actuation_enabled,
+             )
++            trace[-1]["owned_interval_duration_s"] = execution["actual_interval_duration_s"]
++            trace[-1]["interval_force_cost_n_s"] = force_norm * execution["actual_interval_duration_s"]
+             executed_interval_count += 1
+             if online_timing and async_pending is not None:
+                 lifecycle.fallback(async_pending["request"], execution["actual_interval_duration_s"], str(execution["safety_mode"]))
+@@ -3655,10 +3660,14 @@
+                             belief.sequence
+                         )
+         except (RuntimeError, ValueError) as error:
+-            # The boundary row described a proposed interval that did not
+-            # execute. Remove it so costs, command traces, and N/N+1 counts do
+-            # not claim physical work that never occurred.
++            # Keep the attempted boundary for audit, but credit only native
++            # time actually executed; pre-apply rejection owns zero time.
+             attempt = runtime.get("last_execution_attempt", {})
++            # Preserve failed attempts, crediting only the physical interval
++            # actually owned by this attempt (zero for pre-apply rejection).
++            owned_dt = max(0.0, float(plant.data.time) - physical_now)
++            trace[-1]["owned_interval_duration_s"] = owned_dt
++            trace[-1]["interval_force_cost_n_s"] = force_norm * owned_dt
+             if attempt.get("applied") or attempt.get("native_steps", 0):
+                 trace[-1].update(attempt)
+             else:
+@@ -3899,7 +3908,7 @@
+             "physical_interval_moment_integral_nm_s": float(sum(
+                 np.linalg.norm(task_rows[index]["cuff_moment_world_nm"])
+                 * (task_rows[index + 1]["time_s"] - task_rows[index]["time_s"])
+-                for index in range(min(executed_interval_count, max(0, len(task_rows) - 1)))
++                for index in range(max(0, len(task_rows) - 1))
+             )),
+         }
+         summary["task"]["minimum_true_physical_clearance_m_evaluation_only"] = (

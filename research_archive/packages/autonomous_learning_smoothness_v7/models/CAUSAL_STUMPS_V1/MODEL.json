@@ -1,0 +1,254 @@
+{
+  "schema": "ihear.two_causal_stumps.v1",
+  "frozen_unix": 1793050097.634589,
+  "simple_stump_fits": 2,
+  "training_groups": [
+    "EARLYN01",
+    "EARLYL01",
+    "EARLYH01"
+  ],
+  "feature_names": [
+    "estimated_q_hip",
+    "estimated_q_knee",
+    "estimated_dq_hip",
+    "estimated_dq_knee",
+    "request_reference_q_hip",
+    "request_reference_q_knee",
+    "request_reference_dq_hip",
+    "request_reference_dq_knee",
+    "emitted_reference_q_hip",
+    "emitted_reference_q_knee",
+    "emitted_reference_dq_hip",
+    "emitted_reference_dq_knee",
+    "emitted_reference_ddq_hip",
+    "emitted_reference_ddq_knee",
+    "measured_force_world_x",
+    "measured_force_world_y",
+    "measured_force_world_z",
+    "measured_moment_world_x",
+    "measured_moment_world_y",
+    "measured_moment_world_z",
+    "estimated_beta_a_inertia_combination",
+    "estimated_beta_b_distal_inertia_combination",
+    "estimated_beta_d_mass_length_com_combination",
+    "estimated_beta_g1_proximal_gravity_combination",
+    "estimated_beta_g2_distal_gravity_combination",
+    "estimated_beta_k1_passive_stiffness",
+    "estimated_beta_k2_passive_stiffness",
+    "estimated_beta_rho1_stiffness_rest_combination",
+    "estimated_beta_rho2_stiffness_rest_combination",
+    "estimated_beta_bv1_viscous_damping",
+    "estimated_beta_bv2_viscous_damping",
+    "residual_weight_hip_constant",
+    "residual_weight_hip_q_hip_normalized",
+    "residual_weight_hip_q_knee_normalized",
+    "residual_weight_hip_dq_hip_bounded",
+    "residual_weight_hip_dq_knee_bounded",
+    "residual_weight_knee_constant",
+    "residual_weight_knee_q_hip_normalized",
+    "residual_weight_knee_q_knee_normalized",
+    "residual_weight_knee_dq_hip_bounded",
+    "residual_weight_knee_dq_knee_bounded",
+    "estimated_geometry_hip_plane_x",
+    "estimated_geometry_hip_plane_z",
+    "estimated_geometry_thigh_length",
+    "estimated_geometry_knee_to_cuff_distance",
+    "phase_OUTBOUND",
+    "phase_HOLD",
+    "phase_RETURN",
+    "task_elapsed",
+    "phase_elapsed",
+    "task_contract_remaining",
+    "request_source_age",
+    "decision_slot",
+    "previous_executed_delta_q_hip",
+    "previous_executed_delta_q_knee",
+    "previous_K3_residual_0",
+    "previous_K3_residual_1",
+    "previous_K3_residual_2",
+    "task_measured_JF",
+    "task_measured_JM",
+    "task_estimated_peak_velocity_hip",
+    "task_estimated_peak_velocity_knee",
+    "task_estimated_peak_acceleration_hip",
+    "task_estimated_peak_acceleration_knee",
+    "task_estimated_peak_jerk_hip",
+    "task_estimated_peak_jerk_knee",
+    "task_estimated_q_min_hip",
+    "task_estimated_q_min_knee",
+    "task_estimated_q_max_hip",
+    "task_estimated_q_max_knee",
+    "session_guard_calls",
+    "session_guard_active",
+    "session_guard_unsatisfied",
+    "session_guard_peak_correction",
+    "task_context_rejections",
+    "task_history_samples",
+    "task_history_age"
+  ],
+  "context_source_sha256": "8f6cb63214afb511dcff07d04326505602c176731ffaf95a39826bc7dace4d3e",
+  "data_sha256": "b92ab2d9beda02cdf317fbe95439216f34915d1fa6338ab89bec22fd8230667b",
+  "fitter_source_sha256": "6974f96ccee5b6420cbc39f789b6df3742a338ddf90be0fe91fbfd6d173c28c5",
+  "watcher_source_sha256": "bbc20f798f73b35f47cba461f0c81eeb20d77fc5426363c603af01de466c9725",
+  "models": {
+    "K_stump": {
+      "feature": "K_stump",
+      "threshold": 10.803493032981649,
+      "polarity": "gt_positive",
+      "polarity_rank": 1,
+      "error_count": 0,
+      "positive_predictions": 1,
+      "training_predictions": [
+        0,
+        0,
+        1
+      ],
+      "training_count": 3,
+      "training_error_rate": 0.0,
+      "candidate_splits": [
+        9.365937956743451,
+        10.803493032981649
+      ],
+      "all_objective_candidates": [
+        {
+          "threshold": 9.365937956743451,
+          "polarity": "le_positive",
+          "polarity_rank": 0,
+          "error_count": 2,
+          "positive_predictions": 1,
+          "training_predictions": [
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "threshold": 9.365937956743451,
+          "polarity": "gt_positive",
+          "polarity_rank": 1,
+          "error_count": 1,
+          "positive_predictions": 2,
+          "training_predictions": [
+            1,
+            0,
+            1
+          ]
+        },
+        {
+          "threshold": 10.803493032981649,
+          "polarity": "le_positive",
+          "polarity_rank": 0,
+          "error_count": 3,
+          "positive_predictions": 2,
+          "training_predictions": [
+            1,
+            1,
+            0
+          ]
+        },
+        {
+          "threshold": 10.803493032981649,
+          "polarity": "gt_positive",
+          "polarity_rank": 1,
+          "error_count": 0,
+          "positive_predictions": 1,
+          "training_predictions": [
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    },
+    "geometry_stump": {
+      "feature": "geometry_stump",
+      "threshold": 0.4405734463204405,
+      "polarity": "gt_positive",
+      "polarity_rank": 1,
+      "error_count": 0,
+      "positive_predictions": 1,
+      "training_predictions": [
+        0,
+        0,
+        1
+      ],
+      "training_count": 3,
+      "training_error_rate": 0.0,
+      "candidate_splits": [
+        0.43186981691592896,
+        0.4405734463204405
+      ],
+      "all_objective_candidates": [
+        {
+          "threshold": 0.43186981691592896,
+          "polarity": "le_positive",
+          "polarity_rank": 0,
+          "error_count": 2,
+          "positive_predictions": 1,
+          "training_predictions": [
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "threshold": 0.43186981691592896,
+          "polarity": "gt_positive",
+          "polarity_rank": 1,
+          "error_count": 1,
+          "positive_predictions": 2,
+          "training_predictions": [
+            1,
+            0,
+            1
+          ]
+        },
+        {
+          "threshold": 0.4405734463204405,
+          "polarity": "le_positive",
+          "polarity_rank": 0,
+          "error_count": 3,
+          "positive_predictions": 2,
+          "training_predictions": [
+            1,
+            1,
+            0
+          ]
+        },
+        {
+          "threshold": 0.4405734463204405,
+          "polarity": "gt_positive",
+          "polarity_rank": 1,
+          "error_count": 0,
+          "positive_predictions": 1,
+          "training_predictions": [
+            0,
+            0,
+            1
+          ]
+        }
+      ]
+    }
+  },
+  "tie_break": "classification error, fewer positive predictions, lower threshold, polarity rank le_positive=0 then gt_positive=1",
+  "threshold_domain": "training adjacent unique midpoints only; both <=-positive and >-positive polarities",
+  "action_mapping": {
+    "0": "B",
+    "1": "EARLY_H150"
+  },
+  "global_hard_deadline_unix": 1793073411.846771,
+  "label_rule": "1 iff EARLY_H150 complete original-qualified AND JF<B AND both nativehip/kneejerkRMS<B AND nativeforceNormRateRMS<B; otherwise0. JM remains separatelyreported and no overallPareto/safetyqualification implied.",
+  "JM_used_in_label_or_fit": false,
+  "full77D_status": "INVALID_UNCHANGED",
+  "safety_qualification": false,
+  "independent_generalization": "NOT_TESTED",
+  "control_deployment": false,
+  "engineering_revision": {
+    "id": "CAUSAL_STUMP_WATCH_DEADLINE_REPAIR_V2",
+    "variant": "v2b_main_commit_audit_required",
+    "parent_model_sha256": "4ff95a4d1a3f96dc1f5a7bca941f17fc64c710591c778604f5fce8a2bc51267e",
+    "revision_unix": 1793050917.8622122,
+    "thresholds_data_fitter_training_count_unchanged": true,
+    "additional_fits": 0
+  }
+}

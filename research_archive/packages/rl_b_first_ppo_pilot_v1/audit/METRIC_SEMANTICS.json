@@ -1,0 +1,12 @@
+{
+  "entropy_mean": "sum of2 unbounded Gaussian differential entropies before Box clipping, nats; not executed-torque entropy",
+  "PPO_epochs": "SB3 _n_updates;4 epochs per complete episode rollout, distinct from optimizer.step calls",
+  "Adam_steps": "instrumented optimizer.step invocations, not summed per-parameter Adam counters",
+  "undefined_loss_diagnostics": "explained_variance can be NaN for single-transition/constant-return buffers; numeric JSON loss summaries omit nonfinite diagnostics while original ppo_logs/progress.csv retains logger output; gradients/rewards are separately checked finite",
+  "episode": "one original MuJoCo terminal COMPLETE or ABORTED, never means every task succeeded",
+  "training_policy": "Gaussian samples, standard SB3 Box clipping; raw actions/logp/values/advantages/returns saved",
+  "frozen_evaluation": "deterministic initial/final policy means, identical nominal task; weights/Adam frozen; repeated final episode is not a new physical state",
+  "historical_random_policy": "run_rollout.py uniform(-1,1), distinct from randomly initialized Gaussian PPO; historical20.165s result not combined with current policy success rate",
+  "JF_definition": "original5ms executed TASK interval-start left integral of measured cuff-force norm, not a newly defined native0.25ms force objective",
+  "native_steps": "0.25ms physics integrator steps, separately counted from RL event decisions; includes commissioning/recovery unless marked TASK"
+}
