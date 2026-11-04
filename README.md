@@ -1,160 +1,151 @@
-# Adaptive Traction MPC for Lower-Limb Rehabilitation
+# Adaptive Traction MPC for Robot-Assisted Lower-Limb Rehabilitation
 
-Adaptive Traction MPC is a simulation research platform for robot-assisted
-lower-limb motion under uncertain Human dynamics. It combines explicit
-human–robot cuff mechanics, causal effective-dynamics estimation, trust-gated
-model promotion, and constrained model-predictive control. The current system
-is a simulation-qualified prototype preparing for robot-side commissioning—not
-a clinical or production system.
+**Work in Progress · Simulation-Based Research**
 
-## Overview
+A robotics research repository for lower-limb rehabilitation, combining coupled
+human–robot dynamics, adaptive model predictive control, motion planning, and
+learning-based control research. The long-term goal is to generate useful
+rehabilitation motion while managing interaction loads under uncertain human
+dynamics.
 
-The project asks whether natural rehabilitation motion can identify enough of
-a patient's control-effective dynamics to improve tracking without hidden
-calibration motion or direct access to simulator truth. Stage 3 supplies the
-coupled 3D UR10e-surrogate/Human-V2 plant. Stage 4 consumes only robot-facing
-state, cuff pose/twist, and reconstructed wrench measurements.
+The project is still developing. Current evidence comes from MuJoCo simulation;
+robot hardware, human testing, and clinical use have not been validated.
 
-## Method
+**Start here:** [Project overview](docs/overview.md) ·
+[Architecture](docs/architecture.md) · [Development roadmap](docs/development-roadmap.md)
 
-```text
-Robot-facing measurements
-  ├─ smoothed pose-history velocity → Human reconstruction / estimator / MPC
-  └─ cuff-center Jacobian velocity  → robot translational control feedback
-                                      (200 Hz, 5 ms ZOH, 140 Ns/m)
-  → constrained Human-space MPC
-  → Safety Filter / BRAKE
-  → rigid or registered P1 cuff interface
-```
+> **Where is Stage 5?** This branch contains the Stage 1–4 implementation.
+> The later Stage-5 work and research packages are retained in the
+> [2026-10-28 archive](https://github.com/Block-O2/adaptive-traction-mpc/tree/archive/research-closure-20261028).
+> Use the [Stage-5 source and guide](https://github.com/Block-O2/adaptive-traction-mpc/tree/11af82a7ee35ae3c8e41e4b84d235a494b117d8d/stages/stage5_personalized_motion_learning)
+> for that snapshot. These modules have not been merged into this branch.
+> The archive records a research checkpoint; development of the overall project remains open.
 
-The online model is control-effective, not an anatomical parameter estimate.
-Until a challenger passes causal future-block validation, the population prior
-remains in control. The retained allocator and safety/actuator gates are shared
-across fixed and adaptive MPC.
+## Simulation Demo
 
-## Technical contributions
+![MuJoCo replay of a robot and cuff assisting lower-limb motion, with fixed and adaptive MPC side by side](stages/stage4_adaptive_control/results/media/readme/hero_fixed_vs_adaptive.gif)
 
-- A coupled rehabilitation-robot simulation with explicit Human-V2 dynamics,
-  cuff mechanics, robot-side measurements, and reconstructed interaction wrench.
-- A causal, trust-gated adaptive MPC pipeline that keeps the population prior in
-  control until a challenger passes embargoed future-block validation.
-- A separated measurement architecture for estimation and low-latency robot
-  velocity feedback, with matched controller and safety contracts across A/B runs.
-- Model-based force decomposition and clean-clone reporting tools that connect
-  Human mechanics, feedback demand, execution effects, and High-ROM force margins.
+Existing Stage-4 MuJoCo visualization replay from saved simulation states,
+showing the UR10e surrogate, Human-V2 leg, cuff, and support surface. This is
+recorded simulation playback, not a live controller or hardware demonstration.
+It does not show the later Stage-5 variants. See the
+[media index and provenance](assets/README.md).
 
-## Key results
+## Control Architecture
 
-- All 36 preregistered patient-generalization arms completed with full reference
-  progress and no recorded safety-gate event. Across 12 matched comparisons,
-  Fixed MPC was smoother than PD+feedforward, while Adaptive MPC improved or
-  tied Fixed MPC tracking RMSE; load and effort changes remained mixed.
-- The authoritative crossed patient × trajectory × seed replication achieved
-  18/18 promotion, completion, tracking-RMSE improvement, and prediction-RMSE
-  improvement, with two cases still worsening maximum tracking error.
-- Peak cuff force in the 36-arm study remained below the 200 N engineering
-  gate. This is not a comfort, tissue-load, or clinical-safety result.
-- Saved-trace desktop replay measured 9.42 ms mean MPC time and 16.52 ms mean
-  full-cycle time (about 60.5 Hz); this is not a hard-realtime guarantee.
-- The corrected High-ROM baseline separates low-latency robot control velocity
-  from the history-derived estimation velocity. With the Human MPC, 140 Ns/m
-  gain, Safety Filter, BRAKE, 200 N target, models, and trajectories unchanged,
-  Rigid NEW completes 40/80, executes 90/120 to 96.18% outbound / 100.00%
-  return progress, and executes 120/120 to 99.33% / 99.99%, without the old
-  BRAKE/200 N bottleneck.
-- In the corrected Rigid NEW versus P1 NEW comparison, P1 is not required for
-  High-ROM feasibility. Its repeatable independent effect is lower force slew;
-  force-peak and tracking changes remain trajectory-dependent.
-- The dense registered quasistatic force map spans 0.06–182.30 N over
-  q1,q2 = 0–125°, below the registered 200 N engineering stress-test target;
-  it is an analytic mechanics map, not a clinical or dynamic safety boundary.
+![Control architecture: coupled MuJoCo plant, causal measurements, estimation, MPC, execution checks and feedback, with optional learning research](assets/figures/control-architecture.svg)
 
-Detailed claims, hashes, and limitations are in the
-[Stage-4 evidence map](stages/stage4_adaptive_control/docs/research/STAGE4_EVIDENCE_MAP.md)
-and [report-validation evidence map](stages/stage4_adaptive_control/docs/research/STAGE4_REPORT_VALIDATION_EVIDENCE_MAP.md).
-The compact corrected High-ROM evidence is indexed in the
-[Phase-3A corrected baseline package](stages/stage4_adaptive_control/results/summaries/phase3a_corrected_high_rom/README.md),
-and the [single-file professor report](stages/stage4_adaptive_control/results/engineering_validation/PHASE3A_RIGID_VS_P1_PROFESSOR_REVIEW.html)
-opens offline with all media embedded.
+Stage 4 connects robot-facing measurements to effective-dynamics estimation,
+trust-gated model updates, Human-space MPC, and robot torque execution. Later
+Stage-5 research adds waypoint planning, quintic scheduling, reference
+governance, and explicit plan admission/lifecycle checks. Optional learning
+interfaces belong to separate research snapshots. The
+[architecture guide](docs/architecture.md) explains these version boundaries
+and the distinction between simulation time and host execution time.
 
-Both final Phase-3A reporting tools work from tracked clean-clone inputs:
-`build_phase3a_corrected_professor_html.py` regenerates the self-contained
-professor report from a compact render-source package, and
-`build_phase3a_force_landscape.py` regenerates the dense analytic map,
-200/220/250 N margins, conditioning and acceleration-sensitivity views, plus
-corrected dynamic overlays. Neither tool requires historical progressive
-campaign directories or the local corrected raw campaign. Historical binary
-campaign products are intentionally external to the final tree and remain
-identifiable through the Phase-3A external-archive checksum manifest.
+## Current Development
 
-## Demos
+| Module | Available work | Development boundary |
+| --- | --- | --- |
+| Coupled dynamics | Planar Human V2, full-3D robot surrogate, cuff and bed interaction models | Simulation models; physical robot/cuff calibration remains future work |
+| Adaptive control | Stage-4 effective-dynamics estimation, causal trust, constrained MPC and regression tests | Historical simulation checkpoint; anatomical identification is not established |
+| Motion planning | Stage-5 Human waypoint MPC, quintic scheduler/governor and protected execution chain | Available in the linked archive; integration into `main` requires separate review |
+| Coordination and smoothness | Isolated 18D motion-intent studies and H150 schedule variants | Condition-specific research variants, not a unified final controller |
+| Learning–MPC interfaces | Value/Q, imitation and RL research code, contracts and selected trained artifacts | Experimental; stable added benefit over strong traditional controls is not established |
+| Execution timing | Scientific-simulation and host-clock studies, including recorded failures | No unified hard-realtime or hardware-qualified baseline |
 
-### Fixed MPC vs Adaptive MPC
+The repository retains intermediate studies and negative results. A completed
+stage checkpoint does not imply completion of the project. See
+[research notes](docs/research-notes/README.md) and
+[experiment navigation](docs/experiments/README.md) for the original context.
 
-![Fixed versus Adaptive MPC](stages/stage4_adaptive_control/results/media/readme/hero_fixed_vs_adaptive.gif)
-
-Synchronized real MuJoCo replay from frozen traces; no controller rollout or
-new simulation was performed to create this README media.
-
-### Patient Generalization
-
-![Patient generalization](stages/stage4_adaptive_control/results/media/readme/02_Patient_Generalization.png)
-
-The same frozen controller settings are used across the shown patient
-variations without patient-specific retuning.
-
-### Trajectory Generalization
-
-![Trajectory generalization](stages/stage4_adaptive_control/results/media/readme/03_Trajectory_Generalization.png)
-
-The same frozen Adaptive MPC is replayed across different rehabilitation
-trajectories.
-
-## Repository structure
+## Repository Structure
 
 ```text
+README.md
+docs/                         overview, architecture, roadmap, research navigation
+assets/                       presentation figures and existing-media index
 stages/
-├── stage1/                    point-force Spring2D foundation
-├── stage2_linkage/            planar Human V2 and rigid cuff
-├── stage3_full3d/             coupled 3D plant and robot interfaces
-└── stage4_adaptive_control/   estimator, trust, MPC, validation, evidence
+  stage1/                     Spring2D foundation, estimation and MPC
+  stage2_linkage/              planar Human V2 and rigid cuff
+  stage3_full3d/               full-3D UR10e surrogate and coupled plant
+  stage4_adaptive_control/     adaptive estimation, trust, MPC and validation
 ```
 
-Stage 4 imports Stage 3 simulation APIs explicitly; it does not duplicate the
-plant. See the [Stage-4 guide](stages/stage4_adaptive_control/README.md) for its
-code, configs, tests, evidence hierarchy, and canonical commands.
+| Stage | Focus | Entry point |
+| --- | --- | --- |
+| 1 | Single-link traction, state/parameter estimation, fixed and adaptive MPC | [Stage 1](stages/stage1/README.md) |
+| 2 | Planar human–cuff–robot linkage | [Stage 2](stages/stage2_linkage/README.md) |
+| 3 | Torque-actuated 3D robot surrogate and coupled Human-V2 plant | [Stage 3](stages/stage3_full3d/README.md) |
+| 4 | Online effective dynamics, causal trust, constrained MPC | [Stage 4](stages/stage4_adaptive_control/README.md) |
+| 5 | Personalized motion, waypoint planning and learning interfaces; archived snapshot | [Stage 5](https://github.com/Block-O2/adaptive-traction-mpc/tree/11af82a7ee35ae3c8e41e4b84d235a494b117d8d/stages/stage5_personalized_motion_learning) |
 
-## Setup and validation
+The archive also contains `deployment/`, `research/side_studies/`, and selected
+`research_archive/` packages. They remain on that branch; a Stage-5 checkout
+must use one complete snapshot rather than mix same-named modules across versions.
 
-The recorded environment is named `mpc_learn`. From the repository root:
+## Getting Started
+
+For the Stage 3–4 packages on this branch, use Python 3.10 or newer in a separate
+environment. Dependencies are declared in each stage's `pyproject.toml`;
+MuJoCo rendering also requires a working graphics backend.
 
 ```bash
-conda run -n mpc_learn python -m pip install -e "stages/stage3_full3d[dev]"
-conda run -n mpc_learn python -m pip install -e "stages/stage4_adaptive_control[dev]"
-
-PYTHONPATH=stages/stage4_adaptive_control/src:stages/stage3_full3d/src:stages/stage4_adaptive_control \
-  conda run -n mpc_learn pytest -q stages/stage4_adaptive_control/tests
+git clone --branch main --single-branch https://github.com/Block-O2/adaptive-traction-mpc.git
+cd adaptive-traction-mpc
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e "stages/stage3_full3d[dev]" -e "stages/stage4_adaptive_control[dev]"
 ```
 
-Formal scientific runs are user-executed only and must use a new output
-directory. Repository validation never reruns or overwrites frozen evidence.
-Exact experiment commands live in the approved specs under
-[`stages/stage4_adaptive_control/docs/research/`](stages/stage4_adaptive_control/docs/research/).
+Start with existing tests for saved-artifact paths, media sources and frozen
+configuration identities. These checks do not run a new controller rollout:
 
-## Limitations and status
+```bash
+PYTHONPATH=stages/stage4_adaptive_control/src:stages/stage3_full3d/src:stages/stage4_adaptive_control \
+  python -m pytest -q \
+  stages/stage4_adaptive_control/tests/test_stage4_artifact_paths.py \
+  stages/stage4_adaptive_control/tests/test_stage4_report_generalization_visualization.py \
+  stages/stage4_adaptive_control/tests/test_stage4_report_generalization_config.py
+```
 
-- Simulation-only evidence, mostly within the representable Human-V2 family.
-- UR10e is a surrogate; CR12 command, timing, calibration, and emergency-stop
-  behavior remain unvalidated.
-- The cuff surface-load quantity is a mathematical proxy, not pressure,
-  comfort, tissue loading, injury risk, or clinical safety.
-- The 200 N High-ROM target is a registered simulation engineering stress-test
-  target. It is not a clinical threshold or a validated hardware limit.
-- Desktop replay timing is not target-hardware or worst-case real-time proof.
-- No clinical efficacy, certification, or production claim is made.
+Open the [existing GIF](stages/stage4_adaptive_control/results/media/readme/hero_fixed_vs_adaptive.gif)
+to view the simulation without installing dependencies. Stage-specific tests,
+replay tools and approved experiment commands are in the individual stage guides.
+Historical result directories are preserved; new runs need new output locations
+and the applicable experiment contract.
 
-Stage 4 adaptive-estimation science remains closed for its checkpoint. The
-corrected Phase-3A High-ROM engineering baseline is now the current repository
-interpretation; historical history-derived-velocity BRAKE results remain
-diagnostic evidence. The next phase is robot-only commissioning and hardware
-safety-interface validation.
+For later work, use a **separate checkout** of the archive and follow its
+[reproduction guide](https://github.com/Block-O2/adaptive-traction-mpc/blob/11af82a7ee35ae3c8e41e4b84d235a494b117d8d/REPRODUCTION_GUIDE.md).
+Its hashed CPU lock files target Linux x86_64 / CPython 3.12, and are separate
+from the Stage 3–4 package setup above. Historical absolute paths, missing legacy
+assets and platform limits are documented in the
+[archive verification record](https://github.com/Block-O2/adaptive-traction-mpc/blob/11af82a7ee35ae3c8e41e4b84d235a494b117d8d/ARCHIVE_VERIFICATION.md).
+
+## Roadmap
+
+- Review a portable Stage-5 source/dependency closure before incremental integration.
+- Qualify feedback service, planning latency, stale-plan handling and fallback
+  together under a host-clock execution contract.
+- Improve motion coordination and segment transitions while checking tracking,
+  interaction load and smoothness over the complete task.
+- Define learning inputs, actions and comparison budgets before evaluating
+  whether learning adds useful capability to MPC.
+- Prepare calibrated robot/cuff and safety interfaces as a later, separately
+  authorized hardware phase.
+
+These are development directions, not completed milestones. See the
+[roadmap](docs/development-roadmap.md) for scope and open decisions.
+
+## Research History and Reuse
+
+[Stage-4 records](stages/stage4_adaptive_control/docs/research/CURRENT_STATE.md)
+and the [research archive](https://github.com/Block-O2/adaptive-traction-mpc/tree/archive/research-closure-20261028)
+retain their original conclusions, limitations and evidence identities.
+No clinical efficacy, patient suitability or hardware safety is inferred from
+simulation or desktop timing.
+
+A project-wide license has not yet been selected. The vendored UR10e model
+retains its [license](stages/stage3_full3d/vendor/mujoco_menagerie/universal_robots_ur10e/LICENSE)
+and [provenance](stages/stage3_full3d/vendor/PROVENANCE.md); these notices apply
+to that material and do not supply a license for the entire project.
