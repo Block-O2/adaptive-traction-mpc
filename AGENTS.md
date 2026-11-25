@@ -52,6 +52,32 @@ preserve and report the evidence.
 
 ---
 
+# Mandatory Item-by-Item Approval for Threshold and Protection Changes
+
+Before adding, modifying, tightening, relaxing, or deleting any threshold,
+constraint, guard, clipping rule, filtering condition, or evaluation criterion,
+obtain the user's explicit prior approval for each individual change.
+
+This applies to code, configuration, defaults, interfaces, candidate screening,
+safety logic, task completion, time limits, experiment contracts, and scorers,
+including changes that indirectly alter when a rule applies or its effect.
+Present each proposed change with its location, current and proposed behavior
+or value, rationale, physical meaning, risks, and validation plan. Silence,
+general task approval, and general autonomous research authorization do not
+constitute item-by-item approval. Design proposals are not implementation approval.
+
+This requirement takes precedence over every general research authorization
+mode and historical campaign authorization in this file. Neither
+`FORMAL EXPERIMENTS AUTHORIZED` nor
+`AUTONOMOUS RESEARCH CAMPAIGN AUTHORIZED` substitutes for this approval.
+
+Never independently weaken, bypass, disable, or remove an existing safety
+protection. If progress requires a covered change, preserve the current rule,
+report the proposed change, and wait for explicit approval before implementing it.
+Read-only inspection and reporting remain allowed within the current task.
+
+---
+
 # Explicit Research Authorization Modes
 
 The repository is conservative by default.
@@ -690,3 +716,12 @@ For this campaign only, read `stages/stage5_personalized_motion_learning/docs/fu
 ### Overnight budget amendment (same campaign)
 
 The user extended the shared cumulative active-time limit from six to twelve hours; this does not reset elapsed time. The authoritative TASK_CONTRACT.md amendment and STATE.json record the original start 2026-09-24T14:50:03Z and conservative cutoff 2026-09-25T02:50:03Z. The shared 1000-rollout and three-qualification-attempt limits remain unchanged. The earlier six-hour phrase above is historical; the six-hour point is a saved checkpoint, not a stop.
+
+## Experiment records and asset closeout
+
+Use the [experiment logging standard](docs/research/EXPERIMENT_LOGGING_STANDARD.md)
+for study and run identities, denominators, evidence grades and closeout records.
+Preserve the raw inputs and counterexamples required for active work and formal
+claims. Retirement requires the applicable authorization and a recorded recovery
+or information-loss decision. All existing safety, threshold, freeze and
+stage-acceptance requirements continue to apply.

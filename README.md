@@ -3,9 +3,28 @@
 Adaptive Traction MPC is a simulation research platform for robot-assisted
 lower-limb motion under uncertain Human dynamics. It combines explicit
 human–robot cuff mechanics, causal effective-dynamics estimation, trust-gated
-model promotion, and constrained model-predictive control. The current system
-is a simulation-qualified prototype preparing for robot-side commissioning—not
-a clinical or production system.
+model promotion, and constrained model-predictive control. The evidence below covers simulation prototypes and offline checks. Hardware commissioning and clinical qualification require separate studies.
+
+## Current research
+
+The project is studying whether measured interaction force can guide a rehabilitation
+robot toward its motion goal while preserving motion quality and remaining within
+the registered mechanical limits. Controller B is the comparison baseline. A Human
+Observer reconstructs motion from robot-side measurements. Commissioning and the
+Human Identifier establish the working model. Controller B evaluates a finite
+set of waypoint references at decision events. FAST screens proposals, the
+Allocator maps the accepted demand into robot commands, and the Safety Filter
+checks execution on the coupled robot–human plant.
+
+The current design direction is Force-Guided Dynamical Waypoint Control (FGDW),
+a reactive dynamical system driven by force feedback. The strict MPC description
+applies to earlier predictive controllers. The proposed single-rate 200 Hz
+controller remains at the design stage. There is no 200 Hz closed-loop
+qualification or full physical FGDW force-reduction result.
+
+- [Research evolution and evidence](docs/research/RESEARCH_HISTORY.md)
+- [Current study status, code and offline checks](docs/research/CURRENT_RESEARCH.md)
+- [Experiment logging and data retention](docs/research/EXPERIMENT_LOGGING_STANDARD.md)
 
 ## Overview
 
@@ -15,7 +34,7 @@ calibration motion or direct access to simulator truth. Stage 3 supplies the
 coupled 3D UR10e-surrogate/Human-V2 plant. Stage 4 consumes only robot-facing
 state, cuff pose/twist, and reconstructed wrench measurements.
 
-## Method
+## Earlier MPC method
 
 ```text
 Robot-facing measurements
@@ -43,7 +62,7 @@ across fixed and adaptive MPC.
 - Model-based force decomposition and clean-clone reporting tools that connect
   Human mechanics, feedback demand, execution effects, and High-ROM force margins.
 
-## Key results
+## Earlier Stage-4 results
 
 - All 36 preregistered patient-generalization arms completed with full reference
   progress and no recorded safety-gate event. Across 12 matched comparisons,
